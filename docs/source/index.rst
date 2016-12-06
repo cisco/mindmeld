@@ -50,7 +50,6 @@ Our user guide is organized into three sections:
    :caption: Build
    :name: build
 
-   getting_started
    training_data
    kb
    entity_map
