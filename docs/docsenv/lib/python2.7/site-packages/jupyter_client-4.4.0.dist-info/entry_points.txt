@@ -1,0 +1,3 @@
+[console_scripts]
+jupyter-kernelspec = jupyter_client.kernelspecapp:KernelSpecApp.launch_instance
+

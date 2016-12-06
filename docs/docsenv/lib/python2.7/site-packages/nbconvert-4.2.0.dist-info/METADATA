@@ -1,0 +1,39 @@
+Metadata-Version: 2.0
+Name: nbconvert
+Version: 4.2.0
+Summary: Converting Jupyter Notebooks
+Home-page: http://jupyter.org
+Author: Jupyter Development Team
+Author-email: jupyter@googlegroups.com
+License: BSD
+Keywords: Interactive,Interpreter,Shell,Web
+Platform: Linux
+Platform: Mac OS X
+Platform: Windows
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Requires-Dist: entrypoints
+Requires-Dist: jinja2
+Requires-Dist: jupyter-core
+Requires-Dist: mistune (!=0.6)
+Requires-Dist: nbformat
+Requires-Dist: pygments
+Requires-Dist: traitlets
+Provides-Extra: execute
+Requires-Dist: jupyter-client; extra == 'execute'
+Provides-Extra: serve
+Requires-Dist: tornado; extra == 'serve'
+Provides-Extra: test
+Requires-Dist: ipykernel; extra == 'test'
+Requires-Dist: nose; extra == 'test'
+Requires-Dist: testpath; extra == 'test'
+
+UNKNOWN
+
+
