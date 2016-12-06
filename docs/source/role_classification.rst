@@ -26,15 +26,9 @@ Roles are named after the "Semantic Role Labeling" (SRL) task in NLP. Semantic R
 
 :yellow:`Mary` :orange:`sold` the :skin:`book` to :aqua:`John`
 
-In the context of Conversational NLU, a "role" defines how a named entity should be used to fulfill a query. Treating Named Entity Recognition (NER) and Semantic Role Labeling (SRL) as separate tasks has a few advantages -
-
-* NER models are hurt by splitting examples across fairly similar categories. Grouping facets with significantly overlapping entities and similar surrounding natural language will lead to better parsing and let us use more powerful models.
-* Joint NER & SRL needs global dependencies, but fast & good NER models only do local. NER models (MEMM, CRF) quickly become intractable with long-distance dependencies. Separating NER from SRL let us use local dependencies for NER and long-distance dependencies in SRL.
-* Role labeling might be a multi-label problem. With multi-label roles, we can use the same entity to query multiple fields.
-
 .. _Defining The Entity Map: entity_map.html
 
-In Workbench, Roles are defined as part of the Entity Map. See the `Defining The Entity Map`_ chapter for more details.
+In the context of Conversational NLU, a "role" defines how a named entity should be used to fulfill a query. In Workbench, Roles are defined as part of the Entity Map. See the `Defining The Entity Map`_ chapter for more details.
 
 When To Use Roles
 *****************

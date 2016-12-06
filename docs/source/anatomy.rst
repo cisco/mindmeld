@@ -92,8 +92,13 @@ The MindMeld Entity Resolver uses a resource called an Entity Map to transform e
 Role Classifier
 ~~~~~~~~~~~~~~~
 
+Role Classification a.k.a Semantic Role Labeling (SRL) is the task of identifying predicates and predicate arguments. A **semantic role** in language is the relationship that a syntactic constituent has with a predicate. In Conversational NLU, a **"role"** represents the semantic theme a given entity can take. It can also be used to define how a named entity should be used for fulfilling a query intent. For example, in the query "Play Black Sabbath by Black Sabbath", the title entity "Black Sabbath" has different semantic themes - the first referring to the song, and the second referring to the artist.
 
+Treating Named Entity Recognition (NER) and Semantic Role Labeling (SRL) as separate tasks has a few advantages -
 
+* NER models are hurt by splitting examples across fairly similar categories. Grouping facets with significantly overlapping entities and similar surrounding natural language will lead to better parsing and let us use more powerful models.
+* Joint NER & SRL needs global dependencies, but fast & good NER models only do local. NER models (MEMM, CRF) quickly become intractable with long-distance dependencies. Separating NER from SRL let us use local dependencies for NER and long-distance dependencies in SRL.
+* Role labeling might be a multi-label problem. With multi-label roles, we can use the same entity to query multiple fields.
 
 
 Semantic Parsing
@@ -113,7 +118,7 @@ The Dialogue Manager is responsible for directing the flow of the conversation. 
 Question Answerer
 -----------------
 
-
+In the context of Deep-Domain Conversational AI, Question Answering is the task of retrieving relevant documents from a large content catalog in response to a natural language question. A large-vocabulary content catalog is first imported into a Knowledge Base. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. These candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.
 
 
 Natural Language Generator

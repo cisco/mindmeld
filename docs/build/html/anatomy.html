@@ -91,7 +91,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#domain-classifier">Domain Classifier</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#intent-classifier">Intent Classifier</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#entity-recognizer">Entity Recognizer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#entity-resolution">Entity Resolution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#entity-resolver">Entity Resolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#role-classifier">Role Classifier</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#semantic-parsing">Semantic Parsing</a></li>
 </ul>
 </li>
@@ -110,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="domain_classification.html">Building the Domain Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="intent_classification.html">Building the Intent Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="entity_recognition.html">Building the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classification.html">Building The Role Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="entity_resolution.html">Building the Entity Resolver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semantic_parsing.html">Building the Semantic Parser</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dialogue_manager.html">Building the Dialogue Manager</a></li>
@@ -119,6 +121,10 @@
 <p class="caption"><span class="caption-text">Deploy</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="deployment.html">Deploying Conversational Apps</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Notebook</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hello-world.html">Hello, World!</a></li>
 </ul>
 
             
@@ -201,14 +207,14 @@
 <h1>Anatomy of a Deep-Domain Conversational AI System<a class="headerlink" href="#anatomy-of-a-deep-domain-conversational-ai-system" title="Permalink to this headline">¶</a></h1>
 <p>The MindMeld deep-domain conversational AI platform consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.</p>
 <a class="reference external image-reference" href="_images/architecture.png"><img alt="_images/architecture.png" src="_images/architecture.png" /></a>
-<p>This chapter will introduce you to the each of the components in the MindMeld toolkit.</p>
+<p>This chapter will introduce you to the each of the modules in the MindMeld toolkit.</p>
 <div class="section" id="natural-language-parser">
 <h2>Natural Language Parser<a class="headerlink" href="#natural-language-parser" title="Permalink to this headline">¶</a></h2>
 <p>The Natural Language Parser is tasked with comprehending the user&#8217;s natural language input. This involves processing the input text using a combination of techniques such as pattern matching, text classification, information extraction and parsing. The end goal is to produce an actionable semantic representation that can be used to satisfy the dialogue task.</p>
 <p>E.g. If the user says &#8220;A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread.&#8221;, the parser would produce:</p>
-<p>[ Insert Image Clipped from <a class="reference external" href="http://demo.mindmeld.com/demo.html">http://demo.mindmeld.com/demo.html</a> ]</p>
+<a class="reference external image-reference" href="_images/parser.png"><img alt="_images/parser.png" src="_images/parser.png" /></a>
 <p>The MindMeld Parser analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the &#8220;search space&#8221;.</p>
-<p>[ Insert Image of Domain -&gt; Intent -&gt; Entities ]</p>
+<a class="reference external image-reference" href="_images/classifier_hierarchy.png"><img alt="_images/classifier_hierarchy.png" src="_images/classifier_hierarchy.png" style="width: 555.0px; height: 655.5px;" /></a>
 <p>We next take a look at each of the classifiers within the MindMeld Parser one by one.</p>
 <div class="section" id="domain-classifier">
 <h3>Domain Classifier<a class="headerlink" href="#domain-classifier" title="Permalink to this headline">¶</a></h3>
@@ -217,7 +223,7 @@
 <p>On the other hand, you can also have applications where you just have one de facto domain. This is usually the case if all the tasks that your system can handle are conceptually related and share the same vocabulary. For instance, a food ordering app could potentially handle multiple intents like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing any of these tasks would be shared to a large extent.</p>
 <p>The number of domains thus depends on the scope of your application. Personal assistants like Siri, Cortana, Google Assistant and Alexa are capable of handling several different domains.</p>
 <p>The Domain Classifier uses a machine-learned text classification model trained by providing many examples of user queries along with their true domain labels. At runtime, the Classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.</p>
-<p>See chapter [] for a discussion on generating the labelled data for training. In chapter [], we will take a closer look at training and evaluating the domain classification model.</p>
+<p>See the chapter on <a class="reference internal" href="training_data.html"><span class="doc">Training data</span></a> for a discussion on generating the labelled data for training. In the <a class="reference internal" href="domain_classification.html"><span class="doc">Building The Domain Classifier</span></a> chapter, we will take a closer look at training and evaluating the domain classification model.</p>
 </div>
 <div class="section" id="intent-classifier">
 <h3>Intent Classifier<a class="headerlink" href="#intent-classifier" title="Permalink to this headline">¶</a></h3>
@@ -229,21 +235,35 @@ list_dishes: List all the dishes available at a selected restaurant, optionally 
 place_order: Place an order for pick up or delivery</p>
 <p>By convention, we use verbs to name our intents as they inherently refer to an action that needs to be taken.</p>
 <p>The Intent Classifier, similar to the Domain Classifier uses a machine-learned text classification model that is trained using labelled training data. We train one intent classification model per domain and the Classifier at runtime chooses the appropriate model, based on the predicted domain for the input query. The output of the Intent Classifier is an intent label which allows us to identify the exact task that the user is trying to solve.</p>
-<p>We describe how to build intent classification models in chapter [].</p>
+<p>We describe how to build intent classification models in <a class="reference internal" href="intent_classification.html"><span class="doc">Building the Intent Classifier</span></a>.</p>
 </div>
 <div class="section" id="entity-recognizer">
 <h3>Entity Recognizer<a class="headerlink" href="#entity-recognizer" title="Permalink to this headline">¶</a></h3>
-<p>Once the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An &#8220;entity&#8221; is any important word or phrase that provides further information about the user&#8217;s end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.</p>
+<p>After the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An &#8220;entity&#8221; is any important word or phrase that provides further information about the user&#8217;s end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.</p>
 <p>For programmers, a good analogy is to think of intents as functions and entities as the arguments you pass into the function call. E.g. set_thermostat(temperature = 70), get_weather_info(city = &#8216;San Francisco&#8217;), find_movies(release_year = &#8216;2016&#8217;, actor = &#8216;Tom Hanks&#8217;, genre = &#8216;Drama&#8217;).</p>
-<p>The Entity Recognizer&#8217;s job is to analyze the user input and extract all the entities relevant to the current intent. It has to accomplish two things:
-1. Detect which spans of words within the input text correspond to entities of interest
-2. Classify those detected text spans into a pre-determined set of entity types</p>
-<p>The Entity Recognizer uses a machine-learned sequence labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in chapter [].</p>
-<blockquote>
-<div>At runtime, the Entity Recognizer loads up and uses the appropriate model, based on the predicted intent for the query. Once this step is done and we&#8217;ve extracted the relevant entities, we finally have all the raw ingredients required to make sense out of the user input. It&#8217;s now a question of putting those together to build a semantic representation that encapsulates all the information necessary to execute the user&#8217;s intended action.</div></blockquote>
+<p>The Entity Recognizer&#8217;s job is to analyze the user input and extract all the entities relevant to the current intent. In NLP literature, this problem is commonly referred to as <a class="reference external" href="https://en.wikipedia.org/wiki/Named-entity_recognition">Named Entity Recognition</a>.</p>
+<p>The problem essentially consists of two parts:</p>
+<ol class="arabic simple">
+<li>Detect which spans of words within the input text correspond to entities of interest</li>
+<li>Classify those detected text spans into a pre-determined set of entity types</li>
+</ol>
+<p>The Entity Recognizer uses a machine-learned sequence labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in <a class="reference internal" href="entity_recognition.html"><span class="doc">Building the Entity Recognizer</span></a>.</p>
+<p>At runtime, the Entity Recognizer loads up and uses the appropriate model, based on the predicted intent for the query. Once this step is done and we&#8217;ve extracted the relevant entities, we finally have all the raw ingredients required to make sense out of the user input. It&#8217;s now a question of putting those together to build a semantic representation that encapsulates all the information necessary to execute the user&#8217;s intended action.</p>
 </div>
-<div class="section" id="entity-resolution">
-<h3>Entity Resolution<a class="headerlink" href="#entity-resolution" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="entity-resolver">
+<h3>Entity Resolver<a class="headerlink" href="#entity-resolver" title="Permalink to this headline">¶</a></h3>
+<p>The Entity Resolver transforms the entity spans extracted by the Entity Recognizer into canonical forms that can be looked up in a catalog or a knowledge base. For instance, the extracted entity &#8220;lemon bread&#8221; may get resolved to &#8220;Iced Lemon Pound Cake&#8221;, &#8220;SF&#8221; may get resolved to &#8220;San Francisco&#8221; and so on. This problem of entity resolution is also referred to as <a class="reference external" href="https://en.wikipedia.org/wiki/Entity_linking">Entity Linking</a> in NLP literature.</p>
+<p>The MindMeld Entity Resolver uses a resource called an Entity Map to transform extracted entities into their desired normalized forms. The chapters on <a class="reference internal" href="entity_map.html"><span class="doc">Defining the Entity Map</span></a> and <a class="reference internal" href="entity_resolution.html"><span class="doc">Building the Entity Resolver</span></a> provide more details on the entity resolution step.</p>
+</div>
+<div class="section" id="role-classifier">
+<h3>Role Classifier<a class="headerlink" href="#role-classifier" title="Permalink to this headline">¶</a></h3>
+<p>Role Classification a.k.a Semantic Role Labeling (SRL) is the task of identifying predicates and predicate arguments. A <strong>semantic role</strong> in language is the relationship that a syntactic constituent has with a predicate. In Conversational NLU, a <strong>&#8220;role&#8221;</strong> represents the semantic theme a given entity can take. It can also be used to define how a named entity should be used for fulfilling a query intent. For example, in the query &#8220;Play Black Sabbath by Black Sabbath&#8221;, the title entity &#8220;Black Sabbath&#8221; has different semantic themes - the first referring to the song, and the second referring to the artist.</p>
+<p>Treating Named Entity Recognition (NER) and Semantic Role Labeling (SRL) as separate tasks has a few advantages -</p>
+<ul class="simple">
+<li>NER models are hurt by splitting examples across fairly similar categories. Grouping facets with significantly overlapping entities and similar surrounding natural language will lead to better parsing and let us use more powerful models.</li>
+<li>Joint NER &amp; SRL needs global dependencies, but fast &amp; good NER models only do local. NER models (MEMM, CRF) quickly become intractable with long-distance dependencies. Separating NER from SRL let us use local dependencies for NER and long-distance dependencies in SRL.</li>
+<li>Role labeling might be a multi-label problem. With multi-label roles, we can use the same entity to query multiple fields.</li>
+</ul>
 </div>
 <div class="section" id="semantic-parsing">
 <h3>Semantic Parsing<a class="headerlink" href="#semantic-parsing" title="Permalink to this headline">¶</a></h3>
@@ -255,21 +275,11 @@ place_order: Place an order for pick up or delivery</p>
 </div>
 <div class="section" id="question-answerer">
 <h2>Question Answerer<a class="headerlink" href="#question-answerer" title="Permalink to this headline">¶</a></h2>
-<p>Question Answering (QA) is a computer science discipline within the fields of information retrieval and natural language processing (NLP), which is concerned with building systems that automatically answer questions posed by humans in a natural language.</p>
-<p>A QA implementation, usually a computer program, may construct its answers by querying a structured database of knowledge or information, usually a knowledge base. More commonly, QA systems can pull answers from an unstructured collection of natural language documents.</p>
-<p>Some examples of natural language document collections used for QA systems include:</p>
-<ul class="simple">
-<li>a local collection of reference texts</li>
-<li>internal organization documents and web pages</li>
-<li>compiled newswire reports</li>
-<li>a set of Wikipedia pages</li>
-<li>a subset of World Wide Web pages</li>
-</ul>
-<p>QA research attempts to deal with a wide range of question types including: fact, list, definition, How, Why, hypothetical, semantically constrained, and cross-lingual questions.</p>
+<p>Broadly speaking, Question Answering is the task of retrieving relevant results from a Knowledge Base in response to a natural language question. In Deep-Domain Conversational AI, often we have a large content catalog that is imported into a Knowledge Base. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. These candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.</p>
 </div>
 <div class="section" id="natural-language-generator">
 <h2>Natural Language Generator<a class="headerlink" href="#natural-language-generator" title="Permalink to this headline">¶</a></h2>
-<p>The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user&#8217;s intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response.</p>
+<p>The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user&#8217;s intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in <a class="reference internal" href="nlg.html"><span class="doc">Building the NLG</span></a> chapter.</p>
 </div>
 </div>
 
