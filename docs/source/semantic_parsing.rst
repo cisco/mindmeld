@@ -1,2 +1,2 @@
-Building the Semantic Parser
-============================
+Semantic Parser
+===============

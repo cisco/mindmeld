@@ -1,5 +1,5 @@
-Building The Role Classifier
-============================
+Role Classifier
+===============
 
 Roles are named after the "Semantic Role Labeling" (SRL) task in NLP. Semantic Role Labeling is the task of identifying predicates and predicate arguments. For example,
 
@@ -74,6 +74,6 @@ Prediction
 Output:
 
 .. code-block:: python
-  
+
   # List of Roles (as defined in the Entity Map)
   [song, artist, album]
