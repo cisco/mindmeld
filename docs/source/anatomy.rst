@@ -6,7 +6,7 @@ The MindMeld deep-domain conversational AI platform consists of several state-of
 .. image:: images/architecture.png
    :target: _images/architecture.png
 
-This chapter will introduce you to the each of the components in the MindMeld toolkit.
+This chapter will introduce you to the each of the modules in the MindMeld toolkit.
 
 
 Natural Language Parser
@@ -16,12 +16,14 @@ The Natural Language Parser is tasked with comprehending the user's natural lang
 
 E.g. If the user says "A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread.", the parser would produce:
 
-[ Insert Image Clipped from http://demo.mindmeld.com/demo.html ]
+.. image:: images/parser.png
+   :target: _images/parser.png
 
 The MindMeld Parser analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the "search space". 
 
-[ Insert Image of Domain -> Intent -> Entities ]
-
+.. image:: images/classifier_hierarchy.png
+   :target: _images/classifier_hierarchy.png
+   :scale: 75%
 
 We next take a look at each of the classifiers within the MindMeld Parser one by one. 
 
@@ -38,7 +40,7 @@ The number of domains thus depends on the scope of your application. Personal as
 
 The Domain Classifier uses a machine-learned text classification model trained by providing many examples of user queries along with their true domain labels. At runtime, the Classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.
 
-See chapter [] for a discussion on generating the labelled data for training. In chapter [], we will take a closer look at training and evaluating the domain classification model.  
+See the chapter on :doc:`Training data </training_data>` for a discussion on generating the labelled data for training. In the :doc:`Building The Domain Classifier </domain_classification>` chapter, we will take a closer look at training and evaluating the domain classification model.  
 
 
 Intent Classifier
@@ -57,27 +59,41 @@ By convention, we use verbs to name our intents as they inherently refer to an a
 
 The Intent Classifier, similar to the Domain Classifier uses a machine-learned text classification model that is trained using labelled training data. We train one intent classification model per domain and the Classifier at runtime chooses the appropriate model, based on the predicted domain for the input query. The output of the Intent Classifier is an intent label which allows us to identify the exact task that the user is trying to solve.
 
-We describe how to build intent classification models in chapter [].
+We describe how to build intent classification models in :doc:`Building the Intent Classifier </intent_classification>`.
 
 
 Entity Recognizer
 ~~~~~~~~~~~~~~~~~
 
-Once the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An "entity" is any important word or phrase that provides further information about the user's end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.
+After the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An "entity" is any important word or phrase that provides further information about the user's end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.
 
 For programmers, a good analogy is to think of intents as functions and entities as the arguments you pass into the function call. E.g. set_thermostat(temperature = 70), get_weather_info(city = 'San Francisco'), find_movies(release_year = '2016', actor = 'Tom Hanks', genre = 'Drama').
 
-The Entity Recognizer's job is to analyze the user input and extract all the entities relevant to the current intent. It has to accomplish two things: 
+The Entity Recognizer's job is to analyze the user input and extract all the entities relevant to the current intent. In NLP literature, this problem is commonly referred to as `Named Entity Recognition <https://en.wikipedia.org/wiki/Named-entity_recognition>`_. 
+
+The problem essentially consists of two parts:
+
 1. Detect which spans of words within the input text correspond to entities of interest
 2. Classify those detected text spans into a pre-determined set of entity types
 
-The Entity Recognizer uses a machine-learned sequence labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in chapter [].
+The Entity Recognizer uses a machine-learned sequence labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in :doc:`Building the Entity Recognizer </entity_recognition>`.
 
- At runtime, the Entity Recognizer loads up and uses the appropriate model, based on the predicted intent for the query. Once this step is done and we've extracted the relevant entities, we finally have all the raw ingredients required to make sense out of the user input. It's now a question of putting those together to build a semantic representation that encapsulates all the information necessary to execute the user's intended action.
+At runtime, the Entity Recognizer loads up and uses the appropriate model, based on the predicted intent for the query. Once this step is done and we've extracted the relevant entities, we finally have all the raw ingredients required to make sense out of the user input. It's now a question of putting those together to build a semantic representation that encapsulates all the information necessary to execute the user's intended action.
 
 
-Entity Resolution
-~~~~~~~~~~~~~~~~~
+Entity Resolver
+~~~~~~~~~~~~~~~
+
+The Entity Resolver transforms the entity spans extracted by the Entity Recognizer into canonical forms that can be looked up in a catalog or a knowledge base. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake", "SF" may get resolved to "San Francisco" and so on. This problem of entity resolution is also referred to as `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ in NLP literature.
+
+The MindMeld Entity Resolver uses a resource called an Entity Map to transform extracted entities into their desired normalized forms. The chapters on :doc:`Defining the Entity Map </entity_map>` and :doc:`Building the Entity Resolver </entity_resolution>` provide more details on the entity resolution step.
+
+
+Role Classifier
+~~~~~~~~~~~~~~~
+
+
+
 
 
 Semantic Parsing
@@ -97,22 +113,10 @@ The Dialogue Manager is responsible for directing the flow of the conversation. 
 Question Answerer
 -----------------
 
-Question Answering (QA) is a computer science discipline within the fields of information retrieval and natural language processing (NLP), which is concerned with building systems that automatically answer questions posed by humans in a natural language.
 
-A QA implementation, usually a computer program, may construct its answers by querying a structured database of knowledge or information, usually a knowledge base. More commonly, QA systems can pull answers from an unstructured collection of natural language documents.
-
-Some examples of natural language document collections used for QA systems include:
-
-* a local collection of reference texts
-* internal organization documents and web pages
-* compiled newswire reports
-* a set of Wikipedia pages
-* a subset of World Wide Web pages
-
-QA research attempts to deal with a wide range of question types including: fact, list, definition, How, Why, hypothetical, semantically constrained, and cross-lingual questions.
 
 
 Natural Language Generator
 --------------------------
 
-The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response.
+The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in :doc:`Building the NLG </nlg>` chapter.

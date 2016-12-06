@@ -1,18 +1,9 @@
 Welcome to the MindMeld Workbench
 =================================
 
-The MindMeld Workbench library provides a set of Natural Language Processing tools that can be used to build a Deep Domain Conversational AI system, capable of intelligently conversing with users in natural language. The library enables machine learning engineers and data scientists to quickly build, test and deploy conversational user interfaces across a wide range of platforms.
+The MindMeld Workbench python package provides a set of Natural Language Processing tools that can be used to build Deep Domain Conversational AI systems, capable of intelligently conversing with users in natural language. The package enables machine learning engineers and data scientists to quickly build, test and deploy conversational user interfaces across a wide range of platforms.
 
-Choose MindMeld Workbench if you need:
-
-* An integrated toolkit with a good range of grammatical analysis tools
-* Fast, reliable analysis of arbitrary texts
-* The overall highest quality text analytics
-* Support for a number of major (human) languages
-* Interfaces available for various major modern programming languages
-* Ability to run as a simple web service
-
-Along with easy-to-use tools for building an intelligent conversational interface, we also provide detailed tutorials explaining the step-by-step process and describe best practices for building such an application. Our user guide will walk you through the various machine learning components and how to train, test and optimize each of them to achieve the high level of accuracy required for user-facing commercial applications.
+Along with easy-to-use modules for building an intelligent conversational interface, we also provide detailed tutorials explaining the step-by-step process and best practices for building such an application. Our user guide will walk you through the various machine learning components and how to train, test and optimize each of them to achieve the high level of accuracy required for user-facing commercial applications.
 
 Our user guide is organized into three sections:
 
