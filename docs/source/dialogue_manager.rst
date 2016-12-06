@@ -1,2 +1,2 @@
-Building the Dialogue Manager
+Dialogue Manager
 =============================

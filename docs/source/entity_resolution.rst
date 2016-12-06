@@ -1,2 +1,2 @@
-Building the Entity Resolver
+Entity Resolver
 ============================

@@ -1,4 +1,4 @@
-Defining The Entity Map
+Entity Map
 =======================
 
 .. _Building The Entity Recognizer: entity_recognition.html
@@ -13,11 +13,11 @@ Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational 
 
 * Map synonyms - :red:`"let's hear some yeezy"` should search for :red:`"Kanye West"`
 
-* Specify which database fields to query given certain entity types. 
+* Specify which database fields to query given certain entity types.
 
   + E.g. for **movies**, query the **pubdate** fields given a **time-range** entity
 
-* Add small-vocabulary gazetteer entries for named entity extraction. 
+* Add small-vocabulary gazetteer entries for named entity extraction.
 
   + E.g. document type names for music search: **artists**, **tracks**, **albums**, and **playlists**
 
@@ -142,7 +142,7 @@ TextMap and ClauseMap apply to roles in a similar vein -
       },
       ...
     ]
-  }        
+  }
 
 For a mapping that applies to all entity values in the entity block, a **`*`** wildcard can be used to encode the mapping -
 

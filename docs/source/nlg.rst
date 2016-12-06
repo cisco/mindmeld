@@ -1,2 +1,2 @@
-Building the NLG
-================
+Natural Language Generator (NLG)
+================================

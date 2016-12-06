@@ -48,10 +48,10 @@ E.g.
 
 #. I want a chai tea latte.
 #. Just a shot of espresso please.
-#. Get me a grande mocha with whipped cream on top. 
+#. Get me a grande mocha with whipped cream on top.
 #. Can I get a tall cappuccino with skimmed milk, one venti caramel macchiato, two chocolate chip muffins and a banana?
 
-The representative set for "ordering" would theefore have to be a lot larger, since it would need to cover all the different examples of users specifying an order with varying amounts of detail. 
+The representative set for "ordering" would theefore have to be a lot larger, since it would need to cover all the different examples of users specifying an order with varying amounts of detail.
 
 In addition, if you expect the system to handle other kinds of queries at the start state (e.g. reordering from history, checking order status, etc.), you would accordingly have to author more examples covering those as well.
 
@@ -61,11 +61,11 @@ We next look at adding more structure to the training data generation process by
 Defining Intents, Slots and Domains
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An intelligent conversational interface gives its users the flexibility to control and direct the conversation flow rather than forcing them to follow a fixed predetermined sequence of prompts. At every state in the dialogue, users are free to express whatever they want and the system responds by following the appropriate branch in the dialogue flowchart. 
+An intelligent conversational interface gives its users the flexibility to control and direct the conversation flow rather than forcing them to follow a fixed predetermined sequence of prompts. At every state in the dialogue, users are free to express whatever they want and the system responds by following the appropriate branch in the dialogue flowchart.
 
 We saw earlier that a user at the start state of a coffee-ordering app could either greet the system, place a new order, reorder from history, check his order status or say something else altogether. Each of these is called an Intent and corresponds to one of the possible intentions that the user may have at a given state. The intent chooses the transition from the current dialogue state to the next and subsequently determines the type of action to be taken by the system.
 
-By convention, intent names are verbs since they denote some action that the user is trying to accomplish. 
+By convention, intent names are verbs since they denote some action that the user is trying to accomplish.
 
 Some example intents for the coffee-ordering app would be:
 
@@ -124,7 +124,7 @@ The end goal is to have a representative set of queries covering all intents, to
 Annotate the Training Data
 --------------------------
 
-The MindMeld Entity Recognizer extracts relevants entities from user queries and assigns them to appropriate slot types. For instance, when a user says "I want to order a **tall** **decaf**  **latte**", the Entity Recognizer identifies **tall** as a size, **decaf** as an option and **latte** as a drink_name. 
+The MindMeld Entity Recognizer extracts relevants entities from user queries and assigns them to appropriate slot types. For instance, when a user says "I want to order a **tall** **decaf**  **latte**", the Entity Recognizer identifies **tall** as a size, **decaf** as an option and **latte** as a drink_name.
 
 In order to do this accurately at runtime, the Entity Recognizer needs to be trained to recognize and classify entities in free-form text. We do this by adding annotations to our training data to identify all the entities within our collected queries. We mark up the parts of the query that correspond to a slot, i.e. provide further information to the app about the current user intent.
 

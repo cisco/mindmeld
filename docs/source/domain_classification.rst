@@ -1,4 +1,4 @@
-Building the Domain Classifier
+Domain Classifier
 ==============================
 
 The domain classifier determines the target domain for a given query. The target domain determines which intent classifier will be invoked. The domain classifier is trained using all of the labeled queries across all intents for all domains in an application. The labels for the training data are the domain names associated with each query. The classifier uses the "marked down" form of each query i.e all query annotations are removed and the raw text is sent to a text classifier.
@@ -72,7 +72,7 @@ If you set **cv=KFold** or **cv=StratifiedKFold**, a confusion matrix will be ge
     +---------------------+----+---+---+---+---+---+
     |unknown              |  3 | . | 9 | . | . | 2 |
     +---------------------+----+---+---+---+---+---+
-    
+
 
 Training Accuracy Statistics::
 
@@ -152,7 +152,7 @@ You can then print out the accuracy and error analysis of the classification:
 
   accuracy = ev.accuracy_score()
   print("Accuracy: {0:f}".format(accuracy))
-  
+
   # Error Analysis
   errors = ev.prediction_errors()
   for e in errors:

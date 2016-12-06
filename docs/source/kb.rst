@@ -1,4 +1,4 @@
-Building The Knowledge Base
+Knowledge Base
 ===========================
 
 In order to build Deep-Domain Question Answering systems for large content catalogs, a Knowledge Base is required. For narrow-vocabulary domains, it is likely possible to create short lists which capture every possible entity value. But for medium- and large-vocabulary domains, a Knowledge Base can be helpful for storing and exporting all the potential entity values (names of artists, actors, titles, products, etc).

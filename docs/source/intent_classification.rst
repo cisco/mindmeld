@@ -1,4 +1,4 @@
-Building the Intent Classifier
+Intent Classifier
 ==============================
 
 The intent classifier is trained using all of the labeled queries across all intents for all intents. It determines the target intent for a given query. The target intent determines which intent classifier will be invoked. The labels for the training data are the intent names associated with each query. Similar to the Domain Classifier, the intent classifier uses the "marked down" form of each query i.e all query annotations are removed and raw text is sent to a text classifier.
@@ -73,7 +73,7 @@ A confusion matrix will be generated in the printed stats.
     +---------------------+----+---+---+---+---+---+
     |exit                 |  4 | . | 1 | . | . | . |
     +---------------------+----+---+---+---+---+---+
-    
+
 
 Training Accuracy Statistics::
 
@@ -93,7 +93,7 @@ Here is a sample **"intent_model_config.json"** file for specifying model and fe
           "model-type": "logreg",
           "features": {
             "bag-of-words": {
-              "lengths": [1, 2] 
+              "lengths": [1, 2]
             },
             "edge-ngrams": {
               "lengths": [1, 2]
@@ -157,7 +157,7 @@ You can then print out the accuracy and error analysis of the classification:
 
   accuracy = ev.accuracy_score()
   print("Accuracy: {0:f}".format(accuracy))
-  
+
   # Error Analysis
   errors = ev.prediction_errors()
   for e in errors:

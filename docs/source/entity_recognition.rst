@@ -1,4 +1,4 @@
-Building the Entity Recognizer
+Entity Recognizer
 ==============================
 
 The Named Entity Recognizers detect specific words or phrases in a query which might be useful when fulfilling its intent.
@@ -11,7 +11,7 @@ The Named Entity Recognizers detect specific words or phrases in a query which m
 
 * show me tom hanks movies => show me :aqua:`tom hanks` movies
 
-.. _Maximum Entropy Markov Model: https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model 
+.. _Maximum Entropy Markov Model: https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model
 .. _Conditional Random Field: https://en.wikipedia.org/wiki/Conditional_random_field
 
 The named entity recognizers are also called the **facet models** or **facet classifiers**. In practice, sequence models such as the `Maximum Entropy Markov Model`_ or `Conditional Random Field`_ work very effectively for bootstrapping your application.
@@ -182,21 +182,21 @@ In the above case, the model was unable to successfully distinguish "stanley kub
 
 .. code-block:: javascript
 
-  --------                                               --------        --------        --------        --------        --------        --------        
-  name                                                   feat_val         pred_w          gold_w          pred_p          gold_p           diff        
-  --------                                               --------        --------        --------        --------        --------        --------        
-  bag-of-words|length:1|pos:-1=are                         1.000          -0.183          -0.427          -0.183          -0.427          -0.244        
-  bag-of-words|length:1|pos:-2=what                        1.000          -0.536          -0.090          -0.536          -0.090           0.446        
-  bag-of-words|length:1|pos:0=stanley                      1.000           0.079          -0.000           0.079          -0.000          -0.079        
-  bag-of-words|length:1|pos:1=kubrick                      1.000           0.079          -0.000           0.079          -0.000          -0.079        
-  bag-of-words|length:2|pos:0=stanley kubrick              1.000           0.079          -0.000           0.079          -0.000          -0.079        
-  in-gaz|conflict|exact|type1:directors|type2:producers    1.000          -0.277          -0.496          -0.277          -0.496          -0.219        
-  in-gaz|conflict|exact|type1:directors|type2:writers      1.000          -0.074          -0.853          -0.074          -0.853          -0.779        
-  in-gaz|type:directors                                    1.000           0.976          -0.025           0.976          -0.025          -1.001        
-  in-gaz|type:directors|log-char-len                       0.876           0.834          -0.239           0.731          -0.210          -0.940        
-  in-gaz|type:directors|ngram-first|length:1=stanley       1.000           0.079          -0.000           0.079          -0.000          -0.079        
-  in-gaz|type:directors|ngram-last|length:1=kubrick        1.000           0.066          -0.000           0.066          -0.000          -0.066        
-  in-gaz|type:directors|p_ef                              -1.000          -0.750           0.118           0.750          -0.118          -0.868        
+  --------                                               --------        --------        --------        --------        --------        --------
+  name                                                   feat_val         pred_w          gold_w          pred_p          gold_p           diff
+  --------                                               --------        --------        --------        --------        --------        --------
+  bag-of-words|length:1|pos:-1=are                         1.000          -0.183          -0.427          -0.183          -0.427          -0.244
+  bag-of-words|length:1|pos:-2=what                        1.000          -0.536          -0.090          -0.536          -0.090           0.446
+  bag-of-words|length:1|pos:0=stanley                      1.000           0.079          -0.000           0.079          -0.000          -0.079
+  bag-of-words|length:1|pos:1=kubrick                      1.000           0.079          -0.000           0.079          -0.000          -0.079
+  bag-of-words|length:2|pos:0=stanley kubrick              1.000           0.079          -0.000           0.079          -0.000          -0.079
+  in-gaz|conflict|exact|type1:directors|type2:producers    1.000          -0.277          -0.496          -0.277          -0.496          -0.219
+  in-gaz|conflict|exact|type1:directors|type2:writers      1.000          -0.074          -0.853          -0.074          -0.853          -0.779
+  in-gaz|type:directors                                    1.000           0.976          -0.025           0.976          -0.025          -1.001
+  in-gaz|type:directors|log-char-len                       0.876           0.834          -0.239           0.731          -0.210          -0.940
+  in-gaz|type:directors|ngram-first|length:1=stanley       1.000           0.079          -0.000           0.079          -0.000          -0.079
+  in-gaz|type:directors|ngram-last|length:1=kubrick        1.000           0.066          -0.000           0.066          -0.000          -0.066
+  in-gaz|type:directors|p_ef                              -1.000          -0.750           0.118           0.750          -0.118          -0.868
     ...
     ...
 
