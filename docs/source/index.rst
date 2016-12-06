@@ -48,3 +48,10 @@ Our user guide is organized into three sections:
    :name: deploy
 
    deployment
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Notebook
+   :name: notebook
+
+   hello-world
