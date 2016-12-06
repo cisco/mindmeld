@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting Started &#8212; Workbench 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Training Data" href="training_data.html" />
+    <link rel="prev" title="Anatomy of a Deep-Domain Conversational AI System" href="anatomy.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>Install XCode and functools</p>
+<p>Install XCode from the App Store</p>
+<p>Open XCode and &#8216;Agree&#8217; to the Terms &amp; Conditions to finish installing CLI tools
+Install the functools32 package (it&#8217;s included in requirements.txt):</p>
+<p>Make sure you are running Python 2.7.1x, and then run:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">functools32</span>
+</pre></div>
+</div>
+<p>These are the steps you&#8217;d follow for the Barista app after completing all the steps above.</p>
+<p>Check out the repo on the develop branch:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">-</span><span class="n">b</span> <span class="n">develop</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">expectlabs</span><span class="o">/</span><span class="n">barista</span>
+<span class="n">cd</span> <span class="n">barista</span>
+</pre></div>
+</div>
+<p>Make sure submodules are set up:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">submodule</span> <span class="n">update</span> <span class="o">--</span><span class="n">init</span>
+</pre></div>
+</div>
+<p>Start the numerical parser:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">scripts</span><span class="o">/</span><span class="n">start_num_parse</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Build:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">MM_ENVIRONMENT</span><span class="o">=</span><span class="n">dev</span> <span class="o">./</span><span class="n">buildme</span>
+</pre></div>
+</div>
+<p>Run:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">MM_ENVIRONMENT</span><span class="o">=</span><span class="n">dev</span> <span class="o">./</span><span class="n">runme</span>
+</pre></div>
+</div>
+<p>Test:
+Open browser to <a class="reference external" href="http://localhost:7150/barista/test.html">http://localhost:7150/barista/test.html</a></p>
+<p>How to specify Workbench as a submodule from within an app:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">submodule</span> <span class="n">add</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">expectlabs</span><span class="o">/</span><span class="n">mindmeld</span><span class="o">-</span><span class="n">workbench</span><span class="o">.</span><span class="n">git</span> <span class="n">vendor</span><span class="o">/</span><span class="n">mindmeld</span><span class="o">-</span><span class="n">workbench</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="anatomy.html" title="previous chapter">Anatomy of a Deep-Domain Conversational AI System</a></li>
+      <li>Next: <a href="training_data.html" title="next chapter">Training Data</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/getting_started.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, MindMeld Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/getting_started.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

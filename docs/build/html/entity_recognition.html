@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building the Entity Recognizer &#8212; Workbench 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Building the Entity Resolver" href="entity_resolution.html" />
+    <link rel="prev" title="Building the Intent Classifier" href="intent_classification.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="building-the-entity-recognizer">
+<h1>Building the Entity Recognizer<a class="headerlink" href="#building-the-entity-recognizer" title="Permalink to this headline">¶</a></h1>
+<p>The Named Entity Recognizers detect specific words or phrases in a query which might be useful when fulfilling its intent.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="nx">show</span> <span class="nx">me</span> <span class="nx">tom</span> <span class="nx">hanks</span> <span class="nx">movies</span> <span class="o">--&gt;</span> <span class="nx">show</span> <span class="nx">me</span> <span class="p">{</span><span class="nx">tom</span> <span class="nx">hanks</span><span class="o">|</span><span class="nx">cast</span><span class="p">}</span> <span class="nx">movies</span>
+</pre></div>
+</div>
+<p>The named entity recognizers are also called the facet models or facet classifiers. In practice, sequence models such as the Maximum-Entropy Markov Model or Conditional Random Fields work very effectively for bootstrapping your application.</p>
+<p>A formal introduction to sequence NER models can be found in the Stanford lecture <a class="reference external" href="https://web.stanford.edu/class/cs124/lec/Information_Extraction_and_Named_Entity_Recognition.pdf">notes</a>. MindMeld Workbench will prepare the data to an IOBES tagging scheme (an extension to the well known <a class="reference external" href="https://en.wikipedia.org/wiki/Inside_Outside_Beginning">IOB</a> tagging for NER sequence models).</p>
+<div class="section" id="define-the-config">
+<h2>Define The Config<a class="headerlink" href="#define-the-config" title="Permalink to this headline">¶</a></h2>
+<p>Similar to the Domain &amp; Intent Classifiers, we can define a config file for specifying the model and feature settings to use. In the following example, we use the <cite>memm</cite> model with the respective lexical and syntactic features specified -</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;models&quot;</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">&quot;memm&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;model-type&quot;</span><span class="o">:</span> <span class="s2">&quot;memm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;features&quot;</span><span class="o">:</span> <span class="p">{</span>
+          <span class="s2">&quot;bag-of-words&quot;</span><span class="o">:</span> <span class="p">{</span>
+            <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+          <span class="p">},</span>
+          <span class="s2">&quot;edge-ngrams&quot;</span><span class="o">:</span> <span class="p">{</span>
+            <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+          <span class="p">},</span>
+          <span class="s2">&quot;in-gaz&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;scaling&quot;</span><span class="o">:</span> <span class="mi">10</span> <span class="p">},</span>
+          <span class="s2">&quot;length&quot;</span><span class="o">:</span> <span class="p">{},</span>
+          <span class="s2">&quot;gaz-freq&quot;</span><span class="o">:</span> <span class="p">{},</span>
+          <span class="s2">&quot;freq&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;bins&quot;</span><span class="o">:</span> <span class="mi">5</span> <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">},</span>
+      <span class="s2">&quot;ngram&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;model-type&quot;</span><span class="o">:</span> <span class="s2">&quot;logreg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;features&quot;</span><span class="o">:</span> <span class="p">{</span>
+          <span class="s2">&quot;bag-of-words&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">},</span>
+          <span class="s2">&quot;in-gaz&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;scaling&quot;</span><span class="o">:</span> <span class="mi">10</span> <span class="p">},</span>
+          <span class="s2">&quot;length&quot;</span><span class="o">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="train-the-model">
+<h2>Train The Model<a class="headerlink" href="#train-the-model" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="feature-specification">
+<h2>Feature Specification<a class="headerlink" href="#feature-specification" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="88%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Feature Group</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>bag-of-words</td>
+<td>Takes a query and generates N-grams of the specified &#8220;lengths&#8221;</td>
+</tr>
+<tr class="row-odd"><td>freq</td>
+<td>Counts of query tokens within each frequency bin (log-scaled)</td>
+</tr>
+<tr class="row-even"><td>in-gaz</td>
+<td>A set of features indicating presence of N-grams in Gazetteers</td>
+</tr>
+<tr class="row-odd"><td>in-gaz-span</td>
+<td>Extracts various properties of gazetteer spans</td>
+</tr>
+<tr class="row-even"><td>num-candidates</td>
+<td>Heuristically extracted numeric entities</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Building the Entity Recognizer</a><ul>
+<li><a class="reference internal" href="#define-the-config">Define The Config</a></li>
+<li><a class="reference internal" href="#train-the-model">Train The Model</a></li>
+<li><a class="reference internal" href="#feature-specification">Feature Specification</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="intent_classification.html" title="previous chapter">Building the Intent Classifier</a></li>
+      <li>Next: <a href="entity_resolution.html" title="next chapter">Building the Entity Resolver</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/entity_recognition.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, MindMeld Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/entity_recognition.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

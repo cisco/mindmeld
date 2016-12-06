@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building the Intent Classifier &#8212; Workbench 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Building the Entity Recognizer" href="entity_recognition.html" />
+    <link rel="prev" title="Building the Domain Classifier" href="domain_classification.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="building-the-intent-classifier">
+<h1>Building the Intent Classifier<a class="headerlink" href="#building-the-intent-classifier" title="Permalink to this headline">¶</a></h1>
+<p>The intent classifier is trained using all of the labeled queries across all intents for all intents. It determines the target intent for a given query. The target intent determines which intent classifier will be invoked. The labels for the training data are the intent names associated with each query. The intent classifier uses the &#8220;marked down&#8221; form of each query i.e all query annotations are removed and raw text is sent to a text classifier.</p>
+<div class="section" id="loading-the-config">
+<h2>Loading The Config<a class="headerlink" href="#loading-the-config" title="Permalink to this headline">¶</a></h2>
+<p>A model config file containing the Machine Learning model and feature settings needs to be defined. The format of the config file is explained in the section on &#8220;Configuring The Model&#8221; later on:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="n">intent_config</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="s1">&#39;intent_model_config.json&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="training-the-model">
+<h2>Training The Model<a class="headerlink" href="#training-the-model" title="Permalink to this headline">¶</a></h2>
+<p>Once your model config is loaded, you can load your training data and train the model:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Load your training data to a Data Frame</span>
+<span class="n">training_data</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;clothing&#39;</span><span class="p">)</span>
+
+<span class="c1"># Train The Classifier</span>
+<span class="n">intent_classifier</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">IntentClassifier</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">intent_config</span><span class="p">)</span>
+<span class="n">intent_classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;logreg&#39;</span><span class="p">)</span>
+
+<span class="c1"># Evaluate the model</span>
+<span class="n">intent_classifier</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;eval_set.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The &#8220;model&#8221; argument determines which model config to use (as specified in your config file). In the above example, the &#8220;logreg&#8221; model defined in your config file will be used for training.</p>
+<p>For a grid sweep over model hyperparameters, you can specify a param_grid dict object in your fit method. For example, for a SVM model you can define the <cite>kernel</cite> and the regularization parameter <cite>C</cite>. Additionally, if you want to do Cross Validation, you can define a CV iterator by specifying the number of splits.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Specify your grid search params</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
+  <span class="s2">&quot;class_bias&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">],</span>
+  <span class="s2">&quot;kernel&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">],</span>
+  <span class="s2">&quot;probability&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">true</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># Define your CV iterator</span>
+<span class="n">kfold_cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">num_splits</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Train classifier with grid search + CV</span>
+<span class="n">intent_classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;svm&#39;</span><span class="p">,</span> <span class="n">params_grid</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">kfold_cv</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you set <cite>cv=KFold</cite> or <cite>cv=StratifiedKFold</cite>, a confusion matrix will be generated in the printed stats.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="o">+---------------------+------------------------+</span>
+<span class="o">|</span><span class="nb">Error</span> <span class="nx">analysis</span>       <span class="o">|</span>        <span class="nx">predicted</span>       <span class="o">|</span>
+<span class="o">+---------------------+----+---+---+---+---+---+</span>
+<span class="o">|</span>                     <span class="o">|</span><span class="nx">gold</span><span class="o">|</span> <span class="mi">0</span> <span class="o">|</span> <span class="mi">1</span> <span class="o">|</span> <span class="mi">2</span> <span class="o">|</span> <span class="mi">3</span> <span class="o">|</span> <span class="mi">4</span> <span class="o">|</span>
+<span class="o">+=====================+====+===+===+===+===+===+</span>
+<span class="o">|</span><span class="nx">search</span>               <span class="o">|</span>  <span class="mi">0</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="mi">4</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="mi">2</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span>
+<span class="o">+---------------------+----+---+---+---+---+---+</span>
+<span class="o">|</span><span class="nx">check</span><span class="o">-</span><span class="nx">store</span>          <span class="o">|</span>  <span class="mi">1</span> <span class="o">|</span> <span class="mi">9</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="mi">1</span> <span class="o">|</span>
+<span class="o">+---------------------+----+---+---+---+---+---+</span>
+<span class="o">|</span><span class="nx">help</span>                 <span class="o">|</span>  <span class="mi">2</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span>
+<span class="o">+---------------------+----+---+---+---+---+---+</span>
+<span class="o">|</span><span class="nx">greeting</span>             <span class="o">|</span>  <span class="mi">3</span> <span class="o">|</span> <span class="mi">1</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span>
+<span class="o">+---------------------+----+---+---+---+---+---+</span>
+<span class="o">|</span><span class="nx">exit</span>                 <span class="o">|</span>  <span class="mi">4</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="mi">1</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span> <span class="p">.</span> <span class="o">|</span>
+<span class="o">+---------------------+----+---+---+---+---+---+</span>
+</pre></div>
+</div>
+<p>Training Accuracy Statistics:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>Average CV accuracy: 98.56% ± 0.26%
+Best accuracy: 98.56%, settings: {u&#39;kernel&#39;: u&#39;linear&#39;, u&#39;C&#39;: 5000, u&#39;probability&#39;: True, &#39;class_weight&#39;: {0: 0.8454625164401579, 1: 1.404707233065442}}
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuring-the-model">
+<h2>Configuring The Model<a class="headerlink" href="#configuring-the-model" title="Permalink to this headline">¶</a></h2>
+<p>Here is a sample <cite>intent_model_config.json</cite> file for specifying model and feature settings.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;models&quot;</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">&quot;logreg&quot;</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">&quot;model-type&quot;</span><span class="o">:</span> <span class="s2">&quot;logreg&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;features&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;bag-of-words&quot;</span><span class="o">:</span> <span class="p">{</span>
+          <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;edge-ngrams&quot;</span><span class="o">:</span> <span class="p">{</span>
+          <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;in-gaz&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;scaling&quot;</span><span class="o">:</span> <span class="mi">10</span> <span class="p">},</span>
+        <span class="s2">&quot;length&quot;</span><span class="o">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;gaz-freq&quot;</span><span class="o">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;freq&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;bins&quot;</span><span class="o">:</span> <span class="mi">5</span> <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;svm&quot;</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">&quot;model-type&quot;</span><span class="o">:</span> <span class="s2">&quot;svm&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;features&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;bag-of-words&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">},</span>
+        <span class="s2">&quot;edge-ngrams&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">},</span>
+        <span class="s2">&quot;in-gaz&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;scaling&quot;</span><span class="o">:</span> <span class="mi">10</span> <span class="p">},</span>
+        <span class="s2">&quot;length&quot;</span><span class="o">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;gaz-freq&quot;</span><span class="o">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;freq&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;bins&quot;</span><span class="o">:</span> <span class="mi">5</span> <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="feature-specification">
+<h2>Feature Specification<a class="headerlink" href="#feature-specification" title="Permalink to this headline">¶</a></h2>
+<p>The features to be used in your Machine Learning model are specified in the &#8220;features&#8221; field of your model specification. The following feature-specifications are available to use.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="11%" />
+<col width="89%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Feature Group</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>bag-of-words</td>
+<td>Takes a query and generates N-grams of the specified &#8220;lengths&#8221;</td>
+</tr>
+<tr class="row-odd"><td>edge-ngrams</td>
+<td>N-grams of the specified lengths at the start and end of query</td>
+</tr>
+<tr class="row-even"><td>freq</td>
+<td>Counts of query tokens within each frequency bin (log-scaled)</td>
+</tr>
+<tr class="row-odd"><td>in-gaz</td>
+<td>A set of features indicating presence of N-grams in Gazetteers</td>
+</tr>
+<tr class="row-even"><td>gaz-freq</td>
+<td>Extracts frequency bin features for each gazetteer (log-scaled)</td>
+</tr>
+<tr class="row-odd"><td>length</td>
+<td>Extracts length measures (linear &amp; log scale) on whole query</td>
+</tr>
+<tr class="row-even"><td>exact</td>
+<td>Extracts whole query string as a feature - useful for high accuracy on command &amp; control applications</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="evaluation">
+<h2>Evaluation<a class="headerlink" href="#evaluation" title="Permalink to this headline">¶</a></h2>
+<p>Next, see how the trained model performs against the test data set. Run the <cite>evaluate</cite> method on the classifier.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ev</span> <span class="o">=</span> <span class="n">intent_classifier</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;test_set.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can then print out the accuracy and error analysis of the classification:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">accuracy</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Accuracy: {0:f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">accuracy</span><span class="p">))</span>
+
+<span class="c1"># Error Analysis</span>
+<span class="n">errors</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">prediction_errors</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+  <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{0} </span><span class="se">\t</span><span class="s2"> {1} </span><span class="se">\t</span><span class="s2"> {2}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">gold_label</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">predicted_label</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="prediction">
+<h2>Prediction<a class="headerlink" href="#prediction" title="Permalink to this headline">¶</a></h2>
+<p>Finally, you can use the model to predict the intent for any new query input:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="s2">&quot;My new query for classification&quot;</span>
+<span class="n">pred_intent</span> <span class="o">=</span> <span class="n">intent_classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="detailed-inspection">
+<h2>Detailed Inspection<a class="headerlink" href="#detailed-inspection" title="Permalink to this headline">¶</a></h2>
+<p>You can use the <cite>verbose=True</cite> flag for deeper analysis on the feature values used for classifying that query.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="s2">&quot;I&#39;m looking for a pair of jeans&quot;</span>
+<span class="n">pred_intent</span> <span class="o">=</span> <span class="n">intent_classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This outputs a detailed dump of the top feature values used for classifying that query. This provides valuable insights into model behavior towards specific queries and guides you to making alternate modeling choices.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="nx">Predicted</span> <span class="nx">intent</span><span class="o">:</span>
+
+<span class="nx">FEATURE</span>                            <span class="nx">VALUE</span>          <span class="nx">PRED_W</span>          <span class="nx">PRED_P</span>          <span class="nx">GOLD_W</span>          <span class="nx">GOLD_P</span>            <span class="nx">DIFF</span>
+
+<span class="nx">IV</span><span class="o">&amp;</span><span class="nx">category</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>                 <span class="mf">0.226</span>          <span class="o">-</span><span class="mf">0.101</span>          <span class="o">-</span><span class="mf">0.023</span>          <span class="o">-</span><span class="mf">0.101</span>          <span class="o">-</span><span class="mf">0.023</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">IV</span><span class="o">&amp;</span><span class="nx">popularitysort</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>           <span class="mf">0.143</span>           <span class="mf">0.114</span>           <span class="mf">0.016</span>           <span class="mf">0.114</span>           <span class="mf">0.016</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">IV</span><span class="o">&amp;</span><span class="nx">sale</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>                     <span class="mf">0.226</span>           <span class="mf">0.102</span>           <span class="mf">0.023</span>           <span class="mf">0.102</span>           <span class="mf">0.023</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">IV</span><span class="o">&amp;</span><span class="nx">size</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">1</span>                     <span class="mf">0.143</span>           <span class="mf">0.039</span>           <span class="mf">0.006</span>           <span class="mf">0.039</span>           <span class="mf">0.006</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">IV</span><span class="o">&amp;</span><span class="nx">special</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>                  <span class="mf">0.143</span>          <span class="o">-</span><span class="mf">0.077</span>          <span class="o">-</span><span class="mf">0.011</span>          <span class="o">-</span><span class="mf">0.077</span>          <span class="o">-</span><span class="mf">0.011</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">IV</span><span class="o">&amp;</span><span class="nx">unsupported</span><span class="o">-</span><span class="nx">emoji</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>        <span class="mf">0.143</span>          <span class="o">-</span><span class="mf">0.007</span>          <span class="o">-</span><span class="mf">0.001</span>          <span class="o">-</span><span class="mf">0.007</span>          <span class="o">-</span><span class="mf">0.001</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">category</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>                    <span class="mf">0.226</span>          <span class="o">-</span><span class="mf">0.101</span>          <span class="o">-</span><span class="mf">0.023</span>          <span class="o">-</span><span class="mf">0.101</span>          <span class="o">-</span><span class="mf">0.023</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">chars_log</span>                          <span class="mf">3.466</span>           <span class="mf">0.561</span>           <span class="mf">1.946</span>           <span class="mf">0.561</span>           <span class="mf">1.946</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">clothing_category_exists</span>           <span class="mf">1.000</span>          <span class="o">-</span><span class="mf">0.828</span>          <span class="o">-</span><span class="mf">0.828</span>          <span class="o">-</span><span class="mf">0.828</span>          <span class="o">-</span><span class="mf">0.828</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">clothing_category_pop</span>              <span class="mf">0.219</span>          <span class="o">-</span><span class="mf">0.095</span>          <span class="o">-</span><span class="mf">0.021</span>          <span class="o">-</span><span class="mf">0.095</span>          <span class="o">-</span><span class="mf">0.021</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">clothing_category_ratio_pop</span>        <span class="mf">0.354</span>           <span class="mf">0.068</span>           <span class="mf">0.024</span>           <span class="mf">0.068</span>           <span class="mf">0.024</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">collar</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>                      <span class="mf">0.143</span>           <span class="mf">0.279</span>           <span class="mf">0.040</span>           <span class="mf">0.279</span>           <span class="mf">0.040</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">design</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>                      <span class="mf">0.143</span>           <span class="mf">0.087</span>           <span class="mf">0.012</span>           <span class="mf">0.087</span>           <span class="mf">0.012</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">faq</span><span class="o">|</span><span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>                         <span class="mf">0.143</span>          <span class="o">-</span><span class="mf">0.325</span>          <span class="o">-</span><span class="mf">0.046</span>          <span class="o">-</span><span class="mf">0.325</span>          <span class="o">-</span><span class="mf">0.046</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">freq</span><span class="o">|</span><span class="mi">0</span>                             <span class="mf">0.226</span>           <span class="mf">0.003</span>           <span class="mf">0.001</span>           <span class="mf">0.003</span>           <span class="mf">0.001</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">freq</span><span class="o">|</span><span class="mi">2</span>                             <span class="mf">0.286</span>          <span class="o">-</span><span class="mf">0.569</span>          <span class="o">-</span><span class="mf">0.162</span>          <span class="o">-</span><span class="mf">0.569</span>          <span class="o">-</span><span class="mf">0.162</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">freq</span><span class="o">|</span><span class="mi">3</span>                             <span class="mf">0.143</span>          <span class="o">-</span><span class="mf">0.461</span>          <span class="o">-</span><span class="mf">0.066</span>          <span class="o">-</span><span class="mf">0.461</span>          <span class="o">-</span><span class="mf">0.066</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">freq</span><span class="o">|</span><span class="mi">4</span>                             <span class="mf">0.143</span>          <span class="o">-</span><span class="mf">0.508</span>          <span class="o">-</span><span class="mf">0.073</span>          <span class="o">-</span><span class="mf">0.508</span>          <span class="o">-</span><span class="mf">0.073</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">left</span><span class="o">-</span><span class="nx">edge</span><span class="o">|</span><span class="mi">1</span><span class="o">:</span><span class="nx">i</span><span class="s1">&#39;m                    1.000           0.178           0.178           0.178           0.178          +0.000</span>
+<span class="s1">left-edge|2:i&#39;</span><span class="nx">m</span><span class="o">|</span><span class="nx">looking</span>            <span class="mf">1.000</span>           <span class="mf">0.088</span>           <span class="mf">0.088</span>           <span class="mf">0.088</span>           <span class="mf">0.088</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">ngram</span><span class="o">:</span><span class="nx">a</span><span class="o">|</span><span class="nx">pair</span>                       <span class="mf">1.000</span>          <span class="o">-</span><span class="mf">0.039</span>          <span class="o">-</span><span class="mf">0.039</span>          <span class="o">-</span><span class="mf">0.039</span>          <span class="o">-</span><span class="mf">0.039</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="nx">ngram</span><span class="o">:</span><span class="nx">jeans</span>                        <span class="mf">1.000</span>          <span class="o">-</span><span class="mf">0.088</span>          <span class="o">-</span><span class="mf">0.088</span>          <span class="o">-</span><span class="mf">0.088</span>          <span class="o">-</span><span class="mf">0.088</span>          <span class="o">+</span><span class="mf">0.000</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Building the Intent Classifier</a><ul>
+<li><a class="reference internal" href="#loading-the-config">Loading The Config</a></li>
+<li><a class="reference internal" href="#training-the-model">Training The Model</a></li>
+<li><a class="reference internal" href="#configuring-the-model">Configuring The Model</a></li>
+<li><a class="reference internal" href="#feature-specification">Feature Specification</a></li>
+<li><a class="reference internal" href="#evaluation">Evaluation</a></li>
+<li><a class="reference internal" href="#prediction">Prediction</a></li>
+<li><a class="reference internal" href="#detailed-inspection">Detailed Inspection</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="domain_classification.html" title="previous chapter">Building the Domain Classifier</a></li>
+      <li>Next: <a href="entity_recognition.html" title="next chapter">Building the Entity Recognizer</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/intent_classification.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, MindMeld Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/intent_classification.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

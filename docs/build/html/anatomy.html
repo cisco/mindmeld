@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Anatomy of a Deep-Domain Conversational AI System &#8212; Workbench 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Getting Started" href="getting_started.html" />
+    <link rel="prev" title="Welcome to the MindMeld Workbench" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="anatomy-of-a-deep-domain-conversational-ai-system">
+<h1>Anatomy of a Deep-Domain Conversational AI System<a class="headerlink" href="#anatomy-of-a-deep-domain-conversational-ai-system" title="Permalink to this headline">¶</a></h1>
+<p>The MindMeld deep-domain conversational AI platform consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.</p>
+<p>[ Insert architecture diagram here]</p>
+<p>This chapter will introduce you to the each of the components in the MindMeld toolkit.</p>
+<div class="section" id="natural-language-understanding-nlu">
+<h2>Natural Language Understanding (NLU)<a class="headerlink" href="#natural-language-understanding-nlu" title="Permalink to this headline">¶</a></h2>
+<p>The Natural language understanding (NLU) component, as the name suggests, is tasked with comprehending the user&#8217;s natural language input. This involves processing the input text using a combination of techniques such as pattern matching, text classification, information extraction and parsing. The end goal is to produce an actionable semantic representation that can be used to satisfy the dialogue task.</p>
+<p>E.g. If the user says &#8220;A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread.&#8221;, the NLU would produce:</p>
+<p>[ Insert Image Clipped from <a class="reference external" href="http://demo.mindmeld.com/demo.html">http://demo.mindmeld.com/demo.html</a> ]</p>
+<p>The MindMeld NLU analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the &#8220;search space&#8221;.</p>
+<p>[ Insert Image of Domain -&gt; Intent -&gt; Entities ]</p>
+<p>We next take a look at each of the NLU classifiers one by one.</p>
+<div class="section" id="domain-classifier">
+<h3>Domain Classifier<a class="headerlink" href="#domain-classifier" title="Permalink to this headline">¶</a></h3>
+<p>The first level of categorization is done by the Domain Classifier, which classifies the input into one of the predetermined set of domains that can be handled by the conversational system. A &#8220;domain&#8221; can be thought of as a broad category covering multiple related user intents. Generally, each domain would have its own specialized vocabulary or terminology, that sets it apart from other domains.</p>
+<p>For instance, a conversational system built for smart home automation would be expected to handle several distinct tasks such as setting the temperature on the thermostat, toggling the light fixtures in different rooms, locking/unclocking different doors and controlling multimedia devices around the home. The vocabulary for changing the settings on the thermostat is very specific and completely different from interacting with the television. You could therefore consider modeling them under separate domains - a &#8220;thermostat&#8221; domain for handling all interactions related to the thermostat and similarly a &#8220;multimedia&#8221; domain.</p>
+<p>On the other hand, you can also have applications where you just have one de facto domain. This is usually the case if all the tasks that your system can handle are conceptually related and share the same vocabulary. For instance, a food ordering app could potentially handle multiple intents like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing any of these tasks would be shared to a large extent.</p>
+<p>The number of domains thus depends on the scope of your application. Personal assistants like Siri, Cortana, Google Assistant and Alexa are capable of handling several different domains.</p>
+<p>The Domain Classifier uses a machine-learned text classification model trained by providing many examples of user queries along with their true domain labels. At runtime, the Classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.</p>
+<p>See chapter [] for a discussion on generating the labelled data for training. In chapter [], we will take a closer look at training and evaluating the domain classification model.</p>
+</div>
+<div class="section" id="intent-classifier">
+<h3>Intent Classifier<a class="headerlink" href="#intent-classifier" title="Permalink to this headline">¶</a></h3>
+<p>Once the domain for the user input has been determined, the next level of categorization is provided by the Intent Classifier. An &#8220;intent&#8221; refers to a very specific kind of informational or transactional user need. The user may want to book a flight, search for movies from a catalog, know about the weather conditions somewhere or set the temperature on their home thermostat. Each of these is an example of a user intent.</p>
+<p>A domain can, and usually has multiple intents. For instance, the de facto &#8220;food&#8221; domain in a food ordering app would at least contain intents such as:</p>
+<p>search_restaurant: Searching for restaurants matching a particular set of criteria
+get_restaurant_info: Get general information about a selected restaurant like hours, cuisine, price range, etc.
+list_dishes: List all the dishes available at a selected restaurant, optionally filtered by certain criteria
+place_order: Place an order for pick up or delivery</p>
+<p>By convention, we use verbs to name our intents as they inherently refer to an action that needs to be taken.</p>
+<p>The Intent Classifier, similar to the Domain Classifier uses a machine-learned text classification model that is trained using labelled training data. We train one intent classification model per domain and the Classifier at runtime chooses the appropriate model, based on the predicted domain for the input query. The output of the Intent Classifier is an intent label which allows us to identify the exact task that the user is trying to solve.</p>
+<p>We describe how to build intent classification models in chapter [].</p>
+</div>
+<div class="section" id="entity-recognizer">
+<h3>Entity Recognizer<a class="headerlink" href="#entity-recognizer" title="Permalink to this headline">¶</a></h3>
+<p>Once the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An &#8220;entity&#8221; is any important word or phrase that provides further information about the user&#8217;s end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.</p>
+<p>For programmers, a good analogy is to think of intents as functions and entities as the arguments you pass into the function call. E.g. set_thermostat(temperature = 70), get_weather_info(city = &#8216;San Francisco&#8217;), find_movies(release_year = &#8216;2016&#8217;, actor = &#8216;Tom Hanks&#8217;, genre = &#8216;Drama&#8217;).</p>
+<p>The Entity Recognizer&#8217;s job is to analyze the user input and extract all the entities relevant to the current intent. It has to accomplish two things:
+1. Detect which spans of words within the input text correspond to entities of interest
+2. Classify those detected text spans into a pre-determined set of entity types</p>
+<p>The Entity Recognizer uses a machine-learned sequence labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in chapter [].</p>
+<blockquote>
+<div>At runtime, the Entity Recognizer loads up and uses the appropriate model, based on the predicted intent for the query. Once this step is done and we&#8217;ve extracted the relevant entities, we finally have all the raw ingredients required to make sense out of the user input. It&#8217;s now a question of putting those together to build a semantic representation that encapsulates all the information necessary to execute the user&#8217;s intended action.</div></blockquote>
+</div>
+<div class="section" id="entity-resolution">
+<h3>Entity Resolution<a class="headerlink" href="#entity-resolution" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="semantic-parsing">
+<h3>Semantic Parsing<a class="headerlink" href="#semantic-parsing" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="dialogue-manager">
+<h2>Dialogue Manager<a class="headerlink" href="#dialogue-manager" title="Permalink to this headline">¶</a></h2>
+<p>The Dialogue Manager is responsible for directing the flow of the conversation. In contrast to other parts of the system that are stateless, the Dialogue Manager is stateful and maintains information about each state or step in the dialogue flow. It is therefore able to use historical context from previous conversation turns to move the dialogue along towards the end goal of satisfying the user&#8217;s intent.</p>
+</div>
+<div class="section" id="question-answerer">
+<h2>Question Answerer<a class="headerlink" href="#question-answerer" title="Permalink to this headline">¶</a></h2>
+<p>Question Answering (QA) is a computer science discipline within the fields of information retrieval and natural language processing (NLP), which is concerned with building systems that automatically answer questions posed by humans in a natural language.</p>
+<p>A QA implementation, usually a computer program, may construct its answers by querying a structured database of knowledge or information, usually a knowledge base. More commonly, QA systems can pull answers from an unstructured collection of natural language documents.</p>
+<p>Some examples of natural language document collections used for QA systems include:</p>
+<ul class="simple">
+<li>a local collection of reference texts</li>
+<li>internal organization documents and web pages</li>
+<li>compiled newswire reports</li>
+<li>a set of Wikipedia pages</li>
+<li>a subset of World Wide Web pages</li>
+</ul>
+<p>QA research attempts to deal with a wide range of question types including: fact, list, definition, How, Why, hypothetical, semantically constrained, and cross-lingual questions.</p>
+</div>
+<div class="section" id="natural-language-generator">
+<h2>Natural Language Generator<a class="headerlink" href="#natural-language-generator" title="Permalink to this headline">¶</a></h2>
+<p>The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user&#8217;s intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Anatomy of a Deep-Domain Conversational AI System</a><ul>
+<li><a class="reference internal" href="#natural-language-understanding-nlu">Natural Language Understanding (NLU)</a><ul>
+<li><a class="reference internal" href="#domain-classifier">Domain Classifier</a></li>
+<li><a class="reference internal" href="#intent-classifier">Intent Classifier</a></li>
+<li><a class="reference internal" href="#entity-recognizer">Entity Recognizer</a></li>
+<li><a class="reference internal" href="#entity-resolution">Entity Resolution</a></li>
+<li><a class="reference internal" href="#semantic-parsing">Semantic Parsing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dialogue-manager">Dialogue Manager</a></li>
+<li><a class="reference internal" href="#question-answerer">Question Answerer</a></li>
+<li><a class="reference internal" href="#natural-language-generator">Natural Language Generator</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to the MindMeld Workbench</a></li>
+      <li>Next: <a href="getting_started.html" title="next chapter">Getting Started</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/anatomy.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, MindMeld Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/anatomy.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

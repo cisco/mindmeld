@@ -1,0 +1,117 @@
+Anatomy of a Deep-Domain Conversational AI System
+==================================================
+
+The MindMeld deep-domain conversational AI platform consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience. 
+
+[ Insert architecture diagram here]
+
+This chapter will introduce you to the each of the components in the MindMeld toolkit.
+
+
+Natural Language Understanding (NLU)
+------------------------------------
+
+The Natural language understanding (NLU) component, as the name suggests, is tasked with comprehending the user's natural language input. This involves processing the input text using a combination of techniques such as pattern matching, text classification, information extraction and parsing. The end goal is to produce an actionable semantic representation that can be used to satisfy the dialogue task.
+
+E.g. If the user says "A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread.", the NLU would produce:
+
+[ Insert Image Clipped from http://demo.mindmeld.com/demo.html ]
+
+The MindMeld NLU analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the "search space". 
+
+[ Insert Image of Domain -> Intent -> Entities ]
+
+
+We next take a look at each of the NLU classifiers one by one. 
+
+Domain Classifier
+~~~~~~~~~~~~~~~~~
+
+The first level of categorization is done by the Domain Classifier, which classifies the input into one of the predetermined set of domains that can be handled by the conversational system. A "domain" can be thought of as a broad category covering multiple related user intents. Generally, each domain would have its own specialized vocabulary or terminology, that sets it apart from other domains.
+
+For instance, a conversational system built for smart home automation would be expected to handle several distinct tasks such as setting the temperature on the thermostat, toggling the light fixtures in different rooms, locking/unclocking different doors and controlling multimedia devices around the home. The vocabulary for changing the settings on the thermostat is very specific and completely different from interacting with the television. You could therefore consider modeling them under separate domains - a "thermostat" domain for handling all interactions related to the thermostat and similarly a "multimedia" domain.
+
+On the other hand, you can also have applications where you just have one de facto domain. This is usually the case if all the tasks that your system can handle are conceptually related and share the same vocabulary. For instance, a food ordering app could potentially handle multiple intents like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing any of these tasks would be shared to a large extent.
+
+The number of domains thus depends on the scope of your application. Personal assistants like Siri, Cortana, Google Assistant and Alexa are capable of handling several different domains. 
+
+The Domain Classifier uses a machine-learned text classification model trained by providing many examples of user queries along with their true domain labels. At runtime, the Classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.
+
+See chapter [] for a discussion on generating the labelled data for training. In chapter [], we will take a closer look at training and evaluating the domain classification model.  
+
+
+Intent Classifier
+~~~~~~~~~~~~~~~~~
+
+Once the domain for the user input has been determined, the next level of categorization is provided by the Intent Classifier. An "intent" refers to a very specific kind of informational or transactional user need. The user may want to book a flight, search for movies from a catalog, know about the weather conditions somewhere or set the temperature on their home thermostat. Each of these is an example of a user intent.
+
+A domain can, and usually has multiple intents. For instance, the de facto "food" domain in a food ordering app would at least contain intents such as:
+
+search_restaurant: Searching for restaurants matching a particular set of criteria
+get_restaurant_info: Get general information about a selected restaurant like hours, cuisine, price range, etc.
+list_dishes: List all the dishes available at a selected restaurant, optionally filtered by certain criteria
+place_order: Place an order for pick up or delivery
+
+By convention, we use verbs to name our intents as they inherently refer to an action that needs to be taken.
+
+The Intent Classifier, similar to the Domain Classifier uses a machine-learned text classification model that is trained using labelled training data. We train one intent classification model per domain and the Classifier at runtime chooses the appropriate model, based on the predicted domain for the input query. The output of the Intent Classifier is an intent label which allows us to identify the exact task that the user is trying to solve.
+
+We describe how to build intent classification models in chapter [].
+
+
+Entity Recognizer
+~~~~~~~~~~~~~~~~~
+
+Once the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An "entity" is any important word or phrase that provides further information about the user's end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.
+
+For programmers, a good analogy is to think of intents as functions and entities as the arguments you pass into the function call. E.g. set_thermostat(temperature = 70), get_weather_info(city = 'San Francisco'), find_movies(release_year = '2016', actor = 'Tom Hanks', genre = 'Drama').
+
+The Entity Recognizer's job is to analyze the user input and extract all the entities relevant to the current intent. It has to accomplish two things: 
+1. Detect which spans of words within the input text correspond to entities of interest
+2. Classify those detected text spans into a pre-determined set of entity types
+
+The Entity Recognizer uses a machine-learned sequence labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in chapter [].
+
+ At runtime, the Entity Recognizer loads up and uses the appropriate model, based on the predicted intent for the query. Once this step is done and we've extracted the relevant entities, we finally have all the raw ingredients required to make sense out of the user input. It's now a question of putting those together to build a semantic representation that encapsulates all the information necessary to execute the user's intended action.
+
+
+Entity Resolution
+~~~~~~~~~~~~~~~~~
+
+
+Semantic Parsing
+~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+Dialogue Manager
+----------------
+
+The Dialogue Manager is responsible for directing the flow of the conversation. In contrast to other parts of the system that are stateless, the Dialogue Manager is stateful and maintains information about each state or step in the dialogue flow. It is therefore able to use historical context from previous conversation turns to move the dialogue along towards the end goal of satisfying the user's intent.
+
+
+Question Answerer
+-----------------
+
+Question Answering (QA) is a computer science discipline within the fields of information retrieval and natural language processing (NLP), which is concerned with building systems that automatically answer questions posed by humans in a natural language.
+
+A QA implementation, usually a computer program, may construct its answers by querying a structured database of knowledge or information, usually a knowledge base. More commonly, QA systems can pull answers from an unstructured collection of natural language documents.
+
+Some examples of natural language document collections used for QA systems include:
+
+* a local collection of reference texts
+* internal organization documents and web pages
+* compiled newswire reports
+* a set of Wikipedia pages
+* a subset of World Wide Web pages
+
+QA research attempts to deal with a wide range of question types including: fact, list, definition, How, Why, hypothetical, semantically constrained, and cross-lingual questions.
+
+
+Natural Language Generator
+--------------------------
+
+The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response.
