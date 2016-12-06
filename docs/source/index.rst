@@ -47,11 +47,17 @@ Our user guide is organized into three sections:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Build
-   :name: build
+   :caption: Data
+   :name: data
 
    training_data
    kb
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Build
+   :name: build
+
    entity_map
    domain_classification
    intent_classification
