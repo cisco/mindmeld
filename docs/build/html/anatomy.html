@@ -17,7 +17,8 @@
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -26,7 +27,6 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html" />
     <link rel="next" title="Getting Started" href="getting_started.html" />
     <link rel="prev" title="Welcome to the MindMeld Workbench" href="index.html" />
    
@@ -47,16 +47,16 @@
   <div class="section" id="anatomy-of-a-deep-domain-conversational-ai-system">
 <h1>Anatomy of a Deep-Domain Conversational AI System<a class="headerlink" href="#anatomy-of-a-deep-domain-conversational-ai-system" title="Permalink to this headline">¶</a></h1>
 <p>The MindMeld deep-domain conversational AI platform consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.</p>
-<p>[ Insert architecture diagram here]</p>
+<a class="reference external image-reference" href="_images/architecture.png"><img alt="_images/architecture.png" src="_images/architecture.png" /></a>
 <p>This chapter will introduce you to the each of the components in the MindMeld toolkit.</p>
-<div class="section" id="natural-language-understanding-nlu">
-<h2>Natural Language Understanding (NLU)<a class="headerlink" href="#natural-language-understanding-nlu" title="Permalink to this headline">¶</a></h2>
-<p>The Natural language understanding (NLU) component, as the name suggests, is tasked with comprehending the user&#8217;s natural language input. This involves processing the input text using a combination of techniques such as pattern matching, text classification, information extraction and parsing. The end goal is to produce an actionable semantic representation that can be used to satisfy the dialogue task.</p>
-<p>E.g. If the user says &#8220;A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread.&#8221;, the NLU would produce:</p>
+<div class="section" id="natural-language-parser">
+<h2>Natural Language Parser<a class="headerlink" href="#natural-language-parser" title="Permalink to this headline">¶</a></h2>
+<p>The Natural Language Parser is tasked with comprehending the user&#8217;s natural language input. This involves processing the input text using a combination of techniques such as pattern matching, text classification, information extraction and parsing. The end goal is to produce an actionable semantic representation that can be used to satisfy the dialogue task.</p>
+<p>E.g. If the user says &#8220;A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread.&#8221;, the parser would produce:</p>
 <p>[ Insert Image Clipped from <a class="reference external" href="http://demo.mindmeld.com/demo.html">http://demo.mindmeld.com/demo.html</a> ]</p>
-<p>The MindMeld NLU analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the &#8220;search space&#8221;.</p>
+<p>The MindMeld Parser analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the &#8220;search space&#8221;.</p>
 <p>[ Insert Image of Domain -&gt; Intent -&gt; Entities ]</p>
-<p>We next take a look at each of the NLU classifiers one by one.</p>
+<p>We next take a look at each of the classifiers within the MindMeld Parser one by one.</p>
 <div class="section" id="domain-classifier">
 <h3>Domain Classifier<a class="headerlink" href="#domain-classifier" title="Permalink to this headline">¶</a></h3>
 <p>The first level of categorization is done by the Domain Classifier, which classifies the input into one of the predetermined set of domains that can be handled by the conversational system. A &#8220;domain&#8221; can be thought of as a broad category covering multiple related user intents. Generally, each domain would have its own specialized vocabulary or terminology, that sets it apart from other domains.</p>
@@ -129,7 +129,7 @@ place_order: Place an order for pick up or delivery</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Anatomy of a Deep-Domain Conversational AI System</a><ul>
-<li><a class="reference internal" href="#natural-language-understanding-nlu">Natural Language Understanding (NLU)</a><ul>
+<li><a class="reference internal" href="#natural-language-parser">Natural Language Parser</a><ul>
 <li><a class="reference internal" href="#domain-classifier">Domain Classifier</a></li>
 <li><a class="reference internal" href="#intent-classifier">Intent Classifier</a></li>
 <li><a class="reference internal" href="#entity-recognizer">Entity Recognizer</a></li>
@@ -155,7 +155,7 @@ place_order: Place an order for pick up or delivery</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/anatomy.txt"
+      <li><a href="_sources/anatomy.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -177,11 +177,11 @@ place_order: Place an order for pick up or delivery</p>
       &copy;2016, MindMeld Inc..
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/anatomy.txt"
+      <a href="_sources/anatomy.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

@@ -17,7 +17,8 @@
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -26,7 +27,6 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Workbench 1.0.0 documentation" href="#" />
     <link rel="next" title="Anatomy of a Deep-Domain Conversational AI System" href="anatomy.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -55,13 +55,13 @@
 <li>Interfaces available for various major modern programming languages</li>
 <li>Ability to run as a simple web service</li>
 </ul>
-<p>Along with easy-to-use tools for building an intelligent conversational interface, we also provide detailed tutorials explaining the step-by-step process and best practices for building such an application. Our user guide will walk you through the various machine learning components and how to train, test and optimize each of them to achieve the high level of accuracy required for user-facing commercial applications.</p>
+<p>Along with easy-to-use tools for building an intelligent conversational interface, we also provide detailed tutorials explaining the step-by-step process and describe best practices for building such an application. Our user guide will walk you through the various machine learning components and how to train, test and optimize each of them to achieve the high level of accuracy required for user-facing commercial applications.</p>
 <p>Our user guide is organized into three sections:</p>
 <div class="toctree-wrapper compound" id="learn">
 <p class="caption"><span class="caption-text">Learn</span><a class="headerlink" href="#learn" title="Permalink to this toctree">¶</a></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="anatomy.html">Anatomy of a Deep-Domain Conversational AI System</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="anatomy.html#natural-language-understanding-nlu">Natural Language Understanding (NLU)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="anatomy.html#natural-language-parser">Natural Language Parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="anatomy.html#dialogue-manager">Dialogue Manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="anatomy.html#question-answerer">Question Answerer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="anatomy.html#natural-language-generator">Natural Language Generator</a></li>
@@ -75,7 +75,8 @@
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="training_data.html">Training Data</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="training_data.html#generating-representative-training-data">Generating Representative Training Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="training_data.html#annotating-the-training-data">Annotating the Training Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_data.html#annotate-the-training-data">Annotate the Training Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_data.html#tips-and-best-practices">Tips and Best Practices</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="kb.html">Building The Knowledge Base</a><ul>
@@ -146,7 +147,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/index.txt"
+      <li><a href="_sources/index.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -168,11 +169,11 @@
       &copy;2016, MindMeld Inc..
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/index.txt"
+      <a href="_sources/index.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

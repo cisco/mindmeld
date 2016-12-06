@@ -2,3 +2,4 @@ jupyter_client==4.4.0
 sphinx==1.5
 nbsphinx==0.2.11
 pandoc==1.0.0b2
+mock==2.0.0

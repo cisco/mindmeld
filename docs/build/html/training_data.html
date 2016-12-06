@@ -17,7 +17,8 @@
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -26,7 +27,6 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html" />
     <link rel="next" title="Building The Knowledge Base" href="kb.html" />
     <link rel="prev" title="Getting Started" href="getting_started.html" />
    
@@ -46,16 +46,123 @@
             
   <div class="section" id="training-data">
 <h1>Training Data<a class="headerlink" href="#training-data" title="Permalink to this headline">¶</a></h1>
-<p>Data is the fuel that powers any machine learning-based application. Many components in our Deep Domain Conversational AI System utilize machine learned models to parse the user&#8217;s query and derive meaning out of it. It&#8217;s fair to say half the intelligence of the system comes from the machine learning algorithms themselves, but the other half comes from the data used to train those models.</p>
-<p>While some of the following chapters will describe the training data required for a specific model (e.g. intent classification, entity recognition) in more detail, this chapter focuses on general best practices around working with training data.</p>
-<p>In particular, we&#8217;ll take a look at:
-1. Acquiring the right kind of training data for your application
-2. Annotating it appropriately to provide meaningful labels for the machine learning models to learn from</p>
+<p>Data is the fuel that powers any machine learning-based application. Many components in our Deep Domain Conversational AI System utilize machine learned models to parse the user&#8217;s query and derive meaning out of it. It&#8217;s fair to say that half the intelligence of the system comes from the machine learning algorithms themselves, but the other half comes from the data used to train those models.</p>
+<p>This chapter focuses on general best practices around working with training data. In particular, we&#8217;ll take a look at:</p>
+<ol class="arabic simple">
+<li>Acquiring the right kind of training data for your application</li>
+<li>Annotating it appropriately to provide meaningful labels for the machine learning models to learn from</li>
+</ol>
 <div class="section" id="generating-representative-training-data">
 <h2>Generating Representative Training Data<a class="headerlink" href="#generating-representative-training-data" title="Permalink to this headline">¶</a></h2>
+<p>The performance of machine learning systems depends on both the quantity and the quality of training data. Of the two, quantity, being directly measurable is an easier concept to understand. Generally speaking, the more data you use to train your model, the more accurate its predictions are. However, that&#8217;s just half the story. Not all data is created equal. The quality of your data will greatly determine your success in training these advanced machine learning models and by extension, building a successful conversational interface.</p>
+<p>Machine learning models learn to &#8220;fit&#8221; the data you provide during training. In other words, they analyze the examples given during training and build a predictive model based on the patterns they learn from those examples. It&#8217;s hence crucial that your training data be highly representative of the real-world usage of the system. It needs to cover all the conversational scenarios that you expect your app to handle. It also needs to closely match the language (in style and format) that you expect real users to use. You may therefore need to include both formal and informal language constructs, popular slangs, abbreviations and other unconventional language expressions in your training data to ensure that the models powering your system can generalize across a variety of users.</p>
+<div class="section" id="design-dialogue-flowchart">
+<h3>Design Dialogue Flowchart<a class="headerlink" href="#design-dialogue-flowchart" title="Permalink to this headline">¶</a></h3>
+<p>The first step towards training data generation is designing the Dialogue Flowchart for your application. The flowchart should describe the various dialogue states that your system can be in and the transitions between each of those states. This exercise will help you to think through all the different ways the conversation could branch while starting from a clean slate and progressing towards the final goal state.</p>
+<p>For instance, here&#8217;s a sample flowchart for a coffee-ordering application (click to enlarge):</p>
+<a class="reference external image-reference" href="_images/dialog_flow.png"><img alt="_images/dialog_flow.png" src="_images/dialog_flow.png" style="width: 476.5px; height: 464.75px;" /></a>
 </div>
-<div class="section" id="annotating-the-training-data">
-<h2>Annotating the Training Data<a class="headerlink" href="#annotating-the-training-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="author-archetypal-queries">
+<h3>Author Archetypal Queries<a class="headerlink" href="#author-archetypal-queries" title="Permalink to this headline">¶</a></h3>
+<p>Once the Dialogue Flowchart has been designed, the next step is to work through each dialogue state, and author a set of archetypal user queries per state. The goal is to imagine yourself in the shoes of a user who&#8217;s at a particular place in the dialogue flow and predict what would be the most likely things that the user could say to the system at that point. This exercise will help you in clearly understanding the needs and functionality of your conversational interface better. It will also provide you with an initial set of seed examples you can later expand upon to build out a representative training set.</p>
+<p>In the case of a coffee-ordering application, at the very initial state, the user could either begin with a greeting to the system or launch straight into placing an order.</p>
+<p>Below are a few example queries of possible greetings that a user could begin with:</p>
+<ol class="arabic simple">
+<li>Hello!</li>
+<li>Hi!</li>
+<li>Good morning!</li>
+</ol>
+<p>While the number of greeting-like queries is a fairly small set, the number of ways in which a user could place an order are far more and can get arbitrarily complex.</p>
+<p>E.g.</p>
+<ol class="arabic simple">
+<li>I want a chai tea latte.</li>
+<li>Just a shot of espresso please.</li>
+<li>Get me a grande mocha with whipped cream on top.</li>
+<li>Can I get a tall cappuccino with skimmed milk, one venti caramel macchiato, two chocolate chip muffins and a banana?</li>
+</ol>
+<p>The representative set for &#8220;ordering&#8221; would theefore have to be a&nbsp;lot larger, since it would need to cover all the different examples of users specifying an order with varying amounts of detail.</p>
+<p>In addition, if you expect the system to handle other kinds of queries at the start state (e.g. reordering from history, checking order status, etc.), you would accordingly have to author more examples covering those as well.</p>
+<p>We next look at adding more structure to the training data generation process by defining domains, intents and slots.</p>
+</div>
+<div class="section" id="defining-intents-slots-and-domains">
+<h3>Defining Intents, Slots and Domains<a class="headerlink" href="#defining-intents-slots-and-domains" title="Permalink to this headline">¶</a></h3>
+<p>An intelligent conversational interface gives its users the flexibility to control and direct the conversation flow rather than forcing them to follow a fixed predetermined sequence of prompts. At every state in the dialogue, users are free to express whatever they want and the system responds by following the appropriate branch in the dialogue flowchart.</p>
+<p>We saw earlier that a user at the start state of a coffee-ordering app could either greet the system, place a new order, reorder from history, check his order status or say something else altogether. Each of these is called an Intent and corresponds to one of the possible intentions that the user may have at a given state. The intent chooses the transition from the current dialogue state to the next and subsequently determines the type of action to be taken by the system.</p>
+<p>By convention, intent names are verbs since they denote some action that the user is trying to accomplish.</p>
+<p>Some example intents for the coffee-ordering app would be:</p>
+<ol class="arabic simple">
+<li>greeting</li>
+<li>order</li>
+<li>reorder</li>
+<li>check_order_status</li>
+</ol>
+<p>Apart from determining the user intent, the system would usually need more details from the user in order to fulfill their request. These additional pieces of information are called Slots. Each intent has its own set of related slots.</p>
+<p>For instance, the &#8220;order&#8221; intent above can have slots such as &#8220;drink_name&#8221;, &#8220;size&#8221;, &#8220;quantity&#8221;, etc. So when a user says &#8220;a tall grande mocha&#8221;, the system extracts the relevant entities from the query and fills the corresponding slots:&nbsp;drink_name=&#8221;mocha&#8221;, size=&#8221;tall&#8221;, quantity=&#8221;1&#8221;.</p>
+<p>Once you have identified all the intents across all dialogue states for your application, the next step is then to define the slots for each intent. While some slots could be mandatory, i.e. the system can&#8217;t reach the goal state without filling those slots, others can be optional.</p>
+<p>The last step is to group all related intents into a high level category called the Domain. Each domain has its own vocabulary, that is shared among  all the intents belonging to that domain. While it is possible to have all the intents under one single de-facto domain, the MindMeld Parser perfoms better when intent groups with vastly different language patterns and terminology are modeled under separate domains.</p>
+<p>For instance, the conversational interface for a multimedia console may choose to model &#8220;Music&#8221;, &#8220;Movies&#8221; and &#8220;Games&#8221; as separate domains. But a coffee-ordering application may only have a single domain called &#8220;Food and Drinks&#8221;.</p>
+</div>
+<div class="section" id="generating-representative-queries">
+<h3>Generating Representative Queries<a class="headerlink" href="#generating-representative-queries" title="Permalink to this headline">¶</a></h3>
+<p>Clearly establishing the domain-intent-slots hierarchy for your conversational interface is&nbsp;crucial before you can start generating good quality training data. A good strategy is to work on one intent at a time and generate as many representative training examples for it as possible before moving on to the next one. The example queries should reflect actual in-the-wild usage and capture all expected syntax variations.</p>
+<p>Here are a few examples for the &#8220;order&#8221; intent in a coffee-ordering app:</p>
+<div class="line-block">
+<div class="line"># Keyword searches</div>
+<div class="line">One tall peppermint hot chocolate</div>
+<div class="line">Pumpkin spice latte</div>
+</div>
+<div class="line-block">
+<div class="line"># Declarative sentences</div>
+<div class="line">I want a grande iced americano decaf.</div>
+<div class="line">I want to order a tall white chocolate mocha.</div>
+<div class="line">I feel like having a hot chocolate with lemon pound cake.</div>
+</div>
+<div class="line-block">
+<div class="line"># Imperative sentences</div>
+<div class="line">Get me a chai tea latte.</div>
+<div class="line">Order the pumpkin spice latte.</div>
+<div class="line">Place an order for two bagels and a coffee.</div>
+</div>
+<div class="line-block">
+<div class="line"># Interrogative sentences</div>
+<div class="line">Could I please have a grande gingerbread latte with extra whipped cream?</div>
+<div class="line">Could you get me a chocolate croissant?</div>
+<div class="line">How about a Pike Place roast?</div>
+</div>
+<p>You should aim to collect at least a few hundred queries by generating them yourself and getting help from friends and colleagues. Having others contribute ensures more variety in the training data. Once you have an initial set of queries covering all intents, you can follow the remainder of the chapters in the &#8220;Build&#8221; section to train an early version of your conversational interface.</p>
+<p>While this early prototype may not have great accuracy or be ready for real-world usage, it will still be a great tool for you to interact with and start getting a feel for what the end product would look like. It will help you identify any missing dialogue states, intents or slots that you additionally need to capture. It will also help inform the training data generation process since you will be able to think from the perspective of a user in each dialogue state.</p>
+<p>Once the end-to-end conversation flow is fixed and all dialogue states are precisely defined, you can train and pay human annotators to generate a lot more training data. A cheaper alternative to using skilled trained annotators is employing crowdsourcing platforms like Amazon Mechanical Turk. The success of such techniques depends on how clearly you can describe the data collection task to evoke the right responses from the crowd. It&#8217;s hence important for you to have interacted with the prototype yourself, so you can define these tasks in a more informed way.</p>
+<p>The end goal is to have a representative set of queries covering all intents, totalling up to at least tens of thousands, if not hundreds of thousands instances.</p>
+</div>
+</div>
+<div class="section" id="annotate-the-training-data">
+<h2>Annotate the Training Data<a class="headerlink" href="#annotate-the-training-data" title="Permalink to this headline">¶</a></h2>
+<p>The MindMeld Entity Recognizer extracts relevants entities from user queries and assigns them to appropriate slot types. For instance, when a user says &#8220;I want to order a <strong>tall</strong> <strong>decaf</strong>  <strong>latte</strong>&#8221;, the Entity Recognizer identifies <strong>tall</strong> as a size, <strong>decaf</strong> as an option and <strong>latte</strong> as a drink_name.</p>
+<p>In order to do this accurately at runtime, the Entity Recognizer needs to be trained to recognize and classify entities in free-form text. We do this by adding annotations to our training data to identify all the entities within our collected queries. We mark up the parts of the query that correspond to a slot, i.e. provide further information to the app about the current user intent.</p>
+<p>Here are some examples:</p>
+<p>{cinnamon dolce latte|name} {venti|size} {extra whip|option}</p>
+<p>let me get a {double shot on ice|name}</p>
+<p>{medium|size} {iced coffee|name} with {low fat milk|option}</p>
+<p>The annotation markup syntax is fairly simple:</p>
+<ul class="simple">
+<li>Enclose the entity in curly braces</li>
+<li>Follow the entity with its type</li>
+<li>Use the pipe character as separator</li>
+</ul>
+<p>A good strategy is to annotate a few hundred queries, train an initial Entity Recognizer using those examples and then use the trained Entity Recognizer to annotate new queries. That way, you will only need to fix errors made by the Entity Recognizer as opposed to generating annotations from scratch. You can retrain the Entity Recognizer at regular intervals and as the model gets better, you&#8217;ll have lesser errors to correct while annotating new data.</p>
+<p>Be consistent with your entity annotations and ensure that the annotated entity span matches with the entries in your Entity Map. Queries without any slot information should be left unannotated. E.g. &#8220;Sure&#8221;, &#8220;Hello&#8221;, &#8220;Yes, please&#8221;.</p>
+<p>Once you have a large representative training set that&#8217;s annotated for entities and categorized by intent type, you&#8217;re finally ready to build a commercial-grade conversational AI system</p>
+</div>
+<div class="section" id="tips-and-best-practices">
+<h2>Tips and Best Practices<a class="headerlink" href="#tips-and-best-practices" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>In general, queries in any domain should be semantically and/or syntactically different from queries in all other domains. Each application should contain somewhere between one and several different domains.</li>
+<li>Defining the right set of intents for each domain is critical to ensure good accuracy and broad coverage of user queries. Each domain should have no more than a few dozen different intents.</li>
+<li>To optimize parser accuracy, the queries for each intent should should be semantically and/or syntactically different from the queries for all other intents</li>
+<li>Training data should capture all required intents and the queries themselves should capture all expected syntax variations, reflecting actual in-the-wild usage</li>
+<li>Entity annotations should be consistent and their spans should match the entries in the Entity Map file.</li>
+<li>Use trained Entity Recognizers to annotate and new queries and save human annotation time.</li>
+</ul>
 </div>
 </div>
 
@@ -68,8 +175,15 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Training Data</a><ul>
-<li><a class="reference internal" href="#generating-representative-training-data">Generating Representative Training Data</a></li>
-<li><a class="reference internal" href="#annotating-the-training-data">Annotating the Training Data</a></li>
+<li><a class="reference internal" href="#generating-representative-training-data">Generating Representative Training Data</a><ul>
+<li><a class="reference internal" href="#design-dialogue-flowchart">Design Dialogue Flowchart</a></li>
+<li><a class="reference internal" href="#author-archetypal-queries">Author Archetypal Queries</a></li>
+<li><a class="reference internal" href="#defining-intents-slots-and-domains">Defining Intents, Slots and Domains</a></li>
+<li><a class="reference internal" href="#generating-representative-queries">Generating Representative Queries</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#annotate-the-training-data">Annotate the Training Data</a></li>
+<li><a class="reference internal" href="#tips-and-best-practices">Tips and Best Practices</a></li>
 </ul>
 </li>
 </ul>
@@ -85,7 +199,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/training_data.txt"
+      <li><a href="_sources/training_data.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -107,11 +221,11 @@
       &copy;2016, MindMeld Inc..
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/training_data.txt"
+      <a href="_sources/training_data.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

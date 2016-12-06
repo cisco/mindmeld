@@ -1,2 +1,5 @@
 # OS temp file
 .DS_Store
+
+# Sphinx build files
+docs/build/
