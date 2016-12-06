@@ -96,12 +96,12 @@ Role Classifier
 
 
 
-Semantic Parsing
-~~~~~~~~~~~~~~~~
+Semantic Parser
+~~~~~~~~~~~~~~~
 
+The Semantic Parser is the last subcomponent within the MindMeld Natural Language Parser. It takes all the resolved entities and groups them into semantically related items. Each item represents a single real-world entity or concept along with all its describing attributes.
 
-
-
+We provide more details in :doc:`Building the Semantic Parser </semantic_parsing>`.
 
 
 Dialogue Manager
