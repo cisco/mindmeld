@@ -1,73 +1,224 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Defining The Entity Map &#8212; Workbench 1.0.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.0.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Building the Domain Classifier" href="domain_classification.html" />
-    <link rel="prev" title="Building The Knowledge Base" href="kb.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head>
-  <body role="document">
+  <title>Defining The Entity Map &mdash; Workbench 1.0.0 documentation</title>
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Building the Domain Classifier" href="domain_classification.html"/>
+        <link rel="prev" title="Building The Knowledge Base" href="kb.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Workbench
+          
+
+          
+          </a>
+
+          
             
-  <div class="section" id="defining-the-entity-map">
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Learn</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="anatomy.html">Anatomy of a Deep-Domain Conversational AI System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Build</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_data.html">Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Building The Knowledge Base</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Defining The Entity Map</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#entities-and-roles">Entities And Roles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#structure-of-the-entity-map">Structure Of The Entity Map</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classification.html">Building the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classification.html">Building the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognition.html">Building the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classification.html">Building The Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolution.html">Building the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semantic_parsing.html">Building the Semantic Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dialogue_manager.html">Building the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question_answering.html">Building the Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlg.html">Building the NLG</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Deploy</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deploying Conversational Apps</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Workbench</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Defining The Entity Map</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/entity_map.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="defining-the-entity-map">
 <h1>Defining The Entity Map<a class="headerlink" href="#defining-the-entity-map" title="Permalink to this headline">¶</a></h1>
-<p>Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational AI. NER is used to highlight important portions of natural language input. Steps for training ML models for building Entity Recognizers are detailed in the <cite>Building The Entity Recognizer</cite> section. An important precursor to training those models is to define an &#8220;Entity Map&#8221;. The Entity Map allows us to -</p>
-<ul class="simple">
-<li>Map synonyms: &#8220;let&#8217;s hear some yeezy&#8221; should search for &#8220;Kanye West&#8221;</li>
-<li>Specify which database fields to query given certain entity types. E.g. for movies, query the pubdate fields given a time-range entity</li>
-<li>Add small-vocabulary gazetteer entries for named entity extraction. E.g. document type names for music search: artists, tracks, albums, and playlists</li>
+<p>Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational AI. NER is used to highlight important portions of natural language input. Steps for training ML models for building Entity Recognizers are detailed in the <a class="reference external" href="entity_recognition.html">Building The Entity Recognizer</a> section. However, an important precursor to training Entity Recognition models is to define an <strong>Entity Map</strong>. The Entity Map allows us to -</p>
+<style> .red {color:red} </style><ul class="simple">
+<li>Map synonyms - <span class="red">&#8220;let&#8217;s hear some yeezy&#8221;</span> should search for <span class="red">&#8220;Kanye West&#8221;</span></li>
+<li>Specify which database fields to query given certain entity types.<ul>
+<li>E.g. for <strong>movies</strong>, query the <strong>pubdate</strong> fields given a <strong>time-range</strong> entity</li>
+</ul>
+</li>
+<li>Add small-vocabulary gazetteer entries for named entity extraction.<ul>
+<li>E.g. document type names for music search: <strong>artists</strong>, <strong>tracks</strong>, <strong>albums</strong>, and <strong>playlists</strong></li>
+</ul>
+</li>
 <li>Optionally assign &#8220;roles&#8221; to entities for Semantic Role Labeling.</li>
 </ul>
 <div class="section" id="entities-and-roles">
 <h2>Entities And Roles<a class="headerlink" href="#entities-and-roles" title="Permalink to this headline">¶</a></h2>
-<p>Giving an entity a role is an optional additional classification step.</p>
+<style> .orange {background-color:orange} </style><style> .aqua {background-color:#00FFFF} </style><p>Giving an entity a role is an optional additional classification step. Lets consider an example in the <strong>change-alarm</strong> intent -</p>
 <ul class="simple">
-<li>Change my alarm from <cite>6 am</cite> to <cite>7 am</cite></li>
+<li>Change my alarm from <span class="orange">6 am</span> to <span class="aqua">7 am</span></li>
 </ul>
-<p>Here, <cite>6 am</cite> and <cite>7 am</cite> are both <cite>time</cite> entities, but <cite>6 am</cite> has the role <cite>oldtime</cite> and <cite>7 am</cite> has the role <cite>newtime</cite>. The key principles in assigning roles (rather than treating them as separate entities) include -</p>
+<p>Here, <span class="orange">6 am</span> and <span class="aqua">7 am</span> are both <strong>time</strong> entities, but <span class="orange">6 am</span> has the role <span class="orange">oldtime</span> and <span class="aqua">7 am</span> has the role <span class="aqua">newtime</span>. The key principles in assigning roles (rather than treating them as separate entities) are -</p>
 <ul class="simple">
 <li>Avoiding splitting training data unnecessarily. In effect, All time entities strongly share features, and so the NER parser will perform better having them as one class.</li>
-<li>Most NER models utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize <cite>7 am</cite> as a <cite>newtime</cite> with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by &#8220;to&#8221;</li>
+<li>Most NER models utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize <span class="aqua">7 am</span> as a <span class="aqua">newtime</span> with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by &#8220;to&#8221;</li>
 </ul>
 </div>
 <div class="section" id="structure-of-the-entity-map">
 <h2>Structure Of The Entity Map<a class="headerlink" href="#structure-of-the-entity-map" title="Permalink to this headline">¶</a></h2>
-<p>At the top-level, the entity-map.json file structured as follows -</p>
+<p>At the top-level, the <strong>&#8220;entity-map.json&#8221;</strong> file structured as follows -</p>
 <div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s2">&quot;entities&quot;</span><span class="o">:</span> <span class="p">[</span>
     <span class="p">{</span>
@@ -172,7 +323,7 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>For a mapping that applies to all entity values in the entity block, a <cite>*</cite> wildcard can be used to encode the mapping -</p>
+<p>For a mapping that applies to all entity values in the entity block, a <strong>`*`</strong> wildcard can be used to encode the mapping -</p>
 <div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="s2">&quot;clause-map&quot;</span><span class="o">:</span> <span class="p">{</span>
   <span class="s2">&quot;*&quot;</span><span class="o">:</span> <span class="s2">&quot;artist:{entity}&quot;</span>
 <span class="p">}</span>
@@ -182,63 +333,72 @@
 </div>
 
 
+           </div>
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="domain_classification.html" class="btn btn-neutral float-right" title="Building the Domain Classifier" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="kb.html" class="btn btn-neutral" title="Building The Knowledge Base" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, MindMeld Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Defining The Entity Map</a><ul>
-<li><a class="reference internal" href="#entities-and-roles">Entities And Roles</a></li>
-<li><a class="reference internal" href="#structure-of-the-entity-map">Structure Of The Entity Map</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="kb.html" title="previous chapter">Building The Knowledge Base</a></li>
-      <li>Next: <a href="domain_classification.html" title="next chapter">Building the Domain Classifier</a></li>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/entity_map.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2016, MindMeld Inc..
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
-      
-      |
-      <a href="_sources/entity_map.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
-    
-  </body>
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

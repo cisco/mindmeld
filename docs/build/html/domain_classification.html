@@ -1,50 +1,199 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Building the Domain Classifier &#8212; Workbench 1.0.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.0.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Building the Intent Classifier" href="intent_classification.html" />
-    <link rel="prev" title="Defining The Entity Map" href="entity_map.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head>
-  <body role="document">
+  <title>Building the Domain Classifier &mdash; Workbench 1.0.0 documentation</title>
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Building the Intent Classifier" href="intent_classification.html"/>
+        <link rel="prev" title="Defining The Entity Map" href="entity_map.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Workbench
+          
+
+          
+          </a>
+
+          
             
-  <div class="section" id="building-the-domain-classifier">
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Learn</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="anatomy.html">Anatomy of a Deep-Domain Conversational AI System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Build</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_data.html">Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Building The Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_map.html">Defining The Entity Map</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building the Domain Classifier</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#loading-the-config">Loading The Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training-the-model">Training The Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuring-the-model">Configuring The Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-specification">Feature Specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluation">Evaluation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prediction">Prediction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classification.html">Building the Intent Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_recognition.html">Building the Entity Recognizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="role_classification.html">Building The Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolution.html">Building the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semantic_parsing.html">Building the Semantic Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dialogue_manager.html">Building the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question_answering.html">Building the Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlg.html">Building the NLG</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Deploy</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deploying Conversational Apps</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Workbench</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Building the Domain Classifier</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/domain_classification.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="building-the-domain-classifier">
 <h1>Building the Domain Classifier<a class="headerlink" href="#building-the-domain-classifier" title="Permalink to this headline">¶</a></h1>
 <p>The domain classifier determines the target domain for a given query. The target domain determines which intent classifier will be invoked. The domain classifier is trained using all of the labeled queries across all intents for all domains in an application. The labels for the training data are the domain names associated with each query. The classifier uses the &#8220;marked down&#8221; form of each query i.e all query annotations are removed and the raw text is sent to a text classifier.</p>
 <div class="section" id="loading-the-config">
@@ -57,35 +206,39 @@
 </div>
 <div class="section" id="training-the-model">
 <h2>Training The Model<a class="headerlink" href="#training-the-model" title="Permalink to this headline">¶</a></h2>
-<p>Once your model config is loaded, you can load your training data and train the model:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Load your training data to a Data Frame</span>
+<p>Once the model config is loaded, you can load the training data and train the model:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.domain_classification</span> <span class="kn">import</span> <span class="n">DomainClassifier</span>
+
+<span class="c1"># Load training data to a Data Frame</span>
 <span class="n">training_data</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="s1">&#39;barista&#39;</span><span class="p">)</span>
 
 <span class="c1"># Train The Classifier</span>
-<span class="n">domain_classifier</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">DomainClassifier</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">domain_config</span><span class="p">)</span>
+<span class="n">domain_classifier</span> <span class="o">=</span> <span class="n">DomainClassifier</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">domain_config</span><span class="p">)</span>
 <span class="n">domain_classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;logreg&#39;</span><span class="p">)</span>
 
 <span class="c1"># Evaluate the model</span>
 <span class="n">domain_classifier</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;eval_set.txt&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The &#8220;model&#8221; argument determines which model config to use (as specified in your config file). In the above example, the &#8220;logreg&#8221; model defined in your config file will be used for training.</p>
-<p>For a grid sweep over model hyperparameters, you can specify a param_grid dict object in your fit method. For example, for a Logistic Regression model, you can specify the regularization penalty function (l1/l2) and the strength parameter <cite>C</cite>. Additionally, if you want to do Cross Validation, you can define a CV iterator by specifying the number of splits.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Specify your grid search params</span>
+<p>The <strong>model</strong> argument determines which model config to use (as specified in the config file). In the above example, the <em>&#8220;logreg&#8221;</em> model defined in the config file will be used for training.</p>
+<p>For a grid sweep over model hyperparameters, you can specify a param_grid dict object in the fit method. For example, for a Logistic Regression model, you can specify the regularization penalty function (l1/l2) and the strength parameter <strong>C</strong>. Additionally, if you want to do Cross Validation, you can define a CV iterator by specifying the number of splits.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.cross_validation</span> <span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="c1"># Specify grid search params</span>
 <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
   <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">],</span>
   <span class="s2">&quot;class_bias&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">],</span>
   <span class="s2">&quot;penalty&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;l2&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 
-<span class="c1"># Define your CV iterator</span>
+<span class="c1"># Define CV iterator</span>
 <span class="n">kfold_cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">num_splits</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
 <span class="c1"># Train classifier with grid search + CV</span>
 <span class="n">domain_classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;logreg&#39;</span><span class="p">,</span> <span class="n">params_grid</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">kfold_cv</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>If you set <cite>cv=KFold</cite> or <cite>cv=StratifiedKFold</cite>, a confusion matrix will be generated in the printed stats.</p>
+<p>If you set <strong>cv=KFold</strong> or <strong>cv=StratifiedKFold</strong>, a confusion matrix will be generated in the printed stats.</p>
 <div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="o">+---------------------+--------------------+---+</span>
 <span class="o">|</span><span class="nb">Error</span> <span class="nx">analysis</span>       <span class="o">|</span>        <span class="nx">predicted</span>   <span class="o">|</span>   <span class="o">|</span>
 <span class="o">+---------------------+----+---+---+---+---+---+</span>
@@ -104,25 +257,21 @@
 </pre></div>
 </div>
 <p>Training Accuracy Statistics:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>Average CV accuracy: 98.56% ± 0.26%
-Best accuracy: 98.56%, settings: {u&#39;penalty&#39;: u&#39;l2&#39;, u&#39;C&#39;: 100, u&#39;probability&#39;: True, &#39;class_weight&#39;: {0: 0.8454625164401579, 1: 1.404707233065442}}
+<div class="highlight-default"><div class="highlight"><pre><span></span>Average CV accuracy: 99.21% ± 0.36%
+Best accuracy: 99.60%, settings: {u&#39;penalty&#39;: u&#39;l2&#39;, u&#39;C&#39;: 100, u&#39;probability&#39;: True, &#39;class_weight&#39;: {0: 0.8454625164401579, 1: 1.404707233065442}}
 </pre></div>
 </div>
 </div>
 <div class="section" id="configuring-the-model">
 <h2>Configuring The Model<a class="headerlink" href="#configuring-the-model" title="Permalink to this headline">¶</a></h2>
-<p>Here is a sample <cite>domain_model_config.json</cite> file for specifying model and feature settings.</p>
+<p>Here is a sample <strong>&#8220;domain_model_config.json</strong>&#8220;&#8221; file for specifying model and feature settings.</p>
 <div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s2">&quot;models&quot;</span><span class="o">:</span> <span class="p">{</span>
     <span class="s2">&quot;logreg&quot;</span><span class="o">:</span> <span class="p">{</span>
       <span class="s2">&quot;model-type&quot;</span><span class="o">:</span> <span class="s2">&quot;logreg&quot;</span><span class="p">,</span>
       <span class="s2">&quot;features&quot;</span><span class="o">:</span> <span class="p">{</span>
-        <span class="s2">&quot;bag-of-words&quot;</span><span class="o">:</span> <span class="p">{</span>
-          <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;edge-ngrams&quot;</span><span class="o">:</span> <span class="p">{</span>
-          <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-        <span class="p">},</span>
+        <span class="s2">&quot;bag-of-words&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">},</span>
+        <span class="s2">&quot;edge-ngrams&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">},</span>
         <span class="s2">&quot;in-gaz&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;scaling&quot;</span><span class="o">:</span> <span class="mi">10</span> <span class="p">},</span>
         <span class="s2">&quot;length&quot;</span><span class="o">:</span> <span class="p">{},</span>
         <span class="s2">&quot;gaz-freq&quot;</span><span class="o">:</span> <span class="p">{},</span>
@@ -147,7 +296,7 @@ Best accuracy: 98.56%, settings: {u&#39;penalty&#39;: u&#39;l2&#39;, u&#39;C&#39
 </div>
 <div class="section" id="feature-specification">
 <h2>Feature Specification<a class="headerlink" href="#feature-specification" title="Permalink to this headline">¶</a></h2>
-<p>The features to be used in your Machine Learning model are specified in the &#8220;features&#8221; field of your model specification. The following feature-specifications are available to use.</p>
+<p>The features to be used in the Machine Learning model can be specified in the <strong>features</strong> field of your model specification. The following feature-specifications are available to use.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="11%" />
@@ -185,7 +334,7 @@ Best accuracy: 98.56%, settings: {u&#39;penalty&#39;: u&#39;l2&#39;, u&#39;C&#39
 </div>
 <div class="section" id="evaluation">
 <h2>Evaluation<a class="headerlink" href="#evaluation" title="Permalink to this headline">¶</a></h2>
-<p>Next, see how the trained model performs against the test data set. Run the <cite>evaluate</cite> method on the classifier.</p>
+<p>Next, see how the trained model performs against the test data set. Run the <strong>evaluate</strong> method on the classifier.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ev</span> <span class="o">=</span> <span class="n">domain_classifier</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;test_set&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -205,73 +354,80 @@ Best accuracy: 98.56%, settings: {u&#39;penalty&#39;: u&#39;l2&#39;, u&#39;C&#39
 <p>Finally, you can use the model to predict the domain for any new query input:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="s2">&quot;Set a timer for 25 minutes&quot;</span>
 <span class="n">pred_domain</span> <span class="o">=</span> <span class="n">domain_classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">pred_domain</span>
 </pre></div>
 </div>
+<p>will print &#8220;times-and-dates&#8221;.</p>
 </div>
 </div>
 
 
+           </div>
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="intent_classification.html" class="btn btn-neutral float-right" title="Building the Intent Classifier" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="entity_map.html" class="btn btn-neutral" title="Defining The Entity Map" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, MindMeld Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Building the Domain Classifier</a><ul>
-<li><a class="reference internal" href="#loading-the-config">Loading The Config</a></li>
-<li><a class="reference internal" href="#training-the-model">Training The Model</a></li>
-<li><a class="reference internal" href="#configuring-the-model">Configuring The Model</a></li>
-<li><a class="reference internal" href="#feature-specification">Feature Specification</a></li>
-<li><a class="reference internal" href="#evaluation">Evaluation</a></li>
-<li><a class="reference internal" href="#prediction">Prediction</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="entity_map.html" title="previous chapter">Defining The Entity Map</a></li>
-      <li>Next: <a href="intent_classification.html" title="next chapter">Building the Intent Classifier</a></li>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/domain_classification.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2016, MindMeld Inc..
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
-      
-      |
-      <a href="_sources/domain_classification.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
-    
-  </body>
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

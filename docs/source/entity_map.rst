@@ -1,29 +1,55 @@
 Defining The Entity Map
 =======================
 
-Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational AI. NER is used to highlight important portions of natural language input. Steps for training ML models for building Entity Recognizers are detailed in the `Building The Entity Recognizer` section. An important precursor to training those models is to define an "Entity Map". The Entity Map allows us to -
+.. _Building The Entity Recognizer: entity_recognition.html
 
-* Map synonyms: "let's hear some yeezy" should search for "Kanye West"
-* Specify which database fields to query given certain entity types. E.g. for movies, query the pubdate fields given a time-range entity
-* Add small-vocabulary gazetteer entries for named entity extraction. E.g. document type names for music search: artists, tracks, albums, and playlists
+Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational AI. NER is used to highlight important portions of natural language input. Steps for training ML models for building Entity Recognizers are detailed in the `Building The Entity Recognizer`_ section. However, an important precursor to training Entity Recognition models is to define an **Entity Map**. The Entity Map allows us to -
+
+.. raw:: html
+
+    <style> .red {color:red} </style>
+
+.. role:: red
+
+* Map synonyms - :red:`"let's hear some yeezy"` should search for :red:`"Kanye West"`
+
+* Specify which database fields to query given certain entity types. 
+
+  + E.g. for **movies**, query the **pubdate** fields given a **time-range** entity
+
+* Add small-vocabulary gazetteer entries for named entity extraction. 
+
+  + E.g. document type names for music search: **artists**, **tracks**, **albums**, and **playlists**
+
 * Optionally assign "roles" to entities for Semantic Role Labeling.
 
 Entities And Roles
 ******************
 
-Giving an entity a role is an optional additional classification step.
+.. raw:: html
 
-* Change my alarm from `6 am` to `7 am`
+    <style> .orange {background-color:orange} </style>
 
-Here, `6 am` and `7 am` are both `time` entities, but `6 am` has the role `oldtime` and `7 am` has the role `newtime`. The key principles in assigning roles (rather than treating them as separate entities) include -
+.. raw:: html
+
+    <style> .aqua {background-color:#00FFFF} </style>
+
+.. role:: orange
+.. role:: aqua
+
+Giving an entity a role is an optional additional classification step. Lets consider an example in the **change-alarm** intent -
+
+* Change my alarm from :orange:`6 am` to :aqua:`7 am`
+
+Here, :orange:`6 am` and :aqua:`7 am` are both **time** entities, but :orange:`6 am` has the role :orange:`oldtime` and :aqua:`7 am` has the role :aqua:`newtime`. The key principles in assigning roles (rather than treating them as separate entities) are -
 
 * Avoiding splitting training data unnecessarily. In effect, All time entities strongly share features, and so the NER parser will perform better having them as one class.
-* Most NER models utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize `7 am` as a `newtime` with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by "to"
+* Most NER models utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize :aqua:`7 am` as a :aqua:`newtime` with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by "to"
 
 Structure Of The Entity Map
 ***************************
 
-At the top-level, the entity-map.json file structured as follows -
+At the top-level, the **"entity-map.json"** file structured as follows -
 
 .. code-block:: javascript
 
@@ -118,7 +144,7 @@ TextMap and ClauseMap apply to roles in a similar vein -
     ]
   }        
 
-For a mapping that applies to all entity values in the entity block, a `*` wildcard can be used to encode the mapping -
+For a mapping that applies to all entity values in the entity block, a **`*`** wildcard can be used to encode the mapping -
 
 .. code-block:: javascript
 

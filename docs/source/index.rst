@@ -35,6 +35,7 @@ Our user guide is organized into three sections:
    domain_classification
    intent_classification
    entity_recognition
+   role_classification
    entity_resolution
    semantic_parsing
    dialogue_manager

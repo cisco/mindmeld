@@ -16,40 +16,44 @@ A model config file containing the Machine Learning model and feature settings n
 Training The Model
 ******************
 
-Once your model config is loaded, you can load your training data and train the model:
+Once the model config is loaded, you can load the training data and train the model:
 
 .. code-block:: python
 
-  # Load your training data to a Data Frame
+  from mindmeld.domain_classification import DomainClassifier
+
+  # Load training data to a Data Frame
   training_data = mm.load_data(app='barista')
 
   # Train The Classifier
-  domain_classifier = mm.DomainClassifier(config=domain_config)
+  domain_classifier = DomainClassifier(config=domain_config)
   domain_classifier.fit(data=training_data, model='logreg')
 
   # Evaluate the model
   domain_classifier.evaluate(data='eval_set.txt')
 
-The "model" argument determines which model config to use (as specified in your config file). In the above example, the "logreg" model defined in your config file will be used for training.
+The **model** argument determines which model config to use (as specified in the config file). In the above example, the *"logreg"* model defined in the config file will be used for training.
 
-For a grid sweep over model hyperparameters, you can specify a param_grid dict object in your fit method. For example, for a Logistic Regression model, you can specify the regularization penalty function (l1/l2) and the strength parameter `C`. Additionally, if you want to do Cross Validation, you can define a CV iterator by specifying the number of splits.
+For a grid sweep over model hyperparameters, you can specify a param_grid dict object in the fit method. For example, for a Logistic Regression model, you can specify the regularization penalty function (l1/l2) and the strength parameter **C**. Additionally, if you want to do Cross Validation, you can define a CV iterator by specifying the number of splits.
 
 .. code-block:: python
 
-  # Specify your grid search params
+  from mindmeld.cross_validation import KFold
+
+  # Specify grid search params
   params = {
     "C": [1, 10, 100, 1000, 5000],
     "class_bias": [0.5],
     "penalty": ["l2"]
   }
 
-  # Define your CV iterator
+  # Define CV iterator
   kfold_cv = KFold(num_splits=10)
 
   # Train classifier with grid search + CV
   domain_classifier.fit(data=training_data, model='logreg', params_grid=params, cv=kfold_cv)
 
-If you set `cv=KFold` or `cv=StratifiedKFold`, a confusion matrix will be generated in the printed stats.
+If you set **cv=KFold** or **cv=StratifiedKFold**, a confusion matrix will be generated in the printed stats.
 
 .. code-block:: javascript
 
@@ -72,13 +76,13 @@ If you set `cv=KFold` or `cv=StratifiedKFold`, a confusion matrix will be genera
 
 Training Accuracy Statistics::
 
-  Average CV accuracy: 98.56% ± 0.26%
-  Best accuracy: 98.56%, settings: {u'penalty': u'l2', u'C': 100, u'probability': True, 'class_weight': {0: 0.8454625164401579, 1: 1.404707233065442}}
+  Average CV accuracy: 99.21% ± 0.36%
+  Best accuracy: 99.60%, settings: {u'penalty': u'l2', u'C': 100, u'probability': True, 'class_weight': {0: 0.8454625164401579, 1: 1.404707233065442}}
 
 Configuring The Model
 *********************
 
-Here is a sample `domain_model_config.json` file for specifying model and feature settings.
+Here is a sample **"domain_model_config.json**"" file for specifying model and feature settings.
 
 .. code-block:: javascript
 
@@ -87,12 +91,8 @@ Here is a sample `domain_model_config.json` file for specifying model and featur
         "logreg": {
           "model-type": "logreg",
           "features": {
-            "bag-of-words": {
-              "lengths": [1, 2] 
-            },
-            "edge-ngrams": {
-              "lengths": [1, 2]
-            },
+            "bag-of-words": { "lengths": [1, 2] },
+            "edge-ngrams": { "lengths": [1, 2] },
             "in-gaz": { "scaling": 10 },
             "length": {},
             "gaz-freq": {},
@@ -117,7 +117,7 @@ Here is a sample `domain_model_config.json` file for specifying model and featur
 Feature Specification
 *********************
 
-The features to be used in your Machine Learning model are specified in the "features" field of your model specification. The following feature-specifications are available to use.
+The features to be used in the Machine Learning model can be specified in the **features** field of your model specification. The following feature-specifications are available to use.
 
 +--------------+----------------------------------------------------------------------------------------------------------------+
 |Feature Group | Description                                                                                                    |
@@ -140,7 +140,7 @@ The features to be used in your Machine Learning model are specified in the "fea
 Evaluation
 **********
 
-Next, see how the trained model performs against the test data set. Run the `evaluate` method on the classifier.
+Next, see how the trained model performs against the test data set. Run the **evaluate** method on the classifier.
 
 .. code-block:: python
 
@@ -167,4 +167,6 @@ Finally, you can use the model to predict the domain for any new query input:
 
   q = "Set a timer for 25 minutes"
   pred_domain = domain_classifier.predict(query=q)
+  print pred_domain
 
+will print "times-and-dates".

@@ -1,44 +1,30 @@
 Getting Started
 ===============
 
+To install MindMeld Workbench, please contact our Business Development team to obtain a technology licence. Once you obtain the licence, you can run the following command and enter your licence key. 
 
-Install XCode and functools
+.. code-block:: text
 
-Install XCode from the App Store
+  pip install git+ssh://git@github.com/expectlabs/mindmeld-workbench.git
 
-Open XCode and 'Agree' to the Terms & Conditions to finish installing CLI tools
-Install the functools32 package (it's included in requirements.txt):
+Once installed, you will be able to run through the various steps in the tutorial. The preferred python version is Python3.
 
-Make sure you are running Python 2.7.1x, and then run::
+.. code-block:: python
 
-    pip install functools32
+  import mindmeld as mm
 
-These are the steps you'd follow for the Barista app after completing all the steps above.
+Prerequisites
+*************
 
-Check out the repo on the develop branch::
+.. _scikit-learn: http://scikit-learn.org/
+.. _Machine Learning: https://www.coursera.org/learn/machine-learning
 
-	git clone -b develop git@github.com:expectlabs/barista
-	cd barista
+This tutorial assumes familiarity with `Machine Learning`_ and functional knowledge of the `scikit-learn`_ package. MindMeld Workbench has been optimized towards enabling language understanding on large, custom datasets (rather than pre-trained, generic models). Throughout this tutorial, we provide several code snippets that reference the following Conversational AI applications in no particular order -
 
-Make sure submodules are set up::
+* Barista (Coffee-ordering Assistant)
+* Home Assistant (Smart Home, TV/Movies Discovery, Times & Dates)
+* Music Assistant (Search for songs, albums, artists ...)
+* Fashion Assistant (Search for clothing and fashion)
 
-	git submodule update --init
 
-Start the numerical parser::
-
-	scripts/start_num_parse.py
-
-Build::
-
-	MM_ENVIRONMENT=dev ./buildme
-
-Run::
-
-	MM_ENVIRONMENT=dev ./runme
-
-Test:
-Open browser to http://localhost:7150/barista/test.html
-
-How to specify Workbench as a submodule from within an app::
-
-	git submodule add git@github.com:expectlabs/mindmeld-workbench.git vendor/mindmeld-workbench
+The use of MindMeld Workbench has been demonstrated on **production-grade** conversational apps in all of the above domain areas. Each comes with a medium to large-vocabulary content catalog, and Workbench is geared with robust, flexible and scalable Machine Learning modeling constructs to enable Deep-Domain language understanding.

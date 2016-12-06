@@ -1,12 +1,12 @@
 Building the Intent Classifier
 ==============================
 
-The intent classifier is trained using all of the labeled queries across all intents for all intents. It determines the target intent for a given query. The target intent determines which intent classifier will be invoked. The labels for the training data are the intent names associated with each query. The intent classifier uses the "marked down" form of each query i.e all query annotations are removed and raw text is sent to a text classifier.
+The intent classifier is trained using all of the labeled queries across all intents for all intents. It determines the target intent for a given query. The target intent determines which intent classifier will be invoked. The labels for the training data are the intent names associated with each query. Similar to the Domain Classifier, the intent classifier uses the "marked down" form of each query i.e all query annotations are removed and raw text is sent to a text classifier.
 
 Loading The Config
 ******************
 
-A model config file containing the Machine Learning model and feature settings needs to be defined. The format of the config file is explained in the section on "Configuring The Model" later on:
+A model config file containing the Machine Learning model and feature settings needs to be defined. The format of the config file is explained in the section on "Configuring The Model".
 
 .. code-block:: python
 
@@ -16,11 +16,13 @@ A model config file containing the Machine Learning model and feature settings n
 Training The Model
 ******************
 
-Once your model config is loaded, you can load your training data and train the model:
+Once the model config is loaded, you can load the training data and train the model:
 
 .. code-block:: python
 
-  # Load your training data to a Data Frame
+  from mindmeld.intent_classification import IntentClassifier
+
+  # Load training data to a Data Frame
   training_data = mm.load_data(domain='clothing')
 
   # Train The Classifier
@@ -30,13 +32,15 @@ Once your model config is loaded, you can load your training data and train the 
   # Evaluate the model
   intent_classifier.evaluate(data='eval_set.txt')
 
-The "model" argument determines which model config to use (as specified in your config file). In the above example, the "logreg" model defined in your config file will be used for training.
+The **model** argument determines which model config to use (as specified in the config file). In the above example, the *"logreg"* model defined in the config file will be used for training.
 
-For a grid sweep over model hyperparameters, you can specify a param_grid dict object in your fit method. For example, for a SVM model you can define the `kernel` and the regularization parameter `C`. Additionally, if you want to do Cross Validation, you can define a CV iterator by specifying the number of splits.
+For a grid sweep over model hyperparameters, you can specify a param_grid dict object in the fit method. For example, for a SVM model you can define the **kernel** and the regularization parameter **C**. Additionally, if you want to do Cross Validation, you can define a CV iterator by specifying the number of splits.
 
 .. code-block:: python
 
-  # Specify your grid search params
+  from mindmeld.cross_validation import StratifiedKFold
+
+  # Specify grid search params
   params = {
     "C": [1, 10, 100, 1000, 5000],
     "class_bias": [0.5],
@@ -44,13 +48,13 @@ For a grid sweep over model hyperparameters, you can specify a param_grid dict o
     "probability": [true]
   }
 
-  # Define your CV iterator
-  kfold_cv = KFold(num_splits=10)
+  # Define CV iterator
+  skfold_cv = StratifiedKFold(num_splits=10)
 
   # Train classifier with grid search + CV
-  intent_classifier.fit(data=training_data, model='svm', params_grid=params, cv=kfold_cv)
+  intent_classifier.fit(data=training_data, model='svm', params_grid=params, cv=skfold_cv)
 
-If you set `cv=KFold` or `cv=StratifiedKFold`, a confusion matrix will be generated in the printed stats.
+A confusion matrix will be generated in the printed stats.
 
 .. code-block:: javascript
 
@@ -73,13 +77,13 @@ If you set `cv=KFold` or `cv=StratifiedKFold`, a confusion matrix will be genera
 
 Training Accuracy Statistics::
 
-  Average CV accuracy: 98.56% ± 0.26%
+  Average CV accuracy: 98.34% ± 0.26%
   Best accuracy: 98.56%, settings: {u'kernel': u'linear', u'C': 5000, u'probability': True, 'class_weight': {0: 0.8454625164401579, 1: 1.404707233065442}}
 
 Configuring The Model
 *********************
 
-Here is a sample `intent_model_config.json` file for specifying model and feature settings.
+Here is a sample **"intent_model_config.json"** file for specifying model and feature settings.
 
 .. code-block:: javascript
 
@@ -118,7 +122,7 @@ Here is a sample `intent_model_config.json` file for specifying model and featur
 Feature Specification
 *********************
 
-The features to be used in your Machine Learning model are specified in the "features" field of your model specification. The following feature-specifications are available to use.
+The features to be used in the Machine Learning model are specified in the **features** field of your model specification. The following feature-specifications are available to use.
 
 +--------------+----------------------------------------------------------------------------------------------------------------+
 |Feature Group | Description                                                                                                    |
@@ -141,7 +145,7 @@ The features to be used in your Machine Learning model are specified in the "fea
 Evaluation
 **********
 
-Next, see how the trained model performs against the test data set. Run the `evaluate` method on the classifier.
+Next, see how the trained model performs against the test data set. Run the **evaluate** method on the classifier.
 
 .. code-block:: python
 
@@ -162,7 +166,7 @@ You can then print out the accuracy and error analysis of the classification:
 Prediction
 **********
 
-Finally, you can use the model to predict the intent for any new query input:
+Finally, use the model to predict the intent for any new query input:
 
 .. code-block:: python
 
@@ -172,7 +176,7 @@ Finally, you can use the model to predict the intent for any new query input:
 Detailed Inspection
 *********************
 
-You can use the `verbose=True` flag for deeper analysis on the feature values used for classifying that query.
+You can use the **verbose=True** flag for deeper analysis on the feature values used for classifying that query.
 
 .. code-block:: python
 
@@ -181,7 +185,7 @@ You can use the `verbose=True` flag for deeper analysis on the feature values us
 
 This outputs a detailed dump of the top feature values used for classifying that query. This provides valuable insights into model behavior towards specific queries and guides you to making alternate modeling choices.
 
-.. code-block:: javascript
+.. code-block:: text
 
   Predicted intent:
 
@@ -205,8 +209,8 @@ This outputs a detailed dump of the top feature values used for classifying that
   freq|2                             0.286          -0.569          -0.162          -0.569          -0.162          +0.000
   freq|3                             0.143          -0.461          -0.066          -0.461          -0.066          +0.000
   freq|4                             0.143          -0.508          -0.073          -0.508          -0.073          +0.000
-  left-edge|1:i'm                    1.000           0.178           0.178           0.178           0.178          +0.000
-  left-edge|2:i'm|looking            1.000           0.088           0.088           0.088           0.088          +0.000
+  left-edge|1:i\'m                   1.000           0.178           0.178           0.178           0.178          +0.000
+  left-edge|2:i\'m|looking           1.000           0.088           0.088           0.088           0.088          +0.000
   ngram:a|pair                       1.000          -0.039          -0.039          -0.039          -0.039          +0.000
   ngram:jeans                        1.000          -0.088          -0.088          -0.088          -0.088          +0.000
   ...

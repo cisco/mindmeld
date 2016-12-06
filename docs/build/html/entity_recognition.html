@@ -1,71 +1,215 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Building the Entity Recognizer &#8212; Workbench 1.0.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.0.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Building the Entity Resolver" href="entity_resolution.html" />
-    <link rel="prev" title="Building the Intent Classifier" href="intent_classification.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head>
-  <body role="document">
+  <title>Building the Entity Recognizer &mdash; Workbench 1.0.0 documentation</title>
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Workbench 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Building The Role Classifier" href="role_classification.html"/>
+        <link rel="prev" title="Building the Intent Classifier" href="intent_classification.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Workbench
+          
+
+          
+          </a>
+
+          
             
-  <div class="section" id="building-the-entity-recognizer">
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Learn</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="anatomy.html">Anatomy of a Deep-Domain Conversational AI System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Build</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_data.html">Training Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kb.html">Building The Knowledge Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_map.html">Defining The Entity Map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="domain_classification.html">Building the Domain Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent_classification.html">Building the Intent Classifier</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building the Entity Recognizer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#define-the-config">Define The Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train-the-model">Train The Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-specification">Feature Specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prediction">Prediction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#detailed-inspection">Detailed Inspection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="role_classification.html">Building The Role Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entity_resolution.html">Building the Entity Resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semantic_parsing.html">Building the Semantic Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dialogue_manager.html">Building the Dialogue Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question_answering.html">Building the Question Answerer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nlg.html">Building the NLG</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Deploy</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deploying Conversational Apps</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Workbench</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Building the Entity Recognizer</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/entity_recognition.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="building-the-entity-recognizer">
 <h1>Building the Entity Recognizer<a class="headerlink" href="#building-the-entity-recognizer" title="Permalink to this headline">¶</a></h1>
 <p>The Named Entity Recognizers detect specific words or phrases in a query which might be useful when fulfilling its intent.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="nx">show</span> <span class="nx">me</span> <span class="nx">tom</span> <span class="nx">hanks</span> <span class="nx">movies</span> <span class="o">--&gt;</span> <span class="nx">show</span> <span class="nx">me</span> <span class="p">{</span><span class="nx">tom</span> <span class="nx">hanks</span><span class="o">|</span><span class="nx">cast</span><span class="p">}</span> <span class="nx">movies</span>
-</pre></div>
-</div>
-<p>The named entity recognizers are also called the facet models or facet classifiers. In practice, sequence models such as the Maximum-Entropy Markov Model or Conditional Random Fields work very effectively for bootstrapping your application.</p>
-<p>A formal introduction to sequence NER models can be found in the Stanford lecture <a class="reference external" href="https://web.stanford.edu/class/cs124/lec/Information_Extraction_and_Named_Entity_Recognition.pdf">notes</a>. MindMeld Workbench will prepare the data to an IOBES tagging scheme (an extension to the well known <a class="reference external" href="https://en.wikipedia.org/wiki/Inside_Outside_Beginning">IOB</a> tagging for NER sequence models).</p>
+<style> .aqua {background-color:#00FFFF} </style><ul class="simple">
+<li>show me tom hanks movies =&gt; show me <span class="aqua">tom hanks</span> movies</li>
+</ul>
+<p>The named entity recognizers are also called the <strong>facet models</strong> or <strong>facet classifiers</strong>. In practice, sequence models such as the <a class="reference external" href="https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model">Maximum Entropy Markov Model</a> or <a class="reference external" href="https://en.wikipedia.org/wiki/Conditional_random_field">Conditional Random Field</a> work very effectively for bootstrapping your application.</p>
+<p>A formal introduction to sequence NER models can be found in the <a class="reference external" href="https://web.stanford.edu/class/cs124/lec/Information_Extraction_and_Named_Entity_Recognition.pdf">Stanford lecture notes</a> slides. MindMeld Workbench will prepare the data to an &#8220;IOBES&#8221; tagging scheme (an extension to the well known <a class="reference external" href="https://en.wikipedia.org/wiki/Inside_Outside_Beginning">IOB tagging</a> scheme for NER sequence models).</p>
 <div class="section" id="define-the-config">
 <h2>Define The Config<a class="headerlink" href="#define-the-config" title="Permalink to this headline">¶</a></h2>
-<p>Similar to the Domain &amp; Intent Classifiers, we can define a config file for specifying the model and feature settings to use. In the following example, we use the <cite>memm</cite> model with the respective lexical and syntactic features specified -</p>
+<p>Similar to the Domain and Intent Classifiers, we can define a config file for specifying the model and feature settings to use. In the following example, we use the <strong>&#8220;memm&#8221;</strong> model with the respective lexical and syntactic features specified -</p>
 <div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;models&quot;</span><span class="o">:</span> <span class="p">{</span>
       <span class="s2">&quot;memm&quot;</span><span class="o">:</span> <span class="p">{</span>
         <span class="s2">&quot;model-type&quot;</span><span class="o">:</span> <span class="s2">&quot;memm&quot;</span><span class="p">,</span>
         <span class="s2">&quot;features&quot;</span><span class="o">:</span> <span class="p">{</span>
-          <span class="s2">&quot;bag-of-words&quot;</span><span class="o">:</span> <span class="p">{</span>
-            <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-          <span class="p">},</span>
-          <span class="s2">&quot;edge-ngrams&quot;</span><span class="o">:</span> <span class="p">{</span>
-            <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-          <span class="p">},</span>
+          <span class="s2">&quot;bag-of-words&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">},</span>
+          <span class="s2">&quot;edge-ngrams&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;lengths&quot;</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">},</span>
           <span class="s2">&quot;in-gaz&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="s2">&quot;scaling&quot;</span><span class="o">:</span> <span class="mi">10</span> <span class="p">},</span>
           <span class="s2">&quot;length&quot;</span><span class="o">:</span> <span class="p">{},</span>
           <span class="s2">&quot;gaz-freq&quot;</span><span class="o">:</span> <span class="p">{},</span>
@@ -84,12 +228,41 @@
   <span class="p">}</span>
 </pre></div>
 </div>
+<p>Load the config -</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindmeld</span> <span class="kn">as</span> <span class="nn">mm</span>
+<span class="n">facet_config</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="s1">&#39;facet_model_config.json&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="train-the-model">
 <h2>Train The Model<a class="headerlink" href="#train-the-model" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.entity_recognition</span> <span class="kn">import</span> <span class="n">FacetClassifier</span>
+
+<span class="c1"># Load the training data</span>
+<span class="n">training_data</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;clothing&#39;</span><span class="p">,</span> <span class="s1">&#39;intent&#39;</span><span class="o">=</span><span class="s1">&#39;search-products&#39;</span><span class="p">)</span>
+
+<span class="c1"># Train the classifier</span>
+<span class="n">facet_model</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">FacetClassifier</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">facet_config</span><span class="p">)</span>
+<span class="n">facet_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;memm&#39;</span><span class="p">)</span>
+
+<span class="c1"># Evaluate the model</span>
+<span class="n">facet_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;eval_set.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For determining the Cross Validation accuracy, you can define a CV iterator and train with the <strong>cv</strong> argument.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindmeld.cross_validation</span> <span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="c1"># Define CV iterator</span>
+<span class="n">kfold_cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">num_splits</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Train classifier with grid search + CV</span>
+<span class="n">facet_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;svm&#39;</span><span class="p">,</span> <span class="n">params_grid</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">kfold_cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;precision&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="feature-specification">
 <h2>Feature Specification<a class="headerlink" href="#feature-specification" title="Permalink to this headline">¶</a></h2>
+<p>The features to be used in the Machine Learning model are specified in the <strong>features</strong> field of your model specification. The following feature-specifications are available to use.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="13%" />
@@ -119,67 +292,158 @@
 </tbody>
 </table>
 </div>
+<div class="section" id="prediction">
+<h2>Prediction<a class="headerlink" href="#prediction" title="Permalink to this headline">¶</a></h2>
+<p>For predicting the sequence tags on a new query, simply use the <strong>predict</strong> method on the model. This returns a structured JSON with start/end information at the character-level.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="s2">&quot;Show me tom hanks movies featuring meg ryan&quot;</span>
+<span class="n">facets</span> <span class="o">=</span> <span class="n">facet_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Character indices are zero-indexed.</span>
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="n">chstart</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="n">chend</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="n">entity</span><span class="p">:</span> <span class="s2">&quot;tom hanks&quot;</span><span class="p">,</span>
+    <span class="n">raw</span> <span class="n">entity</span><span class="p">:</span> <span class="s2">&quot;tom hanks&quot;</span><span class="p">,</span>
+    <span class="n">tstart</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">tend</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s2">&quot;cast&quot;</span><span class="p">,</span>
+    <span class="n">value</span><span class="p">:</span> <span class="p">{</span>
+      <span class="n">clause</span><span class="p">:</span> <span class="s2">&quot;cast:Tom+Hanks&quot;</span><span class="p">,</span>
+      <span class="n">mode</span><span class="p">:</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span>
+      <span class="n">text</span><span class="p">:</span> <span class="s2">&quot;Tom Hanks&quot;</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="p">{</span>
+    <span class="n">chstart</span><span class="p">:</span> <span class="mi">35</span><span class="p">,</span>
+    <span class="n">chend</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="n">entity</span><span class="p">:</span> <span class="s2">&quot;meg ryan&quot;</span><span class="p">,</span>
+    <span class="n">raw</span> <span class="n">entity</span><span class="p">:</span> <span class="s2">&quot;meg ryan&quot;</span><span class="p">,</span>
+    <span class="n">tstart</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="n">tend</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s2">&quot;cast&quot;</span><span class="p">,</span>
+    <span class="n">value</span><span class="p">:</span> <span class="p">{</span>
+      <span class="n">clause</span><span class="p">:</span> <span class="s2">&quot;cast:Meg+Ryan&quot;</span><span class="p">,</span>
+      <span class="n">mode</span><span class="p">:</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span>
+      <span class="n">text</span><span class="p">:</span> <span class="s2">&quot;Meg Ryan&quot;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="detailed-inspection">
+<h2>Detailed Inspection<a class="headerlink" href="#detailed-inspection" title="Permalink to this headline">¶</a></h2>
+<p>You can use the <strong>verbose=true</strong> flag for detailed inspection on the predicted tags with their log probabilities.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="s2">&quot;what are stanley kubrick&#39;s best rated movies&quot;</span>
+<span class="n">facets</span> <span class="o">=</span> <span class="n">facet_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This outputs a detailed dump of the top feature values used for classifying that query. This provides valuable insights into model behavior towards specific queries and guides you to making alternate modeling choices.</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>Token                   Pred Tag                (Gold Tag)              (Log Prob)
+------------------      ------------------      ------------------      ------------------
+what                    O||O|                        &quot;\&quot;
+are                     O||O|                        &quot;\&quot;
+stanley                 B|directors|O|           B|cast|O|               [-16.80866592]
+kubrick                 I|directors|O|           I|cast|O|               [-16.67216257]
+s                       O||O|                        &quot;\&quot;
+best                    B|sort|O|                    &quot;\&quot;
+rated                   I|sort|O|                    &quot;\&quot;
+movies                  B|type|O|                    &quot;\&quot;
+</pre></div>
+</div>
+<p>In the above case, the model was unable to successfully distinguish &#8220;stanley kubrick&#8221; between cast and director (He appears as both in the training data). For further investigation, detailed feature values are printed along with the the feature names. This provides valuable insights into model and feature engineering for training the system better.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="o">--------</span>                                               <span class="o">--------</span>        <span class="o">--------</span>        <span class="o">--------</span>        <span class="o">--------</span>        <span class="o">--------</span>        <span class="o">--------</span>
+<span class="nx">name</span>                                                   <span class="nx">feat_val</span>         <span class="nx">pred_w</span>          <span class="nx">gold_w</span>          <span class="nx">pred_p</span>          <span class="nx">gold_p</span>           <span class="nx">diff</span>
+<span class="o">--------</span>                                               <span class="o">--------</span>        <span class="o">--------</span>        <span class="o">--------</span>        <span class="o">--------</span>        <span class="o">--------</span>        <span class="o">--------</span>
+<span class="nx">bag</span><span class="o">-</span><span class="k">of</span><span class="o">-</span><span class="nx">words</span><span class="o">|</span><span class="nx">length</span><span class="o">:</span><span class="mi">1</span><span class="o">|</span><span class="nx">pos</span><span class="o">:-</span><span class="mi">1</span><span class="o">=</span><span class="nx">are</span>                         <span class="mf">1.000</span>          <span class="o">-</span><span class="mf">0.183</span>          <span class="o">-</span><span class="mf">0.427</span>          <span class="o">-</span><span class="mf">0.183</span>          <span class="o">-</span><span class="mf">0.427</span>          <span class="o">-</span><span class="mf">0.244</span>
+<span class="nx">bag</span><span class="o">-</span><span class="k">of</span><span class="o">-</span><span class="nx">words</span><span class="o">|</span><span class="nx">length</span><span class="o">:</span><span class="mi">1</span><span class="o">|</span><span class="nx">pos</span><span class="o">:-</span><span class="mi">2</span><span class="o">=</span><span class="nx">what</span>                        <span class="mf">1.000</span>          <span class="o">-</span><span class="mf">0.536</span>          <span class="o">-</span><span class="mf">0.090</span>          <span class="o">-</span><span class="mf">0.536</span>          <span class="o">-</span><span class="mf">0.090</span>           <span class="mf">0.446</span>
+<span class="nx">bag</span><span class="o">-</span><span class="k">of</span><span class="o">-</span><span class="nx">words</span><span class="o">|</span><span class="nx">length</span><span class="o">:</span><span class="mi">1</span><span class="o">|</span><span class="nx">pos</span><span class="o">:</span><span class="mi">0</span><span class="o">=</span><span class="nx">stanley</span>                      <span class="mf">1.000</span>           <span class="mf">0.079</span>          <span class="o">-</span><span class="mf">0.000</span>           <span class="mf">0.079</span>          <span class="o">-</span><span class="mf">0.000</span>          <span class="o">-</span><span class="mf">0.079</span>
+<span class="nx">bag</span><span class="o">-</span><span class="k">of</span><span class="o">-</span><span class="nx">words</span><span class="o">|</span><span class="nx">length</span><span class="o">:</span><span class="mi">1</span><span class="o">|</span><span class="nx">pos</span><span class="o">:</span><span class="mi">1</span><span class="o">=</span><span class="nx">kubrick</span>                      <span class="mf">1.000</span>           <span class="mf">0.079</span>          <span class="o">-</span><span class="mf">0.000</span>           <span class="mf">0.079</span>          <span class="o">-</span><span class="mf">0.000</span>          <span class="o">-</span><span class="mf">0.079</span>
+<span class="nx">bag</span><span class="o">-</span><span class="k">of</span><span class="o">-</span><span class="nx">words</span><span class="o">|</span><span class="nx">length</span><span class="o">:</span><span class="mi">2</span><span class="o">|</span><span class="nx">pos</span><span class="o">:</span><span class="mi">0</span><span class="o">=</span><span class="nx">stanley</span> <span class="nx">kubrick</span>              <span class="mf">1.000</span>           <span class="mf">0.079</span>          <span class="o">-</span><span class="mf">0.000</span>           <span class="mf">0.079</span>          <span class="o">-</span><span class="mf">0.000</span>          <span class="o">-</span><span class="mf">0.079</span>
+<span class="k">in</span><span class="o">-</span><span class="nx">gaz</span><span class="o">|</span><span class="nx">conflict</span><span class="o">|</span><span class="nx">exact</span><span class="o">|</span><span class="nx">type1</span><span class="o">:</span><span class="nx">directors</span><span class="o">|</span><span class="nx">type2</span><span class="o">:</span><span class="nx">producers</span>    <span class="mf">1.000</span>          <span class="o">-</span><span class="mf">0.277</span>          <span class="o">-</span><span class="mf">0.496</span>          <span class="o">-</span><span class="mf">0.277</span>          <span class="o">-</span><span class="mf">0.496</span>          <span class="o">-</span><span class="mf">0.219</span>
+<span class="k">in</span><span class="o">-</span><span class="nx">gaz</span><span class="o">|</span><span class="nx">conflict</span><span class="o">|</span><span class="nx">exact</span><span class="o">|</span><span class="nx">type1</span><span class="o">:</span><span class="nx">directors</span><span class="o">|</span><span class="nx">type2</span><span class="o">:</span><span class="nx">writers</span>      <span class="mf">1.000</span>          <span class="o">-</span><span class="mf">0.074</span>          <span class="o">-</span><span class="mf">0.853</span>          <span class="o">-</span><span class="mf">0.074</span>          <span class="o">-</span><span class="mf">0.853</span>          <span class="o">-</span><span class="mf">0.779</span>
+<span class="k">in</span><span class="o">-</span><span class="nx">gaz</span><span class="o">|</span><span class="nx">type</span><span class="o">:</span><span class="nx">directors</span>                                    <span class="mf">1.000</span>           <span class="mf">0.976</span>          <span class="o">-</span><span class="mf">0.025</span>           <span class="mf">0.976</span>          <span class="o">-</span><span class="mf">0.025</span>          <span class="o">-</span><span class="mf">1.001</span>
+<span class="k">in</span><span class="o">-</span><span class="nx">gaz</span><span class="o">|</span><span class="nx">type</span><span class="o">:</span><span class="nx">directors</span><span class="o">|</span><span class="nx">log</span><span class="o">-</span><span class="kr">char</span><span class="o">-</span><span class="nx">len</span>                       <span class="mf">0.876</span>           <span class="mf">0.834</span>          <span class="o">-</span><span class="mf">0.239</span>           <span class="mf">0.731</span>          <span class="o">-</span><span class="mf">0.210</span>          <span class="o">-</span><span class="mf">0.940</span>
+<span class="k">in</span><span class="o">-</span><span class="nx">gaz</span><span class="o">|</span><span class="nx">type</span><span class="o">:</span><span class="nx">directors</span><span class="o">|</span><span class="nx">ngram</span><span class="o">-</span><span class="nx">first</span><span class="o">|</span><span class="nx">length</span><span class="o">:</span><span class="mi">1</span><span class="o">=</span><span class="nx">stanley</span>       <span class="mf">1.000</span>           <span class="mf">0.079</span>          <span class="o">-</span><span class="mf">0.000</span>           <span class="mf">0.079</span>          <span class="o">-</span><span class="mf">0.000</span>          <span class="o">-</span><span class="mf">0.079</span>
+<span class="k">in</span><span class="o">-</span><span class="nx">gaz</span><span class="o">|</span><span class="nx">type</span><span class="o">:</span><span class="nx">directors</span><span class="o">|</span><span class="nx">ngram</span><span class="o">-</span><span class="nx">last</span><span class="o">|</span><span class="nx">length</span><span class="o">:</span><span class="mi">1</span><span class="o">=</span><span class="nx">kubrick</span>        <span class="mf">1.000</span>           <span class="mf">0.066</span>          <span class="o">-</span><span class="mf">0.000</span>           <span class="mf">0.066</span>          <span class="o">-</span><span class="mf">0.000</span>          <span class="o">-</span><span class="mf">0.066</span>
+<span class="k">in</span><span class="o">-</span><span class="nx">gaz</span><span class="o">|</span><span class="nx">type</span><span class="o">:</span><span class="nx">directors</span><span class="o">|</span><span class="nx">p_ef</span>                              <span class="o">-</span><span class="mf">1.000</span>          <span class="o">-</span><span class="mf">0.750</span>           <span class="mf">0.118</span>           <span class="mf">0.750</span>          <span class="o">-</span><span class="mf">0.118</span>          <span class="o">-</span><span class="mf">0.868</span>
+  <span class="p">...</span>
+  <span class="p">...</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
+           </div>
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="role_classification.html" class="btn btn-neutral float-right" title="Building The Role Classifier" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="intent_classification.html" class="btn btn-neutral" title="Building the Intent Classifier" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, MindMeld Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Building the Entity Recognizer</a><ul>
-<li><a class="reference internal" href="#define-the-config">Define The Config</a></li>
-<li><a class="reference internal" href="#train-the-model">Train The Model</a></li>
-<li><a class="reference internal" href="#feature-specification">Feature Specification</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="intent_classification.html" title="previous chapter">Building the Intent Classifier</a></li>
-      <li>Next: <a href="entity_resolution.html" title="next chapter">Building the Entity Resolver</a></li>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/entity_recognition.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2016, MindMeld Inc..
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
-      
-      |
-      <a href="_sources/entity_recognition.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
-    
-  </body>
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
