@@ -1,7 +1,7 @@
 Entity Recognizer
-==============================
+=================
 
-The Named Entity Recognizers detect specific words or phrases in a query which might be useful when fulfilling its intent.
+The Named Entity Recognizer detects specific words or phrases in a query which might be useful when fulfilling its intent.
 
 .. raw:: html
 
@@ -14,7 +14,7 @@ The Named Entity Recognizers detect specific words or phrases in a query which m
 .. _Maximum Entropy Markov Model: https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model
 .. _Conditional Random Field: https://en.wikipedia.org/wiki/Conditional_random_field
 
-The named entity recognizers are also called the **facet models** or **facet classifiers**. In practice, sequence models such as the `Maximum Entropy Markov Model`_ or `Conditional Random Field`_ work very effectively for bootstrapping your application.
+The named entity recognition models are also called the **facet models** or **facet classifiers**. In practice, sequence models such as the `Maximum Entropy Markov Model`_ or `Conditional Random Field`_ work very effectively for bootstrapping your application.
 
 .. _Stanford lecture notes: https://web.stanford.edu/class/cs124/lec/Information_Extraction_and_Named_Entity_Recognition.pdf
 .. _IOB tagging: https://en.wikipedia.org/wiki/Inside_Outside_Beginning

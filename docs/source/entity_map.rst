@@ -41,19 +41,19 @@ Entities And Roles
 .. role:: orange
 .. role:: aqua
 
-Giving an entity a role is an optional additional classification step. Lets consider an example in the **change-alarm** intent -
+Giving an entity a role is an optional additional classification step. Let's consider an example in the **change-alarm** intent -
 
 * Change my alarm from :orange:`6 am` to :aqua:`7 am`
 
 Here, :orange:`6 am` and :aqua:`7 am` are both **time** entities, but :orange:`6 am` has the role :orange:`oldtime` and :aqua:`7 am` has the role :aqua:`newtime`. The key principles in assigning roles (rather than treating them as separate entities) are -
 
-* Avoiding splitting training data unnecessarily. In effect, All time entities strongly share features, and so the NER parser will perform better having them as one class.
+* Avoiding splitting training data unnecessarily. In effect, all time entities strongly share features, and so the NER parser will perform better having them as one class.
 * Most NER models utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize :aqua:`7 am` as a :aqua:`newtime` with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by "to"
 
 Structure Of The Entity Map
 ***************************
 
-At the top-level, the **"entity-map.json"** file structured as follows -
+At the top-level, the **"entity-map.json"** file is structured as follows -
 
 .. code-block:: javascript
 

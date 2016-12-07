@@ -6,7 +6,7 @@ The domain classifier determines the target domain for a given query. The target
 Loading The Config
 ******************
 
-A model config file containing the Machine Learning model and feature settings needs to be defined. The format of the config file is explained in the section on "Configuring The Model" later on:
+A model config file containing the Machine Learning model and feature settings needs to be defined. The format of the config file is explained in the section on `Configuring The Model`_ later on:
 
 .. code-block:: python
 
