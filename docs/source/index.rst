@@ -80,6 +80,7 @@ Contents
    :name: build
 
    entity_map
+   gazetteers
    domain_classification
    intent_classification
    entity_recognition
