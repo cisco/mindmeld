@@ -1,12 +1,12 @@
 Anatomy of a Deep-Domain Conversational AI System
 ==================================================
 
-The MindMeld deep-domain conversational AI platform consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience. 
+The **MindMeld Deep-Domain Conversational AI Platform** consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience. 
 
 .. image:: images/architecture.png
    :target: _images/architecture.png
 
-This chapter will introduce you to the each of the modules in the MindMeld toolkit.
+This chapter will introduce you to the each of the modules in the MindMeld Workbench library.
 
 
 Natural Language Parser
@@ -14,7 +14,33 @@ Natural Language Parser
 
 The Natural Language Parser is tasked with comprehending the user's natural language input. This involves processing the input text using a combination of techniques such as pattern matching, text classification, information extraction and parsing. The end goal is to produce an actionable semantic representation that can be used to satisfy the dialogue task.
 
-E.g. If the user says "A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread.", the parser would produce:
+.. raw:: html
+
+    <style> .red {color:red} </style>
+
+.. raw:: html
+
+    <style> .green {color:green} </style>
+
+.. raw:: html
+
+    <style> .orange {color:orange} </style>
+
+.. raw:: html
+
+    <style> .pink {color:#DB7093} </style>
+
+.. raw:: html
+
+   <style> .indigo {color:#4B0082} </style>
+
+.. role:: red
+.. role:: green
+.. role:: pink
+.. role:: indigo
+.. role:: orange
+
+For example, if a user said :red:`"A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread."`, the parser would produce:
 
 .. image:: images/parser.png
    :target: _images/parser.png
@@ -30,44 +56,63 @@ We next take a look at each of the classifiers within the MindMeld Parser one by
 Domain Classifier
 ~~~~~~~~~~~~~~~~~
 
-The first level of categorization is done by the Domain Classifier, which classifies the input into one of the predetermined set of domains that can be handled by the conversational system. A "domain" can be thought of as a broad category covering multiple related user intents. Generally, each domain would have its own specialized vocabulary or terminology, that sets it apart from other domains.
+The first level of categorization is done by the Domain Classifier, which classifies the input into one of the predetermined set of domains that can be handled by the conversational system. A **domain** can be thought of as a broad category covering multiple related user intents. Generally, each domain would have its own specialized vocabulary or terminology, that sets it apart from other domains.
 
-For instance, a conversational system built for smart home automation would be expected to handle several distinct tasks such as setting the temperature on the thermostat, toggling the light fixtures in different rooms, locking/unclocking different doors and controlling multimedia devices around the home. The vocabulary for changing the settings on the thermostat is very specific and completely different from interacting with the television. You could therefore consider modeling them under separate domains - a "thermostat" domain for handling all interactions related to the thermostat and similarly a "multimedia" domain.
+For instance, a conversational system built for "Smart Home Automation" would be expected to handle several distinct tasks such as -
 
-On the other hand, you can also have applications where you just have one de facto domain. This is usually the case if all the tasks that your system can handle are conceptually related and share the same vocabulary. For instance, a food ordering app could potentially handle multiple intents like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing any of these tasks would be shared to a large extent.
+* Setting the temperature on the thermostat
+* Toggling the light fixtures in different rooms
+* Locking/unlocking different doors 
+* Controlling multimedia devices around the home
+* ... 
+
+The vocabulary for changing the settings on the thermostat is very specific and completely different from interacting with the television. You could therefore consider modeling them under separate domains - a "thermostat" domain for handling all interactions related to the thermostat and similarly a "multimedia" domain.
+
+On the other hand, you can also have applications where you just have one de facto domain. This is usually the case if all the tasks that your system can handle are conceptually related and share the same vocabulary. For instance, a Food Ordering app could potentially handle multiple intents like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing any of these tasks would be shared to a large extent.
 
 The number of domains thus depends on the scope of your application. Personal assistants like Siri, Cortana, Google Assistant and Alexa are capable of handling several different domains. 
 
-The Domain Classifier uses a machine-learned text classification model trained by providing many examples of user queries along with their true domain labels. At runtime, the Classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.
+The Domain Classifier uses a Machine-Learned text classification model trained on many examples of user queries along with their true domain labels. At runtime, the classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.
 
-See the chapter on :doc:`Training data </training_data>` for a discussion on generating the labelled data for training. In the :doc:`Building The Domain Classifier </domain_classification>` chapter, we will take a closer look at training and evaluating the domain classification model.  
+See the chapter on :doc:`Training data </training_data>` for a discussion on generating the labelled data for training. In the :doc:`Domain Classifier </domain_classification>` chapter, we will take a closer look at training and evaluating the domain classification model.
 
 
 Intent Classifier
 ~~~~~~~~~~~~~~~~~
 
-Once the domain for the user input has been determined, the next level of categorization is provided by the Intent Classifier. An "intent" refers to a very specific kind of informational or transactional user need. The user may want to book a flight, search for movies from a catalog, know about the weather conditions somewhere or set the temperature on their home thermostat. Each of these is an example of a user intent.
+Once the domain for the user input has been determined, the next level of categorization is provided by the Intent Classifier. An **intent** refers to a very specific kind of informational or transactional user need. The user may want to book a flight, search for movies from a catalog, know about the weather conditions somewhere or set the temperature on their home thermostat. Each of these is an example of a user intent.
 
-A domain can, and usually has multiple intents. For instance, the de facto "food" domain in a food ordering app would at least contain intents such as:
+A domain can, and usually has multiple intents. For instance, the de facto "food" domain in a Food Ordering app would at least contain intents such as:
 
-search_restaurant: Searching for restaurants matching a particular set of criteria
-get_restaurant_info: Get general information about a selected restaurant like hours, cuisine, price range, etc.
-list_dishes: List all the dishes available at a selected restaurant, optionally filtered by certain criteria
-place_order: Place an order for pick up or delivery
+  +--------------------+------------------------------------------------------------------------------------------------+
+  |    Intent          |  Description                                                                                   |
+  +====================+================================================================================================+
+  |search_restaurant   | Searching for restaurants matching a particular set of criteria                                |
+  +--------------------+------------------------------------------------------------------------------------------------+
+  |get_restaurant_info | Get general information about a selected restaurant like hours, cuisine, price range, etc.     |
+  +--------------------+------------------------------------------------------------------------------------------------+
+  |list_dishes         | List all the dishes available at a selected restaurant, optionally filtered by certain criteria|
+  +--------------------+------------------------------------------------------------------------------------------------+
+  |place_order         | Place an order for pick up or delivery                                                         |
+  +--------------------+------------------------------------------------------------------------------------------------+
 
 By convention, we use verbs to name our intents as they inherently refer to an action that needs to be taken.
 
-The Intent Classifier, similar to the Domain Classifier uses a machine-learned text classification model that is trained using labelled training data. We train one intent classification model per domain and the Classifier at runtime chooses the appropriate model, based on the predicted domain for the input query. The output of the Intent Classifier is an intent label which allows us to identify the exact task that the user is trying to solve.
+The Intent Classifier, similar to the Domain Classifier uses a Machine-Learned text classification model that is trained using labelled training data. We train one intent classification model per domain and the system chooses the appropriate classifier model at runtime, based on the predicted domain for the input query. The output of the Intent Classifier is an intent label which allows us to identify the exact task that the user is trying to solve.
 
-We describe how to build intent classification models in :doc:`Building the Intent Classifier </intent_classification>`.
+We describe how to build intent classification models in :doc:`Intent Classifier </intent_classification>`.
 
 
 Entity Recognizer
 ~~~~~~~~~~~~~~~~~
 
-After the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An "entity" is any important word or phrase that provides further information about the user's end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.
+After the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An **entity** is any important word or phrase that provides further information about the user's end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.
 
-For programmers, a good analogy is to think of intents as functions and entities as the arguments you pass into the function call. E.g. set_thermostat(temperature = 70), get_weather_info(city = 'San Francisco'), find_movies(release_year = '2016', actor = 'Tom Hanks', genre = 'Drama').
+For programmers, a good analogy is to think of intents as functions and entities as the arguments you pass into the function call. E.g:
+
+* Set_thermostat (:red:`temperature` = 70)
+* Get_weather_info (:green:`city` = 'San Francisco')
+* Find_movies (:indigo:`release_year` = '2016', :pink:`actor` = 'Tom Hanks', :orange:`genre` = 'Drama').
 
 The Entity Recognizer's job is to analyze the user input and extract all the entities relevant to the current intent. In NLP literature, this problem is commonly referred to as `Named Entity Recognition <https://en.wikipedia.org/wiki/Named-entity_recognition>`_. 
 
@@ -76,23 +121,23 @@ The problem essentially consists of two parts:
 1. Detect which spans of words within the input text correspond to entities of interest
 2. Classify those detected text spans into a pre-determined set of entity types
 
-The Entity Recognizer uses a machine-learned sequence labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in :doc:`Building the Entity Recognizer </entity_recognition>`.
+The Entity Recognizer uses a Machine-Learned Sequence Labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in :doc:`Entity Recognizer </entity_recognition>`.
 
-At runtime, the Entity Recognizer loads up and uses the appropriate model, based on the predicted intent for the query. Once this step is done and we've extracted the relevant entities, we finally have all the raw ingredients required to make sense out of the user input. It's now a question of putting those together to build a semantic representation that encapsulates all the information necessary to execute the user's intended action.
+At runtime, the Entity Recognizer loads the appropriate model, based on the predicted intent for the query. Once this step is done and we have extracted the relevant entities, we will finally have all the raw ingredients required to make sense out of the user input. The next step would be to put those together to build a semantic representation that encapsulates all the information necessary to execute the user's intended action.
 
 
 Entity Resolver
 ~~~~~~~~~~~~~~~
 
-The Entity Resolver transforms the entity spans extracted by the Entity Recognizer into canonical forms that can be looked up in a catalog or a knowledge base. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake", "SF" may get resolved to "San Francisco" and so on. This problem of entity resolution is also referred to as `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ in NLP literature.
+The Entity Resolver transforms the entity spans extracted by the Entity Recognizer into canonical forms that can be looked up in a catalog or a Knowledge Base. For instance, the extracted entity :red:`"lemon bread"` may get resolved to :red:`"Iced Lemon Pound Cake"` and :green:`"SF"` may get resolved to :green:`"San Francisco"`. This problem of entity resolution is also referred to as `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ in NLP literature.
 
-The MindMeld Entity Resolver uses a resource called an Entity Map to transform extracted entities into their desired normalized forms. The chapters on :doc:`Defining the Entity Map </entity_map>` and :doc:`Building the Entity Resolver </entity_resolution>` provide more details on the entity resolution step.
+The MindMeld Entity Resolver uses a resource called an **Entity Map** to transform extracted entities into their desired normalized forms. The chapters on :doc:`Entity Map </entity_map>` and :doc:`Entity Resolver </entity_resolution>` provide more details on the entity resolution step.
 
 
 Role Classifier
 ~~~~~~~~~~~~~~~
 
-Role Classification a.k.a Semantic Role Labeling (SRL) is the task of identifying predicates and predicate arguments. A **semantic role** in language is the relationship that a syntactic constituent has with a predicate. In Conversational NLU, a **"role"** represents the semantic theme a given entity can take. It can also be used to define how a named entity should be used for fulfilling a query intent. For example, in the query "Play Black Sabbath by Black Sabbath", the title entity "Black Sabbath" has different semantic themes - the first referring to the song, and the second referring to the artist.
+Role Classification is the task of identifying predicates and predicate arguments. A **semantic role** in language is the relationship that a syntactic constituent has with a predicate. In Conversational NLU, a **role** represents the semantic theme a given entity can take. It can also be used to define how a named entity should be used for fulfilling a query intent. For example, in the query :red:`"Play Black Sabbath by Black Sabbath"`, the **title** entity :green:`"Black Sabbath"` has different semantic themes - **song** and **artist** respectively.
 
 Treating Named Entity Recognition (NER) and Semantic Role Labeling (SRL) as separate tasks has a few advantages -
 
@@ -106,7 +151,7 @@ Semantic Parser
 
 The Semantic Parser is the last subcomponent within the MindMeld Natural Language Parser. It takes all the resolved entities and groups them into semantically related items. Each item represents a single real-world entity or concept along with all its describing attributes.
 
-We provide more details in :doc:`Building the Semantic Parser </semantic_parsing>`.
+We provide more details in :doc:`Semantic Parser </semantic_parsing>`.
 
 
 Dialogue Manager
@@ -118,10 +163,12 @@ The Dialogue Manager is responsible for directing the flow of the conversation. 
 Question Answerer
 -----------------
 
-In the context of Deep-Domain Conversational AI, Question Answering is the task of retrieving relevant documents from a large content catalog in response to a natural language question. A large-vocabulary content catalog is first imported into a Knowledge Base. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. These candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.
+In the context of Deep-Domain Conversational AI, Question Answering is the task of retrieving relevant documents from a large content catalog in response to a natural language question. A large-vocabulary content catalog is first imported into a **Knowledge Base**. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. Finally, these candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.
+
+The parameters and weights assigned to the various entity types determine the effect of those entities on the final ranking. More context is provided in the chapter on :doc:`Question Answerer </question_answering>`.
 
 
 Natural Language Generator
 --------------------------
 
-The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in :doc:`Building the NLG </nlg>` chapter.
+The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in :doc:`Natural Language Generator </nlg>` chapter.
