@@ -13,8 +13,8 @@ test:
     - echo "no tests"
   post:
     - cd docs && make html
-#deployment:
-#  s3: 
-#    branch: /.*/
-#    commands:
-#      - scripts/upload_to_s3.sh
+deployment:
+  s3: 
+    branch: /.*/
+    commands:
+      - docs/scripts/upload_to_s3.sh
