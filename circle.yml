@@ -17,4 +17,4 @@ deployment:
   s3: 
     branch: /.*/
     commands:
-      - docs/scripts/upload_to_s3.sh
+      - bash docs/scripts/upload_to_s3.sh
