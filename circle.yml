@@ -1,0 +1,20 @@
+machine:
+  python:
+    version: 3.5.1
+dependencies:
+  post:
+    - sudo apt-get update; sudo apt-get install haskell-platform
+    - python3 -m pip install --upgrade ipykernel
+    - python3 -m ipykernel install
+test:
+  pre:
+    - pip install -r test-requirements.txt
+  override:
+    - pass
+  post:
+    - cd docs && make html
+#deployment:
+#  s3: 
+#    branch: /.*/
+#    commands:
+#      - scripts/upload_to_s3.sh
