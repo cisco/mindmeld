@@ -37,9 +37,9 @@ In this tutorial, you will learn
 * how to train, test, and optimize each component to achieve the high accuracy required for user-facing commercial applications
 * how to build an intelligent conversational interface with easy-to-use modules
 
-In short, you will learn how to build a Conversational AI application step by step, and gain insight into best practices along the way.
+In short, you will learn how to build Conversational AI applications step by step, while gaining insight into best practices.
 
-The code in this tutorial references four Conversational AI applications, each of which comes with a medium- to large-vocabulary content catalog:
+The code samples in this tutorial reference four applications, each featuring a medium- to large-vocabulary content catalog:
 
 * Barista (Coffee-ordering Assistant)
 * Home Assistant (Smart Home, TV/Movies Discovery, Times & Dates)
