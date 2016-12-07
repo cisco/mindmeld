@@ -13,6 +13,8 @@ Before you build your first application with Workbench, you should:
 * thoroughly study the detailed explanations in the `Guide to Deep-Domain Conversational AI`_, concentrating on the sections of the Guide that are most relevant to your use case
 * continue with the Prepare Data, Build, and Deploy chapters of this tutorial
 
+.. _Guide to Deep-Domain Conversational AI: guide.html
+
 Example Scenarios
 *****************
 
