@@ -9,13 +9,13 @@ Getting Started
 
   pip install git+ssh://git@github.com/expectlabs/mindmeld-workbench.git
 
-  - Workbench supports Python 3.5.x
-
-3. When writing Python code, use `import mindmeld` to import Workbench
+3. When writing Python code, use ``import mindmeld`` to import Workbench
 
 .. code-block:: python
 
   import mindmeld as mm
+
+.. note:: Workbench supports Python 3.5.x.
 
 Prerequisites
 *************
