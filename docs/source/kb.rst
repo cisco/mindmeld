@@ -1,12 +1,12 @@
 Knowledge Base
-===========================
+==============
 
-In order to build Deep-Domain Question Answering systems for large content catalogs, a Knowledge Base is required. For narrow-vocabulary domains, it is likely possible to create short lists which capture every possible entity value. But for medium- and large-vocabulary domains, a Knowledge Base can be helpful for storing and exporting all the potential entity values (names of artists, actors, titles, products, etc).
+In order to build Deep-Domain Question Answering systems for large content catalogs, a Knowledge Base is required. For narrow-vocabulary domains, it is likely possible to create short lists which capture every possible entity value. But for medium- and large-vocabulary domains, a Knowledge Base can be helpful for storing all the potential entity values (names of artists, actors, titles, products, etc). Additionally, the Knowledge Base can be used for exporting entity values into files and/or sata structures that can provide valuable signals to the various classifier models. We will learn more about this in the Gazetteer section.
 
 A Knowledge Base (KB) can be in the form of a simple Key-Value store, a relational database, or a graph database. In Workbench, we support both a lightweight relational database (Sqlite) with a fast full-text index (FTS-5) and a more full-featured Elasticsearch database.
 
 Knowledge Base Configuration
-****************************
+----------------------------
 
 Each domain defines its own configuration for knowledge base.
 
@@ -38,7 +38,7 @@ If the KB type is "elasticsearch", the following parameters need to be defined.
 
 
 Knowledge Base Schema
-*********************
+---------------------
 
 As part of building any database, a schema needs to be defined. This can be defined in the **"schema.json"** file for the Music-Assistant example as follows.
 
@@ -102,9 +102,9 @@ As part of building any database, a schema needs to be defined. This can be defi
 +------------------+---------------------------------------------------------------------------------------------------------+
 
 Create The Knowledge Base
-*************************
+-------------------------
 
-Once the above dependencies are fulfilled, we are ready to import the data into the Knowledge Base.
+Once the above dependencies are fulfilled, we are ready to import the data into the Knowledge Base. The following example assumes the data is stored as JSON flat files locally, but in practice you could substitute it with any data loading process (such as cloud download or a Data-Stream API)
 
 .. code-block:: python
 
@@ -113,8 +113,9 @@ Once the above dependencies are fulfilled, we are ready to import the data into 
   # Initialize the KB
   kb = KnowledgeBase('/path/to/kb_config')
 
-  # Read the data - can be read from flat files, cloud storage, or data-stream API
-  data = read_data()
+  # Read the data
+  with open('data.json') as json_data:
+    data = json.load(json_data)
 
   # Import Data to KB
   kb.import_data(data, format='json')
@@ -122,13 +123,13 @@ Once the above dependencies are fulfilled, we are ready to import the data into 
 Running **import_data** will setup a new Elasticsearch index with the latest imported data.
 
 Advanced Options
-****************
+----------------
 
-.. _here: https://www.elastic.co/
+.. _here: https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html
 
 Elasticsearch (ES) is a versatile search engine based on Lucene. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents. The full set of documentation on tuning and adapting Elasticsearch to your needs is available here_.
 
-Specifically, you might need to tweak the **"es_mapping.json"** file in your domain. The **es_mapping** file defines how a document, and the fields it contains, are stored and indexed. This mapping definition is used to create an ES index. ES is flexible for text analysis and indexing. It can be configured to -
+Specifically, you might need to tweak the **"es_mapping.json"** file in your domain. The **es_mapping** file defines how a document, and the fields it contains, are stored and indexed. This mapping definition is used to create an ES index. ES is flexible for text analysis and indexing. It can be configured to any of the following requirements.
 
 * Support defining text analysis behavior per field
 * Support defining sub-fields to process and index text differently for the same field.

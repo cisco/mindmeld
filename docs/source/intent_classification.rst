@@ -1,10 +1,10 @@
 Intent Classifier
-==============================
+=================
 
-The intent classifier is trained using all of the labeled queries across all intents for all intents. It determines the target intent for a given query. The target intent determines which intent classifier will be invoked. The labels for the training data are the intent names associated with each query. Similar to the Domain Classifier, the intent classifier uses the "marked down" form of each query i.e all query annotations are removed and raw text is sent to a text classifier.
+The intent classifier is trained using all of the labeled queries across all intents for all intents. It determines the target intent for a given query. The labels for the training data are the intent names associated with each query. Similar to the Domain Classifier, the intent classifier uses the "marked down" form of each query i.e all query annotations are removed and raw text is sent to a text classifier.
 
 Loading The Config
-******************
+------------------
 
 A model config file containing the Machine Learning model and feature settings needs to be defined. The format of the config file is explained in the section on "Configuring The Model".
 
@@ -14,7 +14,7 @@ A model config file containing the Machine Learning model and feature settings n
     intent_config = mm.load_config('intent_model_config.json')
 
 Training The Model
-******************
+------------------
 
 Once the model config is loaded, you can load the training data and train the model:
 
@@ -23,14 +23,15 @@ Once the model config is loaded, you can load the training data and train the mo
   from mindmeld.intent_classification import IntentClassifier
 
   # Load training data to a Data Frame
-  training_data = mm.load_data(domain='clothing')
+  training_data = mm.load_data('/path/to/domain/training_data.txt')
 
   # Train The Classifier
-  intent_classifier = mm.IntentClassifier(config=intent_config)
+  intent_classifier = IntentClassifier(config=intent_config)
   intent_classifier.fit(data=training_data, model='logreg')
 
   # Evaluate the model
-  intent_classifier.evaluate(data='eval_set.txt')
+  eval_set = mm.load_data('/path/to/eval_set.txt')
+  intent_classifier.evaluate(data=eval_set)
 
 The **model** argument determines which model config to use (as specified in the config file). In the above example, the *"logreg"* model defined in the config file will be used for training.
 
@@ -81,7 +82,7 @@ Training Accuracy Statistics::
   Best accuracy: 98.56%, settings: {u'kernel': u'linear', u'C': 5000, u'probability': True, 'class_weight': {0: 0.8454625164401579, 1: 1.404707233065442}}
 
 Configuring The Model
-*********************
+---------------------
 
 Here is a sample **"intent_model_config.json"** file for specifying model and feature settings.
 
@@ -120,7 +121,7 @@ Here is a sample **"intent_model_config.json"** file for specifying model and fe
 
 
 Feature Specification
-*********************
+---------------------
 
 The features to be used in the Machine Learning model are specified in the **features** field of your model specification. The following feature-specifications are available to use.
 
@@ -143,7 +144,7 @@ The features to be used in the Machine Learning model are specified in the **fea
 +--------------+----------------------------------------------------------------------------------------------------------------+
 
 Evaluation
-**********
+----------
 
 Next, see how the trained model performs against the test data set. Run the **evaluate** method on the classifier.
 
@@ -164,7 +165,7 @@ You can then print out the accuracy and error analysis of the classification:
     print("{0} \t {1} \t {2}".format(e.data, e.gold_label, e.predicted_label))
 
 Prediction
-**********
+----------
 
 Finally, use the model to predict the intent for any new query input:
 
@@ -174,7 +175,7 @@ Finally, use the model to predict the intent for any new query input:
   pred_intent = intent_classifier.predict(query=q)
 
 Detailed Inspection
-*********************
+-------------------
 
 You can use the **verbose=True** flag for deeper analysis on the feature values used for classifying that query.
 

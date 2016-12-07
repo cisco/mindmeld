@@ -1,10 +1,10 @@
 Domain Classifier
-==============================
+=================
 
-The domain classifier determines the target domain for a given query. The target domain determines which intent classifier will be invoked. The domain classifier is trained using all of the labeled queries across all intents for all domains in an application. The labels for the training data are the domain names associated with each query. The classifier uses the "marked down" form of each query i.e all query annotations are removed and the raw text is sent to a text classifier.
+The domain classifier determines the target domain for a given query. It is trained using all of the labeled queries across all intents for all domains in an application. The labels for the training data are the domain names associated with each query. The classifier uses the "marked down" form of each query i.e all query annotations are removed and the raw text is sent to a text classifier.
 
 Loading The Config
-******************
+------------------
 
 A model config file containing the Machine Learning model and feature settings needs to be defined. The format of the config file is explained in the section on `Configuring The Model`_ later on:
 
@@ -14,7 +14,7 @@ A model config file containing the Machine Learning model and feature settings n
     domain_config = mm.load_config('domain_model_config.json')
 
 Training The Model
-******************
+------------------
 
 Once the model config is loaded, you can load the training data and train the model:
 
@@ -22,15 +22,16 @@ Once the model config is loaded, you can load the training data and train the mo
 
   from mindmeld.domain_classification import DomainClassifier
 
-  # Load training data to a Data Frame
-  training_data = mm.load_data(app='barista')
+  # Load training data to a numpy ndarray
+  training_data = mm.load_data('/path/to/app/training_data.txt')
 
   # Train The Classifier
   domain_classifier = DomainClassifier(config=domain_config)
   domain_classifier.fit(data=training_data, model='logreg')
 
   # Evaluate the model
-  domain_classifier.evaluate(data='eval_set.txt')
+  eval_set = mm.load_data('/path/to/eval_set.txt')
+  domain_classifier.evaluate(data=eval_set)
 
 The **model** argument determines which model config to use (as specified in the config file). In the above example, the *"logreg"* model defined in the config file will be used for training.
 
@@ -53,7 +54,7 @@ For a grid sweep over model hyperparameters, you can specify a param_grid dict o
   # Train classifier with grid search + CV
   domain_classifier.fit(data=training_data, model='logreg', params_grid=params, cv=kfold_cv)
 
-If you set **cv=KFold** or **cv=StratifiedKFold**, a confusion matrix will be generated in the printed stats.
+If you set **cv=KFold** or **cv=StratifiedKFold**, a confusion matrix will be generated in the printed stats. If **cv=None** (default), the entire data will be used for training and no confusion matrix is generated.
 
 .. code-block:: javascript
 
@@ -80,7 +81,7 @@ Training Accuracy Statistics::
   Best accuracy: 99.60%, settings: {u'penalty': u'l2', u'C': 100, u'probability': True, 'class_weight': {0: 0.8454625164401579, 1: 1.404707233065442}}
 
 Configuring The Model
-*********************
+---------------------
 
 Here is a sample **"domain_model_config.json**"" file for specifying model and feature settings.
 
@@ -115,7 +116,7 @@ Here is a sample **"domain_model_config.json**"" file for specifying model and f
 
 
 Feature Specification
-*********************
+---------------------
 
 The features to be used in the Machine Learning model can be specified in the **features** field of your model specification. The following feature-specifications are available to use.
 
@@ -138,7 +139,7 @@ The features to be used in the Machine Learning model can be specified in the **
 +--------------+----------------------------------------------------------------------------------------------------------------+
 
 Evaluation
-**********
+----------
 
 Next, see how the trained model performs against the test data set. Run the **evaluate** method on the classifier.
 
@@ -159,7 +160,7 @@ You can then print out the accuracy and error analysis of the classification:
     print("{0} \t {1} \t {2}".format(e.data, e.gold_label, e.predicted_label))
 
 Prediction
-**********
+----------
 
 Finally, you can use the model to predict the domain for any new query input:
 
@@ -169,4 +170,6 @@ Finally, you can use the model to predict the domain for any new query input:
   pred_domain = domain_classifier.predict(query=q)
   print pred_domain
 
-will print "times-and-dates".
+.. code-block:: text
+  
+  "times-and-dates"

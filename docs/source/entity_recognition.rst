@@ -14,7 +14,7 @@ The Named Entity Recognizer detects specific words or phrases in a query which m
 .. _Maximum Entropy Markov Model: https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model
 .. _Conditional Random Field: https://en.wikipedia.org/wiki/Conditional_random_field
 
-The named entity recognition models are also called the **facet models** or **facet classifiers**. In practice, sequence models such as the `Maximum Entropy Markov Model`_ or `Conditional Random Field`_ work very effectively for bootstrapping your application.
+In practice, sequence models such as the `Maximum Entropy Markov Model`_ or `Conditional Random Field`_ work very effectively for bootstrapping your application.
 
 .. _Stanford lecture notes: https://web.stanford.edu/class/cs124/lec/Information_Extraction_and_Named_Entity_Recognition.pdf
 .. _IOB tagging: https://en.wikipedia.org/wiki/Inside_Outside_Beginning
@@ -22,7 +22,7 @@ The named entity recognition models are also called the **facet models** or **fa
 A formal introduction to sequence NER models can be found in the `Stanford lecture notes`_ slides. MindMeld Workbench will prepare the data to an "IOBES" tagging scheme (an extension to the well known `IOB tagging`_ scheme for NER sequence models).
 
 Define The Config
-*****************
+-----------------
 
 Similar to the Domain and Intent Classifiers, we can define a config file for specifying the model and feature settings to use. In the following example, we use the **"memm"** model with the respective lexical and syntactic features specified -
 
@@ -57,24 +57,25 @@ Load the config -
 .. code-block:: python
 
   import mindmeld as mm
-  facet_config = mm.load_config('facet_model_config.json')
+  entity_config = mm.load_config('entity_model_config.json')
 
 Train The Model
-***************
+---------------
 
 .. code-block:: python
 
-  from mindmeld.entity_recognition import FacetClassifier
+  from mindmeld.entity_recognition import EntityRecognizer
 
   # Load the training data
-  training_data = mm.load_data(domain='clothing', 'intent'='search-products')
+  training_data = mm.load_data('/path/to/domain/intent/training_data.txt')
 
   # Train the classifier
-  facet_model = mm.FacetClassifier(config=facet_config)
-  facet_model.fit(data=training_data, model='memm')
+  entity_model = EntityRecognizer(config=entity_config)
+  entity_model.fit(data=training_data, model='memm')
 
   # Evaluate the model
-  facet_model.evaluate(data='eval_set.txt')
+  eval_set = mm.load_data('/path/to/eval_set.txt')
+  entity_model.evaluate(data=eval_set)
 
 For determining the Cross Validation accuracy, you can define a CV iterator and train with the **cv** argument.
 
@@ -86,10 +87,10 @@ For determining the Cross Validation accuracy, you can define a CV iterator and 
   kfold_cv = KFold(num_splits=10)
 
   # Train classifier with grid search + CV
-  facet_model.fit(data=training_data, model='svm', params_grid=params, cv=kfold_cv, scoring='precision')
+  entity_model.fit(data=training_data, model='svm', params_grid=params, cv=kfold_cv, scoring='precision')
 
 Feature Specification
-*********************
+---------------------
 
 The features to be used in the Machine Learning model are specified in the **features** field of your model specification. The following feature-specifications are available to use.
 
@@ -109,14 +110,14 @@ The features to be used in the Machine Learning model are specified in the **fea
 
 
 Prediction
-**********
+----------
 
 For predicting the sequence tags on a new query, simply use the **predict** method on the model. This returns a structured JSON with start/end information at the character-level.
 
 .. code-block:: python
 
   q = "Show me tom hanks movies featuring meg ryan"
-  facets = facet_model.predict(query=q)
+  entities = entity_model.predict(query=q)
 
 Output::
 
@@ -153,16 +154,16 @@ Output::
   ]
 
 Detailed Inspection
-*******************
+-------------------
 
 You can use the **verbose=true** flag for detailed inspection on the predicted tags with their log probabilities.
 
 .. code-block:: python
 
   q = "what are stanley kubrick's best rated movies"
-  facets = facet_model.predict(query=q, verbose=True)
+  entities = entity_model.predict(query=q, verbose=True)
 
-This outputs a detailed dump of the top feature values used for classifying that query. This provides valuable insights into model behavior towards specific queries and guides you to making alternate modeling choices.
+This outputs a detailed dump of the top feature values used for classifying that query. This provides valuable insights into model behavior towards specific queries and guides you to making alternate modeling choices. For illustration, let us assume that some configuration of the model wrongly predicted an entity tag.
 
 .. code-block:: text
 

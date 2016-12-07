@@ -1,34 +1,30 @@
 Entity Map
 =======================
 
-.. code-block:: python
-
-  import mindmeld as mm
-
-.. _Building The Entity Recognizer: entity_recognition.html
-
-Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational AI. NER is used to highlight important portions of natural language input. Steps for training ML models for building Entity Recognizers are detailed in the `Building The Entity Recognizer`_ section. However, an important precursor to training Entity Recognition models is to define an **Entity Map**. The Entity Map allows us to -
-
 .. raw:: html
 
     <style> .red {color:red} </style>
 
 .. role:: red
 
+.. _Building The Entity Recognizer: entity_recognition.html
+
+Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational AI. NER is used to highlight important portions of natural language input. Steps for training ML models for building Entity Recognizers are detailed in the `Building The Entity Recognizer`_ section. However, an important precursor to training Entity Recognition models is to define an **Entity Map**. The Entity Map allows us to -
+
+* Specify a schema for the types and names of entities we wish to recognize.
+
+  + In the music-assistant app, we might want to support "document-type" entities such as **artists**, **tracks**, **albums**, and **playlists**
+
 * Map synonyms - :red:`"let's hear some yeezy"` should search for :red:`"Kanye West"`
 
 * Specify which database fields to query given certain entity types.
 
-  + E.g. for **movies**, query the **pubdate** fields given a **time-range** entity
+  + E.g. query the **pubdate** fields given a **time-range** entity
 
-* Add small-vocabulary gazetteer entries for named entity extraction.
-
-  + E.g. document type names for music search: **artists**, **tracks**, **albums**, and **playlists**
-
-* Optionally assign "roles" to entities for Semantic Role Labeling.
+* Optionally assign "roles" to entities for Role Classification.
 
 Entities And Roles
-******************
+------------------
 
 .. raw:: html
 
@@ -48,10 +44,10 @@ Giving an entity a role is an optional additional classification step. Let's con
 Here, :orange:`6 am` and :aqua:`7 am` are both **time** entities, but :orange:`6 am` has the role :orange:`oldtime` and :aqua:`7 am` has the role :aqua:`newtime`. The key principles in assigning roles (rather than treating them as separate entities) are -
 
 * Avoiding splitting training data unnecessarily. In effect, all time entities strongly share features, and so the NER parser will perform better having them as one class.
-* Most NER models utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize :aqua:`7 am` as a :aqua:`newtime` with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by "to"
+* Some NER models (such as the **memm**) utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize :aqua:`7 am` as a :aqua:`newtime` with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by "to".
 
 Structure Of The Entity Map
-***************************
+---------------------------
 
 At the top-level, the **"entity-map.json"** file is structured as follows -
 
@@ -79,21 +75,19 @@ Entity configuration objects contain the following fields -
   +---------------+------------------------------------------------------------------------------+
   | Field         | Description                                                                  |
   +===============+==============================================================================+
-  | entity-name   | corresponds to a facet name in labeled queries                               |
+  | entity-name   | corresponds to an entity name in labeled queries                             |
   +---------------+------------------------------------------------------------------------------+
-  | mode          | search, filter, sort, range, or no-kb, according to the purpose of the facet |
+  | mode          | search, filter, sort, range, or no-kb, according to the purpose of the entity|
   +---------------+------------------------------------------------------------------------------+
   | one-per-query | boolean that means “for any query, there can only be one entity of this type”|
   +---------------+------------------------------------------------------------------------------+
-  | numeric       | corresponds to a Duckling (numerical parser) type                            |
+  | numeric       | corresponds to a :doc:`Duckling </mallard>` (numerical parser) type          |
   +---------------+------------------------------------------------------------------------------+
   | roles         | array of role objects                                                        |
   +---------------+------------------------------------------------------------------------------+
   | text-map      | maps raw text from the input query into canonical form                       |
   +---------------+------------------------------------------------------------------------------+
   | clause-map    | maps a language pattern to a template for creating knowledge base queries    |
-  +---------------+------------------------------------------------------------------------------+
-  | conversions   | dictionary which maps conversion names to operations                         |
   +---------------+------------------------------------------------------------------------------+
 
 Entity objects with a TextMap -
