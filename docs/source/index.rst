@@ -39,7 +39,7 @@ In this tutorial, you will learn
 
 In short, you will learn how to build Conversational AI applications step by step, while gaining insight into best practices.
 
-The code samples in this tutorial reference four applications, each featuring a medium- to large-vocabulary content catalog:
+The code samples in this tutorial draw from four applications, each featuring a medium- to large-vocabulary content catalog:
 
 =================  =====================================================================
 Application        Use Case
