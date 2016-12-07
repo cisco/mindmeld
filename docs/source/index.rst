@@ -64,13 +64,7 @@ Contents
    :caption: Formulate Approach
    :name: approach
 
-   approach
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Deep-Domain Conversational AI Guide
-   :name: guide
-
+   scenarios
    guide
 
 .. toctree::

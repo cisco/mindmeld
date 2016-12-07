@@ -1,8 +1,5 @@
-Formulate Approach
-==================
-
-Formulate Approach
-******************
+Your Use Case and ML/NLP
+========================
 
 There is no one-size-fits-all approach to creating conversational AI applications.
 
