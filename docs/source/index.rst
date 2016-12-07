@@ -41,10 +41,14 @@ In short, you will learn how to build Conversational AI applications step by ste
 
 The code samples in this tutorial reference four applications, each featuring a medium- to large-vocabulary content catalog:
 
-* Barista (Coffee-ordering Assistant)
-* Home Assistant (Smart Home, TV/Movies Discovery, Times & Dates)
-* Music Assistant (Search for songs, albums, artists ...)
-* Fashion Assistant (Search for clothing and fashion)
+===========  =========================================================================
+Application  Use Case
+===========  =========================================================================
+Barista  Order drinks and food at a coffee shop
+Home Assistant  Operate a Smart Home, discover TV shows and movies, navigate TV Guide
+Music Assistant  Discover and save favorite songs, albums, artists, playlists
+Fashion Assistant  Shop for clothing and accessories
+===========  =========================================================================
 
 This tutorial assumes familiarity with `Machine Learning`_ and the Python programming language, including functional knowledge of the `scikit-learn`_ package.
 
