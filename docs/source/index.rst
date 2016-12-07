@@ -18,7 +18,7 @@ Getting Started
 .. note:: Workbench supports Python 3.5.x.
 
 Welcome to MindMeld Workbench
-=================================
+=============================
 
 MindMeld Workbench
 
@@ -29,7 +29,7 @@ MindMeld Workbench
 * enables machine learning engineers and data scientists to quickly build, test and deploy conversational user interfaces across a wide range of platforms
 
 About this Tutorial
-*************
+*******************
 
 In this tutorial, you will learn
 
