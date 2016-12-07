@@ -1,0 +1,20 @@
+machine:
+  python:
+    version: 3.5.1
+dependencies:
+  post:
+    - sudo apt-get install libzmq-dev
+    - python3 -m pip install --upgrade ipykernel
+    - python3 -m ipykernel install --user
+    - wget https://github.com/jgm/pandoc/releases/download/1.19/pandoc-1.19-1-amd64.deb
+    - sudo dpkg -i pandoc-1.19-1-amd64.deb
+test:
+  override:
+    - pass
+  post:
+    - cd docs && make html
+#deployment:
+#  s3: 
+#    branch: /.*/
+#    commands:
+#      - scripts/upload_to_s3.sh

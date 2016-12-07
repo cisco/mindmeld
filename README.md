@@ -12,7 +12,7 @@ We will be using Python3. Make sure you are not in a Python2 virtualenv. Run the
 
 `python3 -m pip install --upgrade ipykernel`
 
-`python3 -m ipykernel install`
+`python3 -m ipykernel install --user`
 
 ## Building
 
