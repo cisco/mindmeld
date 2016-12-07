@@ -62,13 +62,13 @@ Contents
 .. toctree::
    :maxdepth: 2
    :caption: Get Familiar with Workbench
-   :name: learn
+   :name: familiar
 
    anatomy
 
 .. toctree::
    :maxdepth: 2
-   :caption: Data
+   :caption: Prepare your Data
    :name: data
 
    training_data
@@ -76,7 +76,7 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Build
+   :caption: Build your Application
    :name: build
 
    entity_map
@@ -92,14 +92,7 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Deploy
+   :caption: Deploy your Application
    :name: deploy
 
    deployment
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Notebook
-   :name: notebook
-
-   hello-world
