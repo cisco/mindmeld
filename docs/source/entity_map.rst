@@ -1,6 +1,10 @@
 Entity Map
 =======================
 
+.. code-block:: python
+
+  import mindmeld as mm
+
 .. _Building The Entity Recognizer: entity_recognition.html
 
 Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational AI. NER is used to highlight important portions of natural language input. Steps for training ML models for building Entity Recognizers are detailed in the `Building The Entity Recognizer`_ section. However, an important precursor to training Entity Recognition models is to define an **Entity Map**. The Entity Map allows us to -

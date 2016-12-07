@@ -1,13 +1,17 @@
 Getting Started
 ===============
 
-To install MindMeld Workbench, please contact our Business Development team to obtain a technology licence. Once you obtain the licence, you can run the following command and enter your licence key.
+1. Obtain a technology license from MindMeld
+
+1. Install MindMeld Workbench — you will be prompted to enter your license key
 
 .. code-block:: text
 
   pip install git+ssh://git@github.com/expectlabs/mindmeld-workbench.git
 
-Once installed, you will be able to run through the various steps in the tutorial. The preferred python version is Python3.
+ - Workbench supports Python 3.5.x
+
+1. When writing Python code, use `import mindmeld` to import Workbench
 
 .. code-block:: python
 
