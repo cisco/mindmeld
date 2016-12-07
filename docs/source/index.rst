@@ -22,11 +22,11 @@ Welcome to MindMeld Workbench
 
 MindMeld Workbench
 
-* is a set of Natural Language Processing tools for building Deep Domain Conversational AI systems that intelligently converse with users in natural language
-* is optimized for language understanding based on large, custom datasets (rather than pre-trained, generic models)
-* supports robust, flexible and scalable Machine Learning modeling constructs to enable Deep-Domain language understanding
+* is a set of Natural Language Processing tools for building **Deep Domain Conversational AI** systems that intelligently converse with users in natural language
+* is optimized for language understanding based on **large, custom datasets** (rather than pre-trained, generic models)
+* supports robust, flexible and scalable Machine Learning modeling constructs to enable **Deep-Domain language understanding**
 * has been demonstrated on **production-grade** conversational apps in several domains (described below)
-* enables machine learning engineers and data scientists to quickly build, test and deploy conversational user interfaces across a wide range of platforms
+* enables machine learning engineers and data scientists to quickly build, test and **deploy conversational user interfaces across a wide range of platforms**
 
 About this Tutorial
 *******************
