@@ -3,12 +3,12 @@ machine:
     version: 3.5.1
 dependencies:
   post:
-    - sudo apt-get update; sudo apt-get install haskell-platform
+    - sudo apt-get install libzmq-dev
     - python3 -m pip install --upgrade ipykernel
-    - sudo python3 -m ipykernel install
+    - python3 -m ipykernel install --user
+    - wget https://github.com/jgm/pandoc/releases/download/1.19/pandoc-1.19-1-amd64.deb
+    - sudo dpkg -i pandoc-1.19-1-amd64.deb
 test:
-  pre:
-    - pip install -r test-requirements.txt
   override:
     - pass
   post:
