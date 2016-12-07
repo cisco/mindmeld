@@ -10,7 +10,7 @@ dependencies:
     - sudo dpkg -i pandoc-1.19-1-amd64.deb
 test:
   override:
-    - pass
+    - echo "no tests"
   post:
     - cd docs && make html
 #deployment:
