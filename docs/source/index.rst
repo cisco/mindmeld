@@ -34,7 +34,7 @@ About this Tutorial
 In this tutorial, you will learn
 
 * the role of each component in the Workbench architecture
-* how to train, test, and optimizate each component to achieve the high accuracy required for user-facing commercial applications
+* how to train, test, and optimize each component to achieve the high accuracy required for user-facing commercial applications
 * how to build an intelligent conversational interface with easy-to-use modules
 
 In short, you will learn how to build a Conversational AI application step by step, and gain insight into best practices along the way.
