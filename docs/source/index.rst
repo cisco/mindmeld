@@ -61,7 +61,7 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Learn
+   :caption: Get Familiar with Workbench
    :name: learn
 
    anatomy
