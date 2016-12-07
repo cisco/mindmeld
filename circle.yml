@@ -5,7 +5,7 @@ dependencies:
   post:
     - sudo apt-get update; sudo apt-get install haskell-platform
     - python3 -m pip install --upgrade ipykernel
-    - python3 -m ipykernel install
+    - sudo python3 -m ipykernel install
 test:
   pre:
     - pip install -r test-requirements.txt
