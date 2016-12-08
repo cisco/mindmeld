@@ -1,5 +1,5 @@
-Your Use Case and ML/NLP
-========================
+Scoping your Scenario
+=====================
 
 There is no one-size-fits-all approach to creating conversational AI applications.
 
