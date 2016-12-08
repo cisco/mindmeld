@@ -131,8 +131,10 @@ Following along the rest of the dialogue flows, you can see how each branch in t
 Define Domains, Intents And Entities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Based on the use cases and data collected, we can develop an intuition towards the types of domains and intents we should create in order to build a robust conversational system. While there is no "one size fits all" approach to modeling domains and intents, we can follow some basic guidelines and recommended best practices for modeling these concepts.
+Based on the use cases and data collected, we can develop an intuition for the types of domains and intents we should create in order to build a robust conversational system. Intents refer to the different possible intentions a user might have in each state and determine which branch gets selected next in the dialogue flow. Domains are collections of related intents sharing a common vocabulary. While there is no "one size fits all" approach to modeling domains and intents, we can follow some basic guidelines and recommended best practices for modeling these concepts.
 
+* Defining domains is not necessary for an app that only needs to handle a small number of intents. In such a case, all intents can be considered as belonging to a single de-facto domain.
+* When you have more than a dozen intents, consider grouping intents into domains based common language patterns and vocabulary.
 * Queries in any domain should be semantically and syntactically different from all other domains.
 * Defining the right set of intents for each domain is critical to ensure good accuracy and broad coverage of user queries. Each domain should have no more than a few dozen different intents.
 * To optimize parser accuracy, the queries for each intent should should be semantically and syntactically different from the queries for all other intents
@@ -180,3 +182,58 @@ A useful strategy is to annotate a few hundred queries, train an initial Entity 
 
 Be consistent with your entity annotations and ensure that the annotated entity span matches with the entries in your Entity Map. Queries without any slot information should be left unannotated. E.g. "Sure", "Hello", "Yes, please".
 
+
+Organize the Training Data
+--------------------------
+
+Workbench expects all your training data to be in the following hierarchical directory structure:
+
+.. code-block:: text
+
+  data_dir_root/
+    domain_1/
+      intent_1/
+        train_file_1.txt
+        train_file_2.txt
+        ...
+      intent_2/
+        train_file_1.txt
+        train_file_2.txt
+        ...
+      .
+      .
+      .
+      intent_n/
+        train_file_1.txt
+        train_file_2.txt
+        ...
+    domain_2/
+      intent_1/
+        train_file_1.txt
+        train_file_2.txt
+        ...
+      .
+      .
+      .
+      intent_n/
+        train_file_1.txt
+        train_file_2.txt
+        ...
+    .
+    .
+    .
+    domain_n/
+      ...
+
+At the top level, there is a folder for each domain, and within each domain folder, there's a subfolder for each intent belonging to that domain. The text files containing the annotated training data for each intent should be placed in their respective intent folders.
+
+Here's how Workbench determines the data to use for training each of our classification models:
+
+=================  =================================================================================
+Model              Training Data Used
+=================  =================================================================================
+Domain Classifier  Data across all domains and intents: :code:`data_dir_root/*`
+Intent Classifier  Data across all intents in a particular domain: :code:`data_dir_root/domain_i/*`
+Entity Recognizer  Data restricted to a particular intent: :code:`data_dir_root/domain_i/intent_j/*`
+Role classifier    Data restricted to a particular intent: :code:`data_dir_root/domain_i/intent_j/*`
+=================  =================================================================================
