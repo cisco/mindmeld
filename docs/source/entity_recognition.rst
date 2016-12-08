@@ -21,44 +21,6 @@ In practice, sequence models such as the `Maximum Entropy Markov Model`_ or `Con
 
 A formal introduction to sequence NER models can be found in the `Stanford lecture notes`_ slides. MindMeld Workbench will prepare the data to an "IOBES" tagging scheme (an extension to the well known `IOB tagging`_ scheme for NER sequence models).
 
-Define The Config
------------------
-
-Similar to the Domain and Intent Classifiers, we can define a config file for specifying the model and feature settings to use. In the following example, we use the **"memm"** model with the respective lexical and syntactic features specified -
-
-.. code-block:: javascript
-
-  {
-      "models": {
-        "memm": {
-          "model-type": "memm",
-          "features": {
-            "bag-of-words": { "lengths": [1, 2] },
-            "edge-ngrams": { "lengths": [1, 2] },
-            "in-gaz": { "scaling": 10 },
-            "length": {},
-            "gaz-freq": {},
-            "freq": { "bins": 5 }
-          }
-        },
-        "ngram": {
-          "model-type": "logreg",
-          "features": {
-            "bag-of-words": { "lengths": [1, 2] },
-            "in-gaz": { "scaling": 10 },
-            "length": {}
-          }
-        }
-      }
-    }
-
-Load the config -
-
-.. code-block:: python
-
-  import mindmeld as mm
-  entity_config = mm.load_config('entity_model_config.json')
-
 Train The Model
 ---------------
 
@@ -69,9 +31,16 @@ Train The Model
   # Load the training data
   training_data = mm.load_data('/path/to/domain/intent/training_data.txt')
 
+  # Define the feature settings
+  features = {
+    "bag-of-words": { "lengths": [1, 2] },
+    "in-gaz": { "scaling": 10 },
+    "length": {}
+  }
+
   # Train the classifier
-  entity_model = EntityRecognizer(config=entity_config)
-  entity_model.fit(data=training_data, model='memm')
+  entity_model = EntityRecognizer(model_type='memm', features=features)
+  entity_model.fit(data=training_data)
 
   # Evaluate the model
   eval_set = mm.load_data('/path/to/eval_set.txt')
@@ -130,12 +99,7 @@ Output::
       raw entity: "tom hanks",
       tstart: 2,
       tend: 3,
-      type: "cast",
-      value: {
-        clause: "cast:Tom+Hanks",
-        mode: "search",
-        text: "Tom Hanks"
-      }
+      type: "cast"
     },
     {
       chstart: 35,
@@ -144,12 +108,7 @@ Output::
       raw entity: "meg ryan",
       tstart: 6,
       tend: 7,
-      type: "cast",
-      value: {
-        clause: "cast:Meg+Ryan",
-        mode: "search",
-        text: "Meg Ryan"
-      }
+      type: "cast"
     }
   ]
 

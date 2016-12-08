@@ -53,8 +53,6 @@ When none of the above are true, and the assumption that named *entity* = *DB co
 Train The Model
 ---------------
 
-The Role Classifier uses a Maximum Entropy Model. At the moment, no role config is required, and the default set of model + feature settings work pretty well.
-
 .. code-block:: python
 
   import mindmeld as mm
@@ -63,8 +61,17 @@ The Role Classifier uses a Maximum Entropy Model. At the moment, no role config 
   # Load the training data
   training_data = mm.load_data('/path/to/domain/intent/training_data.txt')
 
+  # Define the feature settings
+  features = {
+    'bag-of-words-before': {},
+    'bag-of-words-after': {},
+    'in-gaz': {},
+    'other-entities': {},
+    'operator-entities': {},
+  }
+
   # Train the classifier
-  role_model = RoleClassifier()
+  role_model = RoleClassifier(model_type='maxent', features=features)
   role_model.fit(data=training_data, model='memm')
 
   # Evaluate the model

@@ -3,20 +3,8 @@ Intent Classifier
 
 The intent classifier is trained using all of the labeled queries across all intents for all intents. It determines the target intent for a given query. The labels for the training data are the intent names associated with each query. Similar to the Domain Classifier, the intent classifier uses the "marked down" form of each query i.e all query annotations are removed and raw text is sent to a text classifier.
 
-Loading The Config
-------------------
-
-A model config file containing the Machine Learning model and feature settings needs to be defined. The format of the config file is explained in the section on "Configuring The Model".
-
-.. code-block:: python
-
-    import mindmeld as mm
-    intent_config = mm.load_config('intent_model_config.json')
-
 Training The Model
 ------------------
-
-Once the model config is loaded, you can load the training data and train the model:
 
 .. code-block:: python
 
@@ -25,15 +13,23 @@ Once the model config is loaded, you can load the training data and train the mo
   # Load training data to a Data Frame
   training_data = mm.load_data('/path/to/domain/training_data.txt')
 
-  # Train The Classifier
-  intent_classifier = IntentClassifier(config=intent_config)
+  # Select the feature settings
+  features = {
+    "bag-of-words": { "lengths": [1, 2] },
+    "edge-ngrams": { "lengths": [1, 2] },
+    "in-gaz": { "scaling": 10 },
+    "length": {},
+    "gaz-freq": {},
+    "freq": { "bins": 5 }
+  }
+
+  # Train the classifier
+  intent_classifier = IntentClassifier(model_type='logreg', features=features)
   intent_classifier.fit(data=training_data, model='logreg')
 
   # Evaluate the model
   eval_set = mm.load_data('/path/to/eval_set.txt')
   intent_classifier.evaluate(data=eval_set)
-
-The **model** argument determines which model config to use (as specified in the config file). In the above example, the *"logreg"* model defined in the config file will be used for training.
 
 For a grid sweep over model hyperparameters, you can specify a param_grid dict object in the fit method. For example, for a SVM model you can define the **kernel** and the regularization parameter **C**. Additionally, if you want to do Cross Validation, you can define a CV iterator by specifying the number of splits.
 
@@ -80,44 +76,6 @@ Training Accuracy Statistics::
 
   Average CV accuracy: 98.34% ± 0.26%
   Best accuracy: 98.56%, settings: {u'kernel': u'linear', u'C': 5000, u'probability': True, 'class_weight': {0: 0.8454625164401579, 1: 1.404707233065442}}
-
-Configuring The Model
----------------------
-
-Here is a sample **"intent_model_config.json"** file for specifying model and feature settings.
-
-.. code-block:: javascript
-
-    {
-      "models": {
-        "logreg": {
-          "model-type": "logreg",
-          "features": {
-            "bag-of-words": {
-              "lengths": [1, 2]
-            },
-            "edge-ngrams": {
-              "lengths": [1, 2]
-            },
-            "in-gaz": { "scaling": 10 },
-            "length": {},
-            "gaz-freq": {},
-            "freq": { "bins": 5 }
-          }
-        },
-        "svm": {
-          "model-type": "svm",
-          "features": {
-            "bag-of-words": { "lengths": [1, 2] },
-            "edge-ngrams": { "lengths": [1, 2] },
-            "in-gaz": { "scaling": 10 },
-            "length": {},
-            "gaz-freq": {},
-            "freq": { "bins": 5 }
-          }
-        }
-      }
-    }
 
 
 Feature Specification
