@@ -13,6 +13,9 @@ Training The Model
   # Load training data to a numpy ndarray
   training_data = mm.load_data('/path/to/app/training_data.txt')
 
+  # Load the gazetteer resources
+  gazetteers = mm.load_gaz('/path/to/app/gazetteers')
+
   # Define the feature settings
   features = {
     "bag-of-words": { "lengths": [1, 2] },
@@ -24,7 +27,7 @@ Training The Model
   }
 
   # Train the classifier
-  domain_classifier = DomainClassifier(model_type='logreg', features=features)
+  domain_classifier = DomainClassifier(model_type='logreg', features=features, gaz=gazetteers)
   domain_classifier.fit(data=training_data)
 
   # Evaluate the model

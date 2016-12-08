@@ -31,6 +31,9 @@ Train The Model
   # Load the training data
   training_data = mm.load_data('/path/to/domain/intent/training_data.txt')
 
+  # Load the gazetteers
+  gazetteers = mm.load_gaz('/path/to/domain/intent/gazetteers')
+
   # Define the feature settings
   features = {
     "bag-of-words": { "lengths": [1, 2] },
@@ -39,7 +42,7 @@ Train The Model
   }
 
   # Train the classifier
-  entity_model = EntityRecognizer(model_type='memm', features=features)
+  entity_model = EntityRecognizer(model_type='memm', features=features, gaz=gazetteers)
   entity_model.fit(data=training_data)
 
   # Evaluate the model

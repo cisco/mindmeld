@@ -56,10 +56,13 @@ Train The Model
 .. code-block:: python
 
   import mindmeld as mm
-  from mindmeld.role_classification import RoleClassifier
+  from mm.role_classification import RoleClassifier
 
   # Load the training data
   training_data = mm.load_data('/path/to/domain/intent/training_data.txt')
+
+  # Load the gazetteer resources
+  gazetteers = mm.load_gaz('/path/to/domain/intent/gazetteers')
 
   # Define the feature settings
   features = {
@@ -71,7 +74,7 @@ Train The Model
   }
 
   # Train the classifier
-  role_model = RoleClassifier(model_type='maxent', features=features)
+  role_model = RoleClassifier(model_type='maxent', features=features, gaz=gazetteers)
   role_model.fit(data=training_data, model='memm')
 
   # Evaluate the model

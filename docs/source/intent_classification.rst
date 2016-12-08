@@ -10,8 +10,11 @@ Training The Model
 
   from mindmeld.intent_classification import IntentClassifier
 
-  # Load training data to a Data Frame
+  # Load training data to a numpy ndarray
   training_data = mm.load_data('/path/to/domain/training_data.txt')
+
+  # Load the gazetteer resources
+  gazetteers = mm.load_gaz('/path/to/domain/gazetteers')
 
   # Select the feature settings
   features = {
@@ -24,7 +27,7 @@ Training The Model
   }
 
   # Train the classifier
-  intent_classifier = IntentClassifier(model_type='logreg', features=features)
+  intent_classifier = IntentClassifier(model_type='logreg', features=features, gaz=gazetteers)
   intent_classifier.fit(data=training_data, model='logreg')
 
   # Evaluate the model
