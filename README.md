@@ -6,7 +6,7 @@ This repository contains documentation for MindMeld Workbench 3.0.
 
 We will be using Python3. Make sure you are not in a Python2 virtualenv. Run these commands in sequence -
 
-`pip install -r requirements.txt`
+`pip3 install -r requirements.txt`
 
 `brew install pandoc`
 
