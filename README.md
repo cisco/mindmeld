@@ -1,6 +1,6 @@
-# MindMeld Workbench 2.0
+# MindMeld Workbench 3.0
 
-This repository contains documentation for MindMeld Workbench 2.0.
+This repository contains documentation for MindMeld Workbench 3.0.
 
 ## Getting Started
 
@@ -19,6 +19,8 @@ We will be using Python3. Make sure you are not in a Python2 virtualenv. Run the
 `cd docs`
 
 `make html`
+
+(You might see a warning about mallard.rst. Safe to ignore that for now.)
 
 ## Running
 
