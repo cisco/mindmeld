@@ -9,19 +9,19 @@ Entity Map
 
 .. _Building The Entity Recognizer: entity_recognition.html
 
-Named Entity Recognition (NER) is a critical step in Deep-Domain Conversational AI. NER is used to highlight important portions of natural language input. Steps for training ML models for building Entity Recognizers are detailed in the `Building The Entity Recognizer`_ section. However, an important precursor to training Entity Recognition models is to define an **Entity Map**. The Entity Map allows us to -
+Named Entity Recognition (NER) identifies portions of natural language input that are important to your application. For example, in a music-assistant app, any **artist**, **track**, **album**, and **playlist** might need to be recognized as an entity of type **document**.
 
-* Specify a schema for the types and names of entities we wish to recognize.
+Before you can train ML models for building Entity Recognizers (see `Building The Entity Recognizer`_ ), you must define an **Entity Map** in order to
 
-  + In the music-assistant app, we might want to support "document-type" entities such as **artists**, **tracks**, **albums**, and **playlists**
+* specify a schema for the types and names of entities to recognize
 
-* Map synonyms - :red:`"let's hear some yeezy"` should search for :red:`"Kanye West"`
+* map synonyms — :red:`"let's hear some yeezy"` should search for :red:`"Kanye West"`
 
-* Specify which database fields to query given certain entity types.
+* specify which database fields to query given certain entity types
 
-  + E.g. query the **pubdate** fields given a **time-range** entity
+  + e.g., query the **pubdate** fields given a **time-range** entity
 
-* Optionally assign "roles" to entities for Role Classification.
+* optionally assign "roles" to entities (see the next section)
 
 Entities And Roles
 ------------------
@@ -37,14 +37,22 @@ Entities And Roles
 .. role:: orange
 .. role:: aqua
 
-Giving an entity a role is an optional additional classification step. Let's consider an example in the **change-alarm** intent -
+Consider this example in a **change-alarm** intent:
 
 * Change my alarm from :orange:`6 am` to :aqua:`7 am`
 
-Here, :orange:`6 am` and :aqua:`7 am` are both **time** entities, but :orange:`6 am` has the role :orange:`oldtime` and :aqua:`7 am` has the role :aqua:`newtime`. The key principles in assigning roles (rather than treating them as separate entities) are -
+Here, :orange:`6 am` and :aqua:`7 am` are both **time** entities, but they literally play different roles in constructing the meaning of the sentence.
 
-* Avoiding splitting training data unnecessarily. In effect, all time entities strongly share features, and so the NER parser will perform better having them as one class.
-* Some NER models (such as the **memm**) utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize :aqua:`7 am` as a :aqua:`newtime` with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by "to".
+Classifying :orange:`6 am` with the role of :orange:`oldtime` and :aqua:`7 am` with the role :aqua:`newtime` captures the distinction between them.
+
+Taking this extra step is preferable to treating :orange:`oldtime` and :aqua:`newtime` as separate kinds of entities. This is because all time entities strongly share features, which means that the NER parser performs better when they all belong to one class.
+
+Be aware that some NER models (such as the **memm**) utilize local structure better than global (by global we mean depending on words/entities far away in the sentence). We can recognize :aqua:`7 am` as a :aqua:`newtime` with higher accuracy/confidence if we have a feature indicating that there is another time entity in the sentence located before it, separated by "to".
+
+Apply these principles when assigning roles:
+
+* Avoid splitting training data unnecessarily.
+* Consider the interaction between roles, features, and NER model performance characteristics.
 
 Structure Of The Entity Map
 ---------------------------
