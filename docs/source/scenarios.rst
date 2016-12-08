@@ -10,7 +10,7 @@ Based on your use case, you determine an approach which emphasizes appropriate c
 Before you build your first application with Workbench, you should:
 
 * read through the scenarios in this chapter, using the solutions to those use case to help you formulate your own
-* thoroughly study the detailed explanations in the `Guide to Deep-Domain Conversational AI`_, concentrating on the sections of the Guide that are most relevant to your use case
+* thoroughly study the detailed explanations in the `Guide to Deep-Domain Conversational AI`_, concentrating on topics most relevant to your use case
 
 Then, continue with the Prepare Data, Build, and Deploy chapters of this tutorial.
 
