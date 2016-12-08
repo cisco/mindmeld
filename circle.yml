@@ -15,10 +15,6 @@ test:
     - cd docs && make html
 deployment:
   s3: 
-    branches:
-      only:
-        - develop
-        - staging
-        - master
+    branch: /(develop)|(staging)|(master)/
     commands:
       - bash docs/scripts/upload_to_s3.sh
