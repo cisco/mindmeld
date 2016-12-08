@@ -1,7 +1,7 @@
-Anatomy of a Deep-Domain Conversational AI System
-==================================================
+Deep-Domain Conversational AI Guide
+===================================
 
-The **MindMeld Deep-Domain Conversational AI Platform** consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience. 
+The **MindMeld Deep-Domain Conversational AI Platform** consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.
 
 .. image:: images/architecture.png
    :target: _images/architecture.png
@@ -45,13 +45,13 @@ For example, if a user said :red:`"A medium soy milk latte with hazelnut and car
 .. image:: images/parser.png
    :target: _images/parser.png
 
-The MindMeld Parser analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the "search space". 
+The MindMeld Parser analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the "search space".
 
 .. image:: images/classifier_hierarchy.png
    :target: _images/classifier_hierarchy.png
    :scale: 75%
 
-We next take a look at each of the classifiers within the MindMeld Parser one by one. 
+We next take a look at each of the classifiers within the MindMeld Parser one by one.
 
 Domain Classifier
 ~~~~~~~~~~~~~~~~~
@@ -62,15 +62,15 @@ For instance, a conversational system built for "Smart Home Automation" would be
 
 * Setting the temperature on the thermostat
 * Toggling the light fixtures in different rooms
-* Locking/unlocking different doors 
+* Locking/unlocking different doors
 * Controlling multimedia devices around the home
-* ... 
+* ...
 
 The vocabulary for changing the settings on the thermostat is very specific and completely different from interacting with the television. You could therefore consider modeling them under separate domains - a "thermostat" domain for handling all interactions related to the thermostat and similarly a "multimedia" domain.
 
 On the other hand, you can also have applications where you just have one de facto domain. This is usually the case if all the tasks that your system can handle are conceptually related and share the same vocabulary. For instance, a Food Ordering app could potentially handle multiple intents like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing any of these tasks would be shared to a large extent.
 
-The number of domains thus depends on the scope of your application. Personal assistants like Siri, Cortana, Google Assistant and Alexa are capable of handling several different domains. 
+The number of domains thus depends on the scope of your application. Personal assistants like Siri, Cortana, Google Assistant and Alexa are capable of handling several different domains.
 
 The Domain Classifier uses a Machine-Learned text classification model trained on many examples of user queries along with their true domain labels. At runtime, the classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.
 
@@ -114,7 +114,7 @@ For programmers, a good analogy is to think of intents as functions and entities
 * Get_weather_info (:green:`city` = 'San Francisco')
 * Find_movies (:indigo:`release_year` = '2016', :pink:`actor` = 'Tom Hanks', :orange:`genre` = 'Drama').
 
-The Entity Recognizer's job is to analyze the user input and extract all the entities relevant to the current intent. In NLP literature, this problem is commonly referred to as `Named Entity Recognition <https://en.wikipedia.org/wiki/Named-entity_recognition>`_. 
+The Entity Recognizer's job is to analyze the user input and extract all the entities relevant to the current intent. In NLP literature, this problem is commonly referred to as `Named Entity Recognition <https://en.wikipedia.org/wiki/Named-entity_recognition>`_.
 
 The problem essentially consists of two parts:
 
