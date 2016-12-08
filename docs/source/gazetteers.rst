@@ -1,7 +1,7 @@
 Gazetteers
 ==========
 
-Gazetteers are data structures that encapsulate information about entities relevant to a domain. This includes lists and dictionaries containing names of entities such as cities, organisations, days of the week etc. With a large vocabulary content catalog, it is hugely valuable to build a Gazetteer by extracting relevant entities from the Knowledge Base. The Gazetteer serves as a fast and efficient lookup when determining if phrases of text match with a known Knowledge Base entity. This provides tremendous power to the Machine Learning models in training on a large set of queries with known entities.
+Gazetteers are data structures that encapsulate information about entities relevant to a domain. This includes lists and dictionaries containing names of entities such as cities, organisations, days of the week etc. With a large vocabulary content catalog, it is immensely valuable to build a Gazetteer by extracting relevant entities from the Knowledge Base. The Gazetteer serves as a fast and efficient lookup when determining if phrases of text match with a known Knowledge Base entity. This provides tremendous power to the Machine Learning models when training on a large set of queries with known entities.
 
 .. note:: Etymology of the word "Gazetteer"
 
@@ -11,7 +11,7 @@ Gazetteers are data structures that encapsulate information about entities relev
 Extracting Entity Data
 ----------------------
 
-In a Deep Domain setting, the Knowledge Base may contain thousands, millions or even 100s of millions of entities. To eventually feed in the popular entities into a Gazetteer, we first extract the entities from the Knowledge Base and dump them into flat files (known as **Entity Data** files).
+In a Deep Domain setting, the Knowledge Base may contain thousands, millions or even hundreds of millions of entities. To eventually feed in the popular entities into a Gazetteer, we first extract the entities from the Knowledge Base and dump them into flat files known as **Entity Data** files.
 
 The entity data files are simply tsv text files which contain lists of important entity values and their popularity. 
 
@@ -27,7 +27,9 @@ The entity data files are simply tsv text files which contain lists of important
   0.00422845	Barry Sigismondi
   ...           ...
 
-The first column shows the relative popularity of the entities, and the second column contains the entities. If there are more than 10s of millions of documents in your Knowledge Base, it might be better to cut short the document list to scan based on the "popularity" field specified in the Knowledge Base schema.
+The first column shows the relative popularity of the entities, and the second column contains the entities. If there are more than tens of millions of entries in your Knowledge Base, it might be better to truncate the entity list based on the “popularity” field specified in the Knowledge Base schema.
+
+You can use the EntityExtractor class to generate entity data files for each schema entry in the KB schema.
 
 .. code-block:: python
 
@@ -44,9 +46,6 @@ The first column shows the relative popularity of the entities, and the second c
   # Extract Entities
   extractor = EntityExtractor(kb_conf, kb_schema)
   extractor.extract(num_docs=200000)
-
-
-This generates entity data files for each schema entry in the KB schema.
 
 
 Building The Gazetteer
