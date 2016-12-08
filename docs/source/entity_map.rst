@@ -9,9 +9,9 @@ Entity Map
 
 .. _Building The Entity Recognizer: entity_recognition.html
 
-Named Entity Recognition (NER) identifies portions of natural language input that are important to your application. For example, in a music-assistant app, any **artist**, **track**, **album**, and **playlist** might need to be recognized as an entity of type **document**.
+Named Entity Recognition (NER) identifies portions of natural language input that are important to your application. For example, in a **music-assistant** app, any **artist**, **track**, **album**, and **playlist** might need to be recognized as an entity of type **document**.
 
-Before you can train ML models for building Entity Recognizers (see `Building The Entity Recognizer`_ ), you must define an **Entity Map** in order to
+You must define an **Entity Map** in order to
 
 * specify a schema for the types and names of entities to recognize
 
@@ -22,6 +22,8 @@ Before you can train ML models for building Entity Recognizers (see `Building Th
   + e.g., query the **pubdate** fields given a **time-range** entity
 
 * optionally assign "roles" to entities (see the next section)
+
+After you define the Entity Map, you can train ML models for building Entity Recognizers (see `Building The Entity Recognizer`_).
 
 Entities And Roles
 ------------------
