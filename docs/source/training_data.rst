@@ -26,13 +26,13 @@ Data is the fuel that powers any machine learning-based application. Many compon
 
 This chapter focuses on general best practices around working with training data. In particular, we will take a look at:
 
-* Acquiring the right kind of training data for your application. Some key principles to follow -
+* Acquiring the right kind of training data for your application.
 
     + The data must be *highly representative* of real-world usage of the system
     + The spec for generating example queries should very **precise** to your use-case
     + It needs to cover all conversational scenarios that you expect your app to handle
     + The data should include both formal and informal language constructs, ideally including popular slangs, abbreviations and other unconventional language expressions
-    + The sample of users generating this data should be drawn from a real-world, representative and unbiased pool of non-experts
+    + The people generating this data should be drawn from a real-world, representative and unbiased pool of non-experts
 
 * Annotating it appropriately to provide meaningful labels.
 
