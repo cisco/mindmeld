@@ -33,9 +33,38 @@ The goal is to map the parsed entities and associated slot values for a given qu
 
 to some sort of structured query (or logical form), which would like like this for Elasticsearch -
 
-.. code-block:: javascript
+.. code-block:: text
 
-	{ES query example goes here}
+  {
+    'query': {
+      'function_score': {
+        'query': {
+          'filtered': {
+            'filter': {
+              'bool': {
+                'must': [
+                  {'term': {'material.normalized': u'chino'}},
+                  {'bool': {
+                    'should': [
+                    {'term': {'category.normalized': u'pants'}},
+                    {'term': {'category.normalized': u'leggings pants'}},
+                    {'term': {'category.normalized': u'dress pants'}}]
+                  }
+                  },
+                  {'term': {'color.normalized': u'orange'}},
+                  {'term': {'discount.normalized': u'1'}}
+                ]
+              }
+            }
+          }
+        },
+        'score_mode': 'sum',
+        'functions': [{'field_value_factor': {'field': u'popularity', 'factor': 6.392598904692104e-06}}],
+        'boost_mode': 'sum'
+      }
+    },
+    'size': 50
+  }
 
 Query Clauses
 -------------
@@ -45,11 +74,15 @@ Each entity mode has it's own format of mapping to the KB query language.
 Filter Entity Clauses
 ~~~~~~~~~~~~~~~~~~~~~
 
-For each "filter" mode entity, a "must" clause is generated to apply to the Elasticsearch Knowledge Base.
+For each "filter" mode entity, a "must" clause is generated to apply to the Elasticsearch Knowledge Base query.
 
 .. code-block:: javascript
 
-	{Filter clause example goes here}
+	{
+	  'bool': {
+	    'must': filter_clauses
+	  }
+	}
 
 Note that the entity map supports both conjunctive (i.e. 'and') clauses as well as disjunctive (i.e. 'or') clauses. These get translated into the appropriate boolean logic in the query language for querying the Knowledge Base. In the following examples, if we had SQL-like boolean clause, we would have -
 
@@ -65,7 +98,15 @@ Search entity clauses take the following form -
 
 .. code-block:: javascript
 
-	{Search clause example goes here}
+	for f in search_entities:
+	  field_name = f[0]
+	  field_value = f[1]
+	    clause = {
+	      "match": {
+	        f[0]: {"query": field_value}
+	      }
+	    }
+	  search_clauses.append(clause)
 
 To control the text-relevance match score in ranking, a "method" field can be specified in the ranking configuration. To exercise fine-grained control over the effect of the Lucene Practical Scoring Function in Elasticsearch, more knobs are available in the **es_mapping** file. More information is available in the sections on Controlling Text Relevance and Creating the Ranking Config below.
 
@@ -157,7 +198,7 @@ The "match_boost_method" parameter is used to give a ranking boost to any docume
   +---------------+---------------------------------------------------------------------------------------+
   | match_and     | like basic matching, but requiring a match for each token                             |
   +---------------+---------------------------------------------------------------------------------------+
-  | match_backoff | match_and + exact, plus match_and on name_search_field                                |
+  | match_backoff | match_and + exact, plus match_and on important_terms_field                            |
   +---------------+---------------------------------------------------------------------------------------+
 
 If the "important_terms_field" is specified, an additional clause is added to boost matches on that field. The "search_term_method" parameter is used to determine the matching method for search terms (with the same abstractions as "match_boost_method"). 
@@ -173,4 +214,4 @@ For boostrapping applications where no prior search logs are available, the rank
 #. Modify the configs to improve accuracy results for bulk of the misses (without compromising the correct ones)
 #. Repeat from Step 2
 
-Once you have launched the app and have collect a large amount of click data (or if you have prior search logs that can be used as a proxy), the above parameters can be learned automatically (instead of repeatedly tuning by hand). There is a vast amount of literature around search and recommendations using Machine Learning. Using the clicks as positive example and sampling on negatives, you can use F1/F2/F0.5 scores or other evaluation metrics such as NDCG, MRR and MAP to tune your models.
+Once you have launched the app and have collected a large amount of click data (or if you have prior search logs that can be used as a proxy), the above parameters can be learned automatically (instead of repeatedly tuning by hand). There is a vast amount of literature around search and recommendations using Machine Learning. Using the clicks as positive example and sampling on negatives, you can use F1/F2/F0.5 scores or other evaluation metrics such as NDCG, MRR and MAP to tune your models.
