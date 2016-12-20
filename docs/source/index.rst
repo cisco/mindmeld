@@ -98,3 +98,17 @@ Contents
    :name: deploy
 
    deployment
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Other
+   :name: other
+
+   history
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

@@ -1,6 +1,14 @@
+bumpversion==0.5.3
+coverage==4.2
+flake8==3.2.1
+pytest==3.0.5
+pytest-cov==2.4.0
+wheel==0.29.0
+watchdog==0.8.3
+
 jupyter_core==4.2.1
 jupyter_client==4.4.0
-sphinx==1.5
+Sphinx==1.5
 nbsphinx==0.2.11
 sphinx_rtd_theme==0.1.9
 pandoc==1.0.0b2

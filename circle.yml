@@ -1,6 +1,8 @@
 machine:
   python:
     version: 3.5.1
+  post:
+    - pyenv global 3.5.1 3.3.6 3.4.4
 dependencies:
   post:
     - sudo apt-get install libzmq-dev
@@ -9,12 +11,10 @@ dependencies:
     - wget https://github.com/jgm/pandoc/releases/download/1.19/pandoc-1.19-1-amd64.deb
     - sudo dpkg -i pandoc-1.19-1-amd64.deb
 test:
-  override:
-    - echo "no tests"
   post:
-    - cd docs && make html
+    - make docs
 deployment:
-  s3: 
+  s3:
     branch: /(develop)|(staging)|(master)/
     commands:
       - bash docs/scripts/upload_to_s3.sh
