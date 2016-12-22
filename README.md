@@ -16,9 +16,7 @@ We will be using Python3. Make sure you are not in a Python2 virtualenv. Run the
 
 ## Building
 
-`cd docs`
-
-`make html`
+`make docs`
 
 (You might see a warning about mallard.rst. Safe to ignore that for now.)
 
