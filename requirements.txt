@@ -6,6 +6,7 @@ pytest-cov==2.4.0
 wheel==0.29.0
 watchdog==0.8.3
 
+future==0.16.0
 jupyter_core==4.2.1
 jupyter_client==4.4.0
 Sphinx==1.5
