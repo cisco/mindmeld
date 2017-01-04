@@ -28,7 +28,7 @@ This chapter focuses on general best practices around working with training data
 
 * Acquiring the right kind of training data for your application.
 
-    + The data must be *highly representative* of real-world usage of the system
+    + The data must be **highly representative** of real-world usage of the system
     + The spec for generating example queries should very **precise** to your use-case
     + It needs to cover all conversational scenarios that you expect your app to handle
     + The data should include both formal and informal language constructs, ideally including popular slangs, abbreviations and other unconventional language expressions
@@ -92,6 +92,19 @@ Use case - :red:`"Order Food or Beverages from Starbucks"`
   Please try to vary the way you ask questions, so your queries do not all follow the same pattern.
   Here's a menu for reference: http://www.starbucks.com/menu/
 
+
+Training Data Types
+~~~~~~~~~~~~~~~~~~~
+
+The end-to-end accuracy of your AI system is only as good as your worst performing component. For some applications, you would need to collect more than one type of training data to make every component highly accurate. Here are the various components for which we would need large-scale data -
+
+* Queries for Domain Classification, Intent Classification and Entity Recognition.
+  + Within this process, you might need to launch query-collection multiple tasks for various use-cases. High-quality data is unlikely when multiple use-cases are conflated in a single task.
+* Synonyms for Entity Resolution
+  + There may be multiple different ways of expressing a single resolvable entity. This data may also be highly valuable for Entity Recognition too.
+* "Cart" or "Basket" data - Given a set of resolved entities, combining them into logical groups is the task of a semantic parser. Getting lots of such data is useful for training a Machine-Learned parser.
+
+Each of the above might require its own set of crowdsourcing tasks for the various use-cases.
 
 Design Dialogue Flowchart
 ~~~~~~~~~~~~~~~~~~~~~~~~~

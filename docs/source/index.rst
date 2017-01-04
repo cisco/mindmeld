@@ -1,21 +1,3 @@
-Getting Started
-===============
-
-1. Obtain a technology license from MindMeld
-
-2. Install MindMeld Workbench — you will be prompted to enter your license key
-
-.. code-block:: text
-
-  pip install git+ssh://git@github.com/expectlabs/mindmeld-workbench.git
-
-3. When writing Python code, use ``import mindmeld`` to import Workbench
-
-.. code-block:: python
-
-  import mindmeld as mm
-
-.. note:: Workbench supports Python 3.5.x.
 
 Welcome to MindMeld Workbench
 =============================
@@ -61,40 +43,34 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Formulate Approach
-   :name: approach
+   :caption: Introduction
+   :name: intro
 
-   scenarios
-   guide
+   introduction
 
 .. toctree::
    :maxdepth: 2
-   :caption: Prepare Data
-   :name: data
+   :caption: Quickstart
+   :name: quickstart
 
-   training_data
+   quickstart
+
+.. toctree::
+   :maxdepth: 2
+   :caption: User Guide
+   :name: userguide
+
+   userguide
+   architecture
+   key_concepts
+   directory_structure
+   interface
+   dialogue_manager
    kb
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Build
-   :name: build
-
-   entity_map
-   gazetteers
    domain_classification
    intent_classification
    entity_recognition
    role_classification
    entity_resolution
    semantic_parsing
-   dialogue_manager
-   question_answering
-   nlg
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Deploy
-   :name: deploy
-
    deployment
