@@ -1,6 +1,9 @@
+from __future__ import unicode_literals
+
 from collections import defaultdict
 import util
 import logging
+from sklearn.externals import joblib
 
 
 class Gazetteer:
@@ -52,6 +55,16 @@ class Gazetteer:
             "entities": self.entities,
             "numtypes": self.numtypes
         }
+
+    def to_file(self, filename):
+        """
+        Args:
+            filename (str)
+        """
+        try:
+            joblib.dump(self.to_dict(), filename)
+        except IOError as ex:
+            logging.info('Exception writing to {0}: {1}'.format(filename, ex))
 
     def _update_entity(self, entity, popularity, keep_max=True):
         """
