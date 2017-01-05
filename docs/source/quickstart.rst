@@ -27,14 +27,98 @@ Describe what a knowledge base is and what it is used for. Describe options for 
 
 Generate representative training data
 -------------------------------------
-This section should introduce the topic of training data and why it is critical. It should describe different approaches for collecting training data (human data entry, mine the web, crowdsourcing, operational logs, etc.).  It should emphasize that training data needs to be representative and very high quality since it serves as the ground truth.
+Data is the fuel that powers any Machine Learning application. Components in Mindmeld Workbench utilize Supervised Learning models to parse a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of labeled queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
 
-Show examples which illustrate how MindMeld can be used to generate training data for 
-domain and intent classification data
-entity recognition data
-entity resolution and disambiguation data
-answer ranking data
-In particular, illustrate how the knowledge graph can be used to create micro-targeted crowdsourcing tasks which cover the full extend of a large product or content catalog.
+Some strategies for collecting training data are -
+
+#. Human Data Entry
+#. Mining The Web
+#. Crowdsourcing
+#. Operational Logs (Customer Service, Search etc.)
+
+For the **store_information** domain, here are snippets of training examples for Intent Classification -
+
+* **greet**
+
+.. code-block:: text
+
+  Hi
+  Hello
+  Good morning
+  ...
+
+* **get_close_time**
+
+.. code-block:: text
+
+  when does the elm street store close?
+  what's the shut down time for pine & market store?
+  ...
+
+.. _Amazon Mechanical Turk: https://www.mturk.com
+
+To collect data at scale, platforms such as `Amazon Mechanical Turk`_ are popular and relatively inexpensive to get an initial dataset. The spec to send out to "Turkers" should be highly precise and micro-targeted at a specific section of the content catalog or use-case. Lack of clarity or specificity can lead to noisy data, which hurts training accuracy. 
+
+.. raw:: html
+
+    <style> .green {color:green} </style>
+
+.. role:: green
+
+Use case - :green:`"Information on whether a particular Kwik-E-Mart store is open."`
+
+.. code-block:: text
+
+  Scenario: You are interested in knowing if a particular Kwik-E-Mart store is open.
+
+  Task: Ask a Conversational Agent if a specific Kwik-E-Mart store is open. You may specify a 
+  time and/or location to enquire if the store is open.
+
+  Examples:
+
+  Is the Central Plaza Kwik-E-Mart open now?
+  The store near Pine & Market - is it open?
+  Is the Rockerfeller Kwik-E-Mart on 30th Street open for business?
+  Can you check if the Market St store is open at 6 pm tomorrow?
+
+Use case - :green:`"Queries covering popular intersections in the US"`
+
+.. code-block:: text
+
+  Scenario: You are interested in the closing times of Kwik-E-Mart stores at
+  specific intersections.
+
+  Task: Ask a Conversational Agent about the closing times of Kwik-E-Mart stores based on
+  it's nearest intersection location.
+
+  Examples:
+
+  When does the Bush & Kearny store close?
+  What is the closing time of Kwik-E-Mart on 24th and Mission?
+  Can you tell me when the 5th & Market one closes?
+
+Annotating Data
+~~~~~~~~~~~~~~~
+
+To train the MindMeld Entity Recognizer, we need to add annotations to our training data to identify all the entities within our collected queries. Mark up the parts of the query that correspond to an entity in the following syntax -
+
+* Enclose the entity in curly braces
+* Follow the entity with its type
+* Use the pipe character as separator
+
+Examples -
+
+.. code-block:: text
+
+  Is the {Central Plaza|name} Kwik-E-Mart open {now|time}?
+  The store near {Pine & Market|intersection} - is it open?
+  Is the {Rockerfeller|name} Kwik-E-Mart on {30th Street|street} open for business?
+  Can you check if the {Market St|street} store is open at {6 pm tomorrow|time}?
+
+.. note::
+
+  Pro tip - Academic datasets (though instrumental in researching advanced algorithms), are not always reflective of real-world conversational data. Therefore, datasets from popular conferences such as TREC and ACM-SIGDIAL might not be the best choice for developing production applications.
+
 
 Train the domain and intent models
 ----------------------------------
