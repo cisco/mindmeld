@@ -27,7 +27,7 @@ Describe what a knowledge base is and what it is used for. Describe options for 
 
 Generate representative training data
 -------------------------------------
-Data is the fuel that powers any Machine Learning application. Components in Mindmeld Workbench utilize Supervised Learning models to parse a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of labeled queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
+Data is the fuel that powers any Machine Learning application. Components in Mindmeld Workbench utilize Supervised Learning models to analyze a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of labeled queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
 
 Some strategies for collecting training data are -
 
