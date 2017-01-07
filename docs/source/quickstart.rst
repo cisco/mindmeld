@@ -57,7 +57,7 @@ For the **store_information** domain, here are snippets of training examples for
 
 .. _Amazon Mechanical Turk: https://www.mturk.com
 
-To collect data at scale, platforms such as `Amazon Mechanical Turk`_ are popular and relatively inexpensive to get an initial dataset. The spec to send out to "Turkers" should be highly precise and micro-targeted at a specific section of the content catalog or use-case. Lack of clarity or specificity can lead to noisy data, which hurts training accuracy. 
+To collect data at scale, platforms such as `Amazon Mechanical Turk`_ are popular and relatively inexpensive to get an initial dataset. The spec to send out to "Turkers" should be highly precise but should encourage language diversity (including formal and informal variants, slang, common abbreviations etc.) within the task. Lack of clarity or specificity can lead to noisy data, which hurts training accuracy. 
 
 .. raw:: html
 
@@ -65,14 +65,15 @@ To collect data at scale, platforms such as `Amazon Mechanical Turk`_ are popula
 
 .. role:: green
 
-Use case - :green:`"Information on whether a particular Kwik-E-Mart store is open."`
+Task Spec - :green:`"Information on whether a particular Kwik-E-Mart store is open."`
 
 .. code-block:: text
 
   Scenario: You are interested in knowing if a particular Kwik-E-Mart store is open.
 
   Task: Ask a Conversational Agent if a specific Kwik-E-Mart store is open. You may specify a 
-  time and/or location to enquire if the store is open.
+  time and/or location to enquire if the store is open. Please try to vary your phrasing on each
+  query.
 
   Examples:
 
@@ -81,7 +82,9 @@ Use case - :green:`"Information on whether a particular Kwik-E-Mart store is ope
   Is the Rockerfeller Kwik-E-Mart on 30th Street open for business?
   Can you check if the Market St store is open at 6 pm tomorrow?
 
-Use case - :green:`"Queries covering popular intersections in the US"`
+Tasks can also be micro-targeted at specific sections of the content catalog. For example, if the initial collection tasks did not yield many queries with **intersections** examples, we can create a task specific to that section -
+
+Task Spec - :green:`"Queries covering popular intersections in the US"`
 
 .. code-block:: text
 
@@ -89,7 +92,7 @@ Use case - :green:`"Queries covering popular intersections in the US"`
   specific intersections.
 
   Task: Ask a Conversational Agent about the closing times of Kwik-E-Mart stores based on
-  it's nearest intersection location.
+  it's nearest intersection location. Please try to vary your phrasing on each query.
 
   Examples:
 
