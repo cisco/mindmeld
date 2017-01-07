@@ -48,7 +48,7 @@ A "schema" defines the structure of your Knowledge Base. Define a **schema.json*
 
   {
     "object-type": "stores", // name for the table of documents
-    "popularity-field": "reviewstars", // name of the field (of type INTEGER or REAL) to be used for default popularity ranking
+    "popularity-field": "default", // name of the field (of type INTEGER or REAL) to be used for default popularity ranking
     "fields": [
       {
         "old-name": "store_id", // name of field in the data source to be imported
@@ -139,7 +139,7 @@ Introduce the topic of semantic and dependency parsing. Illustrate a simple exam
 
 Optimize Question Answering
 ---------------------------
-The Question Answering module is responsible for retrieving relevant documents from the Knowledge Base. It first maps the resolved entities to a structured logical query form, executes the structured query on Elasticsearch, and then ranks the retrieved candidates based on some specified relevance parameters.
+The Question Answering module is responsible for retrieving relevant documents from the Knowledge Base. It first maps the resolved entities to a structured logical query form, executes the structured query on Elasticsearch, and then ranks the retrieved candidates based on some learned or specified relevance parameters.
 
 To generate the final ranking of the retrieved candidate results, we want to control the impact each of the entity modes have on the final ranking. The ranking formula is a blend of text relevance, popularity and any “sort” entities (if present). Define your ranking coefficients and instantiate a QuestionAnswerer object as follows -
 
