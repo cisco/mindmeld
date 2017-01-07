@@ -27,7 +27,7 @@ Describe what a knowledge base is and what it is used for. Describe options for 
 
 Generate representative training data
 -------------------------------------
-Data is the fuel that powers any Machine Learning application. Components in Mindmeld Workbench utilize Supervised Learning models to analyze a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of labeled queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
+Components in Mindmeld Workbench utilize Supervised Learning models to analyze a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of *labeled* queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
 
 Some strategies for collecting training data are -
 
@@ -57,7 +57,7 @@ For the **store_information** domain, here are snippets of training examples for
 
 .. _Amazon Mechanical Turk: https://www.mturk.com
 
-To collect data at scale, platforms such as `Amazon Mechanical Turk`_ are popular and relatively inexpensive to get an initial dataset. The spec to send out to "Turkers" should be highly precise but should encourage language diversity (including formal and informal variants, slang, common abbreviations etc.) within the task. Lack of clarity or specificity can lead to noisy data, which hurts training accuracy. 
+To collect data at scale, platforms such as `Amazon Mechanical Turk`_ are popular and relatively inexpensive to get an initial dataset. The spec to send out to "Turkers" should be **highly precise** but should also encourage **language diversity** (formal and informal variants, slang, common abbreviations etc.) within the task. Lack of clarity or specificity can lead to noisy data, which hurts training accuracy.
 
 .. raw:: html
 
