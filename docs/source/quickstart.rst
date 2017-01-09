@@ -208,13 +208,78 @@ Examples -
   Pro tip - Academic datasets (though instrumental in researching advanced algorithms), are not always reflective of real-world conversational data. Therefore, datasets from popular conferences such as TREC and ACM-SIGDIAL might not be the best choice for developing production applications.
 
 
-Train the domain and intent models
-----------------------------------
-Introduce the topic of loading training data, training text classification models, measuring CV and held-out performance.
+Train the Natural Language Processor classifiers
+------------------------------------------------
 
-Train the entity and role recognizers
--------------------------------------
-Introduce the topic of loading training data, training entity and role classification models, measuring CV and held-out performance.
+The Natural Language Processor (NLP) is tasked with comprehending the user's natural language input. It analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, successively narrowing down the “search space”.
+
+There are a total of four classifiers, applied in the following order:
+
+#. **Domain Classifier**: For apps that handle conversations across varied topics having their own specialized vocabulary, the domain classifier provides the first level of categorization by classifying the input into one of the predetermined set of conversational domains.
+
+#. **Intent Classifier**: The intent classifier next determines the specific informational or transactional user need by categorizing the input into a set of user intents that the system can handle.
+
+#. **Entity Recognizer**: The entity recognizer then looks for relevant pieces of information in the input that are required to fulfill the user's end goal. It does this by extracting important words and phrases, called entities and assigning each of them a label that describes the type of information conveyed by it.
+
+#. **Role Classifier**: In cases where an entity of a particular type can have multiple meanings depending on the context, the role classifier can be used to provide another level of categorization and assign semantic roles to the extracted entities.
+
+These concepts are explained further in Chapter 3.4 and will also become clearer as you go over the walkthrough of an example app in Chapter 2.2. Chapter 3.9 describes these classifiers in detail along with the different configurations and options available for each. 
+
+For an initial prototype of our "Store Information" app, we can get away with a simple Natural Language Processor that only uses the intent classifier and the entity recognizer. To make it easy for developers, the NLP class in Workbench makes this determination automatically based on your directory structure and the nature of your annotated data. As long as you have prepared your training data following the annotation guidelines in 2.1.6 and placed them in the directory structure described in 2.1.3, the NLP can figure out which classifiers need to be trained and which ones can be ignored.
+
+In our case, we only have one de-facto domain called "store information" and correspondingly have only one folder at the "domain" level. But we do have multiple intent folders under that domain. Also, we annotated entities in the text along with their types, but did not specify any roles for the entities. Therefore, the NLP will only train an intent classifier and an entity recognizer.
+
+Training the NLP classifiers for our app and persisting them to disk can be accomplished in these four simple lines of code:  
+
+.. code-block:: python
+
+  from mmworkbench import NLP
+
+  # Instantiate MindMeld NLP by providing the app_data path.
+  nlp = NLP('path_to_app_data_directory_root')
+
+  # Train the NLP
+  nlp.fit()
+
+  # Save the trained NLP models to disk
+  nlp.dump()
+
+The code for training the NLP for an app that requires all our four classifiers would be exactly the same since the ``fit()`` method automatically makes that inference based on the format of the provided labeled training data. One other thing to note is that the above code will use the default machine learning model, feature extraction and hyper-parameter settings to train our classifiers. While that should be enough to give you a reasonable start, there are no shortcuts to creating a high quality conversational app. To get the best accuracy possible, you would need to understand each of the classifiers in depth and experiment with different classifier configurations to determine what's best for your particular scenario. Workbench enables this by making each of the individual classifiers configurable, so machine learning engineers can try out various model configurations, features, hyperparameters and cross validation settings.
+
+For instance, you may want to specify that the intent classifier should use an SVM classifier instead of Logistic Regression (default) and additionally specify the model parameters that go with it. You may also want to increase the context window size (to 3 from the default 2) for the bag-of-word features computed and used by the entity recognizer. The code below shows how to accomplish this. Note that any settings left unspecified will use the Workbench default values.
+
+.. code-block:: python
+
+  from mmworkbench import NLP
+
+  # Instantiate MindMeld NLP by providing the app_data path.
+  nlp = NLP('path_to_app_data_directory_root')
+
+  # Define model parameters for SVM training
+  params = {
+              "C": [5000],
+              "class_bias": [0.5],
+              "kernel": ["linear"],
+              "probability": [true]
+  }
+
+  # Features for entity recognition
+  entity_features = {
+                      "bag-of-words": { "lengths": [1, 2, 3] },
+                      "in-gaz": { "scaling": 10 },
+                      "length": {}
+  }
+
+  # Train the NLP
+  nlp.fit(intent_classifier_model='svm', 
+          intent_classifier_params=params, 
+          entity_recognizer_features=entity_features)
+
+  # Save the trained NLP models to disk
+  nlp.dump()
+
+Refer to Chapter 3.9 of the Workbench User Guide for detailed documentation on all the NLP classifiers.
+
 
 Train the entity resolvers
 --------------------------
