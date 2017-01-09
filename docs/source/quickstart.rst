@@ -1,4 +1,4 @@
-Building a conversational interface in 11 steps
+Building a conversational interface in 13 steps
 ===============================================
 
 This section outlines the step-by-step approach to building conversational interfaces using MindMeld workbench. This section provides four real-world examples (tutorials) to illustrate each of the steps in practice.
@@ -6,23 +6,174 @@ This section outlines the step-by-step approach to building conversational inter
 
 This section provides a high-level overview introducing the steps.
 
-Select the right use case
--------------------------
+1. Select the right use case
+----------------------------
 Selecting the right use case is critical. Selecting an unrealistic or incorrect use case will render even the smartest voice or chat assistant dead on arrival. 
 The best user cases today typically mimic an existing, familiar real-world interaction. This is the best way to ensure that users will know what they can ask.
 Any use case must offer a practical path for collecting the training data required for the app.
 The best use cases provide a clear value or utility where voice can be a faster way to find information or accomplish a task.
 
-Define the dialog state flows
------------------------------
-In my view, this is where we define the natural language response templates which should be returned at each dialogue state in an interaction. We should illustrate a simple flow in a flow chart and then in a snippet of python code which illustrates how the logic is implemented in the dialogue manager.
+A good candidate use case will have the following:
 
-Define the domain, intent, entity and role hierarchy
-----------------------------------------------------
+- mimics a real-world human interaction (no instructions required)
+- possible to collect sufficient training data
+- save the user time
+- when user knows how to articulate specifically what they want
+- when the users hands are busy
+- when no one else is around
+- goldilocks domain - not too small to be trivial, but not to vast to be intractable
+
+
+
+2. Script your ideal dialogue interactions
+------------------------------------------
+Write down the conversational dialogue interactions in detail.
+
+  :User: Hello.
+  :Bot: Hello, Pat. I can help you find store hours for your local Kwik-E-Mart. How can I help?
+  :User: When does the store on Elm Street close today?
+  :Bot: The 23 Elm Street Kwik-E-Mart at closes at 9pm today.
+  :User: Where is the nearest Kwik-E-Mart?
+  :Bot: Your nearest Kwik-E-Mart is located at Pine and Market.
+  :User: When does that store open tomorrow?
+  :Bot: The Pine and Market Kwik-E-Mart opens at 6am tomorrow.
+  :User:  Is the Central Plaza Kwik-E-Mart open now?
+  :Bot: Yes. The Kwik-E-Mart at Central Plaza closes at 8pm this evening.
+  :User: Goodbye.
+  :Bot: Have a nice day.
+
+3. Define the domain, intent, entity and role hierarchy
+-------------------------------------------------------
 Show and describe a simple diagram which illustrates the domain, intent, entity and role hierarchy.  Show the directory structure which captures this hierarchy for a simple example.
 
-Create the Knowledge Base
--------------------------
+Developer creates a directory structure that implicitly defines the domain, intent and entity hierarchy.
+
+Intent names are always verbs which describe what the user is trying to accomplish.
+Entity names are always nouns which describe the entity type.
+
+For example,
+
+ - ``store_information`` Defines the domain.
+ 
+   - ``greet`` Begins an interaction.
+   - ``get_close_time`` Returns the close time for the requested store.
+   - ``get_open_time`` Returns the open time for the requested store.
+   - ``get_nearest_store`` Returns the closest store to the user.
+   - ``get_is_open_now`` Returns yes or no if the requested store is open now.
+   - ``exit`` Ends the current interaction.
+
+
+Directory structure::
+
+  my_app/
+      my_app.py
+      data/
+          store_information/
+              gazetteers/
+              greet/
+                  labeled_queries/
+              get_store_close_time/
+                  labeled_queries/
+              get_store_open_time/
+                  labeled_queries/
+              get_nearest_store/
+                  labeled_queries/
+              get_is_open_now/
+                  labeled_queries/
+              exit/
+                  labeled_queries/
+
+Entities:
+
+ - When does the store on ``Elm Street | NAME`` close ``today | DATE``?
+ - When does that store open ``tomorrow | DATE``?
+ - Is the ``Central Plaza Kwik-E-Mart | NAME`` open now?
+
+
+4. Define the dialog state handlers
+-----------------------------------
+In my view, this is where we define the natural language response templates which should be returned at each dialogue state in an interaction. We should illustrate a simple flow in a flow chart and then in a snippet of python code which illustrates how the logic is implemented in the dialogue manager.
+
+Create the python file which defines your application.
+
+File my_app.py
+
+.. code:: python
+
+  from mmworkbench import Application
+  from mmworkbench import context, slots
+  import mmworkbench.KnowledgeBase as kb
+  
+  app = Application(__name__)
+  
+  @app.handle(intent='greet')
+  def welcome():
+      slots['name'] = context.request.session.user_name
+      response = {
+          'replies': [
+              'Hello, {name}. I can help you find store hours ' +
+              'for your local Kwik-E-Mart. How can I help?'
+          ]
+      }
+      return response
+  
+  @app.handle(intent='get_store_close_time')
+  def send_close_time():
+      set_target_store(context)
+      if context.frame.target_store:
+          slots['time'] = context.frame.target_store['close_time']
+          slots['store_name'] = context.frame.target_store['name']
+          response = {
+              'replies': [
+                  'The {store_name} Kwik-E-Mart closes at {time}.'
+              ]
+          }
+      else:
+          response = {'replies': ['For which store?']}
+      return response
+  
+  @app.handle(intent='get_store_open_time')
+  def send_open_time():
+      set_target_store(context)
+      if context.frame.target_store:
+          slots['time'] = context.frame.target_store['open_time']
+          slots['store_name'] = context.frame.target_store['name']
+          response = {
+              'replies': [
+                  'The {store_name} Kwik-E-Mart opens at {time}.'
+              ]
+          }
+      else:
+          response = {'replies': ['For which store?']}
+      return response
+  
+  @app.handle(intent='get_nearest_store')
+  def send_nearest_store():
+      loc = context.request.session.location 
+      stores = kb.get('store', sort='proximity', current_location=loc)
+      slots['store_name'] = stores[0]['name']
+      response = {
+          'replies': [
+              'your nearest Kwik-E-Mart is located at {store_name}.'
+          ]
+      }
+      return response
+  
+  @app.handle(intent='exit')
+  def say_goodbye():
+      return {'replies': ['Bye', 'Goodbye', 'Have a nice day.']}
+  
+  def set_target_store(context):
+      stores = [e.value for e in context.entities if e.type == 'name']
+      if names: context.frame.target_store = stores[0]
+  
+  if __name__ == "__main__":
+      app.run()
+
+
+
+5. Create the Knowledge Base
+----------------------------
 A Knowledge Base is a repository for storing complex, structured and unstructured information relevant to a content catalog. In Workbench, we support the use of Elasticsearch - a powerful, distributed, Full Text Search-featured search engine built on top of Lucene. The following section assumes that you have Elasticsearch setup on your cloud or on-premise infrastructure.
 
 To import your catalog data into Elasticsearch, 3 steps are required -
@@ -110,8 +261,8 @@ We are now ready to import the data into the Knowledge Base. The following examp
 Running **import_data** will setup a new Elasticsearch index with the latest imported data.
 
 
-Generate representative training data
--------------------------------------
+6. Generate representative training data
+----------------------------------------
 Components in Mindmeld Workbench utilize Supervised Learning models to analyze a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of *labeled* queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
 
 Some strategies for collecting training data are -
@@ -208,24 +359,24 @@ Examples -
   Pro tip - Academic datasets (though instrumental in researching advanced algorithms), are not always reflective of real-world conversational data. Therefore, datasets from popular conferences such as TREC and ACM-SIGDIAL might not be the best choice for developing production applications.
 
 
-Train the domain and intent models
-----------------------------------
+8. Train the domain and intent models
+-------------------------------------
 Introduce the topic of loading training data, training text classification models, measuring CV and held-out performance.
 
-Train the entity and role recognizers
--------------------------------------
+9. Train the entity and role recognizers
+----------------------------------------
 Introduce the topic of loading training data, training entity and role classification models, measuring CV and held-out performance.
 
-Train the entity resolvers
---------------------------
+10. Train the entity resolvers
+------------------------------
 Introduce the topic of loading training data, training entity resolution models, measuring CV and held-out performance, performing disambiguation.
 
-Implement the semantic parser
------------------------------
+11. Implement the semantic parser
+---------------------------------
 Introduce the topic of semantic and dependency parsing. Illustrate a simple example of a rule-based or grammar-based parser which groups entities into a tree data structure.
 
-Optimize Question Answering
----------------------------
+12. Optimize Question Answering
+-------------------------------
 The Question Answering module is responsible for retrieving relevant documents from the Knowledge Base. It first maps the resolved entities to a structured logical query form, executes the structured query on Elasticsearch, and then ranks the retrieved candidates based on some learned or specified relevance parameters.
 
 To generate the final ranking of the retrieved candidate results, we want to control the impact each of the entity modes have on the final ranking. The ranking formula is a blend of text relevance, popularity and any “sort” entities (if present). Define your ranking coefficients and instantiate a QuestionAnswerer object as follows -
@@ -254,6 +405,6 @@ To generate the final ranking of the retrieved candidate results, we want to con
 Detailed explanations on all ranking coefficients are available in the User Guide chapter on `Question Answering`_. You can also use find additional configurations for finer-grained control on Text Relevance. Check out "Tuning The Ranking Algorithm" section in that chapter for a step-by-step guide on optimizing the parameters by hand-tuning or Machine Learning.
 
 
-Deploy trained models to production
------------------------------------
+13. Deploy trained models to production
+---------------------------------------
 Show a simple example of the steps required to deploy to production
