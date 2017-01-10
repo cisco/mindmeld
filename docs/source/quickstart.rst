@@ -367,7 +367,7 @@ The Natural Language Processor (NLP) is tasked with comprehending the user's nat
 
 There are a total of four classifiers, applied in the following order:
 
-#. **Domain Classifier**: For apps that handle conversations across varied topics having their own specialized vocabulary, the domain classifier provides the first level of categorization by classifying the input into one of the predetermined set of conversational domains.
+#. **Domain Classifier**: For apps that handle conversations across varied topics having their own specialized vocabulary, the domain classifier provides the first level of categorization by classifying the input into one of the pre-defined set of conversational domains.
 
 #. **Intent Classifier**: The intent classifier next determines the specific informational or transactional user need by categorizing the input into a set of user intents that the system can handle.
 
