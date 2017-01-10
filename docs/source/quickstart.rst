@@ -1,5 +1,6 @@
-Building a conversational interface in 11 steps
+Building a Conversational Interface in 11 Steps
 ===============================================
+
 
 This section outlines the step-by-step approach to building conversational interfaces using MindMeld workbench. This section provides four real-world examples (tutorials) to illustrate each of the steps in practice.
 
