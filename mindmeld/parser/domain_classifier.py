@@ -12,9 +12,9 @@ class DomainClassifier(object):
     takes in a query whose normalized text is sent to a text classifier.
 
     Attributes:
-        features (dict): The features which the classifier will use for predictions.
-        gazetteers (Gazetteer): Description
         model_type (str): the name of the underlying model to use
+        features (dict): the features which the classifier will use for predictions
+        gazetteers (dict): the gazetteers used by the classifier
 
     """
     def __init__(self, model_type, features, gazetteers):
@@ -22,8 +22,8 @@ class DomainClassifier(object):
 
         Args:
             model_type (str): the name of the underlying model to use
-            features (dict): The features which the classifier will use for predictions.
-            gazetteers (Gazetteer): Description
+            features (dict): the features which the classifier will use for predictions
+            gazetteers (dict): The gazetteers used by the classifier
         """
         self.model_type = model_type
         self.features = features
@@ -51,26 +51,26 @@ class DomainClassifier(object):
             query (mmworkbench.parser.Query): The input query
 
         Returns:
-            str: Description
+            str: the predicted domain
         """
         pass
 
-    def predict_prob(self, query):
-        """Generates multiple hypotheses and returns their associated probabilities.
+    def predict_proba(self, query):
+        """Generates multiple hypotheses and returns their associated probabilities
 
         Args:
             query (mmworkbench.parser.Query): The input query
 
         Returns:
-            list: a list of tuples of the form (str, float)
+            list: a list of tuples of the form (str, float) grouping domains and their probabilities
         """
         pass
 
     def evaluate(self, data):
-        """Summary
+        """Evaluates the model on the specified data
 
         Args:
-            data (TYPE): Description
+            data (list): A list of ParsedQuery objects
 
         Returns:
             TYPE: Description
@@ -78,13 +78,11 @@ class DomainClassifier(object):
         pass
 
     def dump(self, model_path):
-        """Persists the model to disk
+        """Persists the model to disk.
 
         Args:
-            model_path (str): Description
+            model_path (str): The location on disk where the model should be stored
 
-        Returns:
-            TYPE: Description
         """
         # joblib.dump(self._model, model_path)
         pass
@@ -93,10 +91,8 @@ class DomainClassifier(object):
         """Loads the model from disk
 
         Args:
-            model_path (str): Description
+            model_path (str): The location on disk where the model is stored
 
-        Returns:
-            TYPE: Description
         """
         # self._model = joblib.load(model_path)
         pass
