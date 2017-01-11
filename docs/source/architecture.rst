@@ -1,5 +1,5 @@
-Deep-Domain Conversational AI Guide
-===================================
+Workbench architecture
+======================
 
 The **MindMeld Deep-Domain Conversational AI Platform** consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.
 
@@ -159,6 +159,7 @@ Dialogue Manager
 
 The Dialogue Manager is responsible for directing the flow of the conversation. In contrast to other parts of the system that are stateless, the Dialogue Manager is stateful and maintains information about each state or step in the dialogue flow. It is therefore able to use historical context from previous conversation turns to move the dialogue along towards the end goal of satisfying the user's intent.
 
+The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in Natural Language Generator chapter.
 
 Question Answerer
 -----------------
@@ -166,9 +167,3 @@ Question Answerer
 In the context of Deep-Domain Conversational AI, Question Answering is the task of retrieving relevant documents from a large content catalog in response to a natural language question. A large-vocabulary content catalog is first imported into a **Knowledge Base**. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. Finally, these candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.
 
 The parameters and weights assigned to the various entity types determine the effect of those entities on the final ranking. More context is provided in the chapter on :doc:`Question Answerer </question_answering>`.
-
-
-Natural Language Generator
---------------------------
-
-The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in :doc:`Natural Language Generator </nlg>` chapter.
