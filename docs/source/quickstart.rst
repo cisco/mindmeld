@@ -175,91 +175,79 @@ File my_app.py
 
 5. Create the Knowledge Base
 ----------------------------
-A Knowledge Base is a repository for storing complex, structured and unstructured information relevant to a content catalog. In Workbench, we support the use of Elasticsearch - a powerful, distributed, Full Text Search-featured search engine built on top of Lucene. The following section assumes that you have Elasticsearch setup on your cloud or on-premise infrastructure.
+A Knowledge Base is a repository for storing complex, real-world, structured and unstructured information relevant to a content catalog. In the context of Deep-Domain Conversational AI, a Knowledge Base comprises of a searchable repository of objects that encode entities and their associated attributes. 
 
-To import your catalog data into Elasticsearch, 3 steps are required -
+Here are some examples of Knowledge Base object types for various applications -
 
-#. Define a KB Configuration (operational specifications for your KB cluster)
-#. Define a Schema (structural definition for your data)
-#. Import your data
+* Product objects in a **Products** catalog - Attributes include "sku_id", "name", "price"
+* Video objects in a **Video Content** library - Attributes include "description", "cast", "duration"
+* Menu items from a **Quick Service Restaurants** catalog - Attributes include "size", "price", "modifiers" etc.
 
-Define a **kb_conf.json** file at the top-level as follows -
+In our example of store information on Kwik-E-Mart stores, we would have store objects with the following attributes -
 
-.. code-block:: javascript
+* store_name
+* open_time
+* close_time
+* address
+* phone_number
+
+A Knowledge Base can have 1 or more indexes. An "index" is a logical namespace which maps to objects of a particular type in the Knowledge Base. Roughly, you can think of an index as a "database" in a relational database world. Different indexes can be used to map to objects of different types. In our example of Kwik-E-Mart stores data, we would have just 1 index - *"stores"*.
+
+To setup your Knowledge Base using MindMeld Workbench, you can specify your content catalog as a JSON dump. The MindMeld Knowledge Base can read this JSON dump and extract all fields along with their types directly from the data. For example, if a field is a String, the Knowledge Base would read and store it as searchable strings. If a Float value is encountered, that attribute is stored as float values such that *"greater-than"* and *"lesser-than"* operators are applicable. 
+
+Following is an example of JSON data containing objects and their attributes for a few Kwik-E-Mart stores.
+
+File **stores_data.json**
+
+.. code-block:: text
 
   {
-    "knowledgebase-type": "elasticsearch",
-    "elasticsearch-host": "search.prod", // URL alias to your ES cluster
-    "elasticsearch-port": 9200,
-    "elasticsearch-index-name": "kwik-e-mart"
-  }
-
-A "schema" defines the structure of your Knowledge Base. Define a **schema.json** file at the top-level as follows -
-
-.. code-block:: javascript
-
+    "store_name": "Central Plaza Store", "open_time": 0800 hrs, "close_time": 1800 hrs,
+    "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
+    "phone_number": "(+1) 100-100-1100"
+  },
   {
-    "object-type": "stores", // name for the table of documents
-    "popularity-field": "default", // name of the field (of type INTEGER or REAL) to be used for default popularity ranking
-    "fields": [
-      {
-        "old-name": "store_id", // name of field in the data source to be imported
-        "new-name": "id", // name of corresponding field in KB
-        "type": "ID" // data type for this field (ID, TEXT, LIST, INTEGER, REAL, DATE, TIME, JSON)
-      },
-      {
-        "old-name": "store_name",
-        "new-name": "name",
-        "type": "TEXT",
-        "detect-entities": true // flag which indicates if this field should be used for extracting entity data files
-      },
-      {
-        "old-name": "full_address",
-        "new-name": "address",
-        "type": "TEXT"
-      },
-      {
-        "old-name": "street",
-        "new-name": "street",
-        "type": "TEXT",
-        "detect-entities": true
-      },
-      {
-        "old-name": "intersection",
-        "new-name": "intersection",
-        "type": "TEXT",
-        "detect-entities": true
-      },
-      {
-        "old-name": "open_time",
-        "new-name": "open_time",
-        "type": "TIME"
-      },
-      {
-        "old-name": "close_time",
-        "new-name": "close_time",
-        "type": "TIME"
-      },
-    ]
+    "store_name": "Market Street Store", "open_time": 0900 hrs, "close_time": 2200 hrs,
+    "adress": "750 Market Street, Capital City, CA 94001",
+    "phone_number": "(+1) 450-450-4500"
   }
+  ...
 
-We are now ready to import the data into the Knowledge Base. The following example assumes the data is stored as JSON flat files locally -
+Once your catalog is tranformed to the above JSON format, you can load that data into a Knowledge Base. Following is a code snippet to create and load data into a Knowledge Base using MindMeld Workbench.
 
 .. code-block:: python
 
   from mmworkbench.knowledge_base import KnowledgeBase
 
   # Initialize the KB
-  kb = KnowledgeBase(app_name, app_path, domain_name)
+  kb = KnowledgeBase()
 
-  # Read the data
-  with open('store_data.json') as json_data:
-    data = json.load(json_data)
+  # Load JSON Data into the KB
+  kb.load(data_file='stores_data.json', index='stores')
 
-  # Import Data to KB
-  kb.import_data(data, format='json')
+If the specified index in the **load** method already exists, the data corresponding to that index will be overwritten. If not, a new index with that name is created and tha data is loaded in accordingly.
 
-Running **import_data** will setup a new Elasticsearch index with the latest imported data.
+Once your data is loaded, you can use the **get** method to retrieve objects from the Knowledge Base -
+
+.. code-block:: python
+
+  # Get relevant objects from the KB
+  query = "show me all stores on Elm Street that are open at 4 pm"
+  results = kb.get(index='stores', query)
+
+  print results
+
+Output -
+
+.. code-block:: text
+
+  {
+    "store_name": "Central Plaza Store", "open_time": "8:00 am", "close_time": "6:00 pm",
+    "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
+    "phone_number": "(+1) 100-100-1100"
+  }
+
+The MindMeld Knowledge Base offers a versatile set of ways to specify the **get** to retrieve results for a variety of increasingly complex inputs. Further information is available in the User Guide chapter on the Knowledge Base.
 
 
 6. Generate representative training data
@@ -273,7 +261,16 @@ Some strategies for collecting training data are -
 #. Crowdsourcing
 #. Operational Logs (Customer Service, Search etc.)
 
-For the **store_information** domain, here are snippets of training examples for Intent Classification -
+In MindMeld Workbench, there are 6 components that need training data for a Machine Learning based Conversational Application. Typically, a given application would need training data for some subset of these components depending on the domain and core use-cases. The full set of these components are -
+
+* Domain Classification
+* Intent Classification
+* Entity Recognition
+* Role Classification
+* Entity Resolution
+* Ranking
+
+In our example of Kwik-E-Mart store information, we would need training data just for Domain/Intent Classification and Entity Recognition. For the **store_information** domain, here are snippets of training examples for Intent Classification -
 
 * **greet**
 
@@ -292,59 +289,13 @@ For the **store_information** domain, here are snippets of training examples for
   what's the shut down time for pine & market store?
   ...
 
-.. _Amazon Mechanical Turk: https://www.mturk.com
-
-To collect data at scale, platforms such as `Amazon Mechanical Turk`_ are popular and relatively inexpensive to get an initial dataset. The spec to send out to "Turkers" should be **highly precise** but should also encourage **language diversity** (formal and informal variants, slang, common abbreviations etc.) within the task. Lack of clarity or specificity can lead to noisy data, which hurts training accuracy.
-
-.. raw:: html
-
-    <style> .green {color:green} </style>
-
-.. role:: green
-
-Task Spec - :green:`"Information on whether a particular Kwik-E-Mart store is open."`
-
-.. code-block:: text
-
-  Scenario: You are interested in knowing if a particular Kwik-E-Mart store is open.
-
-  Task: Ask a Conversational Agent if a specific Kwik-E-Mart store is open. You may specify a 
-  time and/or location to enquire if the store is open. Please try to vary your phrasing on each
-  query.
-
-  Examples:
-
-  Is the Central Plaza Kwik-E-Mart open now?
-  The store near Pine & Market - is it open?
-  Is the Rockerfeller Kwik-E-Mart on 30th Street open for business?
-  Can you check if the Market St store is open at 6 pm tomorrow?
-
-Tasks can also be micro-targeted at specific sections of the content catalog. For example, if the initial collection tasks did not yield many queries with **intersections** examples, we can create a task specific to that section -
-
-Task Spec - :green:`"Queries covering popular intersections in the US"`
-
-.. code-block:: text
-
-  Scenario: You are interested in the closing times of Kwik-E-Mart stores at
-  specific intersections.
-
-  Task: Ask a Conversational Agent about the closing times of Kwik-E-Mart stores based on
-  it's nearest intersection location. Please try to vary your phrasing on each query.
-
-  Examples:
-
-  When does the Bush & Kearny store close?
-  What is the closing time of Kwik-E-Mart on 24th and Mission?
-  Can you tell me when the 5th & Market one closes?
-
-Annotating Data
-~~~~~~~~~~~~~~~
-
-To train the MindMeld Entity Recognizer, we need to add annotations to our training data to identify all the entities within our collected queries. Mark up the parts of the query that correspond to an entity in the following syntax -
+To train the MindMeld Entity Recognizer, we need to label sections of the training queries with corresponding entity types. We do this by adding annotations to our training queries to identify all the entities. As a convenience in MindMeld Workbench, the training data for Entity Recognition and Role Classification are stored in the same files that contain queries for Domain/Intent Classification. To locate these files, please refer to the folder structure as specified in Section 2.1.3. For adding annotations for Entity Recognition, mark up the parts of every query that correspond to an entity in the following syntax -
 
 * Enclose the entity in curly braces
 * Follow the entity with its type
 * Use the pipe character as separator
+
+We recommend using a popular text editor such as Vim, Emacs or Sublime Text 3 to create these annotations. This process is normally much faster than creating GUIs and point-and-click systems for annotating data at scale.
 
 Examples -
 
@@ -442,33 +393,25 @@ Introduce the topic of semantic and dependency parsing. Illustrate a simple exam
 
 10. Optimize Question Answering
 -------------------------------
-The Question Answering module is responsible for retrieving relevant documents from the Knowledge Base. It first maps the resolved entities to a structured logical query form, executes the structured query on Elasticsearch, and then ranks the retrieved candidates based on some learned or specified relevance parameters.
+The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. Just as in a relational database, MindMeld Workbench offers a set of operators for ranking results retrieved. For instance, a "sort" operator allows you to rank results based on an ascending or descending order of a specific attribute value.
 
-To generate the final ranking of the retrieved candidate results, we want to control the impact each of the entity modes have on the final ranking. The ranking formula is a blend of text relevance, popularity and any “sort” entities (if present). Define your ranking coefficients and instantiate a QuestionAnswerer object as follows -
+The ranking formula is a blend of text relevance, popularity, sort criteria and other configurable properties. MindMeld Workbench provides a default ranking function off-the-shelf, but there is a flexible option to specify a custom ranking forumla if needed.
 
 .. code-block:: python
 
   from mmworkbench.question_answering import QuestionAnswerer
 
-  # Define the ranking configs
-  ranking_coeff = {
-      "sort_coeff": 0.01, # weight given to the normalized sort entity factor
-      "common_term_cutoff_freq": 0.001, # document frequency threshold to prevent scoring high-frequency terms (absolute or relative)
-      "popularity_coeff": 1.0 # weight given to the normalized popularity factor
-  }
-
   # Create the QuestionAnswerer object
-  qa = QuestionAnswerer(ranking_coefficients=ranking_coeff)
+  qa = QuestionAnswerer()
 
   # Generate ranked results using the QA object
-  results = qa.answer(query, entities)
+  ranked_results = qa.rank(query, results)
 
-  print results
+  print ranked_results
 
 .. _Question Answering: question_answering.html
 
-Detailed explanations on all ranking coefficients are available in the User Guide chapter on `Question Answering`_. You can also use find additional configurations for finer-grained control on Text Relevance. Check out "Tuning The Ranking Algorithm" section in that chapter for a step-by-step guide on optimizing the parameters by hand-tuning or Machine Learning.
-
+Detailed explanations on custom ranking specifications are available in the User Guide chapter on `Question Answering`_.
 
 11. Deploy trained models to production
 ---------------------------------------
