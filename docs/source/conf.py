@@ -74,7 +74,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Workbench'
-copyright = u'2016, MindMeld Inc.'
+copyright = u'2017, MindMeld Inc'
 author = u'MindMeld Inc.'
 
 # The version info for the project you're documenting, acts as replacement for

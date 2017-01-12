@@ -1,6 +1,9 @@
 .wy-side-nav-search .version {
   display: None;
 }
+.wy-table-responsive table td {
+  white-space: inherit;
+}
 
 /*
 .wy-side-nav-search, .wy-nav-top {

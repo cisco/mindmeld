@@ -1,42 +1,10 @@
 
-Welcome to MindMeld Workbench
+MindMeld Workbench User Guide
 =============================
 
-MindMeld Workbench
+MindMeld Workbench is the core machine learning toolkit which powers the `MindMeld <https://www.mindmeld.com/>`_ Conversational AI platform. It is a Python-based framework which encompasses all of the algorithms and utilities required to build modern, production-quality conversational applications. It has evolved over several years during the process of building and deploying dozens of the most advanced conversation experiences achievable today. It has been optimized for the needs of companies that want to build an advanced conversational assistant which demonstrates deep understanding of a particular use case or domain. MindMeld Workbench is a commercial software product which requires a license to use. For more information or to inquire about obtaining a license for MindMeld Workbench, please `contact MindMeld sales <mailto:info@mindmeld.com>`_. 
 
-* is a set of Natural Language Processing tools for building **Deep Domain Conversational AI** systems that intelligently converse with users in natural language
-* is optimized for language understanding based on **large, custom datasets** (rather than pre-trained, generic models)
-* supports robust, flexible and scalable Machine Learning modeling constructs to enable **Deep-Domain language understanding**
-* has been demonstrated on **production-grade** conversational apps in several domains (described below)
-* enables machine learning engineers and data scientists to quickly build, test and **deploy conversational user interfaces across a wide range of platforms**
-
-About this Tutorial
-*******************
-
-In this tutorial, you will learn
-
-* the role of each component in the Workbench architecture
-* how to train, test, and optimize each component to achieve the high accuracy required for user-facing commercial applications
-* how to build an intelligent conversational interface with easy-to-use modules
-
-In short, you will learn how to build Conversational AI applications step by step, while gaining insight into best practices.
-
-The code samples in this tutorial draw from four applications, each featuring a medium- to large-vocabulary content catalog:
-
-=================  =====================================================================
-Application        Use Case
-=================  =====================================================================
-Barista            Order drinks and food at a coffee shop
-Home Assistant     Operate a Smart Home, discover TV shows and movies, navigate TV Guide
-Music Assistant    Discover and save favorite songs, albums, artists, playlists
-Fashion Assistant  Shop for clothing and accessories
-=================  =====================================================================
-
-This tutorial assumes familiarity with `Machine Learning`_ and the Python programming language, including functional knowledge of the `scikit-learn`_ package.
-
-.. _scikit-learn: http://scikit-learn.org/
-.. _Machine Learning: https://www.coursera.org/learn/machine-learning
-
+This guide and the MindMeld platform were created to enable every company with the tools and techniques required to build highly useful and versatile conversational applications. This guide provides detailed instructions, best practices and reference applications which will enable any organization to create some of the most advanced conversational experiences possible today.
 
 Contents
 ========
@@ -46,7 +14,10 @@ Contents
    :caption: Introduction
    :name: intro
 
-   introduction
+   introduction_to_conversational_applications
+   approaches_for_building_conversational_applications
+   anatomy_of_a_conversational_ai_interaction
+   introducing_mindmeld_workbench
 
 .. toctree::
    :maxdepth: 2
