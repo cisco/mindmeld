@@ -261,7 +261,7 @@ Some strategies for collecting training data are -
 #. Crowdsourcing
 #. Operational Logs (Customer Service, Search etc.)
 
-In MindMeld Workbench, there are 6 components that need training data for a Machine Learning based Conversational Application. Typically, a given application would need training data for some subset of these components depending on the domain and core use-cases. The full set of these components are -
+In MindMeld Workbench, there are 6 components that need training data for a Machine Learning based Conversational Application. Typically, a given application would need training data for some subset of these components depending on the domain and core use-cases.
 
 * Domain Classification
 * Intent Classification
@@ -270,7 +270,13 @@ In MindMeld Workbench, there are 6 components that need training data for a Mach
 * Entity Resolution
 * Ranking
 
-In our example of Kwik-E-Mart store information, we would need training data just for Domain/Intent Classification and Entity Recognition. For the **store_information** domain, here are snippets of training examples for Intent Classification -
+In our example application of Kwik-E-Mart store information, Domain Classification is not needed since we have only one domain - **store_information**. In case we have additional domains (such as **order_item**), we would need separate sets of training queries for each domain. In such cases, MindMeld Workbench provides the facility of using queries from all the intents belonging to a domain as labeled queries for that domain. For example, training queries for the **store_information** domain would be the union of all queries in the *greet*, *get_close_time*, *get_open_time*, *get_nearest_store*, *get_is_open_now* and *exit* intents. The folder structure described in Section 3 provides an easy way of specifying your queries pertaining to a domain.
+
+Additionally, in this example application, Entity Resolution could be a simple map from the detected entity to it's construct of retrieving documents from the Knowledge Base, so no special training data is required for this step. Similarly, Role Classification and Ranking are not a must, so we don't need additional training data for those components. For the remaining components, we can specify the training labels in the following way -
+
+Intent Classification -
+
+For the **store_information** domain, here are snippets of training examples for each intent for Intent Classification -
 
 * **greet**
 
@@ -289,7 +295,11 @@ In our example of Kwik-E-Mart store information, we would need training data jus
   what's the shut down time for pine & market store?
   ...
 
-To train the MindMeld Entity Recognizer, we need to label sections of the training queries with corresponding entity types. We do this by adding annotations to our training queries to identify all the entities. As a convenience in MindMeld Workbench, the training data for Entity Recognition and Role Classification are stored in the same files that contain queries for Domain/Intent Classification. To locate these files, please refer to the folder structure as specified in Section 2.1.3. For adding annotations for Entity Recognition, mark up the parts of every query that correspond to an entity in the following syntax -
+In a similar vein, we can define query sets for all other intents.
+
+Entity Recognition -
+
+To train the MindMeld Entity Recognizer, we need to label sections of the training queries with corresponding entity types. We do this by adding annotations to our training queries to identify all the entities. As a convenience in MindMeld Workbench, the training data for Entity Recognition and Role Classification are stored in the same files that contain queries for Intent Classification. To locate these files, please refer to the folder structure as specified in Section 3. For adding annotations for Entity Recognition, mark up the parts of every query that correspond to an entity in the following syntax -
 
 * Enclose the entity in curly braces
 * Follow the entity with its type
@@ -393,19 +403,29 @@ Introduce the topic of semantic and dependency parsing. Illustrate a simple exam
 
 10. Optimize Question Answering
 -------------------------------
-The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. Just as in a relational database, MindMeld Workbench offers a set of operators for ranking results retrieved. For instance, a "sort" operator allows you to rank results based on an ascending or descending order of a specific attribute value.
+The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. Just as in a relational database, MindMeld Workbench offers a set of operators for ranking results retrieved.
 
-The ranking formula is a blend of text relevance, popularity, sort criteria and other configurable properties. MindMeld Workbench provides a default ranking function off-the-shelf, but there is a flexible option to specify a custom ranking forumla if needed.
+The ranking formula is a blend of text relevance, popularity and sort criteria (if any). MindMeld Workbench provides a default ranking function off-the-shelf that works well in most cases, but there is a flexible option to specify a custom ranking forumla if needed.
+
+File **app.py**
 
 .. code-block:: python
 
-  from mmworkbench.question_answering import QuestionAnswerer
+  @app.kb.handle()
+  def custom_ranking_function():    
+    # Custom Ranking logic goes here
+    return text_relevance_coeff, popularity_coeff, sort_coeff
 
-  # Create the QuestionAnswerer object
-  qa = QuestionAnswerer()
+The custom ranking function can then be used in the **get** method of the Knowledge Base object.
 
-  # Generate ranked results using the QA object
-  ranked_results = qa.rank(query, results)
+.. code-block:: python
+
+  # Assume KnowledgeBase object has been created and
+  # the data is loaded into the 'stores' object.
+
+  # Get ranked results from KB
+  ranked_results = kb.get(index='stores', query,
+              context, ranking_fn=custom_ranking_function)
 
   print ranked_results
 
