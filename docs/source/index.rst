@@ -46,5 +46,5 @@ Contents
    entity_recognition
    role_classification
    entity_resolution
-   semantic_parsing
+   language_parsing
    deployment
