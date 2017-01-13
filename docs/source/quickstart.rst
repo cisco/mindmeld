@@ -323,14 +323,16 @@ To train the MindMeld Entity Recognizer, we need to label sections of the traini
 * Follow the entity with its type
 * Use the pipe character as separator
 
-Examples -
+Example -
+
+File .../get_is_open_now/labeled_queries/**train_get_is_open_now.txt**
 
 .. code-block:: text
 
   Is the {Central Plaza|name} Kwik-E-Mart open {now|time}?
   The store near {Pine & Market|intersection} - is it open?
   Is the {Rockerfeller|name} Kwik-E-Mart on {30th Street|street} open for business?
-  Can you check if the {Market St|street} store is open at {6 pm tomorrow|time}?
+  Can you check if the {Main St|street} store is open?
 
 .. note::
 
