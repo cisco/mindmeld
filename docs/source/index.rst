@@ -10,6 +10,7 @@ Contents
 ========
 
 .. toctree::
+   :numbered:
    :maxdepth: 2
    :caption: Introduction
    :name: intro
@@ -20,6 +21,7 @@ Contents
    introducing_mindmeld_workbench
 
 .. toctree::
+   :numbered:
    :maxdepth: 2
    :caption: Quickstart
    :name: quickstart
@@ -27,6 +29,7 @@ Contents
    quickstart
 
 .. toctree::
+   :numbered:
    :maxdepth: 2
    :caption: User Guide
    :name: userguide

@@ -1,34 +1,50 @@
 Building a Conversational Interface in 11 Steps
 ===============================================
 
+Great conversational applications require both advanced technology as well as solid design judgement. The most widely used conversational applications today, such as Siri, Alexa, Google Assistant and Cortana, are all built using a similar set of techniques and technologies to ensure both high accuracy and utility. This section outlines the methodology that is used to build today's most advanced and useful conversational applications. Specifically, this section will walk through the steps that are required to build and deploy a conversational application for a simple use case. This simple example will highlight the key design steps and technology components which underpin any great conversational experience. Along the way, we will illustrate how MindMeld Workbench can be employed to streamline the task of building and deploying conversational interfaces. 
 
-This section outlines the step-by-step approach to building conversational interfaces using MindMeld workbench. This section provides four real-world examples (tutorials) to illustrate each of the steps in practice.
+Taking a conversational application from conception to production typically involves the eleven implementation steps summarized below.
 
+== ===
+1  Select the right use case.
+2  Script your ideal dialogue interactions.
+3  Define the domain, intent, entity and role hierarchy.
+4  Define the dialog state handlers.
+5  Create the knowledge base.
+6  Generate representative training data.
+7  Train the natural language processing classifiers.
+8  Train the entity resolvers.
+9  Implement the language parser.
+10 Optimize question answering performance.
+11 Deploy trained models to production.
+== ===
 
-This section provides a high-level overview introducing the steps.
-
-1. Select the right use case
-----------------------------
-Selecting the right use case is critical. Selecting an unrealistic or incorrect use case will render even the smartest voice or chat assistant dead on arrival. 
-The best user cases today typically mimic an existing, familiar real-world interaction. This is the best way to ensure that users will know what they can ask.
-Any use case must offer a practical path for collecting the training data required for the app.
-The best use cases provide a clear value or utility where voice can be a faster way to find information or accomplish a task.
-
-A good candidate use case will have the following:
-
-- mimics a real-world human interaction (no instructions required)
-- possible to collect sufficient training data
-- save the user time
-- when user knows how to articulate specifically what they want
-- when the users hands are busy
-- when no one else is around
-- goldilocks domain - not too small to be trivial, but not to vast to be intractable
+This section will illustrate each of these steps using an example of a simple conversational application.
 
 
+Select the Right Use Case
+-------------------------
+Selecting the right use case is perhaps the most important step in building a conversational application that users will love. There are many use cases where a voice or chat conversation can simplify the task of finding information or accomplishing a task. There are also many use cases where a conversational interface can be inconvenient or frustrating. Selecting an unrealistic or incorrect use case will render even the smartest voice or chat assistant dead on arrival.
 
-2. Script your ideal dialogue interactions
+While there is no magic formula to determine which use case is ideal for a conversational interface, some best practices have begun to emerge to delineate good candidates from the bad. Before selecting a use case, it is important to ask the following questions to ensure that your conversational application will be practical to build and provide real value to users.
+
+===================================================== ===
+**Does it resemble a real-world human interaction?**  Conversational interfaces do not come with instruction manuals, and there is little opportunity to teach users about the supported functionality before they take it for a spin. The best use cases mimic an existing, familiar real-world human interaction so that users intuitively know what they can ask and how the service can help. For example, a conversational interface could mimic an interaction with a bank teller, a barista or a customer support rep.
+
+**Does it save users time?**                          Conversational interfaces shine when they save users time. A conversational interface that is never faster than a than a well-designed GUI will likely frustrate users. The most useful conversational experiences often center around a use case where users are looking to accomplish a specific task and know how to articulate it. For example, simply saying 'play my jazz music playlist in the kitchen' can be much faster than launching an app and navigating to the equivalent option by touch.
+
+**Is it more convenient for the user?**               Voice interfaces can be particularly useful when users' hands and attention are occupied or if a mobile device is not within reach. If you expect users will often enlist your application while driving, biking, walking, exercising, cooking or sitting on the couch, it is likely an excellent candidate for a conversational interface.
+
+**Does it hit the Goldilocks zone?**                  The best conversational applications fall squarely into the 'Goldilocks zone'. They offer a range of functionality that is narrow enough to ensure the machine learning models have high accuracy. At the same time, they have functionality that is broad enough to ensure that users find the experience useful for a wide variety of tasks. Apps that are too narrow can be trivial and useless. Apps that are too broad can have hit-or-miss accuracy which can frustrate users.
+
+**Is it possible to get enough training data?**       Even the best use cases will fail if it is not possible or practical to collect enough training data to illustrate the complete range of envisioned functionality. For ideal use cases, training data can be easily generated from production traffic or crowdsourcing techniques. If training data for your use case can only be sourced from a small number of hard-to-find human experts, it is likely not a good candidate for a conversational interface.
+===================================================== ===
+
+
+
+Script your ideal dialogue interactions
 ------------------------------------------
-Write down the conversational dialogue interactions in detail.
+Write down the conversational dialogue interactions in detail. This is equivalent to creating your wireframes and pixel-perfect mocks for a GUI.
 
   :User: Hello.
   :Bot: Hello, Pat. I can help you find store hours for your local Kwik-E-Mart. How can I help?
@@ -43,7 +59,7 @@ Write down the conversational dialogue interactions in detail.
   :User: Goodbye.
   :Bot: Have a nice day.
 
-3. Define the domain, intent, entity and role hierarchy
+Define the domain, intent, entity and role hierarchy
 -------------------------------------------------------
 Show and describe a simple diagram which illustrates the domain, intent, entity and role hierarchy.  Show the directory structure which captures this hierarchy for a simple example.
 
@@ -91,7 +107,7 @@ Entities:
  - Is the ``Central Plaza Kwik-E-Mart | NAME`` open now?
 
 
-4. Define the dialog state handlers
+Define the dialog state handlers
 -----------------------------------
 In my view, this is where we define the natural language response templates which should be returned at each dialogue state in an interaction. We should illustrate a simple flow in a flow chart and then in a snippet of python code which illustrates how the logic is implemented in the dialogue manager.
 
@@ -173,7 +189,7 @@ File my_app.py
 
 
 
-5. Create the Knowledge Base
+Create the Knowledge Base
 ----------------------------
 A Knowledge Base is a repository for storing complex, real-world, structured and unstructured information relevant to a content catalog. In the context of Deep-Domain Conversational AI, a Knowledge Base comprises of a searchable repository of objects that encode entities and their associated attributes. 
 
@@ -250,7 +266,7 @@ Output -
 The MindMeld Knowledge Base offers a versatile set of ways to specify the **get** to retrieve results for a variety of increasingly complex inputs. Further information is available in the User Guide chapter on the Knowledge Base.
 
 
-6. Generate representative training data
+Generate representative training data
 ----------------------------------------
 Components in Mindmeld Workbench utilize Supervised Learning models to analyze a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of *labeled* queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
 
@@ -321,7 +337,7 @@ Examples -
   Pro tip - Academic datasets (though instrumental in researching advanced algorithms), are not always reflective of real-world conversational data. Therefore, datasets from popular conferences such as TREC and ACM-SIGDIAL might not be the best choice for developing production applications.
 
 
-7. Train the Natural Language Processor classifiers
+Train the Natural Language Processing classifiers
 ---------------------------------------------------
 
 The Natural Language Processor (NLP) is tasked with comprehending the user's natural language input. It analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, successively narrowing down the “search space”.
@@ -393,16 +409,16 @@ For instance, you may want to specify that the intent classifier should use an S
 
 Refer to Chapter 3.9 of the Workbench User Guide for detailed documentation on all the NLP classifiers.
 
-8. Train the entity resolvers
+Train the entity resolvers
 -----------------------------
 Introduce the topic of loading training data, training entity resolution models, measuring CV and held-out performance, performing disambiguation.
 
-9. Implement the semantic parser
+Implement the language parser
 --------------------------------
 Introduce the topic of semantic and dependency parsing. Illustrate a simple example of a rule-based or grammar-based parser which groups entities into a tree data structure.
 
-10. Optimize Question Answering
--------------------------------
+Optimize question answering performance
+-------------------------------------------
 The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. Just as in a relational database, MindMeld Workbench offers a set of operators for ranking results retrieved.
 
 The ranking formula is a blend of text relevance, popularity and sort criteria (if any). MindMeld Workbench provides a default ranking function off-the-shelf that works well in most cases, but there is a flexible option to specify a custom ranking forumla if needed.
@@ -433,6 +449,6 @@ The custom ranking function can then be used in the **get** method of the Knowle
 
 Detailed explanations on custom ranking specifications are available in the User Guide chapter on `Question Answering`_.
 
-11. Deploy trained models to production
+Deploy trained models to production
 ---------------------------------------
 Show a simple example of the steps required to deploy to production
