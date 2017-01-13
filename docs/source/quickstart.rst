@@ -248,9 +248,22 @@ Once your data is loaded, you can use the **get** method to retrieve objects fro
 .. code-block:: python
 
   # Get relevant objects from the KB
-  query = "show me all stores on Elm Street that are open at 4 pm"
-  results = kb.get(index='stores', query)
-
+  query = "Is the store on Elm Street open?"
+  context = {
+    'domain': 'store_information',
+    'intent': 'get_is_store_open',
+    'entities': [
+      {
+        'name': 'street',
+        'type': 'search',
+        'text': 'Elm Street',
+        'value': 'Elm Street',
+        'chstart': 16,
+        'chend': 25
+      }
+    ]
+  }
+  results = kb.get(index='stores', query, context)
   print results
 
 Output -
