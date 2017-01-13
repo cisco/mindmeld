@@ -504,18 +504,25 @@ Finally, Workbench also offers the flexibility to define your own custom parsing
 
 Optimize question answering performance
 -------------------------------------------
-The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. Just as in a relational database, MindMeld Workbench offers a set of operators for ranking results retrieved.
+The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. Just as in a relational database, MindMeld Workbench offers a set of operators for ranking results retrieved. These operators are combined to define a "ranking formula". The ranking formula is a scoring function ("Function Score") that is used as the final ranking metric. MindMeld Workbench provides an off-the-shelf implementation of the Function Score, which should work well for most applications.
 
-The ranking formula is a blend of text relevance, popularity and sort criteria (if any). MindMeld Workbench provides a default ranking function off-the-shelf that works well in most cases, but there is a flexible option to specify a custom ranking forumla if needed.
+The Function Score is a blend of Text Relevance, Popularity and Sort criteria (if present). If there are no sort entities present, then the Function Score blends the text relevance with descending popularity. The default implementation already considers the scaling factors and distributions of the text relevance scores to adjust the normalized popularity weight accordingly. If a sort entity is present, a decay function is applied to the corresponding sort field and combined with the scaled and normalized popularity and text relevance scores.
+
+This default implementation works well in most simple applications, but there is a flexible option to specify a custom ranking forumla if needed. You need to produce a "ranking score" based on your choice of using the available arguments, which can then be applied as the scoring function after Knowledge Base retrieval.
 
 File **app.py**
 
 .. code-block:: python
 
   @app.kb.handle()
-  def custom_ranking_function():    
-    # Custom Ranking logic goes here
-    return text_relevance_coeff, popularity_coeff, sort_coeff
+  def ranking_function_score():
+    # Custom Ranking logic goes here. You can define arbitrary
+    # logic for each of the scoring components.
+    text_rel = compute_text_relevance_score(query, context)
+    pop_score = compute_popularity_score(query, context)
+    sort_factor = compute_sort_score(context.entities)
+    ranking_score = combine_factors(text_rel, pop_score, sort_factor)
+    return ranking_score
 
 The custom ranking function can then be used in the **get** method of the Knowledge Base object.
 
@@ -532,7 +539,7 @@ The custom ranking function can then be used in the **get** method of the Knowle
 
 .. _Question Answering: question_answering.html
 
-Detailed explanations on custom ranking specifications are available in the User Guide chapter on `Question Answering`_.
+Detailed explanation on controlling Text Relevance is available in the User Guide chapter on `Question Answering`_.
 
 Deploy trained models to production
 ---------------------------------------
