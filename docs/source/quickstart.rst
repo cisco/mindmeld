@@ -515,8 +515,8 @@ Below is an example config file that instructs the Parser to extract the trees d
 Finally, Workbench also offers the flexibility to define your own custom parsing logic that can be run instead of the default config-driven dependency parser. The :doc:`Language Parser User Guide </language_parsing>` in Section 3 has more details on the different options for our config-driven parser and how to implement your own custom parser.
 
 
-Optimize question answering performance
--------------------------------------------
+Optimize Question Answering
+---------------------------
 The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. Just as in a relational database, MindMeld Workbench offers a set of operators for ranking results retrieved. These operators are combined to define a "ranking formula". The ranking formula is a scoring function ("Function Score") that gets applied on each query as the metric for ranking Knowledge Base results. MindMeld Workbench provides a default implementation of the Function Score, which would work well for most applications.
 
 The Function Score is a blend of **Text Relevance**, **Popularity** and **Sort** criteria (if present). If there are no sort entities present, then the Function Score blends the text relevance with descending popularity. The default implementation already considers the scaling factors and distributions of the text relevance scores to adjust the normalized popularity weight accordingly. If a sort entity is present, a decay function is applied to the corresponding sort field and combined with the scaled popularity and text relevance scores.
