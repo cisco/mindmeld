@@ -195,9 +195,9 @@ A Knowledge Base is a repository for storing complex, real-world, structured and
 
 Here are some examples of Knowledge Base object types for various applications -
 
-* Product objects in a **Products** catalog - Attributes include "sku_id", "name", "price"
-* Video objects in a **Video Content** library - Attributes include "description", "cast", "duration"
-* Menu items from a **Quick Service Restaurants** catalog - Attributes include "size", "price", "modifiers" etc.
+* Product items in a **Products** catalog - with attributes *"sku_id"*, *"name"*, *"price"*
+* Video objects in a **Video Content** library - with attributes *"description"*, *"cast"*, *"duration"*
+* Menu items from a **Quick Service Restaurants** catalog - with attributes *"size"*, *"price"*, *"options"* etc.
 
 In our example of store information on Kwik-E-Mart stores, we would have store objects with the following attributes -
 
@@ -207,7 +207,7 @@ In our example of store information on Kwik-E-Mart stores, we would have store o
 * address
 * phone_number
 
-A Knowledge Base can have 1 or more indexes. An "index" is a logical namespace which maps to objects of a particular type in the Knowledge Base. Roughly, you can think of an index as a "database" in a relational database world. Different indexes can be used to map to objects of different types. In our example of Kwik-E-Mart stores data, we would have just 1 index - *"stores"*.
+A Knowledge Base can have 1 or more indexes. An index is a logical namespace which maps to objects of a particular type in the Knowledge Base. Roughly, you can think of an index as a "database" in a relational database world. Different indexes can be used to map to objects of different types. In our example of Kwik-E-Mart stores data, we would have just 1 index - *"stores"*.
 
 To setup your Knowledge Base using MindMeld Workbench, you can specify your content catalog as a JSON dump. The MindMeld Knowledge Base can read this JSON dump and extract all fields along with their types directly from the data. For example, if a field is a String, the Knowledge Base would read and store it as searchable strings. If a Float value is encountered, that attribute is stored as float values such that *"greater-than"* and *"lesser-than"* operators are applicable. 
 
@@ -263,12 +263,12 @@ Output -
     "phone_number": "(+1) 100-100-1100"
   }
 
-The MindMeld Knowledge Base offers a versatile set of ways to specify the **get** to retrieve results for a variety of increasingly complex inputs. Further information is available in the User Guide chapter on the Knowledge Base.
+The MindMeld Knowledge Base offers a versatile set of ways to specify the **get** to retrieve results for a variety of increasingly complex inputs. Additionally, for granular control over the tokenization and text processing mechanisms for searching the Knowledge Base, more information is available in the User Guide chapter on the Knowledge Base.
 
 
 Generate representative training data
 ----------------------------------------
-Components in Mindmeld Workbench utilize Supervised Learning models to analyze a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of *labeled* queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
+Most components in the Mindmeld Workbench Natural Language Processor utilize Supervised Learning models to analyze a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of *labeled* queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
 
 Some strategies for collecting training data are -
 
@@ -277,24 +277,27 @@ Some strategies for collecting training data are -
 #. Crowdsourcing
 #. Operational Logs (Customer Service, Search etc.)
 
-In MindMeld Workbench, there are 6 components that need training data for a Machine Learning based Conversational Application. Typically, a given application would need training data for some subset of these components depending on the domain and core use-cases.
+In MindMeld Workbench, there are 5 components that need training data for a Machine Learning based Conversational Application. Typically, a given application would need training data for some subset of these components depending on the domain and core use-cases.
 
 * Domain Classification
 * Intent Classification
 * Entity Recognition
 * Role Classification
 * Entity Resolution
-* Ranking
 
-In our example application of Kwik-E-Mart store information, Domain Classification is not needed since we have only one domain - **store_information**. In case we have additional domains (such as **order_item**), we would need separate sets of training queries for each domain. In such cases, MindMeld Workbench provides the facility of using queries from all the intents belonging to a domain as labeled queries for that domain. For example, training queries for the **store_information** domain would be the union of all queries in the *greet*, *get_close_time*, *get_open_time*, *get_nearest_store*, *get_is_open_now* and *exit* intents. The folder structure described in Section 3 provides an easy way of specifying your queries pertaining to a domain.
+We now describe the formats and structure of data required for training each of these components.
 
-Additionally, in this example application, Entity Resolution could be a simple map from the detected entity to it's construct of retrieving documents from the Knowledge Base, so no special training data is required for this step. Similarly, Role Classification and Ranking are not a must, so we don't need additional training data for those components. For the remaining components, we can specify the training labels in the following way -
+Domain Classification
+~~~~~~~~~~~~~~~~~~~~~
 
-Intent Classification -
+In our example application of Kwik-E-Mart store information, Domain Classification is not needed since we have only one domain - **store_information**. In case we have additional domains (such as **weather** or **timers**), we would need separate sets of training queries for each domain. In such cases, MindMeld Workbench provides the facility of using queries from all the intents belonging to a domain as labeled queries for that domain. For example, training queries for the **store_information** domain would be the union of all queries in the *greet*, *get_close_time*, *get_open_time*, *get_nearest_store*, *get_is_open_now* and *exit* intents. The folder structure described in Section 1.3 provides an easy way of specifying your queries pertaining to a domain.
 
-For the **store_information** domain, here are snippets of training examples for each intent for Intent Classification -
+Intent Classification
+~~~~~~~~~~~~~~~~~~~~~
 
-* **greet**
+For the **store_information** domain, here are snippets of training examples for a few intents for Intent Classification. In a similar vein, we can define query sets for all other intents. These queries reside in *.txt* files under the **labeled_queries** folder of each intent directory as shown in Section 1.3.
+
+* File .../greet/labeled_queries/**train_greet.txt**
 
 .. code-block:: text
 
@@ -303,7 +306,7 @@ For the **store_information** domain, here are snippets of training examples for
   Good morning
   ...
 
-* **get_close_time**
+* File .../get_close_time/labeled_queries/**train_get_close_time.txt**
 
 .. code-block:: text
 
@@ -311,17 +314,14 @@ For the **store_information** domain, here are snippets of training examples for
   what's the shut down time for pine & market store?
   ...
 
-In a similar vein, we can define query sets for all other intents.
+Entity Recognition
+~~~~~~~~~~~~~~~~~~
 
-Entity Recognition -
-
-To train the MindMeld Entity Recognizer, we need to label sections of the training queries with corresponding entity types. We do this by adding annotations to our training queries to identify all the entities. As a convenience in MindMeld Workbench, the training data for Entity Recognition and Role Classification are stored in the same files that contain queries for Intent Classification. To locate these files, please refer to the folder structure as specified in Section 3. For adding annotations for Entity Recognition, mark up the parts of every query that correspond to an entity in the following syntax -
+To train the MindMeld Entity Recognizer, we need to label sections of the training queries with corresponding entity types. We do this by adding annotations to our training queries to identify all the entities. As a convenience in MindMeld Workbench, the training data for Entity Recognition and Role Classification are stored in the same files that contain queries for Intent Classification. To locate these files, please refer to the folder structure as specified in Section 1.3. For adding annotations for Entity Recognition, mark up the parts of every query that correspond to an entity in the following syntax -
 
 * Enclose the entity in curly braces
 * Follow the entity with its type
 * Use the pipe character as separator
-
-We recommend using a popular text editor such as Vim, Emacs or Sublime Text 3 to create these annotations. This process is normally much faster than creating GUIs and point-and-click systems for annotating data at scale.
 
 Examples -
 
@@ -334,7 +334,56 @@ Examples -
 
 .. note::
 
-  Pro tip - Academic datasets (though instrumental in researching advanced algorithms), are not always reflective of real-world conversational data. Therefore, datasets from popular conferences such as TREC and ACM-SIGDIAL might not be the best choice for developing production applications.
+  Pro Tip - We recommend using a popular text editor such as Vim, Emacs or Sublime Text 3 to create these annotations. This process is normally much faster than creating GUIs and point-and-click systems for annotating data at scale.
+
+Role Classification
+~~~~~~~~~~~~~~~~~~~
+
+In some applications, a single entity can be used to cover multiple semantic roles. In our example of Kwik-E-Mart store information, a good candidate for Role Classification is the **time** entity type. Consider this example -
+
+* Show me all Kwik-E-Mart stores open between 8 am and 6 pm.
+
+Here, both *"8 am"* and *"6 pm"* are **time** entities, but they denote different semantic roles - *"open_time"* and *"close_time"* respectively.
+
+For entities that have multiple semantic roles, a Role Classifier must be trained to accurately identify the semantic roles. To train a role classifier, label the respective entities in the training queries with their corresponding role labels. We can do this by adding additional annotations to the already labeled entities. Mark up the labeled entities with role annotations in the following syntax -
+
+* Follow the labeled entity type with it's role label
+* Use the pipe character as separator (similar to Entity training labels)
+
+Examples -
+
+.. code-block:: text
+
+  Show me all Kwik-E-Mart stores open between {8 am|time|open_time} and {6 pm|time|close_time}
+  Are there any Kwik-E-Mart stores open after {3 pm tomorrow|time|open_time}
+
+Entity Resolution
+~~~~~~~~~~~~~~~~~
+
+Entity Resolution is the task of maping each entity to a unique and unambiguous concept, such as a product with a specific ID or an attribute with a specific SKU number. In MindMeld Workbench, this can usually be specified by a simple lookup dictionary in the Entity Map for all entity types. But for some applications, we need to specify thousands or even millions of mapping-pair examples that can be used to train a Machine Learning model.
+
+In our Kwik-E-Mart store information example, a simple dictionary would be sufficient to map store names and other attributes to their respective constructs to retrieve corresponding Knowledge Base objects. For applications with catalogs such as Quick Service Restaurant menus or Product Information Catalogs, the MindMeld Entity Resolver needs a large number of "synonyms" for Product IDs or attribute SKUs. This is needed to ensure high accuracy on queries about the long-tail of products or attributes, when it is infeasible to map directly in a lookup dictionary.
+
+Consider the following example of ordering items from Kwik-E-Mart stores. Lets assume there was a product named -
+
+* *"Pink Frosted Sprinklicious Doughnut"*
+
+in the menu catalog. However, there might be a multitude of ways users can refer to this particular product. For example, *"sprinkly doughnut"*, *"pink doughnut"*, *"frosty sprinkly doughnut"* could all be ways of referring to the same final product. To train the Entity Resolver, create a **synonyms.tsv** file that encodes various ways users refer to a specific product. The file is a TSV with 2 fields - the synonym and the final product/attribute name (as per the Knowledge Base object). Note that in the case where we don't need to train a Machine Learned Entity Resolver, this file would be optional. Locate the file in the folder structure as shown in Section 1.3.
+
+Example -
+
+File **synonyms.tsv**
+
+.. code-block:: text
+
+  sprinkly doughnut           Pink Frosted Sprinklicious Doughnut
+  pink doughnut               Pink Frosted Sprinklicious Doughnut
+  frosty sprinkly doughnut    Pink Frosted Sprinklicious Doughnut
+  ...
+
+.. note::
+
+  Pro Tip - Academic datasets (though instrumental in researching advanced algorithms), are not always reflective of real-world conversational data. Therefore, datasets from popular conferences such as TREC and ACM-SIGDIAL might not be the best choice for developing production applications.
 
 
 Train the Natural Language Processing classifiers
