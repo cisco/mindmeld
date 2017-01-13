@@ -254,8 +254,8 @@ Once your data is loaded, you can use the **get** method to retrieve objects fro
     'intent': 'get_is_store_open',
     'entities': [
       {
-        'name': 'street',
-        'type': 'search',
+        'type': 'street',
+        'mode': 'search',
         'text': 'Elm Street',
         'value': 'Elm Street',
         'chstart': 16,
