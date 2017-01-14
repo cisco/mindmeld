@@ -31,7 +31,7 @@ While there is no magic formula to determine which use case is ideal for a conve
 ===================================================== ===
 **Does it resemble a real-world human interaction?**  Conversational interfaces do not come with instruction manuals, and there is little opportunity to teach users about the supported functionality before they take it for a spin. The best use cases mimic an existing, familiar real-world human interaction so that users intuitively know what they can ask and how the service can help. For example, a conversational interface could mimic an interaction with a bank teller, a barista or a customer support rep.
 
-**Does it save users time?**                          Conversational interfaces shine when they save users time. A conversational interface that is never faster than a than a well-designed GUI will likely frustrate users. The most useful conversational experiences often center around a use case where users are looking to accomplish a specific task and know how to articulate it. For example, simply saying 'play my jazz music playlist in the kitchen' can be much faster than launching an app and navigating to the equivalent option by touch.
+**Does it save users time?**                          Conversational interfaces shine when they save users time. A conversational interface will be viewed as an unwelcome impediment when a well-designed GUI would be faster. The most useful conversational experiences often center around a use case where users are looking to accomplish a specific task and know how to articulate it. For example, simply saying 'play my jazz music playlist in the kitchen' can be much faster than launching an app and navigating to the equivalent option by touch.
 
 **Is it more convenient for the user?**               Voice interfaces can be particularly useful when users' hands and attention are occupied or if a mobile device is not within reach. If you expect users will often enlist your application while driving, biking, walking, exercising, cooking or sitting on the couch, it is likely an excellent candidate for a conversational interface.
 
@@ -40,24 +40,22 @@ While there is no magic formula to determine which use case is ideal for a conve
 **Is it possible to get enough training data?**       Even the best use cases will fail if it is not possible or practical to collect enough training data to illustrate the complete range of envisioned functionality. For ideal use cases, training data can be easily generated from production traffic or crowdsourcing techniques. If training data for your use case can only be sourced from a small number of hard-to-find human experts, it is likely not a good candidate for a conversational interface.
 ===================================================== ===
 
+For this quickstart section, we will consider a simple conversational use case which can provide information about retail store locations for your neighborhood Kwik-E-Mart. For example, you could use this service to ask about store hours: 'When does the Kwik-E-Mart on Elm street close today?'. This rudimentary use case will serve as a reference example to highlight the key steps in building a useful conversational interface.
 
 
-Script your ideal dialogue interactions
-------------------------------------------
-Write down the conversational dialogue interactions in detail. This is equivalent to creating your wireframes and pixel-perfect mocks for a GUI.
+Script Your Ideal Dialogue Interactions
+---------------------------------------
 
-  :User: Hello.
-  :Bot: Hello, Pat. I can help you find store hours for your local Kwik-E-Mart. How can I help?
-  :User: When does the store on Elm Street close today?
-  :Bot: The 23 Elm Street Kwik-E-Mart at closes at 9pm today.
-  :User: Where is the nearest Kwik-E-Mart?
-  :Bot: Your nearest Kwik-E-Mart is located at Pine and Market.
-  :User: When does that store open tomorrow?
-  :Bot: The Pine and Market Kwik-E-Mart opens at 6am tomorrow.
-  :User:  Is the Central Plaza Kwik-E-Mart open now?
-  :Bot: Yes. The Kwik-E-Mart at Central Plaza closes at 8pm this evening.
-  :User: Goodbye.
-  :Bot: Have a nice day.
+Once you have identified a good use case, the next step is to script your envisioned dialogue interactions. This design exercise details the conversational interaction flows which define the user experience for your application. It is important to think through not just the most obvious user flows, but also the corner case and exception user flows which may be encountered by users during an interaction. For example, the dialogue flows should illustrate how the application responds if the user request is beyond the application scope. Also, the flows should illustrate the interactions which will enable users to get help if they are stuck or gracefully leave the interaction. The dialogue flows should detail not only the various interaction pathways a conversation may traverse, but they should also illustrate the desired language and tone envisioned for the experience.
+
+For developers familiar with graphical interface design, this step is comparable to the task of creating wireframe and pixel-perfect mockups. Like any design step, there will likely be many iterations required to work through usability issues and reach consensus on a final design. It is always wise to begin coding and implementation only after the dust has settled on the scripted dialogue interactions. Otherwise, much implementation work and effort may be wasted. 
+
+For our simple use case, the following diagram illustrates the dialogue interactions we will strive to deliver in our final implementation.
+
+.. image:: images/quickstart_interaction.png
+    :width: 400px
+    :align: center
+
 
 Define the domain, intent, entity and role hierarchy
 -------------------------------------------------------
