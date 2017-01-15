@@ -215,7 +215,7 @@ Loading Data
 
 To load your content catalog into the MindMeld Knowledge Base, you can specify your catalog data as a JSON dump. The MindMeld Knowledge Base can read this JSON dump and extract all fields along with their types directly from the data.
 
-Following is an example of JSON data containing objects and their attributes for a few Kwik-E-Mart stores.
+Following is an example of JSON data containing document objects and their attributes for a few Kwik-E-Mart stores.
 
 File **stores_data.json**
 
@@ -253,16 +253,32 @@ To delete an index, simply use the **delete_index** method by specifying the ind
 
   kb.delete_index(index='stores')
 
+Popularity
+~~~~~~~~~~
+
+An important concept in the MindMeld Knowledge Base is the notion of "popularity" of each document. This can either be a field value that codifies the relative importance of each document in the Knowledge Base, or a hand crafted metric per document based on some external criteria. The popularity value serves two main purposes:
+
+* Computing the relative importance of entities when extracting entity data.
+* Default ranking metric during Knowledge Base retrieval.
+
+In the case of Kwik-E-Mart stores, all stores are equally important, so a default dummy popularity value of "1" is added to all documents. However, if we had an example use-case of ordering items from Kwik-E-Mart stores, the *"avg_rating"* of an item could be used as a proxy for popularity.
+
+.. code-block:: python
+
+  # Load JSON Data into the KB and define popularity field.
+  kb.load(data_file='items_data.json', index='items', popularity_field="avg_rating")
+
+In applications involving Product Catalogs or Content Libraries, metrics such as Page Views, Sale Metrics, Sale Price or a combination of all of these can be used for popularity.
+
 Retrieval
 ~~~~~~~~~
 
-Once your data is loaded, you can use the **get** method to retrieve objects from the MindMeld Knowledge Base. The **get** method uses various types information available in the query and entity mappings (passed in the context object) to retrieve documents. For String-valued fields, the Knowledge Base uses Full-Text Search for retrieval. When "range" entities are detected, the **get** method uses "greater-than" or "lesser-than" operations as applicable on the respective (real-valued) fields. More details on configuring Sorting and Text Relevance strategies are available in Section 1.10 and the User Guide chapter on Knowledge Base.
+Once your data is loaded, you can use the **get** method to retrieve objects from the MindMeld Knowledge Base. The **get** method uses all information available in the query and entity mappings (passed through the context object) to retrieve documents. For String-valued fields, the Knowledge Base uses Full-Text Search for retrieval. When "range" entities are detected, the **get** method uses "greater-than" or "lesser-than" operations as applicable to the respective (real-valued) fields. More details on Sorting and Text Relevance strategies are available in Section 1.10 on "Optimizing Question Answering Performance".
 
 Example use of **get** -
 
 .. code-block:: python
 
-  # Get relevant objects from the KB
   query = "Is the store on Elm Street open?"
   context = {
     'domain': 'store_information',
@@ -272,12 +288,14 @@ Example use of **get** -
         'type': 'street',
         'mode': 'search',
         'text': 'Elm Street',
-        'value': 'Elm Street',
+        'value': 'address:Elm Street',
         'chstart': 16,
         'chend': 25
       }
     ]
   }
+
+  # Retrieve from the KB
   results = kb.get(index='stores', query, context)
   print results
 
@@ -297,55 +315,6 @@ The **get** method also supports pagination. You can use the *offset* and *num_d
 
   # Retrieve documents numbers 11 to 30
   kb.get(index='stores', query, context, offset=10, num_docs=20)
-
-Advanced Settings
-~~~~~~~~~~~~~~~~~
-
-While creating the index, all fields in the data go through a process called "Analysis". "Analyzers" can be defined per field to define the following:
-
-* Tokenizing a block of text into individual terms before adding to inverted index
-* Normalizing these terms into a standard form to improve searchability
-
-In MindMeld Workbench, you can optionally define custom analyzers per field by specifying an **es-mapping.json** file at the application root level. While the default MindMeld Workbench Analyzer uses a robust set of character filtering operations for tokenizing, custom analyzers can be handy for special character/token handling. For example, lets say we have a store named *"Springfield™ store"*. We want the indexer to ignore characters like "™" and "®" since users never specify these in their queries. We need to define a special character filter (*"char_filter"*) and analyzer mapping as follows:
-
-.. code-block:: text
-
-  {
-    "mappings": {
-      "properties": {
-        "store_name": {
-          "type": "string",
-          "index_options": "docs",
-          "analyzer": "keyword_with_folding_custom"
-        }
-      }
-    },
-    "settings": {
-      "char_filter": {
-        "remove_tm_and_r": {
-            "pattern":"™|®",
-            "type":"pattern_replace",
-            "replacement":""
-        }
-      },
-      "analyzers": {
-        "keyword_with_folding_custom": {
-          "type": "custom",
-          "tokenizer": "keyword",
-          "char_filter": [
-            "remove_tm_and_r"
-          ],
-          "filter": [
-            "lowercase",
-            "asciifolding"
-          ]
-        }
-      }
-    }
-  }
-
-More information on custom analyzers and the **es_mapping.json** file is available in the User Guide chapter on the Knowledge Base. Example mapping files for a variety of use-cases and content types are also provided.
-
 
 Generate representative training data
 ----------------------------------------
@@ -376,7 +345,7 @@ In our example application of Kwik-E-Mart store information, Domain Classificati
 Intent Classification
 ~~~~~~~~~~~~~~~~~~~~~
 
-For the **store_information** domain, here are snippets of training examples for a few intents for Intent Classification. In a similar vein, we can define query sets for all other intents. These queries reside in *.txt* files under the **labeled_queries** folder of each intent directory as shown in Section 1.3.
+For the **store_information** domain, here are snippets of training examples for a few intents for Intent Classification. We can define query sets for all other intents in a similar vein. These queries reside in *.txt* files under the **labeled_queries** folder of each intent directory as shown in Section 1.3.
 
 * File .../greet/labeled_queries/**train_greet.txt**
 
@@ -468,6 +437,7 @@ File **synonyms.tsv**
 
   Pro Tip - Academic datasets (though instrumental in researching advanced algorithms), are not always reflective of real-world conversational data. Therefore, datasets from popular conferences such as TREC and ACM-SIGDIAL might not be the best choice for developing production applications.
 
+For guidelines on collecting training data at scale, please refer to the User Guide chapter on Training Data. It has useful information on collecting a large amount of training data using relatively inexpensive and easy-to-implement crowdsourcing techniques.
 
 Train the Natural Language Processing classifiers
 ---------------------------------------------------
@@ -583,58 +553,178 @@ Below is an example config file that instructs the Parser to extract the trees d
 Finally, Workbench also offers the flexibility to define your own custom parsing logic that can be run instead of the default config-driven dependency parser. The :doc:`Language Parser User Guide </language_parsing>` in Section 3 has more details on the different options for our config-driven parser and how to implement your own custom parser.
 
 
-Optimize Question Answering
----------------------------
+Optimize Question Answering Performance
+---------------------------------------
 
-The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. The MindMeld Knowledge Base offers a set of operators for ranking results retrieved. These operators are combined to define a "ranking formula". The ranking formula is a scoring function ("Function Score") that gets applied on each query as the metric for ranking Knowledge Base results. MindMeld Workbench provides a default implementation of the Function Score, which would work well for most applications.
+The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. The relevance of each document is represented by a positive floating point number - the ``score``. The higher the score, the more relevant the document. MindMeld Workbench offers a robust, built-in "ranking formula" for defining a general-purpose scoring function. However, in cases where the default ranking formula is not sufficient in ensuring good performance across a large number of test queries, MindMeld Workbench provides a facility for defining custom ranking formulae. The concept of "performance" is explained in Section 1.10.4 on "Evaluation Metrics".
 
-The Function Score is a blend of **Text Relevance**, **Popularity** and **Sort** criteria (if present). If there are no sort entities present, then the Function Score blends the text relevance with descending popularity. The default implementation already considers the scaling factors and distributions of the text relevance scores to adjust the normalized popularity weight accordingly. If a sort entity is present, a decay function is applied to the corresponding sort field and combined with the scaled popularity and text relevance scores.
+Sorting
+~~~~~~~
 
-While the default ranking score implementation in MindMeld Workbench is well tuned and should work reasonably well for most applications, there is a flexible option to specify a custom ranking forumla if required. You need to produce a "ranking score" based on your choice of usage of the available arguments, which can then be applied as the scoring function after Knowledge Base retrieval.
+Among the various signals used in computing the relevance score, sorting is an important operation offered by MindMeld Workbench. Sorting is applicable on any real-valued field in the Knowledge Base (either ascending or descending order). The Question Answering module gets its cue to invoke the sorting function based on the presence of ``sort`` entities. If one or more sort entities are detected, the documents with resolved field values corresponding to those entities will get a boost in the score function. Additionally, a decay is applied to this sorting boost to ensure a balance between the applied sort and other relevance signals.
 
-Example -
+For example, consider the following query:
 
-File **app.py**
+* What are the cheapest doughnuts available in Kwik-E-Mart?
 
-.. code-block:: python
+Let's say we have the following documents in the Knowledge Base:
 
-  @app.kb.handle()
-  def ranking_function_score():
-    # Custom Ranking logic goes here. You can define arbitrary
-    # logic for each of the scoring components.
-    text_rel = compute_text_relevance_score(query, context)
-    pop_score = compute_popularity_score(query, context)
-    sort_factor = compute_sort_score(context.entities)
+.. code-block:: text
 
-    # Combine the score factors as needed
-    ranking_score = combine_factors(text_rel, pop_score, sort_factor)
+  { "item_id": 1, "item_name": "Pink Doughnut", "price": 20, "popularity": 100 },
+  { "item_id": 2, "item_name": "Green Doughnut", "price": 12, "popularity": 95 },
+  { "item_id": 3, "item_name": "Yellow Doughnut", "price": 15, "popularity": 5 },
+  ...
 
-    return ranking_score
-
-The custom ranking function can then be used in the **get** method of the Knowledge Base object. 
+The Natural Language Processor would detect ``cheapest`` as a sort entity and populates the context object accordingly:
 
 .. code-block:: python
 
-  # Assume KnowledgeBase object has been created and
-  # the data is loaded into the 'stores' object.
+  query = "What are the cheapest doughnuts available in Kwik-E-Mart?"
+  context = {
+    'domain': 'item_information',
+    'intent': 'order_item',
+    'entities': [
+      {
+        'type': 'item_name'
+        'mode': 'search',
+        'text': 'doughnut'
+        'value': 'item_name:doughnut',
+        'chstart': 22,
+        'chend': 30
+      },
+      {
+        'type': 'pricesort',
+        'mode': 'sort',
+        'text': 'cheapest',
+        'value': 'price:asc',
+        'chstart': 13,
+        'chend': 20
+      }
+    ]
+  }
 
-  # Get ranked results from KB
-  ranked_results = kb.get(index='stores', query,
-              context, ranking_fn=ranking_function_score)
+  results = kb.get(index='items', query, context)
 
-  print ranked_results
+Technically, the expected ordering should be -
 
-The process of fine tuning the scoring function can be mastered with more experience in building search ranking apps. But here are some general guidelines you can follow to optimize your ranking configuration -
+.. code-block:: text
 
-#. Collect a set of few hundred (or thousand) diverse, representative queries
-#. Run the queries through the parse + QA system with the default set of configurations
-#. Analyze the results for Top 1 or Top K accuracy (depending on the use case)
-#. Modify the ranking function to improve accuracy results for bulk of the misses (without compromising the correct results)
-#. Repeat from Step 2
+  {item_id: 2},
+  {item_id: 3},
+  {item_id: 1}
 
-.. _Question Answering: question_answering.html
+However, notice that the *Yellow Doughnut* has a really poor popularity value, so with the decay function in play, the final ranking that MindMeld Workbench returns is -
 
-Detailed explanation on controlling Text Relevance is available in the User Guide chapter on `Question Answering`_. Also, if you would like to use a Machine Learning approach to ranking (Learning To Rank), more information on assembling the right kind of training data and building models is available in the User Guide chapter.
+.. code-block:: text
+
+  {item_id: 2},
+  {item_id: 1},
+  {item_id: 3}
+
+Text Relevance
+~~~~~~~~~~~~~~
+
+In general, "Text Relevance" refers to the algorithm used to calculate how *similar* the contents of a full-text field are to a full-text query string. A standard similarity algorithm is the `TF_IDF <https://en.wikipedia.org/wiki/Tf-idf>`_ algorithm. Additionally, a *Field Length Norm* factor is applied, so longer field values are penalized.
+
+Consider the following example documents on three different products:
+
+.. code-block:: text
+
+  { "item_id": 1, "item_name": "Pink Frosty Doughnuts", "popularity": 100 },
+  { "item_id": 2, "item_name": "Pink Sprinklicious Doughnuts", "popularity": 100 },
+  { "item_id": 3, "item_name": "Frosty Yellow Doughnuts With Frosty Sprinkles", "popularity": 100 },
+
+For an incoming query like -
+
+* "I want some frosty doughnuts"
+
+The returned list of documents as per text relevance would be:
+
+.. code-block:: text
+
+  {item_id: 1},
+  {item_id: 3},
+  {item_id: 2} 
+
+* {item_id: 1} is more relevant because it's ``item_name`` is short
+* {item_id: 3} comes next because "frosty" appears twice and "doughnut" appears once
+* {item_id: 2} is the last - only "doughnut" matched
+
+If we want to specify a more stringent match criteria (E.g both "frosty" and "doughnut" must appear in the returned documents), we can use the ``minimum_should_match`` argument in the Knowledge Base **get** method. The ``minimum_should_match`` parameter specifies what percentage of query terms should at least match with the field value.
+
+.. code-block:: python
+
+  # All query terms must match the terms in the field value
+  kb.get(index='items', query, context, minimum_should_match=100)
+
+The default value of the ``minimum_should_match`` parameter is set to 75%.
+
+The above example gives a glimpse of the text-matching strategies available in MindMeld Workbench. Much more complex functionality (such as "Exact Matching", "Boosting Query Clauses" and "Advanced Analyzers") is available in the User Guide chapter on Knowledge Base.
+
+Custom Ranking Functions
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Evaluation Metrics
+~~~~~~~~~~~~~~~~~~
+
+Typically in Information Retrieval, Top 1 accuracy, Top K accuracy, Precision, Recall and F1 scores are all great evaluation metrics to get started. To optimize Precision and Recall, you will need to create a "relevant set" of documents for each query in your test set. This relevant set is typically generated by a human expert, or by repeated error analysis.
+
+.. code-block:: text
+
+  Query                                   Relevant Set
+
+  "get me a doughnut"                     1, 3, 28, 67, 253, 798
+  "i want a lemon Squishee"               4, 363, 692
+  "can I get a buzz cola"                 291
+  "pink frosty sprinklicous doughnut"     67
+
+For a thorough evaluation, it is advisable to create relevant sets for thousands of test queries for the initial pass. This bank of queries and their expected results should grow over time into hundreds of thousands, or even millions of query examples. This then becomes the golden set of data on which future models can be trained and evaluated.
+
+Advanced Settings
+~~~~~~~~~~~~~~~~~
+
+While creating the index, all fields in the data go through a process called "Analysis". Analyzers can be defined per field to define the following:
+
+* Tokenizing a block of text into individual terms before adding to inverted index
+* Normalizing these terms into a standard form to improve searchability
+
+When we search on a full-text field, the query string is passed through the same analysis process, to ensure that we are searching for terms in the same form as those that exist in the index.
+
+In MindMeld Workbench, you can optionally define custom analyzers per field by specifying an **es-mapping.json** file at the application root level. While the default MindMeld Workbench Analyzer uses a robust set of character filtering operations for tokenizing, custom analyzers can be handy for special character/token handling. For example, lets say we have a store named *"Springfield™ store"*. We want the indexer to ignore characters like "™" and "®" since users never specify these in their queries. We need to define special ``char_filter`` and ``analyzers`` mappings as follows:
+
+.. code-block:: text
+
+  {
+    "field_mappings": {
+      "store_name": {
+        "type": "string",
+        "analyzer": "my_custom_analyzer"
+      }
+    },
+    "settings": {
+      "char_filter": {
+        "remove_tm_and_r": {
+            "pattern":"™|®",
+            "type":"pattern_replace",
+            "replacement":""
+        }
+      },
+      "analyzers": {
+        "my_custom_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "char_filter": [
+            "remove_tm_and_r"
+          ]
+        }
+      }
+    }
+  }
+
+More information on custom analyzers and the **es_mapping.json** file is available in the User Guide chapter on Knowledge Base. Example mapping files for a variety of use-cases and content types are also provided. If you would like to use a Machine Learning approach to ranking (Learning To Rank), refer to the guidelines on assembling the right kind of training data and building models in the User Guide chapter.
 
 Deploy trained models to production
 ---------------------------------------
