@@ -205,9 +205,15 @@ In our example of store information on Kwik-E-Mart stores, we would have store o
 * address
 * phone_number
 
-A Knowledge Base can have 1 or more indexes. An index is a logical namespace which maps to objects of a particular type in the Knowledge Base. Roughly, you can think of an index as a "database" in a relational database world. Different indexes can be used to map to objects of different types. In our example of Kwik-E-Mart stores data, we would have just 1 index - *"stores"*.
+Indexing
+~~~~~~~~
 
-To setup your Knowledge Base using MindMeld Workbench, you can specify your content catalog as a JSON dump. The MindMeld Knowledge Base can read this JSON dump and extract all fields along with their types directly from the data. For example, if a field is a String, the Knowledge Base would read and store it as searchable strings. If a Float value is encountered, that attribute is stored as float values such that *"greater-than"* and *"lesser-than"* operators are applicable. 
+A Knowledge Base can have one or more indexes. An index (short for "Inverted Index") is a data structure designed to allow very fast full-text searches. It consists of a list of unique words that appear in any document, and for each word, a list of the documents in which it appears. By default, every field in a document object is indexed, and thus is searchable. Different indexes can be used to map to objects of different types. In MindMeld Workbench, creating an index is as simple as specifying the index name while loading your data into the Knowledge Base. In our example of Kwik-E-Mart stores data, we would have just 1 index - *"stores"*.
+
+Loading Data
+~~~~~~~~~~~~
+
+To load your content catalog into the MindMeld Knowledge Base, you can specify your catalog data as a JSON dump. The MindMeld Knowledge Base can read this JSON dump and extract all fields along with their types directly from the data.
 
 Following is an example of JSON data containing objects and their attributes for a few Kwik-E-Mart stores.
 
@@ -239,9 +245,20 @@ Once your catalog is tranformed to the above JSON format, you can load that data
   # Load JSON Data into the KB
   kb.load(data_file='stores_data.json', index='stores')
 
-If the specified index in the **load** method already exists, the data corresponding to that index will be overwritten. If not, a new index with that name is created and tha data is loaded in accordingly.
+If the specified index in the **load** method already exists, the index is recreated with the new data. If not, a new index with that name is created and tha data is loaded in.
 
-Once your data is loaded, you can use the **get** method to retrieve objects from the Knowledge Base -
+To delete an index, simply use the **delete_index** method by specifying the index name to delete.
+
+.. code-block:: python
+
+  kb.delete_index(index='stores')
+
+Retrieval
+~~~~~~~~~
+
+Once your data is loaded, you can use the **get** method to retrieve objects from the MindMeld Knowledge Base. The **get** method uses various types information available in the query and entity mappings (passed in the context object) to retrieve documents. For String-valued fields, the Knowledge Base uses Full-Text Search for retrieval. When "range" entities are detected, the **get** method uses "greater-than" or "lesser-than" operations as applicable on the respective (real-valued) fields. More details on configuring Sorting and Text Relevance strategies are available in Section 1.10 and the User Guide chapter on Knowledge Base.
+
+Example use of **get** -
 
 .. code-block:: python
 
@@ -274,7 +291,60 @@ Output -
     "phone_number": "(+1) 100-100-1100"
   }
 
-The MindMeld Knowledge Base offers a versatile set of ways to specify the **get** to retrieve results for a variety of increasingly complex inputs. Additionally, for granular control over the tokenization and text processing mechanisms for searching the Knowledge Base, more information is available in the User Guide chapter on the Knowledge Base.
+The **get** method also supports pagination. You can use the *offset* and *num_docs* arguments to retrieve the required window of documents for the query. By default, the **get** method uses a value of *num_docs=10*.
+
+.. code-block:: python
+
+  # Retrieve documents numbers 11 to 30
+  kb.get(index='stores', query, context, offset=10, num_docs=20)
+
+Advanced Settings
+~~~~~~~~~~~~~~~~~
+
+While creating the index, all fields in the data go through a process called "Analysis". "Analyzers" can be defined per field to define the following:
+
+* Tokenizing a block of text into individual terms before adding to inverted index
+* Normalizing these terms into a standard form to improve searchability
+
+In MindMeld Workbench, you can optionally define custom analyzers per field by specifying an **es-mapping.json** file at the application root level. While the default MindMeld Workbench Analyzer uses a robust set of character filtering operations for tokenizing, custom analyzers can be handy for special character/token handling. For example, lets say we have a store named *"Springfield™ store"*. We want the indexer to ignore characters like "™" and "®" since users never specify these in their queries. We need to define a special character filter (*"char_filter"*) and analyzer mapping as follows:
+
+.. code-block:: text
+
+  {
+    "mappings": {
+      "properties": {
+        "store_name": {
+          "type": "string",
+          "index_options": "docs",
+          "analyzer": "keyword_with_folding_custom"
+        }
+      }
+    },
+    "settings": {
+      "char_filter": {
+        "remove_tm_and_r": {
+            "pattern":"™|®",
+            "type":"pattern_replace",
+            "replacement":""
+        }
+      },
+      "analyzers": {
+        "keyword_with_folding_custom": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "char_filter": [
+            "remove_tm_and_r"
+          ],
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+
+More information on custom analyzers and the **es_mapping.json** file is available in the User Guide chapter on the Knowledge Base. Example mapping files for a variety of use-cases and content types are also provided.
 
 
 Generate representative training data
@@ -515,7 +585,8 @@ Finally, Workbench also offers the flexibility to define your own custom parsing
 
 Optimize Question Answering
 ---------------------------
-The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. Just as in a relational database, MindMeld Workbench offers a set of operators for ranking results retrieved. These operators are combined to define a "ranking formula". The ranking formula is a scoring function ("Function Score") that gets applied on each query as the metric for ranking Knowledge Base results. MindMeld Workbench provides a default implementation of the Function Score, which would work well for most applications.
+
+The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. The MindMeld Knowledge Base offers a set of operators for ranking results retrieved. These operators are combined to define a "ranking formula". The ranking formula is a scoring function ("Function Score") that gets applied on each query as the metric for ranking Knowledge Base results. MindMeld Workbench provides a default implementation of the Function Score, which would work well for most applications.
 
 The Function Score is a blend of **Text Relevance**, **Popularity** and **Sort** criteria (if present). If there are no sort entities present, then the Function Score blends the text relevance with descending popularity. The default implementation already considers the scaling factors and distributions of the text relevance scores to adjust the normalized popularity weight accordingly. If a sort entity is present, a decay function is applied to the corresponding sort field and combined with the scaled popularity and text relevance scores.
 
