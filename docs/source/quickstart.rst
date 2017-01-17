@@ -238,17 +238,21 @@ Following is an example of JSON data containing document objects and their attri
 
 File **stores_data.json**
 
-.. code-block:: text
+.. code-block:: javascript
 
   {
-    "store_name": "Central Plaza Store", "open_time": 0800 hrs, "close_time": 1800 hrs,
+    "store_name": "Central Plaza Store",
+    "open_time": 0800 hrs,
+    "close_time": 1800 hrs,
     "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
-    "phone_number": "(+1) 100-100-1100"
+    "phone_number": (+1) 100-100-1100
   },
   {
-    "store_name": "Market Street Store", "open_time": 0900 hrs, "close_time": 2200 hrs,
+    "store_name": "Market Street Store",
+    "open_time": 0900 hrs,
+    "close_time": 2200 hrs,
     "adress": "750 Market Street, Capital City, CA 94001",
-    "phone_number": "(+1) 450-450-4500"
+    "phone_number": (+1) 450-450-4500
   }
   ...
 
@@ -271,23 +275,6 @@ To delete an index, simply use the **delete_index** method by specifying the ind
 .. code-block:: python
 
   kb.delete_index(index='stores')
-
-Popularity
-~~~~~~~~~~
-
-An important concept in the MindMeld Knowledge Base is the notion of "popularity" of each document. This can either be a field value that codifies the relative importance of each document in the Knowledge Base, or a hand crafted metric per document based on some external criteria. The popularity value serves two main purposes:
-
-* Computing the relative importance of entities when extracting entity data.
-* Default ranking metric during Knowledge Base retrieval.
-
-In the case of Kwik-E-Mart stores, all stores are equally important, so a default dummy popularity value of "1" is added to all documents. However, if we had an example use-case of ordering items from Kwik-E-Mart stores, the *"avg_rating"* of an item could be used as a proxy for popularity.
-
-.. code-block:: python
-
-  # Load JSON Data into the KB and define popularity field.
-  kb.load(data_file='items_data.json', index='items', popularity_field="avg_rating")
-
-In applications involving Product Catalogs or Content Libraries, metrics such as Page Views, Sale Metrics, Sale Price or a combination of all of these can be used for popularity.
 
 Retrieval
 ~~~~~~~~~
@@ -320,12 +307,14 @@ Example use of **get** -
 
 Output -
 
-.. code-block:: text
+.. code-block:: javascript
 
   {
-    "store_name": "Central Plaza Store", "open_time": "8:00 am", "close_time": "6:00 pm",
+    "store_name": "Central Plaza Store",
+    "open_time": "8:00 am",
+    "close_time": "6:00 pm",
     "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
-    "phone_number": "(+1) 100-100-1100"
+    "phone_number": (+1) 100-100-1100
   }
 
 The **get** method also supports pagination. You can use the *offset* and *num_docs* arguments to retrieve the required window of documents for the query. By default, the **get** method uses a value of *num_docs=10*.
@@ -636,7 +625,7 @@ The Question Answering module is responsible for ranking results retrieved from 
 Sorting
 ~~~~~~~
 
-Among the various signals used in computing the relevance score, sorting is an important operation offered by MindMeld Workbench. Sorting is applicable on any real-valued field in the Knowledge Base (either ascending or descending order). The Question Answering module gets its cue to invoke the sorting function based on the presence of ``sort`` entities. If one or more sort entities are detected, the documents with resolved field values corresponding to those entities will get a boost in the score function. Additionally, a decay is applied to this sorting boost to ensure a balance between the applied sort and other relevance signals.
+Among the various signals used in computing the relevance score, sorting is an important operation offered by MindMeld Workbench. Sorting is applicable on any real-valued field in the Knowledge Base (either ascending or descending order). The Question Answering module gets its cue to invoke the sorting function based on the presence of ``sort`` entities. If one or more sort entities are detected, the documents with resolved numerical field values corresponding to those entities will get a boost in the score function. Additionally, a decay is applied to this sorting boost to ensure a balance between the applied sort and other relevance signals.
 
 For example, consider the following query:
 
@@ -644,11 +633,23 @@ For example, consider the following query:
 
 Let's say we have the following documents in the Knowledge Base:
 
-.. code-block:: text
+.. code-block:: javascript
 
-  { "item_id": 1, "item_name": "Pink Doughnut", "price": 20, "popularity": 100 },
-  { "item_id": 2, "item_name": "Green Doughnut", "price": 12, "popularity": 95 },
-  { "item_id": 3, "item_name": "Yellow Doughnut", "price": 15, "popularity": 5 },
+  {
+    "item_id": 1,
+    "item_name": "Pink Doughnut",
+    "price": 20
+  },
+  {
+    "item_id": 2,
+    "item_name": "Green Doughnut",
+    "price": 12
+  },
+  {
+    "item_id": 3,
+    "item_name": "Yellow Doughnut",
+    "price": 15
+  }
   ...
 
 The Natural Language Processor would detect ``cheapest`` as a sort entity and populates the context object accordingly:
@@ -682,17 +683,9 @@ The Natural Language Processor would detect ``cheapest`` as a sort entity and po
   results = kb.get(index='items', query, context)
   print results
 
-Technically, the expected ordering should be -
+The final ranking that MindMeld Workbench returns is -
 
-.. code-block:: text
-
-  {item_id: 2},
-  {item_id: 3},
-  {item_id: 1}
-
-However, notice that the *Yellow Doughnut* has a really poor popularity value, so with the decay function in play, the final ranking that MindMeld Workbench returns is -
-
-.. code-block:: text
+.. code-block:: javascript
 
   {item_id: 2},
   {item_id: 1},
@@ -705,11 +698,20 @@ In general, "Text Relevance" refers to the algorithm used to calculate how *simi
 
 Consider the following example documents on three different products:
 
-.. code-block:: text
+.. code-block:: javascript
 
-  { "item_id": 1, "item_name": "Pink Frosty Doughnuts", "popularity": 100 },
-  { "item_id": 2, "item_name": "Pink Sprinklicious Doughnuts", "popularity": 100 },
-  { "item_id": 3, "item_name": "Frosty Yellow Doughnuts With Frosty Sprinkles", "popularity": 100 },
+  { 
+    "item_id": 1,
+    "item_name": "Pink Frosty Doughnuts"
+  },
+  { 
+    "item_id": 2,
+    "item_name": "Pink Sprinklicious Doughnuts"
+  },
+  {
+    "item_id": 3,
+    "item_name": "Frosty Yellow Doughnuts With Frosty Sprinkles"
+  }
 
 For an incoming query like -
 
@@ -717,7 +719,7 @@ For an incoming query like -
 
 The returned list of documents as per text relevance would be:
 
-.. code-block:: text
+.. code-block:: javascript
 
   {item_id: 1},
   {item_id: 3},
@@ -754,7 +756,7 @@ For example, lets say we have a store named *"Springfield™ store"*. We want th
 
 File **es_mapping.json** -
 
-.. code-block:: text
+.. code-block:: javascript
 
   {
     "field_mappings": {
