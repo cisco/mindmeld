@@ -48,7 +48,7 @@ Script Your Ideal Dialogue Interactions
 
 Once you have identified a good use case, the next step is to script your envisioned dialogue interactions. This design exercise details the conversational interaction flows which define the user experience for your application. It is important to think through not just the most obvious user flows, but also the corner case and exception user flows which may be encountered by users during an interaction. For example, the dialogue flows should illustrate how the application responds if the user request is beyond the application scope. Also, the flows should illustrate the interactions which will enable users to get help if they are stuck or gracefully leave the interaction. The dialogue flows should detail not only the various interaction pathways a conversation may traverse, but they should also illustrate the desired language and tone envisioned for the experience.
 
-For developers familiar with graphical interface design, this step is comparable to the task of creating wireframe and pixel-perfect mockups. Like any design step, there will likely be many iterations required to work through usability issues and reach consensus on a final design. It is always wise to begin coding and implementation only after the dust has settled on the scripted dialogue interactions. Otherwise, much implementation work and effort may be wasted. 
+For developers familiar with graphical interface design, this step is comparable to the task of creating wireframes and pixel-perfect mockups. Like any design step, there will likely be many iterations required to work through usability issues and reach consensus on a final design. It is always wise to begin coding and implementation only after the dust has settled on the scripted dialogue interactions. Otherwise, much implementation work and effort may be wasted. 
 
 For our simple use case, the following diagram illustrates the dialogue interactions we will strive to deliver in our final implementation.
 
@@ -60,13 +60,51 @@ For our simple use case, the following diagram illustrates the dialogue interact
 Define the Domain, Intent, Entity and Role Hierarchy
 -------------------------------------------------------
 
-Conversational applications rely on a hierarchy of machine learning classifiers in order to model and understand natural language. Often called the Natural Language Processor, this family of machine learning models sits at the core all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has been adopted in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on a hierarchy of machine learning models illustrated below.
+Conversational applications rely on a hierarchy of machine learning classifiers in order to model and understand natural language. More broadly defined as Natural Language Processing, this family of machine learning models sits at the core all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has been adopted in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on a hierarchy of machine learning models illustrated below.
 
 .. image:: images/hierarchy.png
     :width: 700px
     :align: center
 
 The topmost layer in the model hierarchy is the domain classifier. The domain classifier is responsible for performing a first-pass classification to group incoming queries into set of pre-defined buckets or 'domains'. For any given domain, there may be one or more pre-defined intents. Each intent defines a specific action or answer type to invoke for a given request. The intent classifier models are responsible for deciding which intent is most likely associated with a given request. Once the request is categorized into a specific intent, the entity recognition models are employed to discern the important words and phrases in each query that must be identified in order to understand and fulfill the request. These identified words and phrases are called 'entities', and each intent may have zero or more types of entities which must be recognized. For some types of entities, a fourth and final classification step, called role classification, may be required. The role classifiers are responsible for adding differentiating labels to entities of the same type. Refer to the User Guide for a more in-depth treatment of the natural language processing classifier hierarchy utilized by MindMeld Workbench. 
+
+For our simple conversational application which can help us find store information for our local Kwik-E-Mart, the natural language processing model hierarchy can be designed as illustrated below.
+
+.. image:: images/hierarchy2.png
+    :width: 700px
+    :align: center
+
+As illustrated, this rudimentary application has a single domain, 'store_info', which encompasses all of the functionality required to find information about Kwik-E-Mart retail stores. In addition, this domain supports five initial intents:
+
+   - ``greet`` Begins an interaction and welcomes the user.
+   - ``get_store_hours`` Returns the open and close time for the specified store.
+   - ``find_nearest_store`` Returns the closest store to the user.
+   - ``exit`` Ends the current interaction.
+   - ``help`` Provides help information in case the user gets stuck.
+
+.. note::
+
+  By convention, intent names should always be verbs which describe what the user is trying accomplish.
+
+In this basic example, only the ``get_store_hours`` intent requires entity classification. This intent supports the two defined entity types listed below.
+
+   - ``store_name`` The name of a specific retail store location.
+   - ``date`` The calendar date or day of the week.
+
+Neither of these two entity types will require role classification in this simple example.
+
+.. note::
+
+  By convention, entity names should always be nouns which describe the entity type.
+
+
+The design of the domain, intent, entity and role hierarchy for this example application is now complete. Based on this architecture, we would expect our trained natural language processing models to yield the following results for the user requests in the simple interaction proposed in the preceding section.
+
+.. image:: images/quickstart_parse_output.png
+    :width: 600px
+    :align: center
+
+
 
 
 Show the directory structure which captures this hierarchy for a simple example.
@@ -75,21 +113,6 @@ Developer creates a directory structure that implicitly defines the domain, inte
 
 Mention the concept of 'blueprints' (aka reference applications).
 
-
-For example,
-
- - ``store_information`` Defines the domain.
- 
-   - ``greet`` Begins an interaction.
-   - ``get_close_time`` Returns the close time for the requested store.
-   - ``get_open_time`` Returns the open time for the requested store.
-   - ``get_nearest_store`` Returns the closest store to the user.
-   - ``get_is_open_now`` Returns yes or no if the requested store is open now.
-   - ``exit`` Ends the current interaction.
-
-.. note::
-
-  By convention, intent names should always be verbs which describe what the user is trying accomplish.
 
 
 Directory structure::
@@ -112,15 +135,6 @@ Directory structure::
               exit/
                   labeled_queries/
 
-Entities:
-
- - When does the store on ``Elm Street | NAME`` close ``today | DATE``?
- - When does that store open ``tomorrow | DATE``?
- - Is the ``Central Plaza Kwik-E-Mart | NAME`` open now?
-
-.. note::
-
-  By convention, entity names should always be nouns which describe the entity type.
 
 
 
