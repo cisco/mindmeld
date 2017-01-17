@@ -60,30 +60,21 @@ For our simple use case, the following diagram illustrates the dialogue interact
 Define the Domain, Intent, Entity and Role Hierarchy
 -------------------------------------------------------
 
-Conversational applications rely on a hierarchy of machine learning classifiers in order to model and understand natural language. Often called the Natural Language Processor, this family of machine learning models sits at the core all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to disect and understand human language, a set of best practices has been adopted in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems.  
-
-Today, nearly all commercial conversational applications rely on a hierarchy of machine learning models illustrated below.
+Conversational applications rely on a hierarchy of machine learning classifiers in order to model and understand natural language. Often called the Natural Language Processor, this family of machine learning models sits at the core all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has been adopted in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on a hierarchy of machine learning models illustrated below.
 
 .. image:: images/hierarchy.png
-    :width: 600px
+    :width: 700px
     :align: center
 
-The topmost layer in the model hierarchy is the domain classifier. The domain classifier is responsible for performing a first-pass classification to group incoming queries into set of pre-defined buckets or 'domains'. For any given domain, there may be one or more pre-defined intents. Each intent defines a specific action or answer type to invoke for a given request. The intent classifier models are responsible for deciding which intent is most likely associated with a given request. Once the request is categorized into a specific intent, the entity recognition models are employed to discern the important words and phrases in each query that must be identified in order to understand and fulfill the request. These identified words and phrases are called 'entities', and each intent may have zero or more types of entities which must be recognized. For some types of entities, a fourth and final classification step, called role classification, may be required. The role classifiers are responsible for adding differentiating labels to entities of the same type. 
-
-Refer to section 3 for a more in-depth treatment of the natural language processing classifier hierarchy utilized by MindMeld Workbench. 
+The topmost layer in the model hierarchy is the domain classifier. The domain classifier is responsible for performing a first-pass classification to group incoming queries into set of pre-defined buckets or 'domains'. For any given domain, there may be one or more pre-defined intents. Each intent defines a specific action or answer type to invoke for a given request. The intent classifier models are responsible for deciding which intent is most likely associated with a given request. Once the request is categorized into a specific intent, the entity recognition models are employed to discern the important words and phrases in each query that must be identified in order to understand and fulfill the request. These identified words and phrases are called 'entities', and each intent may have zero or more types of entities which must be recognized. For some types of entities, a fourth and final classification step, called role classification, may be required. The role classifiers are responsible for adding differentiating labels to entities of the same type. Refer to the User Guide for a more in-depth treatment of the natural language processing classifier hierarchy utilized by MindMeld Workbench. 
 
 
-In the past few years, some standard approaches have been adopted 
-
-
-Today's commercial conversational applications rely on 
-
-Show and describe a simple diagram which illustrates the domain, intent, entity and role hierarchy.  Show the directory structure which captures this hierarchy for a simple example.
+Show the directory structure which captures this hierarchy for a simple example.
 
 Developer creates a directory structure that implicitly defines the domain, intent and entity hierarchy.
 
-Intent names are always verbs which describe what the user is trying to accomplish.
-Entity names are always nouns which describe the entity type.
+Mention the concept of 'blueprints' (aka reference applications).
+
 
 For example,
 
@@ -95,6 +86,10 @@ For example,
    - ``get_nearest_store`` Returns the closest store to the user.
    - ``get_is_open_now`` Returns yes or no if the requested store is open now.
    - ``exit`` Ends the current interaction.
+
+.. note::
+
+  By convention, intent names should always be verbs which describe what the user is trying accomplish.
 
 
 Directory structure::
@@ -122,6 +117,11 @@ Entities:
  - When does the store on ``Elm Street | NAME`` close ``today | DATE``?
  - When does that store open ``tomorrow | DATE``?
  - Is the ``Central Plaza Kwik-E-Mart | NAME`` open now?
+
+.. note::
+
+  By convention, entity names should always be nouns which describe the entity type.
+
 
 
 Define the dialog state handlers
