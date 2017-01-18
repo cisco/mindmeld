@@ -97,52 +97,57 @@ Neither of these two entity types will require role classification in this simpl
 
   By convention, entity names should always be nouns which describe the entity type.
 
+The design of the domain, intent, entity and role hierarchy for this example application is now complete. We can now begin implementing this application using MindMeld Workbench. Every Workbench application begins with a root folder. The root folder contains all of the training data files, configuration files and custom code required in each Workbench application. For our simple example, lets first define a root directory called 'my_app'. To define the domain and intent hierarchy for your application, create a subfolder called 'domains'. Inside the 'domains' folder, create a subfolder for the name of each different domain in your application. Then, inside each domain folder, create another subfolder with the name of each individual intent in that domain. These folders are used to organize the training data for your machine learning models to understand natural language.
 
-The design of the domain, intent, entity and role hierarchy for this example application is now complete. Based on this architecture, we would expect our trained natural language processing models to yield the following results for the user requests in the simple interaction proposed in the preceding section.
+Similarly, inside the root folder, create another subdirectory called 'entities'. Inside the entities folder, create a subdirectory for the name of every different entity type required in your application. These folders are used to organize the data files used by the entity recognizer, role classifier and entity resolver models. Refer to the User Guide for more details about the organization and structure of the application root directory. The User Guide also describes application 'blueprints' which provide pre-configured application directory structures for common conversational application use cases.
+
+For our simple example application, the root directory structure which implements our desired natural language model hierarchy is illustrated below. 
+
+.. image:: images/directory.png
+    :width: 400px
+    :align: center
+
+Notice that there is no folder for the ``date`` entity. In this case, ``date`` is a 'system' entity, which is already built in to the Workbench platform. Workbench provides several different 'system' entity types for common, domain-independent entities; see the Workbench User Guide for details.  
+
+Given this defined hierarchy, we would expect our trained natural language processing models to yield the following results for the user requests in the simple interaction proposed in the preceding section.
 
 .. image:: images/quickstart_parse_output.png
     :width: 600px
     :align: center
 
+The following sections of the quickstart will describe how to introduce training data to the defined directories in order to build machine learning models to parse and understand user requests, as shown above.
 
 
-
-Show the directory structure which captures this hierarchy for a simple example.
-
-Developer creates a directory structure that implicitly defines the domain, intent and entity hierarchy.
-
-Mention the concept of 'blueprints' (aka reference applications).
-
-
-
-Directory structure::
-
-  my_app/
-      my_app.py
-      data/
-          store_information/
-              gazetteers/
-              greet/
-                  labeled_queries/
-              get_store_close_time/
-                  labeled_queries/
-              get_store_open_time/
-                  labeled_queries/
-              get_nearest_store/
-                  labeled_queries/
-              get_is_open_now/
-                  labeled_queries/
-              exit/
-                  labeled_queries/
-
-
-
-
-Define the dialog state handlers
+Define the Dialogue State Handlers
 -----------------------------------
-In my view, this is where we define the natural language response templates which should be returned at each dialogue state in an interaction. We should illustrate a simple flow in a flow chart and then in a snippet of python code which illustrates how the logic is implemented in the dialogue manager.
 
-Create the python file which defines your application.
+Today's commercial voice and chat assistants guide users through a conversational interaction in order to find information or accomplish a task. The steps in each conversational interaction are called 'dialogue states'. A dialogue state defines the form of response which is appropriate for that step in an interaction as well as other logic that must be invoked to determine the desired response. At the core of every conversational application is a set of dialogue state handlers which define the logic and response required for every supported dialogue state.
+
+For ideal conversational interactions, the flow of dialogue states can be very straightforward, as illustrated in the flow diagram below.
+
+.. image:: images/simple_dialogue_states.png
+    :width: 700px
+    :align: center
+
+In practice, however, the flow of dialogue states can be quite complex. Conversational applications are powerful since they provide few constraints on what a user can say during an interaction. This makes it easy for a user to shortcut to the specific functionality they may need. This also means that a user is free to change topics or otherwise throw a curve ball at your application at any point in the interaction without warning. Consequently, it is not uncommon for dialogue flows to be quite convoluted, as suggested below.
+
+.. image:: images/complex_dialogue_states.png
+    :width: 700px
+    :align: center
+
+In this section, we will illustrate how the dialogue states and the dialogue state handlers are implemented for the scripted conversational interaction from section 1.2. First, we must define the set of dialogue states which encompass the scripted interactions. For this quickstart example, four different dialogue states will suffice: ``welcome``, ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The following diagram illustrates the conversation flow.
+
+.. image:: images/quickstart_dialogue_states.png
+    :width: 700px
+    :align: center
+
+As shown, each dialogue state prescribes the form of the system response. For most commercial applications today, the form of response consists of natural language templates to reply to the user or prompt for additional information. These templates are populated on-the-fly using contextual state information gleaned from the conversation.  Often, the response also includes additional information to render client-side interactive elements such as content carousels or quick reply buttons.
+
+.. note::
+
+  By convention, the dialogue state names should be a verb which describes the action your application should take at that point in the interaction.
+
+In MindMeld Workbench, the dialogue states and their associated handler logic is defined by a file containing Python code located in the root directory of your application. This file defines a set of patterns, which when matched, should return a specified response. To begin, create a Python file called 'my_app.py' in the root directory of your application. If you begin your implementation using a Workbench 'blueprint' app, this file should already exist in the root directory.
 
 File my_app.py
 
