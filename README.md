@@ -22,4 +22,4 @@ We will be using Python3. Make sure you are not in a Python2 virtualenv. Run the
 
 ## Running
 
-`open build/html/index.html`
+`open docs/build/html/index.html`
