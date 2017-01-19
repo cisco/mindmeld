@@ -42,11 +42,12 @@ While there is no magic formula to determine which use case is ideal for a conve
 
 For this quickstart section, we will consider a simple conversational use case which can provide information about retail store locations for your neighborhood Kwik-E-Mart. For example, you could use this service to ask about store hours: 'When does the Kwik-E-Mart on Elm street close today?'. This rudimentary use case will serve as a reference example to highlight the key steps in building a useful conversational interface.
 
+.. _script-interactions:
 
 Script Your Ideal Dialogue Interactions
 ---------------------------------------
 
-Once you have identified a good use case, the next step is to script your envisioned dialogue interactions. This design exercise details the conversational interaction flows which define the user experience for your application. It is important to think through not just the most obvious user flows, but also the corner case and exception user flows which may be encountered by users during an interaction. For example, the dialogue flows should illustrate how the application responds if the user request is beyond the application scope. Also, the flows should illustrate the interactions which will enable users to get help if they are stuck or gracefully leave the interaction. The dialogue flows should detail not only the various interaction pathways a conversation may traverse, but they should also illustrate the desired language and tone envisioned for the experience.
+Once you have identified a good use case, the next step is to script your envisioned dialogue interactions. This design exercise details the conversational interaction flows which define the user experience for your application. It is important to think through not just the most obvious user flows, but also the corner case and exception user flows which may be encountered by users during an interaction. For example, the dialogue flows should illustrate how the application responds if the user request is beyond the application scope. Also, the flows should illustrate the interactions which will enable users to gracefully leave the interaction or to get help if they are stuck. The dialogue flows should detail not only the various interaction pathways a conversation may traverse, but they should also illustrate the desired language and tone envisioned for the experience.
 
 For developers familiar with graphical interface design, this step is comparable to the task of creating wireframes and pixel-perfect mockups. Like any design step, there will likely be many iterations required to work through usability issues and reach consensus on a final design. It is always wise to begin coding and implementation only after the dust has settled on the scripted dialogue interactions. Otherwise, much implementation work and effort may be wasted. 
 
@@ -60,13 +61,13 @@ For our simple use case, the following diagram illustrates the dialogue interact
 Define the Domain, Intent, Entity and Role Hierarchy
 -------------------------------------------------------
 
-Conversational applications rely on a hierarchy of machine learning classifiers in order to model and understand natural language. More broadly defined as Natural Language Processing, this family of machine learning models sits at the core all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has been adopted in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on a hierarchy of machine learning models illustrated below.
+Conversational applications rely on a hierarchy of machine learning classifiers in order to model and understand natural language. More broadly defined as Natural Language Processing, this family of machine learning models sits at the core all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has been adopted in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on the hierarchy of machine learning models illustrated below.
 
 .. image:: images/hierarchy.png
     :width: 700px
     :align: center
 
-The topmost layer in the model hierarchy is the domain classifier. The domain classifier is responsible for performing a first-pass classification to group incoming queries into set of pre-defined buckets or 'domains'. For any given domain, there may be one or more pre-defined intents. Each intent defines a specific action or answer type to invoke for a given request. The intent classifier models are responsible for deciding which intent is most likely associated with a given request. Once the request is categorized into a specific intent, the entity recognition models are employed to discern the important words and phrases in each query that must be identified in order to understand and fulfill the request. These identified words and phrases are called 'entities', and each intent may have zero or more types of entities which must be recognized. For some types of entities, a fourth and final classification step, called role classification, may be required. The role classifiers are responsible for adding differentiating labels to entities of the same type. Refer to the User Guide for a more in-depth treatment of the natural language processing classifier hierarchy utilized by MindMeld Workbench. 
+The topmost layer in the model hierarchy is the domain classifier. The domain classifier is responsible for performing a first-pass classification to assign incoming queries into set of pre-defined buckets or 'domains'. For any given domain, there may be one or more pre-defined intents. Each intent defines a specific action or answer type to invoke for a given request. The intent classifier models are responsible for deciding which intent is most likely associated with a given request. Once the request is categorized into a specific intent, the entity recognition models are employed to discern the important words and phrases in each query that must be identified in order to understand and fulfill the request. These identified words and phrases are called 'entities', and each intent may have zero or more types of entities which must be recognized. For some types of entities, a fourth and final classification step, called role classification, may be required. The role classifiers are responsible for adding differentiating labels to entities of the same type. Refer to the :ref:`User Guide <userguide>` for a more in-depth treatment of the natural language processing classifier hierarchy utilized by MindMeld Workbench. 
 
 For our simple conversational application which can help us find store information for our local Kwik-E-Mart, the natural language processing model hierarchy can be designed as illustrated below.
 
@@ -86,7 +87,7 @@ As illustrated, this rudimentary application has a single domain, 'store_info', 
 
   By convention, intent names should always be verbs which describe what the user is trying accomplish.
 
-In this basic example, only the ``get_store_hours`` intent requires entity classification. This intent supports the two defined entity types listed below.
+In this basic example, only the ``get_store_hours`` intent requires entity recognition. This intent supports the two defined entity types listed below.
 
    - ``store_name`` The name of a specific retail store location.
    - ``date`` The calendar date or day of the week.
@@ -97,9 +98,9 @@ Neither of these two entity types will require role classification in this simpl
 
   By convention, entity names should always be nouns which describe the entity type.
 
-The design of the domain, intent, entity and role hierarchy for this example application is now complete. We can now begin implementing this application using MindMeld Workbench. Every Workbench application begins with a root folder. The root folder contains all of the training data files, configuration files and custom code required in each Workbench application. For our simple example, lets first define a root directory called 'my_app'. To define the domain and intent hierarchy for your application, create a subfolder called 'domains'. Inside the 'domains' folder, create a subfolder for the name of each different domain in your application. Then, inside each domain folder, create another subfolder with the name of each individual intent in that domain. These folders are used to organize the training data for your machine learning models to understand natural language.
+The design of the domain, intent, entity and role hierarchy for this example application is now complete, and we can begin implementing this application using MindMeld Workbench. Every Workbench application begins with a root folder. The root folder contains all of the training data files, configuration files and custom code required in each Workbench application. For our simple example, lets first define a root directory called 'my_app'. To define the domain and intent hierarchy for your application, create a subfolder called 'domains'. Inside the 'domains' folder, create a subfolder for the name of each different domain in your application. Then, inside each domain folder, create another subfolder with the name of each individual intent in that domain. These folders are used to organize the training data for your machine learning models to understand natural language.
 
-Similarly, inside the root folder, create another subdirectory called 'entities'. Inside the entities folder, create a subdirectory for the name of every different entity type required in your application. These folders are used to organize the data files used by the entity recognizer, role classifier and entity resolver models. Refer to the User Guide for more details about the organization and structure of the application root directory. The User Guide also describes application 'blueprints' which provide pre-configured application directory structures for common conversational application use cases.
+Similarly, inside the root folder, create another subdirectory called 'entities'. Inside the entities folder, create a subdirectory for the name of every different entity type required in your application. These folders organize the data files used by the entity recognizer, role classifier and entity resolver models. Refer to the :ref:`User Guide <userguide>` for more details about the organization and structure of the application root directory. The :ref:`User Guide <userguide>` also describes application 'blueprints' which provide pre-configured application directory structures for common conversational application use cases.
 
 For our simple example application, the root directory structure which implements our desired natural language model hierarchy is illustrated below. 
 
@@ -107,7 +108,7 @@ For our simple example application, the root directory structure which implement
     :width: 400px
     :align: center
 
-Notice that there is no folder for the ``date`` entity. In this case, ``date`` is a 'system' entity, which is already built in to the Workbench platform. Workbench provides several different 'system' entity types for common, domain-independent entities; see the Workbench User Guide for details.  
+Notice that there is no folder for the ``date`` entity. In this case, ``date`` is a 'system' entity, which is already built in to the Workbench platform. Workbench provides several different 'system' entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <userguide>` for details.  
 
 Given this defined hierarchy, we would expect our trained natural language processing models to yield the following results for the user requests in the simple interaction proposed in the preceding section.
 
@@ -121,9 +122,16 @@ The following sections of the quickstart will describe how to introduce training
 Define the Dialogue State Handlers
 -----------------------------------
 
-Today's commercial voice and chat assistants guide users through a conversational interaction in order to find information or accomplish a task. The steps in each conversational interaction are called 'dialogue states'. A dialogue state defines the form of response which is appropriate for that step in an interaction as well as other logic that must be invoked to determine the desired response. At the core of every conversational application is a set of dialogue state handlers which define the logic and response required for every supported dialogue state.
+Today's commercial voice and chat assistants guide users through a conversational interaction in order to find information or accomplish a task. The steps in each conversational interaction are called 'dialogue states'. A dialogue state defines the form of response which is appropriate for each step in an interaction as well as other logic that must be invoked to determine the desired response. Each application relies on a set of dialogue state handlers which define the logic and response required for every supported dialogue state. 
 
-For ideal conversational interactions, the flow of dialogue states can be very straightforward, as illustrated in the flow diagram below.
+At the core of every conversational application resides a dialogue manager. The dialogue manager is responsible for analyzing each incoming request and assigning it to a specific dialogue state handler to execute required logic and return a response. The task of mapping each incoming request to the appropriate dialogue state is often referred to as 'dialogue state tracking'. While applying large-scale machine learning techiniques for dialogue state tracking is an active area of research today, nearly all commercial applications rely heavily on rule-based approaches to map incoming requests to the correct dialogue state.
+
+MindMeld Workbench provides advanced and flexible capabilities for dialogue state tracking. It offers a flexible syntax for defining the rules and patterns each incoming request must match in order to be assigned to a specific dialogue state. In addition, Workbench is fully extensible and can accommodate any custom logic when MindMeld's built-in pattern matching engine will not suffice.
+
+Specify the Superset of Dialogue States
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before you can begin implementing your dialogue state handlers, it is first necessary to define the required dialogue states. For simple conversational interactions, the set of dialogue states can be very straightforward, as illustrated in the flow diagram below.
 
 .. image:: images/simple_dialogue_states.png
     :width: 700px
@@ -135,27 +143,66 @@ In practice, however, the flow of dialogue states can be quite complex. Conversa
     :width: 700px
     :align: center
 
-In this section, we will illustrate how the dialogue states and the dialogue state handlers are implemented for the scripted conversational interaction from section 1.2. First, we must define the set of dialogue states which encompass the scripted interactions. For this quickstart example, four different dialogue states will suffice: ``welcome``, ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The following diagram illustrates the conversation flow.
+Our goal here is to define the required dialogue states for the scripted conversational interaction in :ref:`section 1.2 <script-interactions>`. To capture the envisioned functionality, four different dialogue states will be needed: ``welcome``, ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The following diagram illustrates the conversation flow.
 
 .. image:: images/quickstart_dialogue_states.png
     :width: 700px
     :align: center
 
-As shown, each dialogue state prescribes the form of the system response. For most commercial applications today, the form of response consists of natural language templates to reply to the user or prompt for additional information. These templates are populated on-the-fly using contextual state information gleaned from the conversation.  Often, the response also includes additional information to render client-side interactive elements such as content carousels or quick reply buttons.
+As shown, each dialogue state prescribes the form of the system response. For most commercial applications today, the form of response consists of natural language templates to reply to the user or prompt for additional information. These templates are populated on-the-fly using contextual state information gleaned from the conversation.  Often, the response also includes additional information to render client-side interactive elements such as image carousels or quick reply buttons.
 
 .. note::
 
-  By convention, the dialogue state names should be a verb which describes the action your application should take at that point in the interaction.
+  By convention, the dialogue state names should be verbs which describe the action your application should take at each point in the interaction.
 
-In MindMeld Workbench, the dialogue states and their associated handler logic is defined by a file containing Python code located in the root directory of your application. This file defines a set of patterns, which when matched, should return a specified response. To begin, create a Python file called 'my_app.py' in the root directory of your application. If you begin your implementation using a Workbench 'blueprint' app, this file should already exist in the root directory.
 
-File my_app.py
+Create the Application Container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In MindMeld Workbench, the application container is a Python file which contains all of the logic and functionality for your application. This Python file is located in your project's root directory, and it enumerates all of the dialogue states and their associated handlers. To begin, create a file called 'my_app.py' with the following minimal implementation in your root directory. 
 
 .. code:: python
 
   from mmworkbench import Application
-  from mmworkbench import context, slots
-  import mmworkbench.KnowledgeBase as kb
+  
+  app = Application(__name__)
+  
+  @app.handle(intent='greet')
+  def welcome():
+      response = {
+          'replies': [
+              'Hello. I can help you find store hours ' +
+              'for your local Kwik-E-Mart. How can I help?'
+          ]
+      }
+      return response
+
+Your directory structure should now resemble the following.
+
+.. image:: images/directory2.png
+    :width: 350px
+    :align: center
+
+The minimal code snippet shown above illustrates the conventions employed by Workbench to implement dialogue state tracking and dialogue state handling logic. It performs the following steps:
+
+   1. It imports the Application class from the MindMeld Workbench package.
+   2. It defines an Application instance to serve as the parent container for the application.
+   3. It uses the :keyword:`handle()` decorator to define a pattern which, when matched, will invoke the associated handler function.
+   4. It specifies the handler function :keyword:`welcome()` which defines the ``welcome`` dialogue state and returns the desired response.
+
+This application structure provides a straighforward mechanism to enumerate a variety of patterns along with their associated handlers which will comprise the core interaction logic for your application. 
+
+
+Implement the Dialogue State Handlers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let us now define the dialogue handlers we would need for the interaction in :ref:`section 1.2 <script-interactions>`. In the process, we will introduce several new capabilities of Workbench which are described in depth in the :ref:`User Guide <userguide>`.
+
+To start, let's consider the handler for the ``welcome`` dialogue state.
+
+.. code:: python
+
+  from mmworkbench import Application, context, slots
   
   app = Application(__name__)
   
@@ -169,31 +216,45 @@ File my_app.py
           ]
       }
       return response
+
+As mentioned above, the name of the dialogue state is prescribed by the method name of the dialogue state handler. The :keyword:`handle()` decorator specifies the pattern which must be matched to invoke the handler method. In this case, the pattern is specified simply as :keyword:`intent='greet'`. In other words, if the natural language processer predicts that the intent of the incoming request is 'greet', the :keyword:`welcome()` handler will be invoked.
+
+Every dialogue handler returns a :keyword:`response` object. This object specifies the natural language text as well as other data to be returned in the response. Note that the text strings contained in this response can utilize templated expressions, such as :keyword:`'Hello, {name}.'`. These templates rely on standard Python string formatting syntax. Templated expressions will be populated with real values before returning to the client. The :keyword:`slots` object is used to store the named string values which are used to populate the templates.
+
+In the code snippet above, we also introduce the :keyword:`context` object. Workbench relies on the :keyword:`context` object to keep track of all of the state information associated with the current conversational interaction. In can contain output data from the natural language parsing models, aggregated state from multiple previous interactions, as well as user and session information. The detailed information in the :keyword:`context` can be very useful for implementing custom dialogue state handling logic. More details can be found in the :ref:`User Guide <userguide>`.
+
+Following this same approach, we can now also define handlers for the dialgue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting my_app.py file now looks like this.
+
+.. code:: python
+
+  from mmworkbench import Application, QuestionAnswerer, context, slots
   
-  @app.handle(intent='get_store_close_time')
-  def send_close_time():
-      set_target_store(context)
-      if context.frame.target_store:
-          slots['time'] = context.frame.target_store['close_time']
-          slots['store_name'] = context.frame.target_store['name']
-          response = {
-              'replies': [
-                  'The {store_name} Kwik-E-Mart closes at {time}.'
-              ]
-          }
-      else:
-          response = {'replies': ['For which store?']}
+  qa = QuestionAnswerer('data/stores.json')
+  app = Application(__name__, qa)
+  
+  @app.handle(intent='greet')
+  def welcome():
+      slots['name'] = context.request.session.user_name
+      response = {
+          'replies': [
+              'Hello, {name}. I can help you find store hours ' +
+              'for your local Kwik-E-Mart. How can I help?'
+          ]
+      }
       return response
   
-  @app.handle(intent='get_store_open_time')
-  def send_open_time():
+  @app.handle(intent='get_store_hours')
+  def send_store_hours():
       set_target_store(context)
       if context.frame.target_store:
-          slots['time'] = context.frame.target_store['open_time']
+          slots['open_time'] = context.frame.target_store['open_time']
+          slots['close_time'] = context.frame.target_store['close_time']
           slots['store_name'] = context.frame.target_store['name']
+          dates = [e.value for e in context.entities if e.type == 'date']
+          if dates: slots['date'] = dates[0]
           response = {
               'replies': [
-                  'The {store_name} Kwik-E-Mart opens at {time}.'
+                  'The {store_name} Kwik-E-Mart opens at {open_time} and closes at {close_time} {date}.'
               ]
           }
       else:
@@ -203,11 +264,11 @@ File my_app.py
   @app.handle(intent='get_nearest_store')
   def send_nearest_store():
       loc = context.request.session.location 
-      stores = kb.get('store', sort='proximity', current_location=loc)
+      stores = qa.get(index='stores', sort='proximity', current_location=loc)
       slots['store_name'] = stores[0]['name']
       response = {
           'replies': [
-              'your nearest Kwik-E-Mart is located at {store_name}.'
+              'Your nearest Kwik-E-Mart is located at {store_name}.'
           ]
       }
       return response
@@ -215,14 +276,22 @@ File my_app.py
   @app.handle(intent='exit')
   def say_goodbye():
       return {'replies': ['Bye', 'Goodbye', 'Have a nice day.']}
+
+  @app.handle()
+  def default():
+      return {
+          'replies': [
+              'I did not understand. Please you rephrase your request.'
+          ]
+      }
   
   def set_target_store(context):
-      stores = [e.value for e in context.entities if e.type == 'name']
-      if names: context.frame.target_store = stores[0]
+      stores = [e.value for e in context.entities if e.type == 'store_name']
+      if stores: context.frame.target_store = stores[0]
   
-  if __name__ == "__main__":
-      app.run()
+This code snippet introduces the QuestionAnswerer class. The QuestionAnswerer is the Workbench module responsible for creating and searching across a knowledge base of information relevant to your application. In this example, the ``send_nearest_store`` relies on the QuestionAnswerer component to retrieve the closest retail store location from the knowledge base. The QuestionAnswerer and its associated knowledge base will be discussed in more detail below.
 
+This simple example also illustrates the use of a default handler. The :keyword:`@app.handle()` decorator serves as a 'catchall' pattern which will return a default response if no other specified patterns match.
 
 
 Create the Knowledge Base
