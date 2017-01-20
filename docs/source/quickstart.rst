@@ -929,6 +929,87 @@ Learning To Rank
 
 Given the right kind of training data (and lots of it), Machine Learning methods can be applied for ranking in a variety of ways. To learn how to develop a Machine Learning approach to ranking, i.e. `Learning To Rank <https://en.wikipedia.org/wiki/Learning_to_rank>`_, please refer to the guidelines on assembling the right kind of training data and building models in the User Guide chapter.
 
-Deploy trained models to production
----------------------------------------
-Show a simple example of the steps required to deploy to production
+
+Deploy Trained Models To Production
+-----------------------------------
+
+Apart from serving as a library of Machine Learning tools for building powerful conversational interfaces, MindMeld Workbench also provides functionality for deploying the models to a server (local or remote) for serving live user queries. Additionally, a "Test Console UI" is provided with the deployment setup to visualize the end-to-end flow for any given request.
+
+Local Deployment
+~~~~~~~~~~~~~~~~
+
+To test your end-to-end application on a local machine, spin up a local server by running the following command:
+
+.. code-block:: text
+
+  python my_app.py deploy --environment local
+
+This loads all the NLP models and any other dependencies. Once the local server process is up and running, you should finally see the following message in the terminal:
+
+.. code-block:: text
+
+  2017-01-20 03:12:26,870  * Running on http://0.0.0.0:7150/ (Press CTRL+C to quit)
+
+The test console can then be accessed on a browser at the following URL:
+
+* http://localhost:7150/test.html
+
+.. image:: images/test_console.png
+    :align: center
+
+Production Deployment
+~~~~~~~~~~~~~~~~~~~~~
+
+To deploy your app to a production-grade cloud infrastructure, MindMeld provides a Backend-As-A-Service platform (built on top of AWS), exclusively for MindMeld Workbench applications. With a few simple configurations, you can go from a standalone research project to a full-blown production application within minutes!
+
+The overall process starts with a developer (or build process) invoking a single command to send all the catalog data, NLP models, deployment configurations, requirements.txt and authorization keys to a **MindMeld Deployment Service**. The MindMeld Deployment Service takes these inputs, verifies the auth keys and uses the deployment config to setup any required infrastructure on a Virtual Private Cloud (VPC) in the MindMeld backend. At a high level, this includes setting up the Knowledge Base, server clusters, a load balancer and DNS aliases for the application URL with the relevant endpoints exposed. Here is a diagram explaining the basic process:
+
+.. image:: images/deployment.png
+    :align: center
+
+
+In order to setup a production deployment of your app, you need to first obtain the MINDMELD_CLIENT_KEY and MINDMELD_CLIENT_SECRET credentials from MindMeld Sales. These need to be setup as OS environment variables on the machine that is used to deploy the app:
+
+.. code-block:: text
+
+  export MINDMELD_CLIENT_KEY='my_mindmeld_client_key'
+  export MINDMELD_CLIENT_SECRET='my_mindmeld_client_secret'
+
+Next, you can define a "deployment config". This config specifies all the operational requirements for your production deployment, such as number of servers, datacenter region etc. Here is an example deployment configuration for the Kwik-E-Mart Stores application:
+
+File **deployment_config.json**
+
+.. code-block:: javascript
+
+  {
+    "app_name": 'kwik-e-mart',
+    "region": 'us-east-1',
+    "num_instances": 10,
+    "instance_type": 'm3.xlarge',
+    "use_ssl": True,
+    "use_lb": True
+  }
+
+You can then run the following command to set off the deployment:
+
+.. code-block:: text
+
+  python my_app.py deploy --environment production --data_path '/path/to/stores.json' --deployment_config deployment_config.json
+
+And you're done! Once the deployment is complete (and no errors are encountered) you will get a message with the following details:
+
+.. code-block:: text
+
+  Name: kwik-e-mart
+  Description: None
+  Creation Date: 2017-01-09T02:57:50+00:00
+  URL: https://kwik-e-mart.mindmeld.com/
+
+You can then fire up the production app test console and the /parse API endpoint on the following links:
+
+.. code-block:: text
+
+  https://kwik-e-mart.mindmeld.com/test.html
+  https://kwik-e-mart.mindmeld.com/parse?q="Hello"
+
+Congratulations. You now have the knowledge to build amazing conversational interfaces. Happy chatting!
