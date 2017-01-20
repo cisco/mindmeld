@@ -10,7 +10,7 @@ Taking a conversational application from conception to production typically invo
 2  Script your ideal dialogue interactions.
 3  Define the domain, intent, entity and role hierarchy.
 4  Define the dialog state handlers.
-5  Create the knowledge base.
+5  Create the question answerer knowledge base.
 6  Generate representative training data.
 7  Train the natural language processing classifiers.
 8  Train the entity resolvers.
@@ -124,9 +124,9 @@ Define the Dialogue State Handlers
 
 Today's commercial voice and chat assistants guide users through a conversational interaction in order to find information or accomplish a task. The steps in each conversational interaction are called 'dialogue states'. A dialogue state defines the form of response which is appropriate for each step in an interaction as well as other logic that must be invoked to determine the desired response. Each application relies on a set of dialogue state handlers which define the logic and response required for every supported dialogue state. 
 
-At the core of every conversational application resides a dialogue manager. The dialogue manager is responsible for analyzing each incoming request and assigning it to a specific dialogue state handler to execute required logic and return a response. The task of mapping each incoming request to the appropriate dialogue state is often referred to as 'dialogue state tracking'. While applying large-scale machine learning techiniques for dialogue state tracking is an active area of research today, nearly all commercial applications rely heavily on rule-based approaches to map incoming requests to the correct dialogue state.
+At the core of every conversational application resides a dialogue manager. The dialogue manager is responsible for analyzing each incoming request and assigning it to a specific dialogue state handler to execute required logic and return a response. The task of mapping each incoming request to the appropriate dialogue state is often referred to as 'dialogue state tracking'. While applying large-scale machine learning techiniques for dialogue state tracking is an active area of research today, nearly all commercial applications rely heavily on rule-based and pattern-matching approaches to map incoming requests to the correct dialogue state.
 
-MindMeld Workbench provides advanced and flexible capabilities for dialogue state tracking. It offers a flexible syntax for defining the rules and patterns each incoming request must match in order to be assigned to a specific dialogue state. In addition, Workbench is fully extensible and can accommodate any custom logic when MindMeld's built-in pattern matching engine will not suffice.
+MindMeld Workbench provides advanced and flexible capabilities for dialogue state tracking. It offers a flexible syntax for defining the rules and patterns each incoming request must match in order to be assigned to a specific dialogue state. In addition, Workbench is fully extensible and can accommodate any custom logic to supplement MindMeld's built-in pattern matching capabilities.
 
 Specify the Superset of Dialogue States
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -187,7 +187,7 @@ The minimal code snippet shown above illustrates the conventions employed by Wor
 
    1. It imports the Application class from the MindMeld Workbench package.
    2. It defines an Application instance to serve as the parent container for the application.
-   3. It uses the :keyword:`handle()` decorator to define a pattern which, when matched, will invoke the associated handler function.
+   3. It uses the :keyword:`@app.handle()` decorator to define a pattern which, when matched, will invoke the associated handler function.
    4. It specifies the handler function :keyword:`welcome()` which defines the ``welcome`` dialogue state and returns the desired response.
 
 This application structure provides a straighforward mechanism to enumerate a variety of patterns along with their associated handlers which will comprise the core interaction logic for your application. 
@@ -196,7 +196,7 @@ This application structure provides a straighforward mechanism to enumerate a va
 Implement the Dialogue State Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let us now define the dialogue handlers we would need for the interaction in :ref:`section 1.2 <script-interactions>`. In the process, we will introduce several new capabilities of Workbench which are described in depth in the :ref:`User Guide <userguide>`.
+Let us now define the dialogue handlers we would need for the interaction in :ref:`section 1.2 <script-interactions>`. In the process, we will introduce several new capabilities of Workbench which are described in depth later in the :ref:`User Guide <userguide>`.
 
 To start, let's consider the handler for the ``welcome`` dialogue state.
 
@@ -217,19 +217,19 @@ To start, let's consider the handler for the ``welcome`` dialogue state.
       }
       return response
 
-As mentioned above, the name of the dialogue state is prescribed by the method name of the dialogue state handler. The :keyword:`handle()` decorator specifies the pattern which must be matched to invoke the handler method. In this case, the pattern is specified simply as :keyword:`intent='greet'`. In other words, if the natural language processer predicts that the intent of the incoming request is 'greet', the :keyword:`welcome()` handler will be invoked.
+As mentioned above, the name of the dialogue state is prescribed by the method name of the dialogue state handler, :keyword:`welcome()`. The :keyword:`@app.handle()` decorator specifies the pattern which must be matched to invoke the handler method. In this case, the pattern is specified simply as :keyword:`intent='greet'`. In other words, if the natural language processer predicts that the intent of the incoming request is ``greet``, the :keyword:`welcome()` handler will be invoked.
 
 Every dialogue handler returns a :keyword:`response` object. This object specifies the natural language text as well as other data to be returned in the response. Note that the text strings contained in this response can utilize templated expressions, such as :keyword:`'Hello, {name}.'`. These templates rely on standard Python string formatting syntax. Templated expressions will be populated with real values before returning to the client. The :keyword:`slots` object is used to store the named string values which are used to populate the templates.
 
-In the code snippet above, we also introduce the :keyword:`context` object. Workbench relies on the :keyword:`context` object to keep track of all of the state information associated with the current conversational interaction. In can contain output data from the natural language parsing models, aggregated state from multiple previous interactions, as well as user and session information. The detailed information in the :keyword:`context` can be very useful for implementing custom dialogue state handling logic. More details can be found in the :ref:`User Guide <userguide>`.
+In the code snippet above, we also introduce the :keyword:`context` object. Workbench relies on the :keyword:`context` object to keep track of all of the state information associated with the current conversational interaction. In can contain output data from the natural language processing models, aggregated state from multiple previous interactions, as well as user and session information. The detailed information in the :keyword:`context` can be very useful for implementing custom dialogue state handling logic. More details can be found in the :ref:`User Guide <userguide>`.
 
-Following this same approach, we can now also define handlers for the dialgue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting my_app.py file now looks like this.
+Following this same approach, we can now also define handlers for the dialgue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting my_app.py file now looks like the following.
 
 .. code:: python
 
   from mmworkbench import Application, QuestionAnswerer, context, slots
   
-  qa = QuestionAnswerer('data/stores.json')
+  qa = QuestionAnswerer('stores', 'data/stores.json')
   app = Application(__name__, qa)
   
   @app.handle(intent='greet')
@@ -289,130 +289,84 @@ Following this same approach, we can now also define handlers for the dialgue st
       stores = [e.value for e in context.entities if e.type == 'store_name']
       if stores: context.frame.target_store = stores[0]
   
-This code snippet introduces the QuestionAnswerer class. The QuestionAnswerer is the Workbench module responsible for creating and searching across a knowledge base of information relevant to your application. In this example, the ``send_nearest_store`` relies on the QuestionAnswerer component to retrieve the closest retail store location from the knowledge base. The QuestionAnswerer and its associated knowledge base will be discussed in more detail below.
+This code snippet introduces the QuestionAnswerer class. The QuestionAnswerer is the Workbench module responsible for creating and searching across a knowledge base of information relevant to your application. In this example, the ``send_nearest_store`` dialogue state relies on the QuestionAnswerer component to retrieve the closest retail store location from the knowledge base. The QuestionAnswerer and its associated knowledge base will be discussed in more detail below.
 
-This simple example also illustrates the use of a default handler. The :keyword:`@app.handle()` decorator serves as a 'catchall' pattern which will return a default response if no other specified patterns match.
+This simple example also illustrates the use of a default handler. The :keyword:`@app.handle()` decorator serves as a 'catchall' pattern which will return a default response if no other specified patterns are matched.
+
+Now that we have our initial set of dialogue handlers in place, we can now proceed with building a knowledge base and training machine learning models to understand natural language requests.
 
 
-Create the Knowledge Base
-----------------------------
-A Knowledge Base is a repository for storing complex, real-world, structured and unstructured information relevant to a content catalog. In the context of Deep-Domain Conversational AI, a Knowledge Base comprises of a searchable repository of objects that encode entities and their associated attributes. 
+Create the Question Answerer Knowledge Base
+-------------------------------------------
 
-Here are some examples of Knowledge Base object types for various applications -
+The smartest and most useful intelligent assistants in widespread use today all rely on an underlying knowledge base. A knowledge base is comprehensive repository containing the universe of helpful information which is essential to understand requests and answer questions. In many cases, the knowledge base is the secret ingredient which makes a conversational interface appear surprisingly intelligent and versatile. For example, when you ask Alexa to play a song, it relies on a knowledge base which contains information about every track, artist and album in your music streaming service. When you ask Siri to send a text message, it enlists a knowledge base which knows about all of your important contacts. When IBM's Watson bested Jeopardy! grand champions, it leveraged an extensive knowledge base of Wikipedia facts. While some tasks, like setting a thermostat or appending a to-do list, may not warrant a knowledge base, the lion's share of today's commercial conversational applications owe their intelligence and utility to an underlying base of global knowledge.
 
-* Product items in a **Products** catalog - with attributes *"sku_id"*, *"name"*, *"price"*
-* Video objects in a **Video Content** library - with attributes *"description"*, *"cast"*, *"duration"*
-* Menu items from a **Quick Service Restaurants** catalog - with attributes *"size"*, *"price"*, *"options"* etc.
+In its most basic form, a knowledge base is simply a repository of objects of specified types. For example, each object could represent a film in a large content catalog or a restaurant in a directory of local businesses. Each object typically has multiple attributes which capture important properties associated with each object. For example, a restaurant object might have attributes for the address and phone number; a film object might have attributes which list the cast members, the runtime and the release date.
 
-In our example of store information on Kwik-E-Mart stores, we would have store objects with the following attributes -
+MindMeld Workbench makes it straightforward to leverage a custom knowledge base in any application. The Question Answerer module of Workbench provides a set of powerful capabilities for creating a knowledge base in order to demonstrate intelligent behavior in your application. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this component and its underlying knowledge base for the four primary purposes listed below. 
 
-* store_name
-* open_time
-* close_time
-* address
-* phone_number
+============================ ===
+**Answer Questions**         The primary purpose of the Question Answerer is to identify and rank candidate answers for user questions. For example, if a user asks about good, nearby Italian restaurants, a knowledge base of local restaurants provides available options.
+**Validate Questions**       The knowledge base can also be used to inform a user if their question is invalid. For example, if a user mistakenly asks to order a pizza from a coffee shop assistant, the knowledge base can help steer the user in the right direction.
+**Disambiguate Entities**    Vague user requests might often require clarification. A knowledge base can help disambiguate similar concepts. For example, if a user says 'play Thriller', the Question Answerer could ask the user if they mean the bestselling album or the hit song.
+**Suggest Alternatives**     When an exact answer cannot be found, the knowledge base can sometimes offer relevant suggestions. For example, if a user requests 'Star Wars Rogue One' and it is not yet available, the knowledge base could suggest other available Star Wars titles.
+============================ ===
 
-Indexing
-~~~~~~~~
+Creating the knowledge base is the first step in utilizing the Question Answerer capabilities in Workbench. The knowledge base can contain one or more indexes. Each index is intended to hold a collection of objects of the same type. For example, one index may contain a collection of retail store locations and another index might contain a collection of products in a product catalog. Each index is built using data from one or more JSON files. These JSON data files can be either stored locally or available remotely in an `AWS S3 <https://aws.amazon.com/s3/>`_ bucket, for example.
 
-A Knowledge Base can have one or more indexes. An index (short for "Inverted Index") is a data structure designed to allow very fast full-text searches. It consists of a list of unique words that appear in any document, and for each word, a list of the documents in which it appears. By default, every field in a document object is indexed, and thus is searchable. Different indexes can be used to map to objects of different types. In MindMeld Workbench, creating an index is as simple as specifying the index name while loading your data into the Knowledge Base. In our example of Kwik-E-Mart stores data, we would have just 1 index - *"stores"*.
+As we saw in the preceding section, our example application can provide information about Kwik-E-Mart stores, and it relies on a knowledge base which contains information about all retail store locations. In our example, let's assume that each store object contains the following attributes
 
-Loading Data
-~~~~~~~~~~~~
+    * store_name
+    * open_time
+    * close_time
+    * address
+    * phone_number
 
-To load your content catalog into the MindMeld Knowledge Base, you can specify your catalog data as a JSON dump. The MindMeld Knowledge Base can read this JSON dump and extract all fields along with their types directly from the data.
-
-Following is an example of JSON data containing document objects and their attributes for a few Kwik-E-Mart stores.
-
-File **stores_data.json**
+In this case, the corresponding JSON data file could be represented as shown below.
 
 .. code-block:: javascript
 
+  {
+    "store_name": "23 Elm Street",
+    "open_time": "7am",
+    "close_time": "9pm",
+    "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
+    "phone_number": "(+1) 415-555-1100"
+  },
+  {
+    "store_name": "Pine and Market",
+    "open_time": "6am",
+    "close_time": "10pm",
+    "adress": "750 Market Street, Capital City, CA 94001",
+    "phone_number": "(+1) 650-555-4500"
+  }
+  ...
+
+Assuming this file is named 'stores.json' and it is located in the 'data' subdirectory of the root directory, MindMeld Workbench can create the knowledge graph as follows.
+
+.. code:: python
+
+  > from mmworkbench import QuestionAnswerer
+  > qa = QuestionAnswerer('stores', 'data/stores.json')
+
+This code snippet simply loads the Question Answerer module from Workbench and then loads the :keyword:`data/stores.json` JSON file into the index named :keyword:`stores`. To check that your knowledge base was created successfully, you can use the Question Answerer to retrieve store information from your index:
+
+.. code:: python
+
+  > stores = qa.get(index='stores')
+  > stores[0]
   {
     "store_name": "Central Plaza Store",
     "open_time": 0800 hrs,
     "close_time": 1800 hrs,
     "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
     "phone_number": (+1) 100-100-1100
-  },
-  {
-    "store_name": "Market Street Store",
-    "open_time": 0900 hrs,
-    "close_time": 2200 hrs,
-    "adress": "750 Market Street, Capital City, CA 94001",
-    "phone_number": (+1) 450-450-4500
-  }
-  ...
-
-Once your catalog is tranformed to the above JSON format, you can load that data into a Knowledge Base. Following is a code snippet to create and load data into a Knowledge Base using MindMeld Workbench.
-
-.. code-block:: python
-
-  from mmworkbench.knowledge_base import KnowledgeBase
-
-  # Initialize the KB
-  kb = KnowledgeBase()
-
-  # Load JSON Data into the KB
-  kb.load(data_file='stores_data.json', index='stores')
-
-If the specified index in the **load** method already exists, the index is recreated with the new data. If not, a new index with that name is created and tha data is loaded in.
-
-To delete an index, simply use the **delete_index** method by specifying the index name to delete.
-
-.. code-block:: python
-
-  kb.delete_index(index='stores')
-
-Retrieval
-~~~~~~~~~
-
-Once your data is loaded, you can use the **get** method to retrieve objects from the MindMeld Knowledge Base. The **get** method uses all information available in the query and entity mappings (passed through the context object) to retrieve documents. For String-valued fields, the Knowledge Base uses Full-Text Search for retrieval. When "range" entities are detected, the **get** method uses "greater-than" or "lesser-than" operations as applicable to the respective (real-valued) fields. More details on Sorting and Text Relevance strategies are available in Section 1.10 on "Optimizing Question Answering Performance".
-
-Example use of **get** -
-
-.. code-block:: python
-
-  query = "Is the store on Elm Street open?"
-  context = {
-    'domain': 'store_information',
-    'intent': 'get_is_store_open',
-    'entities': [
-      {
-        'type': 'street',
-        'mode': 'search',
-        'text': 'Elm Street',
-        'value': 'address:Elm Street',
-        'chstart': 16,
-        'chend': 25
-      }
-    ]
   }
 
-  # Retrieve from the KB
-  results = kb.get(index='stores', query, context)
-  print results
+As you can see, your knowlege base is now created and it can be leveraged by the Question Answerer in your dialogue state handling logic. Refer to the :ref:`User Guide <userguide>` for more detailed information on how the Question Answerer can be used to find answers to questions, validate user requests, disambiguate entities and offer alternative suggestions.     
 
-Output -
 
-.. code-block:: javascript
-
-  {
-    "store_name": "Central Plaza Store",
-    "open_time": "8:00 am",
-    "close_time": "6:00 pm",
-    "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
-    "phone_number": (+1) 100-100-1100
-  }
-
-The **get** method also supports pagination. You can use the *offset* and *num_docs* arguments to retrieve the required window of documents for the query. By default, the **get** method uses a value of *num_docs=10*.
-
-.. code-block:: python
-
-  # Retrieve documents numbers 11 to 30
-  kb.get(index='stores', query, context, offset=10, num_docs=20)
-
-Generate representative training data
+Generate Representative Training Data
 ----------------------------------------
 Most components in the Mindmeld Workbench Natural Language Processor utilize Supervised Learning models to analyze a user's query and derive meaning out of it. To train each of these components, we typically require thousands to millions of *labeled* queries to build powerful models. **It is critical that you obtain high-quality, representative training data** to ensure high accuracy. The training data serves as the ground truth for the models, so it is imperative that the ground truth data is clean and represents the exact use-case that you are training the model for.
 
@@ -663,7 +617,7 @@ We can similarly train the entity recognizers for other intents as well.
 When we invoked ``nlp.fit()`` in the "quickstart" at the beginning of this section, we were essentially asking the Natural Language Processor  to do all these steps (``domain.fit_intent_model()``, ``domain.fit_entity_model()``, etc.) on our behalf using some default configuration for all the domains and intents in our hierarchy. However, we have seen that Workbench also offers the flexibility to define the model type, features and cross validation settings for each of its NLP classifiers. In addition, it's also possible to control various other aspects of the training algorithm such as hyperparameters and other model-specific settings (e.g. the kernel to use for an SVM). [3.9 The Natural Language Processor] in the Workbench User Guide has detailed documentation on all the NLP classifiers, along with the different configurations and options available for each. 
 
 
-Train the entity resolvers
+Train the Entity Resolvers
 -----------------------------
 Introduce the topic of loading training data, training entity resolution models, measuring CV and held-out performance, performing disambiguation.
 
