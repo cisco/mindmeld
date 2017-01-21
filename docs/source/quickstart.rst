@@ -229,7 +229,7 @@ Following this same approach, we can now also define handlers for the dialgue st
 
   from mmworkbench import Application, QuestionAnswerer, context, slots
   
-  qa = QuestionAnswerer('stores', 'data/stores.json')
+  qa = QuestionAnswerer()
   app = Application(__name__, qa)
   
   @app.handle(intent='greet')
@@ -306,7 +306,7 @@ In its most basic form, a knowledge base is simply a repository of objects of sp
 MindMeld Workbench makes it straightforward to leverage a custom knowledge base in any application. The Question Answerer module of Workbench provides a set of powerful capabilities for creating a knowledge base in order to demonstrate intelligent behavior in your application. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this component and its underlying knowledge base for the four primary purposes listed below. 
 
 ============================ ===
-**Answer Questions**         The primary purpose of the Question Answerer is to identify and rank candidate answers for user questions. For example, if a user asks about good, nearby Italian restaurants, a knowledge base of local restaurants provides available options.
+**Answer Questions**         The primary purpose of the Question Answerer is to identify and rank candidate answers for user questions. For example, if a user asks about good, nearby Italian restaurants, a knowledge base of local restaurants provides the best options.
 **Validate Questions**       The knowledge base can also be used to inform a user if their question is invalid. For example, if a user mistakenly asks to order a pizza from a coffee shop assistant, the knowledge base can help steer the user in the right direction.
 **Disambiguate Entities**    Vague user requests might often require clarification. A knowledge base can help disambiguate similar concepts. For example, if a user says 'play Thriller', the Question Answerer could ask the user if they mean the bestselling album or the hit song.
 **Suggest Alternatives**     When an exact answer cannot be found, the knowledge base can sometimes offer relevant suggestions. For example, if a user requests 'Star Wars Rogue One' and it is not yet available, the knowledge base could suggest other available Star Wars titles.

@@ -1,6 +1,6 @@
 
-MindMeld Workbench User Guide
-=============================
+The MindMeld Conversational AI Playbook
+=======================================
 
 MindMeld Workbench is the core machine learning toolkit which powers the `MindMeld <https://www.mindmeld.com/>`_ Conversational AI platform. It is a Python-based framework which encompasses all of the algorithms and utilities required to build modern, production-quality conversational applications. It has evolved over several years during the process of building and deploying dozens of the most advanced conversation experiences achievable today. It has been optimized for the needs of companies that want to build an advanced conversational assistant which demonstrates deep understanding of a particular use case or domain. MindMeld Workbench is a commercial software product which requires a license to use. For more information or to inquire about obtaining a license for MindMeld Workbench, please `contact MindMeld sales <mailto:info@mindmeld.com>`_. 
 
@@ -23,7 +23,7 @@ Contents
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: Quickstart
+   :caption: Step-by-Step Guide
    :name: quickstart
 
    quickstart
@@ -31,10 +31,10 @@ Contents
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: User Guide
+   :caption: Workbench User Manual
    :name: userguide
 
-   userguide
+   getting_started
    architecture
    key_concepts
    directory_structure

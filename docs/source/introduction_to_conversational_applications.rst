@@ -1,5 +1,5 @@
-Introduction to Conversational Applications and MindMeld Workbench
-==================================================================
+Introduction to Conversational Applications
+===========================================
 
 Science fiction has long foretold a future where we routinely interact with applications and devices using natural human conversation. It has only been within the past few years, however, when this future has started to become a reality. Today, virtual assitants like Siri, Cortana, Google Assistant, and Alexa field many billions of voice and natural language queries every month. New voice-enabled devices like the Amazon Echo and Google Home reside in tens of millions of homes and represent one of the fastest-growing product categories of all time. Consumers worldwide increasingly expect that quick assistance and expert advice will be only a simple voice command or chat message away. They expect to invoke these services anywhere: in the office, at home, while driving, when on-the-go, and everywhere in between. Experts agree that we are entering a world where voice and chat assistants will be on-command to assist us with many of our daily tasks.
 

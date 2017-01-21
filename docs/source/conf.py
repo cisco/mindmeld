@@ -73,7 +73,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Workbench'
+project = u'The Conversational AI Playbook'
 copyright = u'2017, MindMeld Inc'
 author = u'MindMeld Inc.'
 

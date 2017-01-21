@@ -1049,10 +1049,15 @@ input[type="checkbox"][disabled] {
 .wy-table-responsive table {
     margin-bottom: 0 !important
 }
-.wy-table-responsive table td,
 .wy-table-responsive table th {
     white-space: nowrap
 }
+.wy-table-responsive table td {
+    white-space: inherit
+}
+
+
+
 a {
     color: #0099e5;
     text-decoration: none;
@@ -1071,7 +1076,7 @@ html {
 body {
     font-family: "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
     font-weight: normal;
-    color: #4c555a;
+    color: #131516;
     min-height: 100%;
     overflow-x: hidden;
     background: #edf0f2
@@ -1136,19 +1141,19 @@ h4,
 h5,
 h6,
 legend {
-    font-weight: 400;
+    font-weight: 600;
     font-family: "lato", "Roboto Slab", "ff-tisa-web-pro", "Georgia", Arial, sans-serif
 }
 p {
     line-height: 26px;
     margin: 0;
-    font-size: 14px;
+    font-size: 12pt;
     margin-bottom: 12px
 }
 h1 {
     font-size: 175%;
     margin-bottom: 16px;
-	margin-top: 30px
+	  margin-top: 30px
 }
 h2,
 .rst-content .toctree-wrapper p.caption {
@@ -1408,7 +1413,7 @@ div[class^='highlight'] pre {
 }
 .wy-menu a:hover {
     text-decoration: bold;
-    background: #f5f7f9;
+    background: #ffffff !important;
     color: #44505c;
 }
 .wy-menu-horiz {
@@ -1449,13 +1454,13 @@ div[class^='highlight'] pre {
 	height: 32px;
 	display: inline-block;
 	line-height: 42px;
-	padding: 0 3.5em;
+	padding: 0 3.0em;
 	margin-bottom: 0;
 	display: block;
-	font-weight: bold;
+	font-weight: normal;
 	text-transform: uppercase;
-	font-size: 60%;
-	color: #c4c4c4;
+	font-size: 9pt;
+	color: rgba(0,110,161,0.8);
 	white-space: nowrap;
 }
 .wy-menu-vertical ul {
@@ -1468,14 +1473,17 @@ div[class^='highlight'] pre {
     border-bottom: solid 1px #404040
 }
 .wy-menu-vertical li.current {
-    background: #f5f7f9
+    background: inherit;
+}
+.wy-menu-vertical li a {
+    -webkit-font-smoothing: antialiased;
 }
 .wy-menu-vertical li.current a {
     color: #404040;
     padding: 0.4045em 3.427em
 }
 .wy-menu-vertical li.current a:hover {
-	background: none;
+	/*background: none;*/
 	color: #0c0e10;
 }
 .wy-menu-vertical li code,
@@ -1499,7 +1507,7 @@ div[class^='highlight'] pre {
 .wy-menu-vertical li.current>a {
     color: #404040;
     padding: 0.4045em 2.618em;
-    font-weight: bold;
+    font-weight: normal;
     position: relative;
     border: none;
 
@@ -1521,7 +1529,7 @@ div[class^='highlight'] pre {
     color: #333
 }
 .wy-menu-vertical li.on a, .wy-menu-vertical li.current>a {
-	background: #f5f7f9;
+	background: #f5f8fa;
 }
 .wy-menu-vertical li.toctree-l1.current li.toctree-l2>ul,
 .wy-menu-vertical li.toctree-l2.current li.toctree-l3>ul {
@@ -1593,7 +1601,7 @@ div[class^='highlight'] pre {
     padding: 0.4045em 2.618em;
     display: block;
     position: relative;
-    font-size: 80%;
+    font-size: 10pt;
     font-weight: normal;
     color: #6A7C8F;
 }
@@ -1640,18 +1648,18 @@ div[class^='highlight'] pre {
 .wy-side-nav-search>a,
 .wy-side-nav-search .wy-dropdown>a {
     color: #006da1;
-    font-family: arial;
-    letter-spacing: -0.5px;
+    /*font-family: arial;
+    letter-spacing: -0.5px;*/
     font-weight: normal;
-    font-size: 18px;
-    /* font-weight: bold; */
+    font-size: 11pt;
+    font-weight: bold;
     display: inline-block;
     /* padding: 4px 6px; */
     text-align: center;
     padding-top: 10px;
 }
 .wy-side-nav-search>a, .wy-side-nav-search .wy-dropdown>a {
-	margin-bottom: 0.2em;
+	/*margin-bottom: 0.2em;*/
 }
 .wy-side-nav-search>a:hover,
 .wy-side-nav-search .wy-dropdown>a:hover {
@@ -1675,6 +1683,7 @@ div[class^='highlight'] pre {
 	/* margin-top: -0.4045em; */
 	/* margin-bottom: 0.809em; */
 	/* font-weight: normal; */
+	display: none;
 	color: #44505c;
 	font-size: 12px
 }
@@ -2114,7 +2123,7 @@ footer span.commit .rst-content tt,
 	padding: 10px;
 	z-index: 100;
 	position: relative;
-	margin: 30px 0;
+	/*margin: 30px 0;*/
 
 }
 .rst-content blockquote {
