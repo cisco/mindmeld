@@ -13,36 +13,18 @@ E.g. Here are relations between entities in a query represented in the form of a
 
 The entity groups can also be represented as parse trees:
 
-.. image:: images/parse_trees.png
+.. image:: images/parse_tree.png
 
 Our parser can be told to extract trees of this kind by providing a parser.config file that describes which entity types are the Heads, which ones are the Dependents, and which Dependents go with which Heads.
 
-E.g. Parser configuration representing the above two parse trees: 
+E.g. Parser configuration representing the above two entity groups: 
 
-.. code-block:: text
+.. code-block:: javascript
 
-	tree:
-		name: 'product_info'
-		head:
-			type: 'product'
-		dependent:
-			type: 'quantity'
-		dependent:
-			type: 'size'
-		dependent:
-			tree:
-				name: 'option_info'
-				head:
-					type: 'option'
-				dependent:
-					type: 'size'
-
-	tree: 
-		name:'store_info'
-		head:
-			type: 'store'
-		dependent:
-			type: 'location'
+  {
+    "product": ["quantity", "size", {"option" : "size"}],
+    "store": ["location"]
+  }
 
 .. note::
  	- At a minimum, a name and a head are required to define a parse tree. You can optionally define dependents for the head.
@@ -52,23 +34,26 @@ E.g. Parser configuration representing the above two parse trees:
 
 Defining your trees in the above format should generally be enough and the MindMeld Parser will do a reasonable job of parsing the input according to the given tree specifications. However, in some cases, you may want a more fine-grained control of the parsing settings. Below is the full set of properties you can optionally define in your parser.config file to fine-tune the parser behavior.
 
-.. code-block:: text
+.. code-block:: javascript
 
-	tree:
-		name: '[TREE NAME]'
-		head:
-			type: '[EXPECTED HEAD ENTITY TYPE]'
-			role: '[EXPECTED HEAD ENTITY ROLE]'
-		dependent:
-			type: '[EXPECTED MODIFIER ENTITY TYPE]'
-			role: '[EXPECTED MODIFIER ENTITY ROLE]'
-			left_attachment = [BOOLEAN]
-			left_attachment_distance = [INTEGER]
-			right_attachment = [BOOLEAN]
-			right_attachment_distance = [INTEGER]
-			minimum_instances = [INTEGER]
-			maximum_instances = [INTEGER]
-			precedence: ['left' or 'right']
+  {
+    "EXPECTED HEAD ENTITY TYPE": {
+      "role": "[EXPECTED HEAD ENTITY ROLE]",
+      "dependents": [{
+        "[EXPECTED DEPENDENT ENTITY TYPE]": {
+          "role": "[EXPECTED DEPENDENT ENTITY ROLE]",
+          "left_attachment": BOOLEAN,
+          "left_attachment_distance": INTEGER,
+          "right_attachment": BOOLEAN,
+          "right_attachment_distance": INTEGER,
+          "minimum_instances": INTEGER,
+          "maximum_instances": INTEGER,
+          "precedence": "left"/"right"
+        }
+      }]
+    }
+  }
+
 
 Let's take a look at each of the settings one by one.
 
