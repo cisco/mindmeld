@@ -1208,13 +1208,18 @@ article ul {
 }
 
 .wy-plain-list-disc li,
-.rst-content .section ul li,
 .rst-content .toctree-wrapper ul li,
 article ul li {
     list-style: disc;
     margin-left: 24px;
     font-size: 14px;
     line-height: 26px;
+}
+.rst-content .section ul li {
+    list-style: disc;
+    margin-left: 40px;
+    font-size: 11pt;
+    line-height: 26px;  
 }
 .wy-plain-list-disc li p:last-child,
 .rst-content .section ul li p:last-child,

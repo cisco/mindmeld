@@ -1,3 +1,5 @@
+.. _define-hierarchy:
+
 Define the Domain, Intent, Entity and Role Hierarchy
 ====================================================
 

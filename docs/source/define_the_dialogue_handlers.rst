@@ -75,7 +75,7 @@ This application structure provides a straighforward mechanism to enumerate a va
 Implement the Dialogue State Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let us now define the dialogue handlers we would need for the interaction in :ref:`section 3 <script-interactions>`. In the process, we will introduce several new capabilities of Workbench which are described in depth later in the :ref:`User Guide <userguide>`.
+Let us now define the dialogue handlers we would need for the interaction in :ref:`section 3 <script-interactions>`. In the process, we will introduce several new capabilities of Workbench which are described in depth later in the :ref:`User Manual <userguide>`.
 
 To start, let's consider the handler for the ``welcome`` dialogue state.
 
@@ -100,7 +100,7 @@ As mentioned above, the name of the dialogue state is prescribed by the method n
 
 Every dialogue handler returns a :keyword:`response` object. This object specifies the natural language text as well as other data to be returned in the response. Note that the text strings contained in this response can utilize templated expressions, such as :keyword:`'Hello, {name}.'`. These templates rely on standard Python string formatting syntax. Templated expressions will be populated with real values before returning to the client. The :keyword:`slots` object is used to store the named string values which are used to populate the templates.
 
-In the code snippet above, we also introduce the :keyword:`context` object. Workbench relies on the :keyword:`context` object to keep track of all of the state information associated with the current conversational interaction. In can contain output data from the natural language processing models, aggregated state from multiple previous interactions, as well as user and session information. The detailed information in the :keyword:`context` can be very useful for implementing custom dialogue state handling logic. More details can be found in the :ref:`User Guide <userguide>`.
+In the code snippet above, we also introduce the :keyword:`context` object. Workbench relies on the :keyword:`context` object to keep track of all of the state information associated with the current conversational interaction. In can contain output data from the natural language processing models, aggregated state from multiple previous interactions, as well as user and session information. The detailed information in the :keyword:`context` can be very useful for implementing custom dialogue state handling logic. More details can be found in the :ref:`User Manual <userguide>`.
 
 Following this same approach, we can now also define handlers for the dialgue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting my_app.py file now looks like the following.
 
