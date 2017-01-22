@@ -38,15 +38,49 @@ Neither of these two entity types will require role classification in this simpl
 
   By convention, entity names should always be nouns which describe the entity type.
 
-The design of the domain, intent, entity and role hierarchy for this example application is now complete, and we can begin implementing this application using MindMeld Workbench. Every Workbench application begins with a root folder. The root folder contains all of the training data files, configuration files and custom code required in each Workbench application. For our simple example, lets first define a root directory called 'my_app'. To define the domain and intent hierarchy for your application, create a subfolder called 'domains'. Inside the 'domains' folder, create a subfolder for the name of each different domain in your application. Then, inside each domain folder, create another subfolder with the name of each individual intent in that domain. These folders are used to organize the training data for your machine learning models to understand natural language.
+The design of the domain, intent, entity and role hierarchy for this example application is now complete, and we can begin implementing this application using MindMeld Workbench. Every Workbench application begins with a root folder. The root folder contains all of the training data files, configuration files and custom code required in each Workbench application. For our simple example, lets first define a root directory called 'my_app'. 
 
-Similarly, inside the root folder, create another subdirectory called 'entities'. Inside the entities folder, create a subdirectory for the name of every different entity type required in your application. These folders organize the data files used by the entity recognizer, role classifier and entity resolver models. Refer to the :ref:`User Guide <userguide>` for more details about the organization and structure of the application root directory. The :ref:`User Guide <userguide>` also describes application 'blueprints' which provide pre-configured application directory structures for common conversational application use cases.
+.. code-block:: console
 
-For our simple example application, the root directory structure which implements our desired natural language model hierarchy is illustrated below. 
+    $ export WB_APP_ROOT="$HOME/my_app"
+    $ mkdir -p $WB_APP_ROOT
+    $ cd $WB_APP_ROOT
+
+To define the domain and intent hierarchy for your application, create a subfolder called 'domains'. Inside the 'domains' folder, create a subfolder for the name of each different domain in your application. Then, inside each domain folder, create another subfolder with the name of each individual intent in that domain. These folders are used to organize the training data for your machine learning models to understand natural language.
+
+.. code-block:: console
+
+    $ mkdir domains
+    $ cd domains
+    $ mkdir store_info
+    $ cd store_info
+    $ mkdir greet
+    $ mkdir get_store_hours
+    ...
+
+Similarly, inside the root folder, create another subdirectory called 'entities'. Inside the entities folder, create a subdirectory for the name of every different entity type required in your application. These folders organize the data files used by the entity recognizer, role classifier and entity resolver models. 
+
+.. code-block:: console
+
+    $ cd $WB_APP_ROOT
+    $ mkdir entities
+    $ cd entities
+    $ mkdir store_name
+
+Workbench provides a faster way to create your application structure for common use cases. These are called application 'blueprints'. A blueprint is a pre-configured application structure. Starting with an empty root directory, you can set up your initial application structure using the :keyword:`blueprint()` method, as shown below.
+
+.. code-block:: console
+
+    $ python3 -c "import mmworkbench as wb; wb.blueprint('quickstart');"
+
+For our simple example application, the resulting root directory structure is illustrated below. 
 
 .. image:: images/directory.png
     :width: 400px
     :align: center
+
+Refer to the :ref:`User Manual <userguide>` for more details about available blueprints as well as the organization and structure of the application root directory.
+
 
 Notice that there is no folder for the ``date`` entity. In this case, ``date`` is a 'system' entity, which is already built in to the Workbench platform. Workbench provides several different 'system' entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <userguide>` for details.  
 
@@ -56,5 +90,5 @@ Given this defined hierarchy, we would expect our trained natural language proce
     :width: 600px
     :align: center
 
-The following sections of the quickstart will describe how to introduce training data to the defined directories in order to build machine learning models to parse and understand user requests, as shown above.
+The following sections of the step-by-step guide will describe how to introduce training data to the defined directories in order to build machine learning models to parse and understand user requests, as shown above.
 

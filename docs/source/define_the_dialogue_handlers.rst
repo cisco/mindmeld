@@ -38,7 +38,7 @@ As shown, each dialogue state prescribes the form of the system response. For mo
 Create the Application Container
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In MindMeld Workbench, the application container is a Python file which contains all of the logic and functionality for your application. This Python file is located in your project's root directory, and it enumerates all of the dialogue states and their associated handlers. To begin, create a file called 'my_app.py' with the following minimal implementation in your root directory. 
+In MindMeld Workbench, the application container is a Python file which contains all of the logic and functionality for your application. This Python file is located in your project's root directory, and it enumerates all of the dialogue states and their associated handlers. If you based your application structure on a blueprint, you will see a file 'my_app.py' in the root directory. If not, create a python file called my_app.py with the following minimal implementation in your root directory. 
 
 .. code:: python
 
