@@ -64,24 +64,24 @@ The Natural Language Processor would detect ``cheapest`` as a sort entity and po
   results = qa.get(index='items', query, context)
   print results
 
-The final ranking that MindMeld Workbench returns is -
+The final ranking of doughnut names that MindMeld Workbench returns would be the following:
 
 .. code-block:: javascript
 
-  {item_id: 2},
-  {item_id: 1},
-  {item_id: 3}
+  "Green Doughnut",
+  "Pink Doughnut",
+  "Yellow Doughnut"
 
 Text Relevance
 ~~~~~~~~~~~~~~
 
-In general, "Text Relevance" refers to the algorithm used to calculate how *similar* the contents of a full-text field are to a full-text query string. The Knowledge Base offered by MindMeld Workbench uses a standard similarity algorithm called the `TF_IDF <https://en.wikipedia.org/wiki/Tf-idf>`_ algorithm. Additionally, a *Field Length Norm* factor is applied, so longer field values are penalized.
+In general, "Text Relevance" refers to the algorithm used to calculate how *similar* the contents of a full-text field are to a full-text query string. The Question Answerer offered by MindMeld Workbench uses a standard similarity algorithm called the `TF_IDF <https://en.wikipedia.org/wiki/Tf-idf>`_ algorithm. TF-IDF is a widely used text similarity statistic intended to reflect how important a word is to a document collection. This is usually normalized by the field-length values so that greater simiality emphasis is placed on shorter field values.
 
 Consider the following example documents on three different products:
 
 .. code-block:: javascript
 
-  { 
+  {
     "item_id": 1,
     "item_name": "Pink Frosty Doughnuts"
   },
@@ -102,15 +102,24 @@ The returned list of documents as per text relevance would be:
 
 .. code-block:: javascript
 
-  {item_id: 1},
-  {item_id: 3},
-  {item_id: 2} 
+  {
+    "item_id": 1,
+    "item_name": "Pink Frosty Doughnuts"
+  },
+  {
+    "item_id": 3,
+    "item_name": "Frosty Yellow Doughnuts With Frosty Sprinkles"
+  },
+  {
+    "item_id": 2,
+    "item_name": "Pink Sprinklicious Doughnuts"
+  }
 
-* {item_id: 1} is more relevant because it's ``item_name`` is short
-* {item_id: 3} comes next because "frosty" appears twice and "doughnut" appears once
-* {item_id: 2} is the last - only "doughnut" matched
+* item_id 1 is more relevant because it's ``item_name`` is short
+* item_id 3 comes next because "frosty" appears twice and "doughnut" appears once
+* item_id 2 is the last - only "doughnut" matched
 
-If we want to specify a more stringent match criteria (E.g both "frosty" and "doughnut" must appear in the returned documents), we can use the ``minimum_should_match`` argument in the Question Answerer **get** method. The ``minimum_should_match`` parameter specifies what percentage of query terms should match with the field value (at least).
+The Question Answerer's **get** method offers a versatile set of arguments for controlling text relevance. The ``minimum_should_match`` parameter specifies what percentage of query terms should match with the field value (at least). For the above example, if we wanted to specify more stringent match criteria - e.g both "frosty" and "doughnut" must appear in the returned documents - the ``minimum_should_match`` argument can be used as follows:
 
 .. code-block:: python
 
@@ -124,12 +133,12 @@ While the above example gives a glimpse of the text-matching strategies availabl
 Advanced Settings
 ~~~~~~~~~~~~~~~~~
 
-While creating the index, all fields in the data go through a process called "Analysis". Analyzers can be defined per field to define the following:
+When creating the Knowledge Base index, all fields in the data go through a process called "Analysis". Analyzers can be defined per field to define the following:
 
 * Tokenizing a block of text into individual terms before adding to inverted index
 * Normalizing these terms into a standard form to improve searchability
 
-When we search on a full-text field, the query string is passed through the same analysis process, to ensure that we are searching for terms in the same form as those that exist in the index.
+When searching on a full-text field, the query string is passed through the same analysis process, to ensure that we are searching for terms in the same form as those that exist in the index.
 
 In MindMeld Workbench, you can optionally define custom analyzers per field by specifying an **es_mapping.json** file at the application root level. While the default MindMeld Workbench Analyzer uses a robust set of character filtering operations for tokenizing, custom analyzers can be handy for special character/token handling.
 
@@ -166,7 +175,7 @@ File **es_mapping.json** -
     }
   }
 
-More information on custom analyzers and the **es_mapping.json** file is available in the User Guide chapter on Knowledge Base. Example mapping files for a variety of use-cases and content types are also provided.
+More information on custom analyzers and the **es_mapping.json** file is available in the :ref:`User Manual <userguide>`. Example mapping files for a variety of use-cases and content types are also provided.
 
 Evaluation Metrics
 ~~~~~~~~~~~~~~~~~~
@@ -220,5 +229,5 @@ The function gets applied to each document in the retrieved set to compute their
 Learning To Rank
 ~~~~~~~~~~~~~~~~
 
-Given the right kind of training data (and lots of it), Machine Learning methods can be applied for ranking in a variety of ways. To learn how to develop a Machine Learning approach to ranking, i.e. `Learning To Rank <https://en.wikipedia.org/wiki/Learning_to_rank>`_, please refer to the guidelines on assembling the right kind of training data and building models in the User Guide chapter.
+Given the right kind of training data (and lots of it), Machine Learning methods can be applied for ranking in a variety of ways. To learn how to develop a Machine Learning approach to ranking, i.e. `Learning To Rank <https://en.wikipedia.org/wiki/Learning_to_rank>`_, please refer to the guidelines on assembling the right kind of training data and building models in the :ref:`User Manual <userguide>`.
 
