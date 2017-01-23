@@ -3,39 +3,39 @@ Step 7: Train the Natural Language Processing Classifiers
 
 The Natural Language Processor (NLP) component of Workbench is tasked with understanding the user's natural language input. It analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, successively narrowing down the “search space”.
 
-As introduced in :doc:`step 3 </define_the_hierarchy>`, there are a total of four classifiers, applied in the following order:
+As introduced in :doc:`step 3 </define_the_hierarchy>`, Workbench relies on four layers of classifiers, applied in the following order:
 
-#. **Domain Classifier**: For apps that handle conversations across varied topics having their own specialized vocabulary, the domain classifier provides the first level of categorization by classifying the input into a pre-defined set of conversational domains.
+#. **Domain Classifier**: For apps that handle conversations across varied topics having their own specialized vocabulary, the domain classifier provides the first level of categorization by classifying the input into one of a pre-defined set of conversational domains.
 
-#. **Intent Classifier**: The intent classifier next determines what the user is trying to accomplish by categorizing the input into a set of user intents that the system can handle.
+#. **Intent Classifiers**: The intent classifier next determines what the user is trying to accomplish by assigning each input into one of a set of pre-defined intents that the system can handle.
 
-#. **Entity Recognizer**: The entity recognizer then extracts important words and phrases, called entities, that are required to fulfill the user's end goal.
+#. **Entity Recognizers**: The entity recognizer then extracts important words and phrases, called entities, that are required to fulfill the user's end goal.
 
-#. **Role Classifier**: In cases where an entity of a particular type can have multiple meanings depending on the context, the role classifier can be used to provide another level of categorization and assign a differentiating label called "role" to the extracted entities.
+#. **Role Classifiers**: In cases where an entity of a particular type can have multiple meanings depending on the context, the role classifier can be used to provide another level of categorization and assign a differentiating label called "role" to the extracted entities.
 
-To train the NLP classifiers for our Kwik-E-Mart store information app, we start by gathering the training data as described in :doc:`step 6 </generate_representative_training_data>` and placing them in the directory structure mentioned in :doc:`step 3 </define_the_hierarchy>`. We can then train all the classifiers by invoking one simple command:
+To train the NLP classifiers for our Kwik-E-Mart store information app, we start by gathering the training data as described in :doc:`step 6 </generate_representative_training_data>`. We can then train all the classifiers by invoking one simple command:
 
 .. code-block:: text
 
   python my_app.py build
 
-Based on the directory structure and the marked-up annotations in the training data, the Natural Language Processor can automatically determine which classifiers need to be trained. In our case, the NLP will train an intent classifier for the ``store_information`` domain and entity recognizers for each of the intents under that domain, while ignoring the domain and role classifiers. The above command will use the default machine learning settings for all the classifiers, which in most cases should train reasonable models. But to build a high quality production-ready conversational app, we need to carefully train, test and optimize each classification model individually, and that's where Workbench truly shines. 
+Based on the directory structure and the annotations in the training data, the Natural Language Processor automatically infers which classifiers need to be trained. In our case, the NLP will train an intent classifier for the ``store_information`` domain and entity recognizers for each of the intents which contain labeled queries with entity annotations. This simple example did not include training data for domain classification or role classification, and consequently, these models will not be built.
 
-We'll next take a closer look at two of the NLP steps - Intent Classification and Entity Recognition, and learn how to experiment with different settings for each of them individually.
+By default, the above command will use the baseline machine learning settings for all classifiers, which in most cases should train reasonable models. To further optimize model performance, Workbench provides extensive capabilities to optimize individual model parameters and measure results. We'll next take a closer look at two of the NLP steps, intent classification and entity recognition, and learn how to experiment with different settings for each of them individually.
 
 
-Intent Classifier
-~~~~~~~~~~~~~~~~~
+Intent Classification
+~~~~~~~~~~~~~~~~~~~~~
 
-Intent Classifiers (also called intent models) are text classification models that are trained per domain using the training queries in each intent folder. The ``NLP`` class in Workbench exposes methods for training, testing and saving all the models in our classifier hierarchy, including the intent models.
+Intent Classifiers (also called intent models) are text classification models that are trained, one-per-domain,  using the training queries in each intent folder. The :keyword:`NaturalLanguageProcessor` class in Workbench exposes methods for training, testing and saving all the models in our classifier hierarchy, including the intent models.
 
-For our intent classifier, let's assume that we want to build a `logistic regression <https://en.wikipedia.org/wiki/Logistic_regression>`_ model and use `Bag of Words <https://en.wikipedia.org/wiki/Bag-of-words_model>`_ and `Edge n-grams <https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-edgengram-tokenizer.html>`_ as features. Also, we would like to do `k-fold cross validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation>`_  with 20 splits.
+For our intent classifier, let's assume that we want to build a `logistic regression <https://en.wikipedia.org/wiki/Logistic_regression>`_ model and use `bag of words <https://en.wikipedia.org/wiki/Bag-of-words_model>`_ and `edge n-grams <https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-edgengram-tokenizer.html>`_ as features. Also, we would like to do `k-fold cross validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation>`_  with 20 splits.
 
-We start off by importing and instantiating an object of the Natural Language Processor (NLP) class by providing it the path to the root of our app data directory.
+We start off by importing and instantiating an object of the :keyword:`NaturalLanguageProcessor` class by providing it the path to the root of our app data directory.
 
 .. code-block:: python
 
-  from mmworkbench import NLP
+  from mmworkbench import NaturalLanguageProcessor as NLP
 
   # Instantiate MindMeld NLP by providing the app_data path.
   nlp = NLP('path_to_app_data_directory_root')
@@ -73,8 +73,8 @@ We have now successfully trained an intent classifier for the ``store_informatio
 
 The :doc:`Intent Classifier User Manual </intent_classification>` has a comprehensive list of the different model, feature extraction and hyperparameter settings. It also describes how to evaluate a trained intent model using labeled test data.
 
-Entity Recognizer
-~~~~~~~~~~~~~~~~~
+Entity Recognition
+~~~~~~~~~~~~~~~~~~
 
 Entity Recognizers (also called entity models) are sequence labeling models that are trained per intent using the annotated queries in each entity folder. The task of the entity recognizer is both to detect the entities within a query and label them as one of the pre-defined entity types.
 
