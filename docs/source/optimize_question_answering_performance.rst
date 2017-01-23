@@ -110,7 +110,7 @@ The returned list of documents as per text relevance would be:
 * {item_id: 3} comes next because "frosty" appears twice and "doughnut" appears once
 * {item_id: 2} is the last - only "doughnut" matched
 
-If we want to specify a more stringent match criteria (E.g both "frosty" and "doughnut" must appear in the returned documents), we can use the ``minimum_should_match`` argument in the Knowledge Base **get** method. The ``minimum_should_match`` parameter specifies what percentage of query terms should match with the field value (at least).
+If we want to specify a more stringent match criteria (E.g both "frosty" and "doughnut" must appear in the returned documents), we can use the ``minimum_should_match`` argument in the Question Answerer **get** method. The ``minimum_should_match`` parameter specifies what percentage of query terms should match with the field value (at least).
 
 .. code-block:: python
 
@@ -200,7 +200,7 @@ File **my_app.py** -
     score = compute_doc_score(query, context, document)
     return score
 
-The custom ranking function can then be used in the **get** method of the Knowledge Base object.
+The custom ranking function can then be used in the **get** method of the QuestionAnswerer object.
 
 .. code-block:: python
 
