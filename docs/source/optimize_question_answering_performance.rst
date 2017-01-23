@@ -61,7 +61,7 @@ The Natural Language Processor would detect ``cheapest`` as a sort entity and po
     ]
   }
 
-  results = kb.get(index='items', query, context)
+  results = qa.get(index='items', query, context)
   print results
 
 The final ranking that MindMeld Workbench returns is -
@@ -115,7 +115,7 @@ If we want to specify a more stringent match criteria (E.g both "frosty" and "do
 .. code-block:: python
 
   # All query terms must match the terms in the field value
-  kb.get(index='items', query, context, minimum_should_match=100)
+  qa.get(index='items', query, context, minimum_should_match=100)
 
 The default value of the ``minimum_should_match`` parameter is set to 75%.
 
@@ -194,7 +194,7 @@ File **my_app.py** -
 
 .. code-block:: python
 
-  @app.kb.handle(domain='items')
+  @app.qa.handle(domain='items')
   def items_ranking_fn(query, context, document):
     # Custom scoring logic goes here.
     score = compute_doc_score(query, context, document)
@@ -208,7 +208,7 @@ The custom ranking function can then be used in the **get** method of the Knowle
  # the data is loaded into the 'items' index.
 
  # Get ranked results from KB
- ranked_results = kb.get(index='stores', query,
+ ranked_results = qa.get(index='stores', query,
         context, ranking_fn=items_ranking_fn)
 
 The function gets applied to each document in the retrieved set to compute their final scores, and the ranked set is then returned.
