@@ -1,5 +1,5 @@
-Select the Right Use Case
-=========================
+Step 1: Select the Right Use Case
+=================================
 
 Selecting the right use case is perhaps the most important step in building a conversational application that users will love. There are many use cases where a voice or chat conversation can simplify the task of finding information or accomplishing a task. There are also many use cases where a conversational interface can be inconvenient or frustrating. Selecting an unrealistic or incorrect use case will render even the smartest voice or chat assistant dead on arrival.
 

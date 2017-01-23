@@ -24,7 +24,6 @@ Contents
 ========
 
 .. toctree::
-   :numbered:
    :maxdepth: 2
    :caption: Introduction
    :name: intro
@@ -35,7 +34,6 @@ Contents
    introducing_mindmeld_workbench
 
 .. toctree::
-   :numbered:
    :maxdepth: 2
    :caption: Step-by-Step Guide
    :name: quickstart
@@ -48,7 +46,6 @@ Contents
    create_the_knowledge_base
    generate_representative_training_data
    train_the_natural_language_processing_classifiers
-   train_the_entity_resolvers
    configure_the_language_parser
    optimize_question_answering_performance
    deploy_to_production

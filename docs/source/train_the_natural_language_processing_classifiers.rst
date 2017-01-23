@@ -1,9 +1,9 @@
-Train the Natural Language Processing Classifiers
-=================================================
+Step 7: Train the Natural Language Processing Classifiers
+=========================================================
 
 The Natural Language Processor (NLP) component of Workbench is tasked with understanding the user's natural language input. It analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, successively narrowing down the “search space”.
 
-As introduced in :doc:`Step 4 </define_the_hierarchy>`, there are a total of four classifiers, applied in the following order:
+As introduced in :doc:`step 3 </define_the_hierarchy>`, there are a total of four classifiers, applied in the following order:
 
 #. **Domain Classifier**: For apps that handle conversations across varied topics having their own specialized vocabulary, the domain classifier provides the first level of categorization by classifying the input into a pre-defined set of conversational domains.
 
@@ -13,7 +13,7 @@ As introduced in :doc:`Step 4 </define_the_hierarchy>`, there are a total of fou
 
 #. **Role Classifier**: In cases where an entity of a particular type can have multiple meanings depending on the context, the role classifier can be used to provide another level of categorization and assign a differentiating label called "role" to the extracted entities.
 
-To train the NLP classifiers for our "Kwik-e-Mart Store Information" app, we start by gathering the training data as described in :doc:`Step 6 </generate_representative_training_data>` and placing them in the directory structure mentioned in :doc:`Step 4 </define_the_hierarchy>`. We can then train all the classifiers by invoking one simple command:
+To train the NLP classifiers for our Kwik-E-Mart store information app, we start by gathering the training data as described in :doc:`step 6 </generate_representative_training_data>` and placing them in the directory structure mentioned in :doc:`step 3 </define_the_hierarchy>`. We can then train all the classifiers by invoking one simple command:
 
 .. code-block:: text
 
@@ -124,3 +124,9 @@ We have now looked at how to individually build the intent classification and en
   python my_app.py build --config build_config.json
 
 This is the quickest way to retrain your classifiers in production (e.g. in case of a training data refresh) using the best known model configuration settings. For details on the configuration file format and a more in-depth treatment of the NLP classifiers in Workbench, refer to the :ref:`User Guide <userguide>`.
+
+Entity Resolver
+~~~~~~~~~~~~~~~
+
+Introduce the topic of loading training data, training entity resolution models, measuring CV and held-out performance, performing disambiguation.
+

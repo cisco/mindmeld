@@ -1,7 +1,5 @@
-.. _define-hierarchy:
-
-Define the Domain, Intent, Entity and Role Hierarchy
-====================================================
+Step 3: Define the Domain, Intent, Entity and Role Hierarchy
+============================================================
 
 Conversational applications rely on a hierarchy of machine learning classifiers in order to model and understand natural language. More broadly defined as Natural Language Processing, this family of machine learning models sits at the core all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has been adopted in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on the hierarchy of machine learning models illustrated below.
 

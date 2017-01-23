@@ -1,5 +1,5 @@
-Define the Dialogue State Handlers
-==================================
+Step 4: Define the Dialogue State Handlers
+==========================================
 
 Today's commercial voice and chat assistants guide users through a conversational interaction in order to find information or accomplish a task. The steps in each conversational interaction are called 'dialogue states'. A dialogue state defines the form of response which is appropriate for each step in an interaction as well as other logic that must be invoked to determine the desired response. Each application relies on a set of dialogue state handlers which define the logic and response required for every supported dialogue state. 
 
@@ -22,7 +22,7 @@ In practice, however, the flow of dialogue states can be quite complex. Conversa
     :width: 700px
     :align: center
 
-Our goal here is to define the required dialogue states for the scripted conversational interaction in :ref:`section 3 <script-interactions>`. To capture the envisioned functionality, four different dialogue states will be needed: ``welcome``, ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The following diagram illustrates the conversation flow.
+Our goal here is to define the required dialogue states for the scripted conversational interaction in :doc:`step 2 <script_interactions>`. To capture the envisioned functionality, four different dialogue states will be needed: ``welcome``, ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The following diagram illustrates the conversation flow.
 
 .. image:: images/quickstart_dialogue_states.png
     :width: 700px
@@ -75,7 +75,7 @@ This application structure provides a straighforward mechanism to enumerate a va
 Implement the Dialogue State Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let us now define the dialogue handlers we would need for the interaction in :ref:`section 3 <script-interactions>`. In the process, we will introduce several new capabilities of Workbench which are described in depth later in the :ref:`User Manual <userguide>`.
+Let us now define the dialogue handlers we would need for the interaction in :doc:`step 2 <script_interactions>`. In the process, we will introduce several new capabilities of Workbench which are described in depth later in the :ref:`User Manual <userguide>`.
 
 To start, let's consider the handler for the ``welcome`` dialogue state.
 

@@ -1,5 +1,5 @@
-Generate Representative Training Data
-=====================================
+Step 6: Generate Representative Training Data
+=============================================
 
 Supervised machine learning is the technology behind today's most successful and widely used conversational applications, and data sets are the fuel that power all supervised learning algorithms. For even simple applications, the combinatorial complexity of human language makes rule-based approaches intractable. Supervised machine learning, on the other hand, has proven remarkably effective at understanding human language by observing large amounts of representative training data. Most of the components in MindMeld Workbench rely on supervised machine learning algorithms that learn from thousands or millions of training examples.
 
@@ -17,7 +17,7 @@ In MindMeld Workbench, there are 6 core supervised learning components that rely
   - Entity Resolution
   - Question Answerer Ranking
 
-As described in :ref:`section 4 <define-hierarchy>`, the structure of your application's root directory in Workbench organizes the training data files that may be needed in your application. For our example application which provides Kwik-E-Mart store information, the application directory is shown below.
+As described in :doc:`step 3 <define_the_hierarchy>`, the structure of your application's root directory in Workbench organizes the training data files that may be needed in your application. For our example application which provides Kwik-E-Mart store information, the application directory is shown below.
 
 .. image:: images/directory3.png
     :width: 400px
@@ -83,7 +83,7 @@ As you might expect, this data file captures many of the different ways a user m
   Can you check if the {Main St|store_name} store is open on {Sunday|sys:date}?
   ...
 
-This file illustrates the annotation scheme for inline entities. As you might recall, from :ref:`section 4 <define-hierarchy>`, the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``date``.  As you can see in this example, each inline entity is appended by the pipe character followed by its associated entity type (e.g. :keyword:`|store_name`). The entire expression is then enclosed in curly braces, :keyword:`{Elm Street|store_name}`. You might also recall from :ref:`section 4 <define-hierarchy>` that certain entities, such as ``date``, are built-in or system-defined entities. As you can see in the snippet above, annotations for system entity names begin with :keyword:`sys:`. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
+This file illustrates the annotation scheme for inline entities. As you might recall, from :doc:`step 3 <define_the_hierarchy>`, the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``date``.  As you can see in this example, each inline entity is appended by the pipe character followed by its associated entity type (e.g. :keyword:`|store_name`). The entire expression is then enclosed in curly braces, :keyword:`{Elm Street|store_name}`. You might also recall from :doc:`step 3 <define_the_hierarchy>` that certain entities, such as ``date``, are built-in or system-defined entities. As you can see in the snippet above, annotations for system entity names begin with :keyword:`sys:`. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
 
 Labeled queries can also be used to train role classification models. This is not a requirement for our Kwik-E-Mart application, but to illustrate how it might work, consider the following user query:
 

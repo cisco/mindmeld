@@ -1,5 +1,5 @@
-Deploy Trained Models To Production
-===================================
+Step 10: Deploy Trained Models To Production
+============================================
 
 Apart from serving as a library of Machine Learning tools for building powerful conversational interfaces, MindMeld Workbench also provides functionality for easily deploying the models to a server for testing and serving live user queries. This is done using a lightweight micro web framework built into MindMeld Workbench for local deployment. For deploying to production, running a single command is sufficient to trigger a remote process on a production-ready backend infrastructure (more details below). Finally, a simple "Test Console" UI is provided along with the deployment setup to visualize the end-to-end flow for any given request.
 

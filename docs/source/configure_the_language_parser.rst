@@ -1,5 +1,5 @@
-Configure the Language Parser
-=============================
+Step 8: Configure the Language Parser
+=====================================
 
 The last component within the Natural Language Processor is the **Language Parser**. Its job is to find relations between the extracted entities and group them into meaningful entity groups. The Parser analyzes the information provided by all the previous NLP models and outputs a data structure called the parse tree, that represents how different entites relate to each other. 
 

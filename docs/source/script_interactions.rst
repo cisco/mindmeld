@@ -1,7 +1,5 @@
-.. _script-interactions:
-
-Script Your Ideal Dialogue Interactions
-=======================================
+Step 2: Script Your Ideal Dialogue Interactions
+===============================================
 
 Once you have identified a good use case, the next step is to script your envisioned dialogue interactions. This design exercise details the conversational interaction flows which define the user experience for your application. It is important to think through not just the most obvious user flows, but also the corner case and exception user flows which may be encountered by users during an interaction. For example, the dialogue flows should illustrate how the application responds if the user request is beyond the application scope. Also, the flows should illustrate the interactions which will enable users to gracefully leave the interaction or to get help if they are stuck. The dialogue flows should detail not only the various interaction pathways a conversation may traverse, but they should also illustrate the desired language and tone envisioned for the experience.
 

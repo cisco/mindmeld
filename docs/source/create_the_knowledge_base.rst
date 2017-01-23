@@ -1,5 +1,5 @@
-Create the Question Answerer Knowledge Base
-===========================================
+Step 5: Create the Question Answerer Knowledge Base
+===================================================
 
 The smartest and most useful intelligent assistants in widespread use today all rely on an underlying knowledge base. A knowledge base is comprehensive repository containing the universe of helpful information which is essential to understand requests and answer questions. In many cases, the knowledge base is the secret ingredient which makes a conversational interface appear surprisingly intelligent and versatile. For example, when you ask Alexa to play a song, it relies on a knowledge base which contains information about every track, artist and album in your music streaming service. When you ask Siri to send a text message, it enlists a knowledge base which knows about all of your important contacts. When IBM's Watson bested Jeopardy! grand champions, it leveraged an extensive knowledge base of Wikipedia facts. While some tasks, like setting a thermostat or appending a to-do list, may not warrant a knowledge base, the lion's share of today's commercial conversational applications owe their intelligence and utility to an underlying base of global knowledge.
 
