@@ -1,235 +1,260 @@
 Step 9: Optimize Question Answering Performance
 ===============================================
 
-As stated in :doc:`step 5 </create_the_knowledge_base>`, one of the primary purposes of the Question Answerer is to identify and rank candidate answers for user questions. The answers have to be ranked in order of document relevance to a given query. MindMeld Workbench provides a powerful set of functionalities in the Question Answerer to optimize rankings of results across multiple user queries. This is one of the last important steps to ensure great quality in conversational applications.
+The Workbench question answerer is a powerful component which streamlines the development of applications that need to answer questions in addition to understanding user requests. The question answerer relies on a knowledge base which encompasses all of the important world knowledge for a given application use case. For example, the question answerer might rely on a knowledge base which knows details about every product in a product catalog. Alternately, the question answerer might have a knowledge base containing detailed information about every song or album in a music library.
 
-The "relevance" of each document is represented by a positive floating point number - the ``score``. The higher the score, the more relevant the document. MindMeld Workbench offers a robust, built-in "ranking formula" for defining a general-purpose scoring function. However, in cases where the default ranking formula is not sufficient in ensuring good performance across a large number of test queries, MindMeld Workbench provides a facility for defining custom ranking formulae. The concept of "performance" is explained in Section 1.10.4 on "Evaluation Metrics".
+To leverage the Workbench question answerer in your application, you must first create your knowledge base, as described in :doc:`step 5 </create_the_knowledge_base>`. With your knowledge base created, the question answerer can then be invoked in your dialogue state handlers, as illustrated in :doc:`step 4 </define_the_dialogue_handlers>`, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which could find nearby Kwik-E-Mart store locations might look like:
 
-Sorting
-~~~~~~~
+.. code:: python
 
-Among the various signals used in computing the relevance score, sorting is an important operation offered by MindMeld Workbench. Sorting is applicable on any real-valued field in the Knowledge Base (either ascending or descending order). The Question Answering module gets its cue to invoke the sorting function based on the presence of ``sort`` entities. If one or more sort entities are detected, the documents with resolved numerical field values corresponding to those entities will get a boost in the score function. Additionally, a decay is applied to this sorting boost to ensure a balance between the applied sort and other relevance signals.
-
-For example, consider the following query:
-
-* What are the cheapest doughnuts available in Kwik-E-Mart?
-
-Let's say we have the following documents in the Knowledge Base:
-
-.. code-block:: javascript
-
-  {
-    "item_id": 1,
-    "item_name": "Pink Doughnut",
-    "price": 20
-  },
-  {
-    "item_id": 2,
-    "item_name": "Green Doughnut",
-    "price": 12
-  },
-  {
-    "item_id": 3,
-    "item_name": "Yellow Doughnut",
-    "price": 15
-  }
-  ...
-
-The Natural Language Processor would detect ``cheapest`` as a sort entity and populates the context object accordingly:
-
-.. code-block:: python
-
-  query = "What are the cheapest doughnuts available in Kwik-E-Mart?"
-  context = {
-    'domain': 'item_information',
-    'intent': 'order_item',
-    'entities': [
-      {
-        'type': 'item_name'
-        'mode': 'search',
-        'text': 'doughnut'
-        'value': 'item_name:doughnut',
-        'chstart': 22,
-        'chend': 30
-      },
-      {
-        'type': 'pricesort',
-        'mode': 'sort',
-        'text': 'cheapest',
-        'value': 'price:asc',
-        'chstart': 13,
-        'chend': 20
-      }
-    ]
-  }
-
-  results = qa.get(index='items', query, context)
-  print results
-
-The final ranking of doughnut names that MindMeld Workbench returns would be the following:
-
-.. code-block:: javascript
-
-  "Green Doughnut",
-  "Pink Doughnut",
-  "Yellow Doughnut"
-
-Text Relevance
-~~~~~~~~~~~~~~
-
-In general, "Text Relevance" refers to the algorithm used to calculate how *similar* the contents of a full-text field are to a full-text query string. The Question Answerer offered by MindMeld Workbench uses a standard similarity algorithm called the `TF_IDF <https://en.wikipedia.org/wiki/Tf-idf>`_ algorithm. TF-IDF is a widely used text similarity statistic intended to reflect how important a word is to a document collection. This is usually normalized by the field-length values so that greater simiality emphasis is placed on shorter field values.
-
-Consider the following example documents on three different products:
-
-.. code-block:: javascript
-
-  {
-    "item_id": 1,
-    "item_name": "Pink Frosty Doughnuts"
-  },
-  { 
-    "item_id": 2,
-    "item_name": "Pink Sprinklicious Doughnuts"
-  },
-  {
-    "item_id": 3,
-    "item_name": "Frosty Yellow Doughnuts With Frosty Sprinkles"
-  }
-
-For an incoming query like -
-
-* "I want some frosty doughnuts"
-
-The returned list of documents as per text relevance would be:
-
-.. code-block:: javascript
-
-  {
-    "item_id": 1,
-    "item_name": "Pink Frosty Doughnuts"
-  },
-  {
-    "item_id": 3,
-    "item_name": "Frosty Yellow Doughnuts With Frosty Sprinkles"
-  },
-  {
-    "item_id": 2,
-    "item_name": "Pink Sprinklicious Doughnuts"
-  }
-
-* item_id 1 is more relevant because it's ``item_name`` is short
-* item_id 3 comes next because "frosty" appears twice and "doughnut" appears once
-* item_id 2 is the last - only "doughnut" matched
-
-The Question Answerer's **get** method offers a versatile set of arguments for controlling text relevance. The ``minimum_should_match`` parameter specifies what percentage of query terms should match with the field value (at least). For the above example, if we wanted to specify more stringent match criteria - e.g both "frosty" and "doughnut" must appear in the returned documents - the ``minimum_should_match`` argument can be used as follows:
-
-.. code-block:: python
-
-  # All query terms must match the terms in the field value
-  qa.get(index='items', query, context, minimum_should_match=100)
-
-The default value of the ``minimum_should_match`` parameter is set to 75%.
-
-While the above example gives a glimpse of the text-matching strategies available in MindMeld Workbench, much more complex functionality (such as "Exact Matching" and "Boosting Query Clauses") is available in the User Guide chapter on Knowledge Base.
-
-Advanced Settings
-~~~~~~~~~~~~~~~~~
-
-When creating the Knowledge Base index, all fields in the data go through a process called "Analysis". Analyzers can be defined per field to define the following:
-
-* Tokenizing a block of text into individual terms before adding to inverted index
-* Normalizing these terms into a standard form to improve searchability
-
-When searching on a full-text field, the query string is passed through the same analysis process, to ensure that we are searching for terms in the same form as those that exist in the index.
-
-In MindMeld Workbench, you can optionally define custom analyzers per field by specifying an **es_mapping.json** file at the application root level. While the default MindMeld Workbench Analyzer uses a robust set of character filtering operations for tokenizing, custom analyzers can be handy for special character/token handling.
-
-For example, lets say we have a store named *"Springfield™ store"*. We want the indexer to ignore characters like "™" and "®" since users never specify these in their queries. We need to define special ``char_filter`` and ``analyzers`` mappings as follows:
-
-File **es_mapping.json** -
-
-.. code-block:: javascript
-
-  {
-    "field_mappings": {
-      "store_name": {
-        "type": "string",
-        "analyzer": "my_custom_analyzer"
-      }
-    },
-    "settings": {
-      "char_filter": {
-        "remove_tm_and_r": {
-            "pattern":"™|®",
-            "type":"pattern_replace",
-            "replacement":""
-        }
-      },
-      "analyzers": {
-        "my_custom_analyzer": {
-          "type": "custom",
-          "tokenizer": "whitespace",
-          "char_filter": [
-            "remove_tm_and_r"
+  from mmworkbench import Application, QuestionAnswerer, context, slots
+  qa = QuestionAnswerer()
+  app = Application(__name__, qa)
+  
+  @app.handle(intent='get_nearest_store')
+  def send_nearest_store():
+      loc = context.request.session.location 
+      stores = qa.indexes['stores'].get(sort='location', current_location=loc)
+      slots['store_name'] = stores[0]['name']
+      response = {
+          'replies': [
+              'Your nearest Kwik-E-Mart is located at {store_name}.'
           ]
-        }
       }
-    }
+      return response
+
+As illustrated above, the question answered can be utilized in your application by importing the :keyword:`QuestionAnswerer` component. Assuming you have already created an index, such as ``stores`` and uploaded the knowledge base data, the :keyword:`get()` method provides a flexible mechanism to retrieve relevant results.
+
+.. code:: python
+
+  >>> from mmworkbench import QuestionAnswerer
+  >>> qa = QuestionAnswerer()
+  >>> stores = qa.indexes['stores'].get()
+  >>> stores[0]
+  {
+    "store_name": "23 Elm Street",
+    "open_time": "7am",
+    "close_time": "9pm",
+    "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
+    "phone_number": "(+1) 415-555-1100",
+    "score": 1.0
   }
 
-More information on custom analyzers and the **es_mapping.json** file is available in the :ref:`User Manual <userguide>`. Example mapping files for a variety of use-cases and content types are also provided.
+Similarly, to retrieve store locations on Market Street, you could use something like:
 
-Evaluation Metrics
-~~~~~~~~~~~~~~~~~~
+.. code:: python
 
-In Information Retrieval, Top 1 accuracy, Top K accuracy, Precision, Recall and F1 scores are all great evaluation metrics to get started. To optimize Precision and Recall, you will need to create a "relevant set" of documents for each query in your test set. This relevant set is typically generated by a human expert, or by repeated error analysis.
+  >>> stores = qa.indexes['stores'].get('market')
+  >>> stores[0]
+  {
+    "store_name": "Pine and Market",
+    "open_time": "6am",
+    "close_time": "10pm",
+    "address": "750 Market Street, Capital City, CA 94001",
+    "phone_number": "(+1) 650-555-4500",
+    "score": 0.8276352
+  }
 
-.. code-block:: text
+By default, the :keyword:`get()` method utilizes a baseline ranking algorithm which displays the most relevant documents based on text similarity. Each result includes a :keyword:`score` containing the relevance score.  For some applications, the baseline ranking is sufficient. The Workbench question answerer also provides flexible options for customizing relevance to suit the needs of any application. 
 
-  Query                                   Relevant Set
 
-  "get me a doughnut"                     1, 3, 28, 67, 253, 798
-  "i want a lemon Squishee"               4, 363, 692
-  "can I get a buzz cola"                 291
-  "pink frosty sprinklicous doughnut"     67
+Custom Ranking Configurations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Consider an application where we only want to show the least expensive products to users. For example, a user might ask 'show me your cheapest items', and your application will need to display products in ascending order by price. Let's say we have the following objects in the knowledge base for the question answerer index ``products``:
+
+.. code-block:: javascript
+
+  {
+    "id": 1,
+    "name": "Pink Donut",
+    "price": 1.29
+  },
+  {
+    "id": 2,
+    "name": "Green Donut",
+    "price": 0.99
+  },
+  {
+    "id": 3,
+    "name": "Purple Squishee",
+    "price": 0.89
+  },
+  {
+    "id": 4,
+    "name": "Yellow Donut",
+    "price": 1.09
+  }
   ...
 
-For a thorough evaluation, it is advisable to create relevant sets for thousands of test queries for the initial pass. This bank of queries and their expected results should grow over time into hundreds of thousands, or even millions of query examples. This then becomes the golden set of data on which future models can be trained and evaluated.
 
-Custom Ranking Functions
-~~~~~~~~~~~~~~~~~~~~~~~~
+To retrieve the all products sorted in ascending order by price, you can specify the ranking configuration and then retrieve results as follows.
 
-In general, you should not have to worry about writing your own scoring function for ranking. MindMeld Workbench provides numerous knobs and dials for detailed, granular control over the built-in scoring function. However, in cases where the existing scoring function simply does not fit the needs of your application, you can specify your own custom scoring function for ranking. Define your custom ranking function in the **my_app.py** file as follows:
+.. code:: python
 
-File **my_app.py** -
+  >>> product_index = qa.indexes['products']
+  >>> product_index.config({'price': 'asc'})
+  >>> products = product_index.get()
+  >>> products[0]
+  {
+    "id": 3,
+    "name": "Purple Squishee",
+    "price": 0.89,
+    "score": 0.89
+  }
+
+As you can see, by configuring the ranking algorithm to return the least expensive products first, the item at the top of the list is the one with the lowest price. 
+
+While a single-field sort operation is very straightforward, most applications require a more sophisticated ranking algorithm which can blend many different signals to determine the most relevant result. As a simple example, lets say that your user is looking for the least expensive donut available. In this case, a simple sort by price will not work. Instead, you need to return inexpensive products that might also be described as a 'donut'. In this case, the ideal ranking algorithm should blend both price and the text relevance of the term 'donut'. The Workbench question answerer makes it easy to configure ranking algorithms which blend signals from many different knowledge base fields, as shown below.
+
+.. code:: python
+
+  >>> product_index = qa.indexes['products']
+  >>> product_index.config({'price': 'asc', 'name': 'desc'})
+  >>> products = product_index.get('donut')
+  >>> products[0]
+  {
+    "id": 2,
+    "name": "Green Donut",
+    "price": 0.99,
+    "score": 0.946598
+  }
+
+As you can see, the least expensive donut in the catalog is returned as the top result. Once you have found a ranking configuration for an index that serves your needs, it can be easily saved to file as follows.
+
+.. code:: python
+
+  >>> qa.indexes['products'].dump()
+
+Similarly, to load a previously saved ranking configuration, you can use:
+
+.. code:: python
+
+  >>> qa.indexes['products'].load()
+
+Refer to the :ref:`User Manual <userguide>` for more details on how specify custom ranking configurations for your application.
+
+
+Proximity-Based Ranking
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Location-based ranking is a fairly common capability for many mobile applications. As we already saw in our Kwik-E-Mart store information example, one of the supported intents is designed to provide the nearest Kwik-E-Mart retail locations for a given user. In this case, proximity-based ranking is required, and this is straightforward to accomplish using the Workbench question answerer.
+
+First, lets assume that you have created a knowledge base for the ``stores`` index which contains every retail location. Each store object also contains a field called :keyword:`location`, which contains latitude and longitude coordinates for each store. 
+
+.. code-block:: javascript
+
+  {
+    "store_name": "23 Elm Street",
+    "open_time": "7am",
+    "close_time": "9pm",
+    "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
+    "phone_number": "(+1) 415-555-1100",
+    "location": {"latitude": 37.790683, "longitude": -122.403889}
+  },
+  {
+    "store_name": "Pine and Market",
+    "open_time": "6am",
+    "close_time": "10pm",
+    "address": "750 Market Street, Capital City, CA 94001",
+    "phone_number": "(+1) 650-555-4500",
+    "location": {"latitude": 37.790426, "longitude": -122.405752}
+  }
+  ...
+
+In this case, retrieving the nearest stores can be done as follows.
+
+.. code:: python
+
+  >>> store_index = qa.indexes['stores']
+  >>> store_index.config({'location': 'asc'})
+  >>> my_loc = {"latitude": 37.790415, "longitude": -122.405218}
+  >>> stores = store_index.get(current_location=my_loc)
+  >>> stores[0]
+  {
+    "store_name": "Pine and Market",
+    "open_time": "6am",
+    "close_time": "10pm",
+    "address": "750 Market Street, Capital City, CA 94001",
+    "phone_number": "(+1) 650-555-4500",
+    "location": {"latitude": 37.790426, "longitude": -122.405752},
+    "distance": 0.231543
+  }
+
+Note that each result includes a :keyword:`distance` attribute specifying how far the store is located from the user (in kilometers). Equivalently, you can also use the :keyword:`sort` argument of the :keyword:`get()` method to explictly define the sort operation without relying on configuration beforehand.
+
+.. code:: python
+
+  >>> store_index = qa.indexes['stores']
+  >>> my_loc = {"latitude": 37.790415, "longitude": -122.405218}
+  >>> stores = store_index.get(sort='location', current_location=my_loc)
+  >>> stores[0]
+  {
+    "store_name": "Pine and Market",
+    "open_time": "6am",
+    "close_time": "10pm",
+    "address": "750 Market Street, Capital City, CA 94001",
+    "phone_number": "(+1) 650-555-4500",
+    "location": {"latitude": 37.790426, "longitude": -122.405752},
+    "distance": 0.231543
+  }
+
+
+Machine-Learned Ranking
+~~~~~~~~~~~~~~~~~~~~~~~
+
+State-of-the-art information retrieval systems today, such as search engines like Bing and Google, rely on sophisticated AI-powered ranking algorithms. These ranking algorithms leverage `machine learning <https://en.wikipedia.org/wiki/Learning_to_rank>`_ in order to learn the optimal ranking formula based on training data collected from live user traffic. For large knowledge domains which may contain millions or even billions of objects in a knowledge base, machine-learned ranking is typically the most effective path for delivering optimal ranking. The MindMeld question answerer component provides the capability not only to handle large knowledge bases but also to train machine-learned ranking algorithms.
+
+The training data for machine-learned ranking is captured in the index ranking files, which were discussed in :doc:`step 6 </generate_representative_training_data>`. These index ranking files specify the ideal rank for a knowledge base object given a specific query. For example, for the ``stores`` index, the training data file might look something like:
+
+.. code-block:: javascript
+
+  [
+    {
+      'query': 'Kwik-E-Marts in Springfield',
+      'id': '152323',
+      'rank': 3
+    },
+    {
+      'query': 'Kwik-E-Marts in Springfield',
+      'id': '102843',
+      'rank': 1
+    },
+    {
+      'query': 'stores downtown',
+      'id': '207492',
+      'rank': 1
+    },
+    ...
+  
+  ]
+  ...
+
+These training data examples can be generated using manual QA where human graders subjectively score the relevance of the knowledge base results for a set of reference queries. Alternately, for applications with live production traffic, this training data can often be generated by observing how actual users interact with knowlege base results in the application. If sufficient representative training data is available, the Workbench question answerer makes it straightforward to train and evaluate a custom ranking model.
 
 .. code-block:: python
 
-  @app.qa.handle(domain='items')
-  def items_ranking_fn(query, context, document):
-    # Custom scoring logic goes here.
-    score = compute_doc_score(query, context, document)
-    return score
+  >>> from mmworkbench import QuestionAnswerer
+  >>> qa = QuestionAnswerer()
+  >>> store_index = qa.indexes['stores']
+  >>>
+  >>> # Fit the ranking model using training data available in the application directory.
+  ... store_index.fit()
+  
+  >>> # Now retrieve results using the new ranking model.
+  ... stores = store_index.get('ferry bldg')
+  >>> stores[0]
+  {
+    "store_name": "Ferry Building Market",
+    "open_time": "6am",
+    "close_time": "10pm",
+    "address": "Pier 1, The Embarcadero, SF, CA 94001",
+    "score": 0.874098
+    ...
+  }
+  
+  >>> # To save the model to file.
+  ... store_index.dump()
 
-The custom ranking function can then be used in the **get** method of the QuestionAnswerer object.
-
-.. code-block:: python
-
- # Assume KnowledgeBase object has been created and
- # the data is loaded into the 'items' index.
-
- # Get ranked results from KB
- ranked_results = qa.get(index='stores', query,
-        context, ranking_fn=items_ranking_fn)
-
-The function gets applied to each document in the retrieved set to compute their final scores, and the ranked set is then returned.
-
-.. note::
-
-  A note on system latency - In applications where hundreds or thousands of documents are retrieved on each query, applying a custom scoring function on each document can make the requests terribly slow, depending on how well the function is engineered. Please be mindful of request latencies and overall system performance when designing custom ranking functions.
-
-Learning To Rank
-~~~~~~~~~~~~~~~~
-
-Given the right kind of training data (and lots of it), Machine Learning methods can be applied for ranking in a variety of ways. To learn how to develop a Machine Learning approach to ranking, i.e. `Learning To Rank <https://en.wikipedia.org/wiki/Learning_to_rank>`_, please refer to the guidelines on assembling the right kind of training data and building models in the :ref:`User Manual <userguide>`.
+For more details on how to train and evaluate machine-learned ranking models, refer to the :ref:`User Manual <userguide>`.
 

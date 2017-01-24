@@ -143,7 +143,7 @@ Following this same approach, we can now also define handlers for the dialgue st
   @app.handle(intent='get_nearest_store')
   def send_nearest_store():
       loc = context.request.session.location 
-      stores = qa.get(index='stores', sort='proximity', current_location=loc)
+      stores = qa.get(index='stores', sort='location', current_location=loc)
       slots['store_name'] = stores[0]['name']
       response = {
           'replies': [

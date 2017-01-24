@@ -1,7 +1,7 @@
 Step 8: Configure the Language Parser
 =====================================
 
-The language parser is the final component of the natural language processor. It is invoked after the other NLP models have been evaluated. Its job is to find relationships between the extracted entities and group them into a meaningful hierarchy. The parser analyzes the information provided by all the previous NLP models and outputs a data structure called the 'parse tree', that captures how different entites relate to each other. 
+The language parser is the final component of the natural language processor. It is invoked after the other NLP models have been evaluated. Its job is to find relationships between the extracted entities and group them into a meaningful hierarchy. The parser analyzes the information provided by all the previous NLP models and outputs a data structure called the 'parse tree', which captures how different entities relate to each other. 
 
 Consider the use case where you not only want to check the hours of your local Kwik-E-Mart, but also order items to pick up from the store in advance. To handle this functionality, we could define an entity type called ``product`` which specifies the name of an item you want to order. We could also define other entities such as ``size`` and ``quantity`` which provide more information about the items in your order. The language parser takes these entities, which are detected by the entity recognizer, and `parses <https://en.wikipedia.org/wiki/Parsing>`_ them into a representation which reflects a meaningful real-world organizational structure. This data structure can then be utilized to submit the order to a point-of-sale system, for example, to complete your order.
 
@@ -47,7 +47,7 @@ Notice that the configuration simply specifies the typical entity hierarchy requ
       {
         'id': 15231,
         'type': 'product',
-        'name': 'donuts',
+        'name': 'donut',
         'children': [
           'quantity': {'name': 'a dozen', 'value': 12}
         ]
@@ -75,4 +75,4 @@ To load a previously saved parser configuration, use the following.
 
 The Workbench language parser is a versatile component which can be used to implement a variety of parsing strategies for your application. The :ref:`User Manual <userguide>` has more details on the different options available to fine-tune the behavior of the parser. It also covers how to define your own custom parsing logic and train a state-of-the-art statistical parser using annotated data.
 
-The language parser completes the query understanding process by identifying the heads, their dependents and linking them together with into a number of logical units (entity groups) that can be used by downstream components to take appropriate actions and generate the responses necessary to fulfill the user's request. However, it's worth mentioning that not every scenario may need the language parser. For instance, in our simple Kwik-E-Mart store information app, there are only two kinds of entities - ``date`` and ``store_name``, which are distinct and unrelated pieces of information. Thus, running the parser would just yield two singleton entity groups having heads, but no dependents. The parser becomes more crucial when you have a complex app that supports complicated natural language queries like the example we discussed above.
+The language parser completes the query understanding process by identifying the heads, their dependents and linking them together into a number of logical units (entity groups) that can be used by downstream components to take appropriate actions and generate the responses necessary to fulfill the user's request. However, it's worth mentioning that not every scenario may need the language parser. For instance, in our simple Kwik-E-Mart store information app, there are only two kinds of entities, ``date`` and ``store_name``, which are distinct and unrelated pieces of information. Thus, running the parser would just yield two singleton entity groups having heads, but no dependents. The parser becomes more crucial when you have an application that supports more complex natural language queries like the example we discussed above.

@@ -39,7 +39,7 @@ In this case, the corresponding JSON data file could be represented as shown bel
     "store_name": "Pine and Market",
     "open_time": "6am",
     "close_time": "10pm",
-    "adress": "750 Market Street, Capital City, CA 94001",
+    "address": "750 Market Street, Capital City, CA 94001",
     "phone_number": "(+1) 650-555-4500"
   }
   ...
