@@ -140,7 +140,7 @@ MindMeld Workbench provides advanced capabilities for building a state-of-the-ar
   >>> nlp.parse('When does One Market close?')
   {
     ...
-    entities: [
+    'entities': [
       {
         'type': 'store_name',
         'span': {
@@ -164,14 +164,14 @@ If an entity mapping file is specified, as illustrated in :doc:`step 6 </generat
   >>> nlp.parse('When does One Market close?')
   {
     ...
-    entities: [
+    'entities': [
       {
         'type': 'store_name',
         'span': {
           'raw': 'One Market',
           'norm': 'one market'
         },
-        'value': {{'id': 207492, 'cname': 'Market Square'}},
+        'value': {'id': 207492, 'cname': 'Market Square'},
         'confidence': 0.934512
         ...
       }
@@ -179,7 +179,7 @@ If an entity mapping file is specified, as illustrated in :doc:`step 6 </generat
     ...
   }
 
-Note that the value attribute of the entity has resolved to an object with a defined id and canonical name. As with the other NLP components in Workbench, it is also possible to access the individual entity resolvers for each entity type. The code below illustrates how to train and evaluate the entity resolver model for the ``store_name`` entity.
+Note that the :keyword:`value` attribute of the entity has resolved to an object with a defined id and canonical name. As with the other NLP components in Workbench, it is also possible to access the individual resolvers for each entity type. The code below illustrates how to train and evaluate the entity resolver model for the ``store_name`` entity.
 
 .. code-block:: python
 
