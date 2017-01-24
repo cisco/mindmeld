@@ -51,22 +51,23 @@ Contents
    deploy_to_production
 
 .. toctree::
-   :numbered:
    :maxdepth: 2
    :caption: Workbench User Manual
    :name: userguide
+   
+   coming_soon
 
-   getting_started
-   architecture
-   key_concepts
-   directory_structure
-   interface
-   dialogue_manager
-   kb
-   domain_classification
-   intent_classification
-   entity_recognition
-   role_classification
-   entity_resolution
-   language_parsing
-   deployment
+..   getting_started
+..   architecture
+..   key_concepts
+..   directory_structure
+..   interface
+..   dialogue_manager
+..   kb
+..   domain_classification
+..   intent_classification
+..   entity_recognition
+..   role_classification
+..   entity_resolution
+..   language_parsing
+..   deployment
