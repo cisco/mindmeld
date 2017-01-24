@@ -1,7 +1,7 @@
 Step 7: Train the Natural Language Processing Classifiers
 =========================================================
 
-The Natural Language Processor (NLP) component of Workbench is tasked with understanding the user's natural language input. It analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, successively narrowing down the “search space”.
+The Natural Language Processor (NLP) in Workbench is tasked with understanding the user's natural language input. It analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, successively narrowing down the “search space”.
 
 As introduced in :doc:`step 3 </define_the_hierarchy>`, Workbench relies on four layers of classifiers, applied in the following order:
 
@@ -13,65 +13,108 @@ As introduced in :doc:`step 3 </define_the_hierarchy>`, Workbench relies on four
 
 #. **Role Classifiers**: In cases where an entity of a particular type can have multiple meanings depending on the context, the role classifier can be used to provide another level of categorization and assign a differentiating label called "role" to the extracted entities.
 
-To train the NLP classifiers for our Kwik-E-Mart store information app, we start by gathering the training data as described in :doc:`step 6 </generate_representative_training_data>`. We can then train all the classifiers by invoking one simple command:
+The first step towards training the NLP classifiers for our Kwik-E-Mart store information app is to gather the necessary training data as described in :doc:`step 6 </generate_representative_training_data>`. Once the data is ready, we can fire up a Python shell and start building the different components of our NLP. 
 
-.. code-block:: text
+.. code-block:: console
 
-  python my_app.py build
+  $ cd $WB_APP_ROOT
+  $ python
+
+.. attention::
+
+  The rest of this step-by-step guide assumes that you are typing commands into a Python interactive shell launched from the app's root directory.
+
+Once you are in the Python interactive shell, the quickest way to train all the NLP classifiers together is using the following lines of code.
+
+.. code-block:: python
+
+  >>> from mmworkbench import NaturalLanguageProcessor as NLP
+  >>> nlp = NLP()
+  >>> nlp.build()
+
 
 Based on the directory structure and the annotations in the training data, the Natural Language Processor automatically infers which classifiers need to be trained. In our case, the NLP will train an intent classifier for the ``store_information`` domain and entity recognizers for each of the intents which contain labeled queries with entity annotations. This simple example did not include training data for domain classification or role classification, and consequently, these models will not be built.
 
-By default, the above command will use the baseline machine learning settings for all classifiers, which in most cases should train reasonable models. To further optimize model performance, Workbench provides extensive capabilities to optimize individual model parameters and measure results. We'll next take a closer look at two of the NLP steps, intent classification and entity recognition, and learn how to experiment with different settings for each of them individually.
+By default, the ``build()`` method shown above will use the baseline machine learning settings for all classifiers, which in most cases should train reasonable models. To further optimize model performance, Workbench provides extensive capabilities to optimize individual model parameters and measure results. We'll next take a closer look at each of the NLP components and learn how to experiment with different settings for each of them individually.
+
+
+Domain Classification
+~~~~~~~~~~~~~~~~~~~~~
+
+The Domain Classifier (also called the domain model) is a text classification model that is trained using the labeled queries across all domains. Our simple Kwik-e-Mart app only has one domain to support and hence does not need a domain classifier. However, complex conversational apps such as the virtual assistants on all smartphones today have to handle queries from varied domains such as "weather", "navigation", "sports", "finance" and "music" among others. Such apps use domain classification as the first step to help narrow down the focus of the subsequent classifiers in the NLP pipeline.
+
+The ``NaturalLanguageProcessor`` class in Workbench exposes methods for training, testing and saving all the models in our classifier hierarchy, including the domain model. For the sake of example, let us suppose that we want to build a `support vector machine (SVM) <https://en.wikipedia.org/wiki/Support_vector_machine>`_ that does domain classification. In our Python shell, we start off by importing and instantiating an object of the ``NaturalLanguageProcessor`` class. We then train the ``domain_classifier`` by calling its ``fit()`` method.
+
+.. code-block:: python
+
+  >>> from mmworkbench import NaturalLanguageProcessor as NLP
+  >>> nlp = NLP()
+  >>> nlp.domain_classifier.fit(model='svm')
+
+The trained classifier can be tested on a new query using the ``predict()`` method.
+
+.. code-block:: python
+
+  >>> predicted_domain = nlp.domain_classifier.predict(u'Play my jazz playlist.')
+  >>> predicted_domain
+  u'music'
+
+In addition to the model type parameter that we've used above, the ``fit()`` method also takes arguments for features, cross-validation settings and other model-specific configuration to improve upon the baseline SVM model trained by default. These are covered in detail in the :ref:`User Guide <userguide>`.
 
 
 Intent Classification
 ~~~~~~~~~~~~~~~~~~~~~
 
-Intent Classifiers (also called intent models) are text classification models that are trained, one-per-domain,  using the training queries in each intent folder. The :keyword:`NaturalLanguageProcessor` class in Workbench exposes methods for training, testing and saving all the models in our classifier hierarchy, including the intent models.
+Intent Classifiers (also called intent models) are text classification models that are trained, one-per-domain, using the labeled queries in each intent folder. Our Kwik-e-Mart app supports multiple intents (e.g. ``greet``, ``get_store_hours``, ``find_nearest_store``, etc.) within the ``store_information`` domain. We will now go over the steps for training an intent classifier that can correctly map user queries to one of these supported intents.
 
-For our intent classifier, let's assume that we want to build a `logistic regression <https://en.wikipedia.org/wiki/Logistic_regression>`_ model and use `bag of words <https://en.wikipedia.org/wiki/Bag-of-words_model>`_ and `edge n-grams <https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-edgengram-tokenizer.html>`_ as features. Also, we would like to do `k-fold cross validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation>`_  with 20 splits.
+We'll train our intent model similar to the domain model using the ``NaturalLanguageProcessor`` class, but we will go a step further and explicitly define the features and cross validation settings we want to use this time. For our intent classifier, let us assume that we want to build a `logistic regression <https://en.wikipedia.org/wiki/Logistic_regression>`_ model and use `bag of words <https://en.wikipedia.org/wiki/Bag-of-words_model>`_ and `edge n-grams <https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-edgengram-tokenizer.html>`_ as features. Also, we would like to do `k-fold cross validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation>`_  with 20 splits.
 
-We start off by importing and instantiating an object of the :keyword:`NaturalLanguageProcessor` class by providing it the path to the root of our app data directory.
-
-.. code-block:: python
-
-  from mmworkbench import NaturalLanguageProcessor as NLP
-
-  # Instantiate MindMeld NLP by providing the app_data path.
-  nlp = NLP('path_to_app_data_directory_root')
-
-We next define the feature dictionary that lists all the feature types along with the feature-specific settings. Let's say we want bag-of-words up to size 2 and similarly, edge-ngrams up to length 2.
+We start as before by importing and instantiating the ``NaturalLanguageProcessor`` class. In addition, we import the ``KFold`` module from the ``scikit-learn`` library to define cross validation settings.
 
 .. code-block:: python
 
-  # Define the feature settings
-  feature_dict = {
-    'bag-of-words': { 'lengths': [1, 2] },
-    'edge-ngrams': { 'lengths': [1, 2] }
-  }
+  >>> from mmworkbench import NaturalLanguageProcessor
+  >>> from sklearn.model_selection import KFold
+  >>> nlp = NaturalLanguageProcessor()
+
+Next, we define the feature dictionary that lists all the feature types along with the feature-specific settings. Let's say we want bag-of-n-grams up to size 2 and similarly, edge-ngrams up to length 2.
+
+.. code-block:: python
+
+  >>> feature_dict = {
+  ... 'bag-of-words': { 'lengths': [1, 2] },
+  ... 'edge-ngrams': { 'lengths': [1, 2] }
+  ... }
+
 
 We then define a cross validation iterator with the desired number of splits.
 
 .. code-block:: python
 
-  # Define CV iterator
-  kfold_cv = KFold(num_splits=20)
+  >>> kf = KFold(n_splits=20)
 
-Finally, we fetch the domain we are interested in and call its ``fit_intent_model()`` method to train the intent classifier. We also use the ``dump_intent_model()`` method to persist the trained model to disk. By default, intent classifier models get saved to a ``models`` directory under their respective domains.
-
-.. code-block:: python
-
-  domain = nlp.domains['store_information']
-  domain.fit_intent_model(model='logreg', features=feature_dict, cv=kfold_cv)
-  domain.dump_intent_model()
-
-We have now successfully trained an intent classifier for the ``store_information`` domain. If our app had more domains, we would follow the same steps for those other domains. We can test the model on a new query by calling the domain object's ``predict_intent()`` method.
+Finally, we fetch the ``intent_classifier`` for the domain we are interested in and call its ``fit()`` method to train the model. The code below shows how to train an intent classifier for the ``store_information`` domain in our Kwik-e-Mart app.
 
 .. code-block:: python
 
-  predicted_intent = domain.predict_intent(u'Where is my closest Kwik-e-Mart?')
+  >>> clf = nlp.domains['store_information'].intent_classifier
+  >>> clf.fit(model='logreg', features=feature_dict, cv=kf)
 
-The :doc:`Intent Classifier User Manual </intent_classification>` has a comprehensive list of the different model, feature extraction and hyperparameter settings. It also describes how to evaluate a trained intent model using labeled test data.
+We have now successfully trained an intent classifier for the ``store_information`` domain. If our app had more domains, we would follow the same steps for those other domains. We can test the trained intent model on a new query by calling its ``predict()`` method.
+
+.. code-block:: python
+
+  >>> predicted_intent = clf.predict(u'Where is my closest Kwik-e-Mart?')
+  >>> predicted_intent
+  u'find_nearest_store'
+
+Once we have experimented with different settings and have an optimized intent model that we are happy with, we can use the ``dump()`` method to persist the trained model to disk. By default, intent classifier models get saved to a ``models`` directory under their respective domains. 
+
+.. code-block:: python
+
+  >>> clf.dump()
+
+The :ref:`User Guide <userguide>` has a comprehensive list of the different model, feature extraction and hyperparameter settings for training the intent models. It also describes how to evaluate a trained intent model using labeled test data.
 
 Entity Recognition
 ~~~~~~~~~~~~~~~~~~
