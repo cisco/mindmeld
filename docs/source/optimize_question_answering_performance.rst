@@ -1,7 +1,9 @@
 Step 9: Optimize Question Answering Performance
 ===============================================
 
-The Question Answering module is responsible for ranking results retrieved from the Knowledge Base, based on some notion of relevance. The relevance of each document is represented by a positive floating point number - the ``score``. The higher the score, the more relevant the document. MindMeld Workbench offers a robust, built-in "ranking formula" for defining a general-purpose scoring function. However, in cases where the default ranking formula is not sufficient in ensuring good performance across a large number of test queries, MindMeld Workbench provides a facility for defining custom ranking formulae. The concept of "performance" is explained in Section 1.10.4 on "Evaluation Metrics".
+As stated in :doc:`step 5 </create_the_knowledge_base>`, one of the primary purposes of the Question Answerer is to identify and rank candidate answers for user questions. The answers have to be ranked in order of document relevance to a given query. MindMeld Workbench provides a powerful set of functionalities in the Question Answerer to optimize rankings of results across multiple user queries. This is one of the last important steps to ensure great quality in conversational applications.
+
+The "relevance" of each document is represented by a positive floating point number - the ``score``. The higher the score, the more relevant the document. MindMeld Workbench offers a robust, built-in "ranking formula" for defining a general-purpose scoring function. However, in cases where the default ranking formula is not sufficient in ensuring good performance across a large number of test queries, MindMeld Workbench provides a facility for defining custom ranking formulae. The concept of "performance" is explained in Section 1.10.4 on "Evaluation Metrics".
 
 Sorting
 ~~~~~~~
