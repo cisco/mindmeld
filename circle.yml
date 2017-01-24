@@ -12,7 +12,7 @@ test:
   override:
     - echo "no tests"
   post:
-    - cd docs && make html
+    - cd docs && make html && cp scripts/search.html build/html
 deployment:
   s3: 
     branch: /(develop)|(staging)|(master)/
