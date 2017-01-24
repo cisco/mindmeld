@@ -40,7 +40,7 @@ We start off by importing and instantiating an object of the :keyword:`NaturalLa
   # Instantiate MindMeld NLP by providing the app_data path.
   nlp = NLP('path_to_app_data_directory_root')
 
-We next define the feature dictionary that lists all the feature types along with the feature-specific settings. Let's say we want bag-of-n-grams up to size 2 and similarly, edge-ngrams up to length 2.
+We next define the feature dictionary that lists all the feature types along with the feature-specific settings. Let's say we want bag-of-words up to size 2 and similarly, edge-ngrams up to length 2.
 
 .. code-block:: python
 
@@ -125,8 +125,73 @@ We have now looked at how to individually build the intent classification and en
 
 This is the quickest way to retrain your classifiers in production (e.g. in case of a training data refresh) using the best known model configuration settings. For details on the configuration file format and a more in-depth treatment of the NLP classifiers in Workbench, refer to the :ref:`User Guide <userguide>`.
 
-Entity Resolver
-~~~~~~~~~~~~~~~
+Entity Resolution
+~~~~~~~~~~~~~~~~~
 
-Introduce the topic of loading training data, training entity resolution models, measuring CV and held-out performance, performing disambiguation.
+The entity resolver component of MindMeld Workbench is responsible for mapping each identified entity to a canonical  value. For example, if your application is used to browse TV shows, you may want to map both entity strings 'funny' and 'hilarious' to a pre-defined genre code like 'Comedy'. Similarly, in a music app, you may want to resolve both 'Elvis' and 'The King' to the known artist 'Elvis Presley (ID=20192)', while making sure not get confused by 'Elvis Costello (ID=139028)'. For some classes of entities, it can be pretty straightforward. For other entites, it can be quite complex and the dominant factor which may limit the overall accuracy of your application.
+
+MindMeld Workbench provides advanced capabilities for building a state-of-the-art entity resolver. As discussed in 
+:doc:`step 6 </generate_representative_training_data>`, each entity type can be associated with an optional entity mapping file. This file specifies, for each canonical concept, the possible alternate names or synonyms a user may express to refer to this concept. In the absence of an entity mapping file, the entity resolver simply assigns a value equivalent to the entity raw text span. For example, the following code illustrates the possible parse output of the natural language processor when an entity mapping data file is absent for the ``store_name`` entity:
+
+.. code-block:: python
+
+  >>> from mmworkbench import NaturalLanguageProcessor as nlp
+  >>> nlp.build()
+  >>> nlp.parse('When does One Market close?')
+  {
+    ...
+    entities: [
+      {
+        'type': 'store_name',
+        'span': {
+          'raw': 'One Market',
+          'norm': 'one market'
+        },
+        'value': 'One Market',
+        'confidence': 0.934512
+        ...
+      }
+    ]
+    ...
+  }
+
+If an entity mapping file is specified, as illustrated in :doc:`step 6 </generate_representative_training_data>`, the output of the natural language processor may be as follows
+
+.. code-block:: python
+
+  >>> from mmworkbench import NaturalLanguageProcessor as nlp
+  >>> nlp.build()
+  >>> nlp.parse('When does One Market close?')
+  {
+    ...
+    entities: [
+      {
+        'type': 'store_name',
+        'span': {
+          'raw': 'One Market',
+          'norm': 'one market'
+        },
+        'value': {{'id': 207492, 'cname': 'Market Square'}},
+        'confidence': 0.934512
+        ...
+      }
+    ]
+    ...
+  }
+
+Note that the value attribute of the entity has resolved to an object with a defined id and canonical name. As with the other NLP components in Workbench, it is also possible to access the individual entity resolvers for each entity type. The code below illustrates how to train and evaluate the entity resolver model for the ``store_name`` entity.
+
+.. code-block:: python
+
+  >>> from mmworkbench import NaturalLanguageProcessor as nlp
+  >>> resolver = nlp.domains[0].intents['get_store_hours'].entities['store_name'].resolver
+
+  >>> # Train the resolver model using the mapping file, if available.
+  ... resolver.fit()
+  
+  >>> # Run the model 
+  ... resolver.predict('One Market')
+  {'id': 207492, 'cname': 'Market Square'}
+
+Refer to the :ref:`User Manual <userguide>` for more information about how to evaluation and optimize entity resolution models for your application.
 
