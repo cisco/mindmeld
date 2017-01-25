@@ -119,54 +119,59 @@ The :ref:`User Guide <userguide>` has a comprehensive list of the different mode
 Entity Recognition
 ~~~~~~~~~~~~~~~~~~
 
-Entity Recognizers (also called entity models) are sequence labeling models that are trained per intent using the annotated queries in each entity folder. The task of the entity recognizer is both to detect the entities within a query and label them as one of the pre-defined entity types.
+Entity Recognizers (also called entity models) are `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ models that are trained per intent using the annotated queries in each entity folder. The task of the entity recognizer is both to detect the entities within a query and label them as one of the pre-defined entity types.
 
-We'll again use Workbench's ``NLP`` class to train our entity recognizer. Let's use a `Maximum Entropy Markov Model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_, which is a good choice for sequence labeling tasks. For features, one of the most helpful and commonly used sources of information in entity recognition models is a comprehensive list of entity names called a "`gazetteer <https://gate.ac.uk/sale/tao/splitch13.html#x18-32600013.1>`_". Each entity type has its own gazetteer. In our case, the gazetteer for the ``store_name`` entity type would be a list of all the Kwik-e-Mart store names in our catalog. Gazetteers can then be used to derive features based on full or partial match of words in the query against entries in the gazetteers. 
+From the model hierarchy we defined for our Kwik-e-Mart app in :ref:`step 3 <model_hierarchy>`, we can see that the ``get_store_hours`` intent depends on two types of entities. Of these, ``date`` is a 'system' entity that Workbench already recognizes and has in-built extraction logic for. On the other hand, we need to build our own entity recognizer to detect ``store_name``, which is a custom entity. We'll next take a look at how the ``NaturalLanguageProcessor`` class can be used to train entity recognizers for detecting custom entities in user queries.
 
-[TODO: Add the location for the gazetteer file, and mention the file format (do we require a popularity field?)]
-
-Apart from using gazetteer-based features, we'll use bag-of-words features like we did for intent classification. Length of the current token also ends up being a useful feature for entity recognition, so we'll add that too. Finally, we'll continue using 20-fold cross validation like we did before. Below is the code to instantiate an NLP object, define the features and initialize a k-fold iterator.
-
-.. code-block:: python
-
-  from mmworkbench import NLP
-
-  # Instantiate MindMeld NLP by providing the app_data path.
-  nlp = NLP('path_to_app_data_directory_root')
-
-  # Define the feature settings
-  feature_dict = {
-    'in-gaz': {},
-    'bag-of-words': { 'lengths': [1, 2] },
-    'length': {}
-  }
-
-  # Define CV iterator
-  kfold_cv = KFold(num_splits=20)
-
-Now, let's train an entity recognizer for one of our intents and save it to disk. By default, entity recognizer models get saved to a ``models`` directory under their respective intents.
-
-.. code-block:: python
-
-  intent = nlp.domains['store_information'].intents['get_open_time']
-  intent.fit_entity_model(model='memm', features=feature_dict, cv=kfold_cv)
-  intent.dump_entity_model()
-
-We can similarly train the entity recognizers for other intents as well. The trained entity model can be tested using the ``predict_entities()`` method.
-
-.. code-block:: python
-
-  predicted_entities = intent.predict_entities(u'When does the Main Street store open?')
-
-The :doc:`Entity Recognizer User Guide </entity_recognition>` goes into more detail about all the available training and evaluation options.
-
-We have now looked at how to individually build the intent classification and entity recognition models for our "Kwik-e-Mart Store Information" app. Once we have experimented with different settings (model type, features, training parameters, etc.) for each of our classifiers and found the optimal configuration, we can save those settings in a build configuration file and have Workbench use it the next time we invoke the ``build`` command.
+We'll use a `Maximum Entropy Markov Model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_, which is a good choice for sequence labeling tasks like entity recognition. For features, one of the most powerful and commonly used sources of information in entity recognition models is a comprehensive list of entity names called a "`gazetteer <https://gate.ac.uk/sale/tao/splitch13.html#x18-32600013.1>`_". For instance, the gazetteer for the ``store_name`` entity type would be a list of all the Kwik-e-Mart store names in our catalog. This list is stored in a text file with one entry on each line, as shown below.
 
 .. code-block:: text
 
-  python my_app.py build --config build_config.json
+  3rd Street
+  Central Plaza
+  East Oak Street
+  Elm Street
+  Evergreen Terrace
+  Main Street
+  Main and Market
+  Market Square
+  Shelbyville
+  Spalding Way
+  Springfield Mall
+  ...
 
-This is the quickest way to retrain your classifiers in production (e.g. in case of a training data refresh) using the best known model configuration settings. For details on the configuration file format and a more in-depth treatment of the NLP classifiers in Workbench, refer to the :ref:`User Guide <userguide>`.
+If we had more entity types, we would similarly have gazetteer lists for other types as well. For Workbench to locate and use the gazetteers correctly, the files have to be named ``gazetteer.txt`` and placed under their respective entity folders. Gazetteers can be used to derive features based on full or partial match of words in the query against entries in the gazetteers. They are particularly helpful for detecting entities which might otherwise seem to be a sequence of common nouns. E.g. `main street`, `main and market`, etc. Apart from using gazetteer-based features, we'll use bag-of-words features like we did for our earlier classifiers. Length of the current token also ends up being a useful feature for entity recognition, so we'll add that too. Finally, we'll continue using 20-fold cross validation like we did before.
+
+Below is the code to instantiate a ``NaturalLanguageProcessor`` object, define the features and initialize a k-fold iterator.
+
+.. code-block:: python
+
+  >>> from mmworkbench import NaturalLanguageProcessor as NLP
+  >>> nlp = NLP()
+  >>> feature_dict = {
+  ... 'in-gaz': {},
+  ... 'bag-of-words': { 'lengths': [1, 2] },
+  ... 'length': {}
+  ... }
+  >>> kf = KFold(n_splits=20)
+
+We then get the entity recognizer for the desired intent and invoke its ``fit()`` method. We also serialize the trained model to disk for future use.
+
+.. code-block:: python
+
+  >>> clf = nlp.domains['store_information'].intents['get_store_hours'].entity_recognizer
+  >>> clf.fit(model='memm', features=feature_dict, cv=kfold_cv)
+  >>> clf.dump()
+
+We have thus trained and saved the entity recognizer for the ``get_store_hours`` intent. Had other intents in our app required entity recognizers as well, we would have repeated the same steps as above for those intents. The trained entity classifier can be tested using its ``predict()`` method.
+
+.. code-block:: python
+
+  >>> entities = clf.predict(u'When does the store on Elm Street close?')
+  >>> entities[0].value
+  u'Elm Street'
+
+The :ref:`User Guide <userguide>` goes into more detail about all the available training and evaluation options for the entity recognizer.
 
 Entity Resolution
 ~~~~~~~~~~~~~~~~~

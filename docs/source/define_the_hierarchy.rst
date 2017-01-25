@@ -9,6 +9,8 @@ Conversational applications rely on a hierarchy of machine learning classifiers 
 
 The topmost layer in the model hierarchy is the domain classifier. The domain classifier is responsible for performing a first-pass classification to assign incoming queries into set of pre-defined buckets or 'domains'. For any given domain, there may be one or more pre-defined intents. Each intent defines a specific action or answer type to invoke for a given request. The intent classifier models are responsible for deciding which intent is most likely associated with a given request. Once the request is categorized into a specific intent, the entity recognition models are employed to discern the important words and phrases in each query that must be identified in order to understand and fulfill the request. These identified words and phrases are called 'entities', and each intent may have zero or more types of entities which must be recognized. For some types of entities, a fourth and final classification step, called role classification, may be required. The role classifiers are responsible for adding differentiating labels to entities of the same type. Refer to the :ref:`User Guide <userguide>` for a more in-depth treatment of the natural language processing classifier hierarchy utilized by MindMeld Workbench. 
 
+.. _model_hierarchy:
+
 For our simple conversational application which can help us find store information for our local Kwik-E-Mart, the natural language processing model hierarchy can be designed as illustrated below.
 
 .. image:: images/hierarchy2.png
