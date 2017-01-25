@@ -227,17 +227,19 @@ Let us see how Workbench can be used for training a role classifier for the ``sy
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as NLP
-  >>> nlp = NLP()
-  >>> get_hours_intent = nlp.domains['store_information'].intents['get_store_hours']
+  >>> from mmworkbench import NaturalLanguageProcessor as nlp
+  >>> get_hours_intent = nlp.domains['store_info'].intents['get_store_hours']
   >>> clf = get_hours_intent.entities['sys:time'].role_classifier
   >>> clf.fit()
 
-Once the classifier is trained, we can test it on a new query using the familiar :keyword:`predict()` method.
+Once the classifier is trained, we can test it on a new query using the familiar :keyword:`predict()` method. The :keyword:`predict()` method of the role classifier requires both the full input query and the set of entities predicted by the entity recognizer.
 
 .. code-block:: python
 
-  >>> predicted_roles = clf.predict(u'Show me stores open between 8 AM and 6 PM.')
+  >>> query = u'Show me stores open between 8 AM and 6 PM.'
+  >>> recognizer = get_hours_intent.entity_recognizer
+  >>> predicted_entities = recognizer.predict(query)
+  >>> predicted_roles = clf.predict(query, predicted_entities)
   >>> predicted_roles
   {u'8 AM': u'open_time', u'6 PM': u'close_time'}
 
