@@ -85,6 +85,8 @@ As you might expect, this data file captures many of the different ways a user m
 
 This file illustrates the annotation scheme for inline entities. As you might recall, from :doc:`step 3 <define_the_hierarchy>`, the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``date``.  As you can see in this example, each inline entity is appended by the pipe character followed by its associated entity type (e.g. :keyword:`|store_name`). The entire expression is then enclosed in curly braces, :keyword:`{Elm Street|store_name}`. You might also recall from :doc:`step 3 <define_the_hierarchy>` that certain entities, such as ``date``, are built-in or system-defined entities. As you can see in the snippet above, annotations for system entity names begin with :keyword:`sys:`. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
 
+.. _roles_example:
+
 Labeled queries can also be used to train role classification models. This is not a requirement for our Kwik-E-Mart application, but to illustrate how it might work, consider the following user query:
 
   * "Show me all Kwik-E-Mart stores open between 8am and 6pm."

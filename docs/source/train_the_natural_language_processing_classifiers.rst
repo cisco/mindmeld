@@ -90,7 +90,6 @@ The trained classifier can be tested on a new query using the :keyword:`predict(
 
 As you can see, the model output includes the predicted target domain as well as the classification probabilities associated with all of the available domains. In addition to the model type parameter that we've used above, the :keyword:`fit()` method also takes arguments for features, cross-validation settings and other model-specific configuration to improve upon the baseline SVM model trained by default. These are covered in detail in the :ref:`User Manual <userguide>`.
 
-
 Intent Classification
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -155,7 +154,7 @@ Refer to the :ref:`User Manual <userguide>` for a comprehensive list of the diff
 Entity Recognition
 ~~~~~~~~~~~~~~~~~~
 
-Entity recognizers (also called entity models) are `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ models that are trained per intent using the annotated queries in each intent folder in the :keyword:`domains` directory. The task of the entity recognizer is both to detect the entities within a query as well as label them as one of the pre-defined entity types.
+Entity recognizers (also called entity models) are `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ models that are trained per intent using all the annotated queries in a particular intent folder in the :keyword:`domains` directory. The task of the entity recognizer is both to detect the entities within a query as well as label them as one of the pre-defined entity types.
 
 From the model hierarchy we defined for our Kwik-E-Mart app in :ref:`step 3 <model_hierarchy>`, we can see that the ``get_store_hours`` intent depends on two types of entities. Of these, ``date`` is a 'system' entity that Workbench will recognize automatically. The ``store_name`` entity, on the other hand, will require custom training data and a trained entity model. We'll next take a look at how the :keyword:`NaturalLanguageProcessor` class can be used to train entity recognizers for detecting custom entities in user queries.
 
@@ -219,6 +218,30 @@ We have thus trained and saved the ``get_name`` entity recognizer for the ``get_
   
 The :ref:`User Manual <userguide>` goes into more detail about all the available training and evaluation options for the entity recognizer.
 
+Role Classification
+~~~~~~~~~~~~~~~~~~~
+
+Role Classifiers (also called role models) are trained per entity using all the annotated queries in a particular intent folder. Roles offer a way to assign an additional distinguishing label to entities of the same type. Our simple Kwik-e-Mart application does not need a role classification layer. However, consider a possible extension to our app, where users can search for stores that open and close at specific times. As we saw in the example in :ref:`step 6 <roles_example>`, this would require us to differentiate between the two ``sys:time`` entities by recognizing one as an ``open_time`` and the other as a ``close_time``. This can be accomplished by training an entity-specific role classifier that assigns the correct role label for each such ``sys:time`` entity detected by the Entity Recognizer.
+
+Let us see how Workbench can be used for training a role classifier for the ``sys:time`` entity type. As with the previous classifiers, this involves the predictable workflow of instantiating a ``NaturalLanguageProcessor`` object, accessing the classifier of interest (in this case, the ``role_classifier`` for the ``sys:time`` entity), defining the machine learning settings and calling the ``fit()`` method of the classifier. For this example, we will just train a baseline `Maximum Entropy model <http://repository.upenn.edu/cgi/viewcontent.cgi?article=1083&context=ircs_reports>`_ without specifying any additional training settings. Also, for the sake of code readability, we'll retrieve the classifier of interest in two steps - first get the object representing the current intent and then fetch the ``role_classifier`` object of the appropriate entity under that intent.
+
+.. code-block:: python
+
+  >>> from mmworkbench import NaturalLanguageProcessor as NLP
+  >>> nlp = NLP()
+  >>> get_hours_intent = nlp.domains['store_information'].intents['get_store_hours']
+  >>> clf = get_hours_intent.entities['sys:time'].role_classifier
+  >>> clf.fit()
+
+Once the classifier is trained, we can test it on a new query using the familiar ``predict()`` method.
+
+.. code-block:: python
+
+  >>> predicted_roles = clf.predict(u'Show me stores open between 8 AM and 6 PM.')
+  >>> predicted_roles
+  {u'8 AM': u'open_time', u'6 PM': u'close_time'}
+
+Our baseline role classifier can be further optimized using the various training and evaluation options detailed in the :ref:`User Manual <userguide>`
 
 Entity Resolution
 ~~~~~~~~~~~~~~~~~
@@ -289,4 +312,3 @@ Note that the :keyword:`value` attribute of the entity has resolved to an object
   {'id': 207492, 'cname': 'Market Square'}
 
 Refer to the :ref:`User Manual <userguide>` for more information about how to evaluation and optimize entity resolution models for your application.
-
