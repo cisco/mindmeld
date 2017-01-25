@@ -1,114 +1,126 @@
 Step 10: Deploy Trained Models To Production
 ============================================
 
-Apart from serving as a library of Machine Learning tools for building powerful conversational interfaces, MindMeld Workbench also provides functionality for easily deploying the models to a server for testing and serving live user queries. This is done using a lightweight micro web framework built into MindMeld Workbench for local deployment. For deploying to production, running a single command is sufficient to trigger a remote process on a production-ready backend infrastructure (more details below). Finally, a simple "Test Console" UI is provided along with the deployment setup to visualize the end-to-end flow for any given request.
+Once your application has been built, Workbench makes is easy to test your application locally and then deploy into production. In :doc:`step 4 </define_the_dialogue_handlers>`, we illustrated how to create an application container file to  contain your dialogue state handler logic. More specifically, we created the 'my_app.py' file in the application root directory. We can now append the following two lines of code to this file in order to provide the necessary interface to manage deployment.
+
+.. code:: python
+
+  if __name__ == "__main__":
+      app.run(sys.argv)
+
+Our application container file 'my_app.py' now looks something like the following.
+
+.. code:: python
+
+  import sys
+  from mmworkbench import Application
+  app = Application(__name__)
+  
+  @app.handle(intent='greet')
+  def welcome():
+      return {'replies': ['Hello there!']}
+  ...
+
+  if __name__ == "__main__":
+      app.run(sys.argv)
+
+With this small change, we can now test our application locally or deploy remotely into a production environment. 
+
 
 Local Deployment
 ~~~~~~~~~~~~~~~~
 
-To test your end-to-end application on a local machine, spin up a local server by running the following command:
+To run the application locally, simply enter the following command in your terminal window from your application root directory.
 
-.. code-block:: text
+.. code-block:: console
 
-  python my_app.py deploy --environment local
+    $ python my_app.py
+    Building application my_app.py...complete.
+    Running application my_app.py on http://localhost:7150/ (Press CTRL+C to quit)
 
-This loads all the NLP models and any other dependencies. Once the local server process is up and running, you should see the following message on the terminal:
+As you can see, this command will first build all of the machine learning models required in your application. Once this training is complete, a local web service will be launched for your application. To test your running application, you can open your browser to ``http://localhost:7150/test.html``, and you will see a browser-based console useful for testing. In addition, a web service endpoint will also be available at ``http://localhost:7150/parse``. This endpoint accepts POST requests and it can be used with any REST client (such as Postman or Advanced Rest Client). Alternately, you can use a :keyword:`curl` command from your terminal as follows:
 
-.. code-block:: text
+.. code-block:: console
 
-  2017-01-21 03:12:26,870  * Running on http://0.0.0.0:7150/ (Press CTRL+C to quit)
-
-If there are no other errors reported on ``stdout``, it means that the server startup was successful. You can now run a query through the end-to-end system using the Test Console UI. The test console can then be accessed on a browser at the following URL:
-
-* http://localhost:7150/test.html
-
-The following HTML page opens up. The different tabs show various details on the steps involved in Natural Langauge Processing, Question Answering and Dialog Management for any input query. This is helpful for debugging the each of the components for specific queries.
-
-.. image:: images/test_console.png
-    :align: center
-
-The web framework also exposes a ``/parse`` API endpoint that accepts POST requests. You can use any REST client (such as Postman or Advanced Rest Client) to trigger the endpoint with a ``query`` parameter. Alternately, you can use curl:
-
-.. code-block:: text
-
-  curl -X POST http://localhost:7150/parse?query="Hi"
-
-This returns a JSON response containing all the necessary information:
-
-.. code-block:: javascript
-
+  $ curl -X POST -d '{"query": "hello world"}' "http://localhost:7150/parse"
   {
-    "query": "Hi",
-    "domain": "store_information",
-    "intent": "greet",
-    "entities": {},
-    "numeric-entities": {},
-    "dialogue_context": {
-      "dialogue_id": "c4898837-9dca-4b43-9e93-3c72e3b4c35c",
-      "history": [],
-      "state": "welcome",
-      "response_type": "answer"
-    },
-    "reply": "Hello, Bart. I can help you find store hours for your local Kwik-E-Mart. How can I help?",
-    "request_context": {
-      "query_id":"68f07386-fef6-49e9-b0b6-cf07405e607c"
-    }
+    'request': {...},
+    'domain': {'target': 'store_info'},
+    'intent': {'target': 'greet', 'probs': [...]},
+    'dialogue_state': 'welcome',
+    'entities': [],
+    'parse_tree': [],
+    'frame': {},
+    'history': [],
+    'client_actions': [
+      'replies': ['Hello there!']
+    ]
   }
 
-Production Deployment
-~~~~~~~~~~~~~~~~~~~~~
+As you can see, the web service responds with a JSON data structure containing the application response as well as the detailed output for all of the machine learning components of the Workbench platform.  
 
-MindMeld provides a "Backend As A Service" platform exclusively for MindMeld Workbench applications. All the cloud infrastructure setup needed to deploy production-grade conversational applications is available off-the-shelf with a valid MindMeld license. So with a few simple configurations, you can go from a standalone research project to a full-blown production application within minutes!
+Note that you can use the :keyword:`build` command-line argument to build your models without launching a web service:
 
-The overall process starts with a developer (or build process) invoking a single command to send all the catalog data, NLP models, deployment configurations, requirements.txt and authorization keys to a **MindMeld Deployment Service**. The MindMeld Deployment Service takes these inputs, verifies the auth keys and uses the deployment config to setup any required infrastructure on a Virtual Private Cloud (VPC) in the MindMeld backend. At a high level, this includes setting up the Knowledge Base, server clusters, load balancer and DNS aliases for the application URL with relevant endpoints exposed. Here is a diagram that shows the basic process:
+.. code-block:: console
 
-.. image:: images/deployment.png
-    :align: center
+    $ python my_app.py build
+    Building application my_app.py...complete.
 
-In order to setup a production deployment of your app, you need to first obtain the ``MINDMELD_CLIENT_KEY`` and ``MINDMELD_CLIENT_SECRET`` credentials from MindMeld Sales. These need to be setup as OS environment variables on your local machine (or the build process used for deploying the app):
 
-.. code-block:: text
+To launch a web service without building models beforehand, use the :keyword:`run` command-line argument:
 
-  export MINDMELD_CLIENT_KEY='my_mindmeld_client_key'
-  export MINDMELD_CLIENT_SECRET='my_mindmeld_client_secret'
+.. code-block:: console
 
-Next, you can define a "deployment config" file. This file specifies all the operational configurations for your production deployment, such as number of servers, datacenter region, load balancers etc. Here is an example deployment configuration for the Kwik-E-Mart Stores application:
+    $ python my_app.py run
+    Running application my_app.py on http://localhost:7150/ (Press CTRL+C to quit)
 
-File **deployment_config.json**
+Refer to the :ref:`User Manual <userguide>` for more details about the Workbench request and response interface format.
 
-.. code-block:: javascript
 
+MindMeld Cloud Deployment
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MindMeld offers a cloud-based managed service offering, called the **MindMeld Cloud**, which streamlines the deployment and scaling of production conversational applications. Every application deployed on the MindMeld Cloud is hosted in a secure, private environment dedicated to the application. Each MindMeld Cloud environment supports flexible scaling options which can accommodate complex applications with billions of monthly queries. Some of the largest global enterprises rely on the MindMeld Cloud to host and serve their mission-critical conversational applications.
+
+To get started with the MindMeld Cloud, please `contact MindMeld sales <mailto:info@mindmeld.com>`_ to request a production license and your deployment credentials. Once you have received your deployment key and secret, you can configure Workbench with your credentials using the python shell as follows.
+
+.. code:: python
+
+  >>> from mmworkbench import MindMeldCloud as mmc
+  >>> mmc.config({'key': 'my-access-key', 'secret': 'my-access-secret'})
+  >>> mmc.dump()
+
+You will now be able to run your application with the :keyword:`deploy` command-line argument in a terminal window.
+
+.. code-block:: console
+
+    $ python my_app.py deploy
+    Name: kwik-e-mart
+    Description: None
+    Creation Date: 2017-01-21T02:57:50+00:00
+    URL: https://kwik-e-mart.mindmeld.com/
+
+    Deployment successful!
+
+This command will launch a secure private environment in the MindMeld Cloud. This environment can include a cluster of load-balanced instances which will automatically scale to handle your required application load. This environment will  include a replica of your knowledge bases, suitable for production operation, as well as all of your trained machine learning models optimized for low-latency execution. Completing each cloud deployment can take several seconds to a few minutes. When deployment is finished, an HTTPS web service will be available at the unique production URL displayed in the console. 
+
+By default, the unique production URL includes the application name associated with your deployment key. In this example, the production URL is ``https://kwik-e-mart.mindmeld.com/``. Along the same lines as the local deployment procedure above, you can view a web-based test console by loading ``https://kwik-e-mart.mindmeld.com/test.html`` into your browser. Alternately, you can use the :keyword:`/parse` web service endpoint as illustrated in the following :keyword:`curl` command.
+
+.. code-block:: console
+
+  $ curl -X POST -d '{"query": "hello world"}' "https://kwik-e-mart.mindmeld.com/parse"
   {
-    "app_name": 'kwik-e-mart',
-    "region": 'us-east-1',
-    "num_instances": 10,
-    "instance_type": 'm3.xlarge',
-    "use_ssl": True,
-    "use_lb": True
+    'request': {...},
+    'domain': {'target': 'store_info'},
+    'intent': {'target': 'greet', 'probs': [...]},
+    'dialogue_state': 'welcome',
+    'entities': [],
+    'parse_tree': [],
+    'frame': {},
+    'history': [],
+    'client_actions': [
+      'replies': ['Hello there!']
+    ]
   }
 
-You can then run the following command to set off the deployment:
-
-.. code-block:: text
-
-  python my_app.py deploy --environment production --data_path '/path/to/stores.json' --deployment_config deployment_config.json
-
-And you're done! Once the deployment is complete (and no errors are encountered) you should see the following message on stdout:
-
-.. code-block:: text
-
-  Name: kwik-e-mart
-  Description: None
-  Creation Date: 2017-01-09T02:57:50+00:00
-  URL: https://kwik-e-mart.mindmeld.com/
-
-  Deployment successful!
-
-You can then fire up the production app test console and the ``/parse`` API endpoint on the following links:
-
-.. code-block:: text
-
-  https://kwik-e-mart.mindmeld.com/test.html
-  https://kwik-e-mart.mindmeld.com/parse?q="Hello"
-
-Congratulations. You have learned how to build the most advanced conversational interfaces. Happy chatting!
+The MindMeld Cloud provides flexible configuration and deployment options to handle applications of any complexity and query volume. Refer to the :ref:`User Manual <userguide>` for more details about the MindMeld Cloud managed service offering.
