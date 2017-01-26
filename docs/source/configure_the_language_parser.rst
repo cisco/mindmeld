@@ -23,15 +23,15 @@ Getting started with the parser merely requires specifying a parser configuratio
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
-  >>> nlp.parser.config({'product': ['quantity', 'size']})
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
+  >>> Nlp.parser.config({'product': ['quantity', 'size']})
 
 Notice that the configuration simply specifies the typical entity hierarchy required in your application. With the parser, configured, you can now train your NLP models and then run the parser as follows.
 
 .. code-block:: python
   
-  >>> nlp.build()
-  >>> nlp.parse('Order one large squishee and a dozen donuts from the Elm Street Kwik-E-Mart?')
+  >>> Nlp.build()
+  >>> Nlp.parse('Order one large squishee and a dozen donuts from the Elm Street Kwik-E-Mart?')
   {
     ...
     'parse_tree': [
@@ -65,13 +65,13 @@ As you can see, the output of the parser will now include the :keyword:`parse_tr
 
 .. code-block:: python
 
-  >>> nlp.parser.dump()
+  >>> Nlp.parser.dump()
 
 To load a previously saved parser configuration, use the following.
 
 .. code-block:: python
 
-  >>> nlp.parser.load()
+  >>> Nlp.parser.load()
 
 The Workbench language parser is a versatile component which can be used to implement a variety of parsing strategies for your application. The :ref:`User Manual <userguide>` has more details on the different options available to fine-tune the behavior of the parser. It also covers how to define your own custom parsing logic and train a state-of-the-art statistical parser using annotated data.
 

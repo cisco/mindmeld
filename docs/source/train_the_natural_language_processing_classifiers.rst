@@ -20,20 +20,20 @@ The first step towards training the NLP classifiers for our Kwik-E-Mart store in
   $ cd $WB_APP_ROOT
   $ python
 
-Once you are in the python interactive shell, the quickest way to train all the NLP classifiers together is using the :keyword:`nlp.build()` method, as shown below.
+Once you are in the python interactive shell, the quickest way to train all the NLP classifiers together is using the :keyword:`Nlp.build()` method, as shown below.
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
-  >>> nlp.build()
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
+  >>> Nlp.build()
 
 This method will train all models in the specified NLP pipeline. Based on the directory structure and the annotations in the training data, the Natural Language Processor automatically infers which classifiers need to be trained. In our case, the NLP will train an intent classifier for the ``store_info`` domain and entity recognizers for each of the intents which contain labeled queries with entity annotations. This simple example did not include training data for domain classification or role classification, and consequently, these models will not be built. 
 
-To run all of the trained models in the NLP pipeline, use the :keyword:`nlp.parse()` command as shown below.
+To run all of the trained models in the NLP pipeline, use the :keyword:`Nlp.parse()` command as shown below.
 
 .. code-block:: python
 
-  >>> nlp.parse('When does One Market close?')
+  >>> Nlp.parse('When does One Market close?')
   {
     ...
     'domain': {'target': 'get_store_info', 'probs': []},
@@ -56,7 +56,7 @@ To run all of the trained models in the NLP pipeline, use the :keyword:`nlp.pars
     ...
   }
   
-The :keyword:`nlp.parse()` command will return detailed information about the output of each of the trained NLP models. See the :ref:`User Manual <userguide>` for more details.
+The :keyword:`Nlp.parse()` command will return detailed information about the output of each of the trained NLP models. See the :ref:`User Manual <userguide>` for more details.
 
 By default, the :keyword:`build()` method shown above will use the baseline machine learning settings for all classifiers, which in most cases should train reasonable models. To further optimize model performance, Workbench provides extensive capabilities to optimize individual model parameters and measure results. We'll next take a closer look at each of the NLP components and learn how to experiment with different settings for each of them individually.
 
@@ -70,14 +70,14 @@ The :keyword:`NaturalLanguageProcessor` class in Workbench exposes methods for t
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
-  >>> nlp.domain_classifier.fit(model='svm')
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
+  >>> Nlp.domain_classifier.fit(model='svm')
 
 The trained classifier can be tested on a new query using the :keyword:`predict()` method.
 
 .. code-block:: python
 
-  >>> nlp.domain_classifier.predict('Play my jazz playlist.')
+  >>> Nlp.domain_classifier.predict('Play my jazz playlist.')
   {
     'target': 'music', 
     'probs': [
@@ -101,7 +101,7 @@ We start as before by importing and instantiating the :keyword:`NaturalLanguageP
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
   >>> from sklearn.model_selection import KFold
 
 Next, we define the feature dictionary that lists all the feature types along with the feature-specific settings. Let's say we want bag-of-n-grams up to size 2 and similarly, edge-ngrams up to length 2.
@@ -124,7 +124,7 @@ Finally, we fetch the :keyword:`intent_classifier` for the domain we are interes
 
 .. code-block:: python
 
-  >>> clf = nlp.domains['store_info'].intent_classifier
+  >>> clf = Nlp.domains['store_info'].intent_classifier
   >>> clf.fit(model='logreg', features=feature_dict, cv=kf)
 
 We have now successfully trained an intent classifier for the ``store_info`` domain. If our app had more domains, we would follow the same steps for those other domains. We can test the trained intent model on a new query by calling its :keyword:`predict()` method.
@@ -181,7 +181,7 @@ Below is the code to import the :keyword:`NaturalLanguageProcessor` object, defi
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
   >>> from sklearn.model_selection import KFold
   >>> feature_dict = {
   ...   'in-gaz': {},
@@ -194,7 +194,7 @@ We then get the entity recognizer for the desired intent and invoke its :keyword
 
 .. code-block:: python
 
-  >>> recognizer = nlp.domains['store_info'].intents['get_store_hours'].entities['store_name'].recognizer
+  >>> recognizer = Nlp.domains['store_info'].intents['get_store_hours'].entities['store_name'].recognizer
   >>> recognizer.fit(model='memm', features=feature_dict, cv=kfold_cv)
   >>> recognizer.dump()
 
@@ -227,8 +227,8 @@ Let us see how Workbench can be used for training a role classifier for the ``sy
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
-  >>> get_hours_intent = nlp.domains['store_info'].intents['get_store_hours']
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
+  >>> get_hours_intent = Nlp.domains['store_info'].intents['get_store_hours']
   >>> clf = get_hours_intent.entities['sys:time'].role_classifier
   >>> clf.fit(model='memm')
 
@@ -254,9 +254,9 @@ MindMeld Workbench provides advanced capabilities for building a state-of-the-ar
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
-  >>> nlp.build()
-  >>> nlp.parse('When does One Market close?')
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
+  >>> Nlp.build()
+  >>> Nlp.parse('When does One Market close?')
   {
     ...
     'entities': [
@@ -278,9 +278,9 @@ If an entity mapping file is specified, as illustrated in :doc:`step 6 </generat
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
-  >>> nlp.build()
-  >>> nlp.parse('When does One Market close?')
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
+  >>> Nlp.build()
+  >>> Nlp.parse('When does One Market close?')
   {
     ...
     'entities': [
@@ -302,8 +302,8 @@ Note that the :keyword:`value` attribute of the entity has resolved to an object
 
 .. code-block:: python
 
-  >>> from mmworkbench import NaturalLanguageProcessor as nlp
-  >>> resolver = nlp.domains[0].intents['get_store_hours'].entities['store_name'].resolver
+  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
+  >>> resolver = Nlp.domains[0].intents['get_store_hours'].entities['store_name'].resolver
 
   >>> # Train the resolver model using the mapping file, if available.
   ... resolver.fit()
