@@ -1,41 +1,23 @@
 
-Welcome to MindMeld Workbench
-=============================
+The Conversational AI Playbook
+==============================
 
-MindMeld Workbench
+Conversational applications have been the subject of AI research for many decades. It has only been in the past few years, however, that they have gone mainstream. Today, billions of people around the world rely on products like Siri, Alexa, Google Assistant and Cortana every week. Experts agree that this is just the beginning. Conversational interfaces represent the new frontier of application development, and over the next decade, we will see a wide variety of converational assistants emerge to help us with many daily tasks.
 
-* is a set of Natural Language Processing tools for building **Deep Domain Conversational AI** systems that intelligently converse with users in natural language
-* is optimized for language understanding based on **large, custom datasets** (rather than pre-trained, generic models)
-* supports robust, flexible and scalable Machine Learning modeling constructs to enable **Deep-Domain language understanding**
-* has been demonstrated on **production-grade** conversational apps in several domains (described below)
-* enables machine learning engineers and data scientists to quickly build, test and **deploy conversational user interfaces across a wide range of platforms**
+This is not the first tectonic shift in application development. In the mid 1990s, the arrival of the Web saw traditional packaged software replaced by a new generation of browser-based, web applications. Similarly, with the arrival of the iPhone app store in 2008, native mobile applications supplanted web applications as the predominant application paradigm. Conversational applications are now ushering in a third major transformation in development practices, but this one looks to be even more disruptive than its predecessors.
 
-About this Tutorial
-*******************
+For nearly three decades, application design has centered around the Graphical User Interface, or GUI. Over this time, a generation of developers has become well-versed in a set of tools, design patterns and best practices which streamline the building of professional, GUI-based applications. With conversational experiences, all of this changes, and the GUI becomes de-emphasized or absent altogether. As a result, the previous generation of tools and best practices no longer applies. Furthermore, unlike their predecessors, conversational applications rely heavily on AI technology in order to understand and respond to human language. Prior to now, mastering AI was a never a prerequisite for good application design. 
 
-In this tutorial, you will learn
+Faced with these unfamiliar challenges, developers and companies struggle today to create reliable and useful conversational applications. In fact, over the past few years, the vast majority of attempts have failed. This woeful track record can no doubt be traced to the dearth of tools and best practices available to guide companies down the path toward success. A new playbook and new generation of tools is desperately needed to help organizations chart a fruitful course in this new frontier of conversational application design.
 
-* the role of each component in the Workbench architecture
-* how to train, test, and optimize each component to achieve the high accuracy required for user-facing commercial applications
-* how to build an intelligent conversational interface with easy-to-use modules
 
-In short, you will learn how to build Conversational AI applications step by step, while gaining insight into best practices.
+About This Guide
+----------------
 
-The code samples in this tutorial draw from four applications, each featuring a medium- to large-vocabulary content catalog:
+This guide represents a first step toward defining the governing principles and best practices which will enable developers to build great conversational applications. It is the result of several years of practical experience building and deploying dozens of the most advanced conversational applications achievable today. This guide is not intended to survey cutting-edge research and state-of-the-art algorthims; there are many other helpful resources already available for that topic. Instead, this guide serves as a comprehensive playbook to help developers and data scientists build real production applications. It provides detailed instructions, practical advice, and real-world examples. We hope that this material will empower developers with the tools and know-how to improve the quality and variety of conversational experiences which become available in the coming months and years.
 
-=================  =====================================================================
-Application        Use Case
-=================  =====================================================================
-Barista            Order drinks and food at a coffee shop
-Home Assistant     Operate a Smart Home, discover TV shows and movies, navigate TV Guide
-Music Assistant    Discover and save favorite songs, albums, artists, playlists
-Fashion Assistant  Shop for clothing and accessories
-=================  =====================================================================
+This guide assumes familiarity with `Machine Learning <https://www.coursera.org/learn/machine-learning>`_ and the `python <https://www.python.org/>`_ programming language, including functional knowledge of the `scikit-learn <http://scikit-learn.org/>`_ python package. The :ref:`intro` provides an overview of the state-of-the-art in building conversational applications and discusses some of the tradeoffs associated with different implementation approaches. The :ref:`quickstart` illustrates how to build a simple end-to-end conversational application using the MindMeld Conversational AI toolkit, called Workbench. The :ref:`userguide` covers conversational applications and MindMeld Workbench in depth. In the process, it highlights many of the common techniques and best practices that are used to build production-quality conversational experiences today.
 
-This tutorial assumes familiarity with `Machine Learning`_ and the Python programming language, including functional knowledge of the `scikit-learn`_ package.
-
-.. _scikit-learn: http://scikit-learn.org/
-.. _Machine Learning: https://www.coursera.org/learn/machine-learning
 
 
 Contents
@@ -46,21 +28,37 @@ Contents
    :caption: Introduction
    :name: intro
 
-   introduction
+   introduction_to_conversational_applications
+   approaches_for_building_conversational_applications
+   anatomy_of_a_conversational_ai_interaction
+   introducing_mindmeld_workbench
 
 .. toctree::
    :maxdepth: 2
-   :caption: Quickstart
+   :caption: Step-by-Step Guide
    :name: quickstart
 
-   quickstart
+   overview
+   select_the_right_use_case
+   script_interactions
+   define_the_hierarchy
+   define_the_dialogue_handlers
+   create_the_knowledge_base
+   generate_representative_training_data
+   train_the_natural_language_processing_classifiers
+   configure_the_language_parser
+   optimize_question_answering_performance
+   deploy_to_production
 
 .. toctree::
    :maxdepth: 2
-   :caption: User Guide
+   :caption: Workbench User Manual
    :name: userguide
-
-   userguide
+   
+   coming_soon
+   
+..
+   getting_started
    architecture
    key_concepts
    directory_structure
@@ -72,7 +70,7 @@ Contents
    entity_recognition
    role_classification
    entity_resolution
-   semantic_parsing
+   language_parsing
    deployment
 
 .. toctree::

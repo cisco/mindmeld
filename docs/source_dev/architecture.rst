@@ -146,12 +146,12 @@ Treating Named Entity Recognition (NER) and Semantic Role Labeling (SRL) as sepa
 * Role labeling might be a multi-label problem. With multi-label roles, we can use the same entity to query multiple fields.
 
 
-Semantic Parser
+Language Parser
 ~~~~~~~~~~~~~~~
 
 The Semantic Parser is the last subcomponent within the MindMeld Natural Language Parser. It takes all the resolved entities and groups them into semantically related items. Each item represents a single real-world entity or concept along with all its describing attributes.
 
-We provide more details in :doc:`Semantic Parser </semantic_parsing>`.
+We provide more details in :doc:`Language Parser </language_parsing>`.
 
 
 Dialogue Manager
