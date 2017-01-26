@@ -131,7 +131,7 @@ We have now successfully trained an intent classifier for the ``store_info`` dom
 
 .. code-block:: python
 
-  >>> clf.predict('Where is my closest Kwik-e-Mart?')
+  >>> clf.predict('Where is my closest Kwik-E-Mart?')
   {
     'target': 'find_nearest_store', 
     'probs': [
@@ -202,7 +202,7 @@ We have thus trained and saved the ``get_name`` entity recognizer for the ``get_
 
 .. code-block:: python
 
-  >>> recognizer.predict(u'When does the store on Elm Street close?')
+  >>> recognizer.predict('When does the store on Elm Street close?')
   [
     {
       'type': 'store_name',
@@ -230,18 +230,17 @@ Let us see how Workbench can be used for training a role classifier for the ``sy
   >>> from mmworkbench import NaturalLanguageProcessor as nlp
   >>> get_hours_intent = nlp.domains['store_info'].intents['get_store_hours']
   >>> clf = get_hours_intent.entities['sys:time'].role_classifier
-  >>> clf.fit()
+  >>> clf.fit(model='memm')
 
 Once the classifier is trained, we can test it on a new query using the familiar :keyword:`predict()` method. The :keyword:`predict()` method of the role classifier requires both the full input query and the set of entities predicted by the entity recognizer.
 
 .. code-block:: python
 
-  >>> query = u'Show me stores open between 8 AM and 6 PM.'
+  >>> query = 'Show me stores open between 8 AM and 6 PM.'
   >>> recognizer = get_hours_intent.entities['sys:time'].recognizer
   >>> predicted_entities = recognizer.predict(query)
-  >>> predicted_roles = clf.predict(query, predicted_entities)
-  >>> predicted_roles
-  {u'8 AM': u'open_time', u'6 PM': u'close_time'}
+  >>> clf.predict(query, predicted_entities)
+  {'8 AM': 'open_time', '6 PM': 'close_time'}
 
 Our baseline role classifier can be further optimized using the various training and evaluation options detailed in the :ref:`User Manual <userguide>`
 
