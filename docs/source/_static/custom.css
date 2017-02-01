@@ -1737,22 +1737,9 @@ div[class^='highlight'] pre {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoxOERBMTRGRDBFMUUxMUUzODUwMkJCOThDMEVFNURFMCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoxOERBMTRGRTBFMUUxMUUzODUwMkJCOThDMEVFNURFMCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjE4REExNEZCMEUxRTExRTM4NTAyQkI5OEMwRUU1REUwIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjE4REExNEZDMEUxRTExRTM4NTAyQkI5OEMwRUU1REUwIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+EwrlwAAAAA5JREFUeNpiMDU0BAgwAAE2AJgB9BnaAAAAAElFTkSuQmCC);
     background-size: 300px 1px
 }
-.wy-grid-for-nav {
-    position: absolute;
-    width: 100%;
-    height: 100%
-}
 .wy-nav-side {
-	position: fixed;
-	/*top: 0;*/
-	bottom: 0;
-	left: 0;
 	width: 300px;
-	overflow-x: hidden;
-	overflow-y: hidden;
-	min-height: 100%;
 	background: #f5f7f9;
-	z-index: 200;
 	width: calc((100% - 750px) / 2 + 100px);
 	min-width: 252px;
 	padding-left: calc((100% - 1140px) / 2);
@@ -1880,13 +1867,6 @@ footer span.commit .rst-content tt,
     .wy-nav-top {
         display: block
     }
-    .wy-nav-side {
-        left: -300px
-    }
-    .wy-nav-side.shift {
-        width: 85%;
-        left: 0
-    }
     .wy-side-scroll {
         width: auto
         -ms-overflow-style: none;
@@ -1907,14 +1887,14 @@ footer span.commit .rst-content tt,
     .wy-nav-content-wrap .wy-nav-content {
         padding: 1em
     }
-    .wy-nav-content-wrap.shift {
-        position: fixed;
-        min-width: 100%;
-        left: 85%;
-        top: 0;
-        height: 100%;
-        overflow: hidden
-    }
+}
+@media screen and (max-width: 805px) {
+  .wy-grid-for-nav {
+    top: 60px;
+  }
+  .wy-nav-side {
+    top: 60px;
+  }
 }
 @media screen and (min-width: 1700px) {
 	.wy-nav-content {
@@ -1942,7 +1922,6 @@ footer span.commit .rst-content tt,
 	    min-height: 100%;
 	}
 	.wy-nav-side {
-	    top: 0;
 	    bottom: 0;
 	    width: 300px;
 	}
@@ -2473,6 +2452,11 @@ a .rst-content code {
     white-space: inherit
 }
 .rst-content tt.download span:first-child:before,
+.rst-content code.download span:first-child:before {
+    margin-right: 4px
+}
+
+n:first-child:before,
 .rst-content code.download span:first-child:before {
     margin-right: 4px
 }
