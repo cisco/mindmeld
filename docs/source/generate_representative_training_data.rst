@@ -23,10 +23,10 @@ As described in :doc:`step 3 <define_the_hierarchy>`, the structure of your appl
     :width: 400px
     :align: center
 
-The training data for each component is stored in text files, and Workbench relies on the three different types of data files desribed below.
+The training data for each component is stored in text files, and Workbench relies on the three different types of data files described below.
 
 ==================== ====
-**Labeled Queries**  Labeled query files are text files containing example user queries. All labeled query files belong in the :keyword:`domains` folder. Each domain and intent subfolder should contain labeled query files that apply only to that intent. The hierarchical structure of the :keyword:`domains` folder provides the classification labels which are use to train the domain and intent classification models. Additionally, labeled query files also support an inline markup syntax for annotating entities and entity roles within each query. These annotations are used to train both the entity and role classification models.
+**Labeled Queries**  Labeled query files are text files containing example user queries. All labeled query files belong in the :keyword:`domains` folder. Each domain and intent subfolder should contain labeled query files that apply only to that intent. The hierarchical structure of the :keyword:`domains` folder provides the classification labels which are used to train the domain and intent classification models. Additionally, labeled query files also support an inline markup syntax for annotating entities and entity roles within each query. These annotations are used to train both the entity and role classification models.
 
 **Entity Mappings**  Entity mappings are JSON files which can be used to associate whitelisted and blacklisted alternate names, or synonyms, with individual entities. These entities mappings belong in the :keyword:`entities` folder, and they are used to train the models required for entity resolution.
 
@@ -46,7 +46,7 @@ Labeled query files are the primary source of training data for the Workbench na
     :width: 400px
     :align: center
 
-Note that since this application contains only a single domain, ``store_info``, a domain classifier is not necessary. If additional domains were present, we would need separate sets of training queries for each domain. By default, training data for each domain is derived from the union of all labeled queries available for each intent belonging to a given domain. For example, training queries for the ``store_information`` domain would consist of the union of all queries in the ``greet``, ``get_store_hours``, ``find_nearest_store``, ``exit`` and ``help`` intents. 
+Note that since this application contains only a single domain, ``store_info``, a domain classifier is not necessary. If additional domains were present, we would need separate sets of training queries for each domain. By default, training data for each domain is derived from the union of all labeled queries available for each intent belonging to a given domain. For example, training queries for the ``store_info`` domain would consist of the union of all queries in the ``greet``, ``get_store_hours``, ``find_nearest_store``, ``exit`` and ``help`` intents. 
 
 Since the ``store_info`` domain contains multiple intents, the labeled query text files will be used to train the intent classifier for this domain. The example queries in each individual file should illustrate the typical language patterns associated with each intent. For example, take a look at the :keyword:`greet_queries.txt` file:
 
@@ -60,7 +60,7 @@ Since the ``store_info`` domain contains multiple intents, the labeled query tex
   What's up?
   ...
 
-This file should capture many of the different ways you might expect your users to express a greeting. Similarly, lets take a look at the :keyword:`exit_queries.txt` file:
+This file should capture many of the different ways you might expect your users to express a greeting. Similarly, let's take a look at the :keyword:`exit_queries.txt` file:
 
 .. code-block:: text
 
@@ -71,7 +71,7 @@ This file should capture many of the different ways you might expect your users 
   sayonara
   ...
 
-As you might expect, this data file captures many of the different ways a user might exit your application. Lets now take a look at the :keyword:`get_store_hours_queries.txt` file, which contains the labeled queries for the ``get_store_hours`` intent.
+As you might expect, this data file captures many of the different ways a user might exit your application. Let's now take a look at the :keyword:`get_store_hours_queries.txt` file, which contains the labeled queries for the ``get_store_hours`` intent.
 
 .. code-block:: text
 
@@ -105,7 +105,7 @@ As you can see, the :keyword:`domains` directory hierarchy combined with the ent
 Entity Mapping Files
 ~~~~~~~~~~~~~~~~~~~~
 
-Entity mapping files specify the training data required for entity resolution. Entity resolution is the task of maping each entity to a unique and unambiguous concept, such as a product with a specific ID or an attribute with a specific SKU number. In some cases, this mapping can be obvious. For example, the phrase 'Eiffel Tower' may always unambigously refer to famous Paris landmark. In most applications, however, there are often many variations different users express to describe the same object. For example, some people might call 'Bruce Springsteen' 'The Boss'. The word 'Tesla' might refer to the famous scientist or the electric car company. Customers ordering a 'diet cola', 'diet coke' or a 'diet tonic' might all expect to be served the same beverage. In Workbench, the entity resolver is responsible for identifying the unique and unambiguous concept associated with each entity.
+Entity mapping files specify the training data required for entity resolution. Entity resolution is the task of mapping each entity to a unique and unambiguous concept, such as a product with a specific ID or an attribute with a specific SKU number. In some cases, this mapping can be obvious. For example, the phrase 'Eiffel Tower' may always unambiguously refer to famous Paris landmark. In most applications, however, there are often many variations different users express to describe the same object. For example, some people might call 'Bruce Springsteen' 'The Boss'. The word 'Tesla' might refer to the famous scientist or the electric car company. Customers ordering a 'diet cola', 'diet coke' or a 'diet tonic' might all expect to be served the same beverage. In Workbench, the entity resolver is responsible for identifying the unique and unambiguous concept associated with each entity.
 
 Production conversational applications today rely on training data sets and supervised learning models to perform entity resolution. The training data utilized by Workbench for this purpose resides in entity mapping files located in the :keyword:`entities` folder of the application root directory.
 

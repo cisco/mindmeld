@@ -3,7 +3,7 @@ Step 4: Define the Dialogue State Handlers
 
 Today's commercial voice and chat assistants guide users through a conversational interaction in order to find information or accomplish a task. The steps in each conversational interaction are called 'dialogue states'. A dialogue state defines the form of response which is appropriate for each step in an interaction as well as other logic that must be invoked to determine the desired response. Each application relies on a set of dialogue state handlers which define the logic and response required for every supported dialogue state. 
 
-At the core of every conversational application resides a dialogue manager. The dialogue manager is responsible for analyzing each incoming request and assigning it to a specific dialogue state handler to execute required logic and return a response. The task of mapping each incoming request to the appropriate dialogue state is often referred to as 'dialogue state tracking'. While applying large-scale machine learning techiniques for dialogue state tracking is an active area of research today, nearly all commercial applications rely heavily on rule-based and pattern-matching approaches to map incoming requests to the correct dialogue state.
+At the core of every conversational application resides a dialogue manager. The dialogue manager is responsible for analyzing each incoming request and assigning it to a specific dialogue state handler to execute required logic and return a response. The task of mapping each incoming request to the appropriate dialogue state is often referred to as 'dialogue state tracking'. While applying large-scale machine learning techniques for dialogue state tracking is an active area of research today, nearly all commercial applications rely heavily on rule-based and pattern-matching approaches to map incoming requests to the correct dialogue state.
 
 MindMeld Workbench provides advanced and flexible capabilities for dialogue state tracking. It offers a flexible syntax for defining the rules and patterns each incoming request must match in order to be assigned to a specific dialogue state. In addition, Workbench is fully extensible and can accommodate any custom logic to supplement MindMeld's built-in pattern matching capabilities.
 
@@ -69,7 +69,7 @@ The minimal code snippet shown above illustrates the conventions employed by Wor
    3. It uses the :keyword:`@app.handle()` decorator to define a pattern which, when matched, will invoke the associated handler function.
    4. It specifies the handler function :keyword:`welcome()` which defines the ``welcome`` dialogue state and returns the desired response.
 
-This application structure provides a straighforward mechanism to enumerate a variety of patterns along with their associated handlers which will comprise the core interaction logic for your application. 
+This application structure provides a straightforward mechanism to enumerate a variety of patterns along with their associated handlers which will comprise the core interaction logic for your application. 
 
 
 Implement the Dialogue State Handlers
@@ -102,7 +102,7 @@ Every dialogue handler returns a :keyword:`response` object. This object specifi
 
 In the code snippet above, we also introduce the :keyword:`context` object. Workbench relies on the :keyword:`context` object to keep track of all of the state information associated with the current conversational interaction. In can contain output data from the natural language processing models, aggregated state from multiple previous interactions, as well as user and session information. The detailed information in the :keyword:`context` can be very useful for implementing custom dialogue state handling logic. More details can be found in the :ref:`User Manual <userguide>`.
 
-Following this same approach, we can now also define handlers for the dialgue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting my_app.py file now looks like the following.
+Following this same approach, we can now also define handlers for the dialogue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting my_app.py file now looks like the following.
 
 .. code:: python
 

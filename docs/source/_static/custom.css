@@ -1745,13 +1745,6 @@ div[class^='highlight'] pre {
 	padding-left: calc((100% - 1140px) / 2);
 	padding-bottom: 0em;
 }
-.wy-side-scroll {
-    width: 320px;
-    position: relative;
-    overflow-x: hidden;
-    overflow-y: hidden;
-    height: 100%;
-}
 .wy-nav-top {
     display: none;
     background: #f5f7f9;
@@ -1865,12 +1858,22 @@ footer span.commit .rst-content tt,
 @media screen and (max-width: 768px) {
     .wy-body-for-nav {
         background: #fcfcfc
+        -ms-overflow-style: none;
+        overflow: -moz-scrollbars-none;
+    }
+    .wy-body-for-nav::-webkit-scrollbar { 
+      display: none;
     }
     .wy-nav-top {
         display: block
     }
     .wy-side-scroll {
         width: auto
+        -ms-overflow-style: none;
+        overflow: -moz-scrollbars-none;
+    }
+    .wy-side-scroll::-webkit-scrollbar { 
+      display: none;
     }
     .wy-side-nav-search {
         width: auto
@@ -1915,7 +1918,6 @@ footer span.commit .rst-content tt,
 	    max-width: 100%;
 	}
 	.wy-nav-content-wrap {
-	    /* margin-left: 300px; */
 	    background: #fcfcfc;
 	    min-height: 100%;
 	}

@@ -59,11 +59,11 @@ This code snippet simply loads the Question Answerer module from Workbench and t
   > stores[0]
   {
     "store_name": "Central Plaza Store",
-    "open_time": 0800 hrs,
-    "close_time": 1800 hrs,
+    "open_time": "0800 hrs",
+    "close_time": "1800 hrs",
     "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
     "phone_number": (+1) 100-100-1100
   }
 
-As you can see, your knowlege base is now created and it can be leveraged by the Question Answerer in your dialogue state handling logic. Refer to the :ref:`User Guide <userguide>` for more detailed information on how the Question Answerer can be used to find answers to questions, validate user requests, disambiguate entities and offer alternative suggestions.     
+As you can see, your knowledge base is now created and it can be leveraged by the Question Answerer in your dialogue state handling logic. Refer to the :ref:`User Guide <userguide>` for more detailed information on how the Question Answerer can be used to find answers to questions, validate user requests, disambiguate entities and offer alternative suggestions.     
 

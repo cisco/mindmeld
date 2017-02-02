@@ -86,9 +86,9 @@ To get started with the MindMeld Cloud, please `contact MindMeld sales <mailto:i
 
 .. code:: python
 
-  >>> from mmworkbench import MindMeldCloud as mmc
-  >>> mmc.config({'key': 'my-access-key', 'secret': 'my-access-secret'})
-  >>> mmc.dump()
+  >>> from mmworkbench import MindMeldCloud as mmCld
+  >>> mmCld.config({'key': 'my-access-key', 'secret': 'my-access-secret'})
+  >>> mmCld.dump()
 
 You will now be able to run your application with the :keyword:`deploy` command-line argument in a terminal window.
 

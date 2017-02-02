@@ -12,7 +12,7 @@ dependencies:
     - sudo dpkg -i pandoc-1.19-1-amd64.deb
 test:
   post:
-    - cd docs && make html && cp scripts/search.html build/html
+    - cd docs && make clean text html && cd scripts && ./process_source_files.sh
 deployment:
   s3:
     branch: /(develop)|(staging)|(master)/
