@@ -110,11 +110,12 @@ See the :ref:`User Manual <userguide>` for more about blueprints, and root folde
 
 Notice that there is no folder for the ``date`` entity. None is needed, because ``date`` is a *system entity*, meaning that it is already built into the Workbench platform. Workbench provides several different system entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <userguide>` for details.
 
-Given the simple interaction proposed in.. image:: images/quickstart_parse_output.png
+Given the simple interaction proposed in the preceding section and hierarchy we have now defined, we would expect our trained natural language processing models to yield the results illustrated below.
+
+.. image:: images/quickstart_parse_output.png
     :width: 600px
     :align: center
 
 Next, we explore how to introduce training data to the defined folders in order to build machine learning models that parse and understand user requests as shown above.
 
- the preceding section and hierarchy we have now defined, we would expect our trained natural language processing models to yield the results illustrated below.
 
