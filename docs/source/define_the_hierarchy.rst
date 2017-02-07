@@ -1,5 +1,5 @@
 Step 3: Define the Domain, Intent, Entity, and Role Hierarchy
-============================================================
+=============================================================
 
 To model and understand natural language, every conversational application relies on a hierarchy of machine learning classifiers. This family of machine learning models, broadly defined as the Natural Language Processing (NLP) component of an application, sits at the core of all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has emerged in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on the hierarchy of machine learning models illustrated below.
 
@@ -20,7 +20,7 @@ See the :ref:`User Guide <userguide>` for an in-depth treatment of the NLP class
 .. _model_hierarchy:
 
 The Example NLP Model Hierarchy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We could design the NLP model hierarchy for our simple Kwik-E-Mart conversational application to resemble the illustration below.
 
