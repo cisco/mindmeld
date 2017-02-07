@@ -1743,7 +1743,6 @@ div[class^='highlight'] pre {
 	width: calc((100% - 750px) / 2 + 100px);
 	min-width: 252px;
 	padding-left: calc((100% - 1140px) / 2);
-	padding-bottom: 0em;
 }
 .wy-nav-top {
     display: none;
@@ -1857,7 +1856,7 @@ footer span.commit .rst-content tt,
 }
 @media screen and (max-width: 768px) {
     .wy-body-for-nav {
-        background: #fcfcfc
+        background: #fcfcfc;
         -ms-overflow-style: none;
         overflow: -moz-scrollbars-none;
     }
@@ -1868,7 +1867,7 @@ footer span.commit .rst-content tt,
         display: block
     }
     .wy-side-scroll {
-        width: auto
+        width: auto;
         -ms-overflow-style: none;
         overflow: -moz-scrollbars-none;
     }
@@ -1928,7 +1927,7 @@ footer span.commit .rst-content tt,
 }
 @media screen and (min-width: 1400px) {
     .wy-nav-content-wrap {
-        background: white
+        background: white;
     }
     .wy-nav-content {
         margin-left: calc((100% - 994px) / 2 + 140px);
