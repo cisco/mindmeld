@@ -8,6 +8,5 @@ do
 done
 
 cp -r ../build/text/*.rst.txt ../build/html/_sources
-cp search.html ../build/html/
 
 echo "Processing done."
