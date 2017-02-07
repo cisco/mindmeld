@@ -1742,7 +1742,7 @@ div[class^='highlight'] pre {
 	background: #f5f7f9;
 	width: calc((100% - 750px) / 2 + 100px);
 	min-width: 252px;
-	padding-left: calc((100% - 1140px) / 2);
+	padding-left: calc((100% - 1240px) / 2);
 }
 .wy-nav-top {
     display: none;
@@ -1897,7 +1897,7 @@ footer span.commit .rst-content tt,
 }
 @media screen and (min-width: 1700px) {
 	.wy-nav-content {
-	    padding: 2em 33% 2em 0px;
+	    padding: 2em 28% 2em 0px;
 	}
 }
 @media screen and (min-width: 1200px) and (max-width: 1400px) {
