@@ -26,7 +26,7 @@ test_requirements = [
 ]
 
 setup(
-    name='mindmeld',
+    name='mmworkbench',
     version='0.0.0',
     description="A Python module for building natural language processing models.",
     long_description=readme + '\n\n' + history,
@@ -34,9 +34,9 @@ setup(
     author_email='contact@mindmeld.com',
     url='https://github.com/mindmeld/mindmeld',
     packages=[
-        'mindmeld',
+        'mmworkbench',
     ],
-    package_dir={'mindmeld': 'mindmeld'},
+    package_dir={'mmworkbench': 'mmworkbench'},
     include_package_data=True,
     install_requires=requirements,
     zip_safe=False,
@@ -45,6 +45,8 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'Natural Language :: English',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',

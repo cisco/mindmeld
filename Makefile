@@ -48,7 +48,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 
 lint: ## check style with flake8
-	flake8 mindmeld tests
+	flake8 mmworkbench tests
 
 test: ## run tests quickly with the default Python
 	py.test
@@ -58,16 +58,16 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source mindmeld -m pytest
+	coverage run --source mmworkbench -m pytest
 
 		coverage report -m
 		coverage html
 		$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/source/apidoc/mindmeld.rst
+	rm -f docs/source/apidoc/mmworkbench.rst
 	rm -f docs/source/apidoc/modules.rst
-	sphinx-apidoc -o docs/source/apidoc mindmeld
+	sphinx-apidoc -o docs/source/apidoc mmworkbench
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/build/html/index.html
