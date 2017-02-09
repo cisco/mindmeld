@@ -118,8 +118,8 @@ class Query(object):
         return mapping[index]
 
 
-class ParsedQuery(object):
-    """A parsed query contains a query and the additional metadata that has been labeled or
+class ProcessedQuery(object):
+    """A processed query contains a query and the additional metadata that has been labeled or
     predicted.
 
 
@@ -149,13 +149,13 @@ class Entity(object):
             language responses.
         query (Query): Description
         role (str): Description
-        source_raw_text (str): The raw text that was parsed into this entity
-        source_processed_text (str): The processed text that was parsed into this entity
-        source_normalized_text (str): The normalized text that was parsed into this entity
-        text_start (int): The character index start of the text range that was parsed into this
+        source_raw_text (str): The raw text that was processed into this entity
+        source_processed_text (str): The processed text that was processed into this entity
+        source_normalized_text (str): The normalized text that was processed into this entity
+        text_start (int): The character index start of the text range that was processed into this
             entity. This index is based on the normalized text of the query passed in.
-        text_end (int): The character index end of the text range that was parsed into this entity.
-            This index is based on the normalized text of the query passed in.
+        text_end (int): The character index end of the text range that was processed into this
+            entity. This index is based on the normalized text of the query passed in.
         type (str): The type of entity
         value (str): The resolved value of the entity
     """

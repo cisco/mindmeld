@@ -48,7 +48,7 @@ class DomainClassifier(object):
         """Predicts a domain for the specified query
 
         Args:
-            query (mmworkbench.parser.Query): The input query
+            query (Query): The input query
 
         Returns:
             str: the predicted domain
@@ -59,7 +59,7 @@ class DomainClassifier(object):
         """Generates multiple hypotheses and returns their associated probabilities
 
         Args:
-            query (mmworkbench.parser.Query): The input query
+            query (Query): The input query
 
         Returns:
             list: a list of tuples of the form (str, float) grouping domains and their probabilities
@@ -70,7 +70,7 @@ class DomainClassifier(object):
         """Evaluates the model on the specified data
 
         Args:
-            data (list): A list of ParsedQuery objects
+            data (list): A list of ProcessedQuery objects
 
         Returns:
             TYPE: Description

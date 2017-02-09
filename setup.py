@@ -32,7 +32,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author="MindMeld, Inc.",
     author_email='contact@mindmeld.com',
-    url='https://github.com/mindmeld/mindmeld',
+    url='https://github.com/mindmeld/mindmeld-workbench3',
     packages=[
         'mmworkbench',
     ],

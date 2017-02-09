@@ -6,14 +6,14 @@ from __future__ import unicode_literals
 
 import re
 
-from mmworkbench.parser.data import Query, ParsedQuery, Entity
+from mmworkbench import Query, ProcessedQuery, Entity
 
 ENTITY_PATTERN = re.compile('\{(.*?)\}')
 NUMERIC_PATTERN = re.compile('\[(.*?)\|num:(.*?)\]')
 
 
-def create_parsed_query_for_markup(markup, tokenizer, preprocessor, is_gold=False):
-    """Creates a parsed query object from marked up query text. The
+def create_processed_query_for_markup(markup, tokenizer, preprocessor, is_gold=False):
+    """Creates a processed query object from marked up query text. The
 
     Args:
         markup (str): The marked up query text
@@ -22,27 +22,27 @@ def create_parsed_query_for_markup(markup, tokenizer, preprocessor, is_gold=Fals
         is_gold (bool): True if the markup passed in is a reference, human-labeled example
 
     Returns:
-        ParsedQuery: a parsed query
+        ProcessedQuery: a processed query
     """
 
     raw_text = _mark_down(markup)
     query = Query(raw_text, tokenizer, preprocessor)
     entities = _parse_entities(markup, query=query)
 
-    return ParsedQuery(query, entities=entities, is_gold=is_gold)
+    return ProcessedQuery(query, entities=entities, is_gold=is_gold)
 
 
-def create_markup_for_parsed_query(parsed_query):
-    """Converts a parsed query into marked up query text.
+def create_markup_for_processed_query(processed_query):
+    """Converts a processed query into marked up query text.
 
     Args:
-        parsed_query (ParsedQuery): The query to convert
+        processed_query (ProcessedQuery): The query to convert
 
     Returns:
         str: A marked up representation of the query
     """
-    raw_text = parsed_query.query.raw_text
-    markup = _mark_up(raw_text, parsed_query.entities)
+    raw_text = processed_query.query.raw_text
+    markup = _mark_up(raw_text, processed_query.entities)
     return markup
 
 
