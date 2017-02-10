@@ -8,7 +8,7 @@ from builtins import object
 
 
 '''
-from mmworkbench import path, Query, ProcessedQuery
+from .. import path, Query, ProcessedQuery
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
@@ -24,9 +24,8 @@ class NaturalLanguageProcessor(object):
     Attributes:
         domain_classifier (DomainClassifier): Description
         domains (dict): Description
-        gazetteer_factory (GazetteerFactory): Description
-        preprocessor (TYPE): Description
-        tokenizer (TYPE): Description
+        preprocessor (Preprocessor): the object responsible for processing raw text
+        tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed text
     """
 
     def __init__(self, app_path):
@@ -36,9 +35,9 @@ class NaturalLanguageProcessor(object):
             app_path (str): The path to the directory containing the app's data
         """
         self._app_path = app_path
-        self.tokenizer = None
-        self.preprocessor = None
-        self.gazetteer_factory = None
+        self._tokenizer = create_tokenizer(app_path)
+        self._preprocessor = create_preprocessor(app_path)
+        self._resource_loader = create_resource_loader(app_path)
         self.domain_classifier = None
         self.domains = {}
 
@@ -51,7 +50,15 @@ class NaturalLanguageProcessor(object):
     def dump(self):
         pass
 
-    def process(self, query):
+    def process(self, query_text):
+        """Summary
+
+        Args:
+            query_text (str): The raw user text input
+
+        Returns:
+            ProcessedQuery: The processed query
+        """
         pass
 
 
@@ -59,18 +66,17 @@ class DomainProcessor(object):
     """Summary
 
     Attributes:
-        gazetteer_factory (TYPE): Description
+        name (str): The name of the domain
         intent_classifier (TYPE): Description
         intents (dict): Description
-        preprocessor (TYPE): Description
-        tokenizer (TYPE): Description
     """
 
-    def __init__(self, app_path, tokenizer, gazetteer_factory):
+    def __init__(self, app_path, domain, tokenizer=None, preprocessor=None, resource_loader=None):
         self._app_path = app_path
-        self.tokenizer = None
-        self.preprocessor = None
-        self.gazetteer_factory = None
+        self.name = domain
+        self._tokenizer = tokenizer or create_tokenizer(app_path)
+        self._preprocessor = preprocessor or create_preprocessor(app_path)
+        self._resource_loader = resource_loader or create_resource_loader(app_path)
         self.intents = {}
         self.intent_classifier = None
 
@@ -79,17 +85,21 @@ class IntentProcessor(object):
     """Summary
 
     Attributes:
+        domain (str): The domain this intent belongs to
+        name (str): The name of this intent
         entities (dict): Description
-        linker (TYPE): Description
-        preprocessor (TYPE): Description
-        recognizer (TYPE): Description
-        tokenizer (TYPE): Description
+        linker (NamedEntityLinker): Description
+        recognizer (NamedEntityRecognizer): The
     """
 
-    def __init__(self, app_path, tokenizer, gazetteer_factory):
+    def __init__(self, app_path, domain, intent, tokenizer=None, preprocessor=None,
+                 resource_loader=None):
         self._app_path = app_path
-        self.tokenizer = None
-        self.preprocessor = None
+        self.domain = domain
+        self.name = intent
+        self._tokenizer = tokenizer or create_tokenizer(app_path)
+        self._preprocessor = preprocessor or create_preprocessor(app_path)
+        self._resource_loader = resource_loader or create_resource_loader(app_path)
         self.entities = {}
         self.recognizer = None
         self.linker = None
@@ -99,15 +109,57 @@ class EntityProcessor(object):
     """Summary
 
     Attributes:
-        preprocessor (TYPE): Description
+        domain (str): The domain this entity belongs to
+        intent (str): The intent this entity belongs to
+        type (str): The type of this entity
         role_classifier (TYPE): Description
         roles (dict): Description
-        tokenizer (TYPE): Description
     """
 
-    def __init__(self, app_path, tokenizer, gazetteer_factory):
+    def __init__(self, app_path, domain, intent, entity_type, tokenizer=None, preprocessor=None,
+                 resource_loader=None):
         self._app_path = app_path
-        self.tokenizer = None
-        self.preprocessor = None
+        self.domain = domain
+        self.intent = intent
+        self.type = entity_type
+        self._tokenizer = tokenizer or create_tokenizer(app_path)
+        self._preprocessor = preprocessor or create_preprocessor(app_path)
+        self._resource_loader = resource_loader or create_resource_loader(app_path)
         self.roles = {}
         self.role_classifier = None
+
+
+def create_preprocessor(app_path):
+    """Creates the preprocessor for the app at app path
+
+    Args:
+        app_path (str): The path to the directory containing the app's data
+
+    Returns:
+        Preprocessor: a preprocessor
+    """
+    pass
+
+
+def create_tokenizer(app_path):
+    """Creates the preprocessor for the app at app path
+
+    Args:
+        app_path (str): The path to the directory containing the app's data
+
+    Returns:
+        Tokenizer: a tokenizer
+    """
+    pass
+
+
+def create_resource_loader(app_path):
+    """Creates the resource loader for the app at app path
+
+    Args:
+        app_path (str): The path to the directory containing the app's data
+
+    Returns:
+        ResourceLoader: a resource loader
+    """
+    pass
