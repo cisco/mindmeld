@@ -10,42 +10,32 @@ class DomainClassifier(object):
     using all of the labeled queries across all intents for all domains in an application. The
     labels for the training data are the domain names associated with each query. The classifier
     takes in a query whose normalized text is sent to a text classifier.
-
-    Attributes:
-        model_type (str): the name of the underlying model to use
-        features (dict): the features which the classifier will use for predictions
-        gazetteers (dict): the gazetteers used by the classifier
-
     """
-    def __init__(self, model_type, features, gazetteers):
+    def __init__(self, resource_loader):
         """Initializes a domain classifier
 
         Args:
-            model_type (str): the name of the underlying model to use
-            features (dict): the features which the classifier will use for predictions
-            gazetteers (dict): The gazetteers used by the classifier
+            resource_loader (ResourceLoader): An object which can load resources for the classifier
         """
-        self.model_type = model_type
-        self.features = features
-        self.gazetteers = gazetteers
+        self._resource_loader = resource_loader
         self._model = None  # will be set when model is fit or loaded
 
-    def fit(self, data, params_grid=None, cv=None):
+    def fit(self, model_type=None, features=None, params_grid=None, cv=None):
         """Trains the model
 
         Args:
-            data (TYPE): Description
-            params_grid (None, optional): Description
+            model_type (str): The type of model to use. If omitted, the default model type will
+                be used.
+            features (dict): If omitted, the default features for the model type will be used.
+            params_grid (dict): If omitted the default params will be used
             cv (None, optional): Description
 
-        Returns:
-            TYPE: Description
         """
         # self._model = something
         pass
 
     def predict(self, query):
-        """Predicts a domain for the specified query
+        """Predicts a role for the specified query
 
         Args:
             query (Query): The input query
@@ -66,11 +56,8 @@ class DomainClassifier(object):
         """
         pass
 
-    def evaluate(self, data):
+    def evaluate(self, use_blind=False):
         """Evaluates the model on the specified data
-
-        Args:
-            data (list): A list of ProcessedQuery objects
 
         Returns:
             TYPE: Description

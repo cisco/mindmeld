@@ -11,34 +11,31 @@ class NamedEntityRecognizer(object):
     annotations for each query.
 
     Attributes:
-        model_type (str): the name of the underlying model to use
-        features (dict): the features which the classifier will use for predictions
-        gazetteers (dict): the gazetteers used by the classifier
-
+        domain (str): The domain of this named entity recognizer
+        intent (str): The intent of this named entity recognizer
     """
-    def __init__(self, model_type, features, gazetteers):
+    def __init__(self, resource_loader, domain, intent):
         """Initializes a named entity recognizer
 
         Args:
-            model_type (str): the name of the underlying model to use
-            features (dict): the features which the classifier will use for predictions
-            gazetteers (dict): the gazetteers used by the classifier
+            resource_loader (ResourceLoader): An object which can load resources for the classifier
+            domain (str): The domain of this named entity recognizer
+            intent (str): The intent of this named entity recognizer
         """
-        self.model_type = model_type
-        self.features = features
-        self.gazetteers = gazetteers
+        self._resource_loader = resource_loader
+        self.domain = domain
+        self.intent = intent
         self._model = None  # will be set when model is fit or loaded
 
-    def fit(self, data, params_grid=None, cv=None):
+    def fit(self, model_type=None, features=None, params_grid=None, cv=None):
         """Trains the model
 
         Args:
-            data (TYPE): Description
+            model_type (str): The type of model to use
+            features (None, optional): Description
             params_grid (None, optional): Description
             cv (None, optional): Description
 
-        Returns:
-            TYPE: Description
         """
         # self._model = something
         pass
@@ -50,7 +47,7 @@ class NamedEntityRecognizer(object):
             query (Query): The input query
 
         Returns:
-            str: the predicted intent
+            list: the predicted entities
         """
         pass
 
@@ -61,15 +58,14 @@ class NamedEntityRecognizer(object):
             query (Query): The input query
 
         Returns:
-            list: a list of tuples of the form (str, float) grouping intents and their probabilities
+            list: a list of tuples of the form (Entity, float) grouping potential entities and their
+            probabilities
         """
+        # Note(jj): Not sure we can support this with all classifiers (MEMM?)
         pass
 
-    def evaluate(self, data):
+    def evaluate(self, use_blind=False):
         """Evaluates the model on the specified data
-
-        Args:
-            data (list): A list of ProcessedQuery objects
 
         Returns:
             TYPE: Description

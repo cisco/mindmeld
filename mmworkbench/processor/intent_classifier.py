@@ -12,40 +12,36 @@ class IntentClassifier(object):
     takes in a query whose normalized text is sent to a text classifier.
 
     Attributes:
-        model_type (str): the name of the underlying model to use
-        features (dict): the features which the classifier will use for predictions
-        gazetteers (dict): the gazetteers used by the classifier
+        domain (str): The domain of this intent classifier
 
     """
-    def __init__(self, model_type, features, gazetteers):
-        """Initializes a intent classifier
+    def __init__(self, resource_loader, domain):
+        """Initializes an intent classifier
 
         Args:
-            model_type (str): the name of the underlying model to use
-            features (dict): the features which the classifier will use for predictions
-            gazetteers (dict): the gazetteers used by the classifier
+            resource_loader (ResourceLoader): An object which can load resources for the classifier
+            domain (str): The domain of the intent classifier
+
         """
-        self.model_type = model_type
-        self.features = features
-        self.gazetteers = gazetteers
+        self._resource_loader = resource_loader
+        self.domain = domain
         self._model = None  # will be set when model is fit or loaded
 
-    def fit(self, data, params_grid=None, cv=None):
+    def fit(self, model_type=None, features=None, params_grid=None, cv=None):
         """Trains the model
 
         Args:
-            data (TYPE): Description
+            model_type (str): The type of model to use
+            features (None, optional): Description
             params_grid (None, optional): Description
             cv (None, optional): Description
 
-        Returns:
-            TYPE: Description
         """
         # self._model = something
         pass
 
     def predict(self, query):
-        """Predicts a intent for the specified query
+        """Predicts a role for the specified query
 
         Args:
             query (Query): The input query
@@ -66,11 +62,8 @@ class IntentClassifier(object):
         """
         pass
 
-    def evaluate(self, data):
+    def evaluate(self, use_blind=False):
         """Evaluates the model on the specified data
-
-        Args:
-            data (list): A list of ProcessedQuery objects
 
         Returns:
             TYPE: Description

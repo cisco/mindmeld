@@ -11,46 +11,49 @@ class RoleClassifier(object):
     names associated with each entity within each query.
 
     Attributes:
-        model_type (str): the name of the underlying model to use
-        features (dict): the features which the classifier will use for predictions
-        gazetteers (dict): the gazetteers used by the classifier
+        domain (str): The domain of this role classifier
+        intent (str): The intent of this role classifier
+        entity_type (str): The entity type of this role classifier
 
     """
-    def __init__(self, model_type, features, gazetteers):
+    def __init__(self, resource_loader, domain, intent, entity_type):
         """Initializes a role classifier
 
         Args:
-            model_type (str): the name of the underlying model to use
-            features (dict): the features which the classifier will use for predictions
-            gazetteers (dict): the gazetteers used by the classifier
+            resource_loader (ResourceLoader): An object which can load resources for the classifier
+            domain (str): The domain of this role classifier
+            intent (str): The intent of this role classifier
+            entity_type (str): The entity type of this role classifier
         """
-        self.model_type = model_type
-        self.features = features
-        self.gazetteers = gazetteers
+        self._resource_loader = resource_loader
+        self.domain = domain
+        self.intent = intent
+        self.entity_type = entity_type
         self._model = None  # will be set when model is fit or loaded
 
-    def fit(self, data, params_grid=None, cv=None):
+    def fit(self, model_type=None, features=None, params_grid=None, cv=None):
         """Trains the model
 
         Args:
-            data (TYPE): Description
+            model_type (str): The type of model to use
+            features (None, optional): Description
             params_grid (None, optional): Description
             cv (None, optional): Description
 
-        Returns:
-            TYPE: Description
         """
         # self._model = something
         pass
 
-    def predict(self, query):
+    def predict(self, query, entity, roles=None):
         """Predicts a role for the specified query
 
         Args:
             query (Query): The input query
+            entity (Entity): The input entity
+            roles (None, optional): Description
 
         Returns:
-            str: the predicted intent
+            str: the predicted role
         """
         pass
 
@@ -61,15 +64,12 @@ class RoleClassifier(object):
             query (Query): The input query
 
         Returns:
-            list: a list of tuples of the form (str, float) grouping intents and their probabilities
+            list: a list of tuples of the form (str, float) grouping roles and their probabilities
         """
         pass
 
-    def evaluate(self, data):
+    def evaluate(self, use_blind=False):
         """Evaluates the model on the specified data
-
-        Args:
-            data (list): A list of ProcessedQuery objects
 
         Returns:
             TYPE: Description
