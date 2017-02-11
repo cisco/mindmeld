@@ -44,20 +44,19 @@ class RoleClassifier(object):
         # self._model = something
         pass
 
-    def predict(self, query, entity, roles=None):
+    def predict(self, query, entities):
         """Predicts a role for the specified query
 
         Args:
             query (Query): The input query
-            entity (Entity): The input entity
-            roles (None, optional): Description
+            entities (list): The entities in the query
 
         Returns:
-            str: the predicted role
+            list: a list containing the corresponding roles for the entities passed in
         """
         pass
 
-    def predict_proba(self, query):
+    def predict_proba(self, query, entities):
         """Generates multiple hypotheses and returns their associated probabilities
 
         Args:

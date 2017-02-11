@@ -7,10 +7,10 @@ from __future__ import unicode_literals
 from builtins import object
 
 
-'''
 from .. import path, Query, ProcessedQuery
 
 from .domain_classifier import DomainClassifier
+'''
 from .intent_classifier import IntentClassifier
 from .ner import NamedEntityRecognizer
 from .nel import NamedEntityLinker
@@ -38,10 +38,17 @@ class NaturalLanguageProcessor(object):
         self._tokenizer = create_tokenizer(app_path)
         self._preprocessor = create_preprocessor(app_path)
         self._resource_loader = create_resource_loader(app_path)
-        self.domain_classifier = None
+        self.domain_classifier = DomainClassifier()
         self.domains = {}
 
+        domains = path.get_domains(self.app_path)
+        for domain in domains:
+            self.domains[domain] = DomainProcessor(app_path, self._tokenizer, self._preprocessor,
+                                                   self._resource_loader)
+
+
     def build(self):
+
         pass
 
     def load(self):
@@ -79,6 +86,12 @@ class DomainProcessor(object):
         self._resource_loader = resource_loader or create_resource_loader(app_path)
         self.intents = {}
         self.intent_classifier = None
+        self.linker = None
+
+    def build(self):
+        # build gazetteers
+        # train domain model
+        pass
 
 
 class IntentProcessor(object):
@@ -102,7 +115,7 @@ class IntentProcessor(object):
         self._resource_loader = resource_loader or create_resource_loader(app_path)
         self.entities = {}
         self.recognizer = None
-        self.linker = None
+        self.parser = None  # TODO: revisit this after finishing Kwik-E-Mart demo
 
 
 class EntityProcessor(object):
@@ -162,4 +175,8 @@ def create_resource_loader(app_path):
     Returns:
         ResourceLoader: a resource loader
     """
+    pass
+
+def create_parser(app_path):
+
     pass
