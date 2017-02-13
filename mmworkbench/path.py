@@ -1,0 +1,285 @@
+# -*- coding: utf-8 -*-
+
+"""
+This module is responsible for locating various Workbench app files.
+"""
+
+from __future__ import unicode_literals
+
+import glob
+import os
+
+WORKBENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PACKAGE_ROOT = os.path.join(WORKBENCH_ROOT, 'mmworkbench')
+
+APP_PATH = '{app_path}'
+
+# generated folder structure for models
+GEN_FOLDER = os.path.join(APP_PATH, '.generated')
+DOMAIN_MODEL_PATH = os.path.join(GEN_FOLDER, 'domain.pkl')
+GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, 'domains')
+INTENT_MODEL_PATH = os.path.join(GEN_DOMAINS_FOLDER, 'intent.pkl')
+GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, '{domain}')
+GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, '{intent}')
+ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
+ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'role.pkl')
+GAZETTEER_PATH = os.path.join(GEN_DOMAIN_FOLDER, 'gaz-{entity}.pkl')
+GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, 'indexes')
+GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, '{index}')
+RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, 'ranking.pkl')
+
+# Domains sub tree for labeled queries
+DOMAINS_FOLDER = os.path.join(APP_PATH, 'domains')
+DOMAIN_FOLDER = os.path.join(DOMAINS_FOLDER, '{domain}')
+INTENT_FOLDER = os.path.join(DOMAIN_FOLDER, '{intent}')
+LABELED_QUERY_FILE = os.path.join(INTENT_FOLDER, '{filename}')
+
+# Entities sub tree
+ENTITIES_FOLDER = os.path.join(APP_PATH, 'entities')
+ENTITY_FOLDER = os.path.join(ENTITIES_FOLDER, '{entity}')
+GAZETTEER_TXT_PATH = os.path.join(ENTITY_FOLDER, 'gazetteer.txt')
+ENTITY_MAP_PATH = os.path.join(ENTITY_FOLDER, 'mapping.json')
+
+# Indexes sub tree
+INDEXES_FOLDER = os.path.join(APP_PATH, 'indexes')
+INDEX_FOLDER = os.path.join(INDEXES_FOLDER, '{index}')
+RANKING_FILE_PATH = os.path.join(INDEX_FOLDER, 'ranking.json')
+
+# Default config files
+DEFAULT_CONFIG_PATH = os.path.join(PACKAGE_ROOT, 'config')
+DEFAULT_PROCESSOR_CONFIG_PATH = os.path.join(DEFAULT_CONFIG_PATH, 'default_processor_config.json')
+DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(DEFAULT_CONFIG_PATH, 'default_tokenizer_config.json')
+
+
+# Collections
+
+def get_domains(app_path):
+    """Gets all domains for a given application.
+
+    Args:
+        app_path (str): The path to the app data.
+
+    Returns:
+        (set of str) A list of domain names.
+    """
+    if not os.path.exists(app_path):
+        raise OSError('No app found at "{}"'.format(app_path))
+    domains_dir = DOMAINS_FOLDER.format(app_path=app_path)
+    return set(next(os.walk(domains_dir))[1])
+
+
+def get_intents(app_path, domain):
+    """Gets all intents for a given domain and application.
+
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+
+    Returns:
+        (set of str) A list of intent names.
+    """
+    if not os.path.exists(app_path):
+        raise OSError('Domain "{}" not found in app at "{}"'.format(domain, app_path))
+    domain_dir = DOMAIN_FOLDER.format(app_path=app_path, domain=domain)
+    return set(next(os.walk(domain_dir))[1])
+
+
+def get_labeled_query_tree(app_path, patterns=['*']):
+    """Gets labeled query files for a given domain and application.
+
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+        intents (list(str)): A list of intents to be considered. If none is passed, all intents will
+            be used.
+        patterns (list(str)): A list of file patterns to match
+
+    Returns:
+        (dict) A set of labeled query files.
+    """
+    domains_dir = DOMAINS_FOLDER.format(app_path=app_path)
+    walker = os.walk(domains_dir)
+    tree = {}
+    for parent, dirs, files in walker:
+        components = []
+        while parent != domains_dir:
+            parent, component = os.path.split(parent)
+            components.append(component)
+        if len(components) == 1:
+            domain = components[0]
+            tree[domain] = {}
+        if len(components) == 2:
+            domain = components[1]
+            intent = components[0]
+            tree[domain][intent] = {}
+            if patterns:
+                for pattern in patterns:
+                    for file in glob.iglob(os.path.join(parent, domain, intent, pattern)):
+                        mod_time = os.path.getmtime(os.path.join(parent, domain, intent, file))
+                        tree[domain][intent][file] = mod_time
+            else:
+                for file in files:
+                    mod_time = os.path.getmtime(os.path.join(parent, domain, intent, file))
+                    tree[domain][intent][file] = mod_time
+
+    return tree
+
+
+def get_entities(app_path):
+    """Gets all entities for an application.
+
+    Args:
+        app_path (str): The path to the app data.
+
+    Returns:
+        (str) The path for this app's domain classifier model.
+
+    """
+    if not os.path.exists(app_path):
+        raise OSError('No app found at "{}"'.format(app_path))
+    entities_dir = ENTITIES_FOLDER.format(app_path=app_path)
+
+    return next(os.walk(entities_dir))[1]
+
+
+def get_indexes(app_path):
+    """Gets all indexes for an application.
+
+    Args:
+        app_path (str): The path to the app data.
+
+    Returns:
+        (str) The path for this app's domain classifier model.
+
+    """
+    if not os.path.exists(app_path):
+        raise OSError('No app found at "{}"'.format(app_path))
+    indexes_dir = INDEXES_FOLDER.format(app_path=app_path)
+    return next(os.walk(indexes_dir))[1]
+
+
+# Files and folders
+
+
+def get_domain_model_path(app_path, model_name=None):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        model_name (str): The name of the model. Allows multiple models to be stored.
+
+    Returns:
+        (str) The path for this app's domain classifier model.
+
+    """
+    path = DOMAIN_MODEL_PATH.format(app_path=app_path)
+    return _resolve_model_name(path, model_name)
+
+
+def get_intent_model_path(app_path, domain, model_name=None):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+        model_name (str): The name of the model. Allows multiple models to be stored.
+
+    Returns:
+        (str) The path for this app's domain classifier model.
+
+    """
+    path = INTENT_MODEL_PATH.format(app_path=app_path, domain=domain)
+    return _resolve_model_name(path, model_name)
+
+
+def get_entity_model_path(app_path, domain, intent, model_name=None):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+        intent (str): A intent under the domain.
+        model_name (str): The name of the model. Allows multiple models to be stored.
+
+    Returns:
+        (str) The path for this intent's named entity recognizer.
+
+    """
+    path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
+    return _resolve_model_name(path, model_name)
+
+
+def get_role_model_path(app_path, domain, intent, model_name=None):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+        intent (str): A intent under the domain.
+        model_name (str): The name of the model. Allows multiple models to be stored.
+
+    Returns:
+        (str) The path for the intent's role classifier pickle.
+
+    """
+    path = ROLE_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
+    return _resolve_model_name(path, model_name)
+
+
+def get_labeled_query_file_path(app_path, domain, intent, filename):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+        intent (str): A intent under the domain.
+        filename (str): The name of the queries file.
+
+    Returns:
+        (str) The full path of the specified file.
+    """
+    return LABELED_QUERY_FILE.format(app_path=app_path, domain=domain, intent=intent,
+                                     filename=filename)
+
+
+def get_entity_gaz_path(app_path, entity):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        entity (str): An entity under the application.
+
+    Returns:
+        (str) The path for an mapping of the entity
+
+    """
+    return GAZETTEER_TXT_PATH.format(app_path=app_path, entity=entity)
+
+
+def get_entity_map_path(app_path, entity):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        entity (str): An entity under the application.
+
+    Returns:
+        (str) The path for an mapping of the entity
+
+    """
+    return ENTITY_MAP_PATH.format(app_path=app_path, entity=entity)
+
+
+def get_ranking_file_path(app_path, index):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        index (str): A knowledge base index under the application.
+
+    Returns:
+        (str) The path for an mapping of the entity
+
+    """
+    return RANKING_FILE_PATH.format(app_path=app_path, index=index)
+
+
+# Helpers
+
+def _resolve_model_name(path, model_name=None):
+    if model_name:
+        path, ext = os.path.splitext(path)
+        path = "{}_{}{}".format(path, model_name, ext)
+    return path

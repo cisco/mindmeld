@@ -1,0 +1,14 @@
+{
+  "store_name": "23 Elm Street",
+  "open_time": "7am",
+  "close_time": "9pm",
+  "address": "100 Central Plaza, Suite 800, Elm Street, Capital City, CA 10001",
+  "phone_number": "(+1) 415-555-1100"
+},
+{
+  "store_name": "Pine and Market",
+  "open_time": "6am",
+  "close_time": "10pm",
+  "address": "750 Market Street, Capital City, CA 94001",
+  "phone_number": "(+1) 650-555-4500"
+}
