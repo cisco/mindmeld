@@ -2,6 +2,9 @@
 """
 This module contains the named entity recognizer component.
 """
+
+import os
+
 # from sklearn.externals import joblib
 
 
@@ -37,6 +40,8 @@ class NamedEntityRecognizer(object):
             cv (None, optional): Description
 
         """
+        query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
+                                                               intent=self.intent)
         # self._model = something
         pass
 
@@ -79,6 +84,10 @@ class NamedEntityRecognizer(object):
             model_path (str): The location on disk where the model should be stored
 
         """
+        folder, filename = os.split(model_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
         # joblib.dump(self._model, model_path)
         pass
 

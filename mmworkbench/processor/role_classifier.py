@@ -2,6 +2,9 @@
 """
 This module contains the role classifier component.
 """
+
+import os
+
 # from sklearn.externals import joblib
 
 
@@ -41,6 +44,8 @@ class RoleClassifier(object):
             cv (None, optional): Description
 
         """
+        query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
+                                                               intent=self.intent)
         # self._model = something
         pass
 
@@ -82,6 +87,9 @@ class RoleClassifier(object):
             model_path (str): The location on disk where the model should be stored
 
         """
+        folder, filename = os.split(model_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
         # joblib.dump(self._model, model_path)
         pass
 

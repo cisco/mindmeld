@@ -10,12 +10,11 @@ from builtins import object
 from .. import path, Query, ProcessedQuery
 
 from .domain_classifier import DomainClassifier
-'''
 from .intent_classifier import IntentClassifier
-from .ner import NamedEntityRecognizer
 from .nel import NamedEntityLinker
+from .ner import NamedEntityRecognizer
 from .parser import Parser
-'''
+from .role_classifier import RoleClassifier
 
 
 class NaturalLanguageProcessor(object):
@@ -38,24 +37,19 @@ class NaturalLanguageProcessor(object):
         self._tokenizer = create_tokenizer(app_path)
         self._preprocessor = create_preprocessor(app_path)
         self._resource_loader = create_resource_loader(app_path)
-        self.domain_classifier = DomainClassifier()
-        self.domains = {}
-
-        domains = path.get_domains(self.app_path)
-        for domain in domains:
-            self.domains[domain] = DomainProcessor(app_path, self._tokenizer, self._preprocessor,
-                                                   self._resource_loader)
-
+        self.domain_classifier = DomainClassifier(self._resource_loader)
+        self.domains = {domain: DomainProcessor(app_path, domain, self._tokenizer,
+                                                self._preprocessor, self._resource_loader)
+                        for domain in path.get_domains(self.app_path)}
 
     def build(self):
+        """Builds all models for the app."""
+        # Is there a config that should be loaded here?
+        self.domain_classifier.fit()
+        self.domain_classifier.dump(path.get_domain_model_path(self.app_path))
 
-        pass
-
-    def load(self):
-        pass
-
-    def dump(self):
-        pass
+        for domain_processor in self.domains.values():
+            domain_processor.build()
 
     def process(self, query_text):
         """Summary
@@ -66,6 +60,20 @@ class NaturalLanguageProcessor(object):
         Returns:
             ProcessedQuery: The processed query
         """
+        query = Query(query_text, self._tokenizer, self._preprocessor)
+        return self.process_query(query).to_dict()
+
+    def process_query(self, query, processed_query=None):
+        processed_query = processed_query or ProcessedQuery(query)
+
+        processed_query.domain = domain = self.domain_classifier.predict(query)
+
+        return self.domains[domain].process_query(query, processed_query)
+
+    def load(self):
+        pass
+
+    def dump(self):
         pass
 
 
@@ -84,13 +92,35 @@ class DomainProcessor(object):
         self._tokenizer = tokenizer or create_tokenizer(app_path)
         self._preprocessor = preprocessor or create_preprocessor(app_path)
         self._resource_loader = resource_loader or create_resource_loader(app_path)
-        self.intents = {}
-        self.intent_classifier = None
-        self.linker = None
+        self.intent_classifier = IntentClassifier(domain, self._resource_loader)
+        self.linker = NamedEntityLinker(domain, self._resource_loader)
+        self.intents = {intent: IntentProcessor(app_path, domain, intent, self._tokenizer,
+                                                self._preprocessor, self._resource_loader)
+                        for intent in path.get_domain_intents(app_path, domain)}
 
     def build(self):
-        # build gazetteers
-        # train domain model
+        # TODO: build gazetteers
+
+        # train intent model
+        self.intent_classifier.fit()
+
+        # Something with linker?
+
+        for intent_processor in self.intents.values():
+            intent_processor.build()
+
+    def process(self, query_text):
+        """Summary
+
+        Args:
+            query_text (str): The raw user text input
+
+        Returns:
+            ProcessedQuery: The processed query
+        """
+        pass
+
+    def process_query(self, query, processed_query=None):
         pass
 
 
@@ -113,9 +143,32 @@ class IntentProcessor(object):
         self._tokenizer = tokenizer or create_tokenizer(app_path)
         self._preprocessor = preprocessor or create_preprocessor(app_path)
         self._resource_loader = resource_loader or create_resource_loader(app_path)
-        self.entities = {}
-        self.recognizer = None
-        self.parser = None  # TODO: revisit this after finishing Kwik-E-Mart demo
+        self.recognizer = NamedEntityRecognizer(self._resource_loader, domain, intent)
+        # TODO: the parser after finishing Kwik-E-Mart demo
+        self.parser = Parser(self._resource_loader, domain, intent)
+
+        entity_types = []  # TODO: How do we get the list of entities for this intent
+        self.entities = {entity_type: EntityProcessor(app_path, domain, intent, entity_type,
+                                                      self._tokenizer, self._preprocessor,
+                                                      self._resource_loader)
+                         for entity_type in entity_types}
+
+    def build(self):
+        pass
+
+    def process(self, query_text):
+        """Summary
+
+        Args:
+            query_text (str): The raw user text input
+
+        Returns:
+            ProcessedQuery: The processed query
+        """
+        pass
+
+    def process_query(self, query, processed_query=None):
+        pass
 
 
 class EntityProcessor(object):
@@ -138,8 +191,7 @@ class EntityProcessor(object):
         self._tokenizer = tokenizer or create_tokenizer(app_path)
         self._preprocessor = preprocessor or create_preprocessor(app_path)
         self._resource_loader = resource_loader or create_resource_loader(app_path)
-        self.roles = {}
-        self.role_classifier = None
+        self.role_classifier = RoleClassifier(self._resource_loader, domain, intent, entity_type)
 
 
 def create_preprocessor(app_path):
@@ -177,6 +229,6 @@ def create_resource_loader(app_path):
     """
     pass
 
-def create_parser(app_path):
 
+def create_parser(app_path):
     pass

@@ -2,6 +2,9 @@
 """
 This module contains the intent classifier component.
 """
+
+import os
+
 # from sklearn.externals import joblib
 
 
@@ -37,6 +40,7 @@ class IntentClassifier(object):
             cv (None, optional): Description
 
         """
+        query_tree = self._resource_loader.get_labeled_queries(domain=self.domain)
         # self._model = something
         pass
 
@@ -77,6 +81,11 @@ class IntentClassifier(object):
             model_path (str): The location on disk where the model should be stored
 
         """
+        # make directory if necessary
+        folder, filename = os.split(model_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
         # joblib.dump(self._model, model_path)
         pass
 
