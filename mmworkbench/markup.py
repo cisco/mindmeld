@@ -12,14 +12,17 @@ ENTITY_PATTERN = re.compile('\{(.*?)\}')
 NUMERIC_PATTERN = re.compile('\[(.*?)\|num:(.*?)\]')
 
 
-def create_processed_query_for_markup(markup, tokenizer, preprocessor, is_gold=False):
-    """Creates a processed query object from marked up query text. The
+def create_processed_query(markup, tokenizer, preprocessor, domain=None, intent=None,
+                           is_gold=False):
+    """Creates a processed query object from marked up query text.
 
     Args:
         markup (str): The marked up query text
         tokenizer (str): The tokenizer which should be used to tokenize the query text
         preprocessor (str): The preprocessor which should be used to process the query text
         is_gold (bool): True if the markup passed in is a reference, human-labeled example
+        domain (str): The name of the domain annotated for the query
+        intent (str): The name of the intent annotated for the query
 
     Returns:
         ProcessedQuery: a processed query
@@ -29,7 +32,7 @@ def create_processed_query_for_markup(markup, tokenizer, preprocessor, is_gold=F
     query = Query(raw_text, tokenizer, preprocessor)
     entities = _parse_entities(markup, query=query)
 
-    return ProcessedQuery(query, entities=entities, is_gold=is_gold)
+    return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
 
 def create_markup_for_processed_query(processed_query):
