@@ -13,7 +13,9 @@ class NamedEntityLinker(object):
 
     """
 
-    def __init__(self, resource_loader):
+    def __init__(self, resource_loader, domain):
+        self._resource_loader = resource_loader
+        self.domain = domain
         pass
 
     def fit(self):

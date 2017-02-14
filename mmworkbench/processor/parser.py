@@ -9,4 +9,8 @@ from builtins import object
 
 class Parser(object):
     """A language parser which is used to group entities in a given query."""
-    pass
+
+    def __init__(self, resource_loader, domain, intent):
+        self._resource_loader = resource_loader
+        self.domain = domain
+        self.intent = intent

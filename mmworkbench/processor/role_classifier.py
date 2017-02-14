@@ -17,6 +17,7 @@ class RoleClassifier(object):
         domain (str): The domain of this role classifier
         intent (str): The intent of this role classifier
         entity_type (str): The entity type of this role classifier
+        roles (set): A set containing the roles which can be classified
 
     """
     def __init__(self, resource_loader, domain, intent, entity_type):
@@ -32,6 +33,7 @@ class RoleClassifier(object):
         self.domain = domain
         self.intent = intent
         self.entity_type = entity_type
+        self.roles = set()
         self._model = None  # will be set when model is fit or loaded
 
     def fit(self, model_type=None, features=None, params_grid=None, cv=None):
@@ -49,23 +51,26 @@ class RoleClassifier(object):
         # self._model = something
         pass
 
-    def predict(self, query, entities):
+    def predict(self, query, entities, entity):
         """Predicts a role for the specified query
 
         Args:
             query (Query): The input query
             entities (list): The entities in the query
+            entity (Entity): The entity whose role should be classified
 
         Returns:
             list: a list containing the corresponding roles for the entities passed in
         """
         pass
 
-    def predict_proba(self, query, entities):
+    def predict_proba(self, query, entities, entity):
         """Generates multiple hypotheses and returns their associated probabilities
 
         Args:
             query (Query): The input query
+            entities (list): The entities in the query
+            entity (Entity): The entity whose role should be classified
 
         Returns:
             list: a list of tuples of the form (str, float) grouping roles and their probabilities

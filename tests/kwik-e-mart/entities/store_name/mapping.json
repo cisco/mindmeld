@@ -1,0 +1,17 @@
+[
+  {
+    "id": "152323",
+    "cname": "Pine and Market",
+    "whitelist": ["210 Pine Street", "210 Pine", "Pine St"]
+  },
+  {
+    "id": "102843",
+    "cname": "Central Plaza",
+    "whitelist": ["Central", "Main Street Plaza", "100 Main Street", "100 Main"]
+  },
+  {
+    "id": "207492",
+    "cname": "Market Square",
+    "whitelist": ["1 Market", "1 Market Square"]
+  }
+]

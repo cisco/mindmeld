@@ -16,6 +16,7 @@ class NamedEntityRecognizer(object):
     Attributes:
         domain (str): The domain of this named entity recognizer
         intent (str): The intent of this named entity recognizer
+        entity_types (set): A set containing the entities which can be recognized
     """
     def __init__(self, resource_loader, domain, intent):
         """Initializes a named entity recognizer
@@ -29,6 +30,7 @@ class NamedEntityRecognizer(object):
         self.domain = domain
         self.intent = intent
         self._model = None  # will be set when model is fit or loaded
+        self.entity_types = set()
 
     def fit(self, model_type=None, features=None, params_grid=None, cv=None):
         """Trains the model
@@ -42,6 +44,8 @@ class NamedEntityRecognizer(object):
         """
         query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
                                                                intent=self.intent)
+
+        # TODO: populate entity types
         # self._model = something
         pass
 
@@ -100,3 +104,5 @@ class NamedEntityRecognizer(object):
         """
         # self._model = joblib.load(model_path)
         pass
+
+
