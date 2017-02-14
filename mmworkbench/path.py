@@ -46,9 +46,10 @@ INDEX_FOLDER = os.path.join(INDEXES_FOLDER, '{index}')
 RANKING_FILE_PATH = os.path.join(INDEX_FOLDER, 'ranking.json')
 
 # Default config files
-DEFAULT_CONFIG_PATH = os.path.join(PACKAGE_ROOT, 'config')
-DEFAULT_PROCESSOR_CONFIG_PATH = os.path.join(DEFAULT_CONFIG_PATH, 'default_processor_config.json')
-DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(DEFAULT_CONFIG_PATH, 'default_tokenizer_config.json')
+RESOURCES_FOLDER = os.path.join(PACKAGE_ROOT, 'resources')
+DEFAULT_PROCESSOR_CONFIG_PATH = os.path.join(RESOURCES_FOLDER, 'default_processor_config.json')
+DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(RESOURCES_FOLDER, 'default_tokenizer_config.json')
+ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, 'ascii_folding_dict.txt')
 
 
 # Collections
