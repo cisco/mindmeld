@@ -15,3 +15,7 @@ git+ssh://git@github.com/expectlabs/sphinx_rtd_theme.git@master#egg=sphinx_rtd_t
 pandoc==1.0.0b2
 mock==2.0.0
 Click>=6.0
+
+numpy>=1.10.1
+scipy>=0.9
+scikit-learn==0.17.1

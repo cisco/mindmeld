@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from maxent import MaxentClassifier
-from memm import MemmClassifier
-from text_classifier import TextClassifier
+from .maxent import MaxentRoleClassifier
+from .text_classifier import TextClassifier
 
 CLASSIFIER_TYPE_MAXENT = 'maxent'
 CLASSIFIER_TYPE_MEMM = 'memm'
