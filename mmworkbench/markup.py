@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import re
 
-from mmworkbench import Query, ProcessedQuery, QueryEntity
+from .core import Query, ProcessedQuery, QueryEntity
 
 ENTITY_PATTERN = re.compile('\{(.*?)\}')
 NUMERIC_PATTERN = re.compile('\[(.*?)\|num:(.*?)\]')

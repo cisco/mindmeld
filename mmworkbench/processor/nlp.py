@@ -7,7 +7,9 @@ from __future__ import unicode_literals
 from builtins import object
 
 
-from .. import path, Query, ProcessedQuery
+from .. import path
+from ..core import Query, ProcessedQuery
+from ..tokenizer import Tokenizer
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
@@ -292,7 +294,7 @@ def create_tokenizer(app_path):
     Returns:
         Tokenizer: a tokenizer
     """
-    pass
+    return Tokenizer()
 
 
 def create_resource_loader(app_path):

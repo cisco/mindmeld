@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-test_markup
+test_core
 ----------------------------------
 
-Tests for `markup` module.
+Tests for `core` module.
 """
 from __future__ import unicode_literals
 
@@ -13,7 +13,7 @@ import pytest
 
 from mmworkbench.tokenizer import Tokenizer
 
-from mmworkbench.data_structures import (Query, TEXT_FORM_RAW, TEXT_FORM_PROCESSED,
+from mmworkbench.core import (Query, TEXT_FORM_RAW, TEXT_FORM_PROCESSED,
                                          TEXT_FORM_NORMALIZED)
 
 
