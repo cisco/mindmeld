@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .data_structures import Query, ProcessedQuery, Entity
+from .data_structures import Query, ProcessedQuery, QueryEntity, Entity
 
 __author__ = """MindMeld, Inc."""
 __email__ = 'contact@mindmeld.com'
