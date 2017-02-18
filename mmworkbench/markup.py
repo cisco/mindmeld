@@ -6,13 +6,13 @@ from __future__ import unicode_literals
 
 import re
 
-from mmworkbench import Query, ProcessedQuery, Entity
+from mmworkbench import Query, ProcessedQuery, QueryEntity
 
 ENTITY_PATTERN = re.compile('\{(.*?)\}')
 NUMERIC_PATTERN = re.compile('\[(.*?)\|num:(.*?)\]')
 
 
-def create_processed_query(markup, tokenizer, preprocessor, domain=None, intent=None,
+def create_processed_query(markup, tokenizer, preprocessor=None, domain=None, intent=None,
                            is_gold=False):
     """Creates a processed query object from marked up query text.
 
@@ -28,14 +28,15 @@ def create_processed_query(markup, tokenizer, preprocessor, domain=None, intent=
         ProcessedQuery: a processed query
     """
 
-    raw_text = _mark_down(markup)
+    raw_text = mark_down(markup)
     query = Query(raw_text, tokenizer, preprocessor)
+
     entities = _parse_entities(markup, query=query)
 
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
 
-def create_markup_for_processed_query(processed_query):
+def create_markup(processed_query):
     """Converts a processed query into marked up query text.
 
     Args:
@@ -72,8 +73,8 @@ def _parse(markup):
     pass
 
 
-def _mark_down(markup):
-    return _mark_down_entities(_mark_down_numerics(markup))
+def mark_down(markup):
+    return mark_down_entities(mark_down_numerics(markup))
 
 
 def _mark_up(raw_text, entities=[], numerics=[]):
@@ -84,9 +85,9 @@ def _mark_up(raw_text, entities=[], numerics=[]):
 def _parse_entities(markup, query=None):
     entities = []
     for match in ENTITY_PATTERN.finditer(markup):
-        prefix = _mark_down(markup[:match.start()])
+        prefix = mark_down(markup[:match.start()])
         start = len(prefix)
-        clean_match_str = _mark_down_numerics(match.group(1))
+        clean_match_str = mark_down_numerics(match.group(1))
         components = clean_match_str.split('|')
         if len(components) == 2:
             entity_text, facet_name = components
@@ -94,15 +95,16 @@ def _parse_entities(markup, query=None):
         else:
             entity_text, facet_name, role_name = components
 
-        end = start - 1 + len(entity_text)
-        params = {'query': query, 'text_start': start, 'text_end': end, 'entity_type': facet_name,
+        end = start + len(entity_text)
+
+        params = {'query': query, 'start': start, 'end': end, 'entity_type': facet_name,
                   'role': role_name}
-        entities.append(Entity(**params))
+        entities.append(QueryEntity.from_query(**params))
 
     return entities
 
 
-def _mark_down_entities(markup):
+def mark_down_entities(markup):
     def markeddown(match):
         entity = match.group(1)
         r2 = '\|[^]]*$'
@@ -112,7 +114,7 @@ def _mark_down_entities(markup):
 
 def _mark_up_entities(query_str, entities):
     # remove existing markup just in case
-    query_str = _mark_down_entities(query_str)
+    query_str = mark_down_entities(query_str)
 
     # make sure entities are sorted
     sorted_entities = sorted(entities, key='start')
@@ -121,8 +123,8 @@ def _mark_up_entities(query_str, entities):
 
     # add each entity
     for entity in sorted_entities:
-        start = entity.text_start
-        end = entity.text_end + 1
+        start = entity.start
+        end = entity.end
         new_query += query_str[cursor:start]
         if entity.role is None:
             new_query += "{{{}|{}}}".format(query_str[start:end], entity.type)
@@ -137,10 +139,10 @@ def _mark_up_entities(query_str, entities):
 
 def _parse_numerics(markup):
     numerics = []
-    query_str = _mark_down(markup)
+    query_str = mark_down(markup)
     for match in NUMERIC_PATTERN.finditer(query_str):
         entity_text = match.group(1)
-        prefix = _mark_down(query_str[:match.start()])
+        prefix = mark_down(query_str[:match.start()])
 
         start = len(prefix)
         end = start - 1 + len(entity_text)
@@ -149,7 +151,7 @@ def _parse_numerics(markup):
     return numerics
 
 
-def _mark_down_numerics(markup):
+def mark_down_numerics(markup):
     # TODO: figure out whether we need this
     return re.sub(NUMERIC_PATTERN, r'\1', markup)
 
