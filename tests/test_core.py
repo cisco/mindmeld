@@ -13,7 +13,8 @@ import pytest
 
 from mmworkbench.tokenizer import Tokenizer
 
-from mmworkbench.core import Query, TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED
+from mmworkbench.core import (Query, ProcessedQuery, QueryEntity, Entity,
+                              TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)
 
 
 @pytest.fixture
@@ -147,3 +148,24 @@ def test_transform_range_backward(query):
 
     assert raw_span == (0, 8)
     assert raw_text == 'Test: One'
+
+
+def test_query_equality(tokenizer):
+    a = Query('Hello. There.', tokenizer)
+    b = Query('Hello. There.', tokenizer)
+
+    assert a == b
+
+
+def test_query_entity_equality():
+    a = QueryEntity('Entity', 'Entity', 'entity', 0, 5, 'type', 'role', 'value', 'display')
+    b = QueryEntity('Entity', 'Entity', 'entity', 0, 5, 'type', 'role', 'value', 'display')
+
+    assert a == b
+
+
+def test_entity_equality():
+    a = Entity('type', 'role', 'value', 'display')
+    b = Entity('type', 'role', 'value', 'display')
+
+    assert a == b

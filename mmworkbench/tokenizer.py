@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 class Tokenizer(object):
 
+    ASCII_CUTOFF = ord('\u0080')
+
     def __init__(self, exclude_from_norm=None):
         '''
         Initializes the tokenizer.
@@ -173,6 +175,7 @@ class Tokenizer(object):
             if not raw_token['text'] or len(raw_token['text']) == 0:
                 continue
 
+            norm_token_start = len(norm_tokens)
             norm_token_text = raw_token['text']
 
             if keep_special_chars:
@@ -185,15 +188,20 @@ class Tokenizer(object):
 
             norm_token_text = norm_token_text.lower()
 
+            norm_token_count = 0
             if len(norm_token_text) > 0:
                 # remove diacritics and fold the character to equivalent ascii character if possible
                 for text in norm_token_text.split():
                     norm_token = {}
                     norm_token['entity'] = text
-                    norm_token['raw-entity'] = raw_token['text']
-                    norm_token['raw-token-index'] = i
-                    norm_token['raw-start'] = raw_token['start']
+                    norm_token['raw_entity'] = raw_token['text']
+                    norm_token['raw_token_index'] = i
+                    norm_token['raw_start'] = raw_token['start']
                     norm_tokens.append(norm_token)
+                    norm_token_count += 1
+
+            raw_token['norm_token_start'] = norm_token_start
+            raw_token['norm_token_count'] = norm_token_count
 
         return norm_tokens
 
@@ -218,9 +226,6 @@ class Tokenizer(object):
             tokens.append(token)
 
         return tokens
-
-    def _generate_mapping(self, tokens, raw_tokens):
-        normalized = tokens.join(' ')
 
     def generate_character_index_mappings(self, raw_text, normalized_text):
         """
@@ -257,10 +262,10 @@ class Tokenizer(object):
             for j in range(1, m+1):
                 dis = 999
                 direction = None
-                if normalized_text[i-1] == text[j-1]:
-                    diag_dis = edit_dis[i-1][j-1]
-                elif normalized_text[i-1] != text[j-1]:
-                    diag_dis = edit_dis[i-1][j-1] + 1
+
+                diag_dis = edit_dis[i-1][j-1]
+                if normalized_text[i-1] != text[j-1]:
+                    diag_dis += 1
 
                 # dis from going down
                 down_dis = edit_dis[i-1][j] + 1
@@ -268,15 +273,15 @@ class Tokenizer(object):
                 # dis from going right
                 right_dis = edit_dis[i][j-1] + 1
 
-                if diag_dis < dis:
-                    dis = diag_dis
-                    direction = 'diag'
                 if down_dis < dis:
                     dis = down_dis
-                    direction = 'down'
+                    direction = '↓'
                 if right_dis < dis:
                     dis = right_dis
-                    direction = 'right'
+                    direction = '→'
+                if diag_dis < dis:
+                    dis = diag_dis
+                    direction = '↘'
 
                 edit_dis[i][j] = dis
                 directions[i][j] = direction
@@ -287,16 +292,16 @@ class Tokenizer(object):
         m_idx = m
         n_idx = n
         while m_idx > 0 and n_idx > 0:
-            if directions[n_idx][m_idx] == 'diag':
+            if directions[n_idx][m_idx] == '↘':
                 mapping[n_idx-1] = m_idx-1
                 m_idx -= 1
                 n_idx -= 1
-            elif directions[n_idx][m_idx] == 'right':
+            elif directions[n_idx][m_idx] == '→':
                 m_idx -= 1
-            elif directions[n_idx][m_idx] == 'down':
+            elif directions[n_idx][m_idx] == '↓':
                 n_idx -= 1
 
-        # this is naive and probably not correct
+        # this is naive and probably not robust
         raw_to_norm_mapping = {v: k for k, v in mapping.items()}
 
         for i in range(0, m):
@@ -304,8 +309,6 @@ class Tokenizer(object):
                 raw_to_norm_mapping[i] = raw_to_norm_mapping[i-1]
 
         return raw_to_norm_mapping, mapping
-
-    ASCII_CUTOFF = ord('\u0080')
 
     def fold_char_to_ascii(self, char):
         char_ord = ord(char)
@@ -323,3 +326,6 @@ class Tokenizer(object):
             folded_str += self.fold_char_to_ascii(char)
 
         return folded_str
+
+    def __repr__(self):
+        return "<Tokenizer exclude_from_norm: {}>".format(self.exclude_from_norm.__repr__())

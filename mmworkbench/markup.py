@@ -6,14 +6,13 @@ from __future__ import unicode_literals
 
 import re
 
-from .core import Query, ProcessedQuery, QueryEntity
+from .core import Query, ProcessedQuery, QueryEntity, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
 
 ENTITY_PATTERN = re.compile('\{(.*?)\}')
 NUMERIC_PATTERN = re.compile('\[(.*?)\|num:(.*?)\]')
 
 
-def create_processed_query(markup, tokenizer, preprocessor=None, domain=None, intent=None,
-                           is_gold=False):
+def load_query(markup, tokenizer, preprocessor=None, domain=None, intent=None, is_gold=False):
     """Creates a processed query object from marked up query text.
 
     Args:
@@ -36,7 +35,7 @@ def create_processed_query(markup, tokenizer, preprocessor=None, domain=None, in
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
 
-def create_markup(processed_query):
+def dump_query(processed_query):
     """Converts a processed query into marked up query text.
 
     Args:
@@ -90,15 +89,16 @@ def _parse_entities(markup, query=None):
         clean_match_str = mark_down_numerics(match.group(1))
         components = clean_match_str.split('|')
         if len(components) == 2:
-            entity_text, facet_name = components
+            entity_text, entity_type = components
             role_name = None
         else:
-            entity_text, facet_name, role_name = components
+            entity_text, entity_type, role_name = components
 
-        end = start + len(entity_text)
+        end = start + len(entity_text) - 1
 
-        params = {'query': query, 'start': start, 'end': end, 'entity_type': facet_name,
-                  'role': role_name}
+        norm_span = query.transform_range((start, end), TEXT_FORM_RAW, TEXT_FORM_NORMALIZED)
+        params = {'query': query, 'start': norm_span[0], 'end': norm_span[1],
+                  'entity_type': entity_type, 'role': role_name}
         entities.append(QueryEntity.from_query(**params))
 
     return entities

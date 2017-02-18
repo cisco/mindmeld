@@ -154,9 +154,8 @@ class ResourceLoader(object):
                     if query_text[0] == '-':
                         continue
 
-                    query = markup.create_processed_query(
-                        query_text, self.tokenizer, self.preprocessor, domain=domain, intent=intent,
-                        is_gold=True)
+                    query = markup.load_query(query_text, self.tokenizer, self.preprocessor,
+                                              domain=domain, intent=intent, is_gold=True)
                     queries.append(query)
 
         return queries
