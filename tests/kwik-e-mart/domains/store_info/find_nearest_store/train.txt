@@ -1,0 +1,10 @@
+When does the {Elm Street|store_name} store close?
+At what time does the {Elm Street|store_name} store close?
+When does the {Central Plaza|store_name} store close?
+What are the business hours for the {Central Plaza|store_name} store?
+What are the hours for the Kwik-E-Mart on {Main Street|store_name}?
+Is the {Central Plaza|name} Kwik-E-Mart open now?
+The store at {Pine & Market|store_name} - is it open?
+Is the {Rockefeller|store_name} Kwik-E-Mart open for business {tomorrow|sys:date}?
+Is {Elm Street|store_name} open {tomorrow|sys:date}?
+Can you check if the {Main St|store_name} store is open on {Sunday|sys:date}?
