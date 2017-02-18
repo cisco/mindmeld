@@ -53,7 +53,7 @@ class Query(object):
         self._char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward
         self._char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward
 
-        self.normalized_tokens = tokenizer.tokenize(self.processed_text)
+        self.normalized_tokens = tokenizer.tokenize(self.processed_text, False)
         normalized_text = ' '.join([t['entity'] for t in self.normalized_tokens])
         self._text[TEXT_FORM_NORMALIZED] = normalized_text
 
@@ -63,6 +63,14 @@ class Query(object):
 
         self._char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = forward
         self._char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        raise NotImplemented
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __repr__(self):
         return "<Query {}>".format(self.raw_text.__repr__())
@@ -169,6 +177,14 @@ class ProcessedQuery(object):
         self.entities = entities
         self.is_gold = is_gold
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        raise NotImplemented
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __repr__(self):
         msg = "<ProcessedQuery {}, domain: {}, intent: {}, {} entities{}>"
         return msg.format(self.query.raw_text.__repr__(),  self.domain.__repr__(),
@@ -216,15 +232,23 @@ class QueryEntity(object):
                    display_text=None):
         # TODO: actually get raw and processed text!
         raw_text, processed_text = None, None
-        # raw_text_range = query.transform_range((start, end), TEXT_FORM_NORMALIZED,
-        #                                        TEXT_FORM_RAW)
-        # raw_text = query.raw_text[raw_text_range[0]:raw_text_range[1]]
-        # pro_text_range = query.transform_range((start, end), TEXT_FORM_NORMALIZED,
-        #                                        TEXT_FORM_PROCESSED)
-        # processed_text = query.processed_text[pro_text_range[0]:pro_text_range[1]]
-        normalized_text = query.normalized_text[start:end]
+        raw_text_range = query.transform_range((start, end), TEXT_FORM_NORMALIZED,
+                                               TEXT_FORM_RAW)
+        raw_text = query.raw_text[raw_text_range[0]:raw_text_range[1] + 1]
+        pro_text_range = query.transform_range((start, end), TEXT_FORM_NORMALIZED,
+                                               TEXT_FORM_PROCESSED)
+        processed_text = query.processed_text[pro_text_range[0]:pro_text_range[1] + 1]
+        normalized_text = query.normalized_text[start:end + 1]
         return QueryEntity(raw_text, processed_text, normalized_text, start, end,
                            entity_type, role, value, display_text)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        raise NotImplemented
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __str__(self):
         return "{}{}{} '{}' {}-{} ".format(
@@ -253,6 +277,14 @@ class Entity(object):
         self.role = role
         self.value = value
         self.display_text = display_text
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        raise NotImplemented
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __repr__(self):
         return "<Entity {} ({})>".format(self.display_text.__repr__(), self.type.__repr__())
