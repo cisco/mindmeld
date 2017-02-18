@@ -40,7 +40,7 @@ class NaturalLanguageProcessor(object):
         self.domain_classifier = DomainClassifier(self._resource_loader)
         self.domains = {domain: DomainProcessor(app_path, domain, self._tokenizer,
                                                 self._preprocessor, self._resource_loader)
-                        for domain in path.get_domains(self.app_path)}
+                        for domain in path.get_domains(self._app_path)}
 
     def build(self):
         """Builds all models for the app."""
