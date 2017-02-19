@@ -106,7 +106,7 @@ class DomainProcessor(object):
         self.intents = {intent: IntentProcessor(app_path, domain, intent, self.linker,
                                                 self._tokenizer, self._preprocessor,
                                                 self._resource_loader)
-                        for intent in path.get_domain_intents(app_path, domain)}
+                        for intent in path.get_intents(app_path, domain)}
 
     def build(self):
         """Builds all models for the domain."""
