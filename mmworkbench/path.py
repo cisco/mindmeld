@@ -85,7 +85,7 @@ def get_intents(app_path, domain):
     return set(next(os.walk(domain_dir))[1])
 
 
-def get_labeled_query_tree(app_path, patterns=['*']):
+def get_labeled_query_tree(app_path, patterns=None):
     """Gets labeled query files for a given domain and application.
 
     Args:
@@ -115,8 +115,9 @@ def get_labeled_query_tree(app_path, patterns=['*']):
             tree[domain][intent] = {}
             if patterns:
                 for pattern in patterns:
-                    for file in glob.iglob(os.path.join(parent, domain, intent, pattern)):
-                        mod_time = os.path.getmtime(os.path.join(parent, domain, intent, file))
+                    for file_path in glob.iglob(os.path.join(parent, domain, intent, pattern)):
+                        _, file = os.path.split(file_path)
+                        mod_time = os.path.getmtime(file_path)
                         tree[domain][intent][file] = mod_time
             else:
                 for file in files:

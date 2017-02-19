@@ -16,6 +16,7 @@ from .intent_classifier import IntentClassifier
 from .nel import NamedEntityLinker
 from .ner import NamedEntityRecognizer
 from .parser import Parser
+from .resource_loader import ResourceLoader
 from .role_classifier import RoleClassifier
 
 
@@ -38,7 +39,8 @@ class NaturalLanguageProcessor(object):
         self._app_path = app_path
         self._tokenizer = create_tokenizer(app_path)
         self._preprocessor = create_preprocessor(app_path)
-        self._resource_loader = create_resource_loader(app_path)
+        self._resource_loader = create_resource_loader(app_path, self._tokenizer,
+                                                       self._preprocessor)
         self.domain_classifier = DomainClassifier(self._resource_loader)
         self.domains = {domain: DomainProcessor(app_path, domain, self._tokenizer,
                                                 self._preprocessor, self._resource_loader)
@@ -100,7 +102,11 @@ class DomainProcessor(object):
         self.name = domain
         self._tokenizer = tokenizer or create_tokenizer(app_path)
         self._preprocessor = preprocessor or create_preprocessor(app_path)
-        self._resource_loader = resource_loader or create_resource_loader(app_path)
+        if resource_loader:
+            self._resource_loader = resource_loader
+        else:
+            self._resource_loader = create_resource_loader(app_path, self._tokenizer,
+                                                           self._preprocessor)
         self.intent_classifier = IntentClassifier(self._resource_loader, domain)
         self.linker = NamedEntityLinker(self._resource_loader, domain)
         self.intents = {intent: IntentProcessor(app_path, domain, intent, self.linker,
@@ -168,7 +174,11 @@ class IntentProcessor(object):
         self.linker = linker
         self._tokenizer = tokenizer or create_tokenizer(app_path)
         self._preprocessor = preprocessor or create_preprocessor(app_path)
-        self._resource_loader = resource_loader or create_resource_loader(app_path)
+        if resource_loader:
+            self._resource_loader = resource_loader
+        else:
+            self._resource_loader = create_resource_loader(app_path, self._tokenizer,
+                                                           self._preprocessor)
         self.recognizer = NamedEntityRecognizer(self._resource_loader, domain, intent)
 
         # TODO: revisit the parser after finishing Kwik-E-Mart demo
@@ -253,7 +263,11 @@ class EntityProcessor(object):
         self.type = entity_type
         self._tokenizer = tokenizer or create_tokenizer(app_path)
         self._preprocessor = preprocessor or create_preprocessor(app_path)
-        self._resource_loader = resource_loader or create_resource_loader(app_path)
+        if resource_loader:
+            self._resource_loader = resource_loader
+        else:
+            self._resource_loader = create_resource_loader(app_path, self._tokenizer,
+                                                           self._preprocessor)
         self.role_classifier = RoleClassifier(self._resource_loader, domain, intent, entity_type)
         self.roles = set()
 
@@ -297,16 +311,18 @@ def create_tokenizer(app_path):
     return Tokenizer()
 
 
-def create_resource_loader(app_path):
+def create_resource_loader(app_path, tokenizer, preprocessor):
     """Creates the resource loader for the app at app path
 
     Args:
         app_path (str): The path to the directory containing the app's data
+        tokenizer (Tokenizer): The app's tokenizer
+        preprocessor (Preprocessor): The app's preprocessor
 
     Returns:
         ResourceLoader: a resource loader
     """
-    pass
+    return ResourceLoader(app_path, tokenizer, preprocessor)
 
 
 def create_parser(app_path):

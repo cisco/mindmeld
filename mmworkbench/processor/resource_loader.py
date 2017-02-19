@@ -7,12 +7,11 @@ from __future__ import unicode_literals
 from builtins import object
 
 import fnmatch
-import os
 
 from .. import markup, path
 
 QUERY_SETS = {
-    'train': '*train*.txt'
+    'train': 'train*.txt'
 }
 
 
@@ -69,18 +68,18 @@ class ResourceLoader(object):
         return query_tree
 
     def _update_query_file_dates(self, file_pattern):
+        query_tree = path.get_labeled_query_tree(self.app_path, [file_pattern])
 
+        # Get current query table
+        # We can just use this if it this is the first check
         new_app_table = {}
-        domains = path.get_domains(self.app_path)
-        for domain in domains:
+        for domain in query_tree.keys():
             new_app_table[domain] = {}
-            intents = path.get_domain_intents(self.app_path, domain)
-            for intent in intents:
+            for intent in query_tree[domain].keys():
                 new_app_table[domain][intent] = {}
-                files = path.get_labeled_query_files(self.app_path, domain, intent, file_pattern)
-                for file in files:
+                for file, modified in query_tree[domain][intent].items():
                     new_app_table[domain][intent][file] = {
-                        'modified': os.path.getmtime(file),
+                        'modified': modified,
                         'loaded': None
                     }
 
