@@ -50,7 +50,8 @@ class NaturalLanguageProcessor(object):
         """Builds all models for the app."""
         # TODO: Load configuration from some file
 
-        self.domain_classifier.fit()
+        if len(self.domains) > 1:
+            self.domain_classifier.fit()
 
         for domain_processor in self.domains.values():
             domain_processor.build()
@@ -76,7 +77,11 @@ class NaturalLanguageProcessor(object):
         Returns:
             ProcessedQuery: The resulting processed query
         """
-        domain = self.domain_classifier.predict(query)
+        if len(self.domains) > 1:
+            domain = self.domain_classifier.predict(query)
+        else:
+            domain = list(self.domains.keys())[0]
+
         processed_query = self.domains[domain].process_query(query)
         processed_query.domain = domain
         return processed_query
@@ -122,7 +127,8 @@ class DomainProcessor(object):
         # TODO: build gazetteers
 
         # train intent model
-        self.intent_classifier.fit()
+        if len(self.domains) > 1:
+            self.intent_classifier.fit()
 
         # Something with linker?
 
@@ -152,7 +158,10 @@ class DomainProcessor(object):
         Returns:
             ProcessedQuery: The resulting processed query
         """
-        intent = self.intent_classifier.predict(query)
+        if len(self.intents) > 1:
+            intent = self.intent_classifier.predict(query)
+        else:
+            intent = list(self.intents.keys())[0]
         processed_query = self.intents[intent].process_query(query)
         processed_query.intent = intent
         return processed_query
@@ -191,14 +200,6 @@ class IntentProcessor(object):
         self.parser = Parser(self._resource_loader, domain, intent)
 
         self.entities = {}
-
-        # TODO: How do we get the list of entities for this intent without building the recognizer?
-        # entity_types = self.recognizer.entity_types
-
-        # self.entities = {entity_type: EntityProcessor(app_path, domain, intent, entity_type,
-        #                                               self._tokenizer, self._preprocessor,
-        #                                               self._resource_loader)
-        #                  for entity_type in entity_types}
 
     def build(self):
         """Builds the models for this intent"""
