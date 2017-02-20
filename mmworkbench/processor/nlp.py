@@ -87,6 +87,9 @@ class NaturalLanguageProcessor(object):
     def dump(self):
         pass
 
+    def __repr__(self):
+        return "<NaturalLanguageProcessor {!r}>".format(self._app_path)
+
 
 class DomainProcessor(object):
     """Summary
@@ -153,6 +156,9 @@ class DomainProcessor(object):
         processed_query = self.intents[intent].process_query(query)
         processed_query.intent = intent
         return processed_query
+
+    def __repr__(self):
+        return "<DomainProcessor {!r}>".format(self.name)
 
 
 class IntentProcessor(object):
@@ -244,6 +250,9 @@ class IntentProcessor(object):
 
         return ProcessedQuery(query, entities=entities)
 
+    def __repr__(self):
+        return "<IntentProcessor {!r}>".format(self.name)
+
 
 class EntityProcessor(object):
     """Summary
@@ -285,6 +294,9 @@ class EntityProcessor(object):
         """
         entity.role = self.role_classifier.predict(query, entities, entity)
         return entity
+
+    def __repr__(self):
+        return "<EntityProcessor {!r}>".format(self.name)
 
 
 def create_preprocessor(app_path):
