@@ -13,7 +13,7 @@ import pytest
 
 from mmworkbench.tokenizer import Tokenizer
 
-from mmworkbench.core import (Query, ProcessedQuery, QueryEntity, Entity,
+from mmworkbench.core import (Query, QueryEntity, Entity,
                               TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)
 
 

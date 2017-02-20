@@ -1,7 +1,15 @@
 """
 
 """
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
 
+from builtins import next
+from builtins import str
+from builtins import range
+from past.utils import old_div
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -10,8 +18,8 @@ from scipy.sparse import vstack, hstack
 import numpy
 import logging
 
-import util
-import sequence_features
+from . import util
+from . import sequence_features
 from mmworkbench.facet_classification import FacetClassifier
 
 DEFAULT_FEATURES = {
@@ -103,7 +111,7 @@ class MemmFacetClassifier(FacetClassifier):
                                                       cv_iterator(query_groups))
 
             mean_score = numpy.mean(scores)
-            std_err = numpy.std(scores) / numpy.sqrt(len(scores))
+            std_err = old_div(numpy.std(scores), numpy.sqrt(len(scores)))
             if mean_score > best_score:
                 best_score = mean_score
                 best_settings = settings
@@ -160,7 +168,7 @@ class MemmFacetClassifier(FacetClassifier):
                 if choices > 1:
                     logging.warning("Found multiple model parameter choices "
                                     "but no cross-validation type")
-                self._model_parameters = dict(self._iter_settings().next())
+                self._model_parameters = dict(next(self._iter_settings()))
                 self._clf = LogisticRegression(**self._model_parameters)
                 self._clf.fit(X, y)
             else:
@@ -229,9 +237,9 @@ class MemmFacetClassifier(FacetClassifier):
             confidence_data.append(confidence_dump)
 
             # Return the log probability information
-            tag_labels = self._class_encoder.inverse_transform(range(len(log_probs[0])))
+            tag_labels = self._class_encoder.inverse_transform(list(range(len(log_probs[0]))))
             log_prob_dict = {}
-            for j in xrange(len(tag_labels)):
+            for j in range(len(tag_labels)):
                 log_prob_dict[tag_labels[j]] = log_probs[0][j]
             all_log_probs.append(log_prob_dict)
 
@@ -259,31 +267,31 @@ class MemmFacetClassifier(FacetClassifier):
     def _print_predict_data(data):
         """Print diagnostic prediction data for a single query"""
 
-        print '\t'.join(["{:18}".format(s) for s in
-                         ['Token', 'Pred Tag', '(Gold Tag)', '(Log Prob)']])
-        print '\t'.join(['-' * 18 for _ in range(4)])
+        print('\t'.join(["{:18}".format(s) for s in
+                         ['Token', 'Pred Tag', '(Gold Tag)', '(Log Prob)']]))
+        print('\t'.join(['-' * 18 for _ in range(4)]))
 
         for idx, token in enumerate(data['tokens']):
             if data['tags'][idx] == data['gold_tags'][idx]:
                 row_dat = [token, data['tags'][idx], '"']
-                print '\t'.join(["{:18}".format(s) for s in row_dat])
-                print
+                print('\t'.join(["{:18}".format(s) for s in row_dat]))
+                print()
             else:
                 row_dat = [token, data['tags'][idx], data['gold_tags'][idx],
                            data['gold_probs'][idx] - data['probs'][idx]]
-                print '\t'.join(["{:18}".format(s) for s in row_dat])
+                print('\t'.join(["{:18}".format(s) for s in row_dat]))
                 names = data['feat_names'][idx]
                 head = ("feat_val", "pred_w", "gold_w",
                         "pred_p", "gold_p", "diff", "name")
-                print '\t', '\t'.join(['-' * 8 for _ in range(7)])
-                print '\t', '\t'.join(["{:>8}"] * 6 + ["{}"]).format(*head)
-                print '\t', '\t'.join(['-' * 8 for _ in range(7)])
+                print('\t', '\t'.join(['-' * 8 for _ in range(7)]))
+                print('\t', '\t'.join(["{:>8}"] * 6 + ["{}"]).format(*head))
+                print('\t', '\t'.join(['-' * 8 for _ in range(7)]))
                 format_str = '\t'.join(["{:8.3f}"] * 6 + ["{}"])
 
                 for j, row in enumerate(data['conf_data'][idx].T):
                     row = list(row) + [names[j]]
-                    print '\t', format_str.format(*row)
-                print '\t', '\t'.join(['-' * 8 for _ in range(7)])
+                    print('\t', format_str.format(*row))
+                print('\t', '\t'.join(['-' * 8 for _ in range(7)]))
 
     def _decompose_confidence(self, feat_vec, classes):
 

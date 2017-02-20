@@ -2,7 +2,12 @@
 """
 This module defines the interface for facet classification.
 """
+from __future__ import unicode_literals
+from __future__ import division
 
+from builtins import zip
+from builtins import object
+from past.utils import old_div
 import itertools
 
 from sklearn import cross_validation as cross_val
@@ -112,7 +117,7 @@ class FacetClassifier(object):
                 self.model_parameter_choices.
         """
         if self.model_parameter_choices is not None:
-            gsh_keys, gsh_values = zip(*self.model_parameter_choices.items())
+            gsh_keys, gsh_values = list(zip(*list(self.model_parameter_choices.items())))
             for settings in itertools.product(*gsh_values):
                 yield dict(zip(gsh_keys, settings))
         else:
@@ -142,7 +147,7 @@ class FacetClassifier(object):
     def _shuffle_iterator(self, y):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return cross_val.ShuffleSplit(len(y), n_iter=n, test_size=1.0/k)
+        return cross_val.ShuffleSplit(len(y), n_iter=n, test_size=old_div(1.0,k))
 
     def _groups_k_fold_iterator(self, groups):
         k = self.cross_validation_settings['k']
@@ -153,7 +158,7 @@ class FacetClassifier(object):
     def _groups_shuffle_iterator(self, groups):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return cross_val.LabelShuffleSplit(groups, n_iter=n, test_size=1.0/k)
+        return cross_val.LabelShuffleSplit(groups, n_iter=n, test_size=old_div(1.0,k))
 
     def _stratified_k_fold_iterator(self, y):
         k = self.cross_validation_settings['k']
@@ -162,7 +167,7 @@ class FacetClassifier(object):
     def _stratified_shuffle_iterator(self, y):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return cross_val.StratifiedShuffleSplit(y, n_iter=n, test_size=1.0/k)
+        return cross_val.StratifiedShuffleSplit(y, n_iter=n, test_size=old_div(1.0,k))
 
     def get_feature_selector(self):
         """Get a feature selector instance based on the feature-selector model

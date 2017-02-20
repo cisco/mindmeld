@@ -3,29 +3,34 @@
 This module contains all code required to perform multinomial classification
 of text.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 # TODO (julius): Add validation to the model configuration files.
 
+from builtins import range, str, next, object, zip
+from past.utils import old_div
+
+from collections import Counter, defaultdict
 import copy
 import itertools
 import logging
-import util
 import math
 import re
-from numpy import random, bincount, mean, std, Infinity
-import numpy
 import operator
 
-from collections import Counter
-from collections import defaultdict
+from numpy import random, bincount, mean, std, Infinity
+import numpy
+
+from sklearn.cross_validation import StratifiedKFold, StratifiedShuffleSplit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
-from sklearn.preprocessing import LabelEncoder
-from sklearn.cross_validation import StratifiedKFold, StratifiedShuffleSplit
-from sklearn.metrics import accuracy_score, log_loss
 from sklearn.grid_search import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, log_loss
+from sklearn.preprocessing import LabelEncoder
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 
 _NEG_INF = -1e10
 
@@ -47,7 +52,7 @@ WORD_FREQ_RSC = "w_freq"
 QUERY_FREQ_RSC = "q_freq"
 
 
-class TextClassifier:
+class TextClassifier(object):
     """A machine learning classifier for text.
 
     This class manages feature extraction, training, cross-validation, and
@@ -232,13 +237,19 @@ class TextClassifier:
                 a choice of settings from self.grid_search_hyperparams.
         """
         if param_grid:
-            all_settings = copy.deepcopy(self.hyperparams)
-            gsh_keys, gsh_values = zip(*param_grid.items())
-            for settings in itertools.product(*gsh_values):
-                all_settings.update(dict(zip(gsh_keys, settings)))
-                yield copy.deepcopy(all_settings)
+            for config in self.settings_for_param_grid(self.hyperparams, param_grid):
+                yield config
         else:
             yield self.hyperparams
+
+    @staticmethod
+    def settings_for_param_grid(base, param_grid):
+        base = copy.deepcopy(base)
+        gsh_keys = list()
+        gsh_keys, gsh_values = list(zip(*list(param_grid.items())))
+        for settings in itertools.product(*gsh_values):
+            base.update(dict(list(zip(gsh_keys, settings))))
+            yield copy.deepcopy(base)
 
     def compile_word_freq_dict(self, queries):
         """Compiles unigram frequency dictionary of normalized query tokens
@@ -296,7 +307,7 @@ class TextClassifier:
         random.shuffle(indices)
         classes = [classes[i] for i in indices]
         queries = [queries[i] for i in indices]
-        self._queries = zip(queries, classes)
+        self._queries = list(zip(queries, classes))
 
         classes_set = set(classes)
         if len(set(classes_set)) <= 1:
@@ -385,7 +396,7 @@ class TextClassifier:
         Returns:
             (TextClassifier): self
         """
-        queries, classes = zip(*self._queries)  # unzip
+        queries, classes = list(zip(*self._queries))  # unzip
         predictions = []
         m_classes = []
         m_queries = []
@@ -406,7 +417,7 @@ class TextClassifier:
 
         m_X = self._meta_feat_vectorizer.fit_transform(predictions)
         m_y = self._class_encoder.transform(m_classes)
-        self._queries = zip(m_queries, m_classes)
+        self._queries = list(zip(m_queries, m_classes))
 
         # train the meta classifier
         if verbose is False:
@@ -428,7 +439,7 @@ class TextClassifier:
     def _shuffle_iterator(self, y):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return StratifiedShuffleSplit(y, n_iter=n, test_size=1.0 / k)
+        return StratifiedShuffleSplit(y, n_iter=n, test_size=old_div(1.0, k))
 
     def _convert_settings(self, param_grid, y):
         """
@@ -455,9 +466,9 @@ class TextClassifier:
             param_grid['class_weight'] = []
             for class_bias in param_grid['class_bias']:
                 # these weights are same as sklearn's class_weight='balanced'
-                balanced_w = [len(y) / (float(len(classes)) * c)
+                balanced_w = [old_div(len(y), (float(len(classes)) * c))
                               for c in class_count]
-                balanced_tuples = zip(list(range(len(classes))), balanced_w)
+                balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
 
                 param_grid['class_weight'].append({c: (1 - class_bias) + class_bias * w
                                                    for c, w in balanced_tuples})
@@ -483,7 +494,7 @@ class TextClassifier:
                      .format(classifier_type.__name__, ))
 
         param_grid = self._convert_settings(self.grid_search_hyperparams, y)
-        settings = self._iter_settings(param_grid).next()
+        settings = next(self._iter_settings(param_grid))
 
         logging.info('Fitting text classifier with settings: {}'
                      .format(settings))
@@ -633,10 +644,10 @@ class TextClassifier:
 
                 logging.info('  '.join(row))
 
-            std_err = std(accuracies) / math.sqrt(len(accuracies))
+            std_err = old_div(std(accuracies), math.sqrt(len(accuracies)))
             logging.info('Candidate average CV accuracy: {:.2%} ± {:.2%}'
                          .format(accuracy, std_err * 2))
-            loss_std_err = std(likelihoods) / math.sqrt(len(likelihoods))
+            loss_std_err = old_div(std(likelihoods), math.sqrt(len(likelihoods)))
             logging.info('Candidate average CV log likelihood: {:.2} ± {:.2}'
                          .format(likelihood, loss_std_err * 2))
             logging.debug('Errors per gold class: {}'.format(row_totals))
@@ -782,12 +793,12 @@ class TextClassifier:
             gold_label = self._class_encoder.inverse_transform([gold_class])[0]
             print("Gold:      " + gold_label)
             columns += '\t  GOLD_W\t  GOLD_P\t    DIFF'
-        print
+        print()
         print(columns)
-        print
+        print()
 
         # Get all active features sorted alphabetically by name
-        features = sorted(features.items(), key=operator.itemgetter(0))
+        features = sorted(list(features.items()), key=operator.itemgetter(0))
         name_format = '{{0:{}}}'.format(max([len(f[0]) for f in features] + [20]))
         for feature in features:
             feat_name = feature[0]
@@ -817,7 +828,7 @@ class TextClassifier:
 
                 print(name_format + '\t{1:8.3f}\t{2:8.3f}\t{3:8.3f}\t{4:8.3f}\t{5:8.3f}\t{6:+8.3f}'
                       .format(feat_name, feat_value, weight, product, gold_w, gold_p, diff))
-        print
+        print()
 
     def requires_resource(self, resource):
         for f in self.feat_specs:
@@ -977,7 +988,7 @@ def extract_gaz_freq():
                 for gaz_name, gaz in gazes.items():
                     freq = len(gaz['index'].get(tok, []))
                     if freq > 0:
-                        b = int(math.log(freq, 2) / 2)
+                        b = int(old_div(math.log(freq, 2), 2))
                         freq_features['{}|freq|{}'.format(gaz_name, b)] += 1
                         freq_features['{}&{}|freq|{}'.format(query_freq, gaz_name, b)] += 1
 
@@ -1000,15 +1011,15 @@ def extract_in_gaz_feature(scaling=1):
         tokens = query.split()
         ngrams = []
         for i in range(1, (len(tokens) + 1)):
-            ngrams.extend(util.find_ngrams(tokens, i))
+            ngrams.extend(find_ngrams(tokens, i))
         for ngram in ngrams:
             for domain, gazes in resources[GAZETTEER_RSC].items():
                 for gaz_name, gaz in gazes.items():
                     if ngram in gaz['edict']:
                         popularity = gaz['edict'].get(ngram, 0.0)
-                        ratio_pop = (len(ngram) / float(len(query))) * scaling * popularity
+                        ratio_pop = (old_div(len(ngram), float(len(query)))) * scaling * popularity
                         in_gaz_features[domain + '_' + gaz_name + '_ratio_pop'] += ratio_pop
-                        ratio = (len(ngram) / float(len(query))) * scaling
+                        ratio = (old_div(len(ngram), float(len(query)))) * scaling
                         in_gaz_features[domain + '_' + gaz_name + '_ratio'] += ratio
                         in_gaz_features[domain + '_' + gaz_name + '_pop'] += popularity
                         in_gaz_features[domain + '_' + gaz_name + '_exists'] = 1
@@ -1056,6 +1067,15 @@ def extract_query_string(scaling=1000):
         return {'exact={}'.format(query_key): scaling}
 
     return extractor
+
+
+# Generate all n-gram combinations from a list of strings
+def find_ngrams(input_list, n):
+    result = []
+    ngrams = zip(*[input_list[i:] for i in range(n)])
+    for ngram in ngrams:
+        result.append(" ".join(ngram))
+    return result
 
 
 FEATURE_NAME_MAP = {

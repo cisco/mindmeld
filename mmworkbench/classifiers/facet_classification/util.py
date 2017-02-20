@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import range
 import itertools
 import logging
 
@@ -75,7 +78,7 @@ def get_tags_from_facets(query, scheme='IOB'):
                 num_iobs[facet['end']] = E_TAG
 
     tags = ['|'.join(args) for args in
-            itertools.izip(iobs, ftypes, num_iobs, ntypes)]
+            zip(iobs, ftypes, num_iobs, ntypes)]
 
     return tags
 

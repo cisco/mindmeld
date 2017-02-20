@@ -1,7 +1,12 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import math
 import re
 
-import util
+from . import util
 
 from mmworkbench import util as mmutil
 
@@ -67,14 +72,14 @@ def extract_in_gaz_features():
                 # Inverse document frequency
                 if gaz['total_entities'] > 1:
                     feat_name = feat_name_prefix + '|idf'
-                    feat_seq[i][feat_name] = (math.log(gaz['total_entities'] /
-                                              (len(gaz['index'][ftype]) + 1)))
+                    feat_seq[i][feat_name] = (math.log(old_div(gaz['total_entities'],
+                                              (len(gaz['index'][ftype]) + 1))))
                 # Character length features
                 feat_name = feat_name_prefix + '|log-char-len'
                 feat_seq[i][feat_name] = math.log(len(entity))
                 feat_name = feat_name_prefix + '|pct-char-len'
-                feat_seq[i][feat_name] = (float(len(entity)) /
-                                          len(' '.join(tokens)))
+                feat_seq[i][feat_name] = (old_div(float(len(entity)),
+                                          len(' '.join(tokens))))
             # End of span feature
             if end < len(tokens):
                 feat_name = 'in-gaz|end|type:{}'.format(ftype)
@@ -138,8 +143,8 @@ def extract_in_gaz_features():
                 feat_name = (feat_name_prefix +
                              'diff-pct-len|type1:{}|type2:{}|pos:{}'
                              .format(ftype_1, ftype_2, pos_attr))
-                feat_seq[i][feat_name] = ((len(entity_2) - len(entity_1)) /
-                                          float(len(' '.join(query.get_normalized_tokens()))))
+                feat_seq[i][feat_name] = (old_div((len(entity_2) - len(entity_1)),
+                                          float(len(' '.join(query.get_normalized_tokens())))))
 
             return feat_seq
 
@@ -218,8 +223,8 @@ def extract_in_gaz_span_features():
             feat_seq = [{} for _ in tokens]
 
             pop = gazes[ftype]['edict'][entity]
-            p_total = math.log(sum([g['total_entities']
-                                    for g in gazes.values()]) + 1) / 2
+            p_total = old_div(math.log(sum([g['total_entities']
+                                           for g in gazes.values()]) + 1), 2)
 
             p_ftype = math.log(gazes[ftype]['total_entities'] + 1)
             p_entity = math.log(sum([len(g['index'][entity])
@@ -253,8 +258,8 @@ def extract_in_gaz_span_features():
                 feat_name = feat_prefix + '|log-char-len'
                 feat_seq[i][feat_name] = math.log(len(entity))
                 feat_name = feat_prefix + '|pct-char-len'
-                feat_seq[i][feat_name] = (float(len(entity)) /
-                                          len(' '.join(tokens)))
+                feat_seq[i][feat_name] = (old_div(float(len(entity)),
+                                          len(' '.join(tokens))))
 
                 # entity PMI and conditional prob
                 feat_name = feat_prefix + '|pmi'
@@ -297,8 +302,8 @@ def extract_in_gaz_span_features():
                 feat_name = feat_prefix + '|log-char-len'
                 feat_seq[i][feat_name] = math.log(len(entity))
                 feat_name = feat_prefix + '|pct-char-len'
-                feat_seq[i][feat_name] = (float(len(entity)) /
-                                          len(' '.join(tokens)))
+                feat_seq[i][feat_name] = (old_div(float(len(entity)),
+                                          len(' '.join(tokens))))
 
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[i][feat_name] = p_total + p_joint - p_ftype - p_entity
@@ -315,7 +320,7 @@ def extract_in_gaz_span_features():
                 feat_name = feat_prefix + '|log-char-len'
                 feat_seq[end][feat_name] = math.log(len(entity))
                 feat_name = feat_prefix + '|pct-char-len'
-                feat_seq[end][feat_name] = float(len(entity)) / len(' '.join(tokens))
+                feat_seq[end][feat_name] = old_div(float(len(entity)), len(' '.join(tokens)))
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[end][feat_name] = p_total + p_joint - p_ftype - p_entity
                 feat_name = feat_prefix + '|p_fe'
@@ -474,8 +479,8 @@ def extract_in_gaz_ngram_features():
                     len(gazes[ftype]['index'][get_ngram(tokens, i, 2)]) + 1)
 
                 # entity PMI and conditional prob
-                p_total = math.log(sum([g['total_entities']
-                                        for g in gazes.values()]) + 1) / 2
+                p_total = old_div(math.log(sum([g['total_entities']
+                                                for g in gazes.values()]) + 1), 2)
                 p_ftype = math.log(gazes[ftype]['total_entities'] + 1)
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i, 1)])
                                         for g in gazes.values()]) + 1)

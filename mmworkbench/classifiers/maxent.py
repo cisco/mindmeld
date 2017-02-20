@@ -1,7 +1,10 @@
 """
 
 """
+from __future__ import unicode_literals
 
+from builtins import range
+from builtins import object
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -31,7 +34,7 @@ def get_ngram(tokens, start, length):
     return ' '.join(ngram_tokens)
 
 
-class MaxentRoleClassifier():
+class MaxentRoleClassifier(object):
 
     def __init__(self):
         self._resources = {}
