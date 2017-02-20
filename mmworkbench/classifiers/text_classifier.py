@@ -228,7 +228,7 @@ class TextClassifier(object):
             feat_set.update(feat_extractor(marked_down_query, self._resources))
         return feat_set
 
-    def _iter_settings(self, param_grid=None):
+    def _iter_settings(self, params_grid=None):
         """Iterates through all classifier settings.
 
         Yields:
@@ -236,17 +236,17 @@ class TextClassifier(object):
                 item yielded is a unique combination of self.hyperparams with
                 a choice of settings from self.grid_search_hyperparams.
         """
-        if param_grid:
-            for config in self.settings_for_param_grid(self.hyperparams, param_grid):
+        if params_grid:
+            for config in self.settings_for_params_grid(self.hyperparams, params_grid):
                 yield config
         else:
             yield self.hyperparams
 
     @staticmethod
-    def settings_for_param_grid(base, param_grid):
+    def settings_for_params_grid(base, params_grid):
         base = copy.deepcopy(base)
         gsh_keys = list()
-        gsh_keys, gsh_values = list(zip(*list(param_grid.items())))
+        gsh_keys, gsh_values = list(zip(*list(params_grid.items())))
         for settings in itertools.product(*gsh_values):
             base.update(dict(list(zip(gsh_keys, settings))))
             yield copy.deepcopy(base)
@@ -360,7 +360,7 @@ class TextClassifier(object):
                 losses['all'] = self.cv_loss_
                 diff_losses = {clf: losses[clf] - losses['all'] for clf in self._base_clfs}
                 logger.info("Marginal likelihood contribution for each base model: {}"
-                             .format(diff_losses))
+                            .format(diff_losses))
             else:
                 self._fit_super_learner(clf_cls, cv_iterator,
                                         verbose=verbose, scoring=scoring)
@@ -442,40 +442,40 @@ class TextClassifier(object):
         n = self.cross_validation_settings.get('n', k)
         return StratifiedShuffleSplit(y, n_iter=n, test_size=old_div(1.0, k))
 
-    def _convert_settings(self, param_grid, y):
+    def _convert_settings(self, params_grid, y):
         """
         Convert the settings from the style given by the config
         to the style passed in to the actual classifier.
 
         Args:
-            param_grid (dict): lists of classifier parameter values, keyed by parameter name
+            params_grid (dict): lists of classifier parameter values, keyed by parameter name
 
         Returns:
-            (dict): revised param_grid
+            (dict): revised params_grid
         """
         class_count = bincount(y)
         classes = self._class_encoder.classes_
 
-        if 'class_weight' in param_grid:
-            param_grid['class_weight'] = [{k if type(k) is int else
+        if 'class_weight' in params_grid:
+            params_grid['class_weight'] = [{k if type(k) is int else
                                            self._class_encoder.transform(k): v
                                            for k, v in cw_dict.items()}
-                                          for cw_dict in param_grid['class_weight']]
-        elif 'class_bias' in param_grid:
+                                          for cw_dict in params_grid['class_weight']]
+        elif 'class_bias' in params_grid:
             # interpolate between class_bias=0 => class_weight=None
             # and class_bias=1 => class_weight='balanced'
-            param_grid['class_weight'] = []
-            for class_bias in param_grid['class_bias']:
+            params_grid['class_weight'] = []
+            for class_bias in params_grid['class_bias']:
                 # these weights are same as sklearn's class_weight='balanced'
                 balanced_w = [old_div(len(y), (float(len(classes)) * c))
                               for c in class_count]
                 balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
 
-                param_grid['class_weight'].append({c: (1 - class_bias) + class_bias * w
+                params_grid['class_weight'].append({c: (1 - class_bias) + class_bias * w
                                                    for c, w in balanced_tuples})
-            del param_grid['class_bias']
+            del params_grid['class_bias']
 
-        return param_grid
+        return params_grid
 
     def _fit(self, classifier_type, X, y):
         """Trains a classifier without cross-validation.
@@ -494,8 +494,8 @@ class TextClassifier(object):
         logger.info('Fitting {} text classifier without cross-validation'
                      .format(classifier_type.__name__, ))
 
-        param_grid = self._convert_settings(self.grid_search_hyperparams, y)
-        settings = next(self._iter_settings(param_grid))
+        params_grid = self._convert_settings(self.grid_search_hyperparams, y)
+        settings = next(self._iter_settings(params_grid))
 
         logger.info('Fitting text classifier with settings: {}'
                      .format(settings))
@@ -525,11 +525,11 @@ class TextClassifier(object):
                              self.cross_validation_settings['type'],
                              self.cross_validation_settings))
 
-        param_grid = self._convert_settings(self.grid_search_hyperparams, y)
+        params_grid = self._convert_settings(self.grid_search_hyperparams, y)
         n_jobs = self.cross_validation_settings.get('n_jobs', -1)
 
-        logger.info('Doing grid search over {}'.format(param_grid))
-        grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring, param_grid=param_grid,
+        logger.info('Doing grid search over {}'.format(params_grid))
+        grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring, params_grid=params_grid,
                                cv=cv_iterator(y), verbose=1, n_jobs=n_jobs)
         model = grid_cv.fit(X, y)
 
@@ -582,9 +582,9 @@ class TextClassifier(object):
         best_settings = None
         classes = self._class_encoder.classes_
 
-        param_grid = self._convert_settings(self.grid_search_hyperparams, y)
+        params_grid = self._convert_settings(self.grid_search_hyperparams, y)
 
-        for settings in self._iter_settings(param_grid):
+        for settings in self._iter_settings(params_grid):
 
             logger.info('Fitting text classifier with settings: {}'.format(settings))
 
@@ -706,7 +706,7 @@ class TextClassifier(object):
         """Predicts class labels for a set of queries.
 
         Args:
-            queries (list of Query): The queries.
+            queries (list of Query): The queries
 
         Returns:
             (list of str): The predicted labels for each query.

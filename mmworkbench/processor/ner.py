@@ -88,7 +88,7 @@ class NamedEntityRecognizer(object):
             model_path (str): The location on disk where the model should be stored
 
         """
-        folder, filename = os.split(model_path)
+        folder = os.dirname(model_path)
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
