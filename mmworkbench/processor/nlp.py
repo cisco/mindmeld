@@ -56,6 +56,20 @@ class NaturalLanguageProcessor(object):
         for domain_processor in self.domains.values():
             domain_processor.build()
 
+    def dump(self):
+        model_path = path.get_domain_model_path(self._app_path)
+        self.domain_classifier.dump(model_path)
+
+        for domain_processor in self.domains.values():
+            domain_processor.dump()
+
+    def load(self):
+        model_path = path.get_domain_model_path(self._app_path)
+        self.domain_classifier.load(model_path)
+
+        for domain_processor in self.domains.values():
+            domain_processor.load()
+
     def process(self, query_text):
         """Processes the input text
 
@@ -85,12 +99,6 @@ class NaturalLanguageProcessor(object):
         processed_query = self.domains[domain].process_query(query)
         processed_query.domain = domain
         return processed_query
-
-    def load(self):
-        pass
-
-    def dump(self):
-        pass
 
     def __repr__(self):
         return "<NaturalLanguageProcessor {!r}>".format(self._app_path)
@@ -127,13 +135,33 @@ class DomainProcessor(object):
         # TODO: build gazetteers
 
         # train intent model
-        if len(self.domains) > 1:
+        if len(self.intents) > 1:
             self.intent_classifier.fit()
 
         # Something with linker?
 
         for intent_processor in self.intents.values():
             intent_processor.build()
+
+    def dump(self):
+        # dump gazetteers?
+        model_path = path.get_intent_model_path(self._app_path, self.name)
+        self.intent_classifier.dump(model_path)
+
+        # something with linker?
+
+        for intent_processor in self.intents.values():
+            intent_processor.dump()
+
+    def load(self):
+        # load gazetteers?
+        model_path = path.get_intent_model_path(self._app_path, self.name)
+        self.intent_classifier.load(model_path)
+
+        # something with the linker?
+
+        for intent_processor in self.intents.values():
+            intent_processor.load()
 
     def process(self, query_text):
         """Processes the input text for this domain
@@ -217,6 +245,24 @@ class IntentProcessor(object):
             processor.build()
             self.entities[entity_type] = processor
 
+    def dump(self):
+        model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
+        self.recognizer.dump(model_path)
+
+        # TODO: something with parser?
+
+        for entity_processor in self.entities.values():
+            entity_processor.dump()
+
+    def load(self):
+        model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
+        self.recognizer.load(model_path)
+
+        # TODO: something with the parser?
+
+        for entity_processor in self.entities.values():
+            entity_processor.load()
+
     def process(self, query_text):
         """Processes the input text for this intent
 
@@ -284,6 +330,14 @@ class EntityProcessor(object):
     def build(self):
         """Builds the models for this entity type"""
         self.role_classifier.fit()
+
+    def dump(self):
+        model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.name)
+        self.role_classifier.dump(model_path)
+
+    def load(self):
+        model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.name)
+        self.role_classifier.load(model_path)
 
     def process_entity(self, query, entities, entity):
         """Processes the given entity

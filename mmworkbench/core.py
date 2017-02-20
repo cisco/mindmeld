@@ -67,7 +67,7 @@ class Query(object):
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
-        raise NotImplemented
+        return NotImplemented
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -184,7 +184,7 @@ class ProcessedQuery(object):
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
-        raise NotImplemented
+        return NotImplemented
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -249,7 +249,7 @@ class QueryEntity(object):
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
-        raise NotImplemented
+        return NotImplemented
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -285,7 +285,7 @@ class Entity(object):
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
-        raise NotImplemented
+        return NotImplemented
 
     def __ne__(self, other):
         return not self.__eq__(other)
