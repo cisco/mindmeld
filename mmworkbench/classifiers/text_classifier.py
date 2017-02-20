@@ -8,9 +8,13 @@ of text.
 import copy
 import itertools
 import logging
+import util
 import math
 import re
 from numpy import random, bincount, mean, std, Infinity
+import numpy
+import operator
+
 from collections import Counter
 from collections import defaultdict
 from sklearn.ensemble import RandomForestClassifier
@@ -20,9 +24,27 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.preprocessing import LabelEncoder
 from sklearn.cross_validation import StratifiedKFold, StratifiedShuffleSplit
-from sklearn.metrics import accuracy_score as AccuracyScore
+from sklearn.metrics import accuracy_score, log_loss
+from sklearn.grid_search import GridSearchCV
 
 _NEG_INF = -1e10
+
+# classifier types
+LOG_REG_TYPE = "logreg"
+DECISION_TREE_TYPE = "dtree"
+RANDOM_FOREST_TYPE = "rforest"
+SVM_TYPE = "svm"
+SUPER_LEARNER_TYPE = "super-learner"
+BASE_MODEL_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
+
+# model scoring types
+ACCURACY_SCORING = "accuracy"
+LIKELIHOOD_SCORING = "log_loss"
+
+# resource/requirements names
+GAZETTEER_RSC = "gaz"
+WORD_FREQ_RSC = "w_freq"
+QUERY_FREQ_RSC = "q_freq"
 
 
 class TextClassifier:
@@ -38,7 +60,8 @@ class TextClassifier:
 
     Attributes:
         classifier_type (str): The name of the classifier type. Currently
-            recognized values are "logreg","dtree", and "svm".
+            recognized values are "logreg","dtree", "rforest" and "svm",
+            as well as "super-learner:logreg", "super-learner:dtree" etc.
         hyperparams (dict): A kwargs dict of parameters that will be used to
             initialize the classifier object.
         grid_search_hyperparams (dict): Like 'hyperparams', but the values are
@@ -56,7 +79,7 @@ class TextClassifier:
     """
 
     def __init__(self, classifier_type, hyperparams, grid_search_hyperparams,
-                 feat_specs, cross_validation_settings):
+                 feat_specs, cross_validation_settings=None):
         self.classifier_type = classifier_type
         self.hyperparams = hyperparams
         self.grid_search_hyperparams = grid_search_hyperparams
@@ -65,35 +88,89 @@ class TextClassifier:
 
         self._is_fit = False
         self._feat_vectorizer = DictVectorizer(sparse=True)
+        self._meta_feat_vectorizer = DictVectorizer(sparse=False)
         self._class_encoder = LabelEncoder()
         self._clf = None
+        self._base_clfs = {}
+        self._meta_type = None
         self._resources = {}
         self._queries = {}
+        self.cv_loss_ = None
+        self.train_acc_ = None
 
     @classmethod
-    def from_config(cls, config, model_name):
+    def from_config(cls, config, model_configuration):
         """Initializes a TextClassifier instance from config file data.
 
         Args:
             config (dict): The Python representation of a parsed config file.
-            model_name (str): One of the keys in config['models'].
+            model_configuration (str): One of the keys in config['models'].
 
         Returns:
             (TextClassifier): A TextClassifier instance initialized with the
-                settings from the config entry given by model_name.
+                settings from the config entry given by model_configuration.
         """
-        model_config_entry = config['models'].get(model_name)
+        model_config_entry = config['models'].get(model_configuration)
+        model_type = model_config_entry.get('model-type',
+                                            model_config_entry.get('classifier-type', ''))
+        meta_type = None
+        if ':' in model_type and model_type.split(':')[0] == SUPER_LEARNER_TYPE:
+            meta_type = SUPER_LEARNER_TYPE
+            model_type = model_type.split(':')[1]
         if not model_config_entry:
             error_msg = "Model config does not contain a model named '{}'"
-            raise ValueError(error_msg.format(model_name))
+            raise ValueError(error_msg.format(model_configuration))
 
-        return cls(
-            model_config_entry.get('model-type',
-                                   model_config_entry.get('classifier-type')),
+        # Using ensemble method.
+        classifiers = {}
+        if meta_type == SUPER_LEARNER_TYPE:
+            base_models = model_config_entry.get('base-models', [])
+            if base_models:
+                for base_model_conf in base_models:
+                    config_entry = config['models'].get(base_model_conf)
+                    if not config_entry:
+                        error_msg = "Model config does not contain a model named '{}'"
+                        raise ValueError(error_msg.format(model_configuration))
+                    base_clf = cls(
+                        config_entry.get('model-type', config_entry.get('classifier-type')),
+                        config_entry.get('model-parameters', {}),
+                        config_entry.get('model-parameter-choices', {}),
+                        config_entry['features'],
+                        # Cross-validation is not handled in the base models
+                        None
+                    )
+                    classifiers[base_model_conf] = base_clf
+            else:
+                for base_type in BASE_MODEL_TYPES:
+                    # We still need to define the base model's feature set.
+                    if base_type == SVM_TYPE:
+                        model_choices = {"probability": [True], "C": [100]}
+                    else:
+                        model_choices = {}
+                    base_clf = cls(base_type, {}, model_choices,
+                                   model_config_entry['base-model-features'],
+                                   None)
+                    classifiers[base_type] = base_clf
+
+        if 'cross-validation-settings' not in model_config_entry:
+            model_parameter_choices = model_config_entry.get('model-parameter-choices', {})
+            for key in model_parameter_choices:
+                if len(model_parameter_choices[key]) > 1:
+                    raise ValueError('Cannot pass more than one model parameter choice if not '
+                                     'using cross validation')
+
+        model = cls(
+            model_type,
             model_config_entry.get('model-parameters', {}),
             model_config_entry.get('model-parameter-choices', {}),
-            model_config_entry['features'],
-            model_config_entry['cross-validation-settings'])
+            model_config_entry.get('features', {}),
+            model_config_entry.get('cross-validation-settings', None)
+        )
+        model._meta_type = meta_type
+        if model._meta_type == SUPER_LEARNER_TYPE:
+            model._base_clfs = classifiers
+
+        return model
 
     def __getstate__(self):
         """Returns the information needed pickle an instance of this class.
@@ -102,11 +179,33 @@ class TextClassifier:
         underscores. This overrides that behavior.
         """
         attributes = self.__dict__.copy()
-        attributes['_resources'] = {'freq': self._resources['freq']}
+        attributes['_resources'] = {WORD_FREQ_RSC: self._resources.get(WORD_FREQ_RSC, {}),
+                                    QUERY_FREQ_RSC: self._resources.get(QUERY_FREQ_RSC, {})}
         return attributes
 
-    def load_resources(self, all_gazeteers):
-        self._resources['gaz'] = all_gazeteers
+    def register_resources(self, gazetteers=None, word_freqs=None, query_freqs=None):
+        """Loads resources that are built outside the classifier, e.g. gazetteers
+
+        Args:
+            gazetteers (dict of Gazetteer): domain gazetteer data
+            word_freqs (dict of int): unigram frequencies in queries
+            query_freqs (dict of int): whole query index with frequencies
+        """
+        if gazetteers is not None:
+            self._resources[GAZETTEER_RSC] = gazetteers
+            if self._meta_type == SUPER_LEARNER_TYPE:
+                for model in self._base_clfs.values():
+                    model.register_resources(gazetteers=gazetteers)
+        if word_freqs is not None:
+            self._resources[WORD_FREQ_RSC] = word_freqs
+            if self._meta_type == SUPER_LEARNER_TYPE:
+                for model in self._base_clfs.values():
+                    model.register_resources(word_freqs=word_freqs)
+        if query_freqs is not None:
+            self._resources[QUERY_FREQ_RSC] = query_freqs
+            if self._meta_type == SUPER_LEARNER_TYPE:
+                for model in self._base_clfs.values():
+                    model.register_resources(query_freqs=query_freqs)
 
     def extract_features(self, query):
         """Gets all features from a query.
@@ -124,7 +223,7 @@ class TextClassifier:
             feat_set.update(feat_extractor(marked_down_query, self._resources))
         return feat_set
 
-    def _iter_settings(self):
+    def _iter_settings(self, param_grid=None):
         """Iterates through all classifier settings.
 
         Yields:
@@ -132,33 +231,44 @@ class TextClassifier:
                 item yielded is a unique combination of self.hyperparams with
                 a choice of settings from self.grid_search_hyperparams.
         """
-        if self.grid_search_hyperparams:
+        if param_grid:
             all_settings = copy.deepcopy(self.hyperparams)
-            gsh_keys, gsh_values = zip(*self.grid_search_hyperparams.items())
+            gsh_keys, gsh_values = zip(*param_grid.items())
             for settings in itertools.product(*gsh_values):
                 all_settings.update(dict(zip(gsh_keys, settings)))
                 yield copy.deepcopy(all_settings)
         else:
             yield self.hyperparams
 
-    def _compile_freq_dict(self, queries):
-        """Compiles frequency dictionary of query tokens
+    def compile_word_freq_dict(self, queries):
+        """Compiles unigram frequency dictionary of normalized query tokens
 
+        Args:
+            queries (list of Query): A list of all queries
         """
+        # Unigram frequencies
         tokens = [mask_numerics(tok) for q in queries
                   for tok in q.get_normalized_tokens()]
         freq_dict = Counter(tokens)
 
+        self.register_resources(word_freqs=freq_dict)
+
+    def compile_query_freq_dict(self, queries):
+        """Compiles frequency dictionary of normalized query strings
+
+        Args:
+            queries (list of Query): A list of all queries
+        """
+        # Whole query frequencies, with singletons removed
         query_dict = Counter([u'<{}>'.format(q.get_normalized_query()) for q in queries])
         for q in query_dict:
             if query_dict[q] < 2:
                 query_dict[q] = 0
         query_dict += Counter()
-        freq_dict += query_dict
 
-        self._resources['freq'] = freq_dict
+        self.register_resources(query_freqs=query_dict)
 
-    def fit(self, queries, classes):
+    def fit(self, queries, classes, verbose=True):
         """Trains this TextClassifier.
 
         This method inspects instance attributes to determine the classifier
@@ -169,13 +279,17 @@ class TextClassifier:
             queries (list of Query): A list of queries.
             classes (list of str): A parallel list to queries. The gold labels
                 for each query.
+            verbose (bool): Whether to show analysis output
 
         Returns:
             (TextClassifier): Returns self to match classifier scikit-learn
                 interfaces.
         """
 
-        self._compile_freq_dict(queries)
+        if self._resources.get(WORD_FREQ_RSC) is None and self.requires_resource(WORD_FREQ_RSC):
+            self.compile_word_freq_dict(queries)
+        if self._resources.get(QUERY_FREQ_RSC) is None and self.requires_resource(QUERY_FREQ_RSC):
+            self.compile_query_freq_dict(queries)
 
         # Need to shuffle once to prevent order effects
         indices = list(range(len(classes)))
@@ -185,24 +299,26 @@ class TextClassifier:
         self._queries = zip(queries, classes)
 
         classes_set = set(classes)
-        if len(set(classes_set)) <= 1: return None
-
-        X = self.get_feature_matrix(queries, fit=True)
+        if len(set(classes_set)) <= 1:
+            return None
         y = self._class_encoder.fit_transform(classes)
 
-        if self.classifier_type == 'logreg':
+        if self.classifier_type == LOG_REG_TYPE:
             clf_cls = LogisticRegression
-        elif self.classifier_type == 'dtree':
+        elif self.classifier_type == DECISION_TREE_TYPE:
             clf_cls = DecisionTreeClassifier
-        elif self.classifier_type == 'rforest':
+        elif self.classifier_type == RANDOM_FOREST_TYPE:
             clf_cls = RandomForestClassifier
-        elif self.classifier_type == 'svm':
+        elif self.classifier_type == SVM_TYPE:
             clf_cls = SVC
         else:
             raise ValueError('Classifier type "{}" not recognized'
                              .format(self.classifier_type))
 
-        if self.cross_validation_settings['type'] == 'k-fold':
+        if self.cross_validation_settings is None:
+            # Fit without cross validation
+            cv_iterator = None
+        elif self.cross_validation_settings['type'] == 'k-fold':
             cv_iterator = self._k_fold_iterator
         elif self.cross_validation_settings['type'] == 'shuffle':
             cv_iterator = self._shuffle_iterator
@@ -210,33 +326,172 @@ class TextClassifier:
             raise ValueError('CV iterator type "{}" not recognized'
                              .format(self.cross_validation_settings['type']))
 
-        self._clf = self._fit_cv(clf_cls, X, y, cv_iterator)
+        if (self.cross_validation_settings is not None and
+                self.cross_validation_settings.get("scoring") == LIKELIHOOD_SCORING):
+            scoring = LIKELIHOOD_SCORING
+        else:
+            scoring = ACCURACY_SCORING
 
-        predictions = self._clf.predict(X)
-        acc = AccuracyScore(y, predictions)
-        logging.info("Final accuracy on training data: {:.1%}".format(acc))
-        for idx in range(len(predictions)):
-            if predictions[idx] != y[idx]:
-                logging.debug("Class {} mistaken for {}: {}"
-                              .format(y[idx], predictions[idx], queries[idx].get_raw_query()))
+        if self._meta_type == SUPER_LEARNER_TYPE:
+            if cv_iterator and scoring == LIKELIHOOD_SCORING:
+                # compute marginal likelihood contribution of each base classifier
+                all_base_clfs = self._base_clfs
+                losses = {}
+                for clf in all_base_clfs:
+                    self._base_clfs = {c: all_base_clfs[c] for c in all_base_clfs if c != clf}
+                    self._fit_super_learner(clf_cls, cv_iterator,
+                                            verbose=verbose, scoring=LIKELIHOOD_SCORING)
+                    losses[clf] = self.cv_loss_
+                self._base_clfs = all_base_clfs
+                self._fit_super_learner(clf_cls, cv_iterator,
+                                        verbose=verbose, scoring=LIKELIHOOD_SCORING)
+                losses['all'] = self.cv_loss_
+                diff_losses = {clf: losses[clf] - losses['all'] for clf in self._base_clfs}
+                logging.info("Marginal likelihood contribution for each base model: {}"
+                             .format(diff_losses))
+            else:
+                self._fit_super_learner(clf_cls, cv_iterator,
+                                        verbose=verbose, scoring=scoring)
+        else:
+            X = self.get_feature_matrix(queries, fit=True)
+            if cv_iterator is None:
+                self._clf = self._fit(clf_cls, X, y)
+            elif verbose is False:
+                self._clf = self._fit_cv_grid(clf_cls, X, y, cv_iterator, scoring=scoring)
+            else:
+                self._clf = self._fit_cv_verbose(clf_cls, X, y, cv_iterator, scoring=scoring)
+
+        pred_classes, pred_probs = self.predict_and_log_proba(queries)
+        predictions = self._class_encoder.transform(pred_classes)
+        self.train_acc_ = accuracy_score(y, predictions)
+        logging.info("Final accuracy on training data: {:.1%}".format(self.train_acc_))
+        if verbose:
+            for idx in range(len(predictions)):
+                if predictions[idx] != y[idx]:
+                    logging.debug(u"Class {} mistaken for {}: {}".format(
+                                  y[idx], predictions[idx], queries[idx].get_raw_query()))
+
+        return self
+
+    def _fit_super_learner(self, meta_clf, cv_iterator, verbose=False, scoring=ACCURACY_SCORING):
+        """
+        Trains a super-learner (stacked) classifier
+
+        Args:
+            meta_clf: the classifier class for the meta classifier
+            cv_iterator:
+            verbose:
+
+        Returns:
+            (TextClassifier): self
+        """
+        queries, classes = zip(*self._queries)  # unzip
+        predictions = []
+        m_classes = []
+        m_queries = []
+        # train and apply the base classifiers for each fold
+        for train_idx, test_idx in StratifiedKFold(classes, n_folds=10, random_state=1):
+            train_classes = [classes[i] for i in train_idx]
+            train_queries = [queries[i] for i in train_idx]
+            test_queries = [queries[i] for i in test_idx]
+            test_classes = [classes[i] for i in test_idx]
+            m_classes += test_classes
+            m_queries += test_queries
+
+            # TODO: parallelize
+            for base_model in self._base_clfs.values():
+                base_model.fit(train_queries, train_classes, verbose=False)
+
+            predictions.extend(self.extract_meta_features(test_queries))
+
+        m_X = self._meta_feat_vectorizer.fit_transform(predictions)
+        m_y = self._class_encoder.transform(m_classes)
+        self._queries = zip(m_queries, m_classes)
+
+        # train the meta classifier
+        if verbose is False:
+            self._clf = self._fit_cv_grid(meta_clf, m_X, m_y, cv_iterator, scoring=scoring)
+        else:
+            self._clf = self._fit_cv_verbose(meta_clf, m_X, m_y, cv_iterator, scoring=scoring)
+
+        # TODO: parallelize
+        # retrain the base models on all the data.
+        for base_model in self._base_clfs.values():
+            base_model.fit(queries, classes, verbose=False)
 
         return self
 
     def _k_fold_iterator(self, y):
         k = self.cross_validation_settings['k']
-        return StratifiedKFold(y, n_folds=k)
+        return StratifiedKFold(y, n_folds=k, shuffle=True)
 
     def _shuffle_iterator(self, y):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return StratifiedShuffleSplit(y, n_iter=n, test_size=1.0/k)
+        return StratifiedShuffleSplit(y, n_iter=n, test_size=1.0 / k)
 
-    def _fit_cv(self, classifier_type, X, y, cv_iterator):
-        """Trains a classifier with stratified cross-validation.
+    def _convert_settings(self, param_grid, y):
+        """
+        Convert the settings from the style given by the config
+        to the style passed in to the actual classifier.
 
-        Grid searches over hyperparameter settings and finds one with the
-        highest held-out accuracy, then uses those settings to train over
-        the full dataset.
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by parameter name
+
+        Returns:
+            (dict): revised param_grid
+        """
+        class_count = bincount(y)
+        classes = self._class_encoder.classes_
+
+        if 'class_weight' in param_grid:
+            param_grid['class_weight'] = [{k if type(k) is int else
+                                           self._class_encoder.transform(k): v
+                                           for k, v in cw_dict.items()}
+                                          for cw_dict in param_grid['class_weight']]
+        elif 'class_bias' in param_grid:
+            # interpolate between class_bias=0 => class_weight=None
+            # and class_bias=1 => class_weight='balanced'
+            param_grid['class_weight'] = []
+            for class_bias in param_grid['class_bias']:
+                # these weights are same as sklearn's class_weight='balanced'
+                balanced_w = [len(y) / (float(len(classes)) * c)
+                              for c in class_count]
+                balanced_tuples = zip(list(range(len(classes))), balanced_w)
+
+                param_grid['class_weight'].append({c: (1 - class_bias) + class_bias * w
+                                                   for c, w in balanced_tuples})
+            del param_grid['class_bias']
+
+        return param_grid
+
+    def _fit(self, classifier_type, X, y):
+        """Trains a classifier without cross-validation.
+
+        Args:
+            classifier_type (type): A multinomial classifier type. Must have
+                methods fit() and predict(), like LogisticRegression in
+                scikit-learn.
+            X (numpy.matrix): The feature matrix for a dataset.
+            y (numpy.array): The target output values.
+
+        Returns:
+            (object): An instance of classifier_type.
+        """
+
+        logging.info('Fitting {} text classifier without cross-validation'
+                     .format(classifier_type.__name__, ))
+
+        param_grid = self._convert_settings(self.grid_search_hyperparams, y)
+        settings = self._iter_settings(param_grid).next()
+
+        logging.info('Fitting text classifier with settings: {}'
+                     .format(settings))
+
+        return classifier_type(**settings).fit(X, y)
+
+    def _fit_cv_grid(self, classifier_type, X, y, cv_iterator, scoring=ACCURACY_SCORING):
+        """Efficiently trains a classifier with stratified cross-validation.
 
         Args:
             classifier_type (type): A multinomial classifier type. Must have
@@ -247,44 +502,84 @@ class TextClassifier:
             cv_iterator (callable): A cross-validation split generator over y
 
         Returns:
-            (object): An instance of classifier_type.
-        """
-        logging.info(
-            'Fitting text classifier by {} cross-validation with settings: {}'
-            .format(self.cross_validation_settings['type'],
-                    self.cross_validation_settings))
+            (object): An optimized instance of classifier_type.
 
-        best_accuracy = -1.0
+        Grid searches over hyperparameter settings and finds one with the
+        highest held-out accuracy, then uses those settings to train over
+        the full dataset. Summary scores are shown without error analysis.
+        """
+        logging.info('Fitting {} text classifier by parallel {} cross-validation with settings: {}'
+                     .format(classifier_type.__name__,
+                             self.cross_validation_settings['type'],
+                             self.cross_validation_settings))
+
+        param_grid = self._convert_settings(self.grid_search_hyperparams, y)
+        n_jobs = self.cross_validation_settings.get('n_jobs', -1)
+
+        logging.info('Doing grid search over {}'.format(param_grid))
+        grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring, param_grid=param_grid,
+                               cv=cv_iterator(y), verbose=1, n_jobs=n_jobs)
+        model = grid_cv.fit(X, y)
+
+        for candidate in model.grid_scores_:
+            logging.info('Candidate parameters: {}'
+                         .format(candidate.parameters))
+            std_err = (2 * numpy.std(candidate.cv_validation_scores) /
+                       math.sqrt(len(candidate.cv_validation_scores)))
+            if scoring == ACCURACY_SCORING:
+                logging.info('Candidate average accuracy: {:.2%} ± {:.2%}'
+                             .format(candidate.mean_validation_score, std_err))
+            elif scoring == LIKELIHOOD_SCORING:
+                logging.info('Candidate average log likelihood: {:.4} ± {:.4}'
+                             .format(candidate.mean_validation_score, std_err))
+        if scoring == ACCURACY_SCORING:
+            logging.info('Best accuracy: {:.2%}, settings: {}'
+                         .format(model.best_score_, model.best_params_))
+            self.cv_loss_ = 1 - model.best_score_
+        elif scoring == LIKELIHOOD_SCORING:
+            logging.info('Best log likelihood: {:.4}, settings: {}'
+                         .format(model.best_score_, model.best_params_))
+            self.cv_loss_ = - model.best_score_
+        return model.best_estimator_
+
+    def _fit_cv_verbose(self, classifier_type, X, y, cv_iterator, scoring=ACCURACY_SCORING):
+        """Trains a classifier with stratified cross-validation.
+
+        Args:
+            classifier_type (type): A multinomial classifier type. Must have
+                methods fit() and predict(), like LogisticRegression in
+                scikit-learn.
+            X (numpy.matrix): The feature matrix for a dataset.
+            y (numpy.array): The target output values.
+            cv_iterator (callable): A cross-validation split generator over y
+
+        Returns:
+            (object): An optimized instance of classifier_type.
+
+        Grid searches over hyperparameter settings and finds one with the
+        highest held-out accuracy, then uses those settings to train over
+        the full dataset. Error analysis is provided for each candidate model.
+        """
+        logging.info('Fitting {} text classifier by verbose {} cross-validation with settings: {}'
+                     .format(classifier_type.__name__,
+                             self.cross_validation_settings['type'],
+                             self.cross_validation_settings))
+
+        best_accuracy = 0
+        best_likelihood = _NEG_INF
         best_settings = None
         classes = self._class_encoder.classes_
-        class_count = bincount(y)
 
-        for settings in self._iter_settings():
+        param_grid = self._convert_settings(self.grid_search_hyperparams, y)
 
-            logging.info('Fitting text classifier with settings: {}'.format(
-                settings))
-            if 'class_weight' in settings:
-                # translate string keys to class codes
-                cw_dict = {self._class_encoder.transform(k): v
-                           for k, v in settings['class_weight'].items()}
-                settings['class_weight'] = cw_dict
-            elif 'class_bias' in settings:
-                # interpolate between class_bias=0 => class_weight=None
-                # and class_bias=1 => class_weight='balanced'
-                class_bias = settings['class_bias']
+        for settings in self._iter_settings(param_grid):
 
-                # these weights are same as sklearn's class_weight='balanced'
-                balanced_w = [len(y) / (float(len(classes)) * c)
-                              for c in class_count]
-                balanced_tuples = zip(list(range(len(classes))), balanced_w)
-
-                settings['class_weight'] = {c: (1 - class_bias) + class_bias * w
-                                            for c, w in balanced_tuples}
-                del settings['class_bias']
-
+            logging.info('Fitting text classifier with settings: {}'.format(settings))
 
             clf = classifier_type(**settings)
-            scores = []
+
+            accuracies = []
+            likelihoods = []
             errors = []
             padding = max([len(c) for c in classes])
             int_padding = 4
@@ -292,23 +587,39 @@ class TextClassifier:
             for train_idx, test_idx in cv_iterator(y):
                 clf.fit(X[train_idx], y[train_idx])
                 predictions = clf.predict(X[test_idx])
-                scores.append(AccuracyScore(y[test_idx], predictions))
+                try:
+                    probs = clf.predict_proba(X[test_idx])
+                except AttributeError:
+                    # in case clf doesn't supply probabilities, assume 1 vs 0
+                    probs = numpy.array([[1 if n == predictions[i] else 10E-10
+                                         for n in range(len(classes))]
+                                        for i in range(len(predictions))])
+                accuracies.append(accuracy_score(y[test_idx], predictions))
+                likelihoods.append(-log_loss(y[test_idx], probs, normalize=True))
 
                 # Produce categorization error analysis
                 for idx, (i, j) in enumerate(zip(y[test_idx], predictions)):
                     if i != j:
                         real_idx = test_idx[idx]
                         errors.append((i, j))
-                        logging.debug(u"Class {} mistaken for {}: {}".format(
-                            i, j, self._queries[real_idx][0].get_raw_query()))
-            # format categorization error table
+                        logging.debug(u"Class {} mistaken for {}: {}"
+                                      .format(i, j, self._queries[real_idx][0].get_raw_query()))
 
+            accuracy = mean(accuracies)
+            likelihood = mean(likelihoods)
+            if ((scoring == ACCURACY_SCORING and accuracy > best_accuracy) or
+                    scoring == LIKELIHOOD_SCORING and likelihood > best_likelihood):
+                best_accuracy = accuracy
+                best_likelihood = likelihood
+                best_settings = settings
+
+            # format categorization error table
             table = Counter(errors)
             row_totals = {}
             logging.info('Error analysis:'.ljust(padding + 5 + int_padding * 2) +
-                          ''.rjust((int_padding + 2) * len(classes) / 2 - 5, '_') +
-                          ' predicted ' +
-                          ''.rjust((int_padding + 2) * len(classes) / 2 - 5, '_'))
+                         ''.rjust((int_padding + 2) * len(classes) / 2 - 5, '_') +
+                         ' predicted ' +
+                         ''.rjust((int_padding + 2) * len(classes) / 2 - 5, '_'))
             logging.info('  '.join(['gold'.rjust(padding), 'idx'.rjust(int_padding),
                                     'sum'.rjust(int_padding)] +
                          ["{0: >{1}}".format(c, int_padding) for c in range(len(classes))]))
@@ -322,17 +633,44 @@ class TextClassifier:
 
                 logging.info('  '.join(row))
 
-            accuracy_score = mean(scores)
-            std_err = std(scores) / math.sqrt(len(scores))
-            if accuracy_score > best_accuracy:
-                best_accuracy = accuracy_score
-                best_settings = settings
-            logging.info('Average CV accuracy: {:.2%} ± {:.2%}'.format(
-                accuracy_score, std_err*2))
+            std_err = std(accuracies) / math.sqrt(len(accuracies))
+            logging.info('Candidate average CV accuracy: {:.2%} ± {:.2%}'
+                         .format(accuracy, std_err * 2))
+            loss_std_err = std(likelihoods) / math.sqrt(len(likelihoods))
+            logging.info('Candidate average CV log likelihood: {:.2} ± {:.2}'
+                         .format(likelihood, loss_std_err * 2))
             logging.debug('Errors per gold class: {}'.format(row_totals))
-        logging.info('Best accuracy: {:.2%}, settings: {}'.format(
-            best_accuracy, best_settings))
+
+        logging.info('Best settings: {}'.format(best_settings))
+        logging.info('Accuracy of best settings: {:.2%}'.format(best_accuracy))
+        logging.info('Log likelihood of best settings: {:.2}'.format(best_likelihood))
+        if scoring == ACCURACY_SCORING:
+            self.cv_loss_ = 1 - best_accuracy
+        elif scoring == LIKELIHOOD_SCORING:
+            self.cv_loss_ = - best_likelihood
+
         return classifier_type(**best_settings).fit(X, y)
+
+    def extract_meta_features(self, queries):
+        """Generates the set of features for the super-learner from a list of queries
+
+        Args:
+            queries (list of Query): The queries
+
+        Returns:
+            (list of dict): meta features as feature_name => feature_value pairs
+        """
+        min_lprob = -10.0
+        preds = []
+        for idx, q in enumerate(queries):
+            meta_feats = {}
+            for base_model_conf, base_model in self._base_clfs.items():
+                p_class, p_prob = base_model.predict_and_log_proba([q])
+                meta_feats.update({"{}|class:{}".format(base_model_conf, p_class[0]): 1})
+                meta_feats.update({"{}|class:{}|prob".format(base_model_conf, c): max(p, min_lprob)
+                                   for c, p in p_prob[0].items()})
+            preds.append(meta_feats)
+        return preds
 
     def get_feature_matrix(self, queries, fit=False):
         """Transforms a list of Query objects into a feature matrix.
@@ -360,7 +698,12 @@ class TextClassifier:
         Returns:
             (list of str): The predicted labels for each query.
         """
-        X = self.get_feature_matrix(queries)
+
+        if self._base_clfs:
+            preds = self.extract_meta_features(queries)
+            X = self._meta_feat_vectorizer.transform(preds)
+        else:
+            X = self.get_feature_matrix(queries)
         predictions = self._clf.predict(X)
         return self._class_encoder.inverse_transform(predictions)
 
@@ -385,6 +728,7 @@ class TextClassifier:
 
         Args:
             queries (list of Query): The queries.
+            verbose (bool): calculate and print detailed analysis
             gold (list of int): The gold class index for each query. For analysis.
 
         Returns:
@@ -392,69 +736,26 @@ class TextClassifier:
                 predict(), the second element is the same as in
                 predict_log_proba().
         """
-        X = self.get_feature_matrix(queries)
+
+        # Prediction is somewhat different if we're using ensemble methods.
+        if self._base_clfs:
+            predictions = self.extract_meta_features(queries)
+            X = self._meta_feat_vectorizer.transform(predictions)
+        else:
+            X = self.get_feature_matrix(queries)
         predictions = []
         log_proba = []
         for i, row in enumerate(self._clf.predict_log_proba(X)):
             class_index = row.argmax()
-            predictions.append(
-                self._class_encoder.inverse_transform([class_index])[0])
+            predictions.append(self._class_encoder.inverse_transform([class_index])[0])
             log_proba.append(dict(
                 (self._class_encoder.inverse_transform([j])[0], row[j])
                 for j in range(len(row))))
 
             if verbose:
-                pred_class = predictions[-1]
-                gold = [gold] if isinstance(gold, int) else gold
-                print("Predicted: " + pred_class)
-                columns = 'FEATURE                       \t   VALUE\t  PRED_W\t  PRED_P'
-
                 if gold is not None:
-                    gold_class = self._class_encoder.inverse_transform([gold[i]])
-                    if not isinstance(gold_class, str):
-                        gold_class = gold_class[0]
-                    print("Gold:      " + gold_class)
-                    columns += '\t  GOLD_W\t  GOLD_P\t    DIFF'
-                print
-                print(columns)
-                print
-                import operator
-                # Get all active features sorted alphabetically by name
-                features = sorted(
-                    self.extract_features(queries[i]).items(),
-                    key=operator.itemgetter(0)
-                )
-                for feature in features:
-                    feat_name = feature[0]
-                    feat_value = feature[1]
-
-                    # Features we haven't seen before won't be in our vectorizer
-                    # e.g., an exact match feature for a query we've never seen before
-                    if feat_name not in self._feat_vectorizer.vocabulary_:
-                        continue
-
-                    if len(self._class_encoder.classes_) == 2 and class_index == 1:
-                        weight = 0
-                    else:
-                        weight = self._clf.coef_[class_index,
-                            self._feat_vectorizer.vocabulary_[feat_name]]
-                    product = feat_value * weight
-
-                    if gold is None:
-                        print('{0:30}\t{1:8.3f}\t{2:8.3f}\t{3:8.3f}'.format(
-                            feat_name, feat_value, weight, product))
-                    else:
-                        if len(self._class_encoder.classes_) == 2 and gold[i] == 1:
-                            gold_w = 0
-                        else:
-                            gold_w = self._clf.coef_[gold[i],
-                                self._feat_vectorizer.vocabulary_[feat_name]]
-                        gold_p = feat_value * gold_w
-                        diff = gold_p - product
-
-                        print('{0:30}\t{1:8.3f}\t{2:8.3f}\t{3:8.3f}\t{4:8.3f}\t{5:8.3f}\t{6:+8.3f}'.format(
-                            feat_name, feat_value, weight, product, gold_w, gold_p, diff))
-                print
+                    gold = gold[i]
+                self._print_query_inspection(queries[i], class_index, gold)
 
         # JSON can't reliably encode infinity, so replace it with large number
         for row in log_proba:
@@ -462,6 +763,87 @@ class TextClassifier:
                 if row[label] == -Infinity:
                     row[label] = _NEG_INF
         return predictions, log_proba
+
+    def _print_query_inspection(self, query, pred_class, gold_class):
+        pred_label = self._class_encoder.inverse_transform([pred_class])[0]
+
+        if self._base_clfs:
+            # super-learner
+            features = self.extract_meta_features([query])[0]
+            vectorizer = self._meta_feat_vectorizer
+        else:
+            features = self.extract_features(query)
+            vectorizer = self._feat_vectorizer
+
+        print("Predicted: " + pred_label)
+        columns = 'FEATURE                       \t   VALUE\t  PRED_W\t  PRED_P'
+
+        if gold_class is not None:
+            gold_label = self._class_encoder.inverse_transform([gold_class])[0]
+            print("Gold:      " + gold_label)
+            columns += '\t  GOLD_W\t  GOLD_P\t    DIFF'
+        print
+        print(columns)
+        print
+
+        # Get all active features sorted alphabetically by name
+        features = sorted(features.items(), key=operator.itemgetter(0))
+        name_format = '{{0:{}}}'.format(max([len(f[0]) for f in features] + [20]))
+        for feature in features:
+            feat_name = feature[0]
+            feat_value = feature[1]
+
+            # Features we haven't seen before won't be in our vectorizer
+            # e.g., an exact match feature for a query we've never seen before
+            if feat_name not in vectorizer.vocabulary_:
+                continue
+
+            if len(self._class_encoder.classes_) == 2 and pred_class == 1:
+                weight = 0
+            else:
+                weight = self._clf.coef_[pred_class, vectorizer.vocabulary_[feat_name]]
+            product = feat_value * weight
+
+            if gold_class is None:
+                print(name_format + '\t{1:8.3f}\t{2:8.3f}\t{3:8.3f}'
+                      .format(feat_name, feat_value, weight, product))
+            else:
+                if len(self._class_encoder.classes_) == 2 and gold_class == 1:
+                    gold_w = 0
+                else:
+                    gold_w = self._clf.coef_[gold_class, vectorizer.vocabulary_[feat_name]]
+                gold_p = feat_value * gold_w
+                diff = gold_p - product
+
+                print(name_format + '\t{1:8.3f}\t{2:8.3f}\t{3:8.3f}\t{4:8.3f}\t{5:8.3f}\t{6:+8.3f}'
+                      .format(feat_name, feat_value, weight, product, gold_w, gold_p, diff))
+        print
+
+    def requires_resource(self, resource):
+        for f in self.feat_specs:
+            if ('requirements' in FEATURE_NAME_MAP[f].__dict__ and
+                    resource in FEATURE_NAME_MAP[f].requirements):
+                return True
+        return False
+
+
+def requires(resource):
+    """
+    Decorator to enforce the resource dependencies of the active feature extractors
+
+    Args:
+        resource (str): the key of a classifier resource which must be initialized before
+            the given feature extractor is used
+
+    Returns:
+        (func): the feature extractor
+    """
+    def add_resource(func):
+        req = func.__dict__.get('requirements', [])
+        func.requirements = req + [resource]
+        return func
+
+    return add_resource
 
 
 def mask_numerics(token):
@@ -471,6 +853,7 @@ def mask_numerics(token):
         return re.sub('\d', '8', token)
 
 
+@requires(WORD_FREQ_RSC)
 def extract_ngrams(lengths=(1,)):
     """
     Extract ngrams of some specified lengths.
@@ -488,11 +871,11 @@ def extract_ngrams(lengths=(1,)):
         for length in lengths:
             for i in range(len(tokens) - length + 1):
                 ngram = []
-                for token in tokens[i:i+length]:
+                for token in tokens[i:i + length]:
                     # We never want to differentiate between number tokens.
                     # We may need to convert number words too, like "eighty".
                     tok = mask_numerics(token)
-                    if tok not in resources['freq']:
+                    if tok not in resources[WORD_FREQ_RSC]:
                         tok = 'OOV'
                     ngram.append(tok)
                 ngram_counter.update(['ngram:' + '|'.join(ngram)])
@@ -501,6 +884,7 @@ def extract_ngrams(lengths=(1,)):
     return extractor
 
 
+@requires(WORD_FREQ_RSC)
 def extract_edge_ngrams(lengths=(1,)):
     """
     Extract ngrams of some specified lengths.
@@ -518,10 +902,10 @@ def extract_edge_ngrams(lengths=(1,)):
         for length in lengths:
             if length < len(tokens):
                 left_tokens = [mask_numerics(tok) for tok in tokens[:length]]
-                left_tokens = [tok if resources['freq'].get(tok, 0) > 1 else 'OOV'
+                left_tokens = [tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else 'OOV'
                                for tok in left_tokens]
                 right_tokens = [mask_numerics(tok) for tok in tokens[-length:]]
-                right_tokens = [tok if resources['freq'].get(tok, 0) > 1 else 'OOV'
+                right_tokens = [tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else 'OOV'
                                 for tok in right_tokens]
                 feats.update({'left-edge|{}:{}'.format(length, '|'.join(left_tokens)): 1})
                 feats.update({'right-edge|{}:{}'.format(length, '|'.join(right_tokens)): 1})
@@ -531,6 +915,7 @@ def extract_edge_ngrams(lengths=(1,)):
     return extractor
 
 
+@requires(WORD_FREQ_RSC)
 def extract_freq(bins=5):
     """
     Extract frequency bin features.
@@ -543,9 +928,9 @@ def extract_freq(bins=5):
             count of query tokens within each frequency bin.
 
     """
-    def extractor(query, resources, **kwargs):
+    def extractor(query, resources):
         tokens = query.split()
-        freq_dict = resources['freq']
+        freq_dict = resources[WORD_FREQ_RSC]
         max_freq = freq_dict.most_common(1)[0][1]
         freq_features = defaultdict(int)
         for tok in tokens:
@@ -573,12 +958,11 @@ def extract_freq(bins=5):
     return extractor
 
 
+@requires(GAZETTEER_RSC)
+@requires(WORD_FREQ_RSC)
 def extract_gaz_freq():
     """
     Extract frequency bin features for each gazetteer
-
-    Args:
-        bins (int): The number of frequency bins (besides OOV)
 
     Returns:
         (function): A feature extraction function that returns the log of the
@@ -588,8 +972,8 @@ def extract_gaz_freq():
         tokens = query.split()
         freq_features = defaultdict(int)
         for tok in tokens:
-            query_freq = 'OOV' if resources['freq'].get(tok) is None else 'IV'
-            for domain, gazes in resources['gaz'].items():
+            query_freq = 'OOV' if resources[WORD_FREQ_RSC].get(tok) is None else 'IV'
+            for domain, gazes in resources[GAZETTEER_RSC].items():
                 for gaz_name, gaz in gazes.items():
                     freq = len(gaz['index'].get(tok, []))
                     if freq > 0:
@@ -608,6 +992,7 @@ def extract_gaz_freq():
     return extractor
 
 
+@requires(GAZETTEER_RSC)
 def extract_in_gaz_feature(scaling=1):
 
     def extractor(query, resources):
@@ -615,14 +1000,16 @@ def extract_in_gaz_feature(scaling=1):
         tokens = query.split()
         ngrams = []
         for i in range(1, (len(tokens) + 1)):
-            ngrams.extend(find_ngrams(tokens, i))
+            ngrams.extend(util.find_ngrams(tokens, i))
         for ngram in ngrams:
-            for domain, gazes in resources['gaz'].items():
+            for domain, gazes in resources[GAZETTEER_RSC].items():
                 for gaz_name, gaz in gazes.items():
                     if ngram in gaz['edict']:
                         popularity = gaz['edict'].get(ngram, 0.0)
-                        in_gaz_features[domain + '_' + gaz_name + '_ratio_pop'] += (len(ngram)/float(len(query))) * scaling * popularity
-                        in_gaz_features[domain + '_' + gaz_name + '_ratio'] += (len(ngram)/float(len(query))) * scaling
+                        ratio_pop = (len(ngram) / float(len(query))) * scaling * popularity
+                        in_gaz_features[domain + '_' + gaz_name + '_ratio_pop'] += ratio_pop
+                        ratio = (len(ngram) / float(len(query))) * scaling
+                        in_gaz_features[domain + '_' + gaz_name + '_ratio'] += ratio
                         in_gaz_features[domain + '_' + gaz_name + '_pop'] += popularity
                         in_gaz_features[domain + '_' + gaz_name + '_exists'] = 1
 
@@ -651,6 +1038,7 @@ def extract_length():
     return extractor
 
 
+@requires(QUERY_FREQ_RSC)
 def extract_query_string(scaling=1000):
     """
     Extract whole query string as a feature.
@@ -663,19 +1051,12 @@ def extract_query_string(scaling=1000):
 
     def extractor(query, resources):
         query_key = u'<{}>'.format(query)
-        if query_key not in resources['freq']:
+        if query_key not in resources[QUERY_FREQ_RSC]:
             query_key = '<OOV>'
         return {'exact={}'.format(query_key): scaling}
 
     return extractor
 
-# Generate all n-gram combinations from a list of strings
-def find_ngrams(input_list, n):
-  result = []
-  ngrams = zip(*[input_list[i:] for i in range(n)])
-  for ngram in ngrams:
-    result.append(" ".join(ngram))
-  return result
 
 FEATURE_NAME_MAP = {
     'bag-of-words': extract_ngrams,

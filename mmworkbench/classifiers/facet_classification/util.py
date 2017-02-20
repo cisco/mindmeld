@@ -1,7 +1,7 @@
 import itertools
 import logging
 
-from mmserver import mallard
+from mmworkbench import mallard
 
 START_TAG = 'START'
 B_TAG = 'B'
@@ -136,13 +136,13 @@ def get_facets_from_tags(query, tags):
         # again.
         entity = ' '.join(query.get_normalized_tokens()[start:end])
         for raw_num_candidate in mallard.parse_numerics(entity)['data']:
-            num_candidate = mallard.item_to_facet(raw_num_candidate,
-                query.get_normalized_marked_down_query())
+            num_candidate = mallard.item_to_facet(
+                raw_num_candidate, query.get_normalized_marked_down_query())
             # If there is numeric candidate matches the entire entity, then
             # fiddle with its indices.
             if (num_candidate['start'] == 0 and
-                num_candidate['end'] == end - start - 1 and
-                num_candidate['type'] == ntype):
+                    num_candidate['end'] == end - start - 1 and
+                    num_candidate['type'] == ntype):
 
                 num_candidate['start'] = start
                 num_candidate['end'] = end
@@ -264,6 +264,5 @@ def update_features_sequence(feat_seq, update_feat_seq):
             mutated.
         update_feat_seq (list of dict): The list of features to update with.
     """
-    for i in range(len(feat_seq)): feat_seq[i].update(update_feat_seq[i])
-
-
+    for i in range(len(feat_seq)):
+        feat_seq[i].update(update_feat_seq[i])

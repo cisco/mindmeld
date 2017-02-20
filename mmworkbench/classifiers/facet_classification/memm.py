@@ -10,9 +10,9 @@ from scipy.sparse import vstack, hstack
 import numpy
 import logging
 
-from . import util
-from . import sequence_features
-from .base_model import FacetClassifier
+import util
+import sequence_features
+from mmworkbench.facet_classification import FacetClassifier
 
 DEFAULT_FEATURES = {
     'bag-of-words': {
@@ -26,6 +26,7 @@ DEFAULT_FEATURES = {
         'start_positions': [-1, 0, 1]
     }
 }
+
 
 class MemmFacetClassifier(FacetClassifier):
     """A maximum-entropy Markov model for facet prediction.
@@ -71,7 +72,8 @@ class MemmFacetClassifier(FacetClassifier):
         attributes = self.__dict__.copy()
         saved_resources = ['num_types']
         for key in attributes['_resources'].keys():
-            if key not in saved_resources: del attributes['_resources'][key]
+            if key not in saved_resources:
+                del attributes['_resources'][key]
         return attributes
 
     def _extract_query_features(self, query):
@@ -169,6 +171,11 @@ class MemmFacetClassifier(FacetClassifier):
         if verbose:
             self._print_predict_data(data)
 
+        # Assign a confidence value for each facet.
+        for e in facets:
+            max_cost = min([data['probs'][i] for i in range(e['tstart'], e['tend'])])
+            e['confidence'] = numpy.exp(max_cost)
+
         return facets, num_facets, data
 
     def _predict(self, query, verbose=False):
@@ -185,6 +192,7 @@ class MemmFacetClassifier(FacetClassifier):
         reference_probs = []
         confidence_data = []
         active_features = []
+        all_log_probs = []
 
         # TODO (julius): Use the maximum likelihood Viterbi parse instead of
         # picking the max at each step.
@@ -206,7 +214,7 @@ class MemmFacetClassifier(FacetClassifier):
                 # training data, the classifier will not be able to encode the
                 # tag or evaluate its probability. To prevent complete failure
                 # we use the Outside tag for reference.
-                out_tag = '|'.join([util.O_TAG,'', util.O_TAG,''])
+                out_tag = '|'.join([util.O_TAG, '', util.O_TAG, ''])
                 reference_class = self._class_encoder.transform([out_tag])
                 logging.warning('Unknown tag {} replaced with {}'.format(
                     reference_tags[i], out_tag))
@@ -219,6 +227,14 @@ class MemmFacetClassifier(FacetClassifier):
             predicted_probs.append(log_probs[0][prediction[0]])
             reference_probs.append(log_probs[0][reference_class])
             confidence_data.append(confidence_dump)
+
+            # Return the log probability information
+            tag_labels = self._class_encoder.inverse_transform(range(len(log_probs[0])))
+            log_prob_dict = {}
+            for j in xrange(len(tag_labels)):
+                log_prob_dict[tag_labels[j]] = log_probs[0][j]
+            all_log_probs.append(log_prob_dict)
+
             active_features.append(feat_names)
 
             if i + 1 < len(query_features):
@@ -234,7 +250,8 @@ class MemmFacetClassifier(FacetClassifier):
                 'probs': predicted_probs,
                 'gold_probs': reference_probs,
                 'conf_data': confidence_data,
-                'feat_names': active_features}
+                'feat_names': active_features,
+                'all_log_probs': all_log_probs}
 
         return facets, num_facets, data
 
@@ -242,31 +259,31 @@ class MemmFacetClassifier(FacetClassifier):
     def _print_predict_data(data):
         """Print diagnostic prediction data for a single query"""
 
-        print('\t'.join(["{:18}".format(s) for s in
-                         ['Token', 'Pred Tag', '(Gold Tag)', '(Log Prob)']]))
-        print('\t'.join(['-' * 18 for _ in range(4)]))
+        print '\t'.join(["{:18}".format(s) for s in
+                         ['Token', 'Pred Tag', '(Gold Tag)', '(Log Prob)']])
+        print '\t'.join(['-' * 18 for _ in range(4)])
 
         for idx, token in enumerate(data['tokens']):
             if data['tags'][idx] == data['gold_tags'][idx]:
                 row_dat = [token, data['tags'][idx], '"']
-                print('\t'.join(["{:18}".format(s) for s in row_dat]))
+                print '\t'.join(["{:18}".format(s) for s in row_dat])
                 print
             else:
                 row_dat = [token, data['tags'][idx], data['gold_tags'][idx],
-                       data['gold_probs'][idx] - data['probs'][idx]]
-                print('\t'.join(["{:18}".format(s) for s in row_dat]))
+                           data['gold_probs'][idx] - data['probs'][idx]]
+                print '\t'.join(["{:18}".format(s) for s in row_dat])
                 names = data['feat_names'][idx]
                 head = ("feat_val", "pred_w", "gold_w",
                         "pred_p", "gold_p", "diff", "name")
-                print('\t', '\t'.join(['-' * 8 for _ in range(7)]))
-                print('\t', '\t'.join(["{:>8}"] * 6 + ["{}"]).format(*head))
-                print('\t', '\t'.join(['-' * 8 for _ in range(7)]))
+                print '\t', '\t'.join(['-' * 8 for _ in range(7)])
+                print '\t', '\t'.join(["{:>8}"] * 6 + ["{}"]).format(*head)
+                print '\t', '\t'.join(['-' * 8 for _ in range(7)])
                 format_str = '\t'.join(["{:8.3f}"] * 6 + ["{}"])
 
                 for j, row in enumerate(data['conf_data'][idx].T):
                     row = list(row) + [names[j]]
-                    print('\t', format_str.format(*row))
-                print('\t', '\t'.join(['-' * 8 for _ in range(7)]))
+                    print '\t', format_str.format(*row)
+                print '\t', '\t'.join(['-' * 8 for _ in range(7)])
 
     def _decompose_confidence(self, feat_vec, classes):
 

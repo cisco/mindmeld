@@ -10,6 +10,7 @@ from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 
+
 class FacetClassifier(object):
     """A machine learning classifier for facets.
 
@@ -33,21 +34,21 @@ class FacetClassifier(object):
         self.feat_specs = features
 
     @classmethod
-    def from_config(cls, config, model_name):
+    def from_config(cls, config, model_configuration):
         """Initializes a FacetClassifier instance from config file data.
 
         Args:
             config (dict): The Python representation of a parsed config file.
-            model_name (str): One of the keys in config['models'].
+            model_configuration (str): One of the keys in config['models'].
 
         Returns:
             (FacetClassifier): A FacetClassifier instance initialized with the
-                settings from the config entry given by model_name.
+                settings from the config entry given by model_configuration.
         """
-        model_config_entry = config['models'].get(model_name)
+        model_config_entry = config['models'].get(model_configuration)
         if not model_config_entry:
             error_msg = "Model config does not contain a model named '{}'"
-            raise ValueError(error_msg.format(model_name))
+            raise ValueError(error_msg.format(model_configuration))
 
         params = model_config_entry.get("model-parameter-choices")
         cv_settings = model_config_entry.get("cross-validation-settings")
@@ -55,12 +56,12 @@ class FacetClassifier(object):
         features = model_config_entry.get("features")
 
         if model_config_entry.get("model-type",
-                    model_config_entry.get("classifier-type")) == "memm":
+                                  model_config_entry.get("classifier-type")) == "memm":
             from . import memm
             return memm.MemmFacetClassifier(params, cv_settings,
                                             clf_settings, features)
         elif model_config_entry.get("model-type",
-                    model_config_entry.get("classifier-type")) == "ngram":
+                                    model_config_entry.get("classifier-type")) == "ngram":
             from . import ngram
             return ngram.NgramFacetClassifier(params, cv_settings)
         else:
@@ -145,7 +146,8 @@ class FacetClassifier(object):
 
     def _groups_k_fold_iterator(self, groups):
         k = self.cross_validation_settings['k']
-        n = self.cross_validation_settings.get('n', k)
+        # n = self.cross_validation_settings.get('n', k)
+        # TODO: should this be `n_folds=n`?
         return cross_val.LabelKFold(groups, n_folds=k)
 
     def _groups_shuffle_iterator(self, groups):

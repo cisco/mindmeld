@@ -3,6 +3,9 @@ import re
 
 import util
 
+from mmworkbench import util as mmutil
+
+
 def get_feature_template(template):
     return FEATURE_NAME_MAP[template]
 
@@ -49,8 +52,8 @@ def extract_in_gaz_features():
                 # Features for ngram identity after the span
                 feat_name = feat_name_prefix + '|ngram-after|length:{}'.format(
                     1)
-                ('in-gaz|ngram-after|length:{}|type:{}|pos:{}'
-                             .format(1, ftype, pos_attr))
+                ('in-gaz|ngram-after|length:{}|type:{}|pos:{}'.format(
+                    1, ftype, pos_attr))
                 feat_seq[i][feat_name] = get_ngram(tokens, end, 1)
                 feat_name = feat_name_prefix + '|ngram-after|length:{}'.format(
                     2)
@@ -103,8 +106,8 @@ def extract_in_gaz_features():
 
             return feat_seq
 
-        def get_same_start_span_conflict_features(
-            query, start, end_1, end_2, ftype_1, ftype_2, entity_1, entity_2):
+        def get_same_start_span_conflict_features(query, start, end_1, end_2, ftype_1, ftype_2,
+                                                  entity_1, entity_2):
             feat_seq = [{} for _ in query.get_normalized_tokens()]
             for i in range(start, min(end_1, end_2)):
                 feat_name_prefix = 'in-gaz|conflict|same-start|'
@@ -162,7 +165,8 @@ def extract_in_gaz_features():
         for num_facet in num_facets:
             for gaz_name, gaz in domain_gazes.items():
                 flattened_token = '@' + num_facet['type'] + '@'
-                if flattened_token not in gaz['index']: continue
+                if flattened_token not in gaz['index']:
+                    continue
                 for start in range(num_facet['start']+1):
                     for end in range(num_facet['end']+1, len(tokens)+1):
                         ngram = ' '.join(
@@ -181,7 +185,8 @@ def extract_in_gaz_features():
             util.update_features_sequence(feat_seq, span_feat_seq)
 
             for other_span in in_gaz_spans:
-                if other_span[0] >= span[1]: break
+                if other_span[0] >= span[1]:
+                    break
                 # For now, if two spans of the same type start at the same
                 # place, take the longer one.
                 if other_span[0] == span[0] and other_span[2] == span[2]:
@@ -310,8 +315,7 @@ def extract_in_gaz_span_features():
                 feat_name = feat_prefix + '|log-char-len'
                 feat_seq[end][feat_name] = math.log(len(entity))
                 feat_name = feat_prefix + '|pct-char-len'
-                feat_seq[end][feat_name] = (float(len(entity)) /
-                                          len(' '.join(tokens)))
+                feat_seq[end][feat_name] = float(len(entity)) / len(' '.join(tokens))
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[end][feat_name] = p_total + p_joint - p_ftype - p_entity
                 feat_name = feat_prefix + '|p_fe'
@@ -395,7 +399,8 @@ def extract_in_gaz_span_features():
                                     and (num_facet_j['end'] < end)
                                     and (num_facet_j['end'] < num_facet_i['start']
                                          or num_facet_i['end'] < num_facet_j['start'])):
-                                    ngram, ntoks2 = get_flattened_ngram(ntoks, start, end, num_facet_j, start)
+                                    ngram, ntoks2 = get_flattened_ngram(
+                                        ntoks, start, end, num_facet_j, start)
                                     if ngram in gaz['edict']:
                                         in_gaz_spans.append((start, end, gaz_name, ngram))
 
@@ -414,7 +419,8 @@ def extract_in_gaz_span_features():
         feat_seq = [{} for _ in query.get_normalized_tokens()]
         num_types = []
         for emap in resources['entity_maps']['entities']:
-            if emap.get('numeric'): num_types.append(emap.get('numeric'))
+            if emap.get('numeric'):
+                num_types.append(emap.get('numeric'))
 
         in_gaz_spans = get_gaz_spans(query, domain_gazes, num_types)
 
@@ -428,7 +434,8 @@ def extract_in_gaz_span_features():
             # logging.debug(span_feat_seq)
 
             for other_span in in_gaz_spans:
-                if other_span[0] >= span[1]: break
+                if other_span[0] >= span[1]:
+                    break
                 # For now, if two spans of the same type start at the same
                 # place, take the longer one.
                 if other_span[0] == span[0] and other_span[2] == span[2]:
@@ -457,18 +464,21 @@ def extract_in_gaz_ngram_features():
             for i in range(len(feat_seq)):
                 feat_prefix = 'in-gaz-ngram|type:{}'.format(ftype)
                 feat_name = feat_prefix + '|idf-0'
-                feat_seq[i][feat_name] = math.log(len(gazes[ftype]['index'][get_ngram(tokens, i, 1)]) + 1)
+                feat_seq[i][feat_name] = math.log(
+                    len(gazes[ftype]['index'][get_ngram(tokens, i, 1)]) + 1)
                 feat_name = feat_prefix + '|idf-1'
-                feat_seq[i][feat_name] = math.log(len(gazes[ftype]['index'][get_ngram(tokens, i-1, 2)]) + 1)
+                feat_seq[i][feat_name] = math.log(
+                    len(gazes[ftype]['index'][get_ngram(tokens, i-1, 2)]) + 1)
                 feat_name = feat_prefix + '|idf+1'
-                feat_seq[i][feat_name] = math.log(len(gazes[ftype]['index'][get_ngram(tokens, i, 2)]) + 1)
+                feat_seq[i][feat_name] = math.log(
+                    len(gazes[ftype]['index'][get_ngram(tokens, i, 2)]) + 1)
 
                 # entity PMI and conditional prob
                 p_total = math.log(sum([g['total_entities']
                                         for g in gazes.values()]) + 1) / 2
                 p_ftype = math.log(gazes[ftype]['total_entities'] + 1)
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i, 1)])
-                                    for g in gazes.values()]) + 1)
+                                        for g in gazes.values()]) + 1)
                 p_joint = math.log(len(gazes[ftype]['index'][get_ngram(tokens, i, 1)]) + 1)
                 feat_name = feat_prefix + '|pmi_1'
                 feat_seq[i][feat_name] = p_total + p_joint - p_ftype - p_ngram
@@ -555,7 +565,7 @@ def extract_numeric_candidate_features(start_positions=(0,)):
     def extractor(query, resources):
         feat_seq = [{} for _ in query.get_normalized_tokens()]
         num_facets = query.get_candidate_numeric_facets(resources['num_types'])
-        resolve_conflicts([num_facets])
+        mmutil.resolve_conflicts([num_facets])
         for f in num_facets:
             for i in range(f['start'], f['end']+1):
                 for j in start_positions:
@@ -570,45 +580,6 @@ def extract_numeric_candidate_features(start_positions=(0,)):
 
     return extractor
 
-
-# This method takes a list containing all facets for a set of queries, and it resolves any
-# facet conflicts.  The provided list is modified with replacement.  If two facets in a query
-# conflict with each other, use the following logic.  If the target facet is a subset of another
-# facet, then delete the target facet.  If the target facet shares the identical span as another
-# facet, then keep the one with the highest confidence.  If the target facet overlaps with another
-# facet, then keep the one with the highest confidence.
-def resolve_conflicts(all_facets):
-    for i, facets in enumerate(all_facets):
-        j = 0
-        while j < len(facets):
-            inc = True
-            tf = facets[j]
-            k = j+1
-            while k < len(facets):
-                of = facets[k]
-                if is_superset(tf, of) and not is_same_span(tf, of):
-                    logging.debug("Removing {{{1:s}|{2:s}}} facet in query {0:d} since it is a subset of another.".format(i, of['entity'], of['type']))
-                    del facets[k]
-                    continue
-                elif is_subset(tf, of) and not is_same_span(tf, of):
-                    logging.debug("Removing {{{1:s}|{2:s}}} facet in query {0:d} since it is a subset of another.".format(i, tf['entity'], tf['type']))
-                    del facets[j]
-                    inc = False
-                    break
-                elif is_same_span(tf, of) or is_overlapping(tf, of):
-                    if tf['confidence'] >= of['confidence']:
-                        logging.debug("Removing {{{1:s}|{2:s}}} facet in query {0:d} since it overlaps with another.".format(i, of['entity'], of['type']))
-                        del facets[k]
-                        continue
-                    elif tf['confidence'] < of['confidence']:
-                        logging.debug("Removing {{{1:s}|{2:s}}} facet in query {0:d} since it overlaps with another.".format(i, tf['entity'], tf['type']))
-                        del facets[j]
-                        inc = False
-                        break
-                else:
-                    k += 1
-            if inc: j += 1
-        all_facets[i] = facets
 
 FEATURE_NAME_MAP = {
     'bag-of-words': extract_bag_of_words_features,

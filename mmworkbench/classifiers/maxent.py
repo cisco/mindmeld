@@ -24,7 +24,7 @@ def get_ngram(tokens, start, length):
     """
 
     ngram_tokens = []
-    for index in range(start, start + length):
+    for index in range(start, start+length):
         token = (OUT_OF_BOUNDS_TOKEN if index < 0 or index >= len(tokens)
                  else tokens[index])
         ngram_tokens.append(token)
@@ -32,6 +32,7 @@ def get_ngram(tokens, start, length):
 
 
 class MaxentRoleClassifier():
+
     def __init__(self):
         self._resources = {}
         self.feat_specs = {
@@ -135,7 +136,6 @@ class MaxentRoleClassifier():
 def extract_in_gaz_features():
     def extractor(query, facets, facet_index, resources):
         features = {}
-        tokens = query.get_normalized_tokens()
         current_entity = facets[facet_index]
 
         domain_gazes = resources['gazetteers']
@@ -159,7 +159,6 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions):
     Returns:
         (function) The feature extractor.
     """
-
     def extractor(query, facets, facet_index, resources):
         features = {}
         tokens = query.get_normalized_tokens()
@@ -169,7 +168,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions):
         for length, starts in ngram_lengths_to_start_positions.items():
             for start in starts:
                 feat_name = 'bag-of-words-before|length:{}|pos:{}'.format(
-                    length, start)
+                        length, start)
                 features[feat_name] = get_ngram(tokens, current_facet_index + start, length)
 
         return features
@@ -186,7 +185,6 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions):
     Returns:
         (function) The feature extractor.
     """
-
     def extractor(query, facets, facet_index, resources):
         features = {}
         tokens = query.get_normalized_tokens()
@@ -196,7 +194,7 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions):
         for length, starts in ngram_lengths_to_start_positions.items():
             for start in starts:
                 feat_name = 'bag-of-words-after|length:{}|pos:{}'.format(
-                    length, start)
+                        length, start)
                 features[feat_name] = get_ngram(tokens, current_facet_index + start, length)
 
         return features
@@ -209,7 +207,7 @@ def extract_numeric_candidate_features():
         feat_seq = [{} for _ in query.get_normalized_tokens()]
         num_facets = query.get_candidate_numeric_facets(['time', 'interval'])
         for f in num_facets:
-            for i in range(f['start'], f['end'] + 1):
+            for i in range(f['start'], f['end']+1):
                 feat_name = 'num-candidate|type:{}'.format(f['type'])
                 feat_seq[i][feat_name] = 1
         return feat_seq
@@ -221,7 +219,8 @@ def extract_other_entities_features():
     def extractor(query, facets, facet_index, resources):
         features = {}
         for i, facet in enumerate(facets):
-            if i == facet_index: continue
+            if i == facet_index:
+                continue
             feat_name = 'other-entities|entity_type:{}'.format(facet['type'])
             features[feat_name] = 1
 
@@ -234,7 +233,8 @@ def extract_operator_value_features():
     def extractor(query, facets, facet_index, resources):
         features = {}
         for i, facet in enumerate(facets):
-            if i == facet_index: continue
+            if i == facet_index:
+                continue
             if facet['type'] == 'operator':
                 feat_name = 'operator-entities|value:{}'.format(facet['entity'])
                 features[feat_name] = 1
@@ -251,7 +251,8 @@ def extract_age_features():
     def extractor(query, facets, facet_index, resources):
         features = {}
         for i, facet in enumerate(facets):
-            if i == facet_index: continue
+            if i == facet_index:
+                continue
             if facet['type'] == 'size':
                 feat_name = 'age-entities|value:{}'.format(facet['entity'])
                 features[feat_name] = 1
