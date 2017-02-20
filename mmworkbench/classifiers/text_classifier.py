@@ -3,12 +3,11 @@
 This module contains all code required to perform multinomial classification
 of text.
 """
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from __future__ import division
-# TODO (julius): Add validation to the model configuration files.
 
-from builtins import range, str, next, object, zip
+from builtins import next, object, range, str, zip
 from past.utils import old_div
 
 from collections import Counter, defaultdict
@@ -51,6 +50,8 @@ GAZETTEER_RSC = "gaz"
 WORD_FREQ_RSC = "w_freq"
 QUERY_FREQ_RSC = "q_freq"
 
+logger = logging.getLogger(__name__)
+
 
 class TextClassifier(object):
     """A machine learning classifier for text.
@@ -83,13 +84,12 @@ class TextClassifier(object):
             "k-folds".
     """
 
-    def __init__(self, classifier_type, hyperparams, grid_search_hyperparams,
-                 feat_specs, cross_validation_settings=None):
+    def __init__(self, classifier_type, features, params_grid, cv):
         self.classifier_type = classifier_type
-        self.hyperparams = hyperparams
-        self.grid_search_hyperparams = grid_search_hyperparams
-        self.feat_specs = feat_specs
-        self.cross_validation_settings = cross_validation_settings
+        self.hyperparams = {}
+        self.grid_search_hyperparams = params_grid
+        self.feat_specs = features
+        self.cross_validation_settings = cv
 
         self._is_fit = False
         self._feat_vectorizer = DictVectorizer(sparse=True)
@@ -222,7 +222,7 @@ class TextClassifier(object):
             (dict of str: number): A dict of feature names to their values.
         """
         feat_set = {}
-        marked_down_query = query.get_normalized_marked_down_query()
+        marked_down_query = query.normalized_text
         for name, kwargs in self.feat_specs.items():
             feat_extractor = FEATURE_NAME_MAP[name](**kwargs)
             feat_set.update(feat_extractor(marked_down_query, self._resources))
@@ -259,7 +259,7 @@ class TextClassifier(object):
         """
         # Unigram frequencies
         tokens = [mask_numerics(tok) for q in queries
-                  for tok in q.get_normalized_tokens()]
+                  for tok in q.normalized_tokens]
         freq_dict = Counter(tokens)
 
         self.register_resources(word_freqs=freq_dict)
@@ -271,7 +271,7 @@ class TextClassifier(object):
             queries (list of Query): A list of all queries
         """
         # Whole query frequencies, with singletons removed
-        query_dict = Counter([u'<{}>'.format(q.get_normalized_query()) for q in queries])
+        query_dict = Counter([u'<{}>'.format(q.normalized_text) for q in queries])
         for q in query_dict:
             if query_dict[q] < 2:
                 query_dict[q] = 0
@@ -312,6 +312,7 @@ class TextClassifier(object):
         classes_set = set(classes)
         if len(set(classes_set)) <= 1:
             return None
+
         y = self._class_encoder.fit_transform(classes)
 
         if self.classifier_type == LOG_REG_TYPE:
@@ -358,7 +359,7 @@ class TextClassifier(object):
                                         verbose=verbose, scoring=LIKELIHOOD_SCORING)
                 losses['all'] = self.cv_loss_
                 diff_losses = {clf: losses[clf] - losses['all'] for clf in self._base_clfs}
-                logging.info("Marginal likelihood contribution for each base model: {}"
+                logger.info("Marginal likelihood contribution for each base model: {}"
                              .format(diff_losses))
             else:
                 self._fit_super_learner(clf_cls, cv_iterator,
@@ -375,11 +376,11 @@ class TextClassifier(object):
         pred_classes, pred_probs = self.predict_and_log_proba(queries)
         predictions = self._class_encoder.transform(pred_classes)
         self.train_acc_ = accuracy_score(y, predictions)
-        logging.info("Final accuracy on training data: {:.1%}".format(self.train_acc_))
+        logger.info("Final accuracy on training data: {:.1%}".format(self.train_acc_))
         if verbose:
             for idx in range(len(predictions)):
                 if predictions[idx] != y[idx]:
-                    logging.debug(u"Class {} mistaken for {}: {}".format(
+                    logger.debug(u"Class {} mistaken for {}: {}".format(
                                   y[idx], predictions[idx], queries[idx].get_raw_query()))
 
         return self
@@ -490,13 +491,13 @@ class TextClassifier(object):
             (object): An instance of classifier_type.
         """
 
-        logging.info('Fitting {} text classifier without cross-validation'
+        logger.info('Fitting {} text classifier without cross-validation'
                      .format(classifier_type.__name__, ))
 
         param_grid = self._convert_settings(self.grid_search_hyperparams, y)
         settings = next(self._iter_settings(param_grid))
 
-        logging.info('Fitting text classifier with settings: {}'
+        logger.info('Fitting text classifier with settings: {}'
                      .format(settings))
 
         return classifier_type(**settings).fit(X, y)
@@ -519,7 +520,7 @@ class TextClassifier(object):
         highest held-out accuracy, then uses those settings to train over
         the full dataset. Summary scores are shown without error analysis.
         """
-        logging.info('Fitting {} text classifier by parallel {} cross-validation with settings: {}'
+        logger.info('Fitting {} text classifier by parallel {} cross-validation with settings: {}'
                      .format(classifier_type.__name__,
                              self.cross_validation_settings['type'],
                              self.cross_validation_settings))
@@ -527,28 +528,28 @@ class TextClassifier(object):
         param_grid = self._convert_settings(self.grid_search_hyperparams, y)
         n_jobs = self.cross_validation_settings.get('n_jobs', -1)
 
-        logging.info('Doing grid search over {}'.format(param_grid))
+        logger.info('Doing grid search over {}'.format(param_grid))
         grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring, param_grid=param_grid,
                                cv=cv_iterator(y), verbose=1, n_jobs=n_jobs)
         model = grid_cv.fit(X, y)
 
         for candidate in model.grid_scores_:
-            logging.info('Candidate parameters: {}'
+            logger.info('Candidate parameters: {}'
                          .format(candidate.parameters))
             std_err = (2 * numpy.std(candidate.cv_validation_scores) /
                        math.sqrt(len(candidate.cv_validation_scores)))
             if scoring == ACCURACY_SCORING:
-                logging.info('Candidate average accuracy: {:.2%} ± {:.2%}'
+                logger.info('Candidate average accuracy: {:.2%} ± {:.2%}'
                              .format(candidate.mean_validation_score, std_err))
             elif scoring == LIKELIHOOD_SCORING:
-                logging.info('Candidate average log likelihood: {:.4} ± {:.4}'
+                logger.info('Candidate average log likelihood: {:.4} ± {:.4}'
                              .format(candidate.mean_validation_score, std_err))
         if scoring == ACCURACY_SCORING:
-            logging.info('Best accuracy: {:.2%}, settings: {}'
+            logger.info('Best accuracy: {:.2%}, settings: {}'
                          .format(model.best_score_, model.best_params_))
             self.cv_loss_ = 1 - model.best_score_
         elif scoring == LIKELIHOOD_SCORING:
-            logging.info('Best log likelihood: {:.4}, settings: {}'
+            logger.info('Best log likelihood: {:.4}, settings: {}'
                          .format(model.best_score_, model.best_params_))
             self.cv_loss_ = - model.best_score_
         return model.best_estimator_
@@ -571,10 +572,10 @@ class TextClassifier(object):
         highest held-out accuracy, then uses those settings to train over
         the full dataset. Error analysis is provided for each candidate model.
         """
-        logging.info('Fitting {} text classifier by verbose {} cross-validation with settings: {}'
-                     .format(classifier_type.__name__,
-                             self.cross_validation_settings['type'],
-                             self.cross_validation_settings))
+        logger.info('Fitting {} text classifier by {} cross-validation with settings: {}'
+                    .format(classifier_type.__name__,
+                            self.cross_validation_settings['type'],
+                            self.cross_validation_settings))
 
         best_accuracy = 0
         best_likelihood = _NEG_INF
@@ -585,7 +586,7 @@ class TextClassifier(object):
 
         for settings in self._iter_settings(param_grid):
 
-            logging.info('Fitting text classifier with settings: {}'.format(settings))
+            logger.info('Fitting text classifier with settings: {}'.format(settings))
 
             clf = classifier_type(**settings)
 
@@ -613,8 +614,8 @@ class TextClassifier(object):
                     if i != j:
                         real_idx = test_idx[idx]
                         errors.append((i, j))
-                        logging.debug(u"Class {} mistaken for {}: {}"
-                                      .format(i, j, self._queries[real_idx][0].get_raw_query()))
+                        logger.debug("Class {} mistaken for {}: {}"
+                                     .format(i, j, self._queries[real_idx][0].raw_text))
 
             accuracy = mean(accuracies)
             likelihood = mean(likelihoods)
@@ -627,13 +628,14 @@ class TextClassifier(object):
             # format categorization error table
             table = Counter(errors)
             row_totals = {}
-            logging.info('Error analysis:'.ljust(padding + 5 + int_padding * 2) +
-                         ''.rjust((int_padding + 2) * len(classes) / 2 - 5, '_') +
-                         ' predicted ' +
-                         ''.rjust((int_padding + 2) * len(classes) / 2 - 5, '_'))
-            logging.info('  '.join(['gold'.rjust(padding), 'idx'.rjust(int_padding),
-                                    'sum'.rjust(int_padding)] +
-                         ["{0: >{1}}".format(c, int_padding) for c in range(len(classes))]))
+
+            logger.info('Error analysis:'.ljust(padding + 5 + int_padding * 2) +
+                        ''.rjust(int((int_padding + 2) * len(classes) / 2 - 5), '_') +
+                        ' predicted ' +
+                        ''.rjust(int((int_padding + 2) * len(classes) / 2 - 5), '_'))
+            logger.info('  '.join(['gold'.rjust(padding), 'idx'.rjust(int_padding),
+                                   'sum'.rjust(int_padding)] +
+                        ["{0: >{1}}".format(c, int_padding) for c in range(len(classes))]))
             for i in range(len(classes)):
                 row = [classes[i].rjust(padding), str(i).rjust(int_padding)]
                 row_errors = [table.get((i, j), 0) for j in range(len(classes))]
@@ -642,19 +644,19 @@ class TextClassifier(object):
                 row += ["{0: >{1}}".format('.' if e == 0 else e, int_padding)
                         for e in row_errors]
 
-                logging.info('  '.join(row))
+                logger.info('  '.join(row))
 
             std_err = old_div(std(accuracies), math.sqrt(len(accuracies)))
-            logging.info('Candidate average CV accuracy: {:.2%} ± {:.2%}'
-                         .format(accuracy, std_err * 2))
+            logger.info('Candidate average CV accuracy: {:.2%} ± {:.2%}'
+                        .format(accuracy, std_err * 2))
             loss_std_err = old_div(std(likelihoods), math.sqrt(len(likelihoods)))
-            logging.info('Candidate average CV log likelihood: {:.2} ± {:.2}'
-                         .format(likelihood, loss_std_err * 2))
-            logging.debug('Errors per gold class: {}'.format(row_totals))
+            logger.info('Candidate average CV log likelihood: {:.2} ± {:.2}'
+                        .format(likelihood, loss_std_err * 2))
+            logger.debug('Errors per gold class: {}'.format(row_totals))
 
-        logging.info('Best settings: {}'.format(best_settings))
-        logging.info('Accuracy of best settings: {:.2%}'.format(best_accuracy))
-        logging.info('Log likelihood of best settings: {:.2}'.format(best_likelihood))
+        logger.info('Best settings: {}'.format(best_settings))
+        logger.info('Accuracy of best settings: {:.2%}'.format(best_accuracy))
+        logger.info('Log likelihood of best settings: {:.2}'.format(best_likelihood))
         if scoring == ACCURACY_SCORING:
             self.cv_loss_ = 1 - best_accuracy
         elif scoring == LIKELIHOOD_SCORING:
@@ -982,6 +984,9 @@ def extract_gaz_freq():
     def extractor(query, resources):
         tokens = query.split()
         freq_features = defaultdict(int)
+        return freq_features
+
+        # TODO: finish implementing gazetteers and reenable this
         for tok in tokens:
             query_freq = 'OOV' if resources[WORD_FREQ_RSC].get(tok) is None else 'IV'
             for domain, gazes in resources[GAZETTEER_RSC].items():
@@ -1008,6 +1013,9 @@ def extract_in_gaz_feature(scaling=1):
 
     def extractor(query, resources):
         in_gaz_features = defaultdict(float)
+        return in_gaz_features
+
+        # TODO: finish implementing gazetteers and reenable this
         tokens = query.split()
         ngrams = []
         for i in range(1, (len(tokens) + 1)):
@@ -1017,9 +1025,9 @@ def extract_in_gaz_feature(scaling=1):
                 for gaz_name, gaz in gazes.items():
                     if ngram in gaz['edict']:
                         popularity = gaz['edict'].get(ngram, 0.0)
-                        ratio_pop = (old_div(len(ngram), float(len(query)))) * scaling * popularity
-                        in_gaz_features[domain + '_' + gaz_name + '_ratio_pop'] += ratio_pop
                         ratio = (old_div(len(ngram), float(len(query)))) * scaling
+                        ratio_pop = ratio * popularity
+                        in_gaz_features[domain + '_' + gaz_name + '_ratio_pop'] += ratio_pop
                         in_gaz_features[domain + '_' + gaz_name + '_ratio'] += ratio
                         in_gaz_features[domain + '_' + gaz_name + '_pop'] += popularity
                         in_gaz_features[domain + '_' + gaz_name + '_exists'] = 1
@@ -1072,8 +1080,7 @@ def extract_query_string(scaling=1000):
 # Generate all n-gram combinations from a list of strings
 def find_ngrams(input_list, n):
     result = []
-    ngrams = zip(*[input_list[i:] for i in range(n)])
-    for ngram in ngrams:
+    for ngram in zip(*[input_list[i:] for i in range(n)]):
         result.append(" ".join(ngram))
     return result
 

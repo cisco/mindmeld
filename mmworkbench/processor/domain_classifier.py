@@ -3,9 +3,36 @@
 This module contains the domain classifier component.
 """
 
+import logging
 import os
 
-# from sklearn.externals import joblib
+from ..classifiers.text_classifier import TextClassifier
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_CONFIG = {
+    'default_model': 'main',
+    'models': {
+        "main": {
+            "model_type": "logreg",
+            "params_grid": {
+                "fit_intercept": [True, False],
+                "C": [10, 100, 1000, 10000, 100000]
+            },
+            "cv": {
+                "type": "k-fold",
+                "k": 10
+            },
+            "features": {
+                "bag-of-words": {
+                    "lengths": [1]
+                },
+                "freq": {"bins": 5},
+                "in-gaz": {}
+            }
+        }
+    }
+}
 
 
 class DomainClassifier(object):
@@ -34,9 +61,25 @@ class DomainClassifier(object):
             cv (None, optional): Description
 
         """
+
         query_tree = self._resource_loader.get_labeled_queries()
-        # self._model = something
-        pass
+        domains, _, queries = self._resource_loader.flatten_query_tree(query_tree)
+        queries = [q.query for q in queries]
+        # gazetteers = self._resource_loader.get_gazetteers()
+
+        logger.info('Training domain classifier')
+
+        default_config = DEFAULT_CONFIG['models'][DEFAULT_CONFIG['default_model']]
+        model_type = model_type or default_config['model_type']
+        features = features or default_config['features']
+        params_grid = params_grid or default_config['params_grid']
+        cv = cv or default_config['cv']
+
+        domain_model = TextClassifier(model_type, features, params_grid, cv)
+
+        # domain_model.register_resources(gazetteers)
+        domain_model.fit(queries, domains)
+        self._model = domain_model
 
     def predict(self, query):
         """Predicts a role for the specified query
@@ -47,7 +90,7 @@ class DomainClassifier(object):
         Returns:
             str: the predicted domain
         """
-        pass
+        return self._model.predict([query])[0]
 
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities

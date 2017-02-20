@@ -53,8 +53,8 @@ class Query(object):
         self._char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward
         self._char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward
 
-        self.normalized_tokens = tokenizer.tokenize(self.processed_text, False)
-        normalized_text = ' '.join([t['entity'] for t in self.normalized_tokens])
+        self._normalized_tokens = tokenizer.tokenize(self.processed_text, False)
+        normalized_text = ' '.join([t['entity'] for t in self._normalized_tokens])
         self._text[TEXT_FORM_NORMALIZED] = normalized_text
 
         # create normalized maps
@@ -86,6 +86,10 @@ class Query(object):
     @property
     def normalized_text(self):
         return self._text[TEXT_FORM_NORMALIZED]
+
+    @property
+    def normalized_tokens(self):
+        return [token['entity'] for token in self._normalized_tokens]
 
     def transform_range(self, text_range, form_in, form_out):
         """Transforms a text range from one form to another.

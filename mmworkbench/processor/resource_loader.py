@@ -25,7 +25,7 @@ class ResourceLoader(object):
         self.gazetteers = {}
         self.labeled_query_files = {}
 
-    def get_gazetteers(self, domain, gazeteer_names=None):
+    def get_gazetteers(self, domain=None, gazeteer_names=None):
         pass
 
     def get_labeled_queries(self, domain=None, intent=None, query_set='train', force_reload=False):
@@ -57,6 +57,7 @@ class ResourceLoader(object):
                 files = self.labeled_query_files[domain][intent].keys()
                 # filter to files which belong to the query set
                 files = fnmatch.filter(files, file_pattern)
+                files.sort()
                 for filename in files:
                     file = self.labeled_query_files[domain][intent][filename]
                     if force_reload or (not file['loaded'] or file['loaded'] < file['modified']):
@@ -66,6 +67,15 @@ class ResourceLoader(object):
                 query_tree[domain][intent] = queries
 
         return query_tree
+
+    @staticmethod
+    def flatten_query_tree(query_tree):
+        flattened = []
+        for domain, intent_queries in query_tree.items():
+            for intent, queries in intent_queries.items():
+                for query in queries:
+                    flattened.append((domain, intent, query))
+        return zip(*flattened)
 
     def _update_query_file_dates(self, file_pattern):
         query_tree = path.get_labeled_query_tree(self.app_path, [file_pattern])
