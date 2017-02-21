@@ -38,26 +38,7 @@ class MaxentRoleClassifier(object):
 
     def __init__(self):
         self._resources = {}
-        self.feat_specs = {
-            'bag-of-words-before': {
-                'ngram_lengths_to_start_positions': {
-                    1: [-2, -1],
-                    2: [-2, -1]
-                }
-            },
-            'bag-of-words-after': {
-                'ngram_lengths_to_start_positions': {
-                    1: [0, 1],
-                    2: [0, 1]
-                }
-            },
-            'in-gaz': {},
-            'other-entities': {},
-            'operator-entities': {},
-            'extract-artist-only': {},
-            'age-entities': {}
-        }
-
+        self.feat_specs = {}
         self._clf = {}
         self._class_encoders = {}
         self._feat_vectorizers = {}

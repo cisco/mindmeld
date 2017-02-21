@@ -26,6 +26,58 @@ class EntityRecognizer(Classifier):
         intent (str): The intent of this named entity recognizer
         entity_types (set): A set containing the entities which can be recognized
     """
+
+    DEFAULT_CONFIG = {
+        "default_model": "main",
+        "models": {
+            "main": {
+                "model_type": "memm",
+                "params_grid": {
+                    "penalty": ["l2"],
+                    "C": [100]
+                },
+                "model_settings": {
+                    "tag-scheme": "IOB",
+                    "feature-scaler": "none"
+                }
+            },
+            "sparse": {
+                "model_type": "memm",
+                "params_grid": {
+                    "penalty": ["l2"],
+                    "C": [100]
+                },
+                "model_settings": {
+                    "tag-scheme": "IOB",
+                    "feature-scaler": "max-abs",
+                    "feature-selector": "l1"
+                }
+            },
+            "memm-cv": {
+                "model_type": "memm",
+                "params_grid": {
+                    "penalty": ["l1", "l2"],
+                    "C": [0.01, 1, 100, 10000, 1000000, 100000000]
+                },
+                "cv": {
+                    "type": "k-fold",
+                    "k": 5,
+                    "metric": "accuracy"
+                },
+                "model_settings": {
+                    "tag-scheme": "IOB",
+                    "feature-scaler": "max-abs"
+                }
+            },
+            "ngram": {
+                "model_type": "ngram",
+                "params_grid": {
+                    "C": [100]
+                }
+            }
+        }
+    }
+
     def __init__(self, resource_loader, domain, intent):
         """Initializes a named entity recognizer
 

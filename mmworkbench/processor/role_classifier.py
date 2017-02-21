@@ -9,7 +9,7 @@ import os
 
 
 class RoleClassifier(object):
-    """An role classifier is used to determine the target role for entities in a given query. It is
+    """A role classifier is used to determine the target role for entities in a given query. It is
     trained using all the labeled queries for a particular intent. The labels are the role
     names associated with each entity within each query.
 
@@ -20,6 +20,115 @@ class RoleClassifier(object):
         roles (set): A set containing the roles which can be classified
 
     """
+
+    DEFAULT_CONFIG = {
+        'default_model': 'main',
+        'main': {
+            "classifier_type": "memm",
+            "params_grid": {
+                "C": [100]
+            },
+            'features': {
+                'bag-of-words-before': {
+                    'ngram_lengths_to_start_positions': {
+                        1: [-2, -1],
+                        2: [-2, -1]
+                    }
+                },
+                'bag-of-words-after': {
+                    'ngram_lengths_to_start_positions': {
+                        1: [0, 1],
+                        2: [0, 1]
+                    }
+                },
+                'in-gaz': {},
+                'other-entities': {},
+                'operator-entities': {},
+                'age-entities': {}
+            }
+        },
+        "sparse": {
+            "classifier_type": "memm",
+            "params_grid": {
+                "penalty": ["l1"],
+                "C": [1]
+            },
+            'features': {
+                'bag-of-words-before': {
+                    'ngram_lengths_to_start_positions': {
+                        1: [-2, -1],
+                        2: [-2, -1]
+                    }
+                },
+                'bag-of-words-after': {
+                    'ngram_lengths_to_start_positions': {
+                        1: [0, 1],
+                        2: [0, 1]
+                    }
+                },
+                'in-gaz': {},
+                'other-entities': {},
+                'operator-entities': {},
+                'age-entities': {}
+            }
+        },
+        "memm-cv": {
+            "classifier_type": "memm",
+            "params_grid": {
+                "penalty": ["l1", "l2"],
+                "C": [0.01, 1, 100, 10000, 1000000, 100000000]
+            },
+            "cv": {
+                "type": "k-fold",
+                "k": 5,
+                "metric": "accuracy"
+            },
+            'features': {
+                'bag-of-words-before': {
+                    'ngram_lengths_to_start_positions': {
+                        1: [-2, -1],
+                        2: [-2, -1]
+                    }
+                },
+                'bag-of-words-after': {
+                    'ngram_lengths_to_start_positions': {
+                        1: [0, 1],
+                        2: [0, 1]
+                    }
+                },
+                'in-gaz': {},
+                'other-entities': {},
+                'operator-entities': {},
+                'age-entities': {}
+            }
+        },
+        "ngram": {
+            "classifier_type": "ngram",
+            "params_grid": {
+                "C": [100]
+            },
+            'features': {
+                'bag-of-words-before': {
+                    'ngram_lengths_to_start_positions': {
+                        1: [-2, -1],
+                        2: [-2, -1]
+                    }
+                },
+                'bag-of-words-after': {
+                    'ngram_lengths_to_start_positions': {
+                        1: [0, 1],
+                        2: [0, 1]
+                    }
+                },
+                'in-gaz': {},
+                'other-entities': {},
+                'operator-entities': {},
+                'age-entities': {}
+            }
+        }
+    }
+
+
     def __init__(self, resource_loader, domain, intent, entity_type):
         """Initializes a role classifier
 
