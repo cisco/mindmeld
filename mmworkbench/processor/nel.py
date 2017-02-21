@@ -7,8 +7,8 @@ from __future__ import unicode_literals
 from builtins import object
 
 
-class NamedEntityLinker(object):
-    """A named entity recognizer which is used to link entities to their specific values in a given
+class EntityLinker(object):
+    """A named entity linker which is used to link entities to their specific values in a given
     query.
 
     """

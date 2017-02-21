@@ -13,8 +13,8 @@ from ..tokenizer import Tokenizer
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
-from .nel import NamedEntityLinker
-from .ner import NamedEntityRecognizer
+from .nel import EntityLinker
+from .ner import EntityRecognizer
 from .parser import Parser
 from .resource_loader import ResourceLoader
 from .role_classifier import RoleClassifier
@@ -124,7 +124,7 @@ class DomainProcessor(object):
             self._resource_loader = create_resource_loader(app_path, self._tokenizer,
                                                            self._preprocessor)
         self.intent_classifier = IntentClassifier(self._resource_loader, domain)
-        self.linker = NamedEntityLinker(self._resource_loader, domain)
+        self.linker = EntityLinker(self._resource_loader, domain)
         self.intents = {intent: IntentProcessor(app_path, domain, intent, self.linker,
                                                 self._tokenizer, self._preprocessor,
                                                 self._resource_loader)
@@ -205,8 +205,8 @@ class IntentProcessor(object):
         domain (str): The domain this intent belongs to
         name (str): The name of this intent
         entities (dict): Description
-        linker (NamedEntityLinker): Description
-        recognizer (NamedEntityRecognizer): The
+        linker (EntityLinker): Description
+        recognizer (EntityRecognizer): The
     """
 
     def __init__(self, app_path, domain, intent, linker, tokenizer=None, preprocessor=None,
@@ -222,7 +222,7 @@ class IntentProcessor(object):
         else:
             self._resource_loader = create_resource_loader(app_path, self._tokenizer,
                                                            self._preprocessor)
-        self.recognizer = NamedEntityRecognizer(self._resource_loader, domain, intent)
+        self.recognizer = EntityRecognizer(self._resource_loader, domain, intent)
 
         # TODO: revisit the parser after finishing Kwik-E-Mart demo
         self.parser = Parser(self._resource_loader, domain, intent)

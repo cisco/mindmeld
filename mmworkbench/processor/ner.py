@@ -2,13 +2,21 @@
 """
 This module contains the named entity recognizer component.
 """
+from __future__ import unicode_literals
+
+import logging
+
+from .classifier import Classifier
+
 
 import os
 
 # from sklearn.externals import joblib
 
+logger = logging.getLogger(__name__)
 
-class NamedEntityRecognizer(object):
+
+class EntityRecognizer(Classifier):
     """A named entity recognizer which is used to identify the entities for a given query. It is
     trained using all the labeled queries for a particular intent. The labels are the entity
     annotations for each query.
@@ -58,7 +66,7 @@ class NamedEntityRecognizer(object):
         Returns:
             list: the predicted entities
         """
-        pass
+        return []
 
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities
@@ -88,7 +96,7 @@ class NamedEntityRecognizer(object):
             model_path (str): The location on disk where the model should be stored
 
         """
-        folder = os.dirname(model_path)
+        folder = os.path.dirname(model_path)
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
