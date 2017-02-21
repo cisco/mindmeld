@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-This module defines the interface for facet classification.
+This module defines the interface for entity recognition.
 """
 from __future__ import unicode_literals
 from __future__ import division
@@ -8,46 +8,44 @@ from __future__ import division
 from builtins import zip
 from builtins import object
 from past.utils import old_div
+
 import itertools
+import logging
 
 from sklearn import cross_validation as cross_val
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 
+logger = logging.getLogger(__name__)
 
-class FacetClassifier(object):
-    """A machine learning classifier for facets.
 
-    This FacetClassifier manages feature extraction, training, cross-validation,
+class BaseEntityRecognizer(object):
+    """A machine learning recognizer for entities.
+
+    This BaseEntityRecognizer manages feature extraction, training, cross-validation,
     and prediction.
     """
 
-    def __init__(self, model_parameter_choices=None,
-                 cross_validation_settings=None,
-                 classifier_settings=None,
-                 features=None):
+    def __init__(self, params_grid=None, cv=None, model_settings=None, features=None):
 
         self._resources = {}
-        self.model_parameter_choices = model_parameter_choices
+        self.model_parameter_choices = params_grid
         self._model_parameters = {}
-        self.cross_validation_settings = cross_validation_settings
-        if classifier_settings is None:
-            self.classifier_settings = {}
-        else:
-            self.classifier_settings = classifier_settings
+        self.cross_validation_settings = cv
+        self.classifier_settings = model_settings or {}
         self.feat_specs = features
 
     @classmethod
     def from_config(cls, config, model_configuration):
-        """Initializes a FacetClassifier instance from config file data.
+        """Initializes a BaseEntityRecognizer instance from config file data.
 
         Args:
             config (dict): The Python representation of a parsed config file.
             model_configuration (str): One of the keys in config['models'].
 
         Returns:
-            (FacetClassifier): A FacetClassifier instance initialized with the
+            (BaseEntityRecognizer): A BaseEntityRecognizer instance initialized with the
                 settings from the config entry given by model_configuration.
         """
         model_config_entry = config['models'].get(model_configuration)
@@ -55,20 +53,16 @@ class FacetClassifier(object):
             error_msg = "Model config does not contain a model named '{}'"
             raise ValueError(error_msg.format(model_configuration))
 
-        params = model_config_entry.get("model-parameter-choices")
-        cv_settings = model_config_entry.get("cross-validation-settings")
-        clf_settings = model_config_entry.get("model-settings")
-        features = model_config_entry.get("features")
+        params = model_config_entry.get('params_grid')
+        cv_settings = model_config_entry.get('cv')
+        clf_settings = model_config_entry.get('model_settings')
+        features = model_config_entry.get('features')
 
-        if model_config_entry.get("model-type",
-                                  model_config_entry.get("classifier-type")) == "memm":
+        model_type = model_config_entry.get('model_type',
+                                            model_config_entry.get('classifier_type'))
+        if model_type == 'memm':
             from . import memm
-            return memm.MemmFacetClassifier(params, cv_settings,
-                                            clf_settings, features)
-        elif model_config_entry.get("model-type",
-                                    model_config_entry.get("classifier-type")) == "ngram":
-            from . import ngram
-            return ngram.NgramFacetClassifier(params, cv_settings)
+            return memm.MemmEntityRecognizer(params, cv_settings, clf_settings, features)
         else:
             raise ValueError
 
@@ -81,30 +75,30 @@ class FacetClassifier(object):
         """
         self._resources.update(kwargs)
 
-    def fit(self, labeled_queries, domain, intent, facet_names=None, verbose=False):
+    def fit(self, labeled_queries, domain, intent, entity_types=None, verbose=False):
         """
 
         Args:
             labeled_queries (list): Query objects with annotations
             domain (str): the name of the target domain
             intent (str): the name of the target intent
-            facet_names (list): facet names as a filter (defaults to all)
+            entity_types (list): entity types as a filter (defaults to all)
             verbose (boolean): show more debug/diagnostic output
         """
         raise NotImplementedError
 
-    def predict(self, query, domain, intent, facet_names=None, verbose=False):
+    def predict(self, query, domain, intent, entity_types=None, verbose=False):
         """
 
         Args:
             query (Query): Query object to apply model to
             domain (str): the name of the target domain
             intent (str): the name of the target intent
-            facet_names (list): facet nameas as a filter (defaults to all)
+            entity_types (list): entity typeas as a filter (defaults to all)
             verbose (boolean): show more debug/diagnostic output
 
         Returns:
-            (tuple): (non-numeric_facets, numeric_facets)
+            (tuple): (non-numeric_entities, numeric_entities)
         """
         raise NotImplementedError
 
@@ -147,7 +141,7 @@ class FacetClassifier(object):
     def _shuffle_iterator(self, y):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return cross_val.ShuffleSplit(len(y), n_iter=n, test_size=old_div(1.0,k))
+        return cross_val.ShuffleSplit(len(y), n_iter=n, test_size=old_div(1.0, k))
 
     def _groups_k_fold_iterator(self, groups):
         k = self.cross_validation_settings['k']
@@ -158,7 +152,7 @@ class FacetClassifier(object):
     def _groups_shuffle_iterator(self, groups):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return cross_val.LabelShuffleSplit(groups, n_iter=n, test_size=old_div(1.0,k))
+        return cross_val.LabelShuffleSplit(groups, n_iter=n, test_size=old_div(1.0, k))
 
     def _stratified_k_fold_iterator(self, y):
         k = self.cross_validation_settings['k']
@@ -167,7 +161,7 @@ class FacetClassifier(object):
     def _stratified_shuffle_iterator(self, y):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return cross_val.StratifiedShuffleSplit(y, n_iter=n, test_size=old_div(1.0,k))
+        return cross_val.StratifiedShuffleSplit(y, n_iter=n, test_size=old_div(1.0, k))
 
     def get_feature_selector(self):
         """Get a feature selector instance based on the feature-selector model
@@ -196,6 +190,5 @@ class FacetClassifier(object):
         else:
             scale_type = self.classifier_settings.get('feature-scaler')
         scaler = {'std-dev': StandardScaler(with_mean=False),
-                  'max-abs': MaxAbsScaler()
-                  }.get(scale_type)
+                  'max-abs': MaxAbsScaler()}.get(scale_type)
         return scaler

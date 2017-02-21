@@ -18,9 +18,8 @@ from scipy.sparse import vstack, hstack
 import numpy
 import logging
 
-from . import util
 from . import sequence_features
-from mmworkbench.facet_classification import FacetClassifier
+from . import BaseEntityRecognizer
 
 DEFAULT_FEATURES = {
     'bag-of-words': {
@@ -36,11 +35,11 @@ DEFAULT_FEATURES = {
 }
 
 
-class MemmFacetClassifier(FacetClassifier):
-    """A maximum-entropy Markov model for facet prediction.
+class MemmEntityRecognizer(BaseEntityRecognizer):
+    """A maximum-entropy Markov model for entity recognition.
 
     This class implements a conditional sequence model that predicts tags that
-    are a joint representation of numeric and non-numeric facets.
+    are a joint representation of numeric and non-numeric entities.
 
     Attributes:
         feat_specs (dict): A mapping from feature extractor names, as given in
@@ -48,18 +47,13 @@ class MemmFacetClassifier(FacetClassifier):
             associated feature extractor function.
     """
 
-    def __init__(self, model_parameter_choices=None,
-                 cross_validation_settings=None,
-                 classifier_settings=None,
-                 features=None):
+    def __init__(self, params_grid=None, cv=None, model_settings=None, features=None):
 
         features = features or DEFAULT_FEATURES
 
-        super(MemmFacetClassifier, self).__init__(model_parameter_choices,
-                                                  cross_validation_settings,
-                                                  classifier_settings,
-                                                  features)
+        super().__init__(params_grid, cv, model_settings, features)
 
+        # Default tag scheme to IOB
         self._tag_scheme = self.classifier_settings.get('tag-scheme', 'IOB').upper()
         self._feat_selector = self.get_feature_selector()
         self._feat_scaler = self.get_feature_scaler()
@@ -68,7 +62,7 @@ class MemmFacetClassifier(FacetClassifier):
         self._class_encoder = LabelEncoder()
         self._feat_vectorizer = DictVectorizer()
 
-        self._no_facets = False
+        self._no_entities = False
 
     def __getstate__(self):
         """Returns the information needed pickle an instance of this class.
@@ -100,7 +94,7 @@ class MemmFacetClassifier(FacetClassifier):
         metric = self.cross_validation_settings.get("metric", "accuracy")
 
         for settings in self._iter_settings():
-            logging.info("Fitting facet classifier with settings: {}".format(
+            logging.info("Fitting entity recognizer with settings: {}".format(
                 settings))
 
             self._model_parameters = dict(settings)
@@ -125,7 +119,7 @@ class MemmFacetClassifier(FacetClassifier):
         self._clf = LogisticRegression(**self._model_parameters)
         self._clf.fit(X, y)
 
-    def fit(self, labeled_queries, domain, intent, facet_names=None, verbose=False):
+    def fit(self, labeled_queries, domain, intent, entity_types=None, verbose=False):
         # all_features and all_tags are parallel lists of feature dictionaries
         # and their associated gold tags, respectively. They are concatenations
         # of the features and tags across all the input queries.
@@ -152,7 +146,7 @@ class MemmFacetClassifier(FacetClassifier):
             all_query_groups.extend(query_groups)
 
         if len(set(all_tags)) == 1:
-            self._no_facets = True
+            self._no_entities = True
         else:
             # Fit the model
             X = self._feat_vectorizer.fit_transform(all_features)
@@ -174,20 +168,20 @@ class MemmFacetClassifier(FacetClassifier):
             else:
                 self._clf_fit_cv(X, y, all_query_groups, cv_iterator)
 
-    def predict(self, query, domain, intent, facet_names=None, verbose=False):
-        facets, num_facets, data = self._predict(query, verbose)
+    def predict(self, query, domain, intent, entity_types=None, verbose=False):
+        entities, num_entities, data = self._predict(query, verbose)
         if verbose:
             self._print_predict_data(data)
 
-        # Assign a confidence value for each facet.
-        for e in facets:
+        # Assign a confidence value for each entity.
+        for e in entities:
             max_cost = min([data['probs'][i] for i in range(e['tstart'], e['tend'])])
             e['confidence'] = numpy.exp(max_cost)
 
-        return facets, num_facets, data
+        return entities, num_entities, data
 
     def _predict(self, query, verbose=False):
-        if self._no_facets or not query.get_raw_query():
+        if self._no_entities or not query.get_raw_query():
             return [], [], {}
         query_features = self._extract_query_features(query)
         if len(query_features) == 0:
@@ -248,7 +242,7 @@ class MemmFacetClassifier(FacetClassifier):
             if i + 1 < len(query_features):
                 query_features[i+1]['prev-tag'] = predicted_tag
 
-        facets, num_facets = util.get_facets_from_tags(query, predicted_tags)
+        entities, num_entities = util.get_facets_from_tags(query, predicted_tags)
 
         # Collect diagnostic details
         data = {'tokens': query.get_normalized_tokens(),
@@ -261,7 +255,7 @@ class MemmFacetClassifier(FacetClassifier):
                 'feat_names': active_features,
                 'all_log_probs': all_log_probs}
 
-        return facets, num_facets, data
+        return entities, num_entities, data
 
     @staticmethod
     def _print_predict_data(data):
