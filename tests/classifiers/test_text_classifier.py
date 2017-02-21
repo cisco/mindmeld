@@ -9,7 +9,7 @@ Tests for `text_classifier` module.
 """
 from __future__ import unicode_literals
 
-from mmworkbench.classifiers.text_classifier import TextClassifier
+from mmworkbench.learners.text_classifier import TextClassifier
 
 
 def test_params_grid():

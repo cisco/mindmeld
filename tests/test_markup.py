@@ -117,10 +117,10 @@ def test_load_special_chars(tokenizer):
 
     assert len(entities)
     entity = entities[0]
-    # assert entity.raw_text == 's.o.b.'
+    assert entity.raw_text == 's.o.b.'
     assert entity.normalized_text == 's o b'
     assert entity.start == 5
-    assert entity.end == 9
+    assert entity.end == 10
 
 
 @pytest.mark.load
@@ -131,9 +131,11 @@ def test_load_special_chars_2(tokenizer):
     entities = processed_query.entities
 
     assert len(entities)
+
+    assert entities[0].raw_text == '8 p.m.'
     assert entities[0].normalized_text == '8 p m'
     assert entities[0].start == 10
-    assert entities[0].end == 14
+    assert entities[0].end == 15
 
 
 @pytest.mark.load
@@ -143,14 +145,11 @@ def test_load_special_chars_3(tokenizer):
     processed_query = markup.load_query(text, tokenizer)
     entities = processed_query.entities
 
-    assert len(entities)
-    assert entities[0].start == 3
-    assert entities[0].end == 7
-    assert entities[0].normalized_text == 's o b'
-
-    assert entities[1].start == 24
-    assert entities[1].end == 28
-    assert entities[1].normalized_text == '8 p m'
+    expected = [
+        QueryEntity('s.o.b.', 's.o.b.', 's o b', 3, 8, 'show'),
+        QueryEntity('8 p.m.', '8 p.m.', '8 p m', 25, 30, 'range'),
+    ]
+    assert expected == entities
 
 
 @pytest.mark.load
@@ -162,8 +161,8 @@ def test_load_special_chars_4(tokenizer):
     entities = processed_query.entities
 
     expected = [
-        QueryEntity('s.o.b', 's.o.b', 's o b', 3, 7, 'show'),
-        QueryEntity('8 p.m', '8 p.m', '8 p m', 24, 28, 'range'),
+        QueryEntity('s.o.b.', 's.o.b.', 's o b', 3, 8, 'show'),
+        QueryEntity('8 p.m.', '8 p.m.', '8 p m', 28, 33, 'range'),
     ]
     assert expected == entities
 
@@ -179,6 +178,6 @@ def test_load_special_chars_5(tokenizer):
 
     entity = processed_query.entities[0]
 
-    assert entity.start == 34
-    assert entity.end == 39
+    assert entity.start == 39
+    assert entity.end == 44
     assert entity.normalized_text == 'at 8pm'

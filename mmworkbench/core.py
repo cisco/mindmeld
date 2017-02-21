@@ -228,9 +228,9 @@ class QueryEntity(object):
             processed_text (str): Description
             normalized_text (str): Description
             start (int): The character index start of the text range that was parsed into this
-                entity. This index is based on the normalized text of the query passed in.
+                entity. This index is based on the raw text of the query passed in.
             end (int): The character index end of the text range that was parsed into this
-                entity. This index is based on the normalized text of the query passed in.
+                entity. This index is based on the raw text of the query passed in.
         """
         self.entity = Entity(entity_type, role, value, display_text or raw_text)
         self.raw_text = raw_text
@@ -251,15 +251,13 @@ class QueryEntity(object):
     @staticmethod
     def from_query(query, entity_type, start, end, role=None, value=None,
                    display_text=None):
-        # TODO: actually get raw and processed text!
-        raw_text, processed_text = None, None
-        raw_text_range = query.transform_range((start, end), TEXT_FORM_NORMALIZED,
-                                               TEXT_FORM_RAW)
-        raw_text = query.raw_text[raw_text_range[0]:raw_text_range[1] + 1]
-        pro_text_range = query.transform_range((start, end), TEXT_FORM_NORMALIZED,
-                                               TEXT_FORM_PROCESSED)
+        raw_text = query.raw_text[start:end + 1]
+
+        pro_text_range = query.transform_range((start, end), TEXT_FORM_RAW, TEXT_FORM_PROCESSED)
         processed_text = query.processed_text[pro_text_range[0]:pro_text_range[1] + 1]
-        normalized_text = query.normalized_text[start:end + 1]
+
+        norm_range = query.transform_range((start, end), TEXT_FORM_RAW, TEXT_FORM_NORMALIZED)
+        normalized_text = query.normalized_text[norm_range[0]:norm_range[1] + 1]
         return QueryEntity(raw_text, processed_text, normalized_text, start, end,
                            entity_type, role, value, display_text)
 

@@ -96,8 +96,7 @@ def _parse_entities(markup, query=None):
 
         end = start + len(entity_text) - 1
 
-        norm_span = query.transform_range((start, end), TEXT_FORM_RAW, TEXT_FORM_NORMALIZED)
-        params = {'query': query, 'start': norm_span[0], 'end': norm_span[1],
+        params = {'query': query, 'start': start, 'end': end,
                   'entity_type': entity_type, 'role': role_name}
         entities.append(QueryEntity.from_query(**params))
 
