@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import logging
 
 from .classifier import MultinomialClassifier
-from ..classifiers.text_classifier import TextClassifier
+from ..learners.text_classifier import TextClassifier
 
 logger = logging.getLogger(__name__)
 
