@@ -86,7 +86,3 @@ class IntentClassifier(MultinomialClassifier):
             query_tree = self._resource_loader.get_labeled_queries()
             queries = self._resource_loader.flatten_query_tree(query_tree)
         return list(zip(*[(q.query, q.intent) for q in queries]))
-
-    def _get_gazetteers(self):
-        # gazetteers = self._resource_loader.get_gazetteers(self.domain)
-        pass

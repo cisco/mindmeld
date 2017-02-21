@@ -22,8 +22,8 @@ INTENT_MODEL_PATH = os.path.join(GEN_DOMAINS_FOLDER, 'intent.pkl')
 GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, '{domain}')
 GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, '{intent}')
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
-ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'role.pkl')
-GAZETTEER_PATH = os.path.join(GEN_DOMAIN_FOLDER, 'gaz-{entity}.pkl')
+ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, '{entity}-role.pkl')
+GAZETTEER_PATH = os.path.join(GEN_FOLDER, 'gaz-{entity}.pkl')
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, 'indexes')
 GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, '{index}')
 RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, 'ranking.pkl')
@@ -127,7 +127,7 @@ def get_labeled_query_tree(app_path, patterns=None):
     return tree
 
 
-def get_entities(app_path):
+def get_entity_types(app_path):
     """Gets all entities for an application.
 
     Args:
@@ -208,7 +208,7 @@ def get_entity_model_path(app_path, domain, intent, model_name=None):
     return _resolve_model_name(path, model_name)
 
 
-def get_role_model_path(app_path, domain, intent, model_name=None):
+def get_role_model_path(app_path, domain, intent, entity, model_name=None):
     """
     Args:
         app_path (str): The path to the app data.
@@ -220,7 +220,20 @@ def get_role_model_path(app_path, domain, intent, model_name=None):
         (str) The path for the intent's role classifier pickle.
 
     """
-    path = ROLE_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
+    path = ROLE_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent, entity=entity)
+    return _resolve_model_name(path, model_name)
+
+
+def get_gazetteer_data_path(app_path, gaz_name, model_name=None):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        gaz_name (str): The name of the gazetteer
+
+    Returns:
+        (str) The path for the gazetteer pickle.
+    """
+    path = GAZETTEER_PATH.format(app_path=app_path, entity=gaz_name)
     return _resolve_model_name(path, model_name)
 
 

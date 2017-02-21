@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from builtins import object
 
+import codecs
 from collections import defaultdict
-import util
 import logging
+import os
+
 from sklearn.externals import joblib
 
+logger = logging.getLogger(__name__)
 
-class Gazetteer:
+
+class Gazetteer(object):
     """
     This class holds the following  fields, which are extracted and exported to file.
 
@@ -22,50 +27,67 @@ class Gazetteer:
 
       entities: This is simply a list of all entities
 
-      numtypes: The set of nested numeric types for this facet
+      num_types: The set of nested numeric types for this entity
      """
-    def __init__(self, domain, facet, exclude_ngrams=False):
+
+    def __init__(self, name, exclude_ngrams=False):
         """
         Args:
             domain (str): The domain that this gazetteer is used
-            facet (str): The name of the facet that this gazetteer is used
+            entity_type (str): The name of the entity that this gazetteer is used
             exclude_ngrams (bool): The boolean flat whether to exclude ngrams
         """
-        self.domain = domain
-        self.facet = facet
-        self.entity_count = 0
+        self.name = name
         self.exclude_ngrams = exclude_ngrams
+        self.max_ngram = 1
 
-        self.pop_dic = defaultdict(int)
+        self.entity_count = 0
+        self.pop_dict = defaultdict(int)
         self.index = defaultdict(set)
         self.entities = []
-        self.numtypes = set()
-        self.max_ngram = 1
+        self.num_types = set()
 
     def to_dict(self):
         """
-        Returns:
-            dict
+        Returns: dict
         """
         return {
-            "domain_name": self.domain,
-            "facet_name": self.facet,
-            "total_entities": self.entity_count,
-            "pop_dict": self.pop_dic,
-            "index": self.index,
-            "entities": self.entities,
-            "numtypes": self.numtypes
+            'name': self.name,
+            'total_entities': self.entity_count,
+            'pop_dict': self.pop_dict,
+            'index': self.index,
+            'entities': self.entities,
+            'num_types': self.num_types
         }
 
-    def to_file(self, filename):
-        """
+    def dump(self, gaz_path):
+        """Persists the gazetteer to disk.
+
         Args:
-            filename (str)
+            gaz_path (str): The location on disk where the gazetteer should be stored
+
         """
-        try:
-            joblib.dump(self.to_dict(), filename)
-        except IOError as ex:
-            logging.info('Exception writing to {0}: {1}'.format(filename, ex))
+        # make directory if necessary
+        folder = os.path.dirname(gaz_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
+        joblib.dump(self.to_dict(), gaz_path)
+
+    def load(self, gaz_path):
+        """Loads the gazetteer from disk
+
+        Args:
+            gaz_path (str): The location on disk where the gazetteer is stored
+
+        """
+        gaz_data = joblib.load(gaz_path)
+        self.name = gaz_data['name']
+        self.entity_count = gaz_data['total_entities']
+        self.pop_dict = gaz_data['pop_dict']
+        self.index = gaz_data['index']
+        self.entities = gaz_data['entities']
+        self.num_types = gaz_data['num_types']
 
     def _update_entity(self, entity, popularity, keep_max=True):
         """
@@ -80,17 +102,17 @@ class Gazetteer:
         """
         # Only update the relevant data structures when the entity isn't
         # already in the gazetteer. Update the popularity either way.
-        if self.pop_dic[entity] == 0:
+        if self.pop_dict[entity] == 0:
             self.entities.append(entity)
             if not self.exclude_ngrams:
-                for ngram in util.iter_ngrams(entity.split(), max_length=self.max_ngram):
+                for ngram in iterate_ngrams(entity.split(), max_length=self.max_ngram):
                     self.index[ngram].add(self.entity_count)
             self.entity_count += 1
 
         if keep_max:
-            self.pop_dic[entity] = max(self.pop_dic[entity], popularity)
+            self.pop_dict[entity] = max(self.pop_dict[entity], popularity)
         else:
-            self.pop_dic[entity] = popularity
+            self.pop_dict[entity] = popularity
 
     def update_with_entity_data_file(self, filename, popularity_cutoff, normalizer):
         """
@@ -102,72 +124,85 @@ class Gazetteer:
                 popularity below this value are ignored.
             normalizer (function): A function that normalizes text.
         """
-        logging.info("Loading entity data from '{}'".format(filename))
+        logger.info("Loading entity data from '{}'".format(filename))
         line_count = 0
         entities_added = 0
-        for pop, entity in util.read_tsv_lines(filename, 2):
-            pop = 0 if pop == 'null' else float(pop)
-            line_count += 1
-            entity = normalizer(entity)
-            self.numtypes.update(util.get_nested_numeric_types(entity))
+        num_cols = None
+        with codecs.open(filename, encoding='utf8') as data_file:
+            for i, row in enumerate(data_file.readlines()):
+                if not row:
+                    continue
+                split_row = row.strip('\n').split('\t')
+                if num_cols is None:
+                    num_cols = len(split_row)
+
+                if len(split_row) != num_cols:
+                    msg = "Row {} of .tsv file '{}' malformed, expected {} columns"
+                    raise ValueError(msg.format(i+1, filename, num_cols))
+
+                if num_cols == 2:
+                    pop, entity = split_row
+                else:
+                    pop = 1
+                    entity = split_row[0]
+
+                pop = 0 if pop == 'null' else float(pop)
+                line_count += 1
+                entity = normalizer(entity)
+                # TODO: add this back when we add numeric support
+                # self.num_types.update(util.get_nested_numeric_types(entity))
             if pop > popularity_cutoff:
                 self._update_entity(entity, float(pop))
                 entities_added += 1
 
-        logging.info('{}/{} entities in entity data file exceeded popularity '
-                     "cutoff and were added to the gazetteer".format(
-                         entities_added, line_count))
+        logger.info('{}/{} entities in entity data file exceeded popularity '
+                    "cutoff and were added to the gazetteer".format(entities_added, line_count))
 
-    def update_with_entity_map(self, entity_map, numeric_types, normalizer):
-        """
-        Updates this gazetteer with data from entity map.
+    def update_with_num_types(self, numeric_types):
+        self.num_types.update(numeric_types)
 
-        Args:
-            entity_map (dict)
-            numeric_types (dict)
-            normalizer (function)
-        """
-        for mapping_key, mapping_value in entity_map.items():
-            if mapping_key == '*':
-                continue
-            mapping_key = normalizer(mapping_key)
-            self._update_entity(mapping_key, 1)
-            self.numtypes.update(util.get_nested_numeric_types(mapping_key))
-        self.numtypes.update(numeric_types)
-        logging.info("Nested numeric types for '{}' facet: {}".format(
-            self.facet, map(str, self.numtypes)))
-
-    def update_with_synonyms_file(self, filename, normalizer, update_if_missing_canonical=True):
-        """
-        Updates this gazetteer with data from a synonyms file.
-
-        Args:
-            filename (str): The filename of the entity data file.
-            normalizer (function): A function that normalizes text.
-            update_if_missing_canonical (bool): Bool indicator that added synonyms not in dict
-        """
-        logging.info('Loading synonyms from {}'.format(filename))
+    def update_with_entity_map(self, mapping, normalizer, update_if_missing_canonical=True):
+        logger.info('Loading synonyms from entity mapping')
         line_count = 0
         synonyms_added = 0
         missing_canonicals = 0
         min_popularity = 0
-        if len(self.pop_dic) > 0:
-            min_popularity = min(list(self.pop_dic.values()))
-        for canonical, synonym in util.read_tsv_lines(filename, 2):
-            line_count += 1
-            canonical = normalizer(canonical)
-            synonym = normalizer(synonym)
+        if len(self.pop_dict) > 0:
+            min_popularity = min(self.pop_dict.values())
+        for item in mapping:
+            canonical = normalizer(item['cname'])
 
-            if update_if_missing_canonical or canonical in self.pop_dic:
-                self._update_entity(entity=synonym,
-                                    popularity=self.pop_dic.get(canonical, min_popularity))
-                synonyms_added += 1
-            if canonical not in self.pop_dic:
-                missing_canonicals += 1
-                logging.debug(u"Synonym '{}' for entity '{}' not in gazetteer"
-                              .format(synonym, canonical))
-        logging.info('Added {}/{} synonyms from file into gazetteer'
-                     .format(synonyms_added, line_count))
+            for syn in item['whitelist']:
+                line_count += 1
+                synonym = normalizer(syn)
+
+                if update_if_missing_canonical or canonical in self.pop_dict:
+                    self._update_entity(synonym, self.pop_dict.get(canonical, min_popularity))
+                    synonyms_added += 1
+                if canonical not in self.pop_dict:
+                    missing_canonicals += 1
+                    logger.debug("Synonym '{}' for entity '{}' not in "
+                                 'gazetteer'.format(synonym, canonical))
+        logger.info('Added {}/{} synonyms from file into '
+                    'gazetteer'.format(synonyms_added, line_count))
         if update_if_missing_canonical and missing_canonicals:
-            logging.info('Loaded {} synonyms where the canonical name is not '
-                         'in the gazetteer'.format(missing_canonicals))
+            logger.info('Loaded {} synonyms where the canonical name is not '
+                        'in the gazetteer'.format(missing_canonicals))
+
+
+def iterate_ngrams(tokens, min_length=1, max_length=1):
+    """Iterates over all n-grams in a list of tokens.
+
+    Args:
+        tokens (list of str): A list of word tokens.
+        min_length (int): The minimum length of n-gram to yield.
+        max_length (int): The maximum length of n-gram to yield.
+
+    Yields:
+        (str) An n-gram from the input tokens list.
+    """
+    max_length = min(len(tokens), max_length)
+    unrolled_tokens = [tokens[i:] for i in range(max_length)]
+    for length in range(min_length, max_length+1):
+        for ngram in zip(*unrolled_tokens[:length]):
+            yield ' '.join(ngram)

@@ -38,10 +38,10 @@ def test_get_labeled_query_tree():
     assert set(tree[DOMAIN_NAME].keys()) == INTENTS
 
 
-def test_get_entities():
-    entities = path.get_entities(APP_PATH)
-    assert len(entities) == 1
-    assert 'store_name' in entities
+def test_get_entity_types():
+    entity_types = path.get_entity_types(APP_PATH)
+    assert len(entity_types) == 1
+    assert 'store_name' in entity_types
 
 
 def test_get_indexes():

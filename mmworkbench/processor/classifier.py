@@ -27,6 +27,51 @@ class Classifier(object):
         self._resource_loader = resource_loader
         self._model = None  # will be set when model is fit or loaded
 
+    def fit(self, model_type=None, features=None, params_grid=None, cv=None, queries=None):
+        """Trains the model
+
+        Args:
+            model_type (str): The type of model to use. If omitted, the default model type will
+                be used.
+            features (dict): If omitted, the default features for the model type will be used.
+            params_grid (dict): If omitted the default params will be used
+            cv (None, optional): Description
+            queries (list of ProcessedQuery): The labeled queries to use as training data
+
+        """
+        raise NotImplementedError('Subclasses must implement this method')
+
+    def predict(self, query):
+        """Predicts a domain for the specified query
+
+        Args:
+            query (Query): The input query
+
+        Returns:
+            str: the predicted domain
+        """
+        raise NotImplementedError('Subclasses must implement this method')
+
+    def predict_proba(self, query):
+        """Generates multiple hypotheses and returns their associated probabilities
+
+        Args:
+            query (Query): The input query
+
+        Returns:
+            list: a list of tuples of the form (str, float) grouping predictions and their
+                probabilities
+        """
+        raise NotImplementedError('Subclasses must implement this method')
+
+    def evaluate(self, use_blind=False):
+        """Evaluates the model on the specified data
+
+        Returns:
+            TYPE: Description
+        """
+        raise NotImplementedError('Subclasses must implement this method')
+
     def get_fit_config(self, model_type=None, features=None, params_grid=None, cv=None,
                        model_name=None):
         model_name = model_name or self.DEFAULT_CONFIG['default_model']
@@ -66,8 +111,7 @@ class MultinomialClassifier(Classifier):
     DEFAULT_CONFIG = None
     MODEL_CLASS = None
 
-    def fit(self, model_type=None, features=None, params_grid=None, cv=None, model_name=None,
-            queries=None):
+    def fit(self, model_type=None, features=None, params_grid=None, cv=None, queries=None):
         """Trains the model
 
         Args:
@@ -76,15 +120,16 @@ class MultinomialClassifier(Classifier):
             features (dict): If omitted, the default features for the model type will be used.
             params_grid (dict): If omitted the default params will be used
             cv (None, optional): Description
+            queries (list of ProcessedQuery): The labeled queries to use as training data
 
         """
         queries, classes = self._get_queries_and_classes(queries)
-        gazetteers = self._get_gazetteers()
 
         params = self.get_fit_config(model_type, features, params_grid, cv)
 
         model = self.MODEL_CLASS(**params)
-        model.register_resources(gazetteers)
+        gazetteers = self._resource_loader.get_gazetteers()
+        model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)
         self._model = model
 
@@ -117,7 +162,12 @@ class MultinomialClassifier(Classifier):
         Returns:
             TYPE: Description
         """
-        pass
+        raise NotImplementedError('Still need to implement this. Sorry!')
+
+    def load(self, model_path):
+        super().load(model_path)
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
 
     def _get_queries_and_classes(self, queries=None):
         """Returns the set of queries and their classes to train on
@@ -127,13 +177,4 @@ class MultinomialClassifier(Classifier):
                 training set will be loaded.
 
         """
-        raise NotImplementedError
-
-    def _get_gazetteers(self):
-        """Returns the gazetteers needed by this classifier
-
-        Returns:
-            TYPE: Description
-
-        """
-        raise NotImplementedError
+        raise NotImplementedError('Subclasses must implement this method')

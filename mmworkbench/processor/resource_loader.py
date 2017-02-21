@@ -6,10 +6,15 @@ This module contains the processor resource loader.
 from __future__ import unicode_literals
 from builtins import object
 
+import time
 import fnmatch
+import json
 import logging
+import os
 
 from .. import markup, path
+
+from .gazetteer import Gazetteer
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +33,59 @@ class ResourceLoader(object):
         self.gazetteers = {}
         self.labeled_query_files = {}
         self.entity_maps = {}
+
+    def get_gazetteers(self):
+        """Gets all gazetteers
+
+        Returns:
+            dict: Gazetteer data keyed by entity type
+        """
+        # TODO: get role gazetteers
+        entity_types = path.get_entity_types(self.app_path)
+        return {entity_type: self.get_gazetteer(entity_type)
+                for entity_type in entity_types}
+
+    def get_gazetteer(self, gaz_name):
+        """Gets a gazetteers by name
+
+        Args:
+            gaz_name (str): The name of the entity
+
+        Returns:
+            dict: Gazetteer data
+        """
+        # TODO: get role gazetteers
+        if gaz_name not in self.gazetteers:
+            gaz = Gazetteer(gaz_name)
+            gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
+
+            try:
+                gaz.load(gaz_path)
+                self.gazetteers[gaz_name] = gaz.to_dict()
+            except FileNotFoundError:
+                self.build_gazetteer(gaz_name)
+
+        return self.gazetteers[gaz_name]
+
+    def build_gazetteer(self, gaz_name, exclude_ngrams=False):
+        POPULARITY_CUTOFF = 0.0
+
+        logger.info("Building gazetteer '{}'".format(gaz_name))
+
+        # TODO: support role gazetteers
+        gaz = Gazetteer(gaz_name, exclude_ngrams)
+
+        entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
+        gaz.update_with_entity_data_file(entity_data_path, POPULARITY_CUTOFF,
+                                         self.tokenizer.normalize)
+
+        mapping = self.get_entity_map(gaz_name)
+        gaz.update_with_entity_map(mapping, self.tokenizer.normalize)
+
+        gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
+        gaz.dump(gaz_path)
+
+        self.gazetteers[gaz_name] = gaz.to_dict()
 
     def get_entity_map(self, entity_type, force_reload=False):
         file_path = path.get_entity_map_path(self.app_path, entity_type)
@@ -58,8 +116,6 @@ class ResourceLoader(object):
         self.entity_maps[entity_type]['loaded'] = time.time()
 
 
-    def get_gazetteers(self, domain=None, gazeteer_names=None):
-        pass
 
     def get_labeled_queries(self, domain=None, intent=None, query_set='train', force_reload=False):
         """Gets labeled queries from the cache, or loads them from disk.
