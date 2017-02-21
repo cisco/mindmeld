@@ -72,6 +72,9 @@ class Classifier(object):
         """
         raise NotImplementedError('Subclasses must implement this method')
 
+    def _get_model_class(self, classifier_type):
+        return self.MODEL_CLASS
+
     def get_fit_config(self, model_type=None, features=None, params_grid=None, cv=None,
                        model_name=None):
         model_name = model_name or self.DEFAULT_CONFIG['default_model']
@@ -124,10 +127,10 @@ class MultinomialClassifier(Classifier):
 
         """
         queries, classes = self._get_queries_and_classes(queries)
-
         params = self.get_fit_config(model_type, features, params_grid, cv)
 
-        model = self.MODEL_CLASS(**params)
+        ModelClass = self._get_model_class(model_type)
+        model = ModelClass(**params)
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)

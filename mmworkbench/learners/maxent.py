@@ -265,22 +265,6 @@ def extract_age_features():
     return extractor
 
 
-def extract_artist_only_feature():
-    def extractor(query, facets, facet_index, resources):
-        features = {}
-        allowed_facets = {'artist', 'action'}
-        found_extra_facet = False
-        for i, facet in enumerate(facets):
-            if facet['type'] not in allowed_facets:
-                found_extra_facet = True
-                break
-        if not found_extra_facet:
-            features['artist-only'] = 1
-
-        return features
-
-    return extractor
-
 
 FEATURE_NAME_MAP = {
     'bag-of-words-before': extract_bag_of_words_before_features,
@@ -288,6 +272,5 @@ FEATURE_NAME_MAP = {
     'in-gaz': extract_in_gaz_features,
     'other-entities': extract_other_entities_features,
     'operator-entities': extract_operator_value_features,
-    'extract-artist-only': extract_artist_only_feature,
     'age-entities': extract_age_features
 }
