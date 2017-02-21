@@ -181,6 +181,14 @@ class ProcessedQuery(object):
         self.entities = entities
         self.is_gold = is_gold
 
+    def to_dict(self):
+        return {
+            'query_text': self.query.raw_text,
+            'domain': self.domain,
+            'intent': self.intent,
+            'entities': [e.to_dict() for e in self.entities],
+        }
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
@@ -230,6 +238,15 @@ class QueryEntity(object):
         self.normalized_text = normalized_text
         self.start = start
         self.end = end
+
+    def to_dict(self):
+        base = self.entity.to_dict()
+        base.update({
+            'text': self.raw_text,
+            'start': self.start,
+            'end': self.end
+        })
+        return base
 
     @staticmethod
     def from_query(query, entity_type, start, end, role=None, value=None,
@@ -281,6 +298,14 @@ class Entity(object):
         self.role = role
         self.value = value
         self.display_text = display_text
+
+    def to_dict(self):
+        return {
+            'type': self.type,
+            'role': self.role,
+            'value': self.value,
+            'display_text': self.display_text
+        }
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
