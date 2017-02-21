@@ -45,13 +45,10 @@ class DomainClassifier(MultinomialClassifier):
     MODEL_CLASS = TextClassifier
 
     def _get_queries_and_classes(self, queries=None):
-        if queries:
-            queries, domains = list(zip(*[(q.query, q.domain) for q in queries]))
-        else:
+        if not queries:
             query_tree = self._resource_loader.get_labeled_queries()
-            domains, _, queries = self._resource_loader.flatten_query_tree(query_tree)
-            queries = [q.query for q in queries]
-        return queries, domains
+            queries = self._resource_loader.flatten_query_tree(query_tree)
+        return list(zip(*[(q.query, q.domain) for q in queries]))
 
     def _get_gazetteers(self):
         # gazetteers = self._resource_loader.get_gazetteers()

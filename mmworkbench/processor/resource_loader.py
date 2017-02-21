@@ -7,8 +7,11 @@ from __future__ import unicode_literals
 from builtins import object
 
 import fnmatch
+import logging
 
 from .. import markup, path
+
+logger = logging.getLogger(__name__)
 
 QUERY_SETS = {
     'train': 'train*.txt'
@@ -24,6 +27,36 @@ class ResourceLoader(object):
 
         self.gazetteers = {}
         self.labeled_query_files = {}
+        self.entity_maps = {}
+
+    def get_entity_map(self, entity_type, force_reload=False):
+        file_path = path.get_entity_map_path(self.app_path, entity_type)
+        last_modified = os.path.getmtime(file_path)
+        never_loaded = entity_type not in self.entity_maps
+
+        if force_reload or never_loaded or self.entity_maps[entity_type]['loaded'] < last_modified:
+            # file is out of date, load it
+            self.load_entity_map(entity_type)
+        return self.entity_maps[entity_type]['mapping']
+
+    def load_entity_map(self, entity_type):
+        """Loads an entity map
+
+        Args:
+            entity_type (str): The type of entity to load a mapping
+        """
+        file_path = path.get_entity_map_path(self.app_path, entity_type)
+        logger.info("Loading entity map from file '{}'".format(file_path))
+        if not os.path.isfile(file_path):
+            raise ValueError("Entity map file was not found at '{}'".format(file_path))
+        with open(file_path, 'r') as json_file:
+            json_data = json.load(json_file)
+
+        if entity_type not in self.entity_maps:
+            self.entity_maps[entity_type] = {}
+        self.entity_maps[entity_type]['mapping'] = json_data
+        self.entity_maps[entity_type]['loaded'] = time.time()
+
 
     def get_gazetteers(self, domain=None, gazeteer_names=None):
         pass
@@ -40,6 +73,21 @@ class ResourceLoader(object):
             dict: ProcessedQuery objects loaded from labeled query files, organized by domain and
                 intent.
         """
+        query_tree = {}
+        file_iter = self._traverse_labeled_queries_files(domain, intent, query_set, force_reload)
+        for domain, intent, filename in file_iter:
+            if domain not in query_tree:
+                query_tree[domain] = {}
+
+            if intent not in query_tree[domain]:
+                query_tree[domain][intent] = []
+            queries = query_tree[domain][intent]
+            queries.extend(self.labeled_query_files[domain][intent][filename]['queries'])
+
+        return query_tree
+
+    def _traverse_labeled_queries_files(self, domain=None, intent=None, query_set='train',
+                                        force_reload=False):
         try:
             file_pattern = QUERY_SETS[query_set]
         except KeyError:
@@ -48,12 +96,9 @@ class ResourceLoader(object):
 
         domains = [domain] if domain else self.labeled_query_files.keys()
 
-        query_tree = {}
         for domain in domains:
-            query_tree[domain] = {}
             intents = [intent] if intent else self.labeled_query_files[domain].keys()
             for intent in intents:
-                queries = []
                 files = self.labeled_query_files[domain][intent].keys()
                 # filter to files which belong to the query set
                 files = fnmatch.filter(files, file_pattern)
@@ -62,11 +107,8 @@ class ResourceLoader(object):
                     file = self.labeled_query_files[domain][intent][filename]
                     if force_reload or (not file['loaded'] or file['loaded'] < file['modified']):
                         # file is out of date, load it
-                        file['queries'] = self.load_query_file(domain, intent, filename)
-                    queries.extend(file['queries'])
-                query_tree[domain][intent] = queries
-
-        return query_tree
+                        self.load_query_file(domain, intent, filename)
+                    yield domain, intent, filename
 
     @staticmethod
     def flatten_query_tree(query_tree):
@@ -74,8 +116,8 @@ class ResourceLoader(object):
         for domain, intent_queries in query_tree.items():
             for intent, queries in intent_queries.items():
                 for query in queries:
-                    flattened.append((domain, intent, query))
-        return zip(*flattened)
+                    flattened.append(query)
+        return flattened
 
     def _update_query_file_dates(self, file_pattern):
         query_tree = path.get_labeled_query_tree(self.app_path, [file_pattern])
@@ -151,6 +193,8 @@ class ResourceLoader(object):
             filename (str): The name of the query file
 
         """
+        logger.info("Loading queries from file {}/{}/{}".format(domain, intent, filename))
+
         file_path = path.get_labeled_query_file_path(self.app_path, domain, intent, filename)
         queries = []
         import codecs
@@ -167,4 +211,5 @@ class ResourceLoader(object):
                                               domain=domain, intent=intent, is_gold=True)
                     queries.append(query)
 
-        return queries
+        self.labeled_query_files[domain][intent][filename]['queries'] = queries
+        self.labeled_query_files[domain][intent][filename]['loaded'] = time.time()

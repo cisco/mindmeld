@@ -5,7 +5,6 @@ This module contains the intent classifier component.
 from __future__ import unicode_literals
 
 import logging
-import os
 
 from .classifier import MultinomialClassifier
 from ..classifiers.text_classifier import TextClassifier
@@ -83,13 +82,10 @@ class IntentClassifier(MultinomialClassifier):
         self.domain = domain
 
     def _get_queries_and_classes(self, queries=None):
-        if queries:
-            queries, intents = list(zip(*[(q.query, q.intent) for q in queries]))
-        else:
-            query_tree = self._resource_loader.get_labeled_queries(domain=self.domain)
-            _, intents, queries = self._resource_loader.flatten_query_tree(query_tree)
-            queries = [q.query for q in queries]
-        return queries, intents
+        if not queries:
+            query_tree = self._resource_loader.get_labeled_queries()
+            queries = self._resource_loader.flatten_query_tree(query_tree)
+        return list(zip(*[(q.query, q.intent) for q in queries]))
 
     def _get_gazetteers(self):
         # gazetteers = self._resource_loader.get_gazetteers(self.domain)

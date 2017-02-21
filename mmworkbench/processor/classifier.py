@@ -38,6 +38,29 @@ class Classifier(object):
         return {'classifier_type': model_type, 'features': features, 'params_grid': params_grid,
                 'cv': cv}
 
+    def dump(self, model_path):
+        """Persists the model to disk.
+
+        Args:
+            model_path (str): The location on disk where the model should be stored
+
+        """
+        # make directory if necessary
+        folder = os.path.dirname(model_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
+        joblib.dump(self._model, model_path)
+
+    def load(self, model_path):
+        """Loads the model from disk
+
+        Args:
+            model_path (str): The location on disk where the model is stored
+
+        """
+        self._model = joblib.load(model_path)
+
 
 class MultinomialClassifier(Classifier):
     DEFAULT_CONFIG = None
@@ -83,7 +106,8 @@ class MultinomialClassifier(Classifier):
             query (Query): The input query
 
         Returns:
-            list: a list of tuples of the form (str, float) grouping predictions and their probabilities
+            list: a list of tuples of the form (str, float) grouping predictions and their
+                probabilities
         """
         return self._model.predict_proba([query])[0]
 
@@ -94,29 +118,6 @@ class MultinomialClassifier(Classifier):
             TYPE: Description
         """
         pass
-
-    def dump(self, model_path):
-        """Persists the model to disk.
-
-        Args:
-            model_path (str): The location on disk where the model should be stored
-
-        """
-        # make directory if necessary
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        joblib.dump(self._model, model_path)
-
-    def load(self, model_path):
-        """Loads the model from disk
-
-        Args:
-            model_path (str): The location on disk where the model is stored
-
-        """
-        self._model = joblib.load(model_path)
 
     def _get_queries_and_classes(self, queries=None):
         """Returns the set of queries and their classes to train on
