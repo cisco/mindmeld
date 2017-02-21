@@ -1,10 +1,10 @@
-Where is my nearest Kwik-E-Mart store?
-Where is the nearest Kwik-E-Mart?
-Locate the nearest Kwik-E-Mart.
-Where is my nearest store?
-Which store is closest to me?
-Can you tell me the location of the nearest Kwik-E-Mart?
-Where is the closest store?
-Where is the closest Kwik-E-Mart store?
-Which is the nearest store location?
-Which store is the nearest?
+When does the {Elm Street|store_name} store close?
+At what time does the {Elm Street|store_name} store close?
+When does the {Central Plaza|store_name} store close?
+What are the business hours for the {Central Plaza|store_name} store?
+What are the hours for the Kwik-E-Mart on {Main Street|store_name}?
+Is the {Central Plaza|name} Kwik-E-Mart open now?
+The store at {Pine & Market|store_name} - is it open?
+Is the {Rockefeller|store_name} Kwik-E-Mart open for business {tomorrow|sys:date}?
+Is {Elm Street|store_name} open {tomorrow|sys:date}?
+Can you check if the {Main St|store_name} store is open on {Sunday|sys:date}?
