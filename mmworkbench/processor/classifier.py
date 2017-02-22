@@ -110,7 +110,7 @@ class Classifier(object):
         self._model = joblib.load(model_path)
 
 
-class MultinomialClassifier(Classifier):
+class MultiClassClassifier(Classifier):
     DEFAULT_CONFIG = None
     MODEL_CLASS = None
 
