@@ -9,7 +9,7 @@ import sys
 
 import requests
 
-from .core import QueryEntity
+from .core import Entity, QueryEntity
 
 
 logger = logging.getLogger(__name__)
@@ -122,8 +122,8 @@ def mallard_item_to_entity(query, item):
         num_type = str(item['dimension'])
         value['value'] = str(item['value'][0])
     entity_type = "sys:{}".format(num_type)
-    return QueryEntity.from_query(query, entity_type, start, end, value=value,
-                                  confidence=confidence)
+    entity = Entity(entity_type, value=value, confidence=confidence)
+    return QueryEntity.from_query(query, start, end, entity)
 
 
 def mallard_dimensions_from_entity_types(entity_types):

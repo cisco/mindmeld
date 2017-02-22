@@ -7,6 +7,7 @@ test_markup
 
 Tests for `markup` module.
 """
+# pylint: disable=I0011,W0621
 from __future__ import unicode_literals
 
 import pytest
@@ -81,7 +82,7 @@ def test_mapping(tokenizer):
 
     assert normalized == 'test 1 2 3'
 
-    forward, backward = tokenizer.generate_character_index_mappings(raw, normalized)
+    forward, backward = tokenizer.get_char_index_map_character_index_mappings(raw, normalized)
 
     assert forward == {
         0: 0,
@@ -120,74 +121,74 @@ def test_mapping_2(tokenizer):
 
     assert normalized == 'is s o b gonna be on at 8 p m'
 
-    forward, backward = tokenizer.generate_character_index_mappings(raw, normalized)
+    forward, backward = tokenizer.get_char_index_map_character_index_mappings(raw, normalized)
 
     assert forward == {
-      0: 0,
-      1: 1,
-      2: 2,
-      3: 3,
-      4: 4,
-      5: 5,
-      6: 6,
-      7: 7,
-      8: 7,
-      9: 8,
-      10: 8,
-      11: 8,
-      12: 8,
-      13: 9,
-      14: 10,
-      15: 11,
-      16: 12,
-      17: 13,
-      18: 14,
-      19: 15,
-      20: 16,
-      21: 17,
-      22: 18,
-      23: 19,
-      24: 20,
-      25: 21,
-      26: 22,
-      27: 23,
-      28: 24,
-      29: 25,
-      30: 26,
-      31: 27,
-      32: 28,
-      33: 28,
-      34: 28
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5,
+        6: 6,
+        7: 7,
+        8: 7,
+        9: 8,
+        10: 8,
+        11: 8,
+        12: 8,
+        13: 9,
+        14: 10,
+        15: 11,
+        16: 12,
+        17: 13,
+        18: 14,
+        19: 15,
+        20: 16,
+        21: 17,
+        22: 18,
+        23: 19,
+        24: 20,
+        25: 21,
+        26: 22,
+        27: 23,
+        28: 24,
+        29: 25,
+        30: 26,
+        31: 27,
+        32: 28,
+        33: 28,
+        34: 28
     }
 
     assert backward == {
-      0: 0,
-      1: 1,
-      2: 2,
-      3: 3,
-      4: 4,
-      5: 5,
-      6: 6,
-      7: 7,
-      8: 9,
-      9: 13,
-      10: 14,
-      11: 15,
-      12: 16,
-      13: 17,
-      14: 18,
-      15: 19,
-      16: 20,
-      17: 21,
-      18: 22,
-      19: 23,
-      20: 24,
-      21: 25,
-      22: 26,
-      23: 27,
-      24: 28,
-      25: 29,
-      26: 30,
-      27: 31,
-      28: 32
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5,
+        6: 6,
+        7: 7,
+        8: 9,
+        9: 13,
+        10: 14,
+        11: 15,
+        12: 16,
+        13: 17,
+        14: 18,
+        15: 19,
+        16: 20,
+        17: 21,
+        18: 22,
+        19: 23,
+        20: 24,
+        21: 25,
+        22: 26,
+        23: 27,
+        24: 28,
+        25: 29,
+        26: 30,
+        27: 31,
+        28: 32
     }

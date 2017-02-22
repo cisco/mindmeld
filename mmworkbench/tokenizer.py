@@ -227,7 +227,7 @@ class Tokenizer(object):
 
         return tokens
 
-    def generate_character_index_mappings(self, raw_text, normalized_text):
+    def get_char_index_map(self, raw_text, normalized_text):
         """
         This method generates character index mapping from normalized query to raw query. The facet
         model always operates on normalized query during the parsing but for facet output we need to

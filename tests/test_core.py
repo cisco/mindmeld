@@ -7,6 +7,7 @@ test_core
 
 Tests for `core` module.
 """
+# pylint: disable=I0011,W0621
 from __future__ import unicode_literals
 
 import pytest
@@ -17,10 +18,12 @@ from mmworkbench.core import (QueryEntity, Entity,
 
 @pytest.fixture
 def query(query_factory):
+    """Returns a basic query"""
     return query_factory.create_query('Test: One. 2. 3.')
 
 
 def test_query(query_factory):
+    """Tests creation of a query"""
     text = 'Test: 1. 2. 3.'
     query = query_factory.create_query(text)
 
@@ -30,6 +33,7 @@ def test_query(query_factory):
 
 
 def test_transform_index_forward(query):
+    """Tests transforming a char index from raw to processed or normalized"""
     raw_index = 6
     raw_char = query.raw_text[raw_index]
 
@@ -49,6 +53,7 @@ def test_transform_index_forward(query):
 
 
 def test_transform_index_backward(query):
+    """Tests transforming a char index from normalized to processed or raw"""
     norm_index = 5
     norm_char = query.normalized_text[norm_index]
 
@@ -68,6 +73,7 @@ def test_transform_index_backward(query):
 
 
 def test_transform_index_backward_2(query):
+    """Tests transforming a char index from normalized to processed or raw"""
     norm_index = 7
     norm_char = query.normalized_text[norm_index]
 
@@ -87,6 +93,7 @@ def test_transform_index_backward_2(query):
 
 
 def test_transform_index_backward_3(query):
+    """Tests transforming a char index from normalized to processed or raw"""
     norm_index = 8
     norm_char = query.normalized_text[norm_index]
 
@@ -106,6 +113,7 @@ def test_transform_index_backward_3(query):
 
 
 def test_transform_range_forward(query):
+    """Tests transforming a char span from raw to processed or normalized"""
     raw_span = (0, 9)
     raw_text = query.raw_text[raw_span[0]:raw_span[1] + 1]
 
@@ -125,6 +133,7 @@ def test_transform_range_forward(query):
 
 
 def test_transform_range_backward(query):
+    """Tests transforming a char span from normalized to processed or raw"""
     norm_span = (0, 7)
     norm_text = query.normalized_text[norm_span[0]:norm_span[1] + 1]
 
@@ -144,21 +153,26 @@ def test_transform_range_backward(query):
 
 
 def test_query_equality(query_factory):
-    a = query_factory.create_query('Hello. There.')
-    b = query_factory.create_query('Hello. There.')
+    """Tests query equality"""
+    query_a = query_factory.create_query('Hello. There.')
+    query_b = query_factory.create_query('Hello. There.')
 
-    assert a == b
+    assert query_a == query_b
 
 
 def test_query_entity_equality():
-    a = QueryEntity('Entity', 'Entity', 'entity', 0, 5, 'type', 'role', 'value', 'display')
-    b = QueryEntity('Entity', 'Entity', 'entity', 0, 5, 'type', 'role', 'value', 'display')
+    """Tests query entity equality"""
+    entity_a = QueryEntity('Entity', 'Entity', 'entity', 0, 5,
+                           Entity('type', 'role', 'value', 'display'))
+    entity_b = QueryEntity('Entity', 'Entity', 'entity', 0, 5,
+                           Entity('type', 'role', 'value', 'display'))
 
-    assert a == b
+    assert entity_a == entity_b
 
 
 def test_entity_equality():
-    a = Entity('type', 'role', 'value', 'display')
-    b = Entity('type', 'role', 'value', 'display')
+    """Tests entity equality"""
+    entity_a = Entity('type', 'role', 'value', 'display')
+    entity_b = Entity('type', 'role', 'value', 'display')
 
-    assert a == b
+    assert entity_a == entity_b

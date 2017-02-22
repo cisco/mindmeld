@@ -10,14 +10,6 @@ TEXT_FORM_NORMALIZED = 2
 TEXT_FORMS = [TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED]
 
 
-class PlaceholderPreprocessor(object):
-
-    def process(self, text):
-        return text
-
-    def generate_character_index_mappings(self, raw, processed):
-        return None, None
-
 
 class QueryFactory(object):
     """An object which encapsulates the components required to create a Query object.
@@ -29,26 +21,37 @@ class QueryFactory(object):
     """
     def __init__(self, sys_ent_rec, tokenizer, preprocessor=None):
         self.tokenizer = tokenizer
-        self.preprocessor = preprocessor or PlaceholderPreprocessor()
+        self.preprocessor = preprocessor
         self.sys_ent_rec = sys_ent_rec
 
     def create_query(self, text):
+        """Creates a query with the given text
+
+        Args:
+            text (str): Text to create a query object for
+
+        Returns:
+            Query: A newly constructed query
+        """
         raw_text = text
 
         char_maps = {}
 
         # create raw, processed maps
-        processed_text = self.preprocessor.process(raw_text)
-        maps = self.preprocessor.generate_character_index_mappings(raw_text, processed_text)
-        forward, backward = maps
-        char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward
-        char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward
+        if self.preprocessor:
+            processed_text = self.preprocessor.process(raw_text)
+            maps = self.preprocessor.get_char_index_map(raw_text, processed_text)
+            forward, backward = maps
+            char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward
+            char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward
+        else:
+            processed_text = raw_text
 
         normalized_tokens = self.tokenizer.tokenize(processed_text, False)
         normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
 
         # create normalized maps
-        maps = self.tokenizer.generate_character_index_mappings(processed_text, normalized_text)
+        maps = self.tokenizer.get_char_index_map(processed_text, normalized_text)
         forward, backward = maps
 
         char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = forward
@@ -60,6 +63,14 @@ class QueryFactory(object):
         return query
 
     def normalize(self, text):
+        """Normalizes the given text
+
+        Args:
+            text (str): Text to process
+
+        Returns:
+            str: Normalized text
+        """
         return self.tokenizer.normalize(text)
 
     def __repr__(self):
@@ -73,19 +84,21 @@ class Query(object):
     forms.
 
     Attributes:
-        normalized_tokens (list of str): a list of normalized tokens
         raw_text (str): the original input text
-        normalized_text (str): the normalized text. TODO: better description here
         processed_text (str): the text after it has been preprocessed. TODO: better description here
+        normalized_tokens (list of str): a list of normalized tokens
+        normalized_text (str): the normalized text. TODO: better description here
     """
     def __init__(self, raw_text, processed_text, normalized_tokens, char_maps):
         """Summary
 
         Args:
             raw_text (str): the original input text
-            processed_text (str): Description
-            normalized_tokens (list of dict): List tokens outputted by a tokenizer
-            char_maps (dict): Mappings between raw, processed and normalized text
+            processed_text (str): the input text after it has been preprocessed
+            normalized_tokens (list of dict): List tokens outputted by
+                a tokenizer
+            char_maps (dict): Mappings between character indices in raw,
+                processed and normalized text
         """
         self._normalized_tokens = normalized_tokens
         self._text = {
@@ -109,18 +122,22 @@ class Query(object):
 
     @property
     def raw_text(self):
+        """The original input text"""
         return self._text[TEXT_FORM_RAW]
 
     @property
     def processed_text(self):
+        """The input text after it has been preprocessed"""
         return self._text[TEXT_FORM_PROCESSED]
 
     @property
     def normalized_text(self):
+        """The normalized input text"""
         return self._text[TEXT_FORM_NORMALIZED]
 
     @property
     def normalized_tokens(self):
+        """The tokens of the normalized input text"""
         return [token['entity'] for token in self._normalized_tokens]
 
     def transform_range(self, text_range, form_in, form_out):
@@ -180,7 +197,7 @@ class Query(object):
 
     def _unprocess_index(self, index, form_in):
         if form_in == TEXT_FORM_RAW:
-            raise ValueError("'{}' form cannot be unprocessed".form(TEXT_FORM_RAW))
+            raise ValueError("'{}' form cannot be unprocessed".format(TEXT_FORM_RAW))
         mapping_key = (form_in, (form_in - 1))
         try:
             mapping = self._char_maps[mapping_key]
@@ -214,6 +231,7 @@ class ProcessedQuery(object):
         self.is_gold = is_gold
 
     def to_dict(self):
+        """Converts the processed query into a dictionary"""
         return {
             'query_text': self.query.raw_text,
             'domain': self.domain,
@@ -231,7 +249,7 @@ class ProcessedQuery(object):
 
     def __repr__(self):
         msg = "<ProcessedQuery {}, domain: {}, intent: {}, {} entities{}>"
-        return msg.format(self.query.raw_text.__repr__(),  self.domain.__repr__(),
+        return msg.format(self.query.raw_text.__repr__(), self.domain.__repr__(),
                           self.intent.__repr__(), len(self.entities),
                           ', gold' if self.is_gold else '')
 
@@ -251,8 +269,7 @@ class QueryEntity(object):
             entity. This index is based on the normalized text of the query passed in.
     """
 
-    def __init__(self, raw_text, processed_text, normalized_text, start, end, entity_type,
-                 role=None, value=None, display_text=None, confidence=None):
+    def __init__(self, raw_text, processed_text, normalized_text, start, end, entity):
         """Initializes a query entity object
 
         Args:
@@ -264,7 +281,7 @@ class QueryEntity(object):
             end (int): The character index end of the text range that was parsed into this
                 entity. This index is based on the raw text of the query passed in.
         """
-        self.entity = Entity(entity_type, role, value, display_text or raw_text, confidence)
+        self.entity = entity
         self.raw_text = raw_text
         self.processed_text = processed_text
         self.normalized_text = normalized_text
@@ -272,6 +289,7 @@ class QueryEntity(object):
         self.end = end
 
     def to_dict(self):
+        """Converts the query entity into a dictionary"""
         base = self.entity.to_dict()
         base.update({
             'text': self.raw_text,
@@ -281,8 +299,19 @@ class QueryEntity(object):
         return base
 
     @staticmethod
-    def from_query(query, entity_type, start, end, role=None, value=None,
-                   display_text=None, confidence=None):
+    def from_query(query, start, end, entity):
+        """Creates a query entity using a query
+
+        Args:
+            query (Query): The query
+            start (int): The start of the span of the entity in the query's
+                raw text
+            end (int): The end of the span of the entity in the query's raw text
+            entity (Entity): The entity
+
+        Returns:
+            QueryEntity: the created query entity
+        """
         raw_text = query.raw_text[start:end + 1]
 
         pro_text_range = query.transform_range((start, end), TEXT_FORM_RAW, TEXT_FORM_PROCESSED)
@@ -290,8 +319,7 @@ class QueryEntity(object):
 
         norm_range = query.transform_range((start, end), TEXT_FORM_RAW, TEXT_FORM_NORMALIZED)
         normalized_text = query.normalized_text[norm_range[0]:norm_range[1] + 1]
-        return QueryEntity(raw_text, processed_text, normalized_text, start, end,
-                           entity_type, role, value, display_text, confidence)
+        return QueryEntity(raw_text, processed_text, normalized_text, start, end, entity)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -323,7 +351,7 @@ class Entity(object):
         display_text (str): A human readable text representation of the entity for use in natural
             language responses.
     """
-    def __init__(self, entity_type, role, value, display_text, confidence=None):
+    def __init__(self, entity_type, value=None, role=None, display_text=None, confidence=None):
         self.type = entity_type
         self.role = role
         self.value = value
@@ -332,6 +360,7 @@ class Entity(object):
         self.system_entity = entity_type.startswith('sys:')
 
     def to_dict(self):
+        """Converts the entity into a dictionary"""
         base = {
             'type': self.type,
             'role': self.role,

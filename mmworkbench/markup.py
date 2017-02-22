@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import re
 
-from .core import ProcessedQuery, QueryEntity
+from .core import Entity, ProcessedQuery, QueryEntity
 
 ENTITY_PATTERN = re.compile('\{(.*?)\}')
 NUMERIC_PATTERN = re.compile('\[(.*?)\|num:(.*?)\]')
@@ -74,7 +74,9 @@ def mark_down(markup):
     return mark_down_entities(mark_down_numerics(markup))
 
 
-def _mark_up(raw_text, entities=[], numerics=[]):
+def _mark_up(raw_text, entities=None, numerics=None):
+    entities = entities or []
+    numerics = numerics or []
     # TODO: also mark up numerics
     return _mark_up_entities(raw_text, entities)
 
@@ -94,9 +96,8 @@ def _parse_entities(markup, query=None):
 
         end = start + len(entity_text) - 1
 
-        params = {'query': query, 'start': start, 'end': end,
-                  'entity_type': entity_type, 'role': role_name}
-        entities.append(QueryEntity.from_query(**params))
+        raw_entity = Entity(entity_type, role=role_name)
+        entities.append(QueryEntity.from_query(query, start, end, raw_entity))
 
     return entities
 
