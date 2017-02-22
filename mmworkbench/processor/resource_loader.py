@@ -114,8 +114,6 @@ class ResourceLoader(object):
         self.entity_maps[entity_type]['mapping'] = json_data
         self.entity_maps[entity_type]['loaded'] = time.time()
 
-
-
     def get_labeled_queries(self, domain=None, intent=None, query_set='train', force_reload=False):
         """Gets labeled queries from the cache, or loads them from disk.
 

@@ -984,18 +984,15 @@ def extract_gaz_freq():
     def extractor(query, resources):
         tokens = query.split()
         freq_features = defaultdict(int)
-        return freq_features
 
-        # TODO: finish implementing gazetteers and reenable this
         for tok in tokens:
             query_freq = 'OOV' if resources[WORD_FREQ_RSC].get(tok) is None else 'IV'
-            for domain, gazes in resources[GAZETTEER_RSC].items():
-                for gaz_name, gaz in gazes.items():
-                    freq = len(gaz['index'].get(tok, []))
-                    if freq > 0:
-                        b = int(old_div(math.log(freq, 2), 2))
-                        freq_features['{}|freq|{}'.format(gaz_name, b)] += 1
-                        freq_features['{}&{}|freq|{}'.format(query_freq, gaz_name, b)] += 1
+            for gaz_name, gaz in resources[GAZETTEER_RSC].items():
+                freq = len(gaz['index'].get(tok, []))
+                if freq > 0:
+                    b = int(old_div(math.log(freq, 2), 2))
+                    freq_features['{}|freq|{}'.format(gaz_name, b)] += 1
+                    freq_features['{}&{}|freq|{}'.format(query_freq, gaz_name, b)] += 1
 
         q_len = float(len(tokens))
         for k in freq_features:
@@ -1013,24 +1010,21 @@ def extract_in_gaz_feature(scaling=1):
 
     def extractor(query, resources):
         in_gaz_features = defaultdict(float)
-        return in_gaz_features
 
-        # TODO: finish implementing gazetteers and reenable this
         tokens = query.split()
         ngrams = []
         for i in range(1, (len(tokens) + 1)):
             ngrams.extend(find_ngrams(tokens, i))
         for ngram in ngrams:
-            for domain, gazes in resources[GAZETTEER_RSC].items():
-                for gaz_name, gaz in gazes.items():
-                    if ngram in gaz['edict']:
-                        popularity = gaz['edict'].get(ngram, 0.0)
-                        ratio = (old_div(len(ngram), float(len(query)))) * scaling
-                        ratio_pop = ratio * popularity
-                        in_gaz_features[domain + '_' + gaz_name + '_ratio_pop'] += ratio_pop
-                        in_gaz_features[domain + '_' + gaz_name + '_ratio'] += ratio
-                        in_gaz_features[domain + '_' + gaz_name + '_pop'] += popularity
-                        in_gaz_features[domain + '_' + gaz_name + '_exists'] = 1
+            for gaz_name, gaz in resources[GAZETTEER_RSC].items():
+                if ngram in gaz['pop_dict']:
+                    popularity = gaz['pop_dict'].get(ngram, 0.0)
+                    ratio = (old_div(len(ngram), float(len(query)))) * scaling
+                    ratio_pop = ratio * popularity
+                    in_gaz_features[gaz_name + '_ratio_pop'] += ratio_pop
+                    in_gaz_features[gaz_name + '_ratio'] += ratio
+                    in_gaz_features[gaz_name + '_pop'] += popularity
+                    in_gaz_features[gaz_name + '_exists'] = 1
 
         return in_gaz_features
 

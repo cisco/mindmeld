@@ -164,5 +164,3 @@ class EntityRecognizer(Classifier):
         """
         # self._model = joblib.load(model_path)
         pass
-
-

@@ -128,7 +128,6 @@ class RoleClassifier(object):
         }
     }
 
-
     def __init__(self, resource_loader, domain, intent, entity_type):
         """Initializes a role classifier
 
