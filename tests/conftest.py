@@ -11,6 +11,7 @@ from __future__ import unicode_literals
 import pytest
 
 from mmworkbench.tokenizer import Tokenizer
+from mmworkbench.ser import SystemEntityRecognizer
 
 from mmworkbench.core import QueryFactory
 
@@ -21,5 +22,10 @@ def tokenizer():
 
 
 @pytest.fixture
-def query_factory(tokenizer):
-    return QueryFactory(tokenizer)
+def sys_ent_rec():
+    return SystemEntityRecognizer()
+
+
+@pytest.fixture
+def query_factory(sys_ent_rec, tokenizer):
+    return QueryFactory(sys_ent_rec, tokenizer)

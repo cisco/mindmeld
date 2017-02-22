@@ -27,9 +27,10 @@ class QueryFactory(object):
         tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed
             text
     """
-    def __init__(self, tokenizer, preprocessor=None):
+    def __init__(self, sys_ent_rec, tokenizer, preprocessor=None):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor or PlaceholderPreprocessor()
+        self.sys_ent_rec = sys_ent_rec
 
     def create_query(self, text):
         raw_text = text
@@ -53,7 +54,10 @@ class QueryFactory(object):
         char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = forward
         char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
 
-        return Query(raw_text, processed_text, normalized_tokens, char_maps)
+        query = Query(raw_text, processed_text, normalized_tokens, char_maps)
+        query.system_entities = self.sys_ent_rec.predict(query)
+
+        return query
 
     def normalize(self, text):
         return self.tokenizer.normalize(text)
@@ -90,6 +94,7 @@ class Query(object):
             TEXT_FORM_NORMALIZED: ' '.join([t['entity'] for t in self._normalized_tokens])
         }
         self._char_maps = char_maps
+        self.system_entities = None
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -247,7 +252,7 @@ class QueryEntity(object):
     """
 
     def __init__(self, raw_text, processed_text, normalized_text, start, end, entity_type,
-                 role=None, value=None, display_text=None):
+                 role=None, value=None, display_text=None, confidence=None):
         """Initializes a query entity object
 
         Args:
@@ -259,7 +264,7 @@ class QueryEntity(object):
             end (int): The character index end of the text range that was parsed into this
                 entity. This index is based on the raw text of the query passed in.
         """
-        self.entity = Entity(entity_type, role, value, display_text or raw_text)
+        self.entity = Entity(entity_type, role, value, display_text or raw_text, confidence)
         self.raw_text = raw_text
         self.processed_text = processed_text
         self.normalized_text = normalized_text
@@ -277,7 +282,7 @@ class QueryEntity(object):
 
     @staticmethod
     def from_query(query, entity_type, start, end, role=None, value=None,
-                   display_text=None):
+                   display_text=None, confidence=None):
         raw_text = query.raw_text[start:end + 1]
 
         pro_text_range = query.transform_range((start, end), TEXT_FORM_RAW, TEXT_FORM_PROCESSED)
@@ -286,7 +291,7 @@ class QueryEntity(object):
         norm_range = query.transform_range((start, end), TEXT_FORM_RAW, TEXT_FORM_NORMALIZED)
         normalized_text = query.normalized_text[norm_range[0]:norm_range[1] + 1]
         return QueryEntity(raw_text, processed_text, normalized_text, start, end,
-                           entity_type, role, value, display_text)
+                           entity_type, role, value, display_text, confidence)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -318,19 +323,25 @@ class Entity(object):
         display_text (str): A human readable text representation of the entity for use in natural
             language responses.
     """
-    def __init__(self, entity_type, role, value, display_text):
+    def __init__(self, entity_type, role, value, display_text, confidence=None):
         self.type = entity_type
         self.role = role
         self.value = value
         self.display_text = display_text
+        self.confidence = confidence
+        self.system_entity = entity_type.startswith('sys:')
 
     def to_dict(self):
-        return {
+        base = {
             'type': self.type,
             'role': self.role,
             'value': self.value,
             'display_text': self.display_text
         }
+        if self.confidence is not None:
+            base['confidence'] = self.confidence
+
+        return base
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
