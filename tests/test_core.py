@@ -11,25 +11,18 @@ from __future__ import unicode_literals
 
 import pytest
 
-from mmworkbench.tokenizer import Tokenizer
-
-from mmworkbench.core import (Query, QueryEntity, Entity,
+from mmworkbench.core import (QueryEntity, Entity,
                               TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)
 
 
 @pytest.fixture
-def tokenizer():
-    return Tokenizer()
+def query(query_factory):
+    return query_factory.create_query('Test: One. 2. 3.')
 
 
-@pytest.fixture
-def query(tokenizer):
-    return Query('Test: One. 2. 3.', tokenizer)
-
-
-def test_query(tokenizer):
+def test_query(query_factory):
     text = 'Test: 1. 2. 3.'
-    query = Query(text, tokenizer)
+    query = query_factory.create_query(text)
 
     assert query.raw_text == text
     assert query.processed_text == text
@@ -150,9 +143,9 @@ def test_transform_range_backward(query):
     assert raw_text == 'Test: One'
 
 
-def test_query_equality(tokenizer):
-    a = Query('Hello. There.', tokenizer)
-    b = Query('Hello. There.', tokenizer)
+def test_query_equality(query_factory):
+    a = query_factory.create_query('Hello. There.')
+    b = query_factory.create_query('Hello. There.')
 
     assert a == b
 

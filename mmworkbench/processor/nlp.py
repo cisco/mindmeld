@@ -8,7 +8,7 @@ from builtins import object
 
 
 from .. import path
-from ..core import Query, ProcessedQuery
+from ..core import QueryFactory, ProcessedQuery
 from ..tokenizer import Tokenizer
 
 from .domain_classifier import DomainClassifier
@@ -37,13 +37,11 @@ class NaturalLanguageProcessor(object):
             app_path (str): The path to the directory containing the app's data
         """
         self._app_path = app_path
-        self._tokenizer = create_tokenizer(app_path)
-        self._preprocessor = create_preprocessor(app_path)
-        self._resource_loader = create_resource_loader(app_path, self._tokenizer,
-                                                       self._preprocessor)
+        self._query_factory = create_query_factory(app_path)
+        self._resource_loader = create_resource_loader(app_path, self._query_factory)
         self.domain_classifier = DomainClassifier(self._resource_loader)
-        self.domains = {domain: DomainProcessor(app_path, domain, self._tokenizer,
-                                                self._preprocessor, self._resource_loader)
+        self.domains = {domain: DomainProcessor(app_path, domain, self._query_factory,
+                                                self._resource_loader)
                         for domain in path.get_domains(self._app_path)}
 
     def build(self):
@@ -79,7 +77,7 @@ class NaturalLanguageProcessor(object):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = Query(query_text, self._tokenizer, self._preprocessor)
+        query = self._query_factory.create_query(query_text)
         return self.process_query(query).to_dict()
 
     def process_query(self, query):
@@ -109,25 +107,22 @@ class DomainProcessor(object):
 
     Attributes:
         name (str): The name of the domain
-        intent_classifier (TYPE): Description
+        intent_classifier (IntentClassifier): Description
         intents (dict): Description
     """
 
-    def __init__(self, app_path, domain, tokenizer=None, preprocessor=None, resource_loader=None):
+    def __init__(self, app_path, domain, query_factory=None, resource_loader=None):
         self._app_path = app_path
         self.name = domain
-        self._tokenizer = tokenizer or create_tokenizer(app_path)
-        self._preprocessor = preprocessor or create_preprocessor(app_path)
+        self._query_factory = query_factory or create_query_factory(app_path)
         if resource_loader:
             self._resource_loader = resource_loader
         else:
-            self._resource_loader = create_resource_loader(app_path, self._tokenizer,
-                                                           self._preprocessor)
+            self._resource_loader = create_resource_loader(app_path, self._query_factory)
         self.intent_classifier = IntentClassifier(self._resource_loader, domain)
         self.linker = EntityLinker(self._resource_loader, domain)
         self.intents = {intent: IntentProcessor(app_path, domain, intent, self.linker,
-                                                self._tokenizer, self._preprocessor,
-                                                self._resource_loader)
+                                                self._query_factory, self._resource_loader)
                         for intent in path.get_intents(app_path, domain)}
 
     def build(self):
@@ -172,7 +167,7 @@ class DomainProcessor(object):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = Query(query_text, self._tokenizer, self._preprocessor)
+        query = self.query_factory.create_query(query_text)
         processed_query = self.process_query(query)
         processed_query.domain = self.name
         return processed_query.to_dict()
@@ -209,19 +204,16 @@ class IntentProcessor(object):
         recognizer (EntityRecognizer): The
     """
 
-    def __init__(self, app_path, domain, intent, linker, tokenizer=None, preprocessor=None,
-                 resource_loader=None):
+    def __init__(self, app_path, domain, intent, linker, query_factory=None, resource_loader=None):
         self._app_path = app_path
         self.domain = domain
         self.name = intent
         self.linker = linker
-        self._tokenizer = tokenizer or create_tokenizer(app_path)
-        self._preprocessor = preprocessor or create_preprocessor(app_path)
+        self._query_factory = query_factory or create_query_factory(app_path)
         if resource_loader:
             self._resource_loader = resource_loader
         else:
-            self._resource_loader = create_resource_loader(app_path, self._tokenizer,
-                                                           self._preprocessor)
+            self._resource_loader = create_resource_loader(app_path, self._query_factory)
         self.recognizer = EntityRecognizer(self._resource_loader, domain, intent)
 
         # TODO: revisit the parser after finishing Kwik-E-Mart demo
@@ -272,7 +264,7 @@ class IntentProcessor(object):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = Query(query_text, self._tokenizer, self._preprocessor)
+        query = self.query_factory.create_query(query_text)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name
@@ -311,14 +303,13 @@ class EntityProcessor(object):
         role_classifier (TYPE): Description
     """
 
-    def __init__(self, app_path, domain, intent, entity_type, tokenizer=None, preprocessor=None,
+    def __init__(self, app_path, domain, intent, entity_type, query_factory=None,
                  resource_loader=None):
         self._app_path = app_path
         self.domain = domain
         self.intent = intent
         self.type = entity_type
-        self._tokenizer = tokenizer or create_tokenizer(app_path)
-        self._preprocessor = preprocessor or create_preprocessor(app_path)
+        self._query_factory = query_factory or create_query_factory(app_path)
         if resource_loader:
             self._resource_loader = resource_loader
         else:
@@ -339,6 +330,10 @@ class EntityProcessor(object):
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.name)
         self.role_classifier.load(model_path)
 
+    def process(self, text):
+        raise NotImplementedError('EntityProcessor objects to not support `process()`. '
+                                  'Try `process_entity()`')
+
     def process_entity(self, query, entities, entity):
         """Processes the given entity
 
@@ -354,18 +349,6 @@ class EntityProcessor(object):
         return "<EntityProcessor {!r}>".format(self.name)
 
 
-def create_preprocessor(app_path):
-    """Creates the preprocessor for the app at app path
-
-    Args:
-        app_path (str): The path to the directory containing the app's data
-
-    Returns:
-        Preprocessor: a preprocessor
-    """
-    pass
-
-
 def create_tokenizer(app_path):
     """Creates the preprocessor for the app at app path
 
@@ -378,18 +361,35 @@ def create_tokenizer(app_path):
     return Tokenizer()
 
 
-def create_resource_loader(app_path, tokenizer, preprocessor):
+def create_preprocessor(app_path):
+    """Creates the preprocessor for the app at app path
+
+    Args:
+        app_path (str): The path to the directory containing the app's data
+
+    Returns:
+        Preprocessor: a preprocessor
+    """
+    pass
+
+
+def create_query_factory(app_path, tokenizer=None, preprocessor=None):
+    tokenizer = tokenizer or create_tokenizer(app_path)
+    preprocessor = preprocessor or create_preprocessor(app_path)
+    return QueryFactory(tokenizer, preprocessor)
+
+
+def create_resource_loader(app_path, query_factory):
     """Creates the resource loader for the app at app path
 
     Args:
         app_path (str): The path to the directory containing the app's data
-        tokenizer (Tokenizer): The app's tokenizer
-        preprocessor (Preprocessor): The app's preprocessor
+        query_factory (QueryFactory): The app's query factory
 
     Returns:
         ResourceLoader: a resource loader
     """
-    return ResourceLoader(app_path, tokenizer, preprocessor)
+    return ResourceLoader(app_path, query_factory)
 
 
 def create_parser(app_path):

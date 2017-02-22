@@ -19,6 +19,49 @@ class PlaceholderPreprocessor(object):
         return None, None
 
 
+class QueryFactory(object):
+    """An object which encapsulates the components required to create a Query object.
+
+    Attributes:
+        preprocessor (Preprocessor): the object responsible for processing raw text
+        tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed
+            text
+    """
+    def __init__(self, tokenizer, preprocessor=None):
+        self.tokenizer = tokenizer
+        self.preprocessor = preprocessor or PlaceholderPreprocessor()
+
+    def create_query(self, text):
+        raw_text = text
+
+        char_maps = {}
+
+        # create raw, processed maps
+        processed_text = self.preprocessor.process(raw_text)
+        maps = self.preprocessor.generate_character_index_mappings(raw_text, processed_text)
+        forward, backward = maps
+        char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward
+        char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward
+
+        normalized_tokens = self.tokenizer.tokenize(processed_text, False)
+        normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
+
+        # create normalized maps
+        maps = self.tokenizer.generate_character_index_mappings(processed_text, normalized_text)
+        forward, backward = maps
+
+        char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = forward
+        char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
+
+        return Query(raw_text, processed_text, normalized_tokens, char_maps)
+
+    def normalize(self, text):
+        return self.tokenizer.normalize(text)
+
+    def __repr__(self):
+        return "<QueryFactory id: {!r}>".format(id(self))
+
+
 class Query(object):
     """The query object is responsible for processing and normalizing raw user text input so that
     classifiers can deal with it. A query stores three forms of text: raw text, processed text, and
@@ -26,43 +69,27 @@ class Query(object):
     forms.
 
     Attributes:
-        normalized_tokens (list): a list of normalized tokens
+        normalized_tokens (list of str): a list of normalized tokens
         raw_text (str): the original input text
         normalized_text (str): the normalized text. TODO: better description here
         processed_text (str): the text after it has been preprocessed. TODO: better description here
     """
-    def __init__(self, raw_text, tokenizer, preprocessor=None):
+    def __init__(self, raw_text, processed_text, normalized_tokens, char_maps):
         """Summary
 
         Args:
-            raw_text (TYPE): the original input text
-            preprocessor (Preprocessor): the object responsible for processing raw text
-            tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed
-                text
+            raw_text (str): the original input text
+            processed_text (str): Description
+            normalized_tokens (list of dict): List tokens outputted by a tokenizer
+            char_maps (dict): Mappings between raw, processed and normalized text
         """
-        self._text = {}
-        self._text[TEXT_FORM_RAW] = raw_text
-        self._char_maps = {}
-        preprocessor = preprocessor or PlaceholderPreprocessor()
-        processed_text = preprocessor.process(raw_text)
-        self._text[TEXT_FORM_PROCESSED] = processed_text
-
-        # create raw, processed maps
-        maps = preprocessor.generate_character_index_mappings(raw_text, processed_text)
-        forward, backward = maps
-        self._char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward
-        self._char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward
-
-        self._normalized_tokens = tokenizer.tokenize(self.processed_text, False)
-        normalized_text = ' '.join([t['entity'] for t in self._normalized_tokens])
-        self._text[TEXT_FORM_NORMALIZED] = normalized_text
-
-        # create normalized maps
-        maps = tokenizer.generate_character_index_mappings(processed_text, normalized_text)
-        forward, backward = maps
-
-        self._char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = forward
-        self._char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
+        self._normalized_tokens = normalized_tokens
+        self._text = {
+            TEXT_FORM_RAW: raw_text,
+            TEXT_FORM_PROCESSED: processed_text,
+            TEXT_FORM_NORMALIZED: ' '.join([t['entity'] for t in self._normalized_tokens])
+        }
+        self._char_maps = char_maps
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

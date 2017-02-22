@@ -14,7 +14,6 @@ import pytest
 from mmworkbench import markup
 
 from mmworkbench.core import QueryEntity
-from mmworkbench.tokenizer import Tokenizer
 
 MARKED_UP_STRS = [
     'show me houses under {[600,000|num:number] dollars|price}',
@@ -39,11 +38,6 @@ MARKED_DOWN_STRS = [
 ]
 
 
-@pytest.fixture
-def tokenizer():
-    return Tokenizer()
-
-
 @pytest.mark.mark_down
 def test_mark_down():
     text = 'is {s.o.b.|show} gonna be on at {[8 p.m.|num:time]|range}?'
@@ -52,18 +46,18 @@ def test_mark_down():
 
 
 @pytest.mark.load
-def test_load_basic_query(tokenizer):
+def test_load_basic_query(query_factory):
     markup_text = 'This is a test query string'
-    processed_query = markup.load_query(markup_text, tokenizer)
+    processed_query = markup.load_query(markup_text, query_factory)
     assert processed_query
     assert processed_query.query
 
 
 @pytest.mark.load
-def test_load_entity(tokenizer):
+def test_load_entity(query_factory):
     markup_text = 'When does the {Elm Street|store_name} store close?'
 
-    processed_query = markup.load_query(markup_text, tokenizer)
+    processed_query = markup.load_query(markup_text, query_factory)
 
     assert len(processed_query.entities) == 1
 
@@ -77,10 +71,10 @@ def test_load_entity(tokenizer):
 @pytest.mark.load
 @pytest.mark.numeric
 @pytest.mark.focus
-def test_load_numerics(tokenizer):
+def test_load_numerics(query_factory):
 
     text = 'show me houses under {[600,000|num:number] dollars|price}'
-    processed_query = markup.load_query(text, tokenizer)
+    processed_query = markup.load_query(text, query_factory)
 
     assert processed_query
     assert len(processed_query.entities) == 1
@@ -93,26 +87,26 @@ def test_load_numerics(tokenizer):
 
 @pytest.mark.load
 @pytest.mark.numeric
-def test_load_numerics_2(tokenizer):
+def test_load_numerics_2(query_factory):
     text = 'show me houses under {[$600,000|num:number]|price}'
-    processed_query = markup.load_query(text, tokenizer)
+    processed_query = markup.load_query(text, query_factory)
     assert processed_query
 
 
 @pytest.mark.load
 @pytest.mark.numeric
-def test_load_numerics_3(tokenizer):
+def test_load_numerics_3(query_factory):
     text = 'show me houses under {[1.5|num:number] million dollars|price}'
-    processed_query = markup.load_query(text, tokenizer)
+    processed_query = markup.load_query(text, query_factory)
     assert processed_query
 
 
 @pytest.mark.load
 @pytest.mark.special
-def test_load_special_chars(tokenizer):
+def test_load_special_chars(query_factory):
     text = 'play {s.o.b.|track}'
     # 'play {s o b|track}'
-    processed_query = markup.load_query(text, tokenizer)
+    processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
     assert len(entities)
@@ -125,9 +119,9 @@ def test_load_special_chars(tokenizer):
 
 @pytest.mark.load
 @pytest.mark.special
-def test_load_special_chars_2(tokenizer):
+def test_load_special_chars_2(query_factory):
     text = "what's on {[8 p.m.|num:time]|range}?"
-    processed_query = markup.load_query(text, tokenizer)
+    processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
     assert len(entities)
@@ -140,9 +134,9 @@ def test_load_special_chars_2(tokenizer):
 
 @pytest.mark.load
 @pytest.mark.special
-def test_load_special_chars_3(tokenizer):
+def test_load_special_chars_3(query_factory):
     text = 'is {s.o.b.|show} gonna be on at {[8 p.m.|num:time]|range}?'
-    processed_query = markup.load_query(text, tokenizer)
+    processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
     expected = [
@@ -154,10 +148,10 @@ def test_load_special_chars_3(tokenizer):
 
 @pytest.mark.load
 @pytest.mark.special
-def test_load_special_chars_4(tokenizer):
+def test_load_special_chars_4(query_factory):
     text = 'is {s.o.b.|show} ,, gonna be on at {[8 p.m.|num:time]|range}?'
 
-    processed_query = markup.load_query(text, tokenizer)
+    processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
     expected = [
@@ -169,10 +163,10 @@ def test_load_special_chars_4(tokenizer):
 
 @pytest.mark.load
 @pytest.mark.special
-def test_load_special_chars_5(tokenizer):
+def test_load_special_chars_5(query_factory):
     text = 'what christmas movies   are  , showing {[at 8pm|num:time]|range}'
 
-    processed_query = markup.load_query(text, tokenizer)
+    processed_query = markup.load_query(text, query_factory)
 
     assert len(processed_query.entities) == 1
 

@@ -6,30 +6,28 @@ from __future__ import unicode_literals
 
 import re
 
-from .core import Query, ProcessedQuery, QueryEntity, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
+from .core import ProcessedQuery, QueryEntity
 
 ENTITY_PATTERN = re.compile('\{(.*?)\}')
 NUMERIC_PATTERN = re.compile('\[(.*?)\|num:(.*?)\]')
 
 
-def load_query(markup, tokenizer, preprocessor=None, domain=None, intent=None, is_gold=False):
+def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
     """Creates a processed query object from marked up query text.
 
     Args:
         markup (str): The marked up query text
-        tokenizer (str): The tokenizer which should be used to tokenize the query text
-        preprocessor (str): The preprocessor which should be used to process the query text
-        is_gold (bool): True if the markup passed in is a reference, human-labeled example
+        query_factory (QueryFactory): An object which can create
         domain (str): The name of the domain annotated for the query
         intent (str): The name of the intent annotated for the query
+        is_gold (bool): True if the markup passed in is a reference, human-labeled example
 
     Returns:
         ProcessedQuery: a processed query
     """
 
     raw_text = mark_down(markup)
-    query = Query(raw_text, tokenizer, preprocessor)
-
+    query = query_factory.create_query(raw_text)
     entities = _parse_entities(markup, query=query)
 
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)

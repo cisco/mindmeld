@@ -25,10 +25,9 @@ QUERY_SETS = {
 
 class ResourceLoader(object):
 
-    def __init__(self, app_path, tokenizer, preprocessor):
+    def __init__(self, app_path, query_factory):
         self.app_path = app_path
-        self.tokenizer = tokenizer
-        self.preprocessor = preprocessor
+        self.query_factory = query_factory
 
         self.gazetteers = {}
         self.labeled_query_files = {}
@@ -77,10 +76,10 @@ class ResourceLoader(object):
 
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
         gaz.update_with_entity_data_file(entity_data_path, POPULARITY_CUTOFF,
-                                         self.tokenizer.normalize)
+                                         self.query_factory.normalize)
 
         mapping = self.get_entity_map(gaz_name)
-        gaz.update_with_entity_map(mapping, self.tokenizer.normalize)
+        gaz.update_with_entity_map(mapping, self.query_factory.normalize)
 
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.dump(gaz_path)
@@ -263,7 +262,7 @@ class ResourceLoader(object):
                     if query_text[0] == '-':
                         continue
 
-                    query = markup.load_query(query_text, self.tokenizer, self.preprocessor,
+                    query = markup.load_query(query_text, self.query_factory,
                                               domain=domain, intent=intent, is_gold=True)
                     queries.append(query)
 
