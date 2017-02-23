@@ -99,7 +99,7 @@ msg-template='{msg_id}:{line:3d},{column:2d}: {msg} ({symbol})'
 [BASIC]
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=i,j,k,ex,Run,_
+good-names=i,j,k,n,m,X,y,ex,Run,_
 
 # Bad variable names which should always be refused, separated by a comma
 bad-names=foo,bar,baz,toto,tutu,tata
@@ -389,7 +389,7 @@ int-import-graph=
 
 # Force import order to recognize a module as part of the standard
 # compatibility libraries.
-known-standard-library=
+known-standard-library=past
 
 # Force import order to recognize a module as part of a third party library.
 known-third-party=enchant

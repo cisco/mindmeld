@@ -129,8 +129,8 @@ class MultiClassClassifier(Classifier):
         queries, classes = self._get_queries_and_classes(queries)
         params = self.get_fit_config(model_type, features, params_grid, cv)
 
-        ModelClass = self._get_model_class(model_type)
-        model = ModelClass(**params)
+        model_class = self._get_model_class(model_type)
+        model = model_class(**params)
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)
