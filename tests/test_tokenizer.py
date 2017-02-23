@@ -82,7 +82,7 @@ def test_mapping(tokenizer):
 
     assert normalized == 'test 1 2 3'
 
-    forward, backward = tokenizer.get_char_index_map_character_index_mappings(raw, normalized)
+    forward, backward = tokenizer.get_char_index_map(raw, normalized)
 
     assert forward == {
         0: 0,
@@ -121,7 +121,7 @@ def test_mapping_2(tokenizer):
 
     assert normalized == 'is s o b gonna be on at 8 p m'
 
-    forward, backward = tokenizer.get_char_index_map_character_index_mappings(raw, normalized)
+    forward, backward = tokenizer.get_char_index_map(raw, normalized)
 
     assert forward == {
         0: 0,

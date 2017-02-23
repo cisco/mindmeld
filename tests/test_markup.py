@@ -13,15 +13,15 @@ import pytest
 
 from mmworkbench import markup
 
-from mmworkbench.core import QueryEntity
+from mmworkbench.core import Entity, QueryEntity, Span
 
 MARKED_UP_STRS = [
-    'show me houses under {[600,000|num:number] dollars|price}',
-    'show me houses under {[$600,000|num:number]|price}',
-    'show me houses under {[1.5|num:number] million dollars|price}',
+    'show me houses under {[600,000|sys:number] dollars|price}',
+    'show me houses under {[$600,000|sys:number]|price}',
+    'show me houses under {[1.5|sys:number] million dollars|price}',
     'play {s.o.b.|track}',
-    "what's on at {[8 p.m.|num:time]|range}?",
-    'is {s.o.b.|show} gonna be on at {[8 p.m.|num:time]|range}?',
+    "what's on at {[8 p.m.|sys:time]|range}?",
+    'is {s.o.b.|show} gonna be on at {[8 p.m.|sys:time]|range}?',
     'this is a {role model|type|role}',
     'this query has no entities'
 ]
@@ -40,7 +40,7 @@ MARKED_DOWN_STRS = [
 
 @pytest.mark.mark_down
 def test_mark_down():
-    text = 'is {s.o.b.|show} gonna be on at {[8 p.m.|num:time]|range}?'
+    text = 'is {s.o.b.|show} gonna be on at {[8 p.m.|sys:time]|range}?'
     marked_down = markup.mark_down(text)
     assert marked_down == 'is s.o.b. gonna be on at 8 p.m.?'
 
@@ -62,8 +62,8 @@ def test_load_entity(query_factory):
     assert len(processed_query.entities) == 1
 
     entity = processed_query.entities[0]
-    assert entity.start == 14
-    assert entity.end == 23
+    assert entity.span.start == 14
+    assert entity.span.end == 23
     assert entity.normalized_text == 'elm street'
     assert entity.entity.type == 'store_name'
 
@@ -73,22 +73,22 @@ def test_load_entity(query_factory):
 @pytest.mark.focus
 def test_load_numerics(query_factory):
 
-    text = 'show me houses under {[600,000|num:number] dollars|price}'
+    text = 'show me houses under {[600,000|sys:number] dollars|price}'
     processed_query = markup.load_query(text, query_factory)
 
     assert processed_query
     assert len(processed_query.entities) == 1
 
     entity = processed_query.entities[0]
-    assert entity.raw_text == '600,000 dollars'
+    assert entity.text == '600,000 dollars'
     assert entity.entity.type == 'price'
-    assert entity.start == 21
+    assert entity.span.start == 21
 
 
 @pytest.mark.load
 @pytest.mark.numeric
 def test_load_numerics_2(query_factory):
-    text = 'show me houses under {[$600,000|num:number]|price}'
+    text = 'show me houses under {[$600,000|sys:number]|price}'
     processed_query = markup.load_query(text, query_factory)
     assert processed_query
 
@@ -96,7 +96,7 @@ def test_load_numerics_2(query_factory):
 @pytest.mark.load
 @pytest.mark.numeric
 def test_load_numerics_3(query_factory):
-    text = 'show me houses under {[1.5|num:number] million dollars|price}'
+    text = 'show me houses under {[1.5|sys:number] million dollars|price}'
     processed_query = markup.load_query(text, query_factory)
     assert processed_query
 
@@ -111,37 +111,36 @@ def test_load_special_chars(query_factory):
 
     assert len(entities)
     entity = entities[0]
-    assert entity.raw_text == 's.o.b.'
+    assert entity.text == 's.o.b.'
     assert entity.normalized_text == 's o b'
-    assert entity.start == 5
-    assert entity.end == 10
+    assert entity.span.start == 5
+    assert entity.span.end == 10
 
 
 @pytest.mark.load
 @pytest.mark.special
 def test_load_special_chars_2(query_factory):
-    text = "what's on {[8 p.m.|num:time]|range}?"
+    text = "what's on {[8 p.m.|sys:time]|range}?"
     processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
     assert len(entities)
 
-    assert entities[0].raw_text == '8 p.m.'
+    assert entities[0].text == '8 p.m.'
     assert entities[0].normalized_text == '8 p m'
-    assert entities[0].start == 10
-    assert entities[0].end == 15
+    assert entities[0].span == Span(10, 15)
 
 
 @pytest.mark.load
 @pytest.mark.special
 def test_load_special_chars_3(query_factory):
-    text = 'is {s.o.b.|show} gonna be on at {[8 p.m.|num:time]|range}?'
+    text = 'is {s.o.b.|show} gonna be on at {[8 p.m.|sys:time]|range}?'
     processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
     expected = [
-        QueryEntity('s.o.b.', 's.o.b.', 's o b', 3, 8, 'show'),
-        QueryEntity('8 p.m.', '8 p.m.', '8 p m', 25, 30, 'range'),
+        QueryEntity.from_query(processed_query.query, Entity('show'), Span(3, 8)),
+        QueryEntity.from_query(processed_query.query, Entity('range'), Span(25, 30)),
     ]
     assert expected == entities
 
@@ -149,14 +148,14 @@ def test_load_special_chars_3(query_factory):
 @pytest.mark.load
 @pytest.mark.special
 def test_load_special_chars_4(query_factory):
-    text = 'is {s.o.b.|show} ,, gonna be on at {[8 p.m.|num:time]|range}?'
+    text = 'is {s.o.b.|show} ,, gonna be on at {[8 p.m.|sys:time]|range}?'
 
     processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
     expected = [
-        QueryEntity('s.o.b.', 's.o.b.', 's o b', 3, 8, 'show'),
-        QueryEntity('8 p.m.', '8 p.m.', '8 p m', 28, 33, 'range'),
+        QueryEntity.from_query(processed_query.query, Entity('show'), Span(3, 8)),
+        QueryEntity.from_query(processed_query.query, Entity('range'), Span(28, 33)),
     ]
     assert expected == entities
 
@@ -164,7 +163,7 @@ def test_load_special_chars_4(query_factory):
 @pytest.mark.load
 @pytest.mark.special
 def test_load_special_chars_5(query_factory):
-    text = 'what christmas movies   are  , showing {[at 8pm|num:time]|range}'
+    text = 'what christmas movies   are  , showing {[at 8pm|sys:time]|range}'
 
     processed_query = markup.load_query(text, query_factory)
 
@@ -172,6 +171,6 @@ def test_load_special_chars_5(query_factory):
 
     entity = processed_query.entities[0]
 
-    assert entity.start == 39
-    assert entity.end == 44
+    assert entity.span.start == 39
+    assert entity.span.end == 44
     assert entity.normalized_text == 'at 8pm'

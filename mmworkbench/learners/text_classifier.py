@@ -615,7 +615,7 @@ class TextClassifier(object):
                         real_idx = test_idx[idx]
                         errors.append((i, j))
                         logger.debug("Class {} mistaken for {}: {}"
-                                     .format(i, j, self._queries[real_idx][0].raw_text))
+                                     .format(i, j, self._queries[real_idx][0].text))
 
             accuracy = mean(accuracies)
             likelihood = mean(likelihoods)
@@ -863,7 +863,7 @@ def mask_numerics(token):
     if token.isdigit():
         return '#NUM'
     else:
-        return re.sub('\d', '8', token)
+        return re.sub(r'\d', '8', token)
 
 
 @requires(WORD_FREQ_RSC)
@@ -878,7 +878,7 @@ def extract_ngrams(lengths=(1,)):
         (function) An feature extraction function that takes a query and
             returns ngrams of the specified lengths.
     """
-    def extractor(query, resources):
+    def _extractor(query, resources):
         tokens = query.split()
         ngram_counter = Counter()
         for length in lengths:
@@ -894,7 +894,7 @@ def extract_ngrams(lengths=(1,)):
                 ngram_counter.update(['ngram:' + '|'.join(ngram)])
         return ngram_counter
 
-    return extractor
+    return _extractor
 
 
 @requires(WORD_FREQ_RSC)
@@ -909,7 +909,7 @@ def extract_edge_ngrams(lengths=(1,)):
         (function) An feature extraction function that takes a query and
             returns ngrams of the specified lengths at start and end of query.
     """
-    def extractor(query, resources):
+    def _extractor(query, resources):
         tokens = query.split()
         feats = {}
         for length in lengths:
@@ -925,7 +925,7 @@ def extract_edge_ngrams(lengths=(1,)):
 
         return feats
 
-    return extractor
+    return _extractor
 
 
 @requires(WORD_FREQ_RSC)
@@ -941,7 +941,7 @@ def extract_freq(bins=5):
             count of query tokens within each frequency bin.
 
     """
-    def extractor(query, resources):
+    def _extractor(query, resources):
         tokens = query.split()
         freq_dict = resources[WORD_FREQ_RSC]
         max_freq = freq_dict.most_common(1)[0][1]
@@ -954,11 +954,11 @@ def extract_freq(bins=5):
             else:
                 # Bin the frequency with break points at
                 # half max, a quarter max, an eighth max, etc.
-                b = int(math.log(max_freq, 2) - math.log(freq, 2))
-                if b < bins:
-                    freq_features['freq|{}'.format(b)] += 1
+                freq_bin = int(math.log(max_freq, 2) - math.log(freq, 2))
+                if freq_bin < bins:
+                    freq_features['freq|{}'.format(freq_bin)] += 1
                 else:
-                    freq_features['freq|{}'.format(bins)] += 1
+                    freq_features['freq|{}'.format(freq_bin)] += 1
 
         q_len = float(len(tokens))
         for k in freq_features:
@@ -968,7 +968,7 @@ def extract_freq(bins=5):
             freq_features[k] /= q_len
         return freq_features
 
-    return extractor
+    return _extractor
 
 
 @requires(GAZETTEER_RSC)
@@ -981,7 +981,7 @@ def extract_gaz_freq():
         (function): A feature extraction function that returns the log of the
             count of query tokens within each gazetteer's frequency bins.
     """
-    def extractor(query, resources):
+    def _extractor(query, resources):
         tokens = query.split()
         freq_features = defaultdict(int)
 
@@ -990,9 +990,9 @@ def extract_gaz_freq():
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 freq = len(gaz['index'].get(tok, []))
                 if freq > 0:
-                    b = int(old_div(math.log(freq, 2), 2))
-                    freq_features['{}|freq|{}'.format(gaz_name, b)] += 1
-                    freq_features['{}&{}|freq|{}'.format(query_freq, gaz_name, b)] += 1
+                    freq_bin = int(old_div(math.log(freq, 2), 2))
+                    freq_features['{}|freq|{}'.format(gaz_name, freq_bin)] += 1
+                    freq_features['{}&{}|freq|{}'.format(query_freq, gaz_name, freq_bin)] += 1
 
         q_len = float(len(tokens))
         for k in freq_features:
@@ -1002,13 +1002,13 @@ def extract_gaz_freq():
             freq_features[k] /= q_len
         return freq_features
 
-    return extractor
+    return _extractor
 
 
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_feature(scaling=1):
 
-    def extractor(query, resources):
+    def _extractor(query, resources):
         in_gaz_features = defaultdict(float)
 
         tokens = query.split()
@@ -1028,7 +1028,7 @@ def extract_in_gaz_feature(scaling=1):
 
         return in_gaz_features
 
-    return extractor
+    return _extractor
 
 
 def extract_length():
@@ -1039,8 +1039,8 @@ def extract_length():
         (function) A feature extraction function that takes a query and
             returns number of tokens and characters on linear and log scales
     """
-
-    def extractor(query, resources):
+    # pylint: disable=locally-disabled,unused-argument
+    def _extractor(query, resources):
         tokens = len(query.split())
         chars = len(query)
         return {'tokens': tokens,
@@ -1048,7 +1048,7 @@ def extract_length():
                 'tokens_log': math.log(tokens + 1),
                 'chars_log': math.log(chars + 1)}
 
-    return extractor
+    return _extractor
 
 
 @requires(QUERY_FREQ_RSC)
@@ -1062,13 +1062,13 @@ def extract_query_string(scaling=1000):
 
     """
 
-    def extractor(query, resources):
+    def _extractor(query, resources):
         query_key = u'<{}>'.format(query)
         if query_key not in resources[QUERY_FREQ_RSC]:
             query_key = '<OOV>'
         return {'exact={}'.format(query_key): scaling}
 
-    return extractor
+    return _extractor
 
 
 # Generate all n-gram combinations from a list of strings

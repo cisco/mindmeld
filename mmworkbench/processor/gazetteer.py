@@ -27,7 +27,7 @@ class Gazetteer(object):
 
       entities: This is simply a list of all entities
 
-      num_types: The set of nested numeric types for this entity
+      sys_types: The set of nested numeric types for this entity
      """
 
     def __init__(self, name, exclude_ngrams=False):
@@ -45,7 +45,7 @@ class Gazetteer(object):
         self.pop_dict = defaultdict(int)
         self.index = defaultdict(set)
         self.entities = []
-        self.num_types = set()
+        self.sys_types = set()
 
     def to_dict(self):
         """
@@ -57,7 +57,7 @@ class Gazetteer(object):
             'pop_dict': self.pop_dict,
             'index': self.index,
             'entities': self.entities,
-            'num_types': self.num_types
+            'sys_types': self.sys_types
         }
 
     def dump(self, gaz_path):
@@ -87,7 +87,7 @@ class Gazetteer(object):
         self.pop_dict = gaz_data['pop_dict']
         self.index = gaz_data['index']
         self.entities = gaz_data['entities']
-        self.num_types = gaz_data['num_types']
+        self.sys_types = gaz_data['sys_types']
 
     def _update_entity(self, entity, popularity, keep_max=True):
         """
@@ -150,7 +150,7 @@ class Gazetteer(object):
                 line_count += 1
                 entity = normalizer(entity)
                 # TODO: add this back when we add numeric support
-                # self.num_types.update(util.get_nested_numeric_types(entity))
+                # self.sys_types.update(util.get_nested_numeric_types(entity))
             if pop > popularity_cutoff:
                 self._update_entity(entity, float(pop))
                 entities_added += 1
@@ -158,8 +158,8 @@ class Gazetteer(object):
         logger.info('{}/{} entities in entity data file exceeded popularity '
                     "cutoff and were added to the gazetteer".format(entities_added, line_count))
 
-    def update_with_num_types(self, numeric_types):
-        self.num_types.update(numeric_types)
+    def update_with_sys_types(self, numeric_types):
+        self.sys_types.update(numeric_types)
 
     def update_with_entity_map(self, mapping, normalizer, update_if_missing_canonical=True):
         logger.info('Loading synonyms from entity mapping')

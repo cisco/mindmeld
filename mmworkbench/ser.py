@@ -9,7 +9,7 @@ import sys
 
 import requests
 
-from .core import Entity, QueryEntity
+from .core import Entity, QueryEntity, Span
 
 
 logger = logging.getLogger(__name__)
@@ -23,12 +23,12 @@ class SystemEntityRecognizer(object):
     def __init__(self, entity_types=None):
         self._entity_types = entity_types
 
-    def predict(self, query, entity_types=None):
-        """Identifies system entities in the given query
+    def get_candidates(self, query, entity_types=None):
+        """Identifies candidate system entities in the given query
 
         Args:
             query (Query): The query to examine
-            entity_types (None, optional): The entity types to consider
+            entity_types (list of str): The entity types to consider
 
         Returns:
             list of QueryEntity: The system entities found in this
@@ -36,9 +36,8 @@ class SystemEntityRecognizer(object):
 
         entity_types = entity_types or self._entity_types
         dims = mallard_dimensions_from_entity_types(entity_types)
-        response = parse_numerics(query.raw_text, dimensions=dims)
-        entities = [mallard_item_to_entity(query, item) for item in response['data']]
-        return resolve_entity_conflicts(query, entities)
+        response = parse_numerics(query.text, dimensions=dims)
+        return [mallard_item_to_entity(query, item) for item in response['data']]
 
 
 def parse_numerics(sentence, dimensions=None, language='eng', reference_time=''):
@@ -66,7 +65,7 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
     try:
         response = requests.request('POST', url, json=data)
         return response.json()
-    except requests.ConnectionError as e:
+    except requests.ConnectionError:
         logger.error('Unable to connect to Mallard.')
         raise RuntimeError('Unable to connect to Mallard. Is it running?')
     except Exception as e:
@@ -93,7 +92,7 @@ def mallard_item_to_entity(query, item):
 
     start = int(item['entity']['start'])
     end = int(item['entity']['end']) - 1
-    # TODO: figure out where this confidence might be used
+
     confidence = -float(item['likelihood']) * int(item['rule_count'])
 
     if 'unit' in item:
@@ -123,7 +122,7 @@ def mallard_item_to_entity(query, item):
         value['value'] = str(item['value'][0])
     entity_type = "sys:{}".format(num_type)
     entity = Entity(entity_type, value=value, confidence=confidence)
-    return QueryEntity.from_query(query, start, end, entity)
+    return QueryEntity.from_query(query, entity, Span(start, end))
 
 
 def mallard_dimensions_from_entity_types(entity_types):

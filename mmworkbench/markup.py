@@ -6,10 +6,10 @@ from __future__ import unicode_literals
 
 import re
 
-from .core import Entity, ProcessedQuery, QueryEntity
+from .core import Entity, ProcessedQuery, QueryEntity, Span
 
-ENTITY_PATTERN = re.compile('\{(.*?)\}')
-NUMERIC_PATTERN = re.compile('\[(.*?)\|num:(.*?)\]')
+ENTITY_PATTERN = re.compile(r'\{(.*?)\}')
+SYSTEM_ENTITY_PATTERN = re.compile(r'\[(.*?)\|sys:(.*?)\]')
 
 
 def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
@@ -96,8 +96,9 @@ def _parse_entities(markup, query=None):
 
         end = start + len(entity_text) - 1
 
+        span = Span(start, end)
         raw_entity = Entity(entity_type, role=role_name)
-        entities.append(QueryEntity.from_query(query, start, end, raw_entity))
+        entities.append(QueryEntity.from_query(query, raw_entity, span))
 
     return entities
 
@@ -138,7 +139,7 @@ def _mark_up_entities(query_str, entities):
 def _parse_numerics(markup):
     numerics = []
     query_str = mark_down(markup)
-    for match in NUMERIC_PATTERN.finditer(query_str):
+    for match in SYSTEM_ENTITY_PATTERN.finditer(query_str):
         entity_text = match.group(1)
         prefix = mark_down(query_str[:match.start()])
 
@@ -151,7 +152,7 @@ def _parse_numerics(markup):
 
 def mark_down_numerics(markup):
     # TODO: figure out whether we need this
-    return re.sub(NUMERIC_PATTERN, r'\1', markup)
+    return re.sub(SYSTEM_ENTITY_PATTERN, r'\1', markup)
 
 
 def _mark_up_numerics(markup, numerics):
