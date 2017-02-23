@@ -1,12 +1,9 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 """
 This module defines the interface for entity recognition.
 """
-from __future__ import unicode_literals
-from __future__ import division
-
-from builtins import zip
-from builtins import object
+from __future__ import division, unicode_literals
+from builtins import object, zip
 from past.utils import old_div
 
 import itertools
@@ -15,7 +12,7 @@ import logging
 from sklearn import cross_validation as cross_val
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler, MaxAbsScaler
+from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +63,7 @@ class BaseEntityRecognizer(object):
         else:
             raise ValueError
 
-    def load_resources(self, **kwargs):
+    def register_resources(self, **kwargs):
         """
 
         Args:
@@ -75,25 +72,21 @@ class BaseEntityRecognizer(object):
         """
         self._resources.update(kwargs)
 
-    def fit(self, labeled_queries, domain, intent, entity_types=None, verbose=False):
+    def fit(self, labeled_queries, entity_types=None, verbose=False):
         """
 
         Args:
             labeled_queries (list): Query objects with annotations
-            domain (str): the name of the target domain
-            intent (str): the name of the target intent
             entity_types (list): entity types as a filter (defaults to all)
             verbose (boolean): show more debug/diagnostic output
         """
         raise NotImplementedError
 
-    def predict(self, query, domain, intent, entity_types=None, verbose=False):
+    def predict(self, query, entity_types=None, verbose=False):
         """
 
         Args:
             query (Query): Query object to apply model to
-            domain (str): the name of the target domain
-            intent (str): the name of the target intent
             entity_types (list): entity typeas as a filter (defaults to all)
             verbose (boolean): show more debug/diagnostic output
 
@@ -134,14 +127,13 @@ class BaseEntityRecognizer(object):
                        "shuffle": self._groups_shuffle_iterator,
                        "stratified-k-fold": self._stratified_k_fold_iterator,
                        "stratified-shuffle": self._stratified_shuffle_iterator,
-                       "total-shuffle": self._shuffle_iterator
-                       }.get(cv_type)
+                       "total-shuffle": self._shuffle_iterator}.get(cv_type)
         return cv_iterator
 
-    def _shuffle_iterator(self, y):
+    def _shuffle_iterator(self, groups):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return cross_val.ShuffleSplit(len(y), n_iter=n, test_size=old_div(1.0, k))
+        return cross_val.ShuffleSplit(len(groups), n_iter=n, test_size=old_div(1.0, k))
 
     def _groups_k_fold_iterator(self, groups):
         k = self.cross_validation_settings['k']
@@ -154,14 +146,14 @@ class BaseEntityRecognizer(object):
         n = self.cross_validation_settings.get('n', k)
         return cross_val.LabelShuffleSplit(groups, n_iter=n, test_size=old_div(1.0, k))
 
-    def _stratified_k_fold_iterator(self, y):
+    def _stratified_k_fold_iterator(self, groups):
         k = self.cross_validation_settings['k']
-        return cross_val.StratifiedKFold(y, n_folds=k)
+        return cross_val.StratifiedKFold(groups, n_folds=k)
 
-    def _stratified_shuffle_iterator(self, y):
+    def _stratified_shuffle_iterator(self, groups):
         k = self.cross_validation_settings['k']
         n = self.cross_validation_settings.get('n', k)
-        return cross_val.StratifiedShuffleSplit(y, n_iter=n, test_size=old_div(1.0, k))
+        return cross_val.StratifiedShuffleSplit(groups, n_iter=n, test_size=old_div(1.0, k))
 
     def get_feature_selector(self):
         """Get a feature selector instance based on the feature-selector model

@@ -14,12 +14,12 @@ PACKAGE_ROOT = os.path.join(WORKBENCH_ROOT, 'mmworkbench')
 
 APP_PATH = '{app_path}'
 
-# generated folder structure for models
+# Generated folder structure for models
 GEN_FOLDER = os.path.join(APP_PATH, '.generated')
 DOMAIN_MODEL_PATH = os.path.join(GEN_FOLDER, 'domain.pkl')
 GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, 'domains')
-INTENT_MODEL_PATH = os.path.join(GEN_DOMAINS_FOLDER, 'intent.pkl')
 GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, '{domain}')
+INTENT_MODEL_PATH = os.path.join(GEN_DOMAIN_FOLDER, 'intent.pkl')
 GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, '{intent}')
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, '{entity}-role.pkl')

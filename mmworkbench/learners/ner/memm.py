@@ -1,25 +1,22 @@
-"""
-
-"""
+# -*- coding: utf-8 -*-
+"""This module contains the Memm entity recognizer."""
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import division
-
-from builtins import next
-from builtins import str
-from builtins import range
+from builtins import next, range, str
 from past.utils import old_div
+
+import logging
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn import cross_validation
 from scipy.sparse import vstack, hstack
 import numpy
-import logging
 
-from . import sequence_features
-from . import BaseEntityRecognizer
+from . import BaseEntityRecognizer, sequence_features, tagging
 
 DEFAULT_FEATURES = {
     'bag-of-words': {
@@ -29,7 +26,7 @@ DEFAULT_FEATURES = {
         }
     },
     'in-gaz-span': {},
-    'num-candidates': {
+    'sys-candidates': {
         'start_positions': [-1, 0, 1]
     }
 }
@@ -48,9 +45,7 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
     """
 
     def __init__(self, params_grid=None, cv=None, model_settings=None, features=None):
-
         features = features or DEFAULT_FEATURES
-
         super().__init__(params_grid, cv, model_settings, features)
 
         # Default tag scheme to IOB
@@ -63,6 +58,7 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
         self._feat_vectorizer = DictVectorizer()
 
         self._no_entities = False
+        self._model_parameters = None
 
     def __getstate__(self):
         """Returns the information needed pickle an instance of this class.
@@ -72,7 +68,7 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
         we save the resources that are memory intensive
         """
         attributes = self.__dict__.copy()
-        saved_resources = ['num_types']
+        saved_resources = ['sys_types']
         for key in attributes['_resources'].keys():
             if key not in saved_resources:
                 del attributes['_resources'][key]
@@ -80,12 +76,14 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
 
     def _extract_query_features(self, query):
         """Extracts feature dicts for each token in a query."""
-        feat_seq = [{} for _ in query.get_normalized_tokens()]
+        feat_seq = [{} for _ in query.normalized_tokens]
+
         for name, kwargs in self.feat_specs.items():
-            feat_extractor = sequence_features.get_feature_template(name)(
-                **kwargs)
-            util.update_features_sequence(
-                feat_seq, feat_extractor(query, self._resources))
+            feat_extractor = sequence_features.get_feature_template(name)(**kwargs)
+            update_feat_seq = feat_extractor(query, self._resources)
+            for i in range(len(feat_seq)):
+                feat_seq[i].update(update_feat_seq[i])
+
         return feat_seq
 
     def _clf_fit_cv(self, X, y, query_groups, cv_iterator):
@@ -119,7 +117,16 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
         self._clf = LogisticRegression(**self._model_parameters)
         self._clf.fit(X, y)
 
-    def fit(self, labeled_queries, domain, intent, entity_types=None, verbose=False):
+    def fit(self, labeled_queries, entity_types=None, verbose=False):
+        """Trains the model
+
+        Args:
+            labeled_queries (list of ProcessedQuery): a list of queries to train on
+            entity_types (list): entity types as a filter (defaults to all)
+            verbose (boolean): show more debug/diagnostic output
+
+        """
+
         # all_features and all_tags are parallel lists of feature dictionaries
         # and their associated gold tags, respectively. They are concatenations
         # of the features and tags across all the input queries.
@@ -127,19 +134,19 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
         all_tags = []
         all_query_groups = []
 
-        numeric_types = util.get_numeric_types(self._resources['gazetteers'])
-        self.load_resources(num_types=numeric_types)
+        system_types = self._get_system_types()
+        self.register_resources(sys_types=system_types)
 
         for idx, query in enumerate(labeled_queries):
-            features = self._extract_query_features(query)
-            tags = util.get_tags_from_facets(query, self._tag_scheme)
+            features = self._extract_query_features(query.query)
+            tags = tagging.get_tags_from_entities(query, self._tag_scheme)
             query_groups = [idx for _ in tags]
 
             if len(features) > 0:
                 # Set the special feature for the identity of the previous tag.
-                features[0]['prev-tag'] = util.START_TAG
+                features[0]['prev_tag'] = tagging.START_TAG
                 for i, tag in enumerate(tags[:-1]):
-                    features[i+1]['prev-tag'] = str(tag)
+                    features[i+1]['prev_tag'] = str(tag)
 
             all_features.extend(features)
             all_tags.extend(tags)
@@ -168,15 +175,15 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
             else:
                 self._clf_fit_cv(X, y, all_query_groups, cv_iterator)
 
-    def predict(self, query, domain, intent, entity_types=None, verbose=False):
+    def predict(self, query, entity_types=None, verbose=False):
         entities, num_entities, data = self._predict(query, verbose)
         if verbose:
             self._print_predict_data(data)
 
         # Assign a confidence value for each entity.
-        for e in entities:
-            max_cost = min([data['probs'][i] for i in range(e['tstart'], e['tend'])])
-            e['confidence'] = numpy.exp(max_cost)
+        for entity in entities:
+            max_cost = min([data['probs'][i] for i in entity.normalized_token_span])
+            entity.entity.confidence = numpy.exp(max_cost)
 
         return entities, num_entities, data
 
@@ -186,12 +193,12 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
         query_features = self._extract_query_features(query)
         if len(query_features) == 0:
             return [], [], {}
-        query_features[0]['prev-tag'] = util.START_TAG
+        query_features[0]['prev_tag'] = tagging.START_TAG
 
         predicted_tags = []
         predicted_probs = []
-        reference_tags = util.get_tags_from_facets(query, self._tag_scheme)
-        reference_probs = []
+        # reference_tags = tagging.get_tags_from_entities(query, self._tag_scheme)
+        # reference_probs = []
         confidence_data = []
         active_features = []
         all_log_probs = []
@@ -199,7 +206,7 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
         # TODO (julius): Use the maximum likelihood Viterbi parse instead of
         # picking the max at each step.
         for i, features in enumerate(query_features):
-            feat_vec = self._feat_vectorizer.transform(query_features[i])
+            feat_vec = self._feat_vectorizer.transform(features)
             if self._feat_scaler is not None:
                 feat_vec = self._feat_scaler.transform(feat_vec)
             if self._feat_selector is not None:
@@ -209,25 +216,25 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
 
             confidence_dump = numpy.array([])
             feat_names = numpy.array([])
-            try:
-                reference_class = self._class_encoder.transform([reference_tags[i]])
-            except ValueError:
-                # If the gold parse uses tags that were never observed in the
-                # training data, the classifier will not be able to encode the
-                # tag or evaluate its probability. To prevent complete failure
-                # we use the Outside tag for reference.
-                out_tag = '|'.join([util.O_TAG, '', util.O_TAG, ''])
-                reference_class = self._class_encoder.transform([out_tag])
-                logging.warning('Unknown tag {} replaced with {}'.format(
-                    reference_tags[i], out_tag))
-            if verbose and reference_class != prediction[0]:
-                confidence_dump, feat_names = self._decompose_confidence(
-                    feat_vec, (prediction[0], reference_class))
+            # try:
+            #     reference_class = self._class_encoder.transform([reference_tags[i]])
+            # except ValueError:
+            #     # If the gold parse uses tags that were never observed in the
+            #     # training data, the classifier will not be able to encode the
+            #     # tag or evaluate its probability. To prevent complete failure
+            #     # we use the Outside tag for reference.
+            #     out_tag = '|'.join([tagging.O_TAG, '', tagging.O_TAG, ''])
+            #     reference_class = self._class_encoder.transform([out_tag])
+            #     logging.warning('Unknown tag {} replaced with {}'.format(
+            #         reference_tags[i], out_tag))
+            # if verbose and reference_class != prediction[0]:
+            #     confidence_dump, feat_names = self._decompose_confidence(
+            #         feat_vec, (prediction[0], reference_class))
 
             predicted_tag = self._class_encoder.inverse_transform(prediction)[0]
             predicted_tags.append(predicted_tag)
             predicted_probs.append(log_probs[0][prediction[0]])
-            reference_probs.append(log_probs[0][reference_class])
+            # reference_probs.append(log_probs[0][reference_class])
             confidence_data.append(confidence_dump)
 
             # Return the log probability information
@@ -240,22 +247,22 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
             active_features.append(feat_names)
 
             if i + 1 < len(query_features):
-                query_features[i+1]['prev-tag'] = predicted_tag
+                query_features[i+1]['prev_tag'] = predicted_tag
 
-        entities, num_entities = util.get_facets_from_tags(query, predicted_tags)
+        entities = tagging.get_entities_from_tags(query, predicted_tags)
 
         # Collect diagnostic details
-        data = {'tokens': query.get_normalized_tokens(),
+        data = {'tokens': query.normalized_tokens,
                 'features': query_features,
                 'tags': predicted_tags,
-                'gold_tags': reference_tags,
+                # 'gold_tags': reference_tags,
                 'probs': predicted_probs,
-                'gold_probs': reference_probs,
+                # 'gold_probs': reference_probs,
                 'conf_data': confidence_data,
                 'feat_names': active_features,
                 'all_log_probs': all_log_probs}
 
-        return entities, num_entities, data
+        return entities, data
 
     @staticmethod
     def _print_predict_data(data):
@@ -322,3 +329,9 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
                        intercept_dat.T])
 
         return data.toarray(), feature_names
+
+    def _get_system_types(self):
+        sys_types = set()
+        for gaz in self._resources['gazetteers'].values():
+            sys_types.update(gaz['sys_types'])
+        return sys_types

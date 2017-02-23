@@ -93,6 +93,9 @@ class QueryFactory(object):
         """
         return self.tokenizer.normalize(text)
 
+    def get_system_entity_candidates(self, num_types):
+        return [e for e in self.system_entity_candidates if e.entity.type in num_types]
+
     def __repr__(self):
         return "<QueryFactory id: {!r}>".format(id(self))
 

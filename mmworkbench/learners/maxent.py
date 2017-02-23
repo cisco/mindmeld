@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 
 """
@@ -58,7 +59,7 @@ class MaxentRoleClassifier(object):
                                         for resource in saved_resources)
         return attributes
 
-    def load_resources(self, **kwargs):
+    def register_resources(self, **kwargs):
         """
 
         Args:
