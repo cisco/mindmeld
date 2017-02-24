@@ -1,18 +1,21 @@
 # MindMeld Workbench 3.0
 
+[![CircleCI](https://circleci.com/gh/expectlabs/mindmeld-workbench3.svg?style=svg&circle-token=437cf905895688ac1b58b60fe79144c180893372)](https://circleci.com/gh/expectlabs/mindmeld-workbench3)
+
 This repository contains documentation for MindMeld Workbench 3.0.
 
 ## Getting Started
 
-We will be using Python3. Make sure you are not in a Python2 virtualenv. Run these commands in sequence -
+Workbench 3.0 is developed primarily in Python 3.3+, but has support for Python 2.7 as well. Set up a virtualenv using the latest stable version of Python for Workbench development
 
-`pip3 install -r requirements.txt`
+
+`pip install -r dev-requirements.txt`
 
 `brew install pandoc`
 
-`python3 -m pip install --upgrade ipykernel`
+`pip install --upgrade ipykernel`
 
-`python3 -m ipykernel install --user`
+`python -m ipykernel install --user`
 
 ## Building
 

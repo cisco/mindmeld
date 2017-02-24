@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+"""This module contains the specification of the mmworkbench package"""
+# pylint: disable=locally-disabled,invalid-name
 from setuptools import setup
 
 # TODO: convert readme to restuctured text
@@ -11,8 +12,11 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'future==0.16.0'
-    # TODO: put additional package requirements here
+    'Click>=6.0',
+    'future==0.16.0',
+    'numpy>=1.10.1',
+    'scikit-learn==0.17.1',
+    'scipy>=0.9',
 ]
 
 setup_requirements = [
