@@ -241,7 +241,7 @@ class Query(object):
         return not self.__eq__(other)
 
     def __repr__(self):
-        return "<Query {}>".format(self.text.__repr__())
+        return "<Query {}>".format(self.text)
 
 
 class ProcessedQuery(object):
@@ -285,8 +285,7 @@ class ProcessedQuery(object):
 
     def __repr__(self):
         msg = "<ProcessedQuery {!r}, domain: {!r}, intent: {!r}, {!r} entities{}>"
-        return msg.format(self.query.text.__repr__(), self.domain.__repr__(),
-                          self.intent.__repr__(), len(self.entities),
+        return msg.format(self.query.text, self.domain, self.intent, len(self.entities),
                           ', gold' if self.is_gold else '')
 
 
@@ -446,7 +445,7 @@ class QueryEntity(object):
     def __str__(self):
         return "{}{}{} '{}' {}-{} ".format(
             self.entity.type, ':' if self.entity.role else '', self.entity.role, self.text,
-            self.start, self.end
+            self.span.start, self.span.end
         )
 
     def __repr__(self):
