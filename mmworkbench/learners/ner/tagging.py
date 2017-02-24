@@ -89,14 +89,14 @@ def get_entities_from_tags(query, tags):
     """
 
     sys_types = set([tag.split('|')[3] for tag in tags])
-    sys_candidates = [e for e in query.candidate_system_entities if e.entity.type in sys_types]
+    sys_candidates = query.get_system_entity_candidates(sys_types)
     normalized_tokens = query.normalized_tokens
 
     entities = []
 
     def _append_entity(token_start, entity_type, tokens):
-        prefix = normalized_tokens[:token_start].join()
-        start = len(prefix)
+        prefix = ' '.join(normalized_tokens[:token_start])
+        start = len(prefix) + 1
         end = start - 1 + len(' '.join(tokens))
         norm_span = Span(start, end)
         raw_entity = Entity(entity_type)
@@ -175,7 +175,7 @@ def get_entities_from_tags(query, tags):
 
         # Append the current token to the current entity, if applicable.
         if iob != O_TAG and entity_start is not None:
-            entity_tokens.append(query.normalized_tokens()[tag_idx])
+            entity_tokens.append(normalized_tokens[tag_idx])
 
         # Close the numeric facet if the tag indicates it closed
         if (sys_entity_start is not None and
