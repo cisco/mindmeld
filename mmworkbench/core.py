@@ -93,9 +93,6 @@ class QueryFactory(object):
         """
         return self.tokenizer.normalize(text)
 
-    def get_system_entity_candidates(self, num_types):
-        return [e for e in self.system_entity_candidates if e.entity.type in num_types]
-
     def __repr__(self):
         return "<QueryFactory id: {!r}>".format(id(self))
 
@@ -527,18 +524,18 @@ def resolve_entity_conflicts(query_entities):
         j = i + 1
         while j < len(filtered):
             other = filtered[j]
-            if is_superset(target, other) and not is_same_span(target, other):
+            if _is_superset(target, other) and not _is_same_span(target, other):
                 logger.debug('Removing {{{1:s}|{2:s}}} facet in query {0:d} since it is a '
                              'subset of another.'.format(i, other.text, other.entity.type))
                 del filtered[j]
                 continue
-            elif is_subset(target, other) and not is_same_span(target, other):
+            elif _is_subset(target, other) and not _is_same_span(target, other):
                 logger.debug('Removing {{{1:s}|{2:s}}} facet in query {0:d} since it is a '
                              'subset of another.'.format(i, target.text, target.entity.type))
                 del filtered[i]
                 include_target = False
                 break
-            elif is_same_span(target, other) or is_overlapping(target, other):
+            elif _is_same_span(target, other) or _is_overlapping(target, other):
                 if target.entity.confidence >= other.entity.confidence:
                     logger.debug('Removing {{{1:s}|{2:s}}} facet in query {0:d} since it overlaps '
                                  'with another.'.format(i, other.text, other.entity.type))
@@ -557,23 +554,23 @@ def resolve_entity_conflicts(query_entities):
     return filtered
 
 
-def is_subset(target, other):
+def _is_subset(target, other):
     return ((target.start >= other.start) and
             (target.end <= other.end))
 
 
-def is_superset(target, other):
+def _is_superset(target, other):
     return ((target.start <= other.start) and
             (target.end >= other.end))
 
 
-def is_same_span(target, other):
-    return is_superset(target, other) and is_subset(target, other)
+def _is_same_span(target, other):
+    return _is_superset(target, other) and _is_subset(target, other)
 
 
-def is_overlapping(target, other):
+def _is_overlapping(target, other):
     target_range = range(target.start, target.end + 1)
     predicted_range = range(other.start, other.end + 1)
     overlap = set(target_range).intersection(predicted_range)
-    return (overlap and not is_subset(target, other) and
-            not is_superset(target, other))
+    return (overlap and not _is_subset(target, other) and
+            not _is_superset(target, other))
