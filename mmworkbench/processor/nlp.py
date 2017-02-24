@@ -233,8 +233,8 @@ class IntentProcessor(object):
         entity_types = self.recognizer.entity_types
         self.entities = {}
         for entity_type in entity_types:
-            processor = EntityProcessor(self._app_path, self.domain, self.intent, entity_type,
-                                        self._tokenizer, self._preprocessor, self._resource_loader)
+            processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
+                                        self._query_factory, self._resource_loader)
             processor.build()
             self.entities[entity_type] = processor
 
@@ -283,7 +283,7 @@ class IntentProcessor(object):
         entities = self.recognizer.predict(query)
 
         for entity in entities:
-            self.entities[entity.type].process_entity(query, entities, entity)
+            self.entities[entity.entity.type].process_entity(query, entities, entity)
 
         # TODO: link entities
         # TODO: parse query

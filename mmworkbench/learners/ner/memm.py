@@ -59,6 +59,7 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
 
         self._no_entities = False
         self._model_parameters = None
+        self.entity_types = set()
 
     def __getstate__(self):
         """Returns the information needed pickle an instance of this class.
@@ -137,7 +138,11 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
         system_types = self._get_system_types()
         self.register_resources(sys_types=system_types)
 
+        entity_types = set()
         for idx, query in enumerate(labeled_queries):
+            for entity in query.entities:
+                entity_types.add(entity.entity.type)
+
             features = self._extract_query_features(query.query)
             tags = tagging.get_tags_from_entities(query, self._tag_scheme)
             query_groups = [idx for _ in tags]
@@ -151,6 +156,8 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
             all_features.extend(features)
             all_tags.extend(tags)
             all_query_groups.extend(query_groups)
+
+        self.entity_types = frozenset(entity_types)
 
         if len(set(all_tags)) == 1:
             self._no_entities = True
@@ -176,7 +183,7 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
                 self._clf_fit_cv(X, y, all_query_groups, cv_iterator)
 
     def predict(self, query, entity_types=None, verbose=False):
-        entities, num_entities, data = self._predict(query, verbose)
+        entities, data = self._predict(query, verbose)
         if verbose:
             self._print_predict_data(data)
 
@@ -185,14 +192,16 @@ class MemmEntityRecognizer(BaseEntityRecognizer):
             max_cost = min([data['probs'][i] for i in entity.normalized_token_span])
             entity.entity.confidence = numpy.exp(max_cost)
 
-        return entities, num_entities, data
+        if verbose:
+            return entities, data
+        return entities
 
     def _predict(self, query, verbose=False):
-        if self._no_entities or not query.get_raw_query():
-            return [], [], {}
+        if self._no_entities or not query.text:
+            return [], {}
         query_features = self._extract_query_features(query)
         if len(query_features) == 0:
-            return [], [], {}
+            return [], {}
         query_features[0]['prev_tag'] = tagging.START_TAG
 
         predicted_tags = []

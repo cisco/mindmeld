@@ -5,11 +5,10 @@ This module contains the named entity recognizer component.
 from __future__ import unicode_literals
 
 import logging
+import os
 
 from .classifier import Classifier
 from ..learners.ner import MemmEntityRecognizer
-
-import os
 
 # from sklearn.externals import joblib
 
@@ -91,7 +90,6 @@ class EntityRecognizer(Classifier):
         self.domain = domain
         self.intent = intent
         self._model = None  # will be set when model is fit or loaded
-        self.entity_types = set()
 
     def get_fit_config(self, model_type=None, features=None, params_grid=None, cv=None,
                        model_settings=None, model_name=None):
@@ -117,11 +115,13 @@ class EntityRecognizer(Classifier):
         query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
                                                                intent=self.intent)
         queries = query_tree[self.domain][self.intent]
+
         params = self.get_fit_config(model_type, features, params_grid, cv, model_settings)
         model_class = self._get_model_class(model_type)
         model = model_class(**params)
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
+
         model.fit(queries)
         self._model = model
 
@@ -134,14 +134,14 @@ class EntityRecognizer(Classifier):
         Returns:
             list: the predicted entities
         """
-        return []
+        return self._model.predict(query)
 
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities
 
         Args:
             query (Query): The input query
-
+`
         Returns:
             list: a list of tuples of the form (Entity, float) grouping potential entities and their
             probabilities
@@ -157,26 +157,6 @@ class EntityRecognizer(Classifier):
         """
         pass
 
-    def dump(self, model_path):
-        """Persists the model to disk.
-
-        Args:
-            model_path (str): The location on disk where the model should be stored
-
-        """
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        # joblib.dump(self._model, model_path)
-        pass
-
-    def load(self, model_path):
-        """Loads the model from disk
-
-        Args:
-            model_path (str): The location on disk where the model is stored
-
-        """
-        # self._model = joblib.load(model_path)
-        pass
+    @property
+    def entity_types(self):
+        return self._model.entity_types if self._model else set()
