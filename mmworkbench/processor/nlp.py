@@ -265,7 +265,7 @@ class IntentProcessor(object):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = self.query_factory.create_query(query_text)
+        query = self._query_factory.create_query(query_text)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name
