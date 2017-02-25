@@ -52,6 +52,22 @@ DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(RESOURCES_FOLDER, 'default_tokenize
 ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, 'ascii_folding_dict.txt')
 
 
+# Helpers
+def safe_path(func):
+    """A decorator to make the path safe by replacing unsafe characters"""
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs).replace(':', '_')
+
+    return _wrapper
+
+
+def _resolve_model_name(path, model_name=None):
+    if model_name:
+        path, ext = os.path.splitext(path)
+        path = "{}_{}{}".format(path, model_name, ext)
+    return path
+
+
 # Collections
 
 def get_domains(app_path):
@@ -163,6 +179,7 @@ def get_indexes(app_path):
 # Files and folders
 
 
+@safe_path
 def get_domain_model_path(app_path, model_name=None):
     """
     Args:
@@ -177,6 +194,7 @@ def get_domain_model_path(app_path, model_name=None):
     return _resolve_model_name(path, model_name)
 
 
+@safe_path
 def get_intent_model_path(app_path, domain, model_name=None):
     """
     Args:
@@ -192,6 +210,7 @@ def get_intent_model_path(app_path, domain, model_name=None):
     return _resolve_model_name(path, model_name)
 
 
+@safe_path
 def get_entity_model_path(app_path, domain, intent, model_name=None):
     """
     Args:
@@ -208,6 +227,7 @@ def get_entity_model_path(app_path, domain, intent, model_name=None):
     return _resolve_model_name(path, model_name)
 
 
+@safe_path
 def get_role_model_path(app_path, domain, intent, entity, model_name=None):
     """
     Args:
@@ -224,6 +244,7 @@ def get_role_model_path(app_path, domain, intent, entity, model_name=None):
     return _resolve_model_name(path, model_name)
 
 
+@safe_path
 def get_gazetteer_data_path(app_path, gaz_name, model_name=None):
     """
     Args:
@@ -237,6 +258,7 @@ def get_gazetteer_data_path(app_path, gaz_name, model_name=None):
     return _resolve_model_name(path, model_name)
 
 
+@safe_path
 def get_labeled_query_file_path(app_path, domain, intent, filename):
     """
     Args:
@@ -252,6 +274,7 @@ def get_labeled_query_file_path(app_path, domain, intent, filename):
                                      filename=filename)
 
 
+@safe_path
 def get_entity_gaz_path(app_path, entity):
     """
     Args:
@@ -265,6 +288,7 @@ def get_entity_gaz_path(app_path, entity):
     return GAZETTEER_TXT_PATH.format(app_path=app_path, entity=entity)
 
 
+@safe_path
 def get_entity_map_path(app_path, entity):
     """
     Args:
@@ -278,6 +302,7 @@ def get_entity_map_path(app_path, entity):
     return ENTITY_MAP_PATH.format(app_path=app_path, entity=entity)
 
 
+@safe_path
 def get_ranking_file_path(app_path, index):
     """
     Args:
@@ -289,12 +314,3 @@ def get_ranking_file_path(app_path, index):
 
     """
     return RANKING_FILE_PATH.format(app_path=app_path, index=index)
-
-
-# Helpers
-
-def _resolve_model_name(path, model_name=None):
-    if model_name:
-        path, ext = os.path.splitext(path)
-        path = "{}_{}{}".format(path, model_name, ext)
-    return path
