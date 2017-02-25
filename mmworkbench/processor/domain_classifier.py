@@ -6,13 +6,13 @@ from __future__ import unicode_literals
 
 import logging
 
-from .classifier import MultiClassClassifier
+from .classifier import StandardClassifier
 from ..learners.text_classifier import TextClassifier
 
 logger = logging.getLogger(__name__)
 
 
-class DomainClassifier(MultiClassClassifier):
+class DomainClassifier(StandardClassifier):
     """A domain classifier is used to determine the target domain for a given query. It is trained
     using all of the labeled queries across all intents for all domains in an application. The
     labels for the training data are the domain names associated with each query. The classifier

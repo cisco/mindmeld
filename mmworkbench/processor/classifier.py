@@ -110,7 +110,13 @@ class Classifier(object):
         self._model = joblib.load(model_path)
 
 
-class MultiClassClassifier(Classifier):
+class StandardClassifier(Classifier):
+    """The Standard classifier is a generic base for classification of strings.
+
+    Attributes:
+        DEFAULT_CONFIG (dict): The default configuration
+        MODEL_CLASS (type): The the class of the underlying model.
+    """
     DEFAULT_CONFIG = None
     MODEL_CLASS = None
 
