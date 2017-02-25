@@ -314,8 +314,7 @@ class EntityProcessor(object):
         if resource_loader:
             self._resource_loader = resource_loader
         else:
-            self._resource_loader = create_resource_loader(app_path, self._tokenizer,
-                                                           self._preprocessor)
+            self._resource_loader = create_resource_loader(app_path, self._query_factory)
         self.role_classifier = RoleClassifier(self._resource_loader, domain, intent, entity_type)
         self.roles = set()
 
@@ -324,11 +323,11 @@ class EntityProcessor(object):
         self.role_classifier.fit()
 
     def dump(self):
-        model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.name)
+        model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.dump(model_path)
 
     def load(self):
-        model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.name)
+        model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.load(model_path)
 
     def process(self, text):
@@ -347,7 +346,7 @@ class EntityProcessor(object):
         return entity
 
     def __repr__(self):
-        return "<EntityProcessor {!r}>".format(self.name)
+        return "<EntityProcessor {!r}>".format(self.type)
 
 
 def create_tokenizer(app_path):

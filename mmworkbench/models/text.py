@@ -53,13 +53,13 @@ QUERY_FREQ_RSC = "q_freq"
 logger = logging.getLogger(__name__)
 
 
-class TextClassifier(object):
+class TextModel(object):
     """A machine learning classifier for text.
 
     This class manages feature extraction, training, cross-validation, and
     prediction. The design goal is that after providing initial settings like
     hyperparameters, grid-searchable hyperparameters, feature extractors, and
-    cross-validation settings, TextClassifier manages all of the details
+    cross-validation settings, TextModel manages all of the details
     involved in training and prediction such that the input to training or
     prediction is Query objects, and the output is class names, and no data
     manipulation is needed from the client.
@@ -105,14 +105,14 @@ class TextClassifier(object):
 
     @classmethod
     def from_config(cls, config, model_configuration):
-        """Initializes a TextClassifier instance from config file data.
+        """Initializes a TextModel instance from config file data.
 
         Args:
             config (dict): The Python representation of a parsed config file.
             model_configuration (str): One of the keys in config['models'].
 
         Returns:
-            (TextClassifier): A TextClassifier instance initialized with the
+            (TextModel): A TextModel instance initialized with the
                 settings from the config entry given by model_configuration.
         """
         model_config_entry = config['models'].get(model_configuration)
@@ -280,7 +280,7 @@ class TextClassifier(object):
         self.register_resources(query_freqs=query_dict)
 
     def fit(self, queries, classes, verbose=True):
-        """Trains this TextClassifier.
+        """Trains this TextModel.
 
         This method inspects instance attributes to determine the classifier
         object and cross-validation strategy, and then fits the model to the
@@ -293,7 +293,7 @@ class TextClassifier(object):
             verbose (bool): Whether to show analysis output
 
         Returns:
-            (TextClassifier): Returns self to match classifier scikit-learn
+            (TextModel): Returns self to match classifier scikit-learn
                 interfaces.
         """
 
@@ -395,7 +395,7 @@ class TextClassifier(object):
             verbose:
 
         Returns:
-            (TextClassifier): self
+            (TextModel): self
         """
         queries, classes = list(zip(*self._queries))  # unzip
         predictions = []

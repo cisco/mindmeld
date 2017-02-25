@@ -9,7 +9,7 @@ Tests for `text_classifier` module.
 """
 from __future__ import unicode_literals
 
-from mmworkbench.learners.text_classifier import TextClassifier
+from mmworkbench.models import TextModel
 
 
 def test_params_grid():
@@ -19,7 +19,7 @@ def test_params_grid():
         'class_bias': [1, 0.7, 0.3, 0]
     }
 
-    configs = list(TextClassifier.settings_for_params_grid({}, param_grid))
+    configs = list(TextModel.settings_for_params_grid({}, param_grid))
 
     assert len(configs) == 40
     for key in param_grid.keys():

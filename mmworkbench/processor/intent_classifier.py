@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import logging
 
 from .classifier import StandardClassifier
-from ..learners.text_classifier import TextClassifier
+from ..models import TextModel
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class IntentClassifier(StandardClassifier):
             }
         }
     }
-    MODEL_CLASS = TextClassifier
+    MODEL_CLASS = TextModel
 
     def __init__(self, resource_loader, domain):
         """Initializes an intent classifier

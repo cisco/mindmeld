@@ -8,7 +8,7 @@ import logging
 import os
 
 from .classifier import Classifier
-from ..learners.ner import MemmEntityRecognizer
+from ..models import MemmModel
 
 # from sklearn.externals import joblib
 
@@ -76,7 +76,7 @@ class EntityRecognizer(Classifier):
             }
         }
     }
-    MODEL_CLASS = MemmEntityRecognizer
+    MODEL_CLASS = MemmModel
 
     def __init__(self, resource_loader, domain, intent):
         """Initializes a named entity recognizer

@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import logging
 
 from .classifier import StandardClassifier
-from ..learners.text_classifier import TextClassifier
+from ..models import TextModel
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class DomainClassifier(StandardClassifier):
             }
         }
     }
-    MODEL_CLASS = TextClassifier
+    MODEL_CLASS = TextModel
 
     def _get_queries_and_classes(self, queries=None):
         if not queries:

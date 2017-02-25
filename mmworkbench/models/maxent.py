@@ -35,7 +35,7 @@ def get_ngram(tokens, start, length):
     return ' '.join(ngram_tokens)
 
 
-class MaxentRoleClassifier(object):
+class MaxentRoleModel(object):
 
     def __init__(self):
         self._resources = {}
