@@ -18,6 +18,11 @@ MALLARD_URL = "http://localhost:2626"
 MALLARD_ENDPOINT = "parse"
 
 
+class SystemEntityResolutionError(Exception):
+    """An exception representing an error resolving a system entity"""
+    pass
+
+
 def get_candidates(query, entity_types=None, span=None):
     """Identifies candidate system entities in the given query
 
@@ -72,7 +77,23 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
                  "run Mallard with 'python start-nparse.py'.")
 
 
-def _mallard_item_to_entity(query, item):
+def resolve_system_entity(query, entity_type, span):
+    for candidate in query.get_system_entity_candidates(set((entity_type,))):
+        if candidate.span == span and candidate.entity.type == entity_type:
+            return candidate
+
+    # If no matching candidate was found, try parsing only this entity
+    for raw_candidate in parse_numerics(span.slice(query.text))['data']:
+        candidate = _mallard_item_to_entity(query, raw_candidate, offset=span.start)
+        # If the candidate matches the entire entity, return it
+        if candidate.span == span and candidate.entity.type == entity_type:
+            return candidate
+
+    msg = 'Unable to resolve system entity of type {!r} for {!r}'
+    raise SystemEntityResolutionError(msg.format(entity_type, span.slice(query.text)))
+
+
+def _mallard_item_to_entity(query, item, offset=0):
     """Converts an item from mallard into a QueryEntity
 
     Args:
@@ -124,7 +145,7 @@ def _mallard_item_to_entity(query, item):
         value['value'] = str(item['value'][0])
     entity_type = "sys:{}".format(num_type)
     entity = Entity(entity_type, value=value, confidence=confidence)
-    return QueryEntity.from_query(query, entity, Span(start, end))
+    return QueryEntity.from_query(query, entity, Span(start + offset, end + offset))
 
 
 def _dimensions_from_entity_types(entity_types):

@@ -41,7 +41,7 @@ MARKED_DOWN_STRS = [
 @pytest.mark.mark_down
 def test_mark_down():
     """Tests the mark down function"""
-    text = 'is {s.o.b.|show} gonna be on at {[8 p.m.|sys:time]|range}?'
+    text = 'is {s.o.b.|show} gonna be {[on at 8 p.m.|sys:time]|range}?'
     marked_down = markup.mark_down(text)
     assert marked_down == 'is s.o.b. gonna be on at 8 p.m.?'
 
@@ -149,6 +149,7 @@ def test_load_nested_system_3(query_factory):
     """Tests loading a query with a nested system entity"""
     text = 'show me houses under {[1.5 million|sys:number] dollars|price}'
     processed_query = markup.load_query(text, query_factory)
+
     assert processed_query
 
 
@@ -172,15 +173,24 @@ def test_load_special_chars(query_factory):
 @pytest.mark.special
 def test_load_special_chars_2(query_factory):
     """Tests loading a query with special characters"""
-    text = "what's {[on at 8 p.m.|sys:time]|range}?"
+    text = "what's on at {[8 p.m.|sys:time]|range}?"
     processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
     assert len(entities) == 1
 
-    assert entities[0].text == 'on at 8 p.m.'
-    assert entities[0].normalized_text == 'on at 8 p m'
-    assert entities[0].span == Span(7, 18)
+    entity = entities[0]
+    assert entity.text == '8 p.m.'
+    assert entity.normalized_text == '8 p m'
+    assert entity.span == Span(13, 18)
+    assert entity.entity.type == 'range'
+
+    nested = entity.entity.value['children'][0]
+    assert nested.text == '8 p.m.'
+    assert nested.span == Span(0, 5)
+    assert nested.entity.type == 'sys:time'
+    assert nested.entity.value['value']
+
 
 @pytest.mark.load
 @pytest.mark.special
@@ -204,7 +214,7 @@ def test_load_special_chars_3(query_factory):
 @pytest.mark.special
 def test_load_special_chars_4(query_factory):
     """Tests loading a query with special characters"""
-    text = 'is {s.o.b.|show} ,, gonna be {[on at 8 p.m.|sys:time]|range}?'
+    text = 'is {s.o.b.|show} ,, gonna be on at {[8 p.m.|sys:time]|range}?'
 
     processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
@@ -214,7 +224,7 @@ def test_load_special_chars_4(query_factory):
     assert entities[0] == expected_entity
 
     assert entities[1].entity.type == 'range'
-    assert entities[1].span == Span(22, 33)
+    assert entities[1].span == Span(28, 33)
     assert 'children' in entities[1].entity.value
     assert entities[1].entity.value['children'][0].entity.type == 'sys:time'
 
@@ -223,7 +233,7 @@ def test_load_special_chars_4(query_factory):
 @pytest.mark.special
 def test_load_special_chars_5(query_factory):
     """Tests loading a query with special characters"""
-    text = 'what christmas movies   are  , showing {[at 8pm|sys:time]|range}'
+    text = 'what christmas movies   are  , showing at {[8pm|sys:time]|range}'
 
     processed_query = markup.load_query(text, query_factory)
 
@@ -231,6 +241,20 @@ def test_load_special_chars_5(query_factory):
 
     entity = processed_query.entities[0]
 
-    assert entity.span.start == 39
-    assert entity.span.end == 44
-    assert entity.normalized_text == 'at 8pm'
+    assert entity.span == Span(42, 44)
+    assert entity.normalized_text == '8pm'
+
+
+@pytest.mark.load
+@pytest.mark.special
+def test_load_special_chars_6(query_factory):
+    """Tests loading a query with special characters"""
+    text = "what's on {after [8 p.m.|sys:time]|range}?"
+    processed_query = markup.load_query(text, query_factory)
+    entities = processed_query.entities
+
+    assert len(entities) == 1
+
+    assert entities[0].text == 'after 8 p.m.'
+    assert entities[0].normalized_text == 'after 8 p m'
+    assert entities[0].span == Span(10, 21)

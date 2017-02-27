@@ -5,7 +5,8 @@ from builtins import zip
 
 import logging
 
-from ...core import Entity, QueryEntity, Span
+from ...core import Entity, QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
+from ...ser import resolve_system_entity, SystemEntityResolutionError
 
 logger = logging.getLogger(__name__)
 
@@ -88,8 +89,6 @@ def get_entities_from_tags(query, tags):
         (list of QueryEntity) The tuple containing the list of entities.
     """
 
-    sys_types = set([tag.split('|')[3] for tag in tags])
-    sys_candidates = query.get_system_entity_candidates(sys_types)
     normalized_tokens = query.normalized_tokens
 
     entities = []
@@ -104,34 +103,23 @@ def get_entities_from_tags(query, tags):
         entities.append(entity)
         logger.debug("Appended {}".format(entity))
 
-    def _append_system_entity(start, end, entity_type):
-        logger.debug("Looking for '{}' between {} and {}".format(entity_type, start, end))
-        for sys_candidate in sys_candidates:
-            if (sys_candidate.normalized_token_span == Span(start, end - 1) and
-                    sys_candidate.entity.type == entity_type):
-                entities.append(sys_candidate)
-                logger.debug("Appended system entity {}".format(sys_candidate))
-                return
-        # # If no corresponding numerical candidate was found, try calling
-        # # Mallard again.
-        # entity = ' '.join(query.get_normalized_tokens()[start:end])
-        # for raw_num_candidate in mallard.parse_numerics(entity)['data']:
-        #     num_candidate = mallard.item_to_facet(
-        #         raw_num_candidate, query.get_normalized_marked_down_query())
-        #     # If there is numeric candidate matches the entire entity, then
-        #     # fiddle with its indices.
-        #     if (num_candidate['start'] == 0 and
-        #             num_candidate['end'] == end - start - 1 and
-        #             num_candidate['type'] == entity_type):
+    def _append_system_entity(token_start, token_end, entity_type):
+        msg = "Looking for '{}' between {} and {}"
+        logger.debug(msg.format(entity_type, token_start, token_end))
+        prefix = ' '.join(normalized_tokens[:token_start])
+        start = len(prefix) + 1
+        end = start - 1 + len(' '.join(normalized_tokens[token_start:token_end]))
+        norm_span = Span(start, end)
 
-        #         num_candidate['start'] = start
-        #         num_candidate['end'] = end
-        #         num_candidate['chstart'] = query.get_chstart(start)
-        #         num_candidate['chend'] = query.get_chend(end)
-        #         num_facets.append(num_candidate)
-        #         return
+        span = query.transform_span(norm_span, TEXT_FORM_NORMALIZED, TEXT_FORM_RAW)
 
-            logger.debug("Did not append numeric {}".format(sys_candidate))
+        try:
+            entity = resolve_system_entity(query, entity_type, span)
+            entities.append(entity)
+            logger.debug("Appended system entity {}".format(entity))
+        except SystemEntityResolutionError:
+            msg = "Found no matching system entity {}-{}, {!r}"
+            logger.debug(msg.format(token_start, token_end, entity_type))
 
     entity_tokens = []
     entity_start = None

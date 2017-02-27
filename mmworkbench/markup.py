@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import re
 
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
+from .ser import resolve_system_entity
 
 ENTITY_PATTERN = re.compile(r'\{(.*?)\}')
 NESTED_ENTITY_PATTERN = re.compile(r'\[(.*?)\]')
@@ -88,7 +89,7 @@ def _parse_entities(markup, query):
         elif len(components) == 3:
             entity_text, entity_type, role = components
         else:
-            raise MarkupException('Invalid entity mark up: too many pipes')
+            raise MarkupError('Invalid entity mark up: too many pipes')
         end = start + len(entity_text) - 1
 
         # get entity text excluding type and role
@@ -101,7 +102,7 @@ def _parse_entities(markup, query):
         span = Span(start, end)
         raw_entity = None
         if Entity.is_system_entity(entity_type):
-            raw_entity = _resolve_system_entity(query, span, entity_type)
+            raw_entity = resolve_system_entity(query, entity_type, span).entity
         if raw_entity is None:
             raw_entity = Entity(entity_type, role=role, value=value)
         entities.append(QueryEntity.from_query(query, raw_entity, span))
@@ -139,22 +140,13 @@ def _parse_nested(markup, query, offset):
         span = Span(start, end)
         raw_entity = None
         if Entity.is_system_entity(entity_type):
-            raw_entity = _resolve_system_entity(query, span.shift(offset), entity_type)
+            raw_entity = resolve_system_entity(query, entity_type, span.shift(offset)).entity
         else:
             raw_entity = Entity(entity_type, role=role, value=entity_text)
 
         entities.append(NestedEntity.from_query(query, raw_entity, offset, span))
 
     return entities
-
-
-def _resolve_system_entity(query, span, entity_type):
-    for candidate in query.get_system_entity_candidates(set((entity_type,))):
-        if candidate.span == span and candidate.entity.type == entity_type:
-            return candidate.entity
-
-    msg = 'Unable to resolve system entity of type {!r} for {!r}'
-    raise SystemEntityMarkupError(msg.format(entity_type, span.slice(query.text)))
 
 
 def _mark_up_entities(query_str, entities):
