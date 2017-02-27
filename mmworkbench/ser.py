@@ -96,7 +96,7 @@ def mallard_item_to_entity(query, item):
     confidence = -float(item['likelihood']) * int(item['rule_count'])
 
     if 'unit' in item:
-        value['unit'] = item['unit'].encode('utf-8')
+        value['unit'] = item['unit']
     if 'grain' in item:
         value['grain'] = str(item['grain'])
 
@@ -115,8 +115,14 @@ def mallard_item_to_entity(query, item):
                 num_type = 'interval'
                 value['value'] = item['value']
             else:
-                num_type = str(item['dimension'])
+                num_type = 'time'
                 value['value'] = str(item['value'][0])
+    elif item['dimension'] == 'currency':
+        num_type = 'currency'
+        value['value'] = item['value'][0]
+    elif item['dimension'] == 'number':
+        num_type = 'number'
+        value['value'] = item['value'][0]
     else:
         num_type = str(item['dimension'])
         value['value'] = str(item['value'][0])

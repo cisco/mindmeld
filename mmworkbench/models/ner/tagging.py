@@ -107,8 +107,7 @@ def get_entities_from_tags(query, tags):
     def _append_system_entity(start, end, entity_type):
         logger.debug("Looking for '{}' between {} and {}".format(entity_type, start, end))
         for sys_candidate in sys_candidates:
-            if (sys_candidate.normalized_token_span.start == start and
-                    sys_candidate.normalized_token_span.end == end - 1 and
+            if (sys_candidate.normalized_token_span == Span(start, end - 1) and
                     sys_candidate.entity.type == entity_type):
                 entities.append(sys_candidate)
                 logger.debug("Appended system entity {}".format(sys_candidate))

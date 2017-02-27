@@ -6,10 +6,18 @@ from __future__ import unicode_literals
 
 import re
 
-from .core import Entity, ProcessedQuery, QueryEntity, Span
+from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 
 ENTITY_PATTERN = re.compile(r'\{(.*?)\}')
-SYSTEM_ENTITY_PATTERN = re.compile(r'\[(.*?)\|sys:(.*?)\]')
+NESTED_ENTITY_PATTERN = re.compile(r'\[(.*?)\]')
+
+
+class MarkupError(Exception):
+    pass
+
+
+class SystemEntityMarkupError(MarkupError):
+    pass
 
 
 def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
@@ -17,7 +25,7 @@ def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
 
     Args:
         markup (str): The marked up query text
-        query_factory (QueryFactory): An object which can create
+        query_factory (QueryFactory): An object which can create queries
         domain (str): The name of the domain annotated for the query
         intent (str): The name of the intent annotated for the query
         is_gold (bool): True if the markup passed in is a reference, human-labeled example
@@ -47,68 +55,106 @@ def dump_query(processed_query):
     return markup
 
 
-def validate_markup(markup):
+def validate_markup(markup, query_factory):
     """Checks whether the markup text is well-formed.
 
     Args:
-        markup (str): Description
+        markup (str): The marked up query text
+        query_factory (QueryFactory): An object which can create queries
 
     Returns:
         bool: True if the markup is valid
     """
-    pass
-
-
-def _parse(markup):
-    """Given marked up text returns marked down text and a list of entities.
-
-    Args:
-        markup (str): marked up text
-
-    """
-
-    pass
-
-
-def mark_down(markup):
-    return mark_down_entities(mark_down_numerics(markup))
+    return NotImplemented
 
 
 def _mark_up(raw_text, entities=None, numerics=None):
     entities = entities or []
     numerics = numerics or []
-    # TODO: also mark up numerics
+    # TODO: also mark up nested entities
     return _mark_up_entities(raw_text, entities)
 
 
-def _parse_entities(markup, query=None):
+def _parse_entities(markup, query):
     entities = []
     for match in ENTITY_PATTERN.finditer(markup):
-        prefix = mark_down(markup[:match.start()])
-        start = len(prefix)
-        clean_match_str = mark_down_numerics(match.group(1))
+        start = len(mark_down(markup[:match.start()]))
+        match_text = match.group(1)
+        clean_match_str = mark_down_nested(match_text)
         components = clean_match_str.split('|')
         if len(components) == 2:
             entity_text, entity_type = components
-            role_name = None
+            role = None
+        elif len(components) == 3:
+            entity_text, entity_type, role = components
         else:
-            entity_text, entity_type, role_name = components
-
+            raise MarkupException('Invalid entity mark up: too many pipes')
         end = start + len(entity_text) - 1
 
+        # get entity text excluding type and role
+        marked_entity_text = match_text[:match_text.find('|', match_text.rfind(']'))]
+        nested = _parse_nested(marked_entity_text, query, start)
+        if len(nested):
+            value = {'children': nested}
+        else:
+            value = entity_text
         span = Span(start, end)
-        raw_entity = Entity(entity_type, role=role_name)
+        raw_entity = None
+        if Entity.is_system_entity(entity_type):
+            raw_entity = _resolve_system_entity(query, span, entity_type)
+        if raw_entity is None:
+            raw_entity = Entity(entity_type, role=role, value=value)
         entities.append(QueryEntity.from_query(query, raw_entity, span))
+    return entities
+
+
+def _parse_nested(markup, query, offset):
+    """Parses the markup within an entity for nested entities
+
+    Args:
+        markup (str): The text inside an entity to be parsed for nested entities
+        query (Query): A query object for the cleaned up markup
+        offset (int): The offset from the start of the raw query text to the
+            start of the markup
+
+    Returns:
+        TYPE: Description
+
+    Raises:
+        ValueError: Description
+    """
+    entities = []
+    for match in NESTED_ENTITY_PATTERN.finditer(markup):
+        prefix = mark_down(markup[:match.start()])
+        start = len(prefix)
+        components = match.group(1).split('|')
+        if len(components) == 2:
+            entity_text, entity_type = components
+            role = None
+        elif len(components) == 3:
+            entity_text, entity_type, role = components
+        else:
+            raise MarkupError('Invalid entity mark up: too many pipes')
+        end = start + len(entity_text) - 1
+        span = Span(start, end)
+        raw_entity = None
+        if Entity.is_system_entity(entity_type):
+            raw_entity = _resolve_system_entity(query, span.shift(offset), entity_type)
+        else:
+            raw_entity = Entity(entity_type, role=role, value=entity_text)
+
+        entities.append(NestedEntity.from_query(query, raw_entity, offset, span))
 
     return entities
 
 
-def mark_down_entities(markup):
-    def markeddown(match):
-        entity = match.group(1)
-        r2 = '\|[^]]*$'
-        return re.sub(r2, '', entity)
-    return re.sub(ENTITY_PATTERN, markeddown, markup)
+def _resolve_system_entity(query, span, entity_type):
+    for candidate in query.get_system_entity_candidates(set((entity_type,))):
+        if candidate.span == span and candidate.entity.type == entity_type:
+            return candidate.entity
+
+    msg = 'Unable to resolve system entity of type {!r} for {!r}'
+    raise SystemEntityMarkupError(msg.format(entity_type, span.slice(query.text)))
 
 
 def _mark_up_entities(query_str, entities):
@@ -134,27 +180,69 @@ def _mark_up_entities(query_str, entities):
     return new_query
 
 
-# TODO: figure out whether we need numerics
+def _mark_up_nested(query_str, entities):
+    # remove existing markup just in case
+    query_str = mark_down(query_str)
 
-def _parse_numerics(markup):
-    numerics = []
-    query_str = mark_down(markup)
-    for match in SYSTEM_ENTITY_PATTERN.finditer(query_str):
-        entity_text = match.group(1)
-        prefix = mark_down(query_str[:match.start()])
+    # make sure entities are sorted
+    sorted_entities = sorted(entities, key='start')
+    new_query = ''
+    cursor = 0
 
-        start = len(prefix)
-        end = start - 1 + len(entity_text)
-        numerics.append({'entity': entity_text, 'type': match.group(2),
-                         'start': start, 'end': end})
-    return numerics
+    # add each entity
+    for entity in sorted_entities:
+        start = entity.start
+        end = entity.end
+        new_query += query_str[cursor:start]
+        if entity.role is None:
+            new_query += "[{}|{}]".format(query_str[start:end], entity.type)
+        else:
+            new_query += "[{}|{}|{}]".format(query_str[start:end], entity.type, entity.role)
+        cursor = end
+    new_query += query_str[cursor:]
+    return new_query
 
 
-def mark_down_numerics(markup):
-    # TODO: figure out whether we need this
-    return re.sub(SYSTEM_ENTITY_PATTERN, r'\1', markup)
+def mark_down(markup):
+    """Removes all entity mark up from a string
+
+    Args:
+        markup (str): A marked up string
+
+    Returns:
+        str: A clean string with no mark up
+    """
+    return mark_down_entities(mark_down_nested(markup))
 
 
-def _mark_up_numerics(markup, numerics):
-    # TODO: implement this if we need it
-    return markup
+def mark_down_entities(markup):
+    """Removes top level entity mark up from a string
+
+    Args:
+        markup (str): A marked up string
+
+    Returns:
+        str: A clean string with no top level entity mark up
+    """
+    return _mark_down(markup)
+
+
+def mark_down_nested(markup):
+    """Removes nested entity mark up from a string
+
+    Args:
+        markup (str): A marked up string
+
+    Returns:
+        str: A clean string with no nested entities marked up
+    """
+    return _mark_down(markup, nested=True)
+
+
+def _mark_down(markup, nested=False):
+    def _replace(match):
+        entity = match.group(1)
+        pattern = r'\|[^]]*$'
+        return re.sub(pattern, '', entity)
+    pattern = NESTED_ENTITY_PATTERN if nested else ENTITY_PATTERN
+    return re.sub(pattern, _replace, markup)

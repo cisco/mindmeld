@@ -117,7 +117,7 @@ def get_labeled_query_tree(app_path, patterns=None):
     domains_dir = DOMAINS_FOLDER.format(app_path=app_path)
     walker = os.walk(domains_dir)
     tree = {}
-    for parent, dirs, files in walker:
+    for parent, _, files in walker:
         components = []
         while parent != domains_dir:
             parent, component = os.path.split(parent)
@@ -132,13 +132,13 @@ def get_labeled_query_tree(app_path, patterns=None):
             if patterns:
                 for pattern in patterns:
                     for file_path in glob.iglob(os.path.join(parent, domain, intent, pattern)):
-                        _, file = os.path.split(file_path)
+                        _, filename = os.path.split(file_path)
                         mod_time = os.path.getmtime(file_path)
-                        tree[domain][intent][file] = mod_time
+                        tree[domain][intent][filename] = mod_time
             else:
-                for file in files:
-                    mod_time = os.path.getmtime(os.path.join(parent, domain, intent, file))
-                    tree[domain][intent][file] = mod_time
+                for filename in files:
+                    mod_time = os.path.getmtime(os.path.join(parent, domain, intent, filename))
+                    tree[domain][intent][filename] = mod_time
 
     return tree
 
