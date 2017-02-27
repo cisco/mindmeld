@@ -8,8 +8,8 @@ from builtins import object
 
 
 from .. import path
-from ..core import QueryFactory, ProcessedQuery
-from ..ser import SystemEntityRecognizer
+from ..core import ProcessedQuery
+from ..query_factory import QueryFactory
 from ..tokenizer import Tokenizer
 
 from .domain_classifier import DomainClassifier
@@ -373,24 +373,10 @@ def create_preprocessor(app_path):
     pass
 
 
-def create_system_entity_recognizer(app_path):
-    """Creates the preprocessor for the app at app path
-
-    Args:
-        app_path (str): The path to the directory containing the app's data
-
-    Returns:
-        SystemEntityRecognizer: the system entity recognizer
-    """
-    # TODO: should we pass in entity types?
-    return SystemEntityRecognizer()
-
-
-def create_query_factory(app_path, sys_ent_rec=None, tokenizer=None, preprocessor=None):
-    sys_ent_rec = sys_ent_rec or create_system_entity_recognizer(app_path)
+def create_query_factory(app_path, tokenizer=None, preprocessor=None):
     tokenizer = tokenizer or create_tokenizer(app_path)
     preprocessor = preprocessor or create_preprocessor(app_path)
-    return QueryFactory(sys_ent_rec, tokenizer, preprocessor)
+    return QueryFactory(tokenizer, preprocessor)
 
 
 def create_resource_loader(app_path, query_factory):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 'This module contains the system entity recognizer.'
-from __future__ import unicode_literals
-from builtins import object
+from __future__ import unicode_literals, print_function
+from builtins import str
 
 import logging
 import json
@@ -18,26 +18,20 @@ MALLARD_URL = "http://localhost:2626"
 MALLARD_ENDPOINT = "parse"
 
 
-class SystemEntityRecognizer(object):
+def get_candidates(query, entity_types=None, span=None):
+    """Identifies candidate system entities in the given query
 
-    def __init__(self, entity_types=None):
-        self._entity_types = entity_types
+    Args:
+        query (Query): The query to examine
+        entity_types (list of str): The entity types to consider
 
-    def get_candidates(self, query, entity_types=None):
-        """Identifies candidate system entities in the given query
+    Returns:
+        list of QueryEntity: The system entities found in this
+    """
 
-        Args:
-            query (Query): The query to examine
-            entity_types (list of str): The entity types to consider
-
-        Returns:
-            list of QueryEntity: The system entities found in this
-        """
-
-        entity_types = entity_types or self._entity_types
-        dims = mallard_dimensions_from_entity_types(entity_types)
-        response = parse_numerics(query.text, dimensions=dims)
-        return [mallard_item_to_entity(query, item) for item in response['data']]
+    dims = _dimensions_from_entity_types(entity_types)
+    response = parse_numerics(query.text, dimensions=dims)
+    return [_mallard_item_to_entity(query, item) for item in response['data']]
 
 
 def parse_numerics(sentence, dimensions=None, language='eng', reference_time=''):
@@ -78,12 +72,14 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
                  "run Mallard with 'python start-nparse.py'.")
 
 
-def mallard_item_to_entity(query, item):
+def _mallard_item_to_entity(query, item):
     """Converts an item from mallard into a QueryEntity
 
     Args:
         query (Query): The query
         item (dict): The mallard item
+        offset (int, optional): The offset into the query that the item's
+            indexing begins
 
     Returns:
         QueryEntity: The query entity described by the mallard item
@@ -131,7 +127,7 @@ def mallard_item_to_entity(query, item):
     return QueryEntity.from_query(query, entity, Span(start, end))
 
 
-def mallard_dimensions_from_entity_types(entity_types):
+def _dimensions_from_entity_types(entity_types):
     entity_types = entity_types or []
     dims = [et.split(':')[1] for et in (entity_types or []) if et.startswith('sys:')]
     if len(dims) == 0:

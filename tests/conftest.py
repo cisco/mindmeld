@@ -6,26 +6,22 @@ conftest
 
 Configurations for tests. Include shared fixtures here.
 """
+# pylint: disable=locally-disabled,redefined-outer-name
 from __future__ import unicode_literals
 
 import pytest
 
 from mmworkbench.tokenizer import Tokenizer
-from mmworkbench.ser import SystemEntityRecognizer
-
-from mmworkbench.core import QueryFactory
+from mmworkbench.query_factory import QueryFactory
 
 
 @pytest.fixture
 def tokenizer():
+    """A tokenizer for normalizing text"""
     return Tokenizer()
 
 
 @pytest.fixture
-def sys_ent_rec():
-    return SystemEntityRecognizer()
-
-
-@pytest.fixture
-def query_factory(sys_ent_rec, tokenizer):
-    return QueryFactory(sys_ent_rec, tokenizer)
+def query_factory(tokenizer):
+    """For creating queries"""
+    return QueryFactory(tokenizer)
