@@ -7,7 +7,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from builtins import next, object, range, str, zip
+from builtins import next, range, str, zip
 from past.utils import old_div
 
 from collections import Counter, defaultdict
@@ -31,6 +31,8 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
+from .core import Model
+
 _NEG_INF = -1e10
 
 # classifier types
@@ -53,7 +55,7 @@ QUERY_FREQ_RSC = "q_freq"
 logger = logging.getLogger(__name__)
 
 
-class TextModel(object):
+class TextModel(Model):
     """A machine learning classifier for text.
 
     This class manages feature extraction, training, cross-validation, and
@@ -84,12 +86,8 @@ class TextModel(object):
             "k-folds".
     """
 
-    def __init__(self, classifier_type, features, params_grid, cv):
-        self.classifier_type = classifier_type
-        self.hyperparams = {}
-        self.grid_search_hyperparams = params_grid
-        self.feat_specs = features
-        self.cross_validation_settings = cv
+    def __init__(self, config):
+        super().__init__(config)
 
         self._is_fit = False
         self._feat_vectorizer = DictVectorizer(sparse=True)
@@ -223,24 +221,10 @@ class TextModel(object):
         """
         feat_set = {}
         marked_down_query = query.normalized_text
-        for name, kwargs in self.feat_specs.items():
+        for name, kwargs in self.config.features.items():
             feat_extractor = FEATURE_NAME_MAP[name](**kwargs)
             feat_set.update(feat_extractor(marked_down_query, self._resources))
         return feat_set
-
-    def _iter_settings(self, params_grid=None):
-        """Iterates through all classifier settings.
-
-        Yields:
-            (dict): A kwargs dict to be passed to the classifier object. Each
-                item yielded is a unique combination of self.hyperparams with
-                a choice of settings from self.grid_search_hyperparams.
-        """
-        if params_grid:
-            for config in self.settings_for_params_grid(self.hyperparams, params_grid):
-                yield config
-        else:
-            yield self.hyperparams
 
     @staticmethod
     def settings_for_params_grid(base, params_grid):
@@ -315,31 +299,31 @@ class TextModel(object):
 
         y = self._class_encoder.fit_transform(classes)
 
-        if self.classifier_type == LOG_REG_TYPE:
+        if self.config.model_type == LOG_REG_TYPE:
             clf_cls = LogisticRegression
-        elif self.classifier_type == DECISION_TREE_TYPE:
+        elif self.config.model_type == DECISION_TREE_TYPE:
             clf_cls = DecisionTreeClassifier
-        elif self.classifier_type == RANDOM_FOREST_TYPE:
+        elif self.config.model_type == RANDOM_FOREST_TYPE:
             clf_cls = RandomForestClassifier
-        elif self.classifier_type == SVM_TYPE:
+        elif self.config.model_type == SVM_TYPE:
             clf_cls = SVC
         else:
             raise ValueError('Classifier type "{}" not recognized'
-                             .format(self.classifier_type))
+                             .format(self.config.model_type))
 
-        if self.cross_validation_settings is None:
+        if self.config.cv is None:
             # Fit without cross validation
             cv_iterator = None
-        elif self.cross_validation_settings['type'] == 'k-fold':
+        elif self.config.cv['type'] == 'k-fold':
             cv_iterator = self._k_fold_iterator
-        elif self.cross_validation_settings['type'] == 'shuffle':
+        elif self.config.cv['type'] == 'shuffle':
             cv_iterator = self._shuffle_iterator
         else:
             raise ValueError('CV iterator type "{}" not recognized'
-                             .format(self.cross_validation_settings['type']))
+                             .format(self.config.cv['type']))
 
-        if (self.cross_validation_settings is not None and
-                self.cross_validation_settings.get("scoring") == LIKELIHOOD_SCORING):
+        if (self.config.cv is not None and
+                self.config.cv.get("scoring") == LIKELIHOOD_SCORING):
             scoring = LIKELIHOOD_SCORING
         else:
             scoring = ACCURACY_SCORING
@@ -434,12 +418,12 @@ class TextModel(object):
         return self
 
     def _k_fold_iterator(self, y):
-        k = self.cross_validation_settings['k']
+        k = self.config.cv['k']
         return StratifiedKFold(y, n_folds=k, shuffle=True)
 
     def _shuffle_iterator(self, y):
-        k = self.cross_validation_settings['k']
-        n = self.cross_validation_settings.get('n', k)
+        k = self.config.cv['k']
+        n = self.config.cv.get('n', k)
         return StratifiedShuffleSplit(y, n_iter=n, test_size=old_div(1.0, k))
 
     def _convert_settings(self, params_grid, y):
@@ -494,7 +478,7 @@ class TextModel(object):
         msg = 'Fitting {} text classifier without cross-validation'
         logger.info(msg.format(classifier_type.__name__))
 
-        params_grid = self._convert_settings(self.grid_search_hyperparams, y)
+        params_grid = self._convert_settings(self.config.params_grid, y)
         settings = next(self._iter_settings(params_grid))
 
         msg = 'Fitting text classifier with settings: {}'
@@ -521,11 +505,10 @@ class TextModel(object):
         the full dataset. Summary scores are shown without error analysis.
         """
         msg = 'Fitting {} text classifier by parallel {} cross-validation with settings: {}'
-        logger.info(msg.format(classifier_type.__name__, self.cross_validation_settings['type'],
-                               self.cross_validation_settings))
+        logger.info(msg.format(classifier_type.__name__, self.config.cv['type'], self.config.cv))
 
-        params_grid = self._convert_settings(self.grid_search_hyperparams, y)
-        n_jobs = self.cross_validation_settings.get('n_jobs', -1)
+        params_grid = self._convert_settings(self.config.params_grid, y)
+        n_jobs = self.config.cv.get('n_jobs', -1)
 
         logger.info('Doing grid search over {}'.format(params_grid))
         grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring,
@@ -572,15 +555,15 @@ class TextModel(object):
         """
         logger.info('Fitting {} text classifier by {} cross-validation with settings: {}'
                     .format(classifier_type.__name__,
-                            self.cross_validation_settings['type'],
-                            self.cross_validation_settings))
+                            self.config.cv['type'],
+                            self.config.cv))
 
         best_accuracy = 0
         best_likelihood = _NEG_INF
         best_settings = None
         classes = self._class_encoder.classes_
 
-        params_grid = self._convert_settings(self.grid_search_hyperparams, y)
+        params_grid = self._convert_settings(self.config.params_grid, y)
 
         for settings in self._iter_settings(params_grid):
 
@@ -831,7 +814,7 @@ class TextModel(object):
         print()
 
     def requires_resource(self, resource):
-        for f in self.feat_specs:
+        for f in self.config.features:
             if ('requirements' in FEATURE_NAME_MAP[f].__dict__ and
                     resource in FEATURE_NAME_MAP[f].requirements):
                 return True

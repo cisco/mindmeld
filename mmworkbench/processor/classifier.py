@@ -16,6 +16,7 @@ from ..core import Query
 
 logger = logging.getLogger(__name__)
 
+from ..models import ModelConfig
 
 class Classifier(object):
     DEFAULT_CONFIG = None
@@ -75,19 +76,18 @@ class Classifier(object):
         """
         raise NotImplementedError('Subclasses must implement this method')
 
-    def _get_model_class(self, classifier_type):
+    def _get_model_class(self, model_type):
         return self.MODEL_CLASS
 
-    def get_fit_config(self, model_type=None, features=None, params_grid=None, cv=None,
-                       model_name=None):
+    def get_model_config(self, model_type=None, features=None, params_grid=None, cv=None,
+                         model_name=None):
         model_name = model_name or self.DEFAULT_CONFIG['default_model']
         model_config = self.DEFAULT_CONFIG['models'][model_name]
         model_type = model_type or model_config['model_type']
         features = features or model_config['features']
         params_grid = params_grid or model_config['params_grid']
         cv = cv or model_config['cv']
-        return {'classifier_type': model_type, 'features': features, 'params_grid': params_grid,
-                'cv': cv}
+        return ModelConfig(model_type, None, params_grid, features, cv)
 
     def dump(self, model_path):
         """Persists the model to disk.
@@ -140,10 +140,10 @@ class StandardClassifier(Classifier):
 
         """
         queries, classes = self._get_queries_and_classes(queries)
-        params = self.get_fit_config(model_type, features, params_grid, cv)
+        config = self.get_model_config(model_type, features, params_grid, cv)
 
         model_class = self._get_model_class(model_type)
-        model = model_class(**params)
+        model = model_class(config)
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)
