@@ -11,7 +11,7 @@ import re
 
 from . import tagging
 
-from ...core import resolve_entity_conflicts
+from ..core import resolve_entity_conflicts
 
 
 def get_feature_template(template):
@@ -249,9 +249,8 @@ def extract_in_gaz_span_features():
         sys_types = set()
         for gaz in gazetteers.values():
             sys_types.update(gaz['sys_types'])
-        sys_types = list(sys_types)
 
-        in_gaz_spans = get_gaz_spans(query, gazetteers, sys_types)
+        in_gaz_spans = get_gaz_spans(query, gazetteers, list(sys_types))
 
         # Sort the spans by their indices. The algorithm below assumes this
         # sort order.

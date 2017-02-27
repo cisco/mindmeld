@@ -16,7 +16,8 @@ from sklearn import cross_validation
 from scipy.sparse import vstack, hstack
 import numpy
 
-from . import BaseEntityRecognizer, sequence_features, tagging
+from . import sequence_features, tagging
+from .base import BaseEntityRecognizer
 
 DEFAULT_FEATURES = {
     'bag-of-words': {

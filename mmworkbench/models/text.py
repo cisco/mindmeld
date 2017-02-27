@@ -220,10 +220,10 @@ class TextModel(Model):
             (dict of str: number): A dict of feature names to their values.
         """
         feat_set = {}
-        marked_down_query = query.normalized_text
+        query_text = query.normalized_text
         for name, kwargs in self.config.features.items():
             feat_extractor = FEATURE_NAME_MAP[name](**kwargs)
-            feat_set.update(feat_extractor(marked_down_query, self._resources))
+            feat_set.update(feat_extractor(query_text, self._resources))
         return feat_set
 
     @staticmethod
@@ -256,9 +256,9 @@ class TextModel(Model):
         """
         # Whole query frequencies, with singletons removed
         query_dict = Counter([u'<{}>'.format(q.normalized_text) for q in queries])
-        for q in query_dict:
-            if query_dict[q] < 2:
-                query_dict[q] = 0
+        for query in query_dict:
+            if query_dict[query] < 2:
+                query_dict[query] = 0
         query_dict += Counter()
 
         self.register_resources(query_freqs=query_dict)
@@ -481,8 +481,7 @@ class TextModel(Model):
         params_grid = self._convert_settings(self.config.params_grid, y)
         settings = next(self._iter_settings(params_grid))
 
-        msg = 'Fitting text classifier with settings: {}'
-        logger.info(msg.format(settings))
+        logger.info('Fitting text classifier with settings: {}'.format(settings))
 
         return classifier_type(**settings).fit(X, y)
 
@@ -511,8 +510,8 @@ class TextModel(Model):
         n_jobs = self.config.cv.get('n_jobs', -1)
 
         logger.info('Doing grid search over {}'.format(params_grid))
-        grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring,
-                               params_grid=params_grid, cv=cv_iterator(y), verbose=1, n_jobs=n_jobs)
+        grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring, param_grid=params_grid,
+                               cv=cv_iterator(y), verbose=1, n_jobs=n_jobs)
         model = grid_cv.fit(X, y)
 
         for candidate in model.grid_scores_:

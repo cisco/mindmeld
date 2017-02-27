@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from .maxent import MaxentRoleModel
 from .text import TextModel
-from .ner.memm import MemmModel
+from .memm import MemmModel
 from .core import ModelConfig
 
 CLASSIFIER_TYPE_MAXENT = 'maxent'

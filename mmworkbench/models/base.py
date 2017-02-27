@@ -59,7 +59,7 @@ class BaseEntityRecognizer(object):
                                             model_config_entry.get('classifier_type'))
         if model_type == 'memm':
             from . import memm
-            return memm.MemmEntityRecognizer(params, cv_settings, clf_settings, features)
+            return memm.MemmModel(params, cv_settings, clf_settings, features)
         else:
             raise ValueError
 

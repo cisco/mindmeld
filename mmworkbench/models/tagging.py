@@ -5,8 +5,8 @@ from builtins import zip
 
 import logging
 
-from ...core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
-from ...ser import resolve_system_entity, SystemEntityResolutionError
+from ..core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
+from ..ser import resolve_system_entity, SystemEntityResolutionError
 
 logger = logging.getLogger(__name__)
 
