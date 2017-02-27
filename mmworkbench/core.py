@@ -310,6 +310,15 @@ class NestedEntity(object):
                                              for form_out in TEXT_FORMS]))
         return NestedEntity(texts, spans, tok_spans, entity)
 
+    def to_dict(self):
+        """Converts the query entity into a dictionary"""
+        base = self.entity.to_dict()
+        base.update({
+            'text': self.text,
+            'span': self.span.to_dict()
+        })
+        return base
+
     @property
     def text(self):
         """The original input text span"""
@@ -478,7 +487,8 @@ class Entity(object):
         return entity_type.startswith('sys:')
 
     @classmethod
-    def from_query(cls, query, entity_type, role=None, value=None, display_text=None, confidence=None):
+    def from_query(cls, query, entity_type, role=None, value=None, display_text=None,
+                   confidence=None):
 
         pass
 
