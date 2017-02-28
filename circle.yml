@@ -1,8 +1,8 @@
 machine:
   python:
-    version: 3.5.1
+    version: 3.6.0
   post:
-    - pyenv global 3.5.1 3.3.6 3.4.4
+    - pyenv global 3.6.0 3.5.1 3.4.4
 dependencies:
   post:
     - sudo apt-get install libzmq-dev
