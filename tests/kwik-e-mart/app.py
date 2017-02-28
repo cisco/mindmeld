@@ -15,3 +15,7 @@ def welcome(context):
 @app.handle(intent='exit')
 def goodbye(context):
     return {'replies': 'Goodbye!'}
+
+
+if __name__ == '__main__':
+    app.cli()

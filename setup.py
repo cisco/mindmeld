@@ -13,6 +13,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
+    'click-log>=0.1.8',
     'Flask>=0.12',
     'Flask-Cors>=3.0.2',
     'future>=0.16.0',

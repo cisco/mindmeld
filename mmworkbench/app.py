@@ -50,3 +50,7 @@ class Application(object):
             **kwargs (TYPE): Description
         """
         self._app_manager.add_handler(handler, pattern, **kwargs)
+
+    def cli(self):
+        from .cli import cli
+        cli(obj={'app': self})
