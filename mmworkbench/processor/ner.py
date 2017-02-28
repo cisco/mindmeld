@@ -5,7 +5,6 @@ This module contains the named entity recognizer component.
 from __future__ import unicode_literals
 
 import logging
-import os
 
 from .classifier import Classifier
 from ..models import MemmModel

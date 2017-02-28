@@ -247,7 +247,6 @@ def extract_age_features():
     return extractor
 
 
-
 FEATURE_NAME_MAP = {
     'bag-of-words-before': extract_bag_of_words_before_features,
     'bag-of-words-after': extract_bag_of_words_after_features,

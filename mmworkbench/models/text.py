@@ -458,9 +458,9 @@ class TextModel(object):
 
         if 'class_weight' in params_grid:
             params_grid['class_weight'] = [{k if type(k) is int else
-                                           self._class_encoder.transform(k): v
-                                           for k, v in cw_dict.items()}
-                                          for cw_dict in params_grid['class_weight']]
+                                            self._class_encoder.transform(k): v
+                                            for k, v in cw_dict.items()}
+                                           for cw_dict in params_grid['class_weight']]
         elif 'class_bias' in params_grid:
             # interpolate between class_bias=0 => class_weight=None
             # and class_bias=1 => class_weight='balanced'
@@ -491,14 +491,14 @@ class TextModel(object):
             (object): An instance of classifier_type.
         """
 
-        logger.info('Fitting {} text classifier without cross-validation'
-                     .format(classifier_type.__name__, ))
+        msg = 'Fitting {} text classifier without cross-validation'
+        logger.info(msg.format(classifier_type.__name__))
 
         params_grid = self._convert_settings(self.grid_search_hyperparams, y)
         settings = next(self._iter_settings(params_grid))
 
-        logger.info('Fitting text classifier with settings: {}'
-                     .format(settings))
+        msg = 'Fitting text classifier with settings: {}'
+        logger.info(msg.format(settings))
 
         return classifier_type(**settings).fit(X, y)
 
@@ -520,37 +520,35 @@ class TextModel(object):
         highest held-out accuracy, then uses those settings to train over
         the full dataset. Summary scores are shown without error analysis.
         """
-        logger.info('Fitting {} text classifier by parallel {} cross-validation with settings: {}'
-                     .format(classifier_type.__name__,
-                             self.cross_validation_settings['type'],
-                             self.cross_validation_settings))
+        msg = 'Fitting {} text classifier by parallel {} cross-validation with settings: {}'
+        logger.info(msg.format(classifier_type.__name__, self.cross_validation_settings['type'],
+                               self.cross_validation_settings))
 
         params_grid = self._convert_settings(self.grid_search_hyperparams, y)
         n_jobs = self.cross_validation_settings.get('n_jobs', -1)
 
         logger.info('Doing grid search over {}'.format(params_grid))
-        grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring, params_grid=params_grid,
-                               cv=cv_iterator(y), verbose=1, n_jobs=n_jobs)
+        grid_cv = GridSearchCV(estimator=classifier_type(), scoring=scoring,
+                               params_grid=params_grid, cv=cv_iterator(y), verbose=1, n_jobs=n_jobs)
         model = grid_cv.fit(X, y)
 
         for candidate in model.grid_scores_:
-            logger.info('Candidate parameters: {}'
-                         .format(candidate.parameters))
+            logger.info('Candidate parameters: {}'.format(candidate.parameters))
             std_err = (2 * numpy.std(candidate.cv_validation_scores) /
                        math.sqrt(len(candidate.cv_validation_scores)))
             if scoring == ACCURACY_SCORING:
-                logger.info('Candidate average accuracy: {:.2%} ± {:.2%}'
-                             .format(candidate.mean_validation_score, std_err))
+                logger.info('Candidate average accuracy: {:.2%} ± '
+                            '{:.2%}'.format(candidate.mean_validation_score, std_err))
             elif scoring == LIKELIHOOD_SCORING:
-                logger.info('Candidate average log likelihood: {:.4} ± {:.4}'
-                             .format(candidate.mean_validation_score, std_err))
+                logger.info('Candidate average log likelihood: {:.4} ± '
+                            '{:.4}'.format(candidate.mean_validation_score, std_err))
         if scoring == ACCURACY_SCORING:
-            logger.info('Best accuracy: {:.2%}, settings: {}'
-                         .format(model.best_score_, model.best_params_))
+            logger.info('Best accuracy: {:.2%}, settings: {}'.format(model.best_score_,
+                                                                     model.best_params_))
             self.cv_loss_ = 1 - model.best_score_
         elif scoring == LIKELIHOOD_SCORING:
-            logger.info('Best log likelihood: {:.4}, settings: {}'
-                         .format(model.best_score_, model.best_params_))
+            logger.info('Best log likelihood: {:.4}, settings: {}'.format(model.best_score_,
+                                                                          model.best_params_))
             self.cv_loss_ = - model.best_score_
         return model.best_estimator_
 

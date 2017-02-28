@@ -154,8 +154,8 @@ class RoleClassifier(object):
             cv (None, optional): Description
 
         """
-        query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
-                                                               intent=self.intent)
+        # query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
+        #                                                        intent=self.intent)
         # self._model = something
         pass
 

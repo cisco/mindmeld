@@ -182,7 +182,7 @@ def extract_in_gaz_span_features():
 
             return feat_seq
 
-        def get_gaz_spans(query, domain_gazes, sys_types):
+        def get_gaz_spans(query, gazetteers, sys_types):
             """Collect tuples of (start index, end index, ngram, facet type)
             tracking ngrams that match with the entity gazetteer data
             """
@@ -192,7 +192,7 @@ def extract_in_gaz_span_features():
             # Collect ngrams of plain normalized ngrams
             for start in range(len(tokens)):
                 for end in range(start+1, len(tokens)+1):
-                    for gaz_name, gaz in domain_gazes.items():
+                    for gaz_name, gaz in gazetteers.items():
                         ngram = ' '.join(tokens[start:end])
                         if ngram in gaz['pop_dict']:
                             in_gaz_spans.append((start, end, gaz_name, ngram))
@@ -203,7 +203,7 @@ def extract_in_gaz_span_features():
             # This limits regular facets to contain at most two numeric facets
             system_entities = query.get_system_entity_candidates(sys_types)
 
-            for gaz_name, gaz in domain_gazes.items():
+            for gaz_name, gaz in gazetteers.items():
                 for i, num_facet_i in enumerate(system_entities):
                     if num_facet_i['type'] not in gaz['sys_types']:
                         continue
@@ -272,7 +272,7 @@ def extract_in_gaz_span_features():
                 if span[0] == other_span[0]:
                     if span[1] == other_span[1]:
                         cmp_span_features = get_exact_span_conflict_features(
-                            query, domain_gazes, span[0], span[1], span[2],
+                            query, gazetteers, span[0], span[1], span[2],
                             other_span[2], span[3])
                         update_features_sequence(feat_seq, cmp_span_features)
 
@@ -348,12 +348,12 @@ def extract_in_gaz_ngram_features():
 
             return feat_seq
 
-        domain_gazes = resources['gazetteers']
+        gazetteers = resources['gazetteers']
         tokens = query.normalized_tokens
         feat_seq = [{} for _ in tokens]
 
-        for ftype in domain_gazes:
-            feats = get_ngram_gaz_features(query, domain_gazes, ftype)
+        for ftype in gazetteers:
+            feats = get_ngram_gaz_features(query, gazetteers, ftype)
             update_features_sequence(feat_seq, feats)
 
         return feat_seq
