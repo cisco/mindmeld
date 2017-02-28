@@ -14,7 +14,8 @@ dependencies:
     - sudo dpkg -i pandoc-1.19-1-amd64.deb
 test:
   pre:
-    - python mmworkbench/nparse.py
+    - python mmworkbench/nparse.py:
+        background: true
     - while ! nc -z localhost 2626; do sleep 5; done;:
         timeout: 150
   post:
