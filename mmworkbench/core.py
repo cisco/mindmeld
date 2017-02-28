@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 from builtins import object, range
 
-from collections import namedtuple
 import logging
 
 
@@ -15,8 +14,13 @@ TEXT_FORMS = [TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED]
 logger = logging.getLogger(__name__)
 
 
-class Span(namedtuple('Span', ['start', 'end'])):
+class Span(object):
     """Simple named tuple representing a span: a start and an end"""
+    __slots__ = ['start', 'end']
+
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
 
     def to_dict(self):
         """Converts the span into a dictionary"""
@@ -48,6 +52,15 @@ class Span(namedtuple('Span', ['start', 'end'])):
 
     def __len__(self):
         return self.end - self.start + 1
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.start == other.start and self.end == other.end
+        return NotImplemented
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 
 class Query(object):

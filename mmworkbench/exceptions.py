@@ -15,3 +15,7 @@ class BadWorkbenchRequestError(Exception):
         obj = dict(self.payload or ())
         obj['error'] = self.message
         return obj
+
+
+class ClassifierLoadError(Exception):
+    pass
