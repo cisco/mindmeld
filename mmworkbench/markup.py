@@ -3,11 +3,12 @@
 representing annotations of query text inline.
 """
 from __future__ import unicode_literals
+from future.utils import raise_from
 
 import re
 
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
-from .ser import resolve_system_entity
+from .ser import resolve_system_entity, SystemEntityResolutionError
 
 ENTITY_PATTERN = re.compile(r'\{(.*?)\}')
 NESTED_ENTITY_PATTERN = re.compile(r'\[(.*?)\]')
@@ -37,7 +38,11 @@ def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
 
     raw_text = mark_down(markup)
     query = query_factory.create_query(raw_text)
-    entities = _parse_entities(markup, query=query)
+    try:
+        entities = _parse_entities(markup, query=query)
+    except SystemEntityResolutionError as exc:
+        msg = "Unable to load query {!r}: {}"
+        raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
 
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
