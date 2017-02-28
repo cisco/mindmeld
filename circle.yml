@@ -4,6 +4,8 @@ machine:
   post:
     - pyenv global 3.6.0 3.5.1 3.4.4
 dependencies:
+  override:
+    - pip install -r dev-requirements.txt
   post:
     - sudo apt-get install libzmq-dev
     - python3 -m pip install --upgrade ipykernel
@@ -11,8 +13,12 @@ dependencies:
     - wget https://github.com/jgm/pandoc/releases/download/1.19/pandoc-1.19-1-amd64.deb
     - sudo dpkg -i pandoc-1.19-1-amd64.deb
 test:
+  pre:
+    - python mmworkbench/nparse.py
+    - while ! nc -z localhost 2626; do sleep 5; done;:
+        timeout: 150
   post:
-    - cd docs && make clean text html && cd scripts && ./process_source_files.sh
+    - make docs
 deployment:
   s3:
     branch: /(develop)|(staging)|(master)/

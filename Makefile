@@ -68,8 +68,8 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/source/apidoc/mmworkbench.rst
 	rm -f docs/source/apidoc/modules.rst
 	sphinx-apidoc -o docs/source/apidoc mmworkbench
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
+	$(MAKE) -C docs clean text html
+	docs/scripts/process_source_files.sh
 	$(BROWSER) docs/build/html/index.html
 
 servedocs: docs ## compile the docs watching for changes
