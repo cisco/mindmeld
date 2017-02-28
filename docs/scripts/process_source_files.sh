@@ -2,7 +2,7 @@
 
 echo "Processing source text files."
 
-pushd "$( dirname "${BASH_SOURCE[0]}"
+pushd "$( dirname "${BASH_SOURCE[0]}" )"
 for file in `ls ../build/text/*.txt`
 do
 	sed -e 's/+//g' -e 's/=//g' -e 's/--//g' -e 's/\*\**//g' -e 's/|//g' $file > ${file%.txt}.rst.txt
