@@ -11,7 +11,7 @@ import os
 
 from sklearn.externals import joblib
 
-from ..exceptions import ClassifierLoadError
+from ..exceptions import ClassifierLoadError, FileNotFoundError
 
 logger = logging.getLogger(__name__)
 

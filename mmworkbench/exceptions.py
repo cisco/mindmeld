@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """This module contains exceptions used by the mmworkbench package."""
 
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
 
 class BadWorkbenchRequestError(Exception):
     status_code = 400

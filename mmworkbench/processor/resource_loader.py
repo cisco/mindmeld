@@ -13,6 +13,7 @@ import logging
 import os
 
 from .. import markup, path
+from ..exceptions import FileNotFoundError
 
 from .gazetteer import Gazetteer
 
