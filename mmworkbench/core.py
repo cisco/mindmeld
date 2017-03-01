@@ -439,7 +439,7 @@ class QueryEntity(NestedEntity):
         texts = (raw_text, proc_text, norm_text)
         spans = (raw_span, proc_span, norm_span)
 
-        full_text = (query.text, query.processed_text, query.text)
+        full_text = (query.text, query.processed_text, query.normalized_text)
 
         def get_token_span(full_text, span):
             """Converts a character span to a token span
