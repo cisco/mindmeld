@@ -14,8 +14,8 @@ from ..tokenizer import Tokenizer
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
-from .nel import EntityLinker
-from .ner import EntityRecognizer
+from .linker import EntityLinker
+from .recognizer import EntityRecognizer
 from .parser import Parser
 from .resource_loader import ResourceLoader
 from .role_classifier import RoleClassifier
@@ -121,20 +121,16 @@ class DomainProcessor(object):
         else:
             self._resource_loader = create_resource_loader(app_path, self._query_factory)
         self.intent_classifier = IntentClassifier(self._resource_loader, domain)
-        self.linker = EntityLinker(self._resource_loader, domain)
-        self.intents = {intent: IntentProcessor(app_path, domain, intent, self.linker,
-                                                self._query_factory, self._resource_loader)
+        self.intents = {intent: IntentProcessor(app_path, domain, intent, self._query_factory,
+                                                self._resource_loader)
                         for intent in path.get_intents(app_path, domain)}
 
     def build(self):
         """Builds all models for the domain."""
-        # TODO: build gazetteers
 
         # train intent model
         if len(self.intents) > 1:
             self.intent_classifier.fit()
-
-        # Something with linker?
 
         for intent_processor in self.intents.values():
             intent_processor.build()
@@ -144,17 +140,12 @@ class DomainProcessor(object):
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.dump(model_path)
 
-        # something with linker?
-
         for intent_processor in self.intents.values():
             intent_processor.dump()
 
     def load(self):
-        # load gazetteers?
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.load(model_path)
-
-        # something with the linker?
 
         for intent_processor in self.intents.values():
             intent_processor.load()
@@ -201,15 +192,13 @@ class IntentProcessor(object):
         domain (str): The domain this intent belongs to
         name (str): The name of this intent
         entities (dict): Description
-        linker (EntityLinker): Description
         recognizer (EntityRecognizer): The
     """
 
-    def __init__(self, app_path, domain, intent, linker, query_factory=None, resource_loader=None):
+    def __init__(self, app_path, domain, intent, query_factory=None, resource_loader=None):
         self._app_path = app_path
         self.domain = domain
         self.name = intent
-        self.linker = linker
         self._query_factory = query_factory or create_query_factory(app_path)
         if resource_loader:
             self._resource_loader = resource_loader
@@ -285,7 +274,6 @@ class IntentProcessor(object):
         for entity in entities:
             self.entities[entity.entity.type].process_entity(query, entities, entity)
 
-        # TODO: link entities
         # TODO: parse query
 
         return ProcessedQuery(query, entities=entities)
@@ -315,18 +303,22 @@ class EntityProcessor(object):
             self._resource_loader = resource_loader
         else:
             self._resource_loader = create_resource_loader(app_path, self._query_factory)
+
         self.role_classifier = RoleClassifier(self._resource_loader, domain, intent, entity_type)
-        self.roles = set()
+        self.linker = EntityLinker(self._resource_loader, entity_type, query_factory.normalize)
 
     def build(self):
         """Builds the models for this entity type"""
+        # TODO: something with linker ?
         self.role_classifier.fit()
 
     def dump(self):
+        # TODO: something with linker ?
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.dump(model_path)
 
     def load(self):
+        # TODO: something with linker ?
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.load(model_path)
 
@@ -342,7 +334,11 @@ class EntityProcessor(object):
             entities (list): All entities recognized in the query
             entity (Entity): The entity to process
         """
-        entity.role = self.role_classifier.predict(query, entities, entity)
+        # Classify role
+        entity.entity.role = self.role_classifier.predict(query, entities, entity)
+
+        # Link entity
+        entity.entity.value = self.linker.predict(query, entity.entity)
         return entity
 
     def __repr__(self):
