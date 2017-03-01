@@ -13,7 +13,10 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
-    'future==0.16.0',
+    'click-log>=0.1.8',
+    'Flask>=0.12',
+    'Flask-Cors>=3.0.2',
+    'future>=0.16.0',
     'numpy>=1.10.1',
     'scipy>=0.9',
     'scikit-learn==0.17.1',
@@ -32,7 +35,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='0.0.0',
+    version='3.0.0',
     description="A Python module for building natural language processing models.",
     long_description=readme + '\n\n' + history,
     author="MindMeld, Inc.",

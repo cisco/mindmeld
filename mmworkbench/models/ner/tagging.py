@@ -100,6 +100,7 @@ def get_entities_from_tags(query, tags):
         norm_span = Span(start, end)
         raw_entity = Entity(entity_type)
         entity = QueryEntity.from_query(query, entity=raw_entity, normalized_span=norm_span)
+        raw_entity.value = entity.text
         entities.append(entity)
         logger.debug("Appended {}".format(entity))
 

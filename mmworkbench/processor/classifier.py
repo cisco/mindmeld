@@ -4,12 +4,14 @@ This module contains the domain classifier component.
 """
 
 from __future__ import unicode_literals
-
 from builtins import object
+
 import logging
 import os
 
 from sklearn.externals import joblib
+
+from ..exceptions import ClassifierLoadError
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +109,11 @@ class Classifier(object):
             model_path (str): The location on disk where the model is stored
 
         """
-        self._model = joblib.load(model_path)
+        try:
+            self._model = joblib.load(model_path)
+        except FileNotFoundError:
+            msg = 'Unable to load {}. Pickle file not found at {!r}'
+            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
 
 
 class StandardClassifier(Classifier):
@@ -175,8 +181,9 @@ class StandardClassifier(Classifier):
 
     def load(self, model_path):
         super().load(model_path)
-        gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
+        if self._model:
+            gazetteers = self._resource_loader.get_gazetteers()
+            self._model.register_resources(gazetteers=gazetteers)
 
     def _get_queries_and_classes(self, queries=None):
         """Returns the set of queries and their classes to train on
