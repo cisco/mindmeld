@@ -33,14 +33,12 @@ class ApplicationManager(object):
         #apply nlp here
         return self.dialogue_manager.apply_handler(request)
 
-    def add_handler(self, handler, pattern=None, name=None, **kwargs):
-        """Adds a dialogue handler to the
+    def add_dialogue_rule(self, name, handler, **kwargs):
+        """Adds a dialogue rule for the dialogue manager.
 
         Args:
-            handler (function): Description
-            pattern (TYPE): Description
-            name (None, optional): Description
-            **kwargs (TYPE): Description
+            name (str): The name of the dialogue state
+            handler (function): The dialogue state handler function
+            **kwargs (dict): A list of options which specify the dialogue rule
         """
-        name = name or handler.__name__
-        self.dialogue_manager.add_handler(handler, pattern, name, **kwargs)
+        self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)

@@ -35,21 +35,24 @@ class Application(object):
         self._app_manager.load()
         self._server.run(**kwargs)
 
-    def handle(self, pattern=None, **kwargs):
-        """A decorator that is used to register dialogue state handlers"""
+    def handle(self, **kwargs):
+        """A decorator that is used to register dialogue state rules"""
+
         def _decorator(func):
-            self.add_handler(func, pattern, **kwargs)
+            name = kwargs.pop('name', None)
+            self.add_dialogue_rule(name, func, **kwargs)
             return func
         return _decorator
 
-    def add_handler(self, handler, pattern, **kwargs):
-        """Adds a handler for a dialogue state
+    def add_dialogue_rule(self, name, handler, **kwargs):
+        """Adds a dialogue rule for the dialogue manager.
+
         Args:
-            handler (TYPE): Description
-            pattern (TYPE): Description
-            **kwargs (TYPE): Description
+            name (str): The name of the dialogue state
+            handler (function): The dialogue state handler function
+            **kwargs (dict): A list of options which specify the dialogue rule
         """
-        self._app_manager.add_handler(handler, pattern, **kwargs)
+        self._app_manager.add_dialogue_rule(name, handler, **kwargs)
 
     def cli(self):
         from .cli import cli
