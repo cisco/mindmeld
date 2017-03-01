@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains exceptions used by the mmworkbench package."""
 
+
 class BadWorkbenchRequestError(Exception):
     status_code = 400
 

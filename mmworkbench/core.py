@@ -62,7 +62,6 @@ class Span(object):
         return not self.__eq__(other)
 
 
-
 class Query(object):
     """The query object is responsible for processing and normalizing raw user text input so that
     classifiers can deal with it. A query stores three forms of text: raw text, processed text, and

@@ -35,7 +35,6 @@ class WorkbenchRequest(Request):
         raise BadWorkbenchRequestError("Malformed request body: {0:s}".format(sys.exc_info()[1]))
 
 
-
 class WorkbenchServer(object):
     """This class sets up a Flask web server."""
 

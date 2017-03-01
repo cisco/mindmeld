@@ -33,7 +33,6 @@ class DialogueStateRule(object):
             elif keys[0] in kwargs:
                 resolved[keys[0]] = kwargs[keys[0]]
 
-
         self.domain = resolved.get('domain', None)
         self.intent = resolved.get('intent', None)
         entities = resolved.get('entities', None)
@@ -46,7 +45,7 @@ class DialogueStateRule(object):
             elif isinstance(entities, list) or isinstance(entities, set):
                 # List of entity types passed in
                 self.entity_types = frozenset(entities)
-            elif isinstance(entities, dicts):
+            elif isinstance(entities, dict):
                 self.entity_mappings = entities
             else:
                 msg = 'Invalid entity specification for dialogue state rule: {!r}'
@@ -62,7 +61,6 @@ class DialogueStateRule(object):
             bool: whether or not the context matches
         """
         # Note: this will probably change as the details of "context" are worked out
-
 
         # check domain is correct
         if self.domain is not None and self.domain != context.domain:
@@ -168,9 +166,13 @@ class DialogueManager(object):
                 break
 
         if name is None:
-            # TODO: implement default handler
-            handler = lambda x: x
+            handler = self._default_handler
         else:
             handler = self.handler_map[name]
         response = handler(context)
         return response
+
+    @staticmethod
+    def _default_handler(self, context):
+        # TODO: implement default handler
+        pass

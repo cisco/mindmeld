@@ -14,6 +14,7 @@ from .server import WorkbenchServer
 
 logger = logging.getLogger(__name__)
 
+
 class Application(object):
 
     def __init__(self, import_name):

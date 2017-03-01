@@ -45,8 +45,6 @@ def cli(ctx):
         ctx.obj = {}
 
 
-
-
 @cli.command('run', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('-P', '--port', type=int, default=7150)
@@ -69,6 +67,7 @@ def _get_mallard_pid():
     for line in os.popen("ps ax | grep mindmeld-mallard.jar | grep -v grep"):
         pid.append(line.split()[0])
     return pid
+
 
 # TODO: expose this as a command
 def start_num_parser(start):

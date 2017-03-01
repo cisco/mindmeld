@@ -8,6 +8,7 @@ from builtins import object
 from .dialogue import DialogueManager
 from .processor.nlp import NaturalLanguageProcessor
 
+
 class ApplicationManager(object):
     '''This class provides the functionality to manage a workbench application.
 
@@ -30,7 +31,7 @@ class ApplicationManager(object):
                 received
         """
 
-        #apply nlp here
+        # TODO: apply nlp here
         return self.dialogue_manager.apply_handler(request)
 
     def add_dialogue_rule(self, name, handler, **kwargs):
