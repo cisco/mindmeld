@@ -338,7 +338,7 @@ class EntityProcessor(object):
         entity.entity.role = self.role_classifier.predict(query, entities, entity)
 
         # Link entity
-        entity.entity.value = self.linker.predict(query, entity.entity)
+        entity.entity.value = self.linker.predict(entity.entity)
         return entity
 
     def __repr__(self):

@@ -2,13 +2,13 @@
 """
 This module contains the named entity linker component.
 """
-
 from __future__ import unicode_literals
 from builtins import object, str
 
 import copy
 
 from ..core import Entity
+
 
 class EntityLinker(object):
     """A named entity linker which is used to link entities to their specific
@@ -54,18 +54,17 @@ class EntityLinker(object):
         # self._model = something
         pass
 
-    def predict(self, query, entity):
+    def predict(self, entity):
         """Predicts linked values for the entities provided
 
         Args:
-            query (Query): The input query
-            entity (Entity): An entity from the query
+            entity (Entity): An entity found in an input query
 
         Returns:
             The value for the entity passed in
         """
         if (self._is_system_entity or  # system entities are already linked
-                not isinstance(entity.value, str)): # Entity is already linked
+                not isinstance(entity.value, str)):  # entity is already linked
             return entity.value
 
         normed = self._normalizer(entity.value)
@@ -78,11 +77,11 @@ class EntityLinker(object):
         value.pop('whitelist', None)
         return value
 
-    def predict_proba(self, query, entities):
+    def predict_proba(self, entity):
         """Generates multiple hypotheses and returns their associated probabilities
 
         Args:
-            query (Query): The input query
+            entity (Entity): An entity found in an input query
 
         Returns:
             list: a list of tuples of the form (str, float) grouping roles and their probabilities
