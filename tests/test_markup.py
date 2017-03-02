@@ -13,7 +13,7 @@ import pytest
 
 from mmworkbench import markup
 
-from mmworkbench.core import Entity, QueryEntity, Span
+from mmworkbench.core import ProcessedQuery, QueryEntity, Span
 
 MARKED_UP_STRS = [
     'show me houses under {[600,000|sys:number] dollars|price}',
@@ -69,7 +69,7 @@ def test_load_entity(query_factory):
     assert entity.span.end == 23
     assert entity.normalized_text == 'elm street'
     assert entity.entity.type == 'store_name'
-    assert entity.entity.value == 'Elm Street'
+    assert entity.entity.text == 'Elm Street'
 
 
 @pytest.mark.load
@@ -200,8 +200,7 @@ def test_load_special_chars_3(query_factory):
     processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
-    expected_entity = QueryEntity.from_query(processed_query.query, Entity('show', value='s.o.b.'),
-                                             Span(3, 8))
+    expected_entity = QueryEntity.from_query(processed_query.query, Span(3, 8), entity_type='show')
     assert entities[0] == expected_entity
 
     assert entities[1].entity.type == 'range'
@@ -219,8 +218,7 @@ def test_load_special_chars_4(query_factory):
     processed_query = markup.load_query(text, query_factory)
     entities = processed_query.entities
 
-    expected_entity = QueryEntity.from_query(processed_query.query, Entity('show', value='s.o.b.'),
-                                             Span(3, 8))
+    expected_entity = QueryEntity.from_query(processed_query.query, Span(3, 8), entity_type='show')
     assert entities[0] == expected_entity
 
     assert entities[1].entity.type == 'range'

@@ -5,7 +5,7 @@ from builtins import zip
 
 import logging
 
-from ...core import Entity, QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
+from ...core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
 from ...ser import resolve_system_entity, SystemEntityResolutionError
 
 logger = logging.getLogger(__name__)
@@ -98,9 +98,7 @@ def get_entities_from_tags(query, tags):
         start = len(prefix) + 1
         end = start - 1 + len(' '.join(tokens))
         norm_span = Span(start, end)
-        raw_entity = Entity(entity_type)
-        entity = QueryEntity.from_query(query, entity=raw_entity, normalized_span=norm_span)
-        raw_entity.value = entity.text
+        entity = QueryEntity.from_query(query, normalized_span=norm_span, entity_type=entity_type)
         entities.append(entity)
         logger.debug("Appended {}".format(entity))
 

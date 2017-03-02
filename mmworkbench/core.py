@@ -280,19 +280,24 @@ class NestedEntity(object):
         self._token_spans = token_spans
         self.entity = entity
 
-    @staticmethod
-    def from_query(query, entity, parent_offset, span=None, normalized_span=None):
+    @classmethod
+    def from_query(cls, query, span=None, normalized_span=None, entity_type=None,
+                   entity=None, parent_offset=0):
         """Creates an entity node using a parent entity node
 
         Args:
             query (Query): Description
-            entity (Entity): The entity
             parent_offset (int): The offset of the parent in the query
             span (Span): The span of the entity in the query's raw text
-            normalized_span (None, optional): Description
+            normalized_span (None, optional): The span of the entity in the
+                query's normalized text
+            entity_type (str, optional): The entity type. One of this and entity
+                must be provided
+            entity (Entity, optional): The entity. One of this and entity must
+                be provided
 
         Returns:
-            NestedEntity: the created nested entity
+            the created entity
 
         """
         def _get_form_details(query_span, offset, form_in, form_out):
@@ -319,15 +324,18 @@ class NestedEntity(object):
         texts, spans, tok_spans = list(zip(*[_get_form_details(query_span, parent_offset,
                                                                form_in, form_out)
                                              for form_out in TEXT_FORMS]))
-        return NestedEntity(texts, spans, tok_spans, entity)
+
+        if entity is None:
+            if entity_type is None:
+                raise ValueError("Either 'entity' or 'entity_type' must be specified")
+            entity = Entity(texts[0], entity_type)
+
+        return cls(texts, spans, tok_spans, entity)
 
     def to_dict(self):
         """Converts the query entity into a dictionary"""
         base = self.entity.to_dict()
-        base.update({
-            'text': self.text,
-            'span': self.span.to_dict()
-        })
+        base.update({'span': self.span.to_dict()})
         return base
 
     @property
@@ -398,8 +406,6 @@ class NestedEntity(object):
 class QueryEntity(NestedEntity):
     """An entity with the context of the query it came from.
 
-    TODO: account for numeric entities
-
     Attributes:
         text (str): The raw text that was processed into this entity
         processed_text (str): The processed text that was processed into
@@ -418,59 +424,6 @@ class QueryEntity(NestedEntity):
             entity. This index is based on the normalized text of the query passed in.
     """
 
-    # TODO: look into using __slots__
-
-    @staticmethod
-    def from_query(query, entity, span=None, normalized_span=None):
-        """Creates a query entity using a query
-
-        Args:
-            query (Query): The query
-            span (Span): The span of the entity in the query's raw text
-            entity (Entity): The entity
-
-        Returns:
-            QueryEntity: the created query entity
-        """
-
-        if span:
-            raw_span = span
-            raw_text = span.slice(query.text)
-            proc_span = query.transform_span(span, TEXT_FORM_RAW, TEXT_FORM_PROCESSED)
-            proc_text = proc_span.slice(query.processed_text)
-            norm_span = query.transform_span(span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED)
-            norm_text = norm_span.slice(query.normalized_text)
-        elif normalized_span:
-            norm_span = normalized_span
-            norm_text = norm_span.slice(query.normalized_text)
-            proc_span = query.transform_span(norm_span, TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)
-            proc_text = proc_span.slice(query.processed_text)
-            raw_span = query.transform_span(norm_span, TEXT_FORM_NORMALIZED, TEXT_FORM_RAW)
-            raw_text = raw_span.slice(query.text)
-
-        texts = (raw_text, proc_text, norm_text)
-        spans = (raw_span, proc_span, norm_span)
-
-        full_text = (query.text, query.processed_text, query.normalized_text)
-
-        def get_token_span(full_text, span):
-            """Converts a character span to a token span
-
-            Args:
-                span (Span): the character span
-                full_text (str): The text in question
-
-            Returns:
-                Span: the token span
-            """
-            span_text = full_text[span.start:span.end + 1]
-            start = len(full_text[:span.start].split())
-            end = start - 1 + len(span_text.split())
-            return Span(start, end)
-
-        token_spans = tuple(map(get_token_span, full_text, spans))
-        return QueryEntity(texts, spans, token_spans, entity)
-
 
 class Entity(object):
     """Summary
@@ -485,7 +438,9 @@ class Entity(object):
 
     # TODO: look into using __slots__
 
-    def __init__(self, entity_type, role=None, value=None, display_text=None, confidence=None):
+    def __init__(self, text, entity_type, role=None, value=None, display_text=None,
+                 confidence=None):
+        self.text = text
         self.type = entity_type
         self.role = role
         self.value = value
@@ -497,17 +452,9 @@ class Entity(object):
     def is_system_entity(entity_type):
         return entity_type.startswith('sys:')
 
-    @classmethod
-    def from_query(cls, query, entity_type, role=None, value=None, display_text=None,
-                   confidence=None):
-
-        pass
-
     def to_dict(self):
         """Converts the entity into a dictionary"""
-        base = {
-            'type': self.type,
-        }
+        base = {'text': self.text, 'type': self.type}
         for field in ['role', 'value', 'display_text', 'confidence']:
             value = getattr(self, field)
             if value is not None:
@@ -524,7 +471,8 @@ class Entity(object):
         return not self.__eq__(other)
 
     def __repr__(self):
-        return "<{} {!r} ({!r})>".format(self.__class__.__name__, self.display_text, self.type)
+        text = self.display_text or self.text
+        return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.type)
 
 
 def resolve_entity_conflicts(query_entities):

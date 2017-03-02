@@ -49,7 +49,6 @@ def test_build(empty_nlp):
     nlp.build()
 
 
-@pytest.mark.focus
 def test_dump(nlp):
     """Test dump method of nlp"""
     nlp.dump()

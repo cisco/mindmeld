@@ -170,16 +170,16 @@ def test_query_equality(query_factory):
 def test_query_entity_equality():
     """Tests query entity equality"""
     entity_a = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
-                           Entity('type', 'role', 'value', 'display'))
+                           Entity('text', 'type', 'role', 'value', 'display'))
     entity_b = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
-                           Entity('type', 'role', 'value', 'display'))
+                           Entity('text', 'type', 'role', 'value', 'display'))
 
     assert entity_a == entity_b
 
 
 def test_entity_equality():
     """Tests entity equality"""
-    entity_a = Entity('type', 'role', 'value', 'display')
-    entity_b = Entity('type', 'role', 'value', 'display')
+    entity_a = Entity('text', 'type', 'role', 'value', 'display')
+    entity_b = Entity('text', 'type', 'role', 'value', 'display')
 
     assert entity_a == entity_b

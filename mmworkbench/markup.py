@@ -100,17 +100,14 @@ def _parse_entities(markup, query):
         # get entity text excluding type and role
         marked_entity_text = match_text[:match_text.find('|', match_text.rfind(']'))]
         nested = _parse_nested(marked_entity_text, query, start)
-        if len(nested):
-            value = {'children': nested}
-        else:
-            value = entity_text
+        value = {'children': nested} if len(nested) else None
         span = Span(start, end)
         raw_entity = None
         if Entity.is_system_entity(entity_type):
             raw_entity = resolve_system_entity(query, entity_type, span).entity
         if raw_entity is None:
-            raw_entity = Entity(entity_type, role=role, value=value)
-        entities.append(QueryEntity.from_query(query, raw_entity, span))
+            raw_entity = Entity(entity_text, entity_type, role=role, value=value)
+        entities.append(QueryEntity.from_query(query, span, entity=raw_entity))
     return entities
 
 
@@ -147,9 +144,10 @@ def _parse_nested(markup, query, offset):
         if Entity.is_system_entity(entity_type):
             raw_entity = resolve_system_entity(query, entity_type, span.shift(offset)).entity
         else:
-            raw_entity = Entity(entity_type, role=role, value=entity_text)
+            raw_entity = Entity(entity_text, entity_type, role=role)
 
-        entities.append(NestedEntity.from_query(query, raw_entity, offset, span))
+        entities.append(NestedEntity.from_query(query, span, entity=raw_entity,
+                                                parent_offset=offset))
 
     return entities
 

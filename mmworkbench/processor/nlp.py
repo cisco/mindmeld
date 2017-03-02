@@ -22,11 +22,12 @@ from .role_classifier import RoleClassifier
 
 
 class NaturalLanguageProcessor(object):
-    """Summary
+    """The natural language processor is the workbench component responsible for
+    all nlp.
 
     Attributes:
-        domain_classifier (DomainClassifier): Description
-        domains (dict): Description
+        domain_classifier (DomainClassifier): A classifier for domains
+        domains (dict): Processors for each domain
         preprocessor (Preprocessor): the object responsible for processing raw text
         tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed text
     """

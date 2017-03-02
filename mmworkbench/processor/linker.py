@@ -3,11 +3,14 @@
 This module contains the named entity linker component.
 """
 from __future__ import unicode_literals
-from builtins import object, str
+from builtins import object
 
 import copy
+import logging
 
 from ..core import Entity
+
+logger = logging.getLogger(__name__)
 
 
 class EntityLinker(object):
@@ -63,15 +66,16 @@ class EntityLinker(object):
         Returns:
             The value for the entity passed in
         """
-        if (self._is_system_entity or  # system entities are already linked
-                not isinstance(entity.value, str)):  # entity is already linked
+        if self._is_system_entity:
+            # system entities are already linked
             return entity.value
 
-        normed = self._normalizer(entity.value)
+        normed = self._normalizer(entity.text)
         try:
             cname = self._mapping['synonyms'][normed]
         except KeyError:
-            return entity.value
+            logger.warning('Failed to link entity %r for type %r', entity.text, entity.type)
+            return entity.text
 
         value = copy.copy(self._mapping['items'][cname])
         value.pop('whitelist', None)
