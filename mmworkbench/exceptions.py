@@ -5,6 +5,7 @@ try:
     FileNotFoundError
 except NameError:
     FileNotFoundError = IOError
+FileNotFoundError = FileNotFoundError
 
 
 class BadWorkbenchRequestError(Exception):
