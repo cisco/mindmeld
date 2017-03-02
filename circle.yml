@@ -2,7 +2,7 @@ machine:
   python:
     version: 3.6.0
   post:
-    - pyenv global 3.6.0 3.5.1 3.4.4 2.7.13
+    - pyenv global 3.6.0 3.5.1 3.4.4 2.7.12
 dependencies:
   override:
     - pip install -r dev-requirements.txt
