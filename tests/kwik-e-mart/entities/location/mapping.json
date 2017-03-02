@@ -62,7 +62,7 @@
   {
     "id": "13",
     "cname": "Rural Route 27",
-    "whitelist": ["550 Rural Route 27", "550 Rural Rte 27", "Rural Route", "Rural Rte", "Rte 27", "Route 27", "Ogdenville"]
+    "whitelist": ["550 Rural Route 27", "550 Rural Rte 27", "Rural Route", "Rural Rte", "Rte 27", "Route 27"]
   },
   {
     "id": "14",
@@ -92,7 +92,7 @@
   {
     "id": "19",
     "cname": "D Street",
-    "whitelist": ["1 D Street", "D Street", "D St", "1 D St", "D"]
+    "whitelist": ["1 D Street", "D St", "1 D St", "D"]
   },
   {
     "id": "20",

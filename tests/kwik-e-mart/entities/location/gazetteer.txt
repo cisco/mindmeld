@@ -95,7 +95,6 @@ Rural Route
 Rural Rte
 Rte 27
 Route 27
-Ogdenville
 Industrial Road
 15 Industrial Road
 Industrial
@@ -124,7 +123,6 @@ twelfth
 257th
 D Street
 1 D Street
-D Street
 D St
 1 D St
 D

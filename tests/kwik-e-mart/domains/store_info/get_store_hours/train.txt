@@ -22,7 +22,7 @@ Is {257th|location} open on {Christmas|sys:time}?
 When can I go to {D street|location} location {tomorrow|sys:time}?
 Can I go to {181st|location} {tomorrow|sys:time} at 7 pm?
 i wanna go to {d street|location}. Is it open?
-Is kwik e mart open on {sundays|sys:time}
+Is kwik e mart open on {sunday|sys:time}
 Is {181st street|location} open 24 hours?
 What's the holiday schedule for for {257th street|location}
 Is {d street|location} open right now?
@@ -30,15 +30,15 @@ looking to go to {257th|location}. is it open?
 I'm near {d street|location}. Is your store open?
 what's {257th's|location} weekend hours like?
 Does {d street|location} open at 6am {tomorrow|sys:time}?
-Can i get a squishee at {181st|location} at 3 am {tonight|sys:time}
-If I want a squishee on a {weekday|sys:time} at {d street|location}. When can i go?
+Can i get a squishee at {181st|location} at 3 am {today|sys:time}
+If I want a squishee on a {Wednesday|sys:time} at {d street|location}. When can i go?
 when do the doors clothes for d {181st st|location}
 doors open for {d street|location}?
 i'd like to know when the doors clothes for {181st st|location}
 when can i next get a squishee from {d street|location}?
 When is {181st street|location} open next?
 doors closed for {257th st|location}?
-do i have time to make it to {d street|location} {tonight|sys:time}
+do i have time to make it to {d street|location} {today|sys:time}
 will i make it before close to {257th st|location}
 i'm running late, is {181st|location} still open
 can i make it to {257th before|location} work {tomorrow|sys:time}
@@ -64,7 +64,7 @@ Does the one on {Central Plaza|location} remain open on weekends?
 Is the store on {45 Fifth Avenue|location} closed {today|sys:time}?
 When will the {Fifth Avenue|location} store open on {Monday|sys:time}?
 What are the hours for the Kwik-E-Mart at {Pine and Market|location}?
-When does {Central Plaza|location} close on weekdays?
+When does {Central Plaza|location} close on Thursday?
 Is the store on {23rd Elm Street|location} open now?
 What are the operating hours for the one in {Central Plaza|location}?
 What does the {Elm Street|location} one close on Mondays?
