@@ -5,6 +5,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "23 Elm Street, Suite 800, Springfield, OR, 97077",
+    "location": "44.046236, -123.022029",
     "phone_number": "541-555-1100"
   },
   {
@@ -13,6 +14,7 @@
     "open_time": "6:00",
     "close_time": "22:00",
     "address": "750 Market Street, Shelbyville, OR, 97086",
+    "location": "44.028371,-123.088074",
     "phone_number": "541-555-4500"
   },
   {
@@ -21,6 +23,7 @@
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "100 Main Street, Suite 800, Capital City, OR, 97080",
+    "location": "44.939529,-123.026276",
     "phone_number": "458-100-1100"
   },
   {
@@ -29,6 +32,7 @@
     "open_time": "6:00",
     "close_time": "22:00",
     "address": "45 5th Ave, Ogdenville, OR, 97075",
+    "location": "42.309815,-122.838135",
     "phone_number": "541-150-1100"
   },
   {
@@ -37,6 +41,7 @@
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "104 1st St, North Haverbrook, OR, 97076",
+    "location": "45.512121,-122.662354",
     "phone_number": "541-100-1101"
   },
   {
@@ -45,6 +50,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "123 Fake St, Springfield, OR, 97077",
+    "location": "43.916236, -122.972029",
     "phone_number": "541-555-1141"
   },
   {
@@ -53,6 +59,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "55 3rd St, Springfield, OR, 97077",
+    "location": "44.055136, -123.044229",
     "phone_number": "541-555-1142"
   },
   {
@@ -61,6 +68,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "44 8th Ave, Springfield, OR, 97077",
+    "location": "43.946236, -122.891029",
     "phone_number": "541-555-1143"
   },
   {
@@ -69,6 +77,7 @@
     "open_time": "9:00",
     "close_time": "19:00",
     "address": "20 Central Blvd, Springfield, OR, 97077",
+    "location": "44.076246, -123.022526",
     "phone_number": "541-555-1144"
   },
   {
@@ -77,6 +86,7 @@
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "145 Evergreen Terrace, Springfield, OR, 97077",
+    "location": "44.056236, -122.812029",
     "phone_number": "541-555-1145"
   },
   {
@@ -85,6 +95,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "3 W Oak St, Springfield, OR, 97077",
+    "location": "44.146236, -122.942029",
     "phone_number": "541-555-1146"
   },
   {
@@ -93,6 +104,7 @@
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "10 E Oak St, Springfield, OR, 97077",
+    "location": "44.036336, -123.022229",
     "phone_number": "541-555-1147"
   },
   {
@@ -101,6 +113,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "550 Rural Rte 27, Ogdenville, OR, 97075",
+    "location": "42.329815,-122.898935",
     "phone_number": "541-555-1148"
   },
   {
@@ -109,6 +122,7 @@
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "15 Industrial Road, North Haverbrook, OR, 97076",
+    "location": "45.522121,-122.672354",
     "phone_number": "541-555-1149"
   },
   {
@@ -117,6 +131,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "122 156th St, Springfield, OR, 97077",
+    "location": "43.896236, -123.022029",
     "phone_number": "541-555-1150"
   },
   {
@@ -125,6 +140,7 @@
     "open_time": "9:00",
     "close_time": "22:00",
     "address": "92 12th Ave, Springfield, OR, 97077",
+    "location": "44.046666, -123.022222",
     "phone_number": "541-555-1151"
   },
   {
@@ -133,6 +149,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "90 181st St, Springfield, OR, 97077",
+    "location": "44.246236, -122.882029",
     "phone_number": "541-555-1152"
   },
   {
@@ -141,6 +158,7 @@
     "open_time": "7:00",
     "close_time": "22:00",
     "address": "88 257th St, Springfield, OR, 97077",
+    "location": "43.846236, -123.000029",
     "phone_number": "541-555-1153"
   },
   {
@@ -149,6 +167,7 @@
     "open_time": "8:00",
     "close_time": "19:00",
     "address": "1 D Street, Springfield, OR, 97077",
+    "location": "44.246236, -123.122029",
     "phone_number": "541-555-1154"
   },
   {
@@ -157,6 +176,7 @@
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "50 Peanut St, Springfield, OR, 97077",
+    "location": "44.046236, -122.902029",
     "phone_number": "541-555-1155"
   },
   {
@@ -165,6 +185,7 @@
     "open_time": "8:00",
     "close_time": "18:00",
     "address": "101 Sycamore Ave, Springfield, OR, 97077",
+    "location": "44.146236, -123.021029",
     "phone_number": "541-555-1156"
   },
   {
@@ -173,6 +194,7 @@
     "open_time": "9:00",
     "close_time": "20:00",
     "address": "15 Clown St, Springfield, OR, 97077",
+    "location": "43.999936, -123.111029",
     "phone_number": "541-555-1157"
   },
   {
@@ -181,6 +203,7 @@
     "open_time": "9:00",
     "close_time": "19:00",
     "address": "82 Beer Ave, Springfield, OR, 97077",
+    "location": "44.006206, -123.130029",
     "phone_number": "541-555-1158"
   },
   {
@@ -189,6 +212,7 @@
     "open_time": "9:00",
     "close_time": "20:00",
     "address": "13 W Oak St, Springfield, OR, 97077",
+    "location": "43.042236, -122.988829",
     "phone_number": "541-555-1159"
   },
   {
@@ -197,6 +221,7 @@
     "open_time": "8:00",
     "close_time": "19:00",
     "address": "67 Anaheim Rd, Springfield, OR, 97077",
+    "location": "44.000206, -123.022199",
     "phone_number": "541-555-1160"
   }
 ]
