@@ -54,6 +54,8 @@ class ApplicationManager(object):
         context = {'request': request, 'history': history}
         context.update(processed_query.to_dict())
         context.pop('text')
+        context.update(self.dialogue_manager.apply_handler(context))
+
         return context
 
     def add_dialogue_rule(self, name, handler, **kwargs):

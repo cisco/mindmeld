@@ -63,24 +63,29 @@ class DialogueStateRule(object):
         # Note: this will probably change as the details of "context" are worked out
 
         # check domain is correct
-        if self.domain is not None and self.domain != context.domain:
+        if self.domain is not None and self.domain != context['domain']:
             return False
 
         # check intent is correct
-        if self.intent is not None and self.intent != context.intent:
+        if self.intent is not None and self.intent != context['intent']:
             return False
 
         # check expected entity types are present
-        if (self.entity_types is not None and
-                len(self.entity_types & context.entity_types) < len(self.entity_types)):
-            return False
+        if self.entity_types is not None:
+            # TODO cache entity types
+            entity_types = set()
+            for entity in context['entities']:
+                entity_types.update(entity['type'])
+
+            if len(self.entity_types & context.entity_types) < len(self.entity_types):
+                return False
 
         # check entity mapping
         if self.entity_mappings is not None:
             matched_entities = set()
-            for entity in context.entities:
-                if (entity.type in self.entity_mappings and
-                        entity.value == self.entity_mappings[entity.type]):
+            for entity in context['entities']:
+                if (entity['type'] in self.entity_mappings and
+                        entity['value'] == self.entity_mappings[entity.type]):
                     matched_entities.add(entity.type)
 
             # if there is not a matched entity for each mapping, fail
@@ -159,16 +164,16 @@ class DialogueManager(object):
         Returns:
             TYPE: Description
         """
-        name = None
+        dialogue_state = None
         for rule in self.rules:
-            if rule.apple(context):
-                name = rule.name
+            if rule.apply(context):
+                dialogue_state = rule.dialogue_state
                 break
 
-        if name is None:
+        if dialogue_state is None:
             handler = self._default_handler
         else:
-            handler = self.handler_map[name]
+            handler = self.handler_map[dialogue_state]
         response = handler(context)
         return response
 
