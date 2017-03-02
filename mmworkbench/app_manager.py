@@ -12,9 +12,8 @@ from .processor.nlp import NaturalLanguageProcessor
 class ApplicationManager(object):
     '''This class provides the functionality to manage a workbench application.
 
-    language parser models. It is decoupled from any specific server
-    implementation (underlying server framework, endpoints, request/response
-    signatures).
+    The application manager is responsible for communicating between handling
+    conversation requests components, handling req
     '''
     def __init__(self, app_path):
         self.nlp = NaturalLanguageProcessor(app_path)
@@ -24,11 +23,15 @@ class ApplicationManager(object):
         """Loads all resources required to run the application."""
         self.nlp.load()
 
-    def parse(self, request):
+    def parse(self, text, payload=None, session={}, history=None, verbose=False):
         """
         Args:
-            request (dict): A dictionary containing the body of the request
-                received
+            text (str): The text of the message sent by the user
+            payload (dict, optional): Description
+            session (dict, optional): Description
+            history (list, optional): Description
+            verbose (bool, optional): Description
+
         """
 
         # TODO: apply nlp here

@@ -458,8 +458,8 @@ class Entity(object):
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
-        base = {'text': self.text, 'type': self.type}
-        for field in ['role', 'value', 'display_text', 'confidence']:
+        base = {'text': self.text, 'type': self.type, 'role': self.role}
+        for field in ['value', 'display_text', 'confidence']:
             value = getattr(self, field)
             if value is not None:
                 base[field] = value

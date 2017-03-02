@@ -73,7 +73,11 @@ class WorkbenchServer(object):
                 msg = "Invalid Content-Type: Only 'application/json' is supported."
                 raise BadWorkbenchRequestError(msg, status_code=415)
 
-            response = self._app_manager.handle_request(request_json)
+            safe_request = {}
+            for key in ['text', 'payload', 'session', 'history', 'verbose']:
+                if key in request_json:
+                    safe_request[key] = request_json[key]
+            response = self._app_manager.parse(**safe_request)
 
             return jsonify(response)
 
