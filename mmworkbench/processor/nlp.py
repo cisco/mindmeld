@@ -241,10 +241,15 @@ class IntentProcessor(object):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.recognizer.load(model_path)
 
-        # TODO: something with the parser?
+        # TODO: something with parser?
 
-        for entity_processor in self.entities.values():
-            entity_processor.load()
+        entity_types = self.recognizer.entity_types
+        self.entities = {}
+        for entity_type in entity_types:
+            processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
+                                        self._query_factory, self._resource_loader)
+            processor.load()
+            self.entities[entity_type] = processor
 
     def process(self, query_text):
         """Processes the input text for this intent

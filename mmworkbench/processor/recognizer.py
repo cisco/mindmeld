@@ -156,6 +156,12 @@ class EntityRecognizer(Classifier):
         """
         pass
 
+    def load(self, model_path):
+        super().load(model_path)
+        if self._model:
+            gazetteers = self._resource_loader.get_gazetteers()
+            self._model.register_resources(gazetteers=gazetteers)
+
     @property
     def entity_types(self):
         return self._model.entity_types if self._model else set()
