@@ -13,7 +13,7 @@ import pytest
 
 from mmworkbench import markup
 
-from mmworkbench.core import ProcessedQuery, QueryEntity, Span
+from mmworkbench.core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 
 MARKED_UP_STRS = [
     'show me houses under {[600,000|sys:number] dollars|price}',
@@ -154,6 +154,36 @@ def test_load_nested_system_3(query_factory):
 
 
 @pytest.mark.load
+@pytest.mark.system
+@pytest.mark.nested
+def test_load_nested_system_4(query_factory):
+    """Tests dumping a query with multiple nested system entities"""
+    text = 'show me houses {between [600,000|sys:number] and [1,000,000|sys:number] dollars|price}'
+    processed_query = markup.load_query(text, query_factory)
+
+    assert processed_query
+    assert len(processed_query.entities) == 1
+
+    entity = processed_query.entities[0]
+    assert entity.text == 'between 600,000 and 1,000,000 dollars'
+    assert entity.entity.type == 'price'
+    assert entity.span == Span(15, 51)
+
+    assert not isinstance(entity.entity.value, str)
+    assert 'children' in entity.entity.value
+    assert len(entity.entity.value['children']) == 2
+    lower, upper = entity.entity.value['children']
+
+    assert lower.text == '600,000'
+    assert lower.entity.value == {'value': 600000}
+    assert lower.span == Span(8, 14)
+
+    assert upper.text == '1,000,000'
+    assert upper.entity.value == {'value': 1000000}
+    assert upper.span == Span(20, 28)
+
+
+@pytest.mark.load
 @pytest.mark.special
 def test_load_special_chars(query_factory):
     """Tests loading a query with special characters"""
@@ -256,3 +286,74 @@ def test_load_special_chars_6(query_factory):
     assert entities[0].text == 'after 8 p.m.'
     assert entities[0].normalized_text == 'after 8 p m'
     assert entities[0].span == Span(10, 21)
+
+
+@pytest.mark.dump
+def test_dump_basic(query_factory):
+    """Tests dumping a basic query"""
+    query_text = 'A basic query'
+    query = query_factory.create_query(query_text)
+    processed_query = ProcessedQuery(query)
+
+    assert markup.dump_query(processed_query) == query_text
+
+
+@pytest.mark.dump
+def test_dump_entity(query_factory):
+    """Tests dumping a basic query with an entity"""
+    query_text = 'When does the Elm Street store close?'
+    query = query_factory.create_query(query_text)
+    entities = [QueryEntity.from_query(query, Span(14, 23), entity_type='store_name')]
+    processed_query = ProcessedQuery(query, entities=entities)
+
+    markup_text = 'When does the {Elm Street|store_name} store close?'
+    assert markup.dump_query(processed_query) == markup_text
+
+
+@pytest.mark.dump
+def test_dump_entities(query_factory):
+    """Tests dumping a basic query with two entities"""
+    query_text = 'When does the Elm Street store close on Monday?'
+    query = query_factory.create_query(query_text)
+    entities = [QueryEntity.from_query(query, Span(14, 23), entity_type='store_name'),
+                QueryEntity.from_query(query, Span(40, 45), entity_type='sys:time')]
+    processed_query = ProcessedQuery(query, entities=entities)
+
+    markup_text = 'When does the {Elm Street|store_name} store close on {Monday|sys:time}?'
+    assert markup.dump_query(processed_query) == markup_text
+
+
+@pytest.mark.dump
+@pytest.mark.nested
+def test_dump_nested(query_factory):
+    """Tests dumping a query with a nested system entity"""
+    query_text = 'show me houses under 600,000 dollars'
+    query = query_factory.create_query(query_text)
+
+    nested = NestedEntity.from_query(query, Span(0, 6), parent_offset=21, entity_type='sys:number')
+    raw_entity = Entity('600,000 dollars', 'price', value={'children': [nested]})
+    entities = [QueryEntity.from_query(query, Span(21, 35), entity=raw_entity)]
+    processed_query = ProcessedQuery(query, entities=entities)
+
+    markup_text = 'show me houses under {[600,000|sys:number] dollars|price}'
+    assert markup.dump_query(processed_query) == markup_text
+
+
+@pytest.mark.dump
+@pytest.mark.nested
+def test_dump_multi_nested(query_factory):
+    """Tests dumping a query with multiple nested system entities"""
+    query_text = 'show me houses between 600,000 and 1,000,000 dollars'
+    query = query_factory.create_query(query_text)
+
+    lower = NestedEntity.from_query(query, Span(8, 14), parent_offset=15, entity_type='sys:number')
+    upper = NestedEntity.from_query(query, Span(20, 28), parent_offset=15, entity_type='sys:number')
+    raw_entity = Entity('between 600,000 dollars and 1,000,000', 'price',
+                        value={'children': [lower, upper]})
+    entities = [QueryEntity.from_query(query, Span(15, 51), entity=raw_entity)]
+    processed_query = ProcessedQuery(query, entities=entities)
+
+    markup_text = ('show me houses {between [600,000|sys:number] and '
+                   '[1,000,000|sys:number] dollars|price}')
+
+    assert markup.dump_query(processed_query) == markup_text

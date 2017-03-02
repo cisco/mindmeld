@@ -19,6 +19,7 @@ class Span(object):
     __slots__ = ['start', 'end']
 
     def __init__(self, start, end):
+        assert start <= end, "Span 'start' must be less than or equal to 'end'"
         self.start = start
         self.end = end
 
@@ -60,6 +61,9 @@ class Span(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def __repr__(self):
+        return "{}(start={}, end={})".format(self.__class__.__name__, self.start, self.end)
 
 
 class Query(object):

@@ -56,8 +56,8 @@ def dump_query(processed_query):
     Returns:
         str: A marked up representation of the query
     """
-    raw_text = processed_query.query.raw_text
-    markup = _mark_up(raw_text, processed_query.entities)
+    raw_text = processed_query.query.text
+    markup = _mark_up_entities(raw_text, processed_query.entities)
     return markup
 
 
@@ -153,49 +153,54 @@ def _parse_nested(markup, query, offset):
 
 
 def _mark_up_entities(query_str, entities):
+    entities = entities or []
+
     # remove existing markup just in case
     query_str = mark_down_entities(query_str)
 
     # make sure entities are sorted
-    sorted_entities = sorted(entities, key='start')
-    new_query = ''
+    sorted_entities = sorted(entities, key=lambda x: x.span.start)
+    marked_text = ''
     cursor = 0
 
     # add each entity
     for entity in sorted_entities:
-        start = entity.start
-        end = entity.end
-        new_query += query_str[cursor:start]
-        if entity.role is None:
-            new_query += "{{{}|{}}}".format(query_str[start:end], entity.type)
+        marked_text += query_str[cursor:entity.span.start]
+        entity_text = _mark_up_nested(entity)
+        if entity.entity.role is None:
+            marked_text += "{{{}|{}}}".format(entity_text, entity.entity.type)
         else:
-            new_query += "{{{}|{}|{}}}".format(query_str[start:end], entity.type, entity.role)
-        cursor = end
-    new_query += query_str[cursor:]
-    return new_query
+            marked_text += "{{{}|{}|{}}}".format(entity_text, entity.entity.type,
+                                                 entity.entity.role)
+        cursor = entity.span.end + 1
+    marked_text += query_str[cursor:]
+    return marked_text
 
 
-def _mark_up_nested(query_str, entities):
+def _mark_up_nested(entity):
+    outer_text = entity.text
+    nested_entities = []
+    if isinstance(entity.entity.value, dict):
+        nested_entities = entity.entity.value.get('children', [])
+
     # remove existing markup just in case
-    query_str = mark_down(query_str)
+    outer_text = mark_down(outer_text)
 
     # make sure entities are sorted
-    sorted_entities = sorted(entities, key='start')
-    new_query = ''
+    sorted_entities = sorted(nested_entities, key=lambda x: x.span.start)
+    marked_text = ''
     cursor = 0
 
     # add each entity
     for entity in sorted_entities:
-        start = entity.start
-        end = entity.end
-        new_query += query_str[cursor:start]
-        if entity.role is None:
-            new_query += "[{}|{}]".format(query_str[start:end], entity.type)
+        marked_text += outer_text[cursor:entity.span.start]
+        if entity.entity.role is None:
+            marked_text += "[{}|{}]".format(entity.text, entity.entity.type)
         else:
-            new_query += "[{}|{}|{}]".format(query_str[start:end], entity.type, entity.role)
-        cursor = end
-    new_query += query_str[cursor:]
-    return new_query
+            marked_text += "[{}|{}|{}]".format(entity.text, entity.entity.type, entity.entity.role)
+        cursor = entity.span.end + 1
+    marked_text += outer_text[cursor:]
+    return marked_text
 
 
 def mark_down(markup):
