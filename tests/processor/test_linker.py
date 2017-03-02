@@ -16,12 +16,12 @@ from mmworkbench.core import Entity
 
 from mmworkbench.processor.linker import EntityLinker
 
-ENTITY_TYPE = 'store_name'
+ENTITY_TYPE = 'location'
 
 
 @pytest.fixture
 def linker(resource_loader, tokenizer):
-    """An entity linker for 'store_name' on the Kwik-E-Mart app"""
+    """An entity linker for 'location' on the Kwik-E-Mart app"""
     return EntityLinker(resource_loader, ENTITY_TYPE, tokenizer.normalize)
 
 
