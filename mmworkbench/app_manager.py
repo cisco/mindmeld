@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from builtins import object
 
 from .dialogue import DialogueManager
-from .processor.nlp import NaturalLanguageProcessor
+from .processor.nlp import NaturalLanguageProcessor, create_query_factory, create_resource_loader
 
 
 class ApplicationManager(object):
@@ -16,7 +16,9 @@ class ApplicationManager(object):
     conversation requests components, handling req
     '''
     def __init__(self, app_path):
-        self.nlp = NaturalLanguageProcessor(app_path)
+        self._query_factory = create_query_factory(app_path)
+        self._resource_loader = create_resource_loader(app_path, self._query_factory)
+        self.nlp = NaturalLanguageProcessor(app_path, self._query_factory, self._resource_loader)
         self.dialogue_manager = DialogueManager()
 
     def load(self):
@@ -33,9 +35,26 @@ class ApplicationManager(object):
             verbose (bool, optional): Description
 
         """
+        # TODO: what do we do with verbose???
+        # TODO: where are the slots stored
+        # TODO: where is the frame stored? (Is this the same as slots)
 
-        # TODO: apply nlp here
-        return self.dialogue_manager.apply_handler(request)
+        history = history or []
+
+        request = {'text': text, 'session': session}
+        if payload:
+            request['payload'] = payload
+
+        # TODO: support passing in reference time from session
+        query = self._query_factory.create_query(text)
+
+        # TODO: support specifying target domain, etc in payload
+        processed_query = self.nlp.process_query(query)
+
+        context = {'request': request, 'history': history}
+        context.update(processed_query.to_dict())
+        context.pop('text')
+        return context
 
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue rule for the dialogue manager.

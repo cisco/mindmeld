@@ -28,19 +28,18 @@ class NaturalLanguageProcessor(object):
     Attributes:
         domain_classifier (DomainClassifier): A classifier for domains
         domains (dict): Processors for each domain
-        preprocessor (Preprocessor): the object responsible for processing raw text
-        tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed text
     """
 
-    def __init__(self, app_path):
+    def __init__(self, app_path, query_factory=None, resource_loader=None):
         """Initializes a natural language processor object
 
         Args:
             app_path (str): The path to the directory containing the app's data
         """
         self._app_path = app_path
-        self._query_factory = create_query_factory(app_path)
-        self._resource_loader = create_resource_loader(app_path, self._query_factory)
+        self._query_factory = query_factory or create_query_factory(app_path)
+        self._resource_loader = resource_loader or create_resource_loader(app_path,
+                                                                          self._query_factory)
         self.domain_classifier = DomainClassifier(self._resource_loader)
         self.domains = {domain: DomainProcessor(app_path, domain, self._query_factory,
                                                 self._resource_loader)
