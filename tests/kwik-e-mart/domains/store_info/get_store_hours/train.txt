@@ -7,7 +7,7 @@ Is the {Central Plaza|location} Kwik-E-Mart open now?
 The store at {Pine & Market|location} - is it open?
 Is the {Rockefeller|location} Kwik-E-Mart open for business {tomorrow|sys:time}?
 Is {Elm Street|location} open {tomorrow|sys:time}?
-Can you check if the {Main St|location} store is open {on Sunday|sys:time}?
+Can you check if the {Main St|location} store is open on {Sunday|sys:time}?
 please give me open hours for {russian district|location}
 will {springfield mall|location} be open and what time will it close
 what time will {springfield|location} and {russian district|location} both be open
@@ -67,18 +67,18 @@ What are the hours for the Kwik-E-Mart at {Pine and Market|location}?
 When does {Central Plaza|location} close on Thursday?
 Is the store on {23rd Elm Street|location} open now?
 What are the operating hours for the one in {Central Plaza|location}?
-What does the {Elm Street|location} one close on Mondays?
+What does the {Elm Street|location} one close on {Monday|location}?
 Can you tell me if the Kwik-E-Mart at {Pine and Market|location} is open right now?
 Tell me if the {Elm Street|location} Kwik-E-Mart is closed.
 At what time will the {Central Plaza|location} shop close?
 When will the {Fifth Avenue|location} location open?
-At what time does the {Elm Street|location} location close on Sundays?
+At what time does the {Elm Street|location} location close on {Sunday|location}?
 At what time does the one on {Elm|location} open on {Wednesday|sys:time}?
 When does the one near {Pine and Market|location} open?
 Will the {Central Plaza|location} store close early {today|sys:time}?
 Is the {Fifth Avenue|location} store on holiday schedule?
 Can I go to {Ogdenville|location} store on weekends?
-Is the {Shelbyville|location} store open on Mondays?
+Is the {Shelbyville|location} store open on {Monday|location}?
 Is the {Capital City|location} store open {today|sys:time}?
 What are the store hours for the location on {Main Street|location}?
 Can I go to the {Ogdenville|location} store {today|sys:time}?
@@ -88,7 +88,7 @@ When does the one on {Main Street|location} open?
 Is the {Main Street|location} store open for business on {Christmas|sys:time}?
 Is the {Main Street|location} location open for {Thanksgiving|sys:time}?
 When does {Elm Street|location} close {today|sys:time}?
-Is the {Pine|location} location open on Mondays?
+Is the {Pine|location} location open on {Monday|sys:time}?
 When does the {Market street|location} store close?
 Is {Market Street|location} open for business on {Tuesday|sys:time}?
 When does the the {Main Street|location} store reopen?
