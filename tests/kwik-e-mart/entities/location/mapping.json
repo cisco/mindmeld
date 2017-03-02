@@ -7,7 +7,7 @@
   {
     "id": "2",
     "cname": "Pine and Market",
-    "whitelist": ["750 Market Street", "750 Market St", "750 Market", "Pine", "Market"]
+    "whitelist": ["750 Market Street", "750 Market St", "750 Market", "Pine Street", "Pine St", "Pine", "Market"]
   },
   {
     "id": "3",
