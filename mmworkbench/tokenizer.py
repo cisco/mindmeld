@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from builtins import range
 from builtins import object
 
+import codecs
 import logging
 import re
 
@@ -121,7 +122,7 @@ class Tokenizer(object):
 
         ascii_folding_table = {}
 
-        with open(ASCII_FOLDING_DICT_PATH, 'r', encoding='unicode_escape') as mapping_file:
+        with codecs.open(ASCII_FOLDING_DICT_PATH, 'r', encoding='unicode_escape') as mapping_file:
             for line in mapping_file:
                 tokens = line.split()
                 codepoint = tokens[0]
