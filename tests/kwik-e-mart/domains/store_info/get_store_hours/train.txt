@@ -8,3 +8,93 @@ The store at {Pine & Market|location} - is it open?
 Is the {Rockefeller|location} Kwik-E-Mart open for business {tomorrow|sys:time}?
 Is {Elm Street|location} open {tomorrow|sys:time}?
 Can you check if the {Main St|location} store is open {on Sunday|sys:time}?
+please give me open hours for {russian district|location}
+will {springfield mall|location} be open and what time will it close
+what time will {springfield|location} and {russian district|location} both be open
+the one on {evergreen|location}, open times
+when are the lights on at {evergreen|location}
+please can you tell me if {springfield|location} is possibly open at this time on {friday|sys:time}
+are any stores open on {sunday|sys:time} at 9pm
+is the e mart on {russian district|location} open
+When is the {181st|location} location open {tomorrow|sys:time}?
+Was {D street|location} open {yesterday|sys:time}?
+Is {257th|location} open on {Christmas|sys:time}?
+When can I go to {D street|location} location {tomorrow|sys:time}?
+Can I go to {181st|location} {tomorrow|sys:time} at 7 pm?
+i wanna go to {d street|location}. Is it open?
+Is kwik e mart open on {sundays|sys:time}
+Is {181st street|location} open 24 hours?
+What's the holiday schedule for for {257th street|location}
+Is {d street|location} open right now?
+looking to go to {257th|location}. is it open?
+I'm near {d street|location}. Is your store open?
+what's {257th's|location} weekend hours like?
+Does {d street|location} open at 6am {tomorrow|sys:time}?
+Can i get a squishee at {181st|location} at 3 am {tonight|sys:time}
+If I want a squishee on a {weekday|sys:time} at {d street|location}. When can i go?
+when do the doors clothes for d {181st st|location}
+doors open for {d street|location}?
+i'd like to know when the doors clothes for {181st st|location}
+when can i next get a squishee from {d street|location}?
+When is {181st street|location} open next?
+doors closed for {257th st|location}?
+do i have time to make it to {d street|location} {tonight|sys:time}
+will i make it before close to {257th st|location}
+i'm running late, is {181st|location} still open
+can i make it to {257th before|location} work {tomorrow|sys:time}
+did the nearby fire close the {181st street|location} location {today|sys:time}?
+i heard there was an earthquake. Is {d street|location} still open?
+Are there normal hours for {181st|location} despite the snow?
+Is {d street|location} open on school days?
+What are the business hours for {257th|location}
+it's -5 degrees. Is {181st|location} still open now?
+{181st street|location} is closed for construction. Can I still make it to {257th street|location}?
+{d street|location} has lots of traffic. is {181st|location} still open?
+When does the {Elm Street|location} store open {tomorrow|sys:time}?
+When will one on {Fifth Ave|location} open?
+When will one on {Fifth Ave|location} open {today|sys:time}?
+Is the one on {Pine and Market|location} open now?
+At what time does the {Central Plaza|location} store open {today|sys:time}?
+At what time does one on {Fifth Ave|location} open?
+When will the {Elm Street|location} store close?
+Is the {Elm Street|location} store open {today|sys:time}?
+Is the {Central Plaza|location} store open {tomorrow|sys:time}?
+Is the {Elm Street|location} store open on weekends?
+Does the one on {Central Plaza|location} remain open on weekends?
+Is the store on {45 Fifth Avenue|location} closed {today|sys:time}?
+When will the {Fifth Avenue|location} store open on {Monday|sys:time}?
+What are the hours for the Kwik-E-Mart at {Pine and Market|location}?
+When does {Central Plaza|location} close on weekdays?
+Is the store on {23rd Elm Street|location} open now?
+What are the operating hours for the one in {Central Plaza|location}?
+What does the {Elm Street|location} one close on Mondays?
+Can you tell me if the Kwik-E-Mart at {Pine and Market|location} is open right now?
+Tell me if the {Elm Street|location} Kwik-E-Mart is closed.
+At what time will the {Central Plaza|location} shop close?
+When will the {Fifth Avenue|location} location open?
+At what time does the {Elm Street|location} location close on Sundays?
+At what time does the one on {Elm|location} open on {Wednesday|sys:time}?
+When does the one near {Pine and Market|location} open?
+Will the {Central Plaza|location} store close early {today|sys:time}?
+Is the {Fifth Avenue|location} store on holiday schedule?
+Can I go to {Ogdenville|location} store on weekends?
+Is the {Shelbyville|location} store open on Mondays?
+Is the {Capital City|location} store open {today|sys:time}?
+What are the store hours for the location on {Main Street|location}?
+Can I go to the {Ogdenville|location} store {today|sys:time}?
+Please tell me if the {Shelbyville|location} store is open for business {today|sys:time}.
+Is the {Pine and Market|location} location open for business?
+When does the one on {Main Street|location} open?
+Is the {Main Street|location} store open for business on {Christmas|sys:time}?
+Is the {Main Street|location} location open for {Thanksgiving|sys:time}?
+When does {Elm Street|location} close {today|sys:time}?
+Is the {Pine|location} location open on Mondays?
+When does the {Market street|location} store close?
+Is {Market Street|location} open for business on {Tuesday|sys:time}?
+When does the the {Main Street|location} store reopen?
+Will the {Shelbyville|location} store reopen during the holidays?
+Will the {Market street|location} location close for the holidays.
+Is the {Central Plaza|location} shop open for business?
+When does the shop on {Main Street|location} close?
+Can I go to the {Fifth Avenue|location} store on weekends?
+Will the {Elm Street|location} store be open on {Wednesday|sys:time}?
