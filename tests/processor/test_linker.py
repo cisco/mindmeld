@@ -14,7 +14,7 @@ import pytest
 
 from mmworkbench.core import Entity
 
-from mmworkbench.processor.linker import EntityLinker
+from mmworkbench.processor.entity_linker import EntityLinker
 
 ENTITY_TYPE = 'location'
 
