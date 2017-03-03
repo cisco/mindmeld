@@ -14,8 +14,8 @@ from ..tokenizer import Tokenizer
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
-from .linker import EntityLinker
-from .recognizer import EntityRecognizer
+from .entity_linker import EntityLinker
+from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .resource_loader import ResourceLoader
 from .role_classifier import RoleClassifier
@@ -205,7 +205,7 @@ class IntentProcessor(object):
             self._resource_loader = resource_loader
         else:
             self._resource_loader = create_resource_loader(app_path, self._query_factory)
-        self.recognizer = EntityRecognizer(self._resource_loader, domain, intent)
+        self.entity_recognizer = EntityRecognizer(self._resource_loader, domain, intent)
 
         # TODO: revisit the parser after finishing Kwik-E-Mart demo
         self.parser = Parser(self._resource_loader, domain, intent)
@@ -216,11 +216,11 @@ class IntentProcessor(object):
         """Builds the models for this intent"""
 
         # train entity recognizer
-        self.recognizer.fit()
+        self.entity_recognizer.fit()
 
         # TODO: something for the parser?
 
-        entity_types = self.recognizer.entity_types
+        entity_types = self.entity_recognizer.entity_types
         self.entities = {}
         for entity_type in entity_types:
             processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
@@ -230,7 +230,7 @@ class IntentProcessor(object):
 
     def dump(self):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
-        self.recognizer.dump(model_path)
+        self.entity_recognizer.dump(model_path)
 
         # TODO: something with parser?
 
@@ -239,7 +239,7 @@ class IntentProcessor(object):
 
     def load(self):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
-        self.recognizer.load(model_path)
+        self.entity_recognizer.load(model_path)
 
         # TODO: something with parser?
 
@@ -275,7 +275,7 @@ class IntentProcessor(object):
         Returns:
             ProcessedQuery: The resulting processed query
         """
-        entities = self.recognizer.predict(query)
+        entities = self.entity_recognizer.predict(query)
 
         for entity in entities:
             self.entities[entity.entity.type].process_entity(query, entities, entity)
@@ -311,7 +311,7 @@ class EntityProcessor(object):
             self._resource_loader = create_resource_loader(app_path, self._query_factory)
 
         self.role_classifier = RoleClassifier(self._resource_loader, domain, intent, entity_type)
-        self.linker = EntityLinker(self._resource_loader, entity_type, query_factory.normalize)
+        self.entity_linker = EntityLinker(self._resource_loader, entity_type, query_factory.normalize)
 
     def build(self):
         """Builds the models for this entity type"""
@@ -344,7 +344,7 @@ class EntityProcessor(object):
         entity.entity.role = self.role_classifier.predict(query, entities, entity)
 
         # Link entity
-        entity.entity.value = self.linker.predict(entity.entity)
+        entity.entity.value = self.entity_linker.predict(entity.entity)
         return entity
 
     def __repr__(self):

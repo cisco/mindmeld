@@ -95,7 +95,8 @@ def get_entities_from_tags(query, tags):
 
     def _append_entity(token_start, entity_type, tokens):
         prefix = ' '.join(normalized_tokens[:token_start])
-        start = len(prefix) + 1
+        # If there is a prefix, we have to add one for the whitespace
+        start = len(prefix) + 1 if len(prefix) else 0
         end = start - 1 + len(' '.join(tokens))
         norm_span = Span(start, end)
         entity = QueryEntity.from_query(query, normalized_span=norm_span, entity_type=entity_type)
@@ -106,7 +107,8 @@ def get_entities_from_tags(query, tags):
         msg = "Looking for '{}' between {} and {}"
         logger.debug(msg.format(entity_type, token_start, token_end))
         prefix = ' '.join(normalized_tokens[:token_start])
-        start = len(prefix) + 1
+        # If there is a prefix, we have to add one for the whitespace
+        start = len(prefix) + 1 if len(prefix) else 0
         end = start - 1 + len(' '.join(normalized_tokens[token_start:token_end]))
         norm_span = Span(start, end)
 
