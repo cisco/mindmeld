@@ -13,7 +13,7 @@ import time
 import click
 import click_log
 
-from . import __version__
+from . import __version__, Conversation
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +60,27 @@ def run_server(ctx, port, no_debug, reloader):
 
     ctx.invoke(num_parser, start=True)
     app.run(port=port, debug=not no_debug, host='0.0.0.0', threaded=True, use_reloader=reloader)
+
+
+@cli.command('converse', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+def converse(ctx):
+    """Starts a conversation with the app"""
+    app = ctx.obj.get('app')
+    if app is None:
+        raise ValueError('No app was given')
+
+    ctx.invoke(num_parser, start=True)
+
+    convo = Conversation(app=app)
+
+    while True:
+        message = click.prompt('You')
+        responses = convo.say(message)
+
+        for index, response in enumerate(responses):
+            prefix = 'App: ' if index == 0 else ''
+            click.secho(prefix + response, fg='blue', bg='white')
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
