@@ -19,12 +19,11 @@ class Tokenizer(object):
     ASCII_CUTOFF = ord('\u0080')
 
     def __init__(self, exclude_from_norm=None):
-        '''
-        Initializes the tokenizer.
+        """Initializes the tokenizer.
 
         Args:
             exclude_from_norm (optional) - list of chars to exclude from normalization
-        '''
+        """
 
         self.ascii_folding_table = self.load_ascii_folding_table()
         self.exclude_from_norm = exclude_from_norm or []

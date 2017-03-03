@@ -6,22 +6,29 @@ from __future__ import unicode_literals
 from builtins import object
 
 from .dialogue import DialogueManager
-from .processor.nlp import NaturalLanguageProcessor, create_resource_loader
+from .processor.nlp import NaturalLanguageProcessor
 
 
 class ApplicationManager(object):
-    '''This class provides the functionality to manage a workbench application.
+    """This class provides the functionality to manage a workbench application.
 
     The application manager is responsible for communicating between handling
     conversation requests components, handling req
-    '''
-    def __init__(self, app_path):
-        self._resource_loader = create_resource_loader(app_path)
-        self.nlp = NaturalLanguageProcessor(app_path, self._resource_loader)
+    """
+    def __init__(self, app_path, nlp=None):
+        self.nlp = nlp or NaturalLanguageProcessor(app_path)
+        self._query_factory = self.nlp.resource_loader.query_factory
         self.dialogue_manager = DialogueManager()
+
+    @property
+    def ready(self):
+        return self.nlp.ready
 
     def load(self):
         """Loads all resources required to run the application."""
+        if self.nlp.ready:
+            # if we are ready, don't load again
+            return
         self.nlp.load()
 
     def parse(self, text, payload=None, session=None, history=None, verbose=False):
@@ -34,18 +41,17 @@ class ApplicationManager(object):
             verbose (bool, optional): Description
 
         """
-        # TODO: what do we do with verbose???
-        # TODO: where are the slots stored
-        # TODO: where is the frame stored? (Is this the same as slots)
         session = session or {}
         history = history or []
+        # TODO: what do we do with verbose???
+        # TODO: where is the frame stored?
 
         request = {'text': text, 'session': session}
         if payload:
             request['payload'] = payload
 
         # TODO: support passing in reference time from session
-        query = self._resource_loader.query_factory.create_query(text)
+        query = self._query_factory.create_query(text)
 
         # TODO: support specifying target domain, etc in payload
         processed_query = self.nlp.process_query(query)

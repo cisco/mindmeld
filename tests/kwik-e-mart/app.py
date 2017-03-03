@@ -10,7 +10,7 @@ app = Application(__name__)
 @app.handle(intent='greet')
 def welcome(context, slots, responder):
     try:
-        slots['name'] = context['session']['name']
+        slots['name'] = context['request']['session']['name']
         prefix = 'Hello, {name}. '
     except KeyError:
         prefix = 'Hello. '
