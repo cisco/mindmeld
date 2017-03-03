@@ -62,7 +62,7 @@
   {
     "id": "13",
     "cname": "Rural Route 27",
-    "whitelist": ["550 Rural Route 27", "550 Rural Rte 27", "Rural Route", "Rural Rte", "Rte 27", "Route 27"]
+    "whitelist": ["550 Rural Route 27", "550 Rural Rte 27", "Rural Route", "Rural Rte", "Rte 27", "Route 27", "RR27", "RR 27"]
   },
   {
     "id": "14",
