@@ -221,7 +221,7 @@ class DialogueResponder(object):
         raise NotImplementedError
 
     def respond(self, action):
-        """Used to send arbitrary client actions.
+        """Sends an arbitrary client action.
 
         Args:
             action (dict): A client action

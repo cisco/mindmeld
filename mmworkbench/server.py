@@ -91,10 +91,13 @@ class WorkbenchServer(object):
             g.response = response
 
             # add response time to response
-            data = json.loads(response.get_data())
-            data['response_time'] = g.response_time
-            data['version'] = '1.0'
-            response.set_data(json.dumps(data))
+            try:
+                data = json.loads(response.get_data())
+                data['response_time'] = g.response_time
+                data['version'] = '2.0'
+                response.set_data(json.dumps(data))
+            except json.JSONDecodeError:
+                pass
 
             return response
 
