@@ -18,16 +18,16 @@ class EntityLinker(object):
     values in a given query.
     """
 
-    def __init__(self, resource_loader, entity_type, normalizer):
+    def __init__(self, resource_loader, entity_type):
         self._resource_loader = resource_loader
-        self._normalizer = normalizer
+        self._normalizer = resource_loader.query_factory.normalize
         self.type = entity_type
 
         self._mapping = None
         self._is_system_entity = Entity.is_system_entity(self.type)
         if not self._is_system_entity:
             mapping = self._resource_loader.get_entity_map(self.type)
-            self._mapping = self.process_mapping(self.type, mapping, normalizer)
+            self._mapping = self.process_mapping(self.type, mapping, self._normalizer)
 
     @staticmethod
     def process_mapping(entity_type, mapping, normalizer):

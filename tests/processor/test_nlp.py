@@ -14,10 +14,11 @@ import os
 
 import pytest
 
+from mmworkbench.exceptions import ProcessorError
 from mmworkbench.processor.nlp import NaturalLanguageProcessor
 
 APP_NAME = 'kwik-e-mart'
-APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
+APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME)
 
 
 @pytest.fixture
@@ -54,11 +55,23 @@ def test_dump(nlp):
     nlp.dump()
 
 
-# def test_load(nlp):
-#     nlp.load()
+@pytest.mark.focus
+def test_early_process(empty_nlp):
+    """Tests that attempting to process a message without first loading or
+    building models will raise an exception"""
+    empty_nlp
+    with pytest.raises(ProcessorError):
+        empty_nlp.process('Hello')
+
+
+@pytest.mark.skip
+def test_load(nlp):
+    """Tests loading a processor from disk"""
+    nlp.load()
 
 
 def test_process(nlp):
+    """Tests a basic call to process"""
     response = nlp.process('Hello')
 
     assert response == {

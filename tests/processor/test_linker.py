@@ -20,9 +20,9 @@ ENTITY_TYPE = 'location'
 
 
 @pytest.fixture
-def linker(resource_loader, tokenizer):
+def linker(resource_loader):
     """An entity linker for 'location' on the Kwik-E-Mart app"""
-    return EntityLinker(resource_loader, ENTITY_TYPE, tokenizer.normalize)
+    return EntityLinker(resource_loader, ENTITY_TYPE)
 
 
 def test_canonical(linker):

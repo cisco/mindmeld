@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from builtins import object
 
 from .dialogue import DialogueManager
-from .processor.nlp import NaturalLanguageProcessor, create_query_factory, create_resource_loader
+from .processor.nlp import NaturalLanguageProcessor, create_resource_loader
 
 
 class ApplicationManager(object):
@@ -16,16 +16,15 @@ class ApplicationManager(object):
     conversation requests components, handling req
     '''
     def __init__(self, app_path):
-        self._query_factory = create_query_factory(app_path)
-        self._resource_loader = create_resource_loader(app_path, self._query_factory)
-        self.nlp = NaturalLanguageProcessor(app_path, self._query_factory, self._resource_loader)
+        self._resource_loader = create_resource_loader(app_path)
+        self.nlp = NaturalLanguageProcessor(app_path, self._resource_loader)
         self.dialogue_manager = DialogueManager()
 
     def load(self):
         """Loads all resources required to run the application."""
         self.nlp.load()
 
-    def parse(self, text, payload=None, session={}, history=None, verbose=False):
+    def parse(self, text, payload=None, session=None, history=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
@@ -38,7 +37,7 @@ class ApplicationManager(object):
         # TODO: what do we do with verbose???
         # TODO: where are the slots stored
         # TODO: where is the frame stored? (Is this the same as slots)
-
+        session = session or {}
         history = history or []
 
         request = {'text': text, 'session': session}
@@ -46,7 +45,7 @@ class ApplicationManager(object):
             request['payload'] = payload
 
         # TODO: support passing in reference time from session
-        query = self._query_factory.create_query(text)
+        query = self._resource_loader.query_factory.create_query(text)
 
         # TODO: support specifying target domain, etc in payload
         processed_query = self.nlp.process_query(query)

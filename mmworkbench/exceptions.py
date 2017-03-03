@@ -26,3 +26,8 @@ class BadWorkbenchRequestError(Exception):
 
 class ClassifierLoadError(Exception):
     pass
+
+
+class ProcessorError(Exception):
+    """An exception which indicates an error with a processor."""
+    pass

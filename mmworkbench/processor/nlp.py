@@ -4,11 +4,12 @@ This module contains the natural language processor.
 """
 
 from __future__ import unicode_literals
-from builtins import object
+from builtins import object, super
 
 
 from .. import path
 from ..core import ProcessedQuery
+from ..exceptions import ProcessorError
 from ..query_factory import QueryFactory
 from ..tokenizer import Tokenizer
 
@@ -21,53 +22,65 @@ from .resource_loader import ResourceLoader
 from .role_classifier import RoleClassifier
 
 
-class NaturalLanguageProcessor(object):
-    """The natural language processor is the workbench component responsible for
-    all nlp.
+class Processor(object):
+    """A generic base class for processing queries through the workbench NLP
+    components
 
     Attributes:
-        domain_classifier (DomainClassifier): A classifier for domains
-        domains (dict): Processors for each domain
+        dirty (bool): Indicates whether the processor has unsaved changes to
+            its models
+        ready (bool): Indicates whether the processor is ready to process
+            messages
     """
-
-    def __init__(self, app_path, query_factory=None, resource_loader=None):
-        """Initializes a natural language processor object
-
-        Args:
-            app_path (str): The path to the directory containing the app's data
-        """
+    def __init__(self, app_path, resource_loader=None):
         self._app_path = app_path
-        self._query_factory = query_factory or create_query_factory(app_path)
-        self._resource_loader = resource_loader or create_resource_loader(app_path,
-                                                                          self._query_factory)
-        self.domain_classifier = DomainClassifier(self._resource_loader)
-        self.domains = {domain: DomainProcessor(app_path, domain, self._query_factory,
-                                                self._resource_loader)
-                        for domain in path.get_domains(self._app_path)}
+        self._resource_loader = resource_loader or create_resource_loader(app_path)
+
+        self._children = {}
+        self.ready = False
+        self.dirty = False
 
     def build(self):
-        """Builds all models for the app."""
-        # TODO: Load configuration from some file
+        """Builds all models for this processor and its children."""
+        self._build()
 
-        if len(self.domains) > 1:
-            self.domain_classifier.fit()
+        for child in self._children.values():
+            child.build()
 
-        for domain_processor in self.domains.values():
-            domain_processor.build()
+        self.ready = True
+        self.dirty = True
+
+    def _build(self):
+        raise NotImplementedError
 
     def dump(self):
-        model_path = path.get_domain_model_path(self._app_path)
-        self.domain_classifier.dump(model_path)
+        """Saves all models for this processor and its children to disk."""
+        self._dump()
 
-        for domain_processor in self.domains.values():
-            domain_processor.dump()
+        for child in self._children.values():
+            child.dump()
+
+        self.dirty = True
+
+    def _dump(self):
+        raise NotImplementedError
 
     def load(self):
-        model_path = path.get_domain_model_path(self._app_path)
-        self.domain_classifier.load(model_path)
+        """Loads all models for this processor and its children from disk."""
+        self._load()
 
-        for domain_processor in self.domains.values():
-            domain_processor.load()
+        for child in self._children.values():
+            child.load()
+
+        self.ready = True
+        self.dirty = False
+
+    def _load(self):
+        raise NotImplementedError
+
+    def _check_ready(self):
+        if not self.ready:
+            raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
     def process(self, query_text):
         """Processes the input text
@@ -78,7 +91,7 @@ class NaturalLanguageProcessor(object):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = self._query_factory.create_query(query_text)
+        query = self._resource_loader.query_factory.create_query(query_text)
         return self.process_query(query).to_dict()
 
     def process_query(self, query):
@@ -90,6 +103,66 @@ class NaturalLanguageProcessor(object):
         Returns:
             ProcessedQuery: The resulting processed query
         """
+        raise NotImplementedError
+
+
+class NaturalLanguageProcessor(Processor):
+    """The natural language processor is the workbench component responsible for
+    all nlp.
+
+    Attributes:
+        domain_classifier (DomainClassifier): A classifier for domains
+        domains (dict): Processors for each domain
+    """
+
+    def __init__(self, app_path, resource_loader=None):
+        """Initializes a natural language processor object
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+        """
+        super().__init__(app_path, resource_loader)
+        self._app_path = app_path
+        self.domain_classifier = DomainClassifier(self._resource_loader)
+
+        for domain in path.get_domains(self._app_path):
+            self._children[domain] = DomainProcessor(app_path, domain, self._resource_loader)
+
+    @property
+    def domains(self):
+        return self._children
+
+    def _build(self):
+        if len(self.domains) > 1:
+            self.domain_classifier.fit()
+
+        for domain_processor in self.domains.values():
+            domain_processor.build()
+
+    def _dump(self):
+        model_path = path.get_domain_model_path(self._app_path)
+        self.domain_classifier.dump(model_path)
+
+        for domain_processor in self.domains.values():
+            domain_processor.dump()
+
+    def _load(self):
+        model_path = path.get_domain_model_path(self._app_path)
+        self.domain_classifier.load(model_path)
+
+        for domain_processor in self.domains.values():
+            domain_processor.load()
+
+    def process_query(self, query):
+        """Processes the query object passed in
+
+        Args:
+            query (Query): The query object to process
+
+        Returns:
+            ProcessedQuery: The resulting processed query
+        """
+        self._check_ready()
         if len(self.domains) > 1:
             domain = self.domain_classifier.predict(query)
         else:
@@ -100,10 +173,10 @@ class NaturalLanguageProcessor(object):
         return processed_query
 
     def __repr__(self):
-        return "<NaturalLanguageProcessor {!r}>".format(self._app_path)
+        return "<{} {!r}>".format(self.__class__.__name__, self._app_path)
 
 
-class DomainProcessor(object):
+class DomainProcessor(Processor):
     """Summary
 
     Attributes:
@@ -112,43 +185,30 @@ class DomainProcessor(object):
         intents (dict): Description
     """
 
-    def __init__(self, app_path, domain, query_factory=None, resource_loader=None):
-        self._app_path = app_path
+    @property
+    def intents(self):
+        return self._children
+
+    def __init__(self, app_path, domain, resource_loader=None):
+        super().__init__(app_path, resource_loader)
         self.name = domain
-        self._query_factory = query_factory or create_query_factory(app_path)
-        if resource_loader:
-            self._resource_loader = resource_loader
-        else:
-            self._resource_loader = create_resource_loader(app_path, self._query_factory)
         self.intent_classifier = IntentClassifier(self._resource_loader, domain)
-        self.intents = {intent: IntentProcessor(app_path, domain, intent, self._query_factory,
-                                                self._resource_loader)
-                        for intent in path.get_intents(app_path, domain)}
+        for intent in path.get_intents(app_path, domain):
+            self._children[intent] = IntentProcessor(app_path, domain, intent,
+                                                     self._resource_loader)
 
-    def build(self):
-        """Builds all models for the domain."""
-
+    def _build(self):
         # train intent model
         if len(self.intents) > 1:
             self.intent_classifier.fit()
 
-        for intent_processor in self.intents.values():
-            intent_processor.build()
-
-    def dump(self):
-        # dump gazetteers?
+    def _dump(self):
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.dump(model_path)
 
-        for intent_processor in self.intents.values():
-            intent_processor.dump()
-
-    def load(self):
+    def _load(self):
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.load(model_path)
-
-        for intent_processor in self.intents.values():
-            intent_processor.load()
 
     def process(self, query_text):
         """Processes the input text for this domain
@@ -159,7 +219,7 @@ class DomainProcessor(object):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = self.query_factory.create_query(query_text)
+        query = self._resource_loader.query_factory.create_query(query_text)
         processed_query = self.process_query(query)
         processed_query.domain = self.name
         return processed_query.to_dict()
@@ -173,6 +233,7 @@ class DomainProcessor(object):
         Returns:
             ProcessedQuery: The resulting processed query
         """
+        self._check_ready()
         if len(self.intents) > 1:
             intent = self.intent_classifier.predict(query)
         else:
@@ -182,10 +243,10 @@ class DomainProcessor(object):
         return processed_query
 
     def __repr__(self):
-        return "<DomainProcessor {!r}>".format(self.name)
+        return "<{} {!r}>".format(self.__class__.__name__, self.name)
 
 
-class IntentProcessor(object):
+class IntentProcessor(Processor):
     """Summary
 
     Attributes:
@@ -195,23 +256,19 @@ class IntentProcessor(object):
         recognizer (EntityRecognizer): The
     """
 
-    def __init__(self, app_path, domain, intent, query_factory=None, resource_loader=None):
-        self._app_path = app_path
+    def __init__(self, app_path, domain, intent, resource_loader=None):
+        super().__init__(app_path, resource_loader)
         self.domain = domain
         self.name = intent
-        self._query_factory = query_factory or create_query_factory(app_path)
-        if resource_loader:
-            self._resource_loader = resource_loader
-        else:
-            self._resource_loader = create_resource_loader(app_path, self._query_factory)
-        self.entity_recognizer = EntityRecognizer(self._resource_loader, domain, intent)
 
-        # TODO: revisit the parser after finishing Kwik-E-Mart demo
+        self.entity_recognizer = EntityRecognizer(self._resource_loader, domain, intent)
         self.parser = Parser(self._resource_loader, domain, intent)
 
-        self.entities = {}
+    @property
+    def entities(self):
+        return self._children
 
-    def build(self):
+    def _build(self):
         """Builds the models for this intent"""
 
         # train entity recognizer
@@ -220,35 +277,28 @@ class IntentProcessor(object):
         # TODO: something for the parser?
 
         entity_types = self.entity_recognizer.entity_types
-        self.entities = {}
         for entity_type in entity_types:
             processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
-                                        self._query_factory, self._resource_loader)
-            processor.build()
-            self.entities[entity_type] = processor
+                                        self._resource_loader)
+            self._children[entity_type] = processor
 
-    def dump(self):
+    def _dump(self):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.entity_recognizer.dump(model_path)
 
         # TODO: something with parser?
 
-        for entity_processor in self.entities.values():
-            entity_processor.dump()
-
-    def load(self):
+    def _load(self):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.entity_recognizer.load(model_path)
 
         # TODO: something with parser?
 
-        entity_types = self.recognizer.entity_types
-        self.entities = {}
+        entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
             processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
-                                        self._query_factory, self._resource_loader)
-            processor.load()
-            self.entities[entity_type] = processor
+                                        self._resource_loader)
+            self._children[entity_type] = processor
 
     def process(self, query_text):
         """Processes the input text for this intent
@@ -259,7 +309,7 @@ class IntentProcessor(object):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = self._query_factory.create_query(query_text)
+        query = self._resource_loader.query_factory.create_query(query_text)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name
@@ -274,6 +324,7 @@ class IntentProcessor(object):
         Returns:
             ProcessedQuery: The resulting processed query
         """
+        self._check_ready()
         entities = self.entity_recognizer.predict(query)
 
         for entity in entities:
@@ -287,7 +338,7 @@ class IntentProcessor(object):
         return "<IntentProcessor {!r}>".format(self.name)
 
 
-class EntityProcessor(object):
+class EntityProcessor(Processor):
     """Summary
 
     Attributes:
@@ -297,38 +348,29 @@ class EntityProcessor(object):
         role_classifier (TYPE): Description
     """
 
-    def __init__(self, app_path, domain, intent, entity_type, query_factory=None,
-                 resource_loader=None):
-        self._app_path = app_path
+    def __init__(self, app_path, domain, intent, entity_type, resource_loader=None):
+        super().__init__(app_path, resource_loader)
         self.domain = domain
         self.intent = intent
         self.type = entity_type
-        self._query_factory = query_factory or create_query_factory(app_path)
-        if resource_loader:
-            self._resource_loader = resource_loader
-        else:
-            self._resource_loader = create_resource_loader(app_path, self._query_factory)
 
         self.role_classifier = RoleClassifier(self._resource_loader, domain, intent, entity_type)
-        self.entity_linker = EntityLinker(self._resource_loader, entity_type, query_factory.normalize)
+        self.entity_linker = EntityLinker(self._resource_loader, entity_type)
 
-    def build(self):
+    def _build(self):
         """Builds the models for this entity type"""
-        # TODO: something with linker ?
         self.role_classifier.fit()
 
-    def dump(self):
-        # TODO: something with linker ?
+    def _dump(self):
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.dump(model_path)
 
-    def load(self):
-        # TODO: something with linker ?
+    def _load(self):
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.load(model_path)
 
     def process(self, text):
-        raise NotImplementedError('EntityProcessor objects to not support `process()`. '
+        raise NotImplementedError('EntityProcessor objects do not support `process()`. '
                                   'Try `process_entity()`')
 
     def process_entity(self, query, entities, entity):
@@ -339,6 +381,8 @@ class EntityProcessor(object):
             entities (list): All entities recognized in the query
             entity (Entity): The entity to process
         """
+        self._check_ready()
+
         # Classify role
         entity.entity.role = self.role_classifier.predict(query, entities, entity)
 
@@ -380,7 +424,7 @@ def create_query_factory(app_path, tokenizer=None, preprocessor=None):
     return QueryFactory(tokenizer, preprocessor)
 
 
-def create_resource_loader(app_path, query_factory):
+def create_resource_loader(app_path, query_factory=None):
     """Creates the resource loader for the app at app path
 
     Args:
@@ -390,7 +434,7 @@ def create_resource_loader(app_path, query_factory):
     Returns:
         ResourceLoader: a resource loader
     """
-    return ResourceLoader(app_path, query_factory)
+    return ResourceLoader(app_path, query_factory or create_query_factory(app_path))
 
 
 def create_parser(app_path):
