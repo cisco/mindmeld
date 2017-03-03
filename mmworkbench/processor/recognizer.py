@@ -8,6 +8,7 @@ import logging
 
 from .classifier import Classifier
 from ..models import MemmModel
+from ..core import Query
 
 # from sklearn.externals import joblib
 
@@ -133,6 +134,8 @@ class EntityRecognizer(Classifier):
         Returns:
             list: the predicted entities
         """
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
         return self._model.predict(query)
 
     def predict_proba(self, query):

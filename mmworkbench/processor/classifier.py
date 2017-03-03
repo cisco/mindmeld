@@ -12,6 +12,7 @@ import os
 from sklearn.externals import joblib
 
 from ..exceptions import ClassifierLoadError, FileNotFoundError
+from ..core import Query
 
 logger = logging.getLogger(__name__)
 
@@ -157,6 +158,8 @@ class StandardClassifier(Classifier):
         Returns:
             str: the predicted domain
         """
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
         return self._model.predict([query])[0]
 
     def predict_proba(self, query):
