@@ -14,6 +14,7 @@ import click
 import click_log
 
 from . import __version__, Conversation
+from .path import MALLARD_JAR_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -96,10 +97,8 @@ def num_parser(ctx, start):
             logger.info('Numerical parser running, PID %s', pid[0])
             return
 
-        pwd = os.path.dirname(os.path.abspath(__file__))
-        mallard_path = os.path.join(pwd, 'mindmeld-mallard.jar')
         try:
-            mallard_service = subprocess.Popen(['java', '-jar', mallard_path])
+            mallard_service = subprocess.Popen(['java', '-jar', MALLARD_JAR_PATH])
             # mallard takes some time to start so sleep for a bit
             time.sleep(5)
             logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
@@ -117,8 +116,9 @@ def num_parser(ctx, start):
 
 
 def _get_mallard_pid():
+    _, filename = os.path.split(MALLARD_JAR_PATH)
     pid = []
-    for line in os.popen('ps ax | grep mindmeld-mallard.jar | grep -v grep'):
+    for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
         pid.append(line.split()[0])
     return pid
 
