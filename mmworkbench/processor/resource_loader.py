@@ -6,11 +6,12 @@ This module contains the processor resource loader.
 from __future__ import unicode_literals
 from builtins import object
 
-import time
+from copy import deepcopy
 import fnmatch
 import json
 import logging
 import os
+import time
 
 from .. import markup, path
 from ..exceptions import FileNotFoundError
@@ -95,7 +96,7 @@ class ResourceLoader(object):
         if force_reload or never_loaded or self.entity_maps[entity_type]['loaded'] < last_modified:
             # file is out of date, load it
             self.load_entity_map(entity_type)
-        return self.entity_maps[entity_type]['mapping']
+        return deepcopy(self.entity_maps[entity_type]['mapping'])
 
     def load_entity_map(self, entity_type):
         """Loads an entity map
