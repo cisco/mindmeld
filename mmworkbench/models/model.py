@@ -7,7 +7,7 @@ from collections import namedtuple
 import copy
 import itertools
 
-from sklearn.cross_validation import StratifiedKFold, StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 
 
 class ModelConfig(namedtuple('ModelConfig', ['model_type', 'model_settings', 'params_grid',
