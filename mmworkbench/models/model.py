@@ -27,18 +27,20 @@ _NEG_INF = -1e10
 
 
 class ModelConfig(object):
-    """A simple named tuple containing a model configuration
+    """A value object representing a model configuration
 
-    Deleted Attributes:
+    Attributes:
         model_type (str): The name of the model type. Will be used to find the
             model class to instantiate
         example_type (str): The type of the examples which will be passed into
-            `predict()`
-        label_type (str): The type of the labels which `predict()` will return
-        model_settings (dict)
-        params (dict): Params to pass to the underlying model when
-        param_selection (dict): Configuration for param selection
-
+            `fit()` and `predict()`. Used to select feature extractors
+        label_type (str): The type of the labels which will be passed into
+            `fit()` and returned by `predict()`. Used to select the label
+            encoder
+        model_settings (dict): Settings specific to the model type specified
+        params (dict): Params to pass to the underlying classifier
+        param_selection (dict): Configuration for param selection (using cross
+            validation)
             {'type': 'shuffle',
              'n': 3,
              'k': 10,
@@ -46,14 +48,10 @@ class ModelConfig(object):
              'scoring': '',
              'grid': {}
             }
-
-        features (dict): A mapping from feature extractor names, as given in
-            FEATURE_NAME_MAP, to a kwargs dict, which will be passed into the
-            associated feature extractor function.
-        cv (dict): A dict that contains "type", which specifies the name of the
-            cross-validation strategy, such as "k-folds" or "shuffle". The
-            remaining keys are parameters specific to the cross-validation type,
-            such as "k" when the type is "k-folds".
+        features (dict): The keys are the names of feature extractors and the
+            values are either a kwargs dict which will be passed into the
+            feature extractor function, or a callable which will be used as to
+            extract features
 
     """
     __slots__ = ['model_type', 'example_type', 'label_type', 'features', 'model_settings', 'params',
