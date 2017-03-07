@@ -45,7 +45,6 @@ LIKELIHOOD_SCORING = "log_loss"
 logger = logging.getLogger(__name__)
 
 
-@register_model('text')
 class TextModel(SkLearnModel):
     """A machine learning classifier for text.
 
@@ -221,3 +220,6 @@ class TextModel(SkLearnModel):
 
     def _get_feature_selector(self):
         return None
+
+
+register_model('text', TextModel)

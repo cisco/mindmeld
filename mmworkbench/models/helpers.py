@@ -44,19 +44,29 @@ def get_feature_extractor(example_type, name):
     return FEATURE_MAP[example_type][name]
 
 
-def register_model(model_type):
+def model(model_type):
     """Decorator for registering a model class
+
+
+    """
+
+    def _decorator(cls):
+        register_model(model_type, cls)
+    return _decorator
+
+
+def register_model(model_type, model_class):
+    """Helper for registering models
 
     Args:
         model_type (str): The model type as specified in model configs
+        model_class (type): The model to register
 
     """
     if model_type in MODEL_MAP:
         raise ValueError('Model {!r} is already registered.'.format(model_type))
 
-    def _decorator(cls):
-        MODEL_MAP[model_type] = cls
-    return _decorator
+    MODEL_MAP[model_type] = model_class
 
 
 def register_features(example_type, features):
@@ -64,9 +74,11 @@ def register_features(example_type, features):
 
     Args:
         example_type (str): The example type of the feature extractors
+        features (dict): Features listed by name
 
-    Returns:
-        function: Description
+    Raises:
+        ValueError: If the example type is already registered
+
     """
     if example_type in FEATURE_MAP:
         msg = 'Features for example type {!r} are already registered.'.format(example_type)
