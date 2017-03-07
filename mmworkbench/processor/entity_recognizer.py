@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import logging
 
 from .classifier import Classifier
-from ..models import MemmModel
+from ..models.sequence_models import MemmModel
 from ..core import Query
 
 # from sklearn.externals import joblib
@@ -117,8 +117,7 @@ class EntityRecognizer(Classifier):
         queries = query_tree[self.domain][self.intent]
 
         params = self.get_fit_config(model_type, features, params_grid, cv, model_settings)
-        model_class = self._get_model_class(model_type)
-        model = model_class(**params)
+        model = MemmModel(**params)
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
 

@@ -6,6 +6,7 @@ This module contains the domain classifier component.
 from __future__ import unicode_literals
 from builtins import object
 
+import copy
 import logging
 import os
 
@@ -17,10 +18,10 @@ from ..core import Query
 logger = logging.getLogger(__name__)
 
 from ..models import ModelConfig
+from ..models.helpers import create_model
 
 class Classifier(object):
     DEFAULT_CONFIG = None
-    MODEL_CLASS = None
 
     def __init__(self, resource_loader):
         """Initializes a classifier
@@ -76,18 +77,11 @@ class Classifier(object):
         """
         raise NotImplementedError('Subclasses must implement this method')
 
-    def _get_model_class(self, model_type):
-        return self.MODEL_CLASS
-
-    def get_model_config(self, model_type=None, features=None, params_grid=None, cv=None,
-                         model_name=None):
-        model_name = model_name or self.DEFAULT_CONFIG['default_model']
-        model_config = self.DEFAULT_CONFIG['models'][model_name]
-        model_type = model_type or model_config['model_type']
-        features = features or model_config['features']
-        params_grid = params_grid or model_config['params_grid']
-        cv = cv or model_config['cv']
-        return ModelConfig(model_type, None, params_grid, features, cv)
+    def get_model_config(self, config_name, **kwargs):
+        config_name = config_name or self.DEFAULT_CONFIG['default_model']
+        model_config = copy.copy(self.DEFAULT_CONFIG['models'][config_name])
+        model_config.update(kwargs)
+        return ModelConfig(**model_config)
 
     def dump(self, model_path):
         """Persists the model to disk.
@@ -124,14 +118,12 @@ class StandardClassifier(Classifier):
         DEFAULT_CONFIG (dict): The default configuration
         MODEL_CLASS (type): The the class of the underlying model.
     """
-    DEFAULT_CONFIG = None
-    MODEL_CLASS = None
 
-    def fit(self, model_type=None, features=None, params_grid=None, cv=None, queries=None):
+    def fit(self, queries=None, config_name=None, **kwargs):
         """Trains the model
 
         Args:
-            model_type (str): The type of model to use. If omitted, the default model type will
+            config_name (str): The type of model to use. If omitted, the default model type will
                 be used.
             features (dict): If omitted, the default features for the model type will be used.
             params_grid (dict): If omitted the default params will be used
@@ -140,10 +132,8 @@ class StandardClassifier(Classifier):
 
         """
         queries, classes = self._get_queries_and_classes(queries)
-        config = self.get_model_config(model_type, features, params_grid, cv)
-
-        model_class = self._get_model_class(model_type)
-        model = model_class(config)
+        config = self.get_model_config(config_name, **kwargs)
+        model = create_model(config)
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)

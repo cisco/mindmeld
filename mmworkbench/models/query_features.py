@@ -3,19 +3,19 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import division
-from builtins import range
+from builtins import range, zip
 from past.utils import old_div
 
+from collections import Counter, defaultdict
 import math
 import re
 
-from . import tagging
-
 from ..core import resolve_entity_conflicts
+from .helpers import GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC, register_features, mask_numerics
 
+# TODO: clean this up a LOT
 
-def get_feature_template(template):
-    return FEATURE_NAME_MAP[template]
+OUT_OF_BOUNDS_TOKEN = '<$>'
 
 
 def get_ngram(tokens, start, length):
@@ -34,7 +34,7 @@ def get_ngram(tokens, start, length):
 
     ngram_tokens = []
     for index in range(start, start+length):
-        token = (tagging.OUT_OF_BOUNDS_TOKEN if index < 0 or index >= len(tokens)
+        token = (OUT_OF_BOUNDS_TOKEN if index < 0 or index >= len(tokens)
                  else tokens[index])
         ngram_tokens.append(token)
     return ' '.join(ngram_tokens)
@@ -422,9 +422,248 @@ def update_features_sequence(feat_seq, update_feat_seq):
         feat_seq[i].update(update_feat_seq[i])
 
 
-FEATURE_NAME_MAP = {
-    'bag-of-words': extract_bag_of_words_features,
-    'in-gaz-span': extract_in_gaz_span_features,
-    'in-gaz-ngram': extract_in_gaz_ngram_features,
-    'sys-candidates': extract_sys_candidate_features
-}
+def requires(resource):
+    """
+    Decorator to enforce the resource dependencies of the active feature extractors
+
+    Args:
+        resource (str): the key of a classifier resource which must be initialized before
+            the given feature extractor is used
+
+    Returns:
+        (func): the feature extractor
+    """
+    def add_resource(func):
+        req = func.__dict__.get('requirements', [])
+        func.requirements = req + [resource]
+        return func
+
+    return add_resource
+
+
+@requires(WORD_FREQ_RSC)
+def extract_ngrams(lengths=(1,)):
+    """
+    Extract ngrams of some specified lengths.
+
+    Args:
+        lengths (list of int): The ngram length.
+
+    Returns:
+        (function) An feature extraction function that takes a query and
+            returns ngrams of the specified lengths.
+    """
+    def _extractor(query, resources):
+        tokens = query.normalized_tokens
+        ngram_counter = Counter()
+        for length in lengths:
+            for i in range(len(tokens) - length + 1):
+                ngram = []
+                for token in tokens[i:i + length]:
+                    # We never want to differentiate between number tokens.
+                    # We may need to convert number words too, like "eighty".
+                    tok = mask_numerics(token)
+                    if tok not in resources[WORD_FREQ_RSC]:
+                        tok = 'OOV'
+                    ngram.append(tok)
+                ngram_counter.update(['ngram:' + '|'.join(ngram)])
+        return ngram_counter
+
+    return _extractor
+
+
+@requires(WORD_FREQ_RSC)
+def extract_edge_ngrams(lengths=(1,)):
+    """
+    Extract ngrams of some specified lengths.
+
+    Args:
+        lengths (list of int): The ngram length.
+
+    Returns:
+        (function) An feature extraction function that takes a query and
+            returns ngrams of the specified lengths at start and end of query.
+    """
+    def _extractor(query, resources):
+        tokens = query.normalized_tokens
+        feats = {}
+        for length in lengths:
+            if length < len(tokens):
+                left_tokens = [mask_numerics(tok) for tok in tokens[:length]]
+                left_tokens = [tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else 'OOV'
+                               for tok in left_tokens]
+                right_tokens = [mask_numerics(tok) for tok in tokens[-length:]]
+                right_tokens = [tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else 'OOV'
+                                for tok in right_tokens]
+                feats.update({'left-edge|{}:{}'.format(length, '|'.join(left_tokens)): 1})
+                feats.update({'right-edge|{}:{}'.format(length, '|'.join(right_tokens)): 1})
+
+        return feats
+
+    return _extractor
+
+
+@requires(WORD_FREQ_RSC)
+def extract_freq(bins=5):
+    """
+    Extract frequency bin features.
+
+    Args:
+        bins (int): The number of frequency bins (besides OOV)
+
+    Returns:
+        (function): A feature extraction function that returns the log of the
+            count of query tokens within each frequency bin.
+
+    """
+    def _extractor(query, resources):
+        tokens = query.normalized_tokens
+        freq_dict = resources[WORD_FREQ_RSC]
+        max_freq = freq_dict.most_common(1)[0][1]
+        freq_features = defaultdict(int)
+        for tok in tokens:
+            tok = mask_numerics(tok)
+            freq = freq_dict.get(tok, 0)
+            if freq < 2:
+                freq_features['freq|U'] += 1
+            else:
+                # Bin the frequency with break points at
+                # half max, a quarter max, an eighth max, etc.
+                freq_bin = int(math.log(max_freq, 2) - math.log(freq, 2))
+                if freq_bin < bins:
+                    freq_features['freq|{}'.format(freq_bin)] += 1
+                else:
+                    freq_features['freq|{}'.format(freq_bin)] += 1
+
+        q_len = float(len(tokens))
+        for k in freq_features:
+            # sublinear
+            freq_features[k] = math.log(freq_features[k] + 1, 2)
+            # ratio
+            freq_features[k] /= q_len
+        return freq_features
+
+    return _extractor
+
+
+@requires(GAZETTEER_RSC)
+@requires(WORD_FREQ_RSC)
+def extract_gaz_freq():
+    """
+    Extract frequency bin features for each gazetteer
+
+    Returns:
+        (function): A feature extraction function that returns the log of the
+            count of query tokens within each gazetteer's frequency bins.
+    """
+    def _extractor(query, resources):
+        tokens = query.normalized_tokens
+        freq_features = defaultdict(int)
+
+        for tok in tokens:
+            query_freq = 'OOV' if resources[WORD_FREQ_RSC].get(tok) is None else 'IV'
+            for gaz_name, gaz in resources[GAZETTEER_RSC].items():
+                freq = len(gaz['index'].get(tok, []))
+                if freq > 0:
+                    freq_bin = int(old_div(math.log(freq, 2), 2))
+                    freq_features['{}|freq|{}'.format(gaz_name, freq_bin)] += 1
+                    freq_features['{}&{}|freq|{}'.format(query_freq, gaz_name, freq_bin)] += 1
+
+        q_len = float(len(tokens))
+        for k in freq_features:
+            # sublinear
+            freq_features[k] = math.log(freq_features[k] + 1, 2)
+            # ratio
+            freq_features[k] /= q_len
+        return freq_features
+
+    return _extractor
+
+
+@requires(GAZETTEER_RSC)
+def extract_in_gaz_feature(scaling=1):
+
+    def _extractor(query, resources):
+        in_gaz_features = defaultdict(float)
+
+        norm_text = query.normalized_text
+        tokens = query.normalized_tokens
+        ngrams = []
+        for i in range(1, (len(tokens) + 1)):
+            ngrams.extend(find_ngrams(tokens, i))
+        for ngram in ngrams:
+            for gaz_name, gaz in resources[GAZETTEER_RSC].items():
+                if ngram in gaz['pop_dict']:
+                    popularity = gaz['pop_dict'].get(ngram, 0.0)
+                    ratio = (old_div(len(ngram), float(len(norm_text)))) * scaling
+                    ratio_pop = ratio * popularity
+                    in_gaz_features[gaz_name + '_ratio_pop'] += ratio_pop
+                    in_gaz_features[gaz_name + '_ratio'] += ratio
+                    in_gaz_features[gaz_name + '_pop'] += popularity
+                    in_gaz_features[gaz_name + '_exists'] = 1
+
+        return in_gaz_features
+
+    return _extractor
+
+
+def extract_length():
+    """
+    Extract length measures (tokens and chars; linear and log) on whole query.
+
+    Returns:
+        (function) A feature extraction function that takes a query and
+            returns number of tokens and characters on linear and log scales
+    """
+    # pylint: disable=locally-disabled,unused-argument
+    def _extractor(query, resources):
+        tokens = len(query.normalized_tokens)
+        chars = len(query.normalized_text)
+        return {'tokens': tokens,
+                'chars': chars,
+                'tokens_log': math.log(tokens + 1),
+                'chars_log': math.log(chars + 1)}
+
+    return _extractor
+
+
+@requires(QUERY_FREQ_RSC)
+def extract_query_string(scaling=1000):
+    """
+    Extract whole query string as a feature.
+
+    Returns:
+        (function) A feature extraction function that takes a query and
+            returns the whole query string for exact matching
+
+    """
+
+    def _extractor(query, resources):
+        query_key = '<{}>'.format(query.normalized_text)
+        if query_key not in resources[QUERY_FREQ_RSC]:
+            query_key = '<OOV>'
+        return {'exact={}'.format(query_key): scaling}
+
+    return _extractor
+
+
+# Generate all n-gram combinations from a list of strings
+def find_ngrams(input_list, n):
+    result = []
+    for ngram in zip(*[input_list[i:] for i in range(n)]):
+        result.append(" ".join(ngram))
+    return result
+
+register_features('query', {
+    'bag-of-words': extract_ngrams,
+    'edge-ngrams': extract_edge_ngrams,
+    'freq': extract_freq,
+    'in-gaz': extract_in_gaz_feature,
+    'gaz-freq': extract_gaz_freq,
+    'length': extract_length,
+    'exact': extract_query_string,
+    'bag-of-words-seq': extract_bag_of_words_features,
+    'in-gaz-span-seq': extract_in_gaz_span_features,
+    'in-gaz-ngram-seq': extract_in_gaz_ngram_features,
+    'sys-candidates-seq': extract_sys_candidate_features
+})

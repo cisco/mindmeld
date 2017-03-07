@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 import logging
 
 from .classifier import StandardClassifier
-from ..models import TextModel
 
 logger = logging.getLogger(__name__)
 
@@ -22,27 +21,30 @@ class DomainClassifier(StandardClassifier):
     DEFAULT_CONFIG = {
         'default_model': 'main',
         'models': {
-            "main": {
-                "model_type": "logreg",
-                "params_grid": {
-                    "fit_intercept": [True, False],
-                    "C": [10, 100, 1000, 10000, 100000]
+            'main': {
+                'model_type': 'text',
+                'example_type': 'query',
+                'model_settings': {
+                    'classifier_type': 'logreg',
                 },
-                "cv": {
-                    "type": "k-fold",
-                    "k": 10
-                },
-                "features": {
-                    "bag-of-words": {
-                        "lengths": [1]
+                'param_selection': {
+                    'type': 'k-fold',
+                    'k': 10,
+                    'grid': {
+                        'fit_intercept': [True, False],
+                        'C': [10, 100, 1000, 10000, 100000]
                     },
-                    "freq": {"bins": 5},
-                    "in-gaz": {}
+                },
+                'features': {
+                    'bag-of-words': {
+                        'lengths': [1]
+                    },
+                    'freq': {'bins': 5},
+                    'in-gaz': {}
                 }
             }
         }
     }
-    MODEL_CLASS = TextModel
 
     def _get_queries_and_classes(self, queries=None):
         if not queries:

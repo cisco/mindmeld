@@ -16,7 +16,6 @@ I_TAG = 'I'
 O_TAG = 'O'
 E_TAG = 'E'
 S_TAG = 'S'
-OUT_OF_BOUNDS_TOKEN = '<$>'
 
 
 def get_tags_from_entities(query, scheme='IOB'):

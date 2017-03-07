@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from .maxent import MaxentRoleModel
-from .text import TextModel
-from .memm import MemmModel
-from .core import ModelConfig
 
-CLASSIFIER_TYPE_MAXENT = 'maxent'
-CLASSIFIER_TYPE_MEMM = 'memm'
-CLASSIFIER_TYPE_TEXT = 'text'
+from .model import ModelConfig
+from . import standard_models
+from . import sequence_models
+from . import query_features
 
-__all__ = ['ModelConfig', 'CLASSIFIER_TYPE_MAXENT', 'MaxentRoleModel', 'CLASSIFIER_TYPE_MEMM',
-           'MemmModel', 'CLASSIFIER_TYPE_TEXT', 'TextModel']
+__all__ = ['ModelConfig']

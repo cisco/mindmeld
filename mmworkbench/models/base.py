@@ -137,8 +137,6 @@ class BaseEntityRecognizer(object):
 
     def _groups_k_fold_iterator(self, groups):
         k = self.cross_validation_settings['k']
-        # n = self.cross_validation_settings.get('n', k)
-        # TODO: should this be `n_folds=n`?
         return cross_val.LabelKFold(groups, n_folds=k)
 
     def _groups_shuffle_iterator(self, groups):

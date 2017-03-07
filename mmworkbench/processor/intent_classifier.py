@@ -8,7 +8,6 @@ from builtins import super
 import logging
 
 from .classifier import StandardClassifier
-from ..models import TextModel
 
 logger = logging.getLogger(__name__)
 
@@ -26,50 +25,58 @@ class IntentClassifier(StandardClassifier):
     DEFAULT_CONFIG = {
         'default_model': 'main',
         'models': {
-            "main": {
-                "model_type": "logreg",
-                "params_grid": {
-                    "fit_intercept": [True, False],
-                    "C": [0.01, 1, 100, 10000, 1000000],
-                    "class_bias": [1, 0.7, 0.3, 0]
+            'main': {
+                'model_type': 'text',
+                'example_type': 'query',
+                'label_type': 'class',
+                'model_settings': {
+                    'classifier_type': 'logreg'
                 },
-                "cv": {
-                    "type": "k-fold",
-                    "k": 10
+                'param_selection': {
+                    'type': 'k-fold',
+                    'k': 10,
+                    'grid': {
+                        'fit_intercept': [True, False],
+                        'C': [0.01, 1, 100, 10000, 1000000],
+                        'class_bias': [1, 0.7, 0.3, 0]
+                    }
                 },
-                "features": {
-                    "bag-of-words": {
-                        "lengths": [1]
+                'features': {
+                    'bag-of-words': {
+                        'lengths': [1]
                     },
-                    "in-gaz": {},
-                    "freq": {"bins": 5},
-                    "length": {}
+                    'in-gaz': {},
+                    'freq': {'bins': 5},
+                    'length': {}
                 }
             },
-            "rforest": {
-                "model_type": "rforest",
-                "params_grid": {
-                    "n_estimators": [10],
-                    "max_features": ["auto"],
-                    "n_jobs": [-1]
+            'rforest': {
+                'example_type': 'query',
+                'label_type': 'class',
+                'model_settings': {
+                    'classifier_type': 'rforest'
                 },
-                "cv": {
-                    "type": "k-fold",
-                    "k": 10
-                },
-                "features": {
-                    "bag-of-words": {
-                        "lengths": [1, 2, 3]
+                'param_selection': {
+                    'type': 'k-fold',
+                    'k': 10,
+                    'grid': {
+                        'n_estimators': [10],
+                        'max_features': ['auto'],
+                        'n_jobs': [-1]
                     },
-                    "edge-ngrams": {"lengths": [1, 2, 3]},
-                    "in-gaz": {},
-                    "freq": {"bins": 5},
-                    "length": {}
+                },
+                'features': {
+                    'bag-of-words': {
+                        'lengths': [1, 2, 3]
+                    },
+                    'edge-ngrams': {'lengths': [1, 2, 3]},
+                    'in-gaz': {},
+                    'freq': {'bins': 5},
+                    'length': {}
                 }
             }
         }
     }
-    MODEL_CLASS = TextModel
 
     def __init__(self, resource_loader, domain):
         """Initializes an intent classifier
