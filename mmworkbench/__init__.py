@@ -7,6 +7,6 @@ from .processor.nlp import NaturalLanguageProcessor
 
 __author__ = 'MindMeld, Inc.'
 __email__ = 'contact@mindmeld.com'
-__version__ = '3.0.0'
+__version__ = '3.0.0.dev'
 
 __all__ = ['Application', 'Conversation', 'NaturalLanguageProcessor']
