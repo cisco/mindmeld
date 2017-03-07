@@ -34,7 +34,7 @@ class Processor(object):
     """
     def __init__(self, app_path, resource_loader=None):
         self._app_path = app_path
-        self._resource_loader = resource_loader or create_resource_loader(app_path)
+        self.resource_loader = resource_loader or create_resource_loader(app_path)
 
         self._children = {}
         self.ready = False
@@ -91,7 +91,7 @@ class Processor(object):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = self._resource_loader.query_factory.create_query(query_text)
+        query = self.resource_loader.query_factory.create_query(query_text)
         return self.process_query(query).to_dict()
 
     def process_query(self, query):
@@ -123,10 +123,10 @@ class NaturalLanguageProcessor(Processor):
         """
         super().__init__(app_path, resource_loader)
         self._app_path = app_path
-        self.domain_classifier = DomainClassifier(self._resource_loader)
+        self.domain_classifier = DomainClassifier(self.resource_loader)
 
         for domain in path.get_domains(self._app_path):
-            self._children[domain] = DomainProcessor(app_path, domain, self._resource_loader)
+            self._children[domain] = DomainProcessor(app_path, domain, self.resource_loader)
 
     @property
     def domains(self):
@@ -192,10 +192,10 @@ class DomainProcessor(Processor):
     def __init__(self, app_path, domain, resource_loader=None):
         super().__init__(app_path, resource_loader)
         self.name = domain
-        self.intent_classifier = IntentClassifier(self._resource_loader, domain)
+        self.intent_classifier = IntentClassifier(self.resource_loader, domain)
         for intent in path.get_intents(app_path, domain):
             self._children[intent] = IntentProcessor(app_path, domain, intent,
-                                                     self._resource_loader)
+                                                     self.resource_loader)
 
     def _build(self):
         # train intent model
@@ -219,7 +219,7 @@ class DomainProcessor(Processor):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = self._resource_loader.query_factory.create_query(query_text)
+        query = self.resource_loader.query_factory.create_query(query_text)
         processed_query = self.process_query(query)
         processed_query.domain = self.name
         return processed_query.to_dict()
@@ -261,8 +261,8 @@ class IntentProcessor(Processor):
         self.domain = domain
         self.name = intent
 
-        self.entity_recognizer = EntityRecognizer(self._resource_loader, domain, intent)
-        self.parser = Parser(self._resource_loader, domain, intent)
+        self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
+        self.parser = Parser(self.resource_loader, domain, intent)
 
     @property
     def entities(self):
@@ -279,7 +279,7 @@ class IntentProcessor(Processor):
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
             processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
-                                        self._resource_loader)
+                                        self.resource_loader)
             self._children[entity_type] = processor
 
     def _dump(self):
@@ -297,7 +297,7 @@ class IntentProcessor(Processor):
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
             processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
-                                        self._resource_loader)
+                                        self.resource_loader)
             self._children[entity_type] = processor
 
     def process(self, query_text):
@@ -309,7 +309,7 @@ class IntentProcessor(Processor):
         Returns:
             ProcessedQuery: The processed query
         """
-        query = self._resource_loader.query_factory.create_query(query_text)
+        query = self.resource_loader.query_factory.create_query(query_text)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name
@@ -354,8 +354,8 @@ class EntityProcessor(Processor):
         self.intent = intent
         self.type = entity_type
 
-        self.role_classifier = RoleClassifier(self._resource_loader, domain, intent, entity_type)
-        self.entity_linker = EntityLinker(self._resource_loader, entity_type)
+        self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
+        self.entity_linker = EntityLinker(self.resource_loader, entity_type)
 
     def _build(self):
         """Builds the models for this entity type"""

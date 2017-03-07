@@ -45,11 +45,15 @@ INDEXES_FOLDER = os.path.join(APP_PATH, 'indexes')
 INDEX_FOLDER = os.path.join(INDEXES_FOLDER, '{index}')
 RANKING_FILE_PATH = os.path.join(INDEX_FOLDER, 'ranking.json')
 
+
+APP_MODULE_PATH = os.path.join(APP_PATH, 'app.py')
+
 # Default config files
 RESOURCES_FOLDER = os.path.join(PACKAGE_ROOT, 'resources')
 DEFAULT_PROCESSOR_CONFIG_PATH = os.path.join(RESOURCES_FOLDER, 'default_processor_config.json')
 DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(RESOURCES_FOLDER, 'default_tokenizer_config.json')
 ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, 'ascii_folding_dict.txt')
+MALLARD_JAR_PATH = os.path.join(RESOURCES_FOLDER, 'mindmeld-mallard.jar')
 
 
 # Helpers
@@ -314,3 +318,15 @@ def get_ranking_file_path(app_path, index):
 
     """
     return RANKING_FILE_PATH.format(app_path=app_path, index=index)
+
+
+@safe_path
+def get_app_module_path(app_path):
+    """
+    Args:
+        app_path (str): The path to the app data.
+
+    Returns:
+        str: The path of the app module file.
+    """
+    return APP_MODULE_PATH.format(app_path=app_path)

@@ -45,6 +45,9 @@ setup(
         'mmworkbench',
     ],
     package_dir={'mmworkbench': 'mmworkbench'},
+    entry_points={
+        'console_scripts': ['mmworkbench=mmworkbench.cli:cli']
+    },
     include_package_data=True,
     install_requires=requirements,
     zip_safe=False,

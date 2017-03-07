@@ -5,6 +5,12 @@ from builtins import object, str
 
 import random
 
+from . import path
+
+
+SHOW_REPLY = 'show-reply'
+SHOW_PROMPT = 'show-prompt'
+
 
 class DialogueStateRule(object):
     """A rule for resolving dialogue states
@@ -188,7 +194,14 @@ class DialogueManager(object):
 
 
 class DialogueResponder(object):
+    """The dialogue responder helps generate client actions and fill slots in
+    textual messages.
 
+    Attributes:
+        client_actions (list): A list of client actions that the responder
+            has added
+        slots (dict): Slots to fill in format strings
+    """
     def __init__(self, slots):
         self.slots = slots
         self.client_actions = []
@@ -207,9 +220,9 @@ class DialogueResponder(object):
         Args:
             text (str): The text of the prompt
         """
-        self._reply(text, action='show-prompt')
+        self._reply(text, action=SHOW_PROMPT)
 
-    def _reply(self, text, action='show-reply'):
+    def _reply(self, text, action=SHOW_REPLY):
         """Convenience method as reply and prompt are basically the same."""
         text = self._choose(text)
         self.respond({
@@ -231,8 +244,83 @@ class DialogueResponder(object):
 
     @staticmethod
     def _choose(items):
+        """Chooses a random item from items"""
         if isinstance(items, tuple) or isinstance(items, list):
             return random.choice(items)
         elif isinstance(items, set):
             items = random.choice(tuple(items))
         return items
+
+
+def _get_app_module(app_path):
+    module_path = path.get_app_module_path(app_path)
+
+    import imp
+    app_module = imp.load_source('app_module', module_path)
+    app = app_module.app
+    return app
+
+
+class Conversation(object):
+    """The conversation object is a very basic workbench client.
+
+    It can be useful for testing out dialogue flows in python.
+
+    Example:
+        >>> convo = Conversation(app_path='path/to/my/app')
+        >>> convo.say('Hello')
+        ['Hello. I can help you find store hours. How can I help?']
+        >>> convo.say('Is the store on elm open?')
+        ['The 23 Elm Street Kwik-E-Mart is open from 7:00 to 19:00.']
+
+    Attributes:
+        history (list): The history of the conversation. Most recent messages
+        session (dict): Description
+    """
+    def __init__(self, app=None, app_path=None, nlp=None, session=None):
+        """
+        Args:
+            app (Application, optional): An initialized app object. Either app
+                or app_path must be given.
+            app_path (None, optional): The path to the app data. Used to create
+                an app object. Either app or app_path must be given.
+            nlp (NaturalLanguageProcessor, optional): A natural language
+                processor for the app. If passed, changes to this processor will
+                affect to `say()`
+            session (dict, optional): The session to be used in the conversation
+        """
+        app = app or _get_app_module(app_path)
+        app.lazy_init(nlp)
+        self._app_manager = app.app_manager
+        self.session = session or {}
+        self.history = []
+
+    def say(self, text):
+        """Send a message in the conversation. The message will be processed by
+        the app based on the current state of the conversation.
+
+        Args:
+            text (str): The text of a message
+
+        Returns:
+            list of str: A text representation of the dialogue responses
+        """
+        if not self._app_manager.ready:
+            self._app_manager.load()
+        response = self._app_manager.parse(text, session=self.session, history=self.history)
+        response.pop('history')
+        self.history.insert(0, response)
+
+        # handle client actions
+        response_texts = [self._handle_client_action(a) for a in response['client_actions']]
+        return response_texts
+
+    def _handle_client_action(self, action):
+        try:
+            if action['name'] in set((SHOW_REPLY, SHOW_PROMPT)):
+                msg = action['message']['text']
+
+        except (KeyError, ValueError, AttributeError):
+            msg = "Unsupported response: {!r}".format(action)
+
+        return msg

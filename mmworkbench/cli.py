@@ -13,7 +13,8 @@ import time
 import click
 import click_log
 
-from . import __version__
+from . import __version__, Conversation
+from .path import MALLARD_JAR_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -58,47 +59,69 @@ def run_server(ctx, port, no_debug, reloader):
     if app is None:
         raise ValueError('No app was given')
 
-    start_num_parser(True)
+    ctx.invoke(num_parser, start=True)
     app.run(port=port, debug=not no_debug, host='0.0.0.0', threaded=True, use_reloader=reloader)
 
 
-def _get_mallard_pid():
-    pid = []
-    for line in os.popen("ps ax | grep mindmeld-mallard.jar | grep -v grep"):
-        pid.append(line.split()[0])
-    return pid
+@cli.command('converse', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+def converse(ctx):
+    """Starts a conversation with the app"""
+    app = ctx.obj.get('app')
+    if app is None:
+        raise ValueError('No app was given')
+
+    ctx.invoke(num_parser, start=True)
+
+    convo = Conversation(app=app)
+
+    while True:
+        message = click.prompt('You')
+        responses = convo.say(message)
+
+        for index, response in enumerate(responses):
+            prefix = 'App: ' if index == 0 else ''
+            click.secho(prefix + response, fg='blue', bg='white')
 
 
-# TODO: expose this as a command
-def start_num_parser(start):
-    """Simple command that starts or stops Mallard, the numerical parser service."""
+@cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+@click.option('--start/--stop', default=True, help='Start or stop numerical parser')
+def num_parser(ctx, start):
+    """Starts or stops the numerical parser service"""
     if start:
         pid = _get_mallard_pid()
 
         if len(pid) > 0:
             # if mallard is already running, leave it be
-            click.echo("Numerical parser running, PID {0:s}".format(pid[0]))
+            logger.info('Numerical parser running, PID %s', pid[0])
             return
 
-        pwd = os.path.dirname(os.path.abspath(__file__))
-        mallard_path = os.path.join(pwd, 'mindmeld-mallard.jar')
         try:
-            mallard_service = subprocess.Popen(["java", "-jar", mallard_path])
+            mallard_service = subprocess.Popen(['java', '-jar', MALLARD_JAR_PATH])
             # mallard takes some time to start so sleep for a bit
             time.sleep(5)
-            click.echo("Starting numerical parsing service, PID %s" % mallard_service.pid)
+            logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
         except OSError as exc:
             if exc.errno != errno.ENOENT:
-                click.echo("Java is not found; please verify that Java 8 is installed and in your"
-                           " path variable.")
-                exit(1)
+                logger.error('Java is not found; please verify that Java 8 is '
+                             'installed and in your path.')
+                ctx.exit(1)
             else:
                 raise exc
     else:
         for pid in _get_mallard_pid():
             os.kill(int(pid), signal.SIGKILL)
-            click.echo("Stopping numerical parsing service, PID %s" % pid)
+            logger.info('Stopping numerical parsing service, PID %s', pid)
 
 
-if __name__ == "__main__":
+def _get_mallard_pid():
+    _, filename = os.path.split(MALLARD_JAR_PATH)
+    pid = []
+    for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
+        pid.append(line.split()[0])
+    return pid
+
+
+if __name__ == '__main__':
     cli({})
