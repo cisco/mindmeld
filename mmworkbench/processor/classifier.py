@@ -4,7 +4,7 @@ This module contains the domain classifier component.
 """
 
 from __future__ import unicode_literals
-from builtins import object
+from builtins import object, zip
 
 import copy
 import logging
@@ -170,7 +170,9 @@ class StandardClassifier(Classifier):
             list: a list of tuples of the form (str, float) grouping predictions and their
                 probabilities
         """
-        return self._model.predict_proba([query])[0]
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
+        return list(zip(*self._model.predict_proba([query])))[0]
 
     def evaluate(self, use_blind=False):
         """Evaluates the model on the specified data
