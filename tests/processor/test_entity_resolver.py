@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-test_resolver
+test_entity_resolver
 ----------------------------------
 
-Tests for `resolver` module.
+Tests for `entity_resolver` module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 from __future__ import unicode_literals
