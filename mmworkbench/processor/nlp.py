@@ -15,7 +15,7 @@ from ..tokenizer import Tokenizer
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
-from .entity_linker import EntityLinker
+from .entity_resolver import EntityResolver
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .resource_loader import ResourceLoader
@@ -355,7 +355,7 @@ class EntityProcessor(Processor):
         self.type = entity_type
 
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
-        self.entity_linker = EntityLinker(self.resource_loader, entity_type)
+        self.entity_resolver = EntityResolver(self.resource_loader, entity_type)
 
     def _build(self):
         """Builds the models for this entity type"""
@@ -386,8 +386,8 @@ class EntityProcessor(Processor):
         # Classify role
         entity.entity.role = self.role_classifier.predict(query, entities, entity)
 
-        # Link entity
-        entity.entity.value = self.entity_linker.predict(entity.entity)
+        # Resolver entity
+        entity.entity.value = self.entity_resolver.predict(entity.entity)
         return entity
 
     def __repr__(self):

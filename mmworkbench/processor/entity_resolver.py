@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the named entity linker component.
+This module contains the named entity resolver component.
 """
 from __future__ import unicode_literals
 from builtins import object
@@ -13,8 +13,8 @@ from ..core import Entity
 logger = logging.getLogger(__name__)
 
 
-class EntityLinker(object):
-    """A named entity linker which is used to link entities to their specific
+class EntityResolver(object):
+    """A named entity resolver which is used to resolve and link entities to their specific
     values in a given query.
     """
 
@@ -58,7 +58,7 @@ class EntityLinker(object):
         pass
 
     def predict(self, entity):
-        """Predicts linked values for the entities provided
+        """Predicts resolved values for the entities provided
 
         Args:
             entity (Entity): An entity found in an input query
@@ -67,14 +67,14 @@ class EntityLinker(object):
             The value for the entity passed in
         """
         if self._is_system_entity:
-            # system entities are already linked
+            # system entities are already resolved
             return entity.value
 
         normed = self._normalizer(entity.text)
         try:
             cname = self._mapping['synonyms'][normed]
         except KeyError:
-            logger.warning('Failed to link entity %r for type %r', entity.text, entity.type)
+            logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.type)
             return entity.text
 
         value = copy.copy(self._mapping['items'][cname])
