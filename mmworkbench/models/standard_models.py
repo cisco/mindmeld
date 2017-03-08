@@ -11,8 +11,6 @@ from builtins import range, zip
 from past.utils import old_div
 
 from collections import Counter
-import copy
-import itertools
 import logging
 
 from numpy import bincount

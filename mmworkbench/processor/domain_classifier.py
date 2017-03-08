@@ -46,7 +46,7 @@ class DomainClassifier(StandardClassifier):
         }
     }
 
-    def _get_queries_and_classes(self, queries=None):
+    def _get_queries_and_labels(self, queries=None):
         if not queries:
             query_tree = self._resource_loader.get_labeled_queries()
             queries = self._resource_loader.flatten_query_tree(query_tree)

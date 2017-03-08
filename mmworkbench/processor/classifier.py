@@ -15,10 +15,11 @@ from sklearn.externals import joblib
 from ..exceptions import ClassifierLoadError, FileNotFoundError
 from ..core import Query
 
-logger = logging.getLogger(__name__)
-
 from ..models import ModelConfig
 from ..models.helpers import create_model
+
+logger = logging.getLogger(__name__)
+
 
 class Classifier(object):
     DEFAULT_CONFIG = None
@@ -110,6 +111,16 @@ class Classifier(object):
             msg = 'Unable to load {}. Pickle file not found at {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
 
+    def _get_queries_and_labels(self, queries=None):
+        """Returns the set of queries and their classes to train on
+
+        Args:
+            queries (list): A list of ProcessedQuery objects to train. If not passed, the default
+                training set will be loaded.
+
+        """
+        raise NotImplementedError('Subclasses must implement this method')
+
 
 class StandardClassifier(Classifier):
     """The Standard classifier is a generic base for classification of strings.
@@ -123,15 +134,12 @@ class StandardClassifier(Classifier):
         """Trains the model
 
         Args:
+            queries (list of ProcessedQuery): The labeled queries to use as training data
             config_name (str): The type of model to use. If omitted, the default model type will
                 be used.
-            features (dict): If omitted, the default features for the model type will be used.
-            params_grid (dict): If omitted the default params will be used
-            cv (None, optional): Description
-            queries (list of ProcessedQuery): The labeled queries to use as training data
 
         """
-        queries, classes = self._get_queries_and_classes(queries)
+        queries, classes = self._get_queries_and_labels(queries)
         config = self.get_model_config(config_name, **kwargs)
         model = create_model(config)
         gazetteers = self._resource_loader.get_gazetteers()
@@ -177,13 +185,3 @@ class StandardClassifier(Classifier):
         if self._model:
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
-
-    def _get_queries_and_classes(self, queries=None):
-        """Returns the set of queries and their classes to train on
-
-        Args:
-            queries (list): A list of ProcessedQuery objects to train. If not passed, the default
-                training set will be loaded.
-
-        """
-        raise NotImplementedError('Subclasses must implement this method')

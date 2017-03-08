@@ -44,19 +44,8 @@ def get_feature_extractor(example_type, name):
     return FEATURE_MAP[example_type][name]
 
 
-def model(model_type):
-    """Decorator for registering a model class
-
-
-    """
-
-    def _decorator(cls):
-        register_model(model_type, cls)
-    return _decorator
-
-
 def register_model(model_type, model_class):
-    """Helper for registering models
+    """Registers a model for use with `create_model()`
 
     Args:
         model_type (str): The model type as specified in model configs
@@ -70,11 +59,12 @@ def register_model(model_type, model_class):
 
 
 def register_features(example_type, features):
-    """Helper for registering feature extractors for a particular example type
+    """Register a set of feature extractors for use with
+    `get_feature_extractor()`
 
     Args:
         example_type (str): The example type of the feature extractors
-        features (dict): Features listed by name
+        features (dict): Features extractor templates keyed by name
 
     Raises:
         ValueError: If the example type is already registered

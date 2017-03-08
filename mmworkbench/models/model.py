@@ -1,10 +1,8 @@
 """This module contains base classes for models defined in the models subpackage."""
 from __future__ import absolute_import
 from __future__ import unicode_literals
-from builtins import object, super, str
+from builtins import object, super
 
-import copy
-import itertools
 import logging
 import math
 import random
@@ -16,12 +14,12 @@ from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuff
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 
 from .helpers import get_feature_extractor
-
+from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
 # model scoring types
-ACCURACY_SCORING = "accuracy"
-LIKELIHOOD_SCORING = "log_loss"
+ACCURACY_SCORING = 'accuracy'
+LIKELIHOOD_SCORING = 'log_loss'
 
 _NEG_INF = -1e10
 
@@ -72,6 +70,17 @@ class ModelConfig(object):
         self.model_settings = model_settings
         self.params = params
         self.param_selection = param_selection
+
+    def to_dict(self):
+        """Converts the model config object into a dict
+
+        Returns:
+            dict: A dict version of the config
+        """
+        result = {}
+        for attr in self.__slots__:
+            result[attr] = getattr(self, attr)
+        return result
 
     def __repr__(self):
         args_str = ', '.join("{}={!r}".format(key, getattr(self, key)) for key in self.__slots__)
@@ -130,48 +139,17 @@ class Model(object):
         """
         self._resources.update(kwargs)
 
-    def get_feature_matrix(self, examples):
+    def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
 
     def _get_label_encoder(self):
-        # TODO: support other label encoders
-        return LabelEncoder()
-
-    def _iter_settings(self, params_grid):
-        """Iterates through all model settings.
-
-        Yields:
-            (dict): A kwargs dict to be passed to the classifier object. Each
-                item yielded is a unique combination of values from with
-                a choice of settings from the hyper params grid.
-        """
-        if params_grid:
-            for config in self.settings_for_params_grid({}, params_grid):
-                yield config
-
-    @staticmethod
-    def settings_for_params_grid(base, params_grid):
-        """Iterates through all model settings.
-
-        Args:
-            base (dict): A dictionary containing the base settings which all
-                permutations contain
-            params_grid (dict): A kwargs dict of parameters that will be used to
-                initialize the classifier object. The value for each key is a
-                list of candidate parameters. The training process will grid
-                search over the Cartesian product of these parameter lists and
-                select the best via cross-validation.
-
-        Yields:
-            (dict): A kwargs dict to be passed to an underlying model object.
-                Each item yielded is a unique combination of values from with
-                a choice of settings from the hyper params grid.
-        """
-        base = copy.deepcopy(base)
-        keys, values = list(zip(*list(params_grid.items())))
-        for settings in itertools.product(*values):
-            base.update(dict(list(zip(keys, settings))))
-            yield copy.deepcopy(base)
+        label_type = self.config.label_type
+        try:
+            return {'class': LabelEncoder,
+                    'entities': EntityLabelEncoder}[label_type](self.config)
+        except KeyError:
+            msg = '{}: Unrecognized label type {!r}'.format(self.__class__.__name__, label_type)
+            raise ValueError(msg)
 
     def _extract_features(self, example):
         """Gets all features from an example.
@@ -260,7 +238,6 @@ class Model(object):
         return False
 
 
-
 class SkLearnModel(Model):
     def __init__(self, config):
         super().__init__(config)
@@ -303,9 +280,8 @@ class SkLearnModel(Model):
         #     return None
 
         # Extract features and classes
-        X, groups = self.get_feature_matrix(examples, fit=True)
         y = self._label_encoder.encode(labels)
-        y = self._class_encoder.fit_transform(labels)
+        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
 
         if skip_param_selection:
             self._clf = self._fit(X, y, self.config.params)
@@ -319,9 +295,8 @@ class SkLearnModel(Model):
         return self
 
     def select_params(self, examples, labels, selection_settings=None):
-        X, groups = self.get_feature_matrix(examples, fit=True)
         y = self._label_encoder.encode(labels)
-        y = self._class_encoder.fit_transform(labels)
+        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
         clf, params = self._fit_cv(X, y, groups, selection_settings)
         self._clf = clf
         return params
@@ -334,8 +309,6 @@ class SkLearnModel(Model):
             y (numpy.array): The target output values.
             params (dict): Parameters of the classifier
 
-        Returns:
-            SkLearnModel
         """
         params = self._convert_params(params, y)
         model_class = self._get_model_class()
@@ -349,14 +322,12 @@ class SkLearnModel(Model):
             y (numpy.array): The target output values.
             selection_settings (None, optional): Description
 
-        Returns:
-            SkLearnModel
         """
         selection_settings = selection_settings or self.config.param_selection
         cv_iterator = self._get_cv_iterator(selection_settings)
 
         if selection_settings is None:
-            return self.config.params
+            return self._fit(X, y, self.config.params), self.config.params
 
         scoring = selection_settings.get('scoring', self.DEFAULT_CV_SCORING)
         n_jobs = selection_settings.get('n_jobs', -1)
@@ -370,7 +341,7 @@ class SkLearnModel(Model):
 
         for candidate in model.grid_scores_:
             logger.debug('Candidate parameters: {}'.format(candidate.parameters))
-            std_err = (2 * numpy.std(candidate.cv_validation_scores) /
+            std_err = (2.0 * numpy.std(candidate.cv_validation_scores) /
                        math.sqrt(len(candidate.cv_validation_scores)))
             if scoring == ACCURACY_SCORING:
                 msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
@@ -381,28 +352,26 @@ class SkLearnModel(Model):
         if scoring == ACCURACY_SCORING:
             logger.info('Best accuracy: {:.2%}, settings: {}'.format(model.best_score_,
                                                                      model.best_params_))
-            cv_loss_ = 1 - model.best_score_
+            # cv_loss_ = 1 - model.best_score_
         elif scoring == LIKELIHOOD_SCORING:
             logger.info('Best log likelihood: {:.4}, settings: {}'.format(model.best_score_,
                                                                           model.best_params_))
-            cv_loss_ = - model.best_score_
+            # cv_loss_ = - model.best_score_
 
         return model.best_estimator_, model.best_params_
 
     def predict(self, examples):
-        X, _ = self.get_feature_matrix(examples)
-
+        X, _, _ = self.get_feature_matrix(examples)
         y = self._clf.predict(X)
         predictions = self._class_encoder.inverse_transform(y)
-
         return self._label_encoder.decode(predictions)
 
     def predict_proba(self, examples):
-        X, _ = self.get_feature_matrix(examples)
+        X, _, _ = self.get_feature_matrix(examples)
         return self._predict_proba(X, self._clf.predict_proba)
 
     def predict_log_proba(self, examples):
-        X, _ = self.get_feature_matrix(examples)
+        X, _, _ = self.get_feature_matrix(examples)
         predictions, log_proba = self._predict_proba(X, self._clf.predict_log_proba)
 
         # JSON can't reliably encode infinity, so replace it with large number
@@ -415,6 +384,7 @@ class SkLearnModel(Model):
     def _predict_proba(self, X, predictor):
         predictions = []
         proba = []
+
         for row in predictor(X):
             class_index = row.argmax()
             prediction = self._class_encoder.inverse_transform([class_index])[0]
@@ -449,32 +419,42 @@ class SkLearnModel(Model):
                   'max-abs': MaxAbsScaler()}.get(scale_type)
         return scaler
 
-    def get_feature_matrix(self, examples, fit=False, y=None):
+    def get_feature_matrix(self, examples, y=None, fit=False):
         """Transforms a list of examples into a feature matrix.
 
         Args:
             examples (list): The examples.
-            fit (bool): Whether to (re)fit vectorizer with examples
 
         Returns:
             (numpy.matrix): The feature matrix.
             (numpy.array): The group labels for examples.
         """
-        feats = [self._extract_features(e) for e in examples]
+        groups = []
+        feats = []
+        for idx, example in enumerate(examples):
+            feats.append(self._extract_features(example))
+            groups.append(idx)
+
+        X, y = self._preprocess_data(feats, y, fit=fit)
+        return X, y, groups
+
+    def _preprocess_data(self, X, y=None, fit=False):
+
         if fit:
-            X = self._feat_vectorizer.fit_transform(feats)
+            y = self._class_encoder.fit_transform(y)
+            X = self._feat_vectorizer.fit_transform(X)
             if self._feat_scaler is not None:
                 X = self._feat_scaler.fit_transform(X)
             if self._feat_selector is not None:
                 X = self._feat_selector.fit_transform(X, y)
         else:
-            X = self._feat_vectorizer.transform(feats)
+            X = self._feat_vectorizer.transform(X)
             if self._feat_scaler is not None:
                 X = self._feat_scaler.transform(X)
             if self._feat_selector is not None:
                 X = self._feat_selector.transform(X)
 
-        return X, None
+        return X, y
 
 
 class LabelEncoder(object):
@@ -485,16 +465,24 @@ class LabelEncoder(object):
     form it can deal with, and at predict time to decode predictions into
     objects
     """
+    def __init__(self, config):
+        """Initializes an encoder
+
+        Args:
+            config (ModelConfig): The model
+        """
+        self.config = config
+
     def encode(self, labels):
         """Transforms a list of label objects into a vector of classes.
 
 
         Args:
-            labels (list): A list of labels to encoder
+            labels (list): A list of labels to encode
         """
         return labels
 
-    def decode(self, classes):
+    def decode(self, classes, groups):
         """Decodes a vector of classes into a list of labels
 
         Args:
@@ -504,3 +492,24 @@ class LabelEncoder(object):
             list: The decoded labels
         """
         return classes
+
+
+class EntityLabelEncoder(LabelEncoder):
+
+    def _get_tag_scheme(self):
+        return self.config.model_settings.get('tag_scheme', 'IOB').upper()
+
+    def encode(self, labels):
+        scheme = self._get_tag_scheme()
+        all_tags = []
+        for label in labels:
+            all_tags.extend(get_tags_from_entities(label, scheme))
+        return all_tags
+
+    def decode(self, tags, groups):
+        scheme = self._get_tag_scheme()
+        if groups is None:
+            return get_entities_from_tags(tags, scheme)
+        else:
+            # TODO implement this part!
+            raise NotImplementedError

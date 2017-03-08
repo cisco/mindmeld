@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains the intent classifier component.
 """
@@ -89,8 +88,8 @@ class IntentClassifier(StandardClassifier):
         super().__init__(resource_loader)
         self.domain = domain
 
-    def _get_queries_and_classes(self, queries=None):
-        if not queries:
+    def _get_queries_and_labels(self, labeled_queries=None):
+        if not labeled_queries:
             query_tree = self._resource_loader.get_labeled_queries()
-            queries = self._resource_loader.flatten_query_tree(query_tree)
-        return list(zip(*[(q.query, q.intent) for q in queries]))
+            labeled_queries = self._resource_loader.flatten_query_tree(query_tree)
+        return list(zip(*[(q.query, q.intent) for q in labeled_queries]))

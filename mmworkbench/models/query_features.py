@@ -654,6 +654,7 @@ def find_ngrams(input_list, n):
         result.append(" ".join(ngram))
     return result
 
+
 register_features('query', {
     'bag-of-words': extract_ngrams,
     'edge-ngrams': extract_edge_ngrams,
