@@ -126,7 +126,7 @@ class EntityRecognizer(Classifier):
         """
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
-        return self._model.predict(query)
+        return self._model.predict([query])[0]
 
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities

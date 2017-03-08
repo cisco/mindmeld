@@ -482,7 +482,7 @@ class LabelEncoder(object):
         """
         return labels
 
-    def decode(self, classes, groups):
+    def decode(self, classes, **kwargs):
         """Decodes a vector of classes into a list of labels
 
         Args:
@@ -506,10 +506,8 @@ class EntityLabelEncoder(LabelEncoder):
             all_tags.extend(get_tags_from_entities(label, scheme))
         return all_tags
 
-    def decode(self, tags, groups):
+    def decode(self, tags, **kwargs):
+        # TODO: support decoding multiple queries at once
         scheme = self._get_tag_scheme()
-        if groups is None:
-            return get_entities_from_tags(tags, scheme)
-        else:
-            # TODO implement this part!
-            raise NotImplementedError
+        query = kwargs['example']
+        return get_entities_from_tags(query, tags, scheme)

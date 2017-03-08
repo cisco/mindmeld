@@ -74,7 +74,7 @@ def _get_tags_from_entities(query, entities, scheme='IOB'):
     return iobs, types
 
 
-def get_entities_from_tags(query, tags):
+def get_entities_from_tags(query, tags, scheme='IOB'):
     """From a set of joint IOB tags, parse the app and system entities.
 
     This performs the reverse operation of get_tags_from_entities.

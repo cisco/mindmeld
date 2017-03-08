@@ -157,27 +157,28 @@ class MemmModel(SkLearnModel):
     def predict(self, examples):
         labels = []
         if self._no_entities:
-            return [None for e in examples]
+            return [self._label_encoder.decode([], example=e) for e in examples]
         for example in examples:
-            label, _ = self._predict_example(example)
+            label = self._predict_example(example)
             labels.append(label)
         return labels
 
     def _predict_example(self, example):
         features_by_segment = self._extract_features(example)
         if len(features_by_segment) == 0:
-            return None, None
+            return self._label_encoder.decode([], example=example)
 
         predicted_tags = []
         prev_tag = tagging.START_TAG
         for features in features_by_segment:
             features['prev_tag'] = prev_tag
-            prediction = self._clf.predict(features)
+            X, _ = self._preprocess_data([features])
+            prediction = self._clf.predict(X)
             predicted_tag = self._class_encoder.inverse_transform(prediction)[0]
             predicted_tags.append(predicted_tag)
             prev_tag = predicted_tag
 
-        return self._label_encoder.decode(predicted_tags)
+        return self._label_encoder.decode(predicted_tags, example=example)
 
     def predict_proba(self, examples):
         # TODO: implement this
