@@ -21,99 +21,105 @@ class QuestionAnswerer(object):
 
     # default ElasticSearch mapping to define text analysis settings for text fields
     DEFAULT_ES_MAPPING = {
-       "mappings": {
-          DOC_TYPE: {
-             "dynamic_templates": [
-                {
-                   "default_text": {
-                      "match": "*",
-                      "match_mapping_type": "string",
-                      "mapping": {
-                         "type": "string",
-                         "analyzer": "default_analyzer"
-                      }
-                   }
+        "mappings": {
+            DOC_TYPE: {
+                "dynamic_templates": [
+                    {
+                        "default_text": {
+                            "match": "*",
+                            "match_mapping_type": "string",
+                            "mapping": {
+                                "type": "text",
+                                "analyzer": "default_analyzer",
+                                "fields": {
+                                    "raw": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "properties": {
+                    "location": {
+                        "type": "geo_point"
+                    },
+                    "id": {
+                        "type": "keyword"
+                    }
                 }
-             ],
-             "properties": {
-                "location": {
-                    "type": "geo_point"
+            }
+        },
+        "settings": {
+            "analysis": {
+                "char_filter": {
+                    "remove_loose_apostrophes": {
+                        "pattern": " '|' ",
+                        "type": "pattern_replace",
+                        "replacement": ""
+                    },
+                    "space_possessive_apostrophes": {
+                        "pattern": "([^\\p{N}\\s]+)'s ",
+                        "type": "pattern_replace",
+                        "replacement": "$1 's "
+                    },
+                    "remove_special_beginning": {
+                        "pattern": "^[^\\p{L}\\p{N}\\p{Sc}&']+",
+                        "type": "pattern_replace",
+                        "replacement": ""
+                    },
+                    "remove_special_end": {
+                        "pattern": "[^\\p{L}\\p{N}&']+$",
+                        "type": "pattern_replace",
+                        "replacement": ""
+                    },
+                    "remove_special1": {
+                        "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{N}\\s]+)",
+                        "type": "pattern_replace",
+                        "replacement": "$1 "
+                    },
+                    "remove_special2": {
+                        "pattern": "([\\p{N}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}\\s]+)",
+                        "type": "pattern_replace",
+                        "replacement": "$1 "
+                    },
+                    "remove_special3": {
+                        "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
+                        "type": "pattern_replace",
+                        "replacement": "$1 "
+                    }
                 },
-                "id": {
-                    "type": "keyword"
+                "analyzer": {
+                    "default_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "whitespace",
+                        "char_filter": [
+                            "remove_loose_apostrophes",
+                            "space_possessive_apostrophes",
+                            "remove_special_beginning",
+                            "remove_special_end",
+                            "remove_special1",
+                            "remove_special2",
+                            "remove_special3"
+                        ],
+                        "filter": [
+                            "lowercase",
+                            "asciifolding",
+                            "shingle"
+                        ]
+                    }
+                },
+                "filter": {
+                    "token_shingle": {
+                        "type": "shingle",
+                        "max_shingle_size": 4,
+                        "min_shingle_size": 2,
+                        "output_unigrams": "true"
+                    }
                 }
-             }
-          }
-       },
-       "settings": {
-          "analysis": {
-             "char_filter": {
-                "remove_loose_apostrophes": {
-                   "pattern": " '|' ",
-                   "type": "pattern_replace",
-                   "replacement": ""
-                },
-                "space_possessive_apostrophes": {
-                   "pattern": "([^\\p{N}\\s]+)'s ",
-                   "type": "pattern_replace",
-                   "replacement": "$1 's "
-                },
-                "remove_special_beginning": {
-                   "pattern": "^[^\\p{L}\\p{N}\\p{Sc}&']+",
-                   "type": "pattern_replace",
-                   "replacement": ""
-                },
-                "remove_special_end": {
-                   "pattern": "[^\\p{L}\\p{N}&']+$",
-                   "type": "pattern_replace",
-                   "replacement": ""
-                },
-                "remove_special1": {
-                   "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{N}\\s]+)",
-                   "type": "pattern_replace",
-                   "replacement": "$1 "
-                },
-                "remove_special2": {
-                   "pattern": "([\\p{N}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}\\s]+)",
-                   "type": "pattern_replace",
-                   "replacement": "$1 "
-                },
-                "remove_special3": {
-                   "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
-                   "type": "pattern_replace",
-                   "replacement": "$1 "
-                }
-             },
-             "analyzer": {
-                "default_analyzer": {
-                   "type": "custom",
-                   "tokenizer": "whitespace",
-                   "char_filter": [
-                      "remove_loose_apostrophes",
-                      "space_possessive_apostrophes",
-                      "remove_special_beginning",
-                      "remove_special_end",
-                      "remove_special1",
-                      "remove_special2",
-                      "remove_special3"
-                   ],
-                   "filter": [
-                      "lowercase",
-                      "asciifolding",
-                      "shingle"
-                   ]
-                }
-             },
-             "filter": {
-                "token_shingle": {
-                   "type": "shingle",
-                   "max_shingle_size": 4,
-                   "min_shingle_size": 2,
-                   "output_unigrams": "true"
-                }
-             }
-          }
-       }
+            }
+        }
     }
 
     def __init__(self, resource_loader, es_host=None):
@@ -202,7 +208,6 @@ def load_index(es_host, index_name, data_file):
 
     # create index if specified index does not exist
     if not es_client.indices.exists(index=index_name):
-        logger.info("Creating index '{}'".format(index_name))
         create_index(es_host, index_name)
 
     for okay, result in streaming_bulk(es_client, _doc_generator(data), index=index_name,
