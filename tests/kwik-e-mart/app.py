@@ -28,7 +28,11 @@ def send_store_hours(context, slots, responder):
     active_store = None
     store_entity = [e for e in context['entities'] if e['type'] == 'location']
     if store_entity:
-        stores = app.question_answerer.get(index='stores', id=store_entity['value']['id'])
+        try:
+            stores = app.question_answerer.get(index='stores', id=store_entity['value']['id'])
+        except KeyError:
+            # failed to resolve entity
+            stores = app.question_answerer.get(store_entity['text'], index='stores')
         try:
             active_store = stores[0]
         except IndexError:
@@ -64,6 +68,15 @@ def send_nearest_store(context, slots, responder):
 
     context['frame']['target_store'] = target_store
     responder.reply('Your nearest Kwik-E-Mart is located at {store_name}.')
+
+
+@app.handle()
+def default(context, slots, responder):
+    import pdb; pdb.set_trace()  # breakpoint 66794c5c //
+
+    prompts = ["Sorry, not sure what you meant there. I can help you find store hours "
+               "for your local Kwik-E-Mart."]
+    responder.prompt(prompts)
 
 
 if __name__ == '__main__':
