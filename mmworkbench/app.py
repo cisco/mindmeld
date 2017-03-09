@@ -9,6 +9,7 @@ from builtins import object
 import logging
 import os
 import sys
+
 from .app_manager import ApplicationManager
 from .server import WorkbenchServer
 
@@ -27,6 +28,10 @@ class Application(object):
         self.app_manager = None
         self._server = None
         self._dialogue_rules = []
+
+    @property
+    def question_answerer(self):
+        return None if self.app_manager is None else self.app_manager.question_answerer
 
     def lazy_init(self, nlp=None):
         if self.app_manager:

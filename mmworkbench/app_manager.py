@@ -9,6 +9,7 @@ import copy
 
 from .dialogue import DialogueManager
 from .processor.nlp import NaturalLanguageProcessor
+from .question_answerer import QuestionAnswerer
 
 
 class ApplicationManager(object):
@@ -17,10 +18,12 @@ class ApplicationManager(object):
     The application manager is responsible for communicating between handling
     conversation requests components, handling req
     """
-    def __init__(self, app_path, nlp=None):
+    def __init__(self, app_path, nlp=None, es_host=None):
+        self._app_path = app_path
         self.nlp = nlp or NaturalLanguageProcessor(app_path)
         self._query_factory = self.nlp.resource_loader.query_factory
         self.dialogue_manager = DialogueManager()
+        self.question_answerer = QuestionAnswerer(self.nlp.resource_loader, es_host)
 
     @property
     def ready(self):
