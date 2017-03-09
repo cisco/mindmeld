@@ -22,7 +22,9 @@ ENTITY_TYPE = 'location'
 @pytest.fixture
 def resolver(resource_loader):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
-    return EntityResolver(resource_loader, ENTITY_TYPE)
+    resolver = EntityResolver(resource_loader, ENTITY_TYPE)
+    resolver.fit()
+    return resolver
 
 
 def test_canonical(resolver):

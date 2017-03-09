@@ -25,9 +25,6 @@ class EntityResolver(object):
 
         self._mapping = None
         self._is_system_entity = Entity.is_system_entity(self.type)
-        if not self._is_system_entity:
-            mapping = self._resource_loader.get_entity_map(self.type)
-            self._mapping = self.process_mapping(self.type, mapping, self._normalizer)
 
     @staticmethod
     def process_mapping(entity_type, mapping, normalizer):
@@ -54,8 +51,9 @@ class EntityResolver(object):
 
     def fit(self):
         """Trains the model"""
-        # self._model = something
-        pass
+        if not self._is_system_entity:
+            mapping = self._resource_loader.get_entity_map(self.type)
+            self._mapping = self.process_mapping(self.type, mapping, self._normalizer)
 
     def predict(self, entity):
         """Predicts resolved values for the entities provided

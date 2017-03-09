@@ -360,6 +360,7 @@ class EntityProcessor(Processor):
     def _build(self):
         """Builds the models for this entity type"""
         self.role_classifier.fit()
+        self.entity_resolver.fit()
 
     def _dump(self):
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
