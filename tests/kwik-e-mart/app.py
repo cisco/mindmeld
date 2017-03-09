@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains the Kwik-E-Mart workbench demo application"""
+from __future__ import unicode_literals
+from builtins import next
 
 from mmworkbench import Application
 
@@ -26,18 +28,19 @@ def say_goodbye(context, slots, responder):
 @app.handle(intent='get_store_hours')
 def send_store_hours(context, slots, responder):
     active_store = None
-    store_entity = [e for e in context['entities'] if e['type'] == 'location']
+    store_entity = next((e for e in context['entities'] if e['type'] == 'location'), None)
     if store_entity:
         try:
             stores = app.question_answerer.get(index='stores', id=store_entity['value']['id'])
-        except KeyError:
+        except TypeError:
             # failed to resolve entity
+
             stores = app.question_answerer.get(store_entity['text'], index='stores')
         try:
             active_store = stores[0]
         except IndexError:
             # No active store... continue
-            # TODO: we probably need a better response here
+            # TODO: maybe we want a better response here
             pass
     elif 'target_store' in context['frame']:
         active_store = context['frame']['target_store']
@@ -72,8 +75,6 @@ def send_nearest_store(context, slots, responder):
 
 @app.handle()
 def default(context, slots, responder):
-    import pdb; pdb.set_trace()  # breakpoint 66794c5c //
-
     prompts = ["Sorry, not sure what you meant there. I can help you find store hours "
                "for your local Kwik-E-Mart."]
     responder.prompt(prompts)
