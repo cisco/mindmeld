@@ -7,6 +7,7 @@ from builtins import object
 
 import json
 import logging
+import os
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
@@ -18,10 +19,17 @@ logger = logging.getLogger(__name__)
 
 class QuestionAnswerer(object):
 
-    def __init__(self, resource_loader, es_host):
+    def __init__(self, resource_loader, es_host=None):
         self._resource_loader = resource_loader
-        self._es_host = es_host
-        self._es_client = Elasticsearch(es_host)
+        self._es_host = es_host or os.environ.get('MM_ES_HOST')
+        self.__es_client = None
+
+    @property
+    def _es_client(self):
+        # Lazily connect to Elasticsearch
+        if self.__es_client is None:
+            self.__es_client = Elasticsearch(self._es_host)
+        return self.__es_client
 
     def get(self, query_string=None, **kwargs):
         """Gets a collection of documents from the knowledge base.
