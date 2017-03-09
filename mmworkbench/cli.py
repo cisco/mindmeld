@@ -14,8 +14,6 @@ import time
 
 import click
 import click_log
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk
 
 from . import __version__, Conversation, question_answerer as qa
 from .path import MALLARD_JAR_PATH
