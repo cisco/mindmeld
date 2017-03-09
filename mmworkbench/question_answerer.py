@@ -43,11 +43,18 @@ class QuestionAnswerer(object):
         Returns:
             list: list of matching documents
         """
-        es_query = None
+        es_query = {}
         try:
             index = kwargs['index']
         except KeyError:
             raise TypeError("get() missing required keyword argument 'index'")
+
+        doc_id = kwargs.get('id')
+        if doc_id:
+            # If an id was passed in, simply retrieve the specified document
+            response = self._es_client.get(index=index, doc_type=DOC_TYPE, id=doc_id)
+            return [response['_source']]
+
         sort = kwargs.get('sort')
         location = kwargs.get('location')
 
@@ -63,7 +70,10 @@ class QuestionAnswerer(object):
                 }]
             }
         # TODO: handle other sorts
-        return self._es_client.search(index=index, body=es_query, q=query_string)
+        response = self._es_client.search(index=index, body=es_query, q=query_string)
+
+        results = [hit['_source'] for hit in response['hits']['hits']]
+        return results
 
     def config(self, config):
         raise NotImplementedError
