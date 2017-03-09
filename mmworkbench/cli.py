@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+from builtins import str
 
 import errno
 import json
@@ -68,15 +69,18 @@ def run_server(ctx, port, no_debug, reloader):
 
 @cli.command('converse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-def converse(ctx):
+@click.option('--session', help='JSON object to be used as the session')
+def converse(ctx, session):
     """Starts a conversation with the app"""
     app = ctx.obj.get('app')
+    if isinstance(session, str):
+        session = json.loads(session)
     if app is None:
         raise ValueError('No app was given')
 
     ctx.invoke(num_parser, start=True)
 
-    convo = Conversation(app=app)
+    convo = Conversation(app=app, session=session)
 
     while True:
         message = click.prompt('You')
