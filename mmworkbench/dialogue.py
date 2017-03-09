@@ -34,7 +34,7 @@ class DialogueStateRule(object):
             if len(keys) == 2:
                 single, plural = keys
                 if single in kwargs and plural in kwargs:
-                    msg = 'Only one of {!r} and {!r} can be sepcified for a dialogue state rule'
+                    msg = 'Only one of {!r} and {!r} can be specified for a dialogue state rule'
                     raise ValueError(msg.format(single, plural, self.__class__.__name__))
                 if single in kwargs:
                     resolved[plural] = frozenset((kwargs[single],))
@@ -157,7 +157,7 @@ class DialogueManager(object):
         rule = DialogueStateRule(name, **kwargs)
 
         self.rules.append(rule)
-        self.rules.sort(key=lambda x: x.complexity)
+        self.rules.sort(key=lambda x: -x.complexity)
         if handler is not None:
             old_handler = self.handler_map.get(name)
             if old_handler is not None and old_handler != handler:
@@ -191,7 +191,7 @@ class DialogueManager(object):
         return {'dialogue_state': dialogue_state, 'client_actions': responder.client_actions}
 
     @staticmethod
-    def _default_handler(self, context):
+    def _default_handler(context, slots, responder):
         # TODO: implement default handler
         pass
 
