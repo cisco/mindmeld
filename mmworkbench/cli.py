@@ -1,8 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+from builtins import str
 
 import errno
+import json
 import logging
 import os
 import signal
@@ -13,7 +15,7 @@ import time
 import click
 import click_log
 
-from . import __version__, Conversation
+from . import __version__, Conversation, question_answerer as qa
 from .path import MALLARD_JAR_PATH
 
 logger = logging.getLogger(__name__)
@@ -65,15 +67,18 @@ def run_server(ctx, port, no_debug, reloader):
 
 @cli.command('converse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-def converse(ctx):
+@click.option('--session', help='JSON object to be used as the session')
+def converse(ctx, session):
     """Starts a conversation with the app"""
     app = ctx.obj.get('app')
+    if isinstance(session, str):
+        session = json.loads(session)
     if app is None:
         raise ValueError('No app was given')
 
     ctx.invoke(num_parser, start=True)
 
-    convo = Conversation(app=app)
+    convo = Conversation(app=app, session=session)
 
     while True:
         message = click.prompt('You')
@@ -82,6 +87,23 @@ def converse(ctx):
         for index, response in enumerate(responses):
             prefix = 'App: ' if index == 0 else ''
             click.secho(prefix + response, fg='blue', bg='white')
+
+
+@cli.command('create-index', context_settings=CONTEXT_SETTINGS)
+@click.option('-n', '--es-host', required=True)
+@click.argument('index_name', required=True)
+def create_index(es_host, index_name):
+    """Create a new question answerer index"""
+    qa.create_index(es_host, index_name)
+
+
+@cli.command('load-index', context_settings=CONTEXT_SETTINGS)
+@click.option('-n', '--es-host', required=True)
+@click.argument('index_name', required=True)
+@click.argument('data_file', required=True)
+def load_index(es_host, index_name, data_file):
+    """Load data into a question answerer index"""
+    qa.load_index(es_host, index_name, data_file)
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)

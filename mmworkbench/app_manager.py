@@ -5,8 +5,11 @@ This module contains the application manager
 from __future__ import unicode_literals
 from builtins import object
 
+import copy
+
 from .dialogue import DialogueManager
 from .processor.nlp import NaturalLanguageProcessor
+from .question_answerer import QuestionAnswerer
 
 
 class ApplicationManager(object):
@@ -15,10 +18,12 @@ class ApplicationManager(object):
     The application manager is responsible for communicating between handling
     conversation requests components, handling req
     """
-    def __init__(self, app_path, nlp=None):
+    def __init__(self, app_path, nlp=None, es_host=None):
+        self._app_path = app_path
         self.nlp = nlp or NaturalLanguageProcessor(app_path)
         self._query_factory = self.nlp.resource_loader.query_factory
         self.dialogue_manager = DialogueManager()
+        self.question_answerer = QuestionAnswerer(self.nlp.resource_loader, es_host)
 
     @property
     def ready(self):
@@ -31,7 +36,7 @@ class ApplicationManager(object):
             return
         self.nlp.load()
 
-    def parse(self, text, payload=None, session=None, history=None, verbose=False):
+    def parse(self, text, payload=None, session=None, frame=None, history=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
@@ -43,6 +48,7 @@ class ApplicationManager(object):
         """
         session = session or {}
         history = history or []
+        frame = frame or {}
         # TODO: what do we do with verbose???
         # TODO: where is the frame stored?
 
@@ -56,7 +62,7 @@ class ApplicationManager(object):
         # TODO: support specifying target domain, etc in payload
         processed_query = self.nlp.process_query(query)
 
-        context = {'request': request, 'history': history}
+        context = {'request': request, 'history': history, 'frame': copy.deepcopy(frame)}
         context.update(processed_query.to_dict())
         context.pop('text')
         context.update(self.dialogue_manager.apply_handler(context))

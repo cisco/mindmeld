@@ -3,10 +3,12 @@
 from __future__ import unicode_literals
 from builtins import object, str
 
+import logging
 import random
 
 from . import path
 
+logger = logging.getLogger(__name__)
 
 SHOW_REPLY = 'show-reply'
 SHOW_PROMPT = 'show-prompt'
@@ -32,7 +34,7 @@ class DialogueStateRule(object):
             if len(keys) == 2:
                 single, plural = keys
                 if single in kwargs and plural in kwargs:
-                    msg = 'Only one of {!r} and {!r} can be sepcified for a dialogue state rule'
+                    msg = 'Only one of {!r} and {!r} can be specified for a dialogue state rule'
                     raise ValueError(msg.format(single, plural, self.__class__.__name__))
                 if single in kwargs:
                     resolved[plural] = frozenset((kwargs[single],))
@@ -155,7 +157,7 @@ class DialogueManager(object):
         rule = DialogueStateRule(name, **kwargs)
 
         self.rules.append(rule)
-        self.rules.sort(key=lambda x: x.complexity)
+        self.rules.sort(key=lambda x: -x.complexity)
         if handler is not None:
             old_handler = self.handler_map.get(name)
             if old_handler is not None and old_handler != handler:
@@ -179,6 +181,7 @@ class DialogueManager(object):
                 break
 
         if dialogue_state is None:
+            logger.info('Failed to find dialogue state', context)
             handler = self._default_handler
         else:
             handler = self.handler_map[dialogue_state]
@@ -188,7 +191,7 @@ class DialogueManager(object):
         return {'dialogue_state': dialogue_state, 'client_actions': responder.client_actions}
 
     @staticmethod
-    def _default_handler(self, context):
+    def _default_handler(context, slots, responder):
         # TODO: implement default handler
         pass
 
@@ -294,6 +297,7 @@ class Conversation(object):
         self._app_manager = app.app_manager
         self.session = session or {}
         self.history = []
+        self.frame = {}
 
     def say(self, text):
         """Send a message in the conversation. The message will be processed by
@@ -307,9 +311,11 @@ class Conversation(object):
         """
         if not self._app_manager.ready:
             self._app_manager.load()
-        response = self._app_manager.parse(text, session=self.session, history=self.history)
+        response = self._app_manager.parse(text, session=self.session, frame=self.frame,
+                                           history=self.history)
         response.pop('history')
         self.history.insert(0, response)
+        self.frame = response['frame']
 
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
