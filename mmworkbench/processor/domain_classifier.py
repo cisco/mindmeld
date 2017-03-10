@@ -47,9 +47,10 @@ class DomainClassifier(Classifier):
         }
     }
 
-    def get_model_config(self, config_name, **kwargs):
-        return super().get_model_config(config_name, example_type=QUERY_EXAMPLE_TYPE,
-                                        label_type=CLASS_LABEL_TYPE)
+    def _get_model_config(self, config_name, **kwargs):
+        kwargs['example_type'] = QUERY_EXAMPLE_TYPE
+        kwargs['label_type'] = CLASS_LABEL_TYPE
+        return super()._get_model_config(config_name, **kwargs)
 
     def fit(self, *args, **kwargs):
         logger.info('Fitting domain classifier')

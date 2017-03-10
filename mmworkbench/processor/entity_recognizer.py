@@ -12,7 +12,7 @@ from sklearn.externals import joblib
 from ..models.helpers import create_model
 from ..models import QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
-from .classifier import Classifier, ClassifierLoadError
+from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 
 logger = logging.getLogger(__name__)
 
@@ -89,9 +89,10 @@ class EntityRecognizer(Classifier):
         self.intent = intent
         self.entity_types = set()
 
-    def get_model_config(self, config_name, **kwargs):
-        return super().get_model_config(config_name, example_type=QUERY_EXAMPLE_TYPE,
-                                        label_type=ENTITIES_LABEL_TYPE)
+    def _get_model_config(self, config_name, **kwargs):
+        kwargs['example_type'] = QUERY_EXAMPLE_TYPE
+        kwargs['label_type'] = ENTITIES_LABEL_TYPE
+        return super()._get_model_config(config_name, **kwargs)
 
     def fit(self, queries=None, config_name=None, **kwargs):
         """Trains the model
@@ -104,8 +105,8 @@ class EntityRecognizer(Classifier):
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         queries, labels = self._get_queries_and_labels(queries)
-        config = self.get_model_config(config_name, **kwargs)
-        model = create_model(config)
+        model_config = self._get_model_config(config_name, **kwargs)
+        model = create_model(model_config)
         gazetteers = self._resource_loader.get_gazetteers()
 
         # build  entity types set
@@ -117,6 +118,7 @@ class EntityRecognizer(Classifier):
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, labels)
         self._model = model
+        self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.ready = True
         self.dirty = True
@@ -157,6 +159,7 @@ class EntityRecognizer(Classifier):
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
+            self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.ready = True
         self.dirty = False
