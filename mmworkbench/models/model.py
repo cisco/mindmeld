@@ -101,6 +101,7 @@ class Model(object):
         self._current_params = None
         self._resources = {}
         self._clf = None
+        self.cv_loss_ = None
 
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
@@ -336,27 +337,25 @@ class SkLearnModel(Model):
         model_class = self._get_model_class()
 
         grid_cv = GridSearchCV(estimator=model_class(), scoring=scoring, param_grid=param_grid,
-                               cv=cv_iterator, n_jobs=n_jobs, verbose=1)
+                               cv=cv_iterator, n_jobs=n_jobs)
         model = grid_cv.fit(X, y, groups)
 
-        for candidate in model.grid_scores_:
-            logger.debug('Candidate parameters: {}'.format(candidate.parameters))
-            std_err = (2.0 * numpy.std(candidate.cv_validation_scores) /
-                       math.sqrt(len(candidate.cv_validation_scores)))
+        for idx, params in enumerate(model.cv_results_['params']):
+            logger.debug('Candidate parameters: {}'.format(params))
+            std_err = 2.0 * model.cv_results_['std_test_score'][idx] / math.sqrt(model.n_splits_)
             if scoring == ACCURACY_SCORING:
                 msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
-                logger.debug(msg.format(candidate.mean_validation_score, std_err))
             elif scoring == LIKELIHOOD_SCORING:
                 msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
-                logger.debug(msg.format(candidate.mean_validation_score, std_err))
+            logger.debug(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
+
         if scoring == ACCURACY_SCORING:
-            logger.info('Best accuracy: {:.2%}, settings: {}'.format(model.best_score_,
-                                                                     model.best_params_))
-            # cv_loss_ = 1 - model.best_score_
+            msg = 'Best accuracy: {:.2%}, settings: {}'
+            self.cv_loss_ = 1 - model.best_score_
         elif scoring == LIKELIHOOD_SCORING:
-            logger.info('Best log likelihood: {:.4}, settings: {}'.format(model.best_score_,
-                                                                          model.best_params_))
-            # cv_loss_ = - model.best_score_
+            msg = 'Best log likelihood: {:.4}, settings: {}'
+            self.cv_loss_ = - model.best_score_
+        logger.info(msg.format(model.best_score_, model.best_params_))
 
         return model.best_estimator_, model.best_params_
 
