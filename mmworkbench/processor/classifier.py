@@ -15,8 +15,7 @@ from sklearn.externals import joblib
 from ..exceptions import ClassifierLoadError, FileNotFoundError
 from ..core import Query
 
-from ..models import ModelConfig
-from ..models.helpers import create_model
+from ..models import create_model, ModelConfig
 
 logger = logging.getLogger(__name__)
 

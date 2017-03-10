@@ -87,10 +87,10 @@ class IntentClassifier(Classifier):
         super().__init__(resource_loader)
         self.domain = domain
 
-    def get_model_config(self, config_name, **kwargs):
+    def _get_model_config(self, config_name, **kwargs):
         kwargs['example_type'] = QUERY_EXAMPLE_TYPE
         kwargs['label_type'] = CLASS_LABEL_TYPE
-        return super().get_model_config(config_name, **kwargs)
+        return super()._get_model_config(config_name, **kwargs)
 
     def fit(self, *args, **kwargs):
         logger.info('Fitting intent classifier: domain=%r', self.domain)
