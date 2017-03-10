@@ -15,7 +15,8 @@ import time
 import click
 import click_log
 
-from . import __version__, Conversation, question_answerer as qa
+from . import __version__, Conversation, QuestionAnswerer
+
 from .path import MALLARD_JAR_PATH
 
 logger = logging.getLogger(__name__)
@@ -105,7 +106,7 @@ def build(ctx):
 @click.argument('index_name', required=True)
 def create_index(es_host, index_name):
     """Create a new question answerer index"""
-    qa.create_index(es_host, index_name)
+    QuestionAnswerer.create_index(es_host, index_name)
 
 
 @cli.command('load-index', context_settings=CONTEXT_SETTINGS)
@@ -114,7 +115,7 @@ def create_index(es_host, index_name):
 @click.argument('data_file', required=True)
 def load_index(es_host, index_name, data_file):
     """Load data into a question answerer index"""
-    qa.load_index(es_host, index_name, data_file)
+    QuestionAnswerer.load_index(es_host, index_name, data_file)
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
