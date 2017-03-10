@@ -116,6 +116,9 @@ class EntityRecognizer(Classifier):
         model.fit(queries, labels)
         self._model = model
 
+        self.ready = True
+        self.dirty = True
+
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities
 

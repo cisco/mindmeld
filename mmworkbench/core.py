@@ -402,7 +402,7 @@ class NestedEntity(object):
         )
 
     def __repr__(self):
-        msg = '<{} {!r} ({!r}) char: [{!r}-{!r}] tok: [{!r}-{!r}]>'
+        msg = '<{} {!r} ({!r}) char: [{!r}-{!r}], tok: [{!r}-{!r}]>'
         return msg.format(self.__class__.__name__, self.text, self.entity.type, self.span.start,
                           self.span.end, self.token_span.start, self.token_span.end)
 

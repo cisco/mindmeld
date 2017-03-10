@@ -39,6 +39,7 @@ class Processor(object):
         self._children = {}
         self.ready = False
         self.dirty = False
+        self.name = None
 
     def build(self):
         """Builds all models for this processor and its children."""
@@ -60,7 +61,7 @@ class Processor(object):
         for child in self._children.values():
             child.dump()
 
-        self.dirty = True
+        self.dirty = False
 
     def _dump(self):
         raise NotImplementedError
@@ -108,6 +109,10 @@ class Processor(object):
     def create_query(self, query_text):
         return self.resource_loader.query_factory.create_query(query_text)
 
+    def __repr__(self):
+        msg = '<{} {!r} ready: {!r}, dirty: {!r}>'
+        return msg.format(self.__class__.__name__, self.name, self.ready, self.dirty)
+
 
 class NaturalLanguageProcessor(Processor):
     """The natural language processor is the workbench component responsible for
@@ -126,6 +131,7 @@ class NaturalLanguageProcessor(Processor):
         """
         super().__init__(app_path, resource_loader)
         self._app_path = app_path
+        self.name = app_path
         self.domain_classifier = DomainClassifier(self.resource_loader)
 
         for domain in path.get_domains(self._app_path):
@@ -165,9 +171,6 @@ class NaturalLanguageProcessor(Processor):
         processed_query = self.domains[domain].process_query(query)
         processed_query.domain = domain
         return processed_query
-
-    def __repr__(self):
-        return "<{} {!r}>".format(self.__class__.__name__, self._app_path)
 
 
 class DomainProcessor(Processor):
@@ -236,9 +239,6 @@ class DomainProcessor(Processor):
         processed_query.intent = intent
         return processed_query
 
-    def __repr__(self):
-        return "<{} {!r}>".format(self.__class__.__name__, self.name)
-
 
 class IntentProcessor(Processor):
     """Summary
@@ -270,6 +270,7 @@ class IntentProcessor(Processor):
 
         # TODO: something for the parser?
 
+        # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
             processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
@@ -288,6 +289,7 @@ class IntentProcessor(Processor):
 
         # TODO: something with parser?
 
+        # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
             processor = EntityProcessor(self._app_path, self.domain, self.name, entity_type,
@@ -328,9 +330,6 @@ class IntentProcessor(Processor):
 
         return ProcessedQuery(query, entities=entities)
 
-    def __repr__(self):
-        return "<IntentProcessor {!r}>".format(self.name)
-
 
 class EntityProcessor(Processor):
     """Summary
@@ -347,6 +346,7 @@ class EntityProcessor(Processor):
         self.domain = domain
         self.intent = intent
         self.type = entity_type
+        self.name = self.type
 
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
         self.entity_resolver = EntityResolver(self.resource_loader, entity_type)
@@ -384,9 +384,6 @@ class EntityProcessor(Processor):
         # Resolver entity
         entity.entity.value = self.entity_resolver.predict(entity.entity)
         return entity
-
-    def __repr__(self):
-        return "<EntityProcessor {!r}>".format(self.type)
 
 
 def create_tokenizer(app_path):
