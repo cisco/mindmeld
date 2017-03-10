@@ -139,22 +139,13 @@ class NaturalLanguageProcessor(Processor):
         if len(self.domains) > 1:
             self.domain_classifier.fit()
 
-        for domain_processor in self.domains.values():
-            domain_processor.build()
-
     def _dump(self):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.dump(model_path)
 
-        for domain_processor in self.domains.values():
-            domain_processor.dump()
-
     def _load(self):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
-
-        for domain_processor in self.domains.values():
-            domain_processor.load()
 
     def process_query(self, query):
         """Processes the query object passed in
