@@ -108,12 +108,12 @@ class EntityResolver(object):
         # joblib.dump(self._model, model_path)
         pass
 
-    def load(self, model_path):
+    def load(self):
         """Loads the model from disk
 
         Args:
             model_path (str): The location on disk where the model is stored
 
         """
-        # self._model = joblib.load(model_path)
-        pass
+        self.fit()
+

@@ -369,6 +369,7 @@ class EntityProcessor(Processor):
     def _load(self):
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.load(model_path)
+        self.entity_resolver.load()
 
     def process(self, text):
         raise NotImplementedError('EntityProcessor objects do not support `process()`. '
