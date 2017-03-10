@@ -11,7 +11,7 @@ from .classifier import StandardClassifier
 logger = logging.getLogger(__name__)
 
 
-class IntentClassifier(StandardClassifier):
+class IntentClassifier(Classifier):
     """An intent classifier is used to determine the target intent for a given query. It is trained
     using all of the labeled queries across all intents for a domain in an application. The
     labels for the training data are the intent names associated with each query. The classifier
@@ -88,8 +88,20 @@ class IntentClassifier(StandardClassifier):
         super().__init__(resource_loader)
         self.domain = domain
 
-    def _get_queries_and_labels(self, labeled_queries=None):
-        if not labeled_queries:
+    def fit(self, *args, **kwargs):
+        logger.info('Fitting intent classifier: %s', self.domain)
+        super().fit(*args, **kwargs)
+
+    def _get_queries_and_labels(self, queries=None, label_set=None):
+        """Returns the set of queries and their labels to train on
+
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+        """
+        if not queries:
             query_tree = self._resource_loader.get_labeled_queries()
-            labeled_queries = self._resource_loader.flatten_query_tree(query_tree)
-        return list(zip(*[(q.query, q.intent) for q in labeled_queries]))
+            queries = self._resource_loader.flatten_query_tree(query_tree)
+        return list(zip(*[(q.query, q.intent) for q in queries]))

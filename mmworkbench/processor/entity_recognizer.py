@@ -6,9 +6,10 @@ from __future__ import unicode_literals
 
 import logging
 
-from .classifier import Classifier
 from ..core import Query
 from ..models.helpers import create_model
+
+from .classifier import Classifier
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +101,7 @@ class EntityRecognizer(Classifier):
                 be used.
 
         """
+        logger.info('Fitting entity recognizer: %r, %r', self.domain, self.intent)
         queries, labels = self._get_queries_and_labels(queries)
         config = self.get_model_config(config_name, **kwargs)
         model = create_model(config)
@@ -115,19 +117,6 @@ class EntityRecognizer(Classifier):
         model.fit(queries, labels)
         self._model = model
 
-    def predict(self, query):
-        """Predicts a role for the specified query
-
-        Args:
-            query (Query): The input query
-
-        Returns:
-            list: the predicted entities
-        """
-        if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query)
-        return self._model.predict([query])[0]
-
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities
 
@@ -138,16 +127,7 @@ class EntityRecognizer(Classifier):
             list: a list of tuples of the form (Entity, float) grouping potential entities and their
             probabilities
         """
-        # Note(jj): Not sure we can support this with all classifiers (MEMM?)
-        pass
-
-    def evaluate(self, use_blind=False):
-        """Evaluates the model on the specified data
-
-        Returns:
-            TYPE: Description
-        """
-        pass
+        raise NotImplementedError
 
     def load(self, model_path):
         super().load(model_path)

@@ -32,8 +32,10 @@ class Classifier(object):
         """
         self._resource_loader = resource_loader
         self._model = None  # will be set when model is fit or loaded
+        self.ready = False
+        self.dirty = False
 
-    def fit(self, model_type=None, features=None, params_grid=None, cv=None, queries=None):
+    def fit(self, queries=None, config_name=None, **kwargs):
         """Trains the model
 
         Args:
@@ -45,18 +47,37 @@ class Classifier(object):
             queries (list of ProcessedQuery): The labeled queries to use as training data
 
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        """Trains the model
+
+        Args:
+            queries (list of ProcessedQuery): The labeled queries to use as training data
+            config_name (str): The type of model to use. If omitted, the default model type will
+                be used.
+
+        """
+        queries, classes = self._get_queries_and_labels(queries)
+        config = self.get_model_config(config_name, **kwargs)
+        model = create_model(config)
+        gazetteers = self._resource_loader.get_gazetteers()
+        model.register_resources(gazetteers=gazetteers)
+        model.fit(queries, classes)
+        self._model = model
+
+        self.ready = True
+        self.dirty = True
 
     def predict(self, query):
         """Predicts a domain for the specified query
 
         Args:
-            query (Query): The input query
+            query (Query or str): The input query
 
         Returns:
             str: the predicted domain
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
+        return self._model.predict([query])[0]
 
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities
@@ -68,7 +89,9 @@ class Classifier(object):
             list: a list of tuples of the form (str, float) grouping predictions and their
                 probabilities
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
+        return list(zip(*self._model.predict_proba([query])))[0]
 
     def evaluate(self, use_blind=False):
         """Evaluates the model on the specified data
@@ -98,6 +121,8 @@ class Classifier(object):
 
         joblib.dump(self._model, model_path)
 
+        self.dirty = False
+
     def load(self, model_path):
         """Loads the model from disk
 
@@ -110,80 +135,24 @@ class Classifier(object):
         except FileNotFoundError:
             msg = 'Unable to load {}. Pickle file not found at {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+        if self._model is not None:
+            gazetteers = self._resource_loader.get_gazetteers()
+            self._model.register_resources(gazetteers=gazetteers)
 
-    def _get_queries_and_labels(self, queries=None):
-        """Returns the set of queries and their classes to train on
+        self.ready = True
+        self.dirty = False
+
+    def _get_queries_and_labels(self, queries=None, label_set=None):
+        """Returns the set of queries and their labels to train on
 
         Args:
-            queries (list): A list of ProcessedQuery objects to train. If not passed, the default
-                training set will be loaded.
-
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
         """
         raise NotImplementedError('Subclasses must implement this method')
 
-
-class StandardClassifier(Classifier):
-    """The Standard classifier is a generic base for classification of strings.
-
-    Attributes:
-        DEFAULT_CONFIG (dict): The default configuration
-        MODEL_CLASS (type): The the class of the underlying model.
-    """
-
-    def fit(self, queries=None, config_name=None, **kwargs):
-        """Trains the model
-
-        Args:
-            queries (list of ProcessedQuery): The labeled queries to use as training data
-            config_name (str): The type of model to use. If omitted, the default model type will
-                be used.
-
-        """
-        queries, classes = self._get_queries_and_labels(queries)
-        config = self.get_model_config(config_name, **kwargs)
-        model = create_model(config)
-        gazetteers = self._resource_loader.get_gazetteers()
-        model.register_resources(gazetteers=gazetteers)
-        model.fit(queries, classes)
-        self._model = model
-
-    def predict(self, query):
-        """Predicts a domain for the specified query
-
-        Args:
-            query (Query): The input query
-
-        Returns:
-            str: the predicted domain
-        """
-        if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query)
-        return self._model.predict([query])[0]
-
-    def predict_proba(self, query):
-        """Generates multiple hypotheses and returns their associated probabilities
-
-        Args:
-            query (Query): The input query
-
-        Returns:
-            list: a list of tuples of the form (str, float) grouping predictions and their
-                probabilities
-        """
-        if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query)
-        return list(zip(*self._model.predict_proba([query])))[0]
-
-    def evaluate(self, use_blind=False):
-        """Evaluates the model on the specified data
-
-        Returns:
-            TYPE: Description
-        """
-        raise NotImplementedError('Still need to implement this. Sorry!')
-
-    def load(self, model_path):
-        super().load(model_path)
-        if self._model:
-            gazetteers = self._resource_loader.get_gazetteers()
-            self._model.register_resources(gazetteers=gazetteers)
+    def __repr__(self):
+        msg = '<{} ready: {!r}, dirty: {!r}>'
+        return msg.format(self.__class__.__name__, self.ready, self.dirty)
