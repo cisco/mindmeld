@@ -89,6 +89,17 @@ def converse(ctx, session):
             click.secho(prefix + response, fg='blue', bg='white')
 
 
+@cli.command('build', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+def build(ctx):
+    """Builds the app with default config"""
+    app = ctx.obj.get('app')
+    app.lazy_init()
+    nlp = app.app_manager.nlp
+    nlp.build()
+    nlp.dump()
+
+
 @cli.command('create-index', context_settings=CONTEXT_SETTINGS)
 @click.option('-n', '--es-host', required=True)
 @click.argument('index_name', required=True)
