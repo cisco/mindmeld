@@ -92,8 +92,16 @@ class IntentClassifier(Classifier):
                                         label_type=CLASS_LABEL_TYPE)
 
     def fit(self, *args, **kwargs):
-        logger.info('Fitting intent classifier: %s', self.domain)
+        logger.info('Fitting intent classifier: domain=%r', self.domain)
         super().fit(*args, **kwargs)
+
+    def dump(self, *args, **kwargs):
+        logger.info('Saving intent classifier: domain=%r', self.domain)
+        super().dump(*args, **kwargs)
+
+    def load(self, *args, **kwargs):
+        logger.info('Loading intent classifier: domain=%r', self.domain)
+        super().load(*args, **kwargs)
 
     def _get_queries_and_labels(self, queries=None, label_set=None):
         """Returns the set of queries and their labels to train on

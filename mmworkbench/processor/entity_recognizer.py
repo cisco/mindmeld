@@ -102,7 +102,7 @@ class EntityRecognizer(Classifier):
                 be used.
 
         """
-        logger.info('Fitting entity recognizer: %r, %r', self.domain, self.intent)
+        logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         queries, labels = self._get_queries_and_labels(queries)
         config = self.get_model_config(config_name, **kwargs)
         model = create_model(config)
@@ -128,6 +128,7 @@ class EntityRecognizer(Classifier):
             model_path (str): The location on disk where the model should be stored
 
         """
+        logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         # make directory if necessary
         folder = os.path.dirname(model_path)
         if not os.path.isdir(folder):
@@ -145,6 +146,7 @@ class EntityRecognizer(Classifier):
             model_path (str): The location on disk where the model is stored
 
         """
+        logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
             er_data = joblib.load(model_path)
             self._model = er_data['model']

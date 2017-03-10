@@ -55,6 +55,14 @@ class DomainClassifier(Classifier):
         logger.info('Fitting domain classifier')
         super().fit(*args, **kwargs)
 
+    def dump(self, *args, **kwargs):
+        logger.info('Saving domain classifier')
+        super().dump(*args, **kwargs)
+
+    def load(self, *args, **kwargs):
+        logger.info('Loading domain classifier')
+        super().load(*args, **kwargs)
+
     def _get_examples_and_labels(self, examples=None, label_set=None):
         if not examples:
             query_tree = self._resource_loader.get_labeled_queries(label_set=label_set)
