@@ -20,7 +20,7 @@ from .gazetteer import Gazetteer
 
 logger = logging.getLogger(__name__)
 
-QUERY_SETS = {
+LABEL_SETS = {
     'train': 'train*.txt'
 }
 
@@ -116,7 +116,7 @@ class ResourceLoader(object):
         self.entity_maps[entity_type]['mapping'] = json_data
         self.entity_maps[entity_type]['loaded'] = time.time()
 
-    def get_labeled_queries(self, domain=None, intent=None, query_set='train', force_reload=False):
+    def get_labeled_queries(self, domain=None, intent=None, label_set='train', force_reload=False):
         """Gets labeled queries from the cache, or loads them from disk.
 
         Args:
@@ -129,7 +129,7 @@ class ResourceLoader(object):
                 intent.
         """
         query_tree = {}
-        file_iter = self._traverse_labeled_queries_files(domain, intent, query_set, force_reload)
+        file_iter = self._traverse_labeled_queries_files(domain, intent, label_set, force_reload)
         for domain, intent, filename in file_iter:
             if domain not in query_tree:
                 query_tree[domain] = {}
@@ -141,12 +141,12 @@ class ResourceLoader(object):
 
         return query_tree
 
-    def _traverse_labeled_queries_files(self, domain=None, intent=None, query_set='train',
+    def _traverse_labeled_queries_files(self, domain=None, intent=None, label_set='train',
                                         force_reload=False):
         try:
-            file_pattern = QUERY_SETS[query_set]
+            file_pattern = LABEL_SETS[label_set]
         except KeyError:
-            raise ValueError("Unknown query set '{}'".format(query_set))
+            raise ValueError("Unknown label set '{}'".format(label_set))
         self._update_query_file_dates(file_pattern)
 
         domains = [domain] if domain else self.labeled_query_files.keys()
@@ -155,7 +155,7 @@ class ResourceLoader(object):
             intents = [intent] if intent else self.labeled_query_files[domain].keys()
             for intent in intents:
                 files = self.labeled_query_files[domain][intent].keys()
-                # filter to files which belong to the query set
+                # filter to files which belong to the label set
                 files = fnmatch.filter(files, file_pattern)
                 files.sort()
                 for filename in files:
