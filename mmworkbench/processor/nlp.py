@@ -105,6 +105,9 @@ class Processor(object):
         """
         raise NotImplementedError
 
+    def create_query(self, query_text):
+        return self.resource_loader.query_factory.create_query(query_text)
+
 
 class NaturalLanguageProcessor(Processor):
     """The natural language processor is the workbench component responsible for
