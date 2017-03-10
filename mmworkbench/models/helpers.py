@@ -6,6 +6,15 @@ import re
 FEATURE_MAP = {}
 MODEL_MAP = {}
 
+# Example types
+QUERY_EXAMPLE_TYPE = 'query'
+ENTITY_EXAMPLE_TYPE = 'entity'
+
+# Label types
+CLASS_LABEL_TYPE = 'class'
+ENTITIES_LABEL_TYPE = 'entities'
+
+
 # resource/requirements names
 GAZETTEER_RSC = "gaz"
 WORD_FREQ_RSC = "w_freq"

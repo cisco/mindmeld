@@ -8,6 +8,7 @@ import logging
 
 from ..core import Query
 from ..models.helpers import create_model
+from ..models import QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
 from .classifier import Classifier
 
@@ -30,8 +31,6 @@ class EntityRecognizer(Classifier):
         'models': {
             'main': {
                 'model_type': 'memm',
-                'example_type': 'query',
-                'label_type': 'entities',
                 'model_settings': {
                     'tag_scheme': 'IOB',
                     'feature_scaler': 'none'
@@ -44,8 +43,6 @@ class EntityRecognizer(Classifier):
             },
             'sparse': {
                 'model_type': 'memm',
-                'example_type': 'query',
-                'label_type': 'entities',
                 'model_settings': {
                     'tag_scheme': 'IOB',
                     'feature_scaler': 'max-abs',
@@ -59,8 +56,6 @@ class EntityRecognizer(Classifier):
             },
             'memm-cv': {
                 'model_type': 'memm',
-                'example_type': 'query',
-                'label_type': 'entities',
                 'model_settings': {
                     'tag_scheme': 'IOB',
                     'feature_scaler': 'max-abs'
@@ -91,6 +86,10 @@ class EntityRecognizer(Classifier):
         self.domain = domain
         self.intent = intent
         self.entity_types = set()
+
+    def get_model_config(self, config_name, **kwargs):
+        return super().get_model_config(config_name, example_type=QUERY_EXAMPLE_TYPE,
+                                        label_type=ENTITIES_LABEL_TYPE)
 
     def fit(self, queries=None, config_name=None, **kwargs):
         """Trains the model

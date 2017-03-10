@@ -6,7 +6,9 @@ from builtins import super
 
 import logging
 
-from .classifier import StandardClassifier
+from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
+
+from .classifier import Classifier
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +28,6 @@ class IntentClassifier(Classifier):
         'models': {
             'main': {
                 'model_type': 'text',
-                'example_type': 'query',
-                'label_type': 'class',
                 'model_settings': {
                     'classifier_type': 'logreg'
                 },
@@ -50,8 +50,7 @@ class IntentClassifier(Classifier):
                 }
             },
             'rforest': {
-                'example_type': 'query',
-                'label_type': 'class',
+                'model_type': 'text',
                 'model_settings': {
                     'classifier_type': 'rforest'
                 },
@@ -87,6 +86,10 @@ class IntentClassifier(Classifier):
         """
         super().__init__(resource_loader)
         self.domain = domain
+
+    def get_model_config(self, config_name, **kwargs):
+        return super().get_model_config(config_name, example_type=QUERY_EXAMPLE_TYPE,
+                                        label_type=CLASS_LABEL_TYPE)
 
     def fit(self, *args, **kwargs):
         logger.info('Fitting intent classifier: %s', self.domain)

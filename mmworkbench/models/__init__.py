@@ -8,4 +8,7 @@ from . import standard_models
 from . import sequence_models
 from . import query_features
 
-__all__ = ['ModelConfig', 'standard_models', 'sequence_models', 'query_features']
+from .helpers import QUERY_EXAMPLE_TYPE, ENTITY_EXAMPLE_TYPE, CLASS_LABEL_TYPE, ENTITIES_LABEL_TYPE
+
+__all__ = ['ModelConfig', 'standard_models', 'sequence_models', 'query_features',
+           'QUERY_EXAMPLE_TYPE', 'ENTITY_EXAMPLE_TYPE', 'CLASS_LABEL_TYPE', 'ENTITIES_LABEL_TYPE']

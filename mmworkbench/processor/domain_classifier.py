@@ -7,6 +7,8 @@ from builtins import super
 
 import logging
 
+from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
+
 from .classifier import Classifier
 
 logger = logging.getLogger(__name__)
@@ -23,8 +25,6 @@ class DomainClassifier(Classifier):
         'default_model': 'main',
         'models': {
             'main': {
-                'model_type': 'text',
-                'example_type': 'query',
                 'model_settings': {
                     'classifier_type': 'logreg',
                 },
@@ -46,6 +46,10 @@ class DomainClassifier(Classifier):
             }
         }
     }
+
+    def get_model_config(self, config_name, **kwargs):
+        return super().get_model_config(config_name, example_type=QUERY_EXAMPLE_TYPE,
+                                        label_type=CLASS_LABEL_TYPE)
 
     def fit(self, *args, **kwargs):
         logger.info('Fitting domain classifier')
