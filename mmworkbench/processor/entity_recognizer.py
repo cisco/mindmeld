@@ -4,13 +4,15 @@ This module contains the named entity recognizer component.
 """
 from __future__ import unicode_literals
 
+import os
 import logging
 
-from ..core import Query
+from sklearn.externals import joblib
+
 from ..models.helpers import create_model
 from ..models import QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
-from .classifier import Classifier
+from .classifier import Classifier, ClassifierLoadError
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +121,44 @@ class EntityRecognizer(Classifier):
         self.ready = True
         self.dirty = True
 
+    def dump(self, model_path):
+        """Persists the model to disk.
+
+        Args:
+            model_path (str): The location on disk where the model should be stored
+
+        """
+        # make directory if necessary
+        folder = os.path.dirname(model_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
+        er_data = {'model': self._model, 'entity_types': self.entity_types}
+        joblib.dump(er_data, model_path)
+
+        self.dirty = False
+
+    def load(self, model_path):
+        """Loads the model from disk
+
+        Args:
+            model_path (str): The location on disk where the model is stored
+
+        """
+        try:
+            er_data = joblib.load(model_path)
+            self._model = er_data['model']
+            self.entity_types = er_data['entity_types']
+        except FileNotFoundError:
+            msg = 'Unable to load {}. Pickle file not found at {!r}'
+            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+        if self._model is not None:
+            gazetteers = self._resource_loader.get_gazetteers()
+            self._model.register_resources(gazetteers=gazetteers)
+
+        self.ready = True
+        self.dirty = False
+
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities
 
@@ -130,12 +170,6 @@ class EntityRecognizer(Classifier):
             probabilities
         """
         raise NotImplementedError
-
-    def load(self, model_path):
-        super().load(model_path)
-        if self._model:
-            gazetteers = self._resource_loader.get_gazetteers()
-            self._model.register_resources(gazetteers=gazetteers)
 
     def _get_queries_and_labels(self, labeled_queries=None):
         """Returns the set of queries and their classes to train on
