@@ -31,11 +31,41 @@ class ResourceLoader(object):
         self.app_path = app_path
         self.query_factory = query_factory
 
-        self.gazetteers = {}
-        self.labeled_query_files = {}
-        self.entity_maps = {}
+        # Example Layout: {
+        #   'entity_type': {
+        #     'entity_data': {  # for gazetteer.txt
+        #        'loaded': '',  # the time the file was last loaded
+        #        'modified': '',  # the time the file was last modified
+        #        'data': contents of file
+        #     },
+        #     'mapping': {  # for mapping.json
+        #        'loaded': '',  # the time the file was last loaded
+        #        'modified': '',  # the time the file was last modified
+        #        ''
+        #     },
+        #     'gazetteer': {  # for pickled gazetteer
+        #        'loaded': '',  # the time the file was last loaded
+        #        'modified': '',  # the time the file was last modified
+        #        ''
+        #     }
+        #   }
+        # }
+        self._entity_files = {}
 
-    def get_gazetteers(self):
+        # Example layout: {
+        #   'domain': {
+        #     'intent': {
+        #        'filename': {
+        #          'loaded': '',  # the time the file was last loaded
+        #          'modified': '',  # the time the file was last modified
+        #          'queries': []  # the queries loaded from the file
+        #        }
+        #     }
+        #   }
+        # }
+        self.labeled_query_files = {}
+
+    def get_gazetteers(self, force_reload=False):
         """Gets all gazetteers
 
         Returns:
@@ -43,10 +73,10 @@ class ResourceLoader(object):
         """
         # TODO: get role gazetteers
         entity_types = path.get_entity_types(self.app_path)
-        return {entity_type: self.get_gazetteer(entity_type)
+        return {entity_type: self.get_gazetteer(entity_type, force_reload=force_reload)
                 for entity_type in entity_types}
 
-    def get_gazetteer(self, gaz_name):
+    def get_gazetteer(self, gaz_name, force_reload=False):
         """Gets a gazetteers by name
 
         Args:
@@ -55,21 +85,25 @@ class ResourceLoader(object):
         Returns:
             dict: Gazetteer data
         """
+        self._update_entity_file_dates(gaz_name)
         # TODO: get role gazetteers
-        if gaz_name not in self.gazetteers:
-            gaz = Gazetteer(gaz_name)
-            gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
+        if self._gaz_needs_build(gaz_name) or force_reload:
+            self.build_gazetteer(gaz_name, force_reload=force_reload)
+        if self._entity_file_needs_load('gazetteer', gaz_name):
+            self.load_gazetteer(gaz_name)
 
-            try:
-                gaz.load(gaz_path)
-                self.gazetteers[gaz_name] = gaz.to_dict()
-            except FileNotFoundError:
-                self.build_gazetteer(gaz_name)
+        return self._entity_files[gaz_name]['gazetteer']['data']
 
-        return self.gazetteers[gaz_name]
-
-    def build_gazetteer(self, gaz_name, exclude_ngrams=False):
-        POPULARITY_CUTOFF = 0.0
+    def build_gazetteer(self, gaz_name, exclude_ngrams=False, force_reload=False):
+        """Builds the specified gazetteer using the entity data and mapping files
+        Args:
+            gaz_name (str): The name of the gazetteer
+            exclude_ngrams (bool, optional): Whether partial matches of
+                entities should be included in the gazetteer
+            force_reload (bool, optional): Whether file should be forcefully
+                reloaded from disk
+        """
+        popularity_cutoff = 0.0
 
         logger.info("Building gazetteer '{}'".format(gaz_name))
 
@@ -77,26 +111,32 @@ class ResourceLoader(object):
         gaz = Gazetteer(gaz_name, exclude_ngrams)
 
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
-        gaz.update_with_entity_data_file(entity_data_path, POPULARITY_CUTOFF,
+        gaz.update_with_entity_data_file(entity_data_path, popularity_cutoff,
                                          self.query_factory.normalize)
+        self._entity_files[gaz_name]['entity_data']['loaded'] = time.time()
 
-        mapping = self.get_entity_map(gaz_name)
+        mapping = self.get_entity_map(gaz_name, force_reload=force_reload)
         gaz.update_with_entity_map(mapping, self.query_factory.normalize)
 
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.dump(gaz_path)
 
-        self.gazetteers[gaz_name] = gaz.to_dict()
+        self._entity_files[gaz_name]['gazetteer']['data'] = gaz.to_dict()
+        self._entity_files[gaz_name]['gazetteer']['loaded'] = time.time()
+
+    def load_gazetteer(self, gaz_name):
+        gaz = Gazetteer(gaz_name)
+        gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
+        gaz.load(gaz_path)
+        self._entity_files[gaz_name]['gazetteer']['data'] = gaz.to_dict()
+        self._entity_files[gaz_name]['gazetteer']['loaded'] = time.time()
 
     def get_entity_map(self, entity_type, force_reload=False):
-        file_path = path.get_entity_map_path(self.app_path, entity_type)
-        last_modified = os.path.getmtime(file_path)
-        never_loaded = entity_type not in self.entity_maps
-
-        if force_reload or never_loaded or self.entity_maps[entity_type]['loaded'] < last_modified:
+        self._update_entity_file_dates(entity_type)
+        if self._entity_file_needs_load('mapping', entity_type) or force_reload:
             # file is out of date, load it
             self.load_entity_map(entity_type)
-        return deepcopy(self.entity_maps[entity_type]['mapping'])
+        return deepcopy(self._entity_files[entity_type]['mapping']['data'])
 
     def load_entity_map(self, entity_type):
         """Loads an entity map
@@ -111,10 +151,55 @@ class ResourceLoader(object):
         with open(file_path, 'r') as json_file:
             json_data = json.load(json_file)
 
-        if entity_type not in self.entity_maps:
-            self.entity_maps[entity_type] = {}
-        self.entity_maps[entity_type]['mapping'] = json_data
-        self.entity_maps[entity_type]['loaded'] = time.time()
+        self._entity_files[entity_type]['mapping']['data'] = json_data
+        self._entity_files[entity_type]['mapping']['loaded'] = time.time()
+
+    def _gaz_needs_build(self, gaz_name):
+        try:
+            build_time = self._entity_files[gaz_name]['gazetteer']['modified']
+        except KeyError:
+            # gazetteer hasn't been built
+            return True
+
+        data_modified = self._entity_files[gaz_name]['entity_data']['modified']
+        mapping_modified = self._entity_files[gaz_name]['mapping']['modified']
+
+        # If entity data or mapping modified after gaz build -> stale
+        return build_time < data_modified or build_time < mapping_modified
+
+    def _entity_file_needs_load(self, file_type, entity_type):
+        mod_time = self._entity_files[entity_type][file_type]['modified']
+        try:
+            load_time = self._entity_files[entity_type][file_type]['loaded']
+        except KeyError:
+            # file hasn't been loaded
+            return True
+        return load_time < mod_time
+
+    def _update_entity_file_dates(self, entity_type):
+        # TODO: handle deleted entity
+        file_table = self._entity_files.get(entity_type, {
+            'entity_data': {},
+            'mapping': {},
+            'gazetteer': {}
+        })
+        self._entity_files[entity_type] = file_table
+
+        # update entity data
+        entity_data_path = path.get_entity_gaz_path(self.app_path, entity_type)
+        file_table['entity_data']['modified'] = os.path.getmtime(entity_data_path)
+
+        # update mapping
+        mapping_path = path.get_entity_map_path(self.app_path, entity_type)
+        file_table['mapping']['modified'] = os.path.getmtime(mapping_path)
+
+        # update gaz data
+        gazetteer_path = path.get_gazetteer_data_path(self.app_path, entity_type)
+        try:
+            file_table['gazetteer']['modified'] = os.path.getmtime(gazetteer_path)
+        except FileNotFoundError:
+            # gaz not yet built so set to a time impossibly long ago
+            file_table['gazetteer']['modified'] = 0.0
 
     def get_labeled_queries(self, domain=None, intent=None, label_set='train', force_reload=False):
         """Gets labeled queries from the cache, or loads them from disk.
@@ -141,6 +226,15 @@ class ResourceLoader(object):
 
         return query_tree
 
+    @staticmethod
+    def flatten_query_tree(query_tree):
+        flattened = []
+        for _, intent_queries in query_tree.items():
+            for _, queries in intent_queries.items():
+                for query in queries:
+                    flattened.append(query)
+        return flattened
+
     def _traverse_labeled_queries_files(self, domain=None, intent=None, label_set='train',
                                         force_reload=False):
         try:
@@ -165,14 +259,35 @@ class ResourceLoader(object):
                         self.load_query_file(domain, intent, filename)
                     yield domain, intent, filename
 
-    @staticmethod
-    def flatten_query_tree(query_tree):
-        flattened = []
-        for domain, intent_queries in query_tree.items():
-            for intent, queries in intent_queries.items():
-                for query in queries:
-                    flattened.append(query)
-        return flattened
+    def load_query_file(self, domain, intent, filename):
+        """Loads the queries from the specified file
+
+        Args:
+            domain (str): The domain of the query file
+            intent (str): The intent of the query file
+            filename (str): The name of the query file
+
+        """
+        logger.info("Loading queries from file {}/{}/{}".format(domain, intent, filename))
+
+        file_path = path.get_labeled_query_file_path(self.app_path, domain, intent, filename)
+        queries = []
+        import codecs
+        with codecs.open(file_path, encoding='utf-8') as queries_file:
+            for line in queries_file:
+                line = line.strip()
+                # only create query if line is not empty string
+                query_text = line.split('\t')[0].strip()
+                if query_text:
+                    if query_text[0] == '-':
+                        continue
+
+                    query = markup.load_query(query_text, self.query_factory,
+                                              domain=domain, intent=intent, is_gold=True)
+                    queries.append(query)
+
+        self.labeled_query_files[domain][intent][filename]['queries'] = queries
+        self.labeled_query_files[domain][intent][filename]['loaded'] = time.time()
 
     def _update_query_file_dates(self, file_pattern):
         query_tree = path.get_labeled_query_tree(self.app_path, [file_pattern])
@@ -239,32 +354,3 @@ class ResourceLoader(object):
                     else:
                         intent_table[file]['modified'] = new_intent_table[file]['modified']
 
-    def load_query_file(self, domain, intent, filename):
-        """Loads the queries from the specified file
-
-        Args:
-            domain (str): The domain of the query file
-            intent (str): The intent of the query file
-            filename (str): The name of the query file
-
-        """
-        logger.info("Loading queries from file {}/{}/{}".format(domain, intent, filename))
-
-        file_path = path.get_labeled_query_file_path(self.app_path, domain, intent, filename)
-        queries = []
-        import codecs
-        with codecs.open(file_path, encoding='utf-8') as queries_file:
-            for line in queries_file:
-                line = line.strip()
-                # only create query if line is not empty string
-                query_text = line.split('\t')[0].strip()
-                if query_text:
-                    if query_text[0] == '-':
-                        continue
-
-                    query = markup.load_query(query_text, self.query_factory,
-                                              domain=domain, intent=intent, is_gold=True)
-                    queries.append(query)
-
-        self.labeled_query_files[domain][intent][filename]['queries'] = queries
-        self.labeled_query_files[domain][intent][filename]['loaded'] = time.time()
