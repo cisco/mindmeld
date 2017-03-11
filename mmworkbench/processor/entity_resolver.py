@@ -116,4 +116,3 @@ class EntityResolver(object):
 
         """
         self.fit()
-

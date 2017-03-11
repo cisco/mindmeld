@@ -353,4 +353,3 @@ class ResourceLoader(object):
                         intent_table[file] = new_intent_table[file]
                     else:
                         intent_table[file]['modified'] = new_intent_table[file]['modified']
-
