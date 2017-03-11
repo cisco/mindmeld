@@ -143,17 +143,15 @@ class Gazetteer(object):
                 if num_cols == 2:
                     pop, entity = split_row
                 else:
-                    pop = 1
+                    pop = 1.0
                     entity = split_row[0]
 
                 pop = 0 if pop == 'null' else float(pop)
                 line_count += 1
                 entity = normalizer(entity)
-                # TODO: add this back when we add numeric support
-                # self.sys_types.update(util.get_nested_numeric_types(entity))
-            if pop > popularity_cutoff:
-                self._update_entity(entity, float(pop))
-                entities_added += 1
+                if pop > popularity_cutoff:
+                    self._update_entity(entity, float(pop))
+                    entities_added += 1
 
         logger.info('{}/{} entities in entity data file exceeded popularity '
                     "cutoff and were added to the gazetteer".format(entities_added, line_count))
