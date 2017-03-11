@@ -182,6 +182,19 @@ def get_indexes(app_path):
 
 # Files and folders
 
+@safe_path
+def get_generated_data_folder(app_path):
+    """
+    Args:
+        app_path (str): The path to the app data.
+
+    Returns:
+        str: The path for this app's generated files
+
+    """
+    path = GEN_FOLDER.format(app_path=app_path)
+    return path
+
 
 @safe_path
 def get_domain_model_path(app_path, model_name=None):
