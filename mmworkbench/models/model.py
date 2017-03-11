@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from builtins import object, super
 
+from collections import namedtuple
 import logging
 import math
 import random
@@ -87,6 +88,47 @@ class ModelConfig(object):
         return "{}({})".format(self.__class__.__name__, args_str)
 
 
+class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
+                                                       'probas'])):
+    """Summary
+
+    Attributes:
+        example (object): The example being evaluated
+        expected (object): The expected label for the example
+        prediction (object): The predicted label for the example
+        proba (object): The full prediction, including
+    """
+
+    @property
+    def is_correct(self):
+        return self.expected == self.predicted
+
+
+class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
+
+    def get_accuracy(self):
+        num_examples = len(self.results)
+        num_correct = len([e for e in self.results if e.is_correct])
+        return float(num_correct) / float(num_examples)
+
+    def __repr__(self):
+        num_examples = len(self.results)
+        accuracy = self.get_accuracy()
+        msg = "<{} score: {:.2%}, {} example{}>"
+        return msg.format(self.__class__.__name__, accuracy, num_examples,
+                          '' if num_examples == 1 else 's')
+
+    def correct_results(self):
+        for result in self.results:
+            if result.is_correct:
+                yield result
+
+    def incorrect_results(self):
+        for result in self.results:
+            if not result.is_correct:
+                yield result
+
+
 class Model(object):
     """An abstract class upon which all models are based.
 
@@ -130,6 +172,20 @@ class Model(object):
 
     def predict_log_proba(self, examples):
         raise NotImplementedError
+
+    def evaluate(self, examples, labels):
+        # TODO: also expose feature weights?
+        predictions = self.predict_proba(examples)
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1])
+                       for i, e in enumerate(examples)]
+
+        # Create a model config object for the current effective config (after param selection)
+        config_dict = self.config.to_dict()
+        config_dict.pop('param_selection')
+        config_dict['params'] = self._current_params
+        config = ModelConfig(**config_dict)
+        model_eval = ModelEvaluation(config, evaluations)
+        return model_eval
 
     def register_resources(self, **kwargs):
         """Registers resources which are accessible to feature extractors
@@ -376,28 +432,31 @@ class SkLearnModel(Model):
 
     def predict_log_proba(self, examples):
         X, _, _ = self.get_feature_matrix(examples)
-        predictions, log_proba = self._predict_proba(X, self._clf.predict_log_proba)
+        predictions = self._predict_proba(X, self._clf.predict_log_proba)
 
         # JSON can't reliably encode infinity, so replace it with large number
-        for row in log_proba:
-            for label in row:
-                if row[label] == -numpy.Infinity:
-                    row[label] = _NEG_INF
-        return predictions, log_proba
+        for row in predictions:
+            _, probas = row
+            for label, proba in probas.items():
+                    if proba == -numpy.Infinity:
+                        probas[label] = _NEG_INF
+        return predictions
 
     def _predict_proba(self, X, predictor):
         predictions = []
-        proba = []
-
         for row in predictor(X):
             class_index = row.argmax()
-            prediction = self._class_encoder.inverse_transform([class_index])[0]
-            predictions.append(self._label_encoder.decode([prediction])[0])
-            proba.append(dict(
-                (self._label_encoder.decode(self._class_encoder.inverse_transform([j]))[0], row[j])
-                for j in range(len(row))))
+            probabilities = {}
+            top_class = None
+            for class_index, proba in enumerate(row):
+                raw_class = self._class_encoder.inverse_transform([class_index])[0]
+                decoded_class = self._label_encoder.decode([raw_class])[0]
+                probabilities[decoded_class] = proba
+                if proba > probabilities.get(top_class, -1.0):
+                    top_class = decoded_class
+            predictions.append((top_class, probabilities))
 
-        return predictions, proba
+        return predictions
 
     def _get_model_class(self):
         """Returns the class of the actual underlying model"""

@@ -21,7 +21,8 @@ from .gazetteer import Gazetteer
 logger = logging.getLogger(__name__)
 
 LABEL_SETS = {
-    'train': 'train*.txt'
+    'train': 'train*.txt',
+    'heldout': 'heldout*.txt'
 }
 DEFAULT_LABEL_SET = 'train'
 
