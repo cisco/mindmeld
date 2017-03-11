@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from .app import Application
 from .core import config_logs
 from .dialogue import Conversation
-from .processor.nlp import NaturalLanguageProcessor
+from .processor import NaturalLanguageProcessor
 from .question_answerer import QuestionAnswerer
 
 
