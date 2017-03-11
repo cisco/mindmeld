@@ -269,23 +269,9 @@ class ResourceLoader(object):
 
         """
         logger.info("Loading queries from file {}/{}/{}".format(domain, intent, filename))
-
         file_path = path.get_labeled_query_file_path(self.app_path, domain, intent, filename)
-        queries = []
-        import codecs
-        with codecs.open(file_path, encoding='utf-8') as queries_file:
-            for line in queries_file:
-                line = line.strip()
-                # only create query if line is not empty string
-                query_text = line.split('\t')[0].strip()
-                if query_text:
-                    if query_text[0] == '-':
-                        continue
-
-                    query = markup.load_query(query_text, self.query_factory,
-                                              domain=domain, intent=intent, is_gold=True)
-                    queries.append(query)
-
+        queries = markup.load_query_file(file_path, self.query_factory, domain, intent,
+                                         is_gold=True)
         self.labeled_query_files[domain][intent][filename]['queries'] = queries
         self.labeled_query_files[domain][intent][filename]['loaded'] = time.time()
 

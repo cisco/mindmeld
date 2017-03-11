@@ -175,17 +175,19 @@ class EntityRecognizer(Classifier):
         """
         raise NotImplementedError
 
-    def _get_queries_and_labels(self, labeled_queries=None):
-        """Returns the set of queries and their classes to train on
+    def _get_queries_and_labels(self, queries=None, label_set=None):
+        """Returns a set of queries and their labels based on the label set
 
         Args:
-            queries (list): A list of ProcessedQuery objects to train. If not passed, the default
-                training set will be loaded.
-
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
         """
-        if not labeled_queries:
+        if not queries:
             query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
-                                                                   intent=self.intent)
-            labeled_queries = query_tree[self.domain][self.intent]
-        raw_queries = [q.query for q in labeled_queries]
-        return raw_queries, labeled_queries
+                                                                   intent=self.intent,
+                                                                   label_set=label_set)
+            queries = query_tree[self.domain][self.intent]
+        raw_queries = [q.query for q in queries]
+        return raw_queries, queries

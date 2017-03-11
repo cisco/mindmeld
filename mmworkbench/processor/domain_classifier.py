@@ -64,8 +64,16 @@ class DomainClassifier(Classifier):
         logger.info('Loading domain classifier')
         super().load(*args, **kwargs)
 
-    def _get_examples_and_labels(self, examples=None, label_set=None):
-        if not examples:
+    def _get_queries_and_labels(self, queries=None, label_set=None):
+        """Returns a set of queries and their labels based on the label set
+
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+        """
+        if not queries:
             query_tree = self._resource_loader.get_labeled_queries(label_set=label_set)
             queries = self._resource_loader.flatten_query_tree(query_tree)
         else:

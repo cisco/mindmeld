@@ -105,7 +105,7 @@ class IntentClassifier(Classifier):
         super().load(*args, **kwargs)
 
     def _get_queries_and_labels(self, queries=None, label_set=None):
-        """Returns the set of queries and their labels to train on
+        """Returns a set of queries and their labels based on the label set
 
         Args:
             queries (list, optional): A list of ProcessedQuery objects, to
@@ -114,6 +114,6 @@ class IntentClassifier(Classifier):
                 the default training set will be loaded.
         """
         if not queries:
-            query_tree = self._resource_loader.get_labeled_queries()
+            query_tree = self._resource_loader.get_labeled_queries(label_set=label_set)
             queries = self._resource_loader.flatten_query_tree(query_tree)
         return list(zip(*[(q.query, q.intent) for q in queries]))
