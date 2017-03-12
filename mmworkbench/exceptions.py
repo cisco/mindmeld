@@ -31,3 +31,16 @@ class ClassifierLoadError(Exception):
 class ProcessorError(Exception):
     """An exception which indicates an error with a processor."""
     pass
+
+
+class MarkupError(Exception):
+    pass
+
+
+class SystemEntityMarkupError(MarkupError):
+    pass
+
+
+class SystemEntityResolutionError(Exception):
+    """An exception representing an error resolving a system entity"""
+    pass

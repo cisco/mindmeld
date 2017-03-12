@@ -8,18 +8,11 @@ from future.utils import raise_from
 import re
 
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
-from .ser import resolve_system_entity, SystemEntityResolutionError
+from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
+from .ser import resolve_system_entity
 
 ENTITY_PATTERN = re.compile(r'\{(.*?)\}')
 NESTED_ENTITY_PATTERN = re.compile(r'\[(.*?)\]')
-
-
-class MarkupError(Exception):
-    pass
-
-
-class SystemEntityMarkupError(MarkupError):
-    pass
 
 
 def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):

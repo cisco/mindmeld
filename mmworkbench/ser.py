@@ -10,17 +10,12 @@ import sys
 import requests
 
 from .core import Entity, QueryEntity, Span
-
+from .exceptions import SystemEntityResolutionError
 
 logger = logging.getLogger(__name__)
 
 MALLARD_URL = "http://localhost:2626"
 MALLARD_ENDPOINT = "parse"
-
-
-class SystemEntityResolutionError(Exception):
-    """An exception representing an error resolving a system entity"""
-    pass
 
 
 def get_candidates(query, entity_types=None, span=None):
