@@ -90,13 +90,13 @@ class ModelConfig(object):
 
 class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
                                                        'probas'])):
-    """Summary
+    """Represents the evaluation of a single example
 
     Attributes:
-        example (object): The example being evaluated
-        expected (object): The expected label for the example
-        prediction (object): The predicted label for the example
-        proba (object): The full prediction, including
+        example: The example being evaluated
+        expected: The expected label for the example
+        prediction: The predicted label for the example
+        proba (dict): Maps labels to their predicted probabilities
     """
 
     @property
@@ -105,8 +105,20 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
 
 
 class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
+    """Reprepresents the evaluation of a model at a specific configuration
+    using a collection of examples and labels
 
+    Attributes:
+        config (ModelConfig): The model config used during evaluation
+        results (list of EvaluatedExample): A list of the evaluated examples
+    """
     def get_accuracy(self):
+        """The accuracy represents the share of examples whose predicted labels
+        exactly matched their expected labels.
+
+        Returns:
+            float: The accuracy of the model
+        """
         num_examples = len(self.results)
         num_correct = len([e for e in self.results if e.is_correct])
         return float(num_correct) / float(num_examples)
@@ -119,11 +131,19 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
                           '' if num_examples == 1 else 's')
 
     def correct_results(self):
+        """
+        Returns:
+            iterable: Collection of the examples which were correct
+        """
         for result in self.results:
             if result.is_correct:
                 yield result
 
     def incorrect_results(self):
+        """
+        Returns:
+            iterable: Collection of the examples which were incorrect
+        """
         for result in self.results:
             if not result.is_correct:
                 yield result
@@ -174,6 +194,16 @@ class Model(object):
         raise NotImplementedError
 
     def evaluate(self, examples, labels):
+        """Evaluates a model against the given examples and labels
+
+        Args:
+            examples: A list of examples to predict
+            labels: A list of expected labels
+
+        Returns:
+            ModelEvaluation: an object containing information about the
+                evaluation
+        """
         # TODO: also expose feature weights?
         predictions = self.predict_proba(examples)
         evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1])
