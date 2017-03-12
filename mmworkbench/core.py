@@ -558,10 +558,10 @@ def _is_overlapping(target, other):
             not _is_superset(target, other))
 
 
-def config_logs(**kwargs):
+def configure_logging(**kwargs):
     """Helper method for easily configuring logs from the python shell.
     Args:
-        level (TYPE, optional): Description
+        level (TYPE, optional): A logging level recognized by python's logging module.
     """
     import sys
     level = kwargs.get('level', logging.INFO)
