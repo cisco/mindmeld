@@ -60,7 +60,7 @@ def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
                 if query_text[0] == '-':
                     continue
 
-            query = load_query(query_text, query_factory, domain=domain, intent=intent, is_gold=is_gold)
+            query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
             queries.append(query)
     return queries
 
