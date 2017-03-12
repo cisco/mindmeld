@@ -558,7 +558,7 @@ def _is_overlapping(target, other):
             not _is_superset(target, other))
 
 
-def configure_logging(**kwargs):
+def configure_logs(**kwargs):
     """Helper method for easily configuring logs from the python shell.
     Args:
         level (TYPE, optional): A logging level recognized by python's logging module.
