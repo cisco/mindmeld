@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 LABEL_SETS = {
     'train': 'train*.txt'
 }
+DEFAULT_LABEL_SET = 'train'
 
 
 class ResourceLoader(object):
@@ -201,7 +202,7 @@ class ResourceLoader(object):
             # gaz not yet built so set to a time impossibly long ago
             file_table['gazetteer']['modified'] = 0.0
 
-    def get_labeled_queries(self, domain=None, intent=None, label_set='train', force_reload=False):
+    def get_labeled_queries(self, domain=None, intent=None, label_set=None, force_reload=False):
         """Gets labeled queries from the cache, or loads them from disk.
 
         Args:
@@ -213,6 +214,7 @@ class ResourceLoader(object):
             dict: ProcessedQuery objects loaded from labeled query files, organized by domain and
                 intent.
         """
+        label_set = label_set or DEFAULT_LABEL_SET
         query_tree = {}
         file_iter = self._traverse_labeled_queries_files(domain, intent, label_set, force_reload)
         for domain, intent, filename in file_iter:

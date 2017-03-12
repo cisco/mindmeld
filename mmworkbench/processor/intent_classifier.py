@@ -104,7 +104,7 @@ class IntentClassifier(Classifier):
         logger.info('Loading intent classifier: domain=%r', self.domain)
         super().load(*args, **kwargs)
 
-    def _get_queries_and_labels(self, queries=None, label_set=None):
+    def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
         Args:

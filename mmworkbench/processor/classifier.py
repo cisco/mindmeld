@@ -96,7 +96,7 @@ class Classifier(object):
         self.dirty = False
         self.config = None
 
-    def fit(self, queries=None, config_name=None, **kwargs):
+    def fit(self, queries=None, config_name=None, label_set='train', **kwargs):
         """Trains the model
 
         Args:
@@ -116,7 +116,7 @@ class Classifier(object):
                 be used.
 
         """
-        queries, classes = self._get_queries_and_labels(queries)
+        queries, classes = self._get_queries_and_labels(queries, label_set)
         model_config = self._get_model_config(config_name, **kwargs)
         model = create_model(model_config)
         gazetteers = self._resource_loader.get_gazetteers()
@@ -205,7 +205,7 @@ class Classifier(object):
         self.ready = True
         self.dirty = False
 
-    def _get_queries_and_labels(self, queries=None, label_set=None):
+    def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns the set of queries and their labels to train on
 
         Args:

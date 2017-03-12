@@ -93,7 +93,7 @@ class EntityRecognizer(Classifier):
         kwargs['label_type'] = ENTITIES_LABEL_TYPE
         return super()._get_model_config(config_name, **kwargs)
 
-    def fit(self, queries=None, config_name=None, **kwargs):
+    def fit(self, queries=None, config_name=None, label_set='train', **kwargs):
         """Trains the model
 
         Args:
@@ -103,7 +103,7 @@ class EntityRecognizer(Classifier):
 
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
-        queries, labels = self._get_queries_and_labels(queries)
+        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
         model_config = self._get_model_config(config_name, **kwargs)
         model = create_model(model_config)
         gazetteers = self._resource_loader.get_gazetteers()
@@ -175,7 +175,7 @@ class EntityRecognizer(Classifier):
         """
         raise NotImplementedError
 
-    def _get_queries_and_labels(self, queries=None, label_set=None):
+    def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
         Args:
