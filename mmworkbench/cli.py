@@ -121,7 +121,7 @@ def clean(ctx):
 @click.argument('index_name', required=True)
 def create_index(es_host, index_name):
     """Create a new question answerer index"""
-    QuestionAnswerer.create_index(es_host, index_name)
+    QuestionAnswerer.create_index(index_name, es_host)
 
 
 @cli.command('load-index', context_settings=CONTEXT_SETTINGS)
@@ -130,7 +130,7 @@ def create_index(es_host, index_name):
 @click.argument('data_file', required=True)
 def load_index(es_host, index_name, data_file):
     """Load data into a question answerer index"""
-    QuestionAnswerer.load_index(es_host, index_name, data_file)
+    QuestionAnswerer.load_index(index_name, data_file, es_host)
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)

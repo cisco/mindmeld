@@ -124,7 +124,7 @@ class QuestionAnswerer(object):
 
     def __init__(self, resource_loader, es_host=None):
         self._resource_loader = resource_loader
-        self._es_host = es_host or os.environ.get('MM_ES_HOST')
+        self._es_host = self._get_es_host(es_host)
         self.__es_client = None
 
     @property
@@ -182,7 +182,13 @@ class QuestionAnswerer(object):
         raise NotImplementedError
 
     @staticmethod
-    def create_index(es_host, index_name):
+    def _get_es_host(es_host=None):
+        es_host = es_host or os.environ.get('MM_ES_HOST')
+        return es_host
+
+    @classmethod
+    def create_index(cls, index_name, es_host=None):
+        es_host = cls._get_es_host(es_host)
         es_client = Elasticsearch(es_host)
 
         mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
@@ -193,8 +199,9 @@ class QuestionAnswerer(object):
         else:
             logger.error("Index '{}' already exists.".format(index_name))
 
-    @staticmethod
-    def load_index(es_host, index_name, data_file):
+    @classmethod
+    def load_index(cls, index_name, data_file, es_host=None):
+        es_host = cls._get_es_host(es_host)
         es_client = Elasticsearch(es_host)
 
         with open(data_file) as data_fp:
