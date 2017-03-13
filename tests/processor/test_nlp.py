@@ -55,11 +55,9 @@ def test_dump(nlp):
     nlp.dump()
 
 
-@pytest.mark.focus
 def test_early_process(empty_nlp):
     """Tests that attempting to process a message without first loading or
     building models will raise an exception"""
-    empty_nlp
     with pytest.raises(ProcessorError):
         empty_nlp.process('Hello')
 

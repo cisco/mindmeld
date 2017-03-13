@@ -1,7 +1,6 @@
 [
   {
     "id": "1",
-    "store_id": "1",
     "store_name": "23 Elm Street",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -11,7 +10,6 @@
   },
   {
     "id": "2",
-    "store_id": "2",
     "store_name": "Pine and Market",
     "open_time": "6:00",
     "close_time": "22:00",
@@ -21,7 +19,6 @@
   },
   {
     "id": "3",
-    "store_id": "3",
     "store_name": "Central Plaza Store",
     "open_time": "8:00",
     "close_time": "22:00",
@@ -31,7 +28,6 @@
   },
   {
     "id": "4",
-    "store_id": "4",
     "store_name": "45 Fifth Avenue",
     "open_time": "6:00",
     "close_time": "22:00",
@@ -41,7 +37,6 @@
   },
   {
     "id": "5",
-    "store_id": "5",
     "store_name": "104 First Street",
     "open_time": "8:00",
     "close_time": "22:00",
@@ -51,7 +46,6 @@
   },
   {
     "id": "6",
-    "store_id": "6",
     "store_name": "Chinatown Store",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -61,7 +55,6 @@
   },
   {
     "id": "7",
-    "store_id": "7",
     "store_name": "Little Italy Store",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -71,7 +64,6 @@
   },
   {
     "id": "8",
-    "store_id": "8",
     "store_name": "Russian District Store",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -81,7 +73,6 @@
   },
   {
     "id": "9",
-    "store_id": "9",
     "store_name": "Springfield Mall Store",
     "open_time": "9:00",
     "close_time": "19:00",
@@ -91,7 +82,6 @@
   },
   {
     "id": "10",
-    "store_id": "10",
     "store_name": "Evergreen Terrace",
     "open_time": "8:00",
     "close_time": "22:00",
@@ -101,7 +91,6 @@
   },
   {
     "id": "11",
-    "store_id": "11",
     "store_name": "West Oak Street",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -111,7 +100,6 @@
   },
   {
     "id": "12",
-    "store_id": "12",
     "store_name": "East Oak Street",
     "open_time": "8:00",
     "close_time": "22:00",
@@ -121,7 +109,6 @@
   },
   {
     "id": "13",
-    "store_id": "13",
     "store_name": "Rural Route 27",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -131,7 +118,6 @@
   },
   {
     "id": "14",
-    "store_id": "14",
     "store_name": "Industrial Road",
     "open_time": "8:00",
     "close_time": "22:00",
@@ -141,7 +127,6 @@
   },
   {
     "id": "15",
-    "store_id": "15",
     "store_name": "156th Street",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -151,7 +136,6 @@
   },
   {
     "id": "16",
-    "store_id": "16",
     "store_name": "12th Avenue",
     "open_time": "9:00",
     "close_time": "22:00",
@@ -161,7 +145,6 @@
   },
   {
     "id": "17",
-    "store_id": "17",
     "store_name": "181st Street",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -171,7 +154,6 @@
   },
   {
     "id": "18",
-    "store_id": "18",
     "store_name": "257th Street",
     "open_time": "7:00",
     "close_time": "22:00",
@@ -181,7 +163,6 @@
   },
   {
     "id": "19",
-    "store_id": "19",
     "store_name": "D Street",
     "open_time": "8:00",
     "close_time": "19:00",
@@ -191,7 +172,6 @@
   },
   {
     "id": "20",
-    "store_id": "20",
     "store_name": "Peanut Street",
     "open_time": "7:00",
     "close_time": "19:00",
@@ -201,7 +181,6 @@
   },
   {
     "id": "21",
-    "store_id": "21",
     "store_name": "Sycamore Avenue",
     "open_time": "8:00",
     "close_time": "18:00",
@@ -211,7 +190,6 @@
   },
   {
     "id": "22",
-    "store_id": "22",
     "store_name": "Krustyland Store",
     "open_time": "9:00",
     "close_time": "20:00",
@@ -221,7 +199,6 @@
   },
   {
     "id": "23",
-    "store_id": "23",
     "store_name": "Duff Gardens Store",
     "open_time": "9:00",
     "close_time": "19:00",
@@ -231,7 +208,6 @@
   },
   {
     "id": "24",
-    "store_id": "24",
     "store_name": "Springfield Heights Store",
     "open_time": "9:00",
     "close_time": "20:00",
@@ -241,7 +217,6 @@
   },
   {
     "id": "25",
-    "store_id": "25",
     "store_name": "Diz-Nee Land Store",
     "open_time": "8:00",
     "close_time": "19:00",

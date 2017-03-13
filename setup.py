@@ -20,7 +20,7 @@ requirements = [
     'future>=0.16.0',
     'numpy>=1.10.1',
     'scipy>=0.9',
-    'scikit-learn==0.17.1',
+    'scikit-learn>=0.18.1',
 ]
 
 setup_requirements = [

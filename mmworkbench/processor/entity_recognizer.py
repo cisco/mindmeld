@@ -5,13 +5,15 @@ This module contains the named entity recognizer component.
 from __future__ import unicode_literals
 from builtins import super
 
+import os
 import logging
 
-from .classifier import Classifier
-from ..models import MemmModel
-from ..core import Query
+from sklearn.externals import joblib
 
-# from sklearn.externals import joblib
+from ..exceptions import FileNotFoundError
+from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
+
+from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 
 logger = logging.getLogger(__name__)
 
@@ -28,56 +30,52 @@ class EntityRecognizer(Classifier):
     """
 
     DEFAULT_CONFIG = {
-        "default_model": "main",
-        "models": {
-            "main": {
-                "model_type": "memm",
-                "params_grid": {
-                    "penalty": ["l2"],
-                    "C": [100]
+        'default_model': 'memm-cv',
+        'models': {
+            'main': {
+                'model_type': 'memm',
+                'model_settings': {
+                    'tag_scheme': 'IOB',
+                    'feature_scaler': 'none'
                 },
-                "model_settings": {
-                    "tag-scheme": "IOB",
-                    "feature-scaler": "none"
-                }
+                'params': {
+                    'penalty': 'l2',
+                    'C': 100
+                },
+                'features': {}  # use default
             },
-            "sparse": {
-                "model_type": "memm",
-                "params_grid": {
-                    "penalty": ["l2"],
-                    "C": [100]
+            'sparse': {
+                'model_type': 'memm',
+                'model_settings': {
+                    'tag_scheme': 'IOB',
+                    'feature_scaler': 'max-abs',
+                    'feature_selector': 'l1'
                 },
-                "model_settings": {
-                    "tag-scheme": "IOB",
-                    "feature-scaler": "max-abs",
-                    "feature-selector": "l1"
-                }
+                'params': {
+                    'penalty': 'l2',
+                    'C': 100
+                },
+                'features': {}  # use default
             },
-            "memm-cv": {
-                "model_type": "memm",
-                "params_grid": {
-                    "penalty": ["l1", "l2"],
-                    "C": [0.01, 1, 100, 10000, 1000000, 100000000]
+            'memm-cv': {
+                'model_type': 'memm',
+                'model_settings': {
+                    'tag_scheme': 'IOB',
+                    'feature_scaler': 'max-abs'
                 },
-                "cv": {
-                    "type": "k-fold",
-                    "k": 5,
-                    "metric": "accuracy"
+                'param_selection': {
+                    'type': 'k-fold',
+                    'k': 5,
+                    'scoring': 'accuracy',
+                    'grid': {
+                        'penalty': ['l1', 'l2'],
+                        'C': [0.01, 1, 100, 10000, 1000000, 100000000]
+                    },
                 },
-                "model_settings": {
-                    "tag-scheme": "IOB",
-                    "feature-scaler": "max-abs"
-                }
-            },
-            "ngram": {
-                "model_type": "ngram",
-                "params_grid": {
-                    "C": [100]
-                }
+                'features': {}  # use default
             }
         }
     }
-    MODEL_CLASS = MemmModel
 
     def __init__(self, resource_loader, domain, intent):
         """Initializes a named entity recognizer
@@ -87,57 +85,85 @@ class EntityRecognizer(Classifier):
             domain (str): The domain of this named entity recognizer
             intent (str): The intent of this named entity recognizer
         """
-        self._resource_loader = resource_loader
+        super().__init__(resource_loader)
         self.domain = domain
         self.intent = intent
-        self._model = None  # will be set when model is fit or loaded
+        self.entity_types = set()
 
-    def get_fit_config(self, model_type=None, features=None, params_grid=None, cv=None,
-                       model_settings=None, model_name=None):
-        model_name = model_name or self.DEFAULT_CONFIG['default_model']
-        model_config = self.DEFAULT_CONFIG['models'][model_name]
-        model_settings = model_settings or model_config['model_settings']
-        features = features or model_config.get('features')
-        params_grid = params_grid or model_config['params_grid']
-        cv = cv or model_config.get('cv')
-        return {'model_settings': model_settings, 'features': features, 'params_grid': params_grid,
-                'cv': cv}
+    def _get_model_config(self, config_name, **kwargs):
+        kwargs['example_type'] = QUERY_EXAMPLE_TYPE
+        kwargs['label_type'] = ENTITIES_LABEL_TYPE
+        return super()._get_model_config(config_name, **kwargs)
 
-    def fit(self, model_type=None, features=None, params_grid=None, cv=None, model_settings=None):
+    def fit(self, queries=None, config_name=None, label_set='train', **kwargs):
         """Trains the model
 
         Args:
-            model_type (str): The type of model to use
-            features (None, optional): Description
-            params_grid (None, optional): Description
-            cv (None, optional): Description
+            queries (list of ProcessedQuery): The labeled queries to use as training data
+            config_name (str): The type of model to use. If omitted, the default model type will
+                be used.
 
         """
-        query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
-                                                               intent=self.intent)
-        queries = query_tree[self.domain][self.intent]
-
-        params = self.get_fit_config(model_type, features, params_grid, cv, model_settings)
-        model_class = self._get_model_class(model_type)
-        model = model_class(**params)
+        logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
+        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+        model_config = self._get_model_config(config_name, **kwargs)
+        model = create_model(model_config)
         gazetteers = self._resource_loader.get_gazetteers()
+
+        # build  entity types set
+        self.entity_types = set()
+        for label in labels:
+            for entity in label:
+                self.entity_types.add(entity.entity.type)
+
         model.register_resources(gazetteers=gazetteers)
-
-        model.fit(queries)
+        model.fit(queries, labels)
         self._model = model
+        self.config = ClassifierConfig.from_model_config(self._model.config)
 
-    def predict(self, query):
-        """Predicts a role for the specified query
+        self.ready = True
+        self.dirty = True
+
+    def dump(self, model_path):
+        """Persists the model to disk.
 
         Args:
-            query (Query): The input query
+            model_path (str): The location on disk where the model should be stored
 
-        Returns:
-            list: the predicted entities
         """
-        if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query)
-        return self._model.predict(query)
+        logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
+        # make directory if necessary
+        folder = os.path.dirname(model_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
+        er_data = {'model': self._model, 'entity_types': self.entity_types}
+        joblib.dump(er_data, model_path)
+
+        self.dirty = False
+
+    def load(self, model_path):
+        """Loads the model from disk
+
+        Args:
+            model_path (str): The location on disk where the model is stored
+
+        """
+        logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
+        try:
+            er_data = joblib.load(model_path)
+            self._model = er_data['model']
+            self.entity_types = er_data['entity_types']
+        except FileNotFoundError:
+            msg = 'Unable to load {}. Pickle file not found at {!r}'
+            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+        if self._model is not None:
+            gazetteers = self._resource_loader.get_gazetteers()
+            self._model.register_resources(gazetteers=gazetteers)
+            self.config = ClassifierConfig.from_model_config(self._model.config)
+
+        self.ready = True
+        self.dirty = False
 
     def predict_proba(self, query):
         """Generates multiple hypotheses and returns their associated probabilities
@@ -149,23 +175,37 @@ class EntityRecognizer(Classifier):
             list: a list of tuples of the form (Entity, float) grouping potential entities and their
             probabilities
         """
-        # Note(jj): Not sure we can support this with all classifiers (MEMM?)
-        pass
+        raise NotImplementedError
 
-    def evaluate(self, use_blind=False):
-        """Evaluates the model on the specified data
+    def evaluate(self, queries=None):
+        """Evaluates the classifier
+
+        Args:
+            queries (list of ProcessedQuery): The labeled queries to use as training data. If none
+                are provided, the heldout label set will be used.
 
         Returns:
-            TYPE: Description
+            ModelEvaluation object
+
         """
-        pass
+        queries, labels = self._get_queries_and_labels(queries, label_set='heldout')
+        evaluation = self._model.evaluate(queries, labels)
+        return evaluation
 
-    def load(self, model_path):
-        super().load(model_path)
-        if self._model:
-            gazetteers = self._resource_loader.get_gazetteers()
-            self._model.register_resources(gazetteers=gazetteers)
+    def _get_queries_and_labels(self, queries=None, label_set='train'):
+        """Returns a set of queries and their labels based on the label set
 
-    @property
-    def entity_types(self):
-        return self._model.entity_types if self._model else set()
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+        """
+        if not queries:
+            query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
+                                                                   intent=self.intent,
+                                                                   label_set=label_set)
+            queries = query_tree[self.domain][self.intent]
+        raw_queries = [q.query for q in queries]
+        labels = [q.entities for q in queries]
+        return raw_queries, labels

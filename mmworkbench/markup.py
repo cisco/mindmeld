@@ -40,6 +40,31 @@ def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
 
+def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
+    """Loads the queries from the specified file
+
+    Args:
+        domain (str): The domain of the query file
+        intent (str): The intent of the query file
+        filename (str): The name of the query file
+
+    """
+    queries = []
+    import codecs
+    with codecs.open(file_path, encoding='utf-8') as queries_file:
+        for line in queries_file:
+            line = line.strip()
+            # only create query if line is not empty string
+            query_text = line.split('\t')[0].strip()
+            if query_text:
+                if query_text[0] == '-':
+                    continue
+
+            query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
+            queries.append(query)
+    return queries
+
+
 def dump_query(processed_query):
     """Converts a processed query into marked up query text.
 

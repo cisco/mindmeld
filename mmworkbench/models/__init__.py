@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from .maxent import MaxentRoleModel
-from .text import TextModel
-from .ner.memm import MemmModel
 
-CLASSIFIER_TYPE_MAXENT = 'maxent'
-CLASSIFIER_TYPE_MEMM = 'memm'
-CLASSIFIER_TYPE_TEXT = 'text'
+from .model import ModelConfig
 
-__all__ = ['CLASSIFIER_TYPE_MAXENT', 'MaxentRoleModel', 'CLASSIFIER_TYPE_MEMM', 'MemmModel',
-           'CLASSIFIER_TYPE_TEXT', 'TextModel']
+# Need to import the following so models and features are registered. See helpers module
+from . import standard_models
+from . import sequence_models
+from . import query_features
+
+from .helpers import (create_model, QUERY_EXAMPLE_TYPE, ENTITY_EXAMPLE_TYPE, CLASS_LABEL_TYPE,
+                      ENTITIES_LABEL_TYPE)
+
+__all__ = ['ModelConfig', 'standard_models', 'sequence_models', 'query_features', 'create_model',
+           'QUERY_EXAMPLE_TYPE', 'ENTITY_EXAMPLE_TYPE', 'CLASS_LABEL_TYPE', 'ENTITIES_LABEL_TYPE']

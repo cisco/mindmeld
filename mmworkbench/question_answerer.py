@@ -124,7 +124,7 @@ class QuestionAnswerer(object):
 
     def __init__(self, resource_loader, es_host=None):
         self._resource_loader = resource_loader
-        self._es_host = es_host or os.environ.get('MM_ES_HOST')
+        self._es_host = self._get_es_host(es_host)
         self.__es_client = None
 
     @property
@@ -181,43 +181,50 @@ class QuestionAnswerer(object):
     def config(self, config):
         raise NotImplementedError
 
+    @staticmethod
+    def _get_es_host(es_host=None):
+        es_host = es_host or os.environ.get('MM_ES_HOST')
+        return es_host
 
-def create_index(es_host, index_name):
-    es_client = Elasticsearch(es_host)
+    @classmethod
+    def create_index(cls, index_name, es_host=None, es_client=None):
+        es_host = cls._get_es_host(es_host)
+        es_client = es_client or Elasticsearch(es_host)
 
-    mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
+        mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
 
-    if not es_client.indices.exists(index=index_name):
-        logger.info("Creating index '{}'".format(index_name))
-        es_client.indices.create(index_name, body=mapping)
-    else:
-        logger.error("Index '{}' already exists.".format(index_name))
-
-
-def load_index(es_host, index_name, data_file):
-    es_client = Elasticsearch(es_host)
-
-    with open(data_file) as data_fp:
-        data = json.load(data_fp)
-
-    def _doc_generator(docs):
-        for doc in docs:
-            base = {'_id': doc['id']}
-            base.update(doc)
-            yield base
-
-    # create index if specified index does not exist
-    if not es_client.indices.exists(index=index_name):
-        create_index(es_host, index_name)
-
-    for okay, result in streaming_bulk(es_client, _doc_generator(data), index=index_name,
-                                       doc_type=DOC_TYPE, chunk_size=50):
-
-        action, result = result.popitem()
-        doc_id = '/%s/%s/%s' % (index_name, DOC_TYPE, result['_id'])
-        # process the information from ES whether the document has been
-        # successfully indexed
-        if not okay:
-            logger.error('Failed to %s document %s: %r', action, doc_id, result)
+        if not es_client.indices.exists(index=index_name):
+            logger.info("Creating index '{}'".format(index_name))
+            es_client.indices.create(index_name, body=mapping)
         else:
-            logger.info('Loaded document: %s', doc_id)
+            logger.error("Index '{}' already exists.".format(index_name))
+
+    @classmethod
+    def load_index(cls, index_name, data_file, es_host=None, es_client=None):
+        es_host = cls._get_es_host(es_host)
+        es_client = es_client or Elasticsearch(es_host)
+
+        with open(data_file) as data_fp:
+            data = json.load(data_fp)
+
+        def _doc_generator(docs):
+            for doc in docs:
+                base = {'_id': doc['id']}
+                base.update(doc)
+                yield base
+
+        # create index if specified index does not exist
+        if not es_client.indices.exists(index=index_name):
+            QuestionAnswerer.create_index(index_name, es_host=es_host, es_client=es_client)
+
+        for okay, result in streaming_bulk(es_client, _doc_generator(data), index=index_name,
+                                           doc_type=DOC_TYPE, chunk_size=50):
+
+            action, result = result.popitem()
+            doc_id = '/%s/%s/%s' % (index_name, DOC_TYPE, result['_id'])
+            # process the information from ES whether the document has been
+            # successfully indexed
+            if not okay:
+                logger.error('Failed to %s document %s: %r', action, doc_id, result)
+            else:
+                logger.info('Loaded document: %s', doc_id)

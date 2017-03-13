@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import signal
+import shutil
 import subprocess
 import sys
 import time
@@ -15,7 +16,9 @@ import time
 import click
 import click_log
 
-from . import __version__, Conversation, question_answerer as qa
+from . import __version__, Conversation, QuestionAnswerer, path
+
+from .exceptions import FileNotFoundError
 from .path import MALLARD_JAR_PATH
 
 logger = logging.getLogger(__name__)
@@ -89,12 +92,36 @@ def converse(ctx, session):
             click.secho(prefix + response, fg='blue', bg='white')
 
 
+@cli.command('build', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+def build(ctx):
+    """Builds the app with default config"""
+    app = ctx.obj.get('app')
+    app.lazy_init()
+    nlp = app.app_manager.nlp
+    nlp.build()
+    nlp.dump()
+
+
+@cli.command('clean', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+def clean(ctx):
+    """Delete all built data, undoing `build`"""
+    app = ctx.obj.get('app')
+    gen_path = path.get_generated_data_folder(app.app_path)
+    try:
+        shutil.rmtree(gen_path)
+        logger.info('Generated data deleted')
+    except FileNotFoundError:
+        logger.info('No generated data to delete')
+
+
 @cli.command('create-index', context_settings=CONTEXT_SETTINGS)
 @click.option('-n', '--es-host', required=True)
 @click.argument('index_name', required=True)
 def create_index(es_host, index_name):
     """Create a new question answerer index"""
-    qa.create_index(es_host, index_name)
+    QuestionAnswerer.create_index(index_name, es_host)
 
 
 @cli.command('load-index', context_settings=CONTEXT_SETTINGS)
@@ -103,7 +130,7 @@ def create_index(es_host, index_name):
 @click.argument('data_file', required=True)
 def load_index(es_host, index_name, data_file):
     """Load data into a question answerer index"""
-    qa.load_index(es_host, index_name, data_file)
+    QuestionAnswerer.load_index(index_name, data_file, es_host)
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)

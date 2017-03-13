@@ -1,7 +1,6 @@
 When does the {Elm Street|location} store close?
 At what time does the {Elm Street|location} store close?
 When does the {Central Plaza|location} store close?
-What are the business hours for the {Central Plaza|location} store?
 What are the hours for the Kwik-E-Mart on {Main Street|location}?
 Is the {Central Plaza|location} Kwik-E-Mart open now?
 The store at {Pine & Market|location} - is it open?
@@ -12,7 +11,6 @@ please give me open hours for {russian district|location}
 will {springfield mall|location} be open and what time will it close
 what time will {springfield|location} and {russian district|location} both be open
 the one on {evergreen|location}, open times
-when are the lights on at {evergreen|location}
 please can you tell me if {springfield|location} is possibly open at this time on {friday|sys:time}
 are any stores open on {sunday|sys:time} at 9pm
 is the e mart on {russian district|location} open
@@ -20,7 +18,6 @@ When is the {181st|location} location open {tomorrow|sys:time}?
 Was {D street|location} open {yesterday|sys:time}?
 Is {257th|location} open on {Christmas|sys:time}?
 When can I go to {D street|location} location {tomorrow|sys:time}?
-Can I go to {181st|location} {tomorrow|sys:time} at 7 pm?
 i wanna go to {d street|location}. Is it open?
 Is kwik e mart open on {sunday|sys:time}
 Is {181st street|location} open 24 hours?
@@ -44,7 +41,6 @@ i'm running late, is {181st|location} still open
 can i make it to {257th before|location} work {tomorrow|sys:time}
 did the nearby fire close the {181st street|location} location {today|sys:time}?
 i heard there was an earthquake. Is {d street|location} still open?
-Are there normal hours for {181st|location} despite the snow?
 Is {d street|location} open on school days?
 What are the business hours for {257th|location}
 it's -5 degrees. Is {181st|location} still open now?
@@ -57,19 +53,15 @@ Is the one on {Pine and Market|location} open now?
 At what time does the {Central Plaza|location} store open {today|sys:time}?
 At what time does one on {Fifth Ave|location} open?
 When will the {Elm Street|location} store close?
-Is the {Elm Street|location} store open {today|sys:time}?
 Is the {Central Plaza|location} store open {tomorrow|sys:time}?
 Is the {Elm Street|location} store open on {Saturday|sys:time}?
 Does the one on {Central Plaza|location} remain open on {Sunday|sys:time}?
 Is the store on {45 Fifth Avenue|location} closed {today|sys:time}?
 When will the {Fifth Avenue|location} store open on {Monday|sys:time}?
-What are the hours for the Kwik-E-Mart at {Pine and Market|location}?
 When does {Central Plaza|location} close on Thursday?
 Is the store on {23rd Elm Street|location} open now?
-What are the operating hours for the one in {Central Plaza|location}?
 What does the {Elm Street|location} one close on {Monday|sys:time}?
 Can you tell me if the Kwik-E-Mart at {Pine and Market|location} is open right now?
-Tell me if the {Elm Street|location} Kwik-E-Mart is closed.
 At what time will the {Central Plaza|location} shop close?
 When will the {Fifth Avenue|location} location open?
 At what time does the {Elm Street|location} location close on {Sunday|sys:time}?
@@ -82,8 +74,6 @@ Is the {Shelbyville|location} store open on {Monday|sys:time}?
 Is the {Capital City|location} store open {today|sys:time}?
 What are the store hours for the location on {Main Street|location}?
 Can I go to the {Ogdenville|location} store {today|sys:time}?
-Please tell me if the {Shelbyville|location} store is open for business {today|sys:time}.
-Is the {Pine and Market|location} location open for business?
 When does the one on {Main Street|location} open?
 Is the {Main Street|location} store open for business on {Christmas|sys:time}?
 Is the {Main Street|location} location open for {Thanksgiving|sys:time}?
@@ -106,9 +96,7 @@ when do you open and close at the {little italy|location} store during {this wee
 does the {chinatown|location} store open later on {sunday|sys:time}
 what time does the {little italy|location} store close on {christmas day|sys:time}
 is the store at {104 first|location} open on {mothers day|sys:time}
-what time does your {north haverbrook|location} store open and close {tomorrow|sys:time}
 what time does the {fake street|location} store in {springfield|location} open on {tuesday|sys:time}
-what time does the store at {55 3rd|location} close {today|sys:time}
 are you guys open on {christmas day|sys:time} at your {north haverbrook|location} location
 what are your hours at the {chinatown|location} store on {fake|location}
 when does the {springfield|location} store at {3rd|location} open {tomorrow|sys:time}
@@ -121,10 +109,8 @@ Is the {Industrial Road|location} store open on {Sunday|sys:time}
 Can I visit the {156th street|location} location {Monday|sys:time} morning?
 Is the Kwik-E-Mart on {12th Avenue|location} open?
 What time does the {12th avenue|location} location close {today|sys:time}?
-What time does the {156th street|location} Kwik-E-Mart close on {Sunday|sys:time}?
 Does the {Industrial Road|location} store close before midnight {today|sys:time}?
 When does the {12th ave|location} location open on {Monday|sys:time}?
-Does the {156th|location} location open on {Saturday|sys:time}?
 Does the {Industrial Road|location} location open {today|sys:time}?
 At what time does the {156th street|location} Kwik E Mart open on {Saturday|sys:time}?
 When does the {Industrial Road|location} store close?
@@ -142,13 +128,11 @@ What time does the {156th street|location} mart close on {Wednesday|sys:time}?
 Does the {Industrial Road|location} location close at 10?
 Does the location on {12th Avenue|location} close early {today|sys:time}?
 Does the location on {Industrial Road|location} close before midnight?
-Does the kwik e mart on {156th street|location} stay opened late?
 Is the {12th Ave|location} store open all night?
 Is the {156th street|location} mart stay opened past midnight {today|sys:time}
 Does {12th Ave|location} store close before 10pm?
 When does the store on {156th|location} close on {Thursday|sys:time}?
 Does the store on {12th avenue|location} close before 11 on {Tuesday|sys:time}?
-when are the lights switched on on {13 W Oak St|location} kwik emart?
 can you please let me know when {diz-nee land|location} store opens on {friday|sys:time}?
 when does the kwik emart on {duff gardens|location} store close {today|sys:time}?
 {82 Beer Ave, Springfield|location} kwik emart, when does it close?
@@ -156,7 +140,6 @@ can i get into {duff gardens|location} store today? at what time?
 please tell me when the lights switch off at kwik emart at {82 beer ave|location}
 is {diz-nee land|location} store open for business {tomorrow|sys:time}?
 i want to buy things from {13 w oak st|location} {tomorrow|sys:time}, please tell me the hours
-when is the {Peanut st|location} store open?
 what are the hours for the {sycamore|location} location?
 when is the {Krustyland|location} store open {tomorrow|sys:time}
 at what times on {saturday|sys:time} is the store on {peanut st|location} open
@@ -171,7 +154,6 @@ and when will the {krustyland|location} store open?
 when does {sycamore ave|location} close {today|sys:time}?
 when is it that the {peanut street|location} store closes?
 what time will the {Krustyland|location} quickie mart close?
-how soon does the {sycamore ave|location} one close?
 and what time is the store at {50 clown st|location} closing?
 what about the closing time for the quicky mart on {peanut st|location}
 is the {clown st|location} store still open?
@@ -180,14 +162,12 @@ did the store on {sycamore avenue|location} open yet
 will the {crusty land|location} store be open on {saturday|sys:time}
 what about the store on {peanut st|location} on {friday|sys:time}
 does the quickie mart on {sycamore|location} open on {sunday|sys:time}?
-{Russian District|location} Store open times
 {Springfield Mall|location} Store timings
 what are the {Evergreen Terrace|location} hours
 at what time does {springfield|location} open
 when does {russian district|location} open
 what time is {springfield mall|location} open
 is the {mall|location} open now
-is the {mall|location} open on {Christmas day|sys:time}
 is the {terrace|location} closed for {Thanksgiving|sys:time}
 take me to the {springfield mall|location}
 when does {russian district|location} close on {friday|sys:time}
@@ -206,22 +186,18 @@ Does the store on {12th avenue|location} stay open passed 10PM?
 Can I still go to the store on {Industrial road|location} after 10?
 Will someone still be at the counter at {156th Street|location} if I come in after 9PM?
 Can I go to the store on {12th avenue|location} after midnight?
-Is the {156th|location} store still open after 930PM? 
+Is the {156th|location} store still open after 930PM?
 If I show up at 9am, will the {Industrial road|location} store be open already?
 Can I show up at the {12th Ave|location} store at 9am?
-Can I still shop at the {12th ave|location} store after midnight on {Monday|sys:time}?
 when is {Duff Gardens|location} Store open {tomorrow|sys:time}?
 what are the operating hours of {duff gardens|location}?
 when will {duff gardens|location} store be open on {sunday|sys:time}?
 at what time will {duff gardens|location} open {tomorrow|sys:time}?
-when does {duff gardens|location} store close {today|sys:time}?
 when can {duff gardens|location} open {tomorrow|sys:time}?
 is {duff gardens|location} open now?
-when will {duff gardens|location} open?
 till when is {duff gardens|location} open {this Saturday|sys:time}?
 {duff gardens|location} stores operating hours
 when is {springfields heights|location} open {tomorrow|sys:time}?
-opening hours of {springfield heights|location}
 when will {springfield heights|location} close on {sunday|sys:time}?
 when is {springfields heights|location} open now?
 what are the operating hours of {springfield heights|location}?
@@ -240,7 +216,6 @@ till when can I go to {Diz-Nee Land|location} Store on {friday|sys:time}?
 till when is {Diz-Nee Land|location} Store open {today|sys:time}
 please give me operating hours of {Diz-Nee Land|location} Store
 when I can go to {Diz-Nee Land|location} Store?
-tell me when I can enter {Diz-Nee Land|location} Store {tomorrow|sys:time}?
 i want to go to {Diz-Nee Land|location} Store, what time {today|sys:time}?
 when will {Diz-Nee Land|location} Store open?
 operating hours of {67 Anaheim Rd, Springfield, OR|location}
@@ -280,13 +255,11 @@ Will kwik e mart be open on {sunday|sys:time}? The one on {East Oak|location}
 When does kwikemart close on {east oak street|location}
 Hours of {3 W Oak St, Springfield, OR, 97077|location}
 will {e oak|location} hours be different for {Sunday|sys:time}?
-is {e oak|location} open for {memorial day|sys:time}?
 {w oak|location} hours for {sunday|sys:time}
 is {r route 27|location} open late on {monday|sys:time}?
 is {r route 27|location} open late {today|sys:time}?
 will {east oak|location} kwikemart be open before work {tomorrow|sys:time}?
 when will the kwikemart on {rural route 27|location} close {tomorrow|sys:time}?
-what are the hours for kwikemart, the one on {rural route|location}
 Tell me about the store hours for the kwik-e-mart on {West oak|location}
 Can I get a squishee from the {west oak|location} store {today|sys:time}?
 I want a squishee after work, will {e oak|location} be open?
@@ -298,3 +271,40 @@ what are your hours for the {little italy|location} store
 when does the {chinatown|location} location open {tomorrow|sys:time}
 what time do you close on {friday|sys:time} night at your {little italy|location} location
 is the {104 first street|location} store open this {sunday|sys:time}
+When does it close?
+When does it open?
+What are its hours?
+What are its operating hours?
+What are its timings?
+What are its business hours?
+Till when is that open?
+When will it open?
+When will it close?
+Is it open?
+Is it closed?
+Is that open?
+Are they open?
+Are they closed?
+Will they be open?
+Will they be closed now?
+When does that close?
+When does that open?
+When does that store close?
+When does that store open?
+When does that one close?
+When does that one open?
+When does this store open?
+When does this one close?
+At what time will it open?
+At what will that open?
+At what time will it close?
+At what time does that close?
+At what will that close?
+Is it closing soon?
+Is it going to close soon?
+Is that closed?
+Is that going to close soon?
+When does it close on {Monday|sys:time}?
+When does it open on {Saturday|sys:time}?
+When does that close on {Wednesday|sys:time}?
+When does that open {today|sys:time}?

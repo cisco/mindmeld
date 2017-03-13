@@ -5,8 +5,8 @@ from builtins import zip
 
 import logging
 
-from ...core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
-from ...ser import resolve_system_entity, SystemEntityResolutionError
+from ..core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
+from ..ser import resolve_system_entity, SystemEntityResolutionError
 
 logger = logging.getLogger(__name__)
 
@@ -16,14 +16,14 @@ I_TAG = 'I'
 O_TAG = 'O'
 E_TAG = 'E'
 S_TAG = 'S'
-OUT_OF_BOUNDS_TOKEN = '<$>'
 
 
-def get_tags_from_entities(query, scheme='IOB'):
+def get_tags_from_entities(query, entities, scheme='IOB'):
     """Get joint app and system IOB tags from a query's entities.
 
     Args:
-        query (ProcessedQuery): An annotated query instance.
+        query (Query): A query instance.
+        entities (List of QueryEntity): A list of queries found in the query
 
     Returns:
         (list of str): The tags for each token in the query. A tag has four
@@ -34,13 +34,13 @@ def get_tags_from_entities(query, scheme='IOB'):
     """
 
     # Normal entities
-    app_entities = [e for e in query.entities if not e.entity.is_system_entity]
+    app_entities = [e for e in entities if not e.entity.is_system_entity]
     iobs, app_types = _get_tags_from_entities(query, app_entities, scheme)
 
     # System entities
     # This algorithm assumes that the query system entities are well-formed and
     # only occur as standalone or fully inside an app entity.
-    sys_entities = [e for e in query.entities if e.entity.is_system_entity]
+    sys_entities = [e for e in entities if e.entity.is_system_entity]
     sys_iobs, sys_types = _get_tags_from_entities(query, sys_entities, scheme)
 
     tags = ['|'.join(args) for args in
@@ -50,7 +50,7 @@ def get_tags_from_entities(query, scheme='IOB'):
 
 
 def _get_tags_from_entities(query, entities, scheme='IOB'):
-    normalized_tokens = query.query.normalized_tokens
+    normalized_tokens = query.normalized_tokens
     iobs = [O_TAG for _ in normalized_tokens]
     types = ['' for _ in normalized_tokens]
 
@@ -75,7 +75,7 @@ def _get_tags_from_entities(query, entities, scheme='IOB'):
     return iobs, types
 
 
-def get_entities_from_tags(query, tags):
+def get_entities_from_tags(query, tags, scheme='IOB'):
     """From a set of joint IOB tags, parse the app and system entities.
 
     This performs the reverse operation of get_tags_from_entities.
