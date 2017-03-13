@@ -25,6 +25,13 @@ def say_goodbye(context, slots, responder):
     responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
 
 
+@app.handle(intent='help')
+def provide_help(context, slots, responder):
+    prompts = ["I can help you find store hours for your local Kwik-E-Mart. For example, you can say "
+               "'Where's the nearest store?' or 'When does the Elm Street store open?'"]
+    responder.prompt(prompts)
+
+
 @app.handle(intent='get_store_hours')
 def send_store_hours(context, slots, responder):
     active_store = None
