@@ -27,8 +27,8 @@ def say_goodbye(context, slots, responder):
 
 @app.handle(intent='help')
 def provide_help(context, slots, responder):
-    prompts = ["I can help you find store hours for your local Kwik-E-Mart. For example, you can say "
-               "'Where's the nearest store?' or 'When does the Elm Street store open?'"]
+    prompts = ["I can help you find store hours for your local Kwik-E-Mart. For example, you can "
+               "say 'Where's the nearest store?' or 'When does the Elm Street store open?'"]
     responder.prompt(prompts)
 
 
