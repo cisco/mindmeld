@@ -123,6 +123,7 @@ class MemmModel(SkLearnModel):
         self.register_resources(sys_types=system_types)
 
         skip_param_selection = params is not None or self.config.param_selection is None
+        params = params or self.config.params
 
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
@@ -144,7 +145,7 @@ class MemmModel(SkLearnModel):
         X, y, groups = self.get_feature_matrix(examples, y, fit=True)
 
         if skip_param_selection:
-            self._clf = self._fit(X, y, self.config.params)
+            self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
             # run cross validation to select params

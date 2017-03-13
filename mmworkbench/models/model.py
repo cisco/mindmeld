@@ -352,6 +352,7 @@ class SkLearnModel(Model):
                 interfaces.
         """
         skip_param_selection = params is not None or self.config.param_selection is None
+        params = params or self.config.params
 
         # Prepare resources
 
@@ -371,7 +372,7 @@ class SkLearnModel(Model):
         X, y, groups = self.get_feature_matrix(examples, y, fit=True)
 
         if skip_param_selection:
-            self._clf = self._fit(X, y, self.config.params)
+            self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
             # run cross validation to select params
@@ -468,8 +469,8 @@ class SkLearnModel(Model):
         for row in predictions:
             _, probas = row
             for label, proba in probas.items():
-                    if proba == -numpy.Infinity:
-                        probas[label] = _NEG_INF
+                if proba == -numpy.Infinity:
+                    probas[label] = _NEG_INF
         return predictions
 
     def _predict_proba(self, X, predictor):
