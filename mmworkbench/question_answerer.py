@@ -187,9 +187,9 @@ class QuestionAnswerer(object):
         return es_host
 
     @classmethod
-    def create_index(cls, index_name, es_host=None):
+    def create_index(cls, index_name, es_host=None, es_client=None):
         es_host = cls._get_es_host(es_host)
-        es_client = Elasticsearch(es_host)
+        es_client = es_client or Elasticsearch(es_host)
 
         mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
 
@@ -200,9 +200,9 @@ class QuestionAnswerer(object):
             logger.error("Index '{}' already exists.".format(index_name))
 
     @classmethod
-    def load_index(cls, index_name, data_file, es_host=None):
+    def load_index(cls, index_name, data_file, es_host=None, es_client=None):
         es_host = cls._get_es_host(es_host)
-        es_client = Elasticsearch(es_host)
+        es_client = es_client or Elasticsearch(es_host)
 
         with open(data_file) as data_fp:
             data = json.load(data_fp)
@@ -215,7 +215,7 @@ class QuestionAnswerer(object):
 
         # create index if specified index does not exist
         if not es_client.indices.exists(index=index_name):
-            QuestionAnswerer.create_index(es_host, index_name)
+            QuestionAnswerer.create_index(index_name, es_host=es_host, es_client=es_client)
 
         for okay, result in streaming_bulk(es_client, _doc_generator(data), index=index_name,
                                            doc_type=DOC_TYPE, chunk_size=50):
