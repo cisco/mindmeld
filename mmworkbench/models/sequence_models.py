@@ -231,8 +231,8 @@ class MemmModel(SkLearnModel):
                     'f': SelectPercentile()}.get(selector_type)
         return selector
 
-    def _get_model_class(self):
-        """Returns the class of the actual underlying model"""
+    def _get_model_constructor(self):
+        """Returns the python class of the actual underlying model"""
         return LogisticRegression
 
 

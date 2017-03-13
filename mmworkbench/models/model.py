@@ -409,7 +409,7 @@ class SkLearnModel(Model):
 
         """
         params = self._convert_params(params, y)
-        model_class = self._get_model_class()
+        model_class = self._get_model_constructor()
         return model_class(**params).fit(X, y)
 
     def _fit_cv(self, X, y, groups=None, selection_settings=None):
@@ -436,7 +436,7 @@ class SkLearnModel(Model):
         n_jobs = selection_settings.get('n_jobs', -1)
 
         param_grid = self._convert_params(selection_settings['grid'], y)
-        model_class = self._get_model_class()
+        model_class = self._get_model_constructor()
 
         grid_cv = GridSearchCV(estimator=model_class(), scoring=scoring, param_grid=param_grid,
                                cv=cv_iterator, n_jobs=n_jobs)
@@ -499,8 +499,8 @@ class SkLearnModel(Model):
 
         return predictions
 
-    def _get_model_class(self):
-        """Returns the class of the actual underlying model"""
+    def _get_model_constructor(self):
+        """Returns the Python class of the actual underlying model"""
         raise NotImplementedError
 
     def _get_feature_selector(self):

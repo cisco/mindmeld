@@ -144,7 +144,7 @@ class TextModel(SkLearnModel):
 
         self.register_resources(query_freqs=query_dict)
 
-    def _get_model_class(self):
+    def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
         classifier_type = self.config.model_settings['classifier_type']
         try:
