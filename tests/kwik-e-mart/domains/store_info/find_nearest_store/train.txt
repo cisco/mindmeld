@@ -2,7 +2,6 @@ Where is my nearest Kwik-E-Mart store?
 Where is the nearest Kwik-E-Mart?
 Locate the nearest Kwik-E-Mart.
 Where is my nearest store?
-Which store is closest to me?
 Can you tell me the location of the nearest Kwik-E-Mart?
 Where is the closest store?
 Where is the closest Kwik-E-Mart store?
@@ -14,7 +13,6 @@ are there any kwik-e-mart stores near me?
 are there any kwik-e-marts near me?
 are there any kwik-e-mart near me?
 are there any stores near me?
-are there locations near me
 change location to nearest store
 closest squishee shops
 closest donut shops
@@ -36,14 +34,12 @@ i'd like a list of nearby stores to pickup a donut at.
 is there a store that is closer to me?
 is there another nearby store where i could pick this up?
 is there any location near me
-is there any kwik-e-mart near me
 is there somewhere closer to pick this up?
 let me know if there is another pickup store?
 list locations
 list nearby stores.
 list pickup locations
 list stores
-locations near me
 locations near me.
 nearest squishee shops.
 nearest donut shops.
@@ -56,8 +52,6 @@ other location
 other locations
 other popular locations near me
 other store
-other stores
-other stores near me
 show me all locations closest to me
 show me all locations i can pick-up at
 show me nearby stores
@@ -92,7 +86,6 @@ where is the closest store?
 where is the nearest store?
 where can I find a squishee?
 where can I find donuts?
-where can I get my donuts?
 where can I get a squishee?
 where can I get donuts?
 where is my nearest kwik-e-mart?
@@ -103,23 +96,18 @@ where is my nearest location?
 where is the nearest place from where I can get a squishee?
 nearby locations.
 nearby stores
-nearby kwik-e-mart.
 nearby shops
 i want donut now
 i want a donut right now
 i want a squishee now
 i want a squishee right now
-lead me to donuts
-lead me to the nearest store
 lead me to the nearest shop
 lead me to the nearest kwik-e-mart
 get me donuts
 get me a squishee
-get me a slurpee
 i want a slurpee
 where is the nearest squishee
 i am hungry
 i am thirsty
-show me the nearest location
 how far is the nearest store?
 how far is the closest store?
