@@ -113,7 +113,7 @@ class EntityRecognizer(Classifier):
         # build  entity types set
         self.entity_types = set()
         for label in labels:
-            for entity in label.entities:
+            for entity in label:
                 self.entity_types.add(entity.entity.type)
 
         model.register_resources(gazetteers=gazetteers)
@@ -192,4 +192,5 @@ class EntityRecognizer(Classifier):
                                                                    label_set=label_set)
             queries = query_tree[self.domain][self.intent]
         raw_queries = [q.query for q in queries]
-        return raw_queries, queries
+        labels = [q.entities for q in queries]
+        return raw_queries, labels

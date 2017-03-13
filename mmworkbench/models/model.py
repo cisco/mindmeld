@@ -567,7 +567,7 @@ class LabelEncoder(object):
         """
         self.config = config
 
-    def encode(self, labels):
+    def encode(self, labels, **kwargs):
         """Transforms a list of label objects into a vector of classes.
 
 
@@ -593,15 +593,19 @@ class EntityLabelEncoder(LabelEncoder):
     def _get_tag_scheme(self):
         return self.config.model_settings.get('tag_scheme', 'IOB').upper()
 
-    def encode(self, labels):
+    def encode(self, labels, **kwargs):
+        examples = kwargs['examples']
         scheme = self._get_tag_scheme()
+        # Here each label is a list of entities for the corresponding example
         all_tags = []
-        for label in labels:
-            all_tags.extend(get_tags_from_entities(label, scheme))
+        for idx, label in enumerate(labels):
+            all_tags.extend(get_tags_from_entities(examples[idx], label, scheme))
         return all_tags
 
-    def decode(self, tags, **kwargs):
+    def decode(self, tags_by_example, **kwargs):
         # TODO: support decoding multiple queries at once
         scheme = self._get_tag_scheme()
-        query = kwargs['example']
-        return get_entities_from_tags(query, tags, scheme)
+        examples = kwargs['examples']
+        labels = [get_entities_from_tags(examples[idx], tags, scheme)
+                  for idx, tags in enumerate(tags_by_example)]
+        return labels
