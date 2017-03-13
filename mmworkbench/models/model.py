@@ -24,7 +24,6 @@ LIKELIHOOD_SCORING = 'log_loss'
 
 _NEG_INF = -1e10
 
-
 class ModelConfig(object):
     """A value object representing a model configuration
 
@@ -331,6 +330,11 @@ class SkLearnModel(Model):
         if selection_settings is None:
             return self._fit(X, y, self.config.params), self.config.params
 
+        cv_type = selection_settings['type']
+        num_splits = cv_iterator.get_n_splits(X, y, groups)
+        logger.info('Selecting hyperparameters using %s cross validation with %s split%s', cv_type,
+                    num_splits, '' if num_splits == 1 else 's')
+
         scoring = selection_settings.get('scoring', self.DEFAULT_CV_SCORING)
         n_jobs = selection_settings.get('n_jobs', -1)
 
@@ -351,10 +355,10 @@ class SkLearnModel(Model):
             logger.debug(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
 
         if scoring == ACCURACY_SCORING:
-            msg = 'Best accuracy: {:.2%}, settings: {}'
+            msg = 'Best accuracy: {:.2%}, params: {}'
             self.cv_loss_ = 1 - model.best_score_
         elif scoring == LIKELIHOOD_SCORING:
-            msg = 'Best log likelihood: {:.4}, settings: {}'
+            msg = 'Best log likelihood: {:.4}, params: {}'
             self.cv_loss_ = - model.best_score_
         logger.info(msg.format(model.best_score_, model.best_params_))
 

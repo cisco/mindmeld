@@ -146,10 +146,14 @@ class NaturalLanguageProcessor(Processor):
             self.domain_classifier.fit()
 
     def _dump(self):
+        if len(self.domains) == 1:
+            return
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.dump(model_path)
 
     def _load(self):
+        if len(self.domains) == 1:
+            return
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
 
@@ -200,10 +204,14 @@ class DomainProcessor(Processor):
             self.intent_classifier.fit()
 
     def _dump(self):
+        if len(self.intents) == 1:
+            return
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.dump(model_path)
 
     def _load(self):
+        if len(self.intents) == 1:
+            return
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.load(model_path)
 

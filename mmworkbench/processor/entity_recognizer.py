@@ -30,7 +30,7 @@ class EntityRecognizer(Classifier):
     """
 
     DEFAULT_CONFIG = {
-        'default_model': 'main',
+        'default_model': 'memm-cv',
         'models': {
             'main': {
                 'model_type': 'memm',
