@@ -198,7 +198,7 @@ class ResourceLoader(object):
         gazetteer_path = path.get_gazetteer_data_path(self.app_path, entity_type)
         try:
             file_table['gazetteer']['modified'] = os.path.getmtime(gazetteer_path)
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             # gaz not yet built so set to a time impossibly long ago
             file_table['gazetteer']['modified'] = 0.0
 
