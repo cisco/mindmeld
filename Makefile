@@ -3,11 +3,14 @@
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
 try:
-	from urllib import pathname2url
+    from urllib import pathname2url
 except:
-	from urllib.request import pathname2url
+    from urllib.request import pathname2url
 
-webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
+try:
+    webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
+except:
+    pass
 endef
 export BROWSER_PYSCRIPT
 
@@ -48,7 +51,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 
 lint: ## check style with flake8
-	flake8 mindmeld tests
+	flake8 mmworkbench tests
 
 test: ## run tests quickly with the default Python
 	py.test
@@ -58,18 +61,18 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source mindmeld -m pytest
+	coverage run --source mmworkbench -m pytest
 
 		coverage report -m
 		coverage html
 		$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/source/apidoc/mindmeld.rst
+	rm -f docs/source/apidoc/mmworkbench.rst
 	rm -f docs/source/apidoc/modules.rst
-	sphinx-apidoc -o docs/source/apidoc mindmeld
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
+	sphinx-apidoc -o docs/source/apidoc mmworkbench
+	$(MAKE) -C docs clean text html
+	docs/scripts/process_source_files.sh
 	$(BROWSER) docs/build/html/index.html
 
 servedocs: docs ## compile the docs watching for changes

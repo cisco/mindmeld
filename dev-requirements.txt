@@ -1,17 +1,20 @@
+-e .
 bumpversion==0.5.3
 coverage==4.2
 flake8==3.2.1
+pylint==1.6.5
 pytest==3.0.5
 pytest-cov==2.4.0
 wheel==0.29.0
 watchdog==0.8.3
+tox==2.6.0
 
 future==0.16.0
-jupyter_core==4.2.1
-jupyter_client==4.4.0
+jupyter>=1.0.0
+jupyter_core>=4.2.1
+jupyter_client>=4.4.0
 Sphinx==1.5
 nbsphinx==0.2.11
 git+ssh://git@github.com/expectlabs/sphinx_rtd_theme.git@master#egg=sphinx_rtd_theme-0.1.10-alpha
 pandoc==1.0.0b2
 mock==2.0.0
-Click>=6.0

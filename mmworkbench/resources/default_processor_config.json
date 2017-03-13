@@ -1,0 +1,14 @@
+{
+  "domain": {
+    "model_type": "text"
+  },
+  "intent": {
+    "model_type": "text"
+  },
+  "entity_type": {
+    "model_type": "memm"
+  },
+  "entity_role": {
+    "model_type": "maxent"
+  }
+}
