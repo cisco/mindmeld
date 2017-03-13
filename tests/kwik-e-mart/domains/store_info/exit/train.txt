@@ -115,8 +115,19 @@ See you soon!
 Smell you later.
 Talk to you later!
 Thank you so much
-Thank you so muchabort
+abort
 Thanks so much
+Thanks
+Thank you
+Thanks for the info
+Thank you for the information
+Thanks. That was helpful.
+Thank you for the help
+Thanks for that
+Thanks!
+Thank you!
+Thanks.
+Thank you.
 That about covers it.
 That's all I needed
 That's everything I need.
@@ -157,3 +168,4 @@ this is the end
 this is the end
 we are done here.
 you too
+that's all for now

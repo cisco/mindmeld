@@ -206,7 +206,7 @@ Does the store on {12th avenue|location} stay open passed 10PM?
 Can I still go to the store on {Industrial road|location} after 10?
 Will someone still be at the counter at {156th Street|location} if I come in after 9PM?
 Can I go to the store on {12th avenue|location} after midnight?
-Is the {156th|location} store still open after 930PM? 
+Is the {156th|location} store still open after 930PM?
 If I show up at 9am, will the {Industrial road|location} store be open already?
 Can I show up at the {12th Ave|location} store at 9am?
 Can I still shop at the {12th ave|location} store after midnight on {Monday|sys:time}?
@@ -298,3 +298,47 @@ what are your hours for the {little italy|location} store
 when does the {chinatown|location} location open {tomorrow|sys:time}
 what time do you close on {friday|sys:time} night at your {little italy|location} location
 is the {104 first street|location} store open this {sunday|sys:time}
+When does it close?
+When does it open?
+What are its hours?
+What are its operating hours?
+What are its timings?
+What are its business hours?
+What are the store's timings?
+What are the timings?
+Till when is that open?
+When will it open?
+When will it close?
+Is it open?
+Is it closed?
+Is that open?
+Are they open?
+Are they closed?
+Will they be open?
+Will they be closed now?
+When does that close?
+When does that open?
+When does that store close?
+When does that store open?
+When does that one close?
+When does that one open?
+When does this store close?
+When does this store open?
+When does this one close?
+When does this one open?
+At what time will it open?
+At what time does that open?
+At what will that open?
+At what time will it close?
+At what time does that close?
+At what will that close?
+Is it closing soon?
+Is it going to close soon?
+Is that closed?
+Is that going to close soon?
+Is that going to be open {tomorrow|sys:time}?
+When will it open on {sunday|sys:time}?
+When does it close on {Monday|sys:time}?
+When does it open on {Saturday|sys:time}?
+When does that close on {Wednesday|sys:time}?
+When does that open {today|sys:time}?

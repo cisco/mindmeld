@@ -27,8 +27,8 @@ def say_goodbye(context, slots, responder):
 
 @app.handle(intent='help')
 def provide_help(context, slots, responder):
-    prompts = ["I can help you find store hours for your local Kwik-E-Mart. For example, you can "
-               "say 'Where's the nearest store?' or 'When does the Elm Street store open?'"]
+    prompts = ["I can help you find store hours for your local Kwik-E-Mart. For example, you can say "
+               "'Where's the nearest store?' or 'When does the Elm Street store open?'"]
     responder.prompt(prompts)
 
 
@@ -45,9 +45,9 @@ def send_store_hours(context, slots, responder):
             stores = app.question_answerer.get(store_entity['text'], index='stores')
         try:
             active_store = stores[0]
+            context['frame']['target_store'] = active_store
         except IndexError:
             # No active store... continue
-            # TODO: maybe we want a better response here
             pass
     elif 'target_store' in context['frame']:
         active_store = context['frame']['target_store']
