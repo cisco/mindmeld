@@ -217,6 +217,7 @@ class QuestionAnswerer(object):
         if not es_client.indices.exists(index=index_name):
             QuestionAnswerer.create_index(index_name, es_host=es_host, es_client=es_client)
 
+        count = 0
         for okay, result in streaming_bulk(es_client, _doc_generator(data), index=index_name,
                                            doc_type=DOC_TYPE, chunk_size=50):
 
@@ -227,4 +228,6 @@ class QuestionAnswerer(object):
             if not okay:
                 logger.error('Failed to %s document %s: %r', action, doc_id, result)
             else:
-                logger.info('Loaded document: %s', doc_id)
+                count += 1
+                logger.debug('Loaded document: %s', doc_id)
+        logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
