@@ -14,7 +14,7 @@ from sklearn.linear_model import LogisticRegression
 
 from . import tagging
 from .helpers import get_feature_extractor, register_model
-from .model import ModelConfig, SkLearnModel
+from .model import EvaluatedExample, ModelConfig, ModelEvaluation, SkLearnModel
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +123,7 @@ class MemmModel(SkLearnModel):
         self.register_resources(sys_types=system_types)
 
         skip_param_selection = params is not None or self.config.param_selection is None
+        params = params or self.config.params
 
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
@@ -136,7 +137,8 @@ class MemmModel(SkLearnModel):
         #     return None
 
         # Extract features and classes
-        y = self._label_encoder.encode(labels)
+        y = self._label_encoder.encode(labels, examples=examples)
+
         if len(set(y)) == 1:
             self._no_entities = True
             return self
@@ -144,7 +146,7 @@ class MemmModel(SkLearnModel):
         X, y, groups = self.get_feature_matrix(examples, y, fit=True)
 
         if skip_param_selection:
-            self._clf = self._fit(X, y, self.config.params)
+            self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
             # run cross validation to select params
@@ -155,18 +157,14 @@ class MemmModel(SkLearnModel):
         return self
 
     def predict(self, examples):
-        labels = []
         if self._no_entities:
-            return [self._label_encoder.decode([], example=e) for e in examples]
-        for example in examples:
-            label = self._predict_example(example)
-            labels.append(label)
-        return labels
+            return self._label_encoder.decode([[] for e in examples], examples=examples)
+        return [self._predict_example(example) for example in examples]
 
     def _predict_example(self, example):
         features_by_segment = self._extract_features(example)
         if len(features_by_segment) == 0:
-            return self._label_encoder.decode([], example=example)
+            return self._label_encoder.decode([], examples=[example])[0]
 
         predicted_tags = []
         prev_tag = tagging.START_TAG
@@ -178,15 +176,35 @@ class MemmModel(SkLearnModel):
             predicted_tags.append(predicted_tag)
             prev_tag = predicted_tag
 
-        return self._label_encoder.decode(predicted_tags, example=example)
+        return self._label_encoder.decode([predicted_tags], examples=[example])[0]
 
     def predict_proba(self, examples):
-        # TODO: implement this
-        raise NotImplementedError
+        # TODO: figure out if we can support this somehow
+        raise NotImplementedError('This method is not supported for the memm')
 
     def predict_log_proba(self, examples):
-        # TODO: implement this
-        raise NotImplementedError
+        # TODO: figure out if we can support this somehow
+        raise NotImplementedError('This method is not supported for the memm')
+
+    def evaluate(self, examples, labels):
+        """Evaluates a model against the given examples and labels
+
+        Args:
+            examples: A list of examples to predict
+            labels: A list of expected labels
+
+        Returns:
+            ModelEvaluation: an object containing information about the
+                evaluation
+        """
+        # TODO: also expose feature weights?
+        predictions = self.predict(examples)
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i], None)
+                       for i, e in enumerate(examples)]
+
+        config = self._get_effective_config()
+        model_eval = ModelEvaluation(config, evaluations)
+        return model_eval
 
     def _convert_params(self, param_grid, y):
         return param_grid

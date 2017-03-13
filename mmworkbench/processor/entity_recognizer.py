@@ -113,7 +113,7 @@ class EntityRecognizer(Classifier):
         # build  entity types set
         self.entity_types = set()
         for label in labels:
-            for entity in label.entities:
+            for entity in label:
                 self.entity_types.add(entity.entity.type)
 
         model.register_resources(gazetteers=gazetteers)
@@ -177,6 +177,21 @@ class EntityRecognizer(Classifier):
         """
         raise NotImplementedError
 
+    def evaluate(self, queries=None):
+        """Evaluates the classifier
+
+        Args:
+            queries (list of ProcessedQuery): The labeled queries to use as training data. If none
+                are provided, the heldout label set will be used.
+
+        Returns:
+            ModelEvaluation object
+
+        """
+        queries, labels = self._get_queries_and_labels(queries, label_set='heldout')
+        evaluation = self._model.evaluate(queries, labels)
+        return evaluation
+
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
@@ -192,4 +207,5 @@ class EntityRecognizer(Classifier):
                                                                    label_set=label_set)
             queries = query_tree[self.domain][self.intent]
         raw_queries = [q.query for q in queries]
-        return raw_queries, queries
+        labels = [q.entities for q in queries]
+        return raw_queries, labels

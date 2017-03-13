@@ -104,6 +104,21 @@ class IntentClassifier(Classifier):
         logger.info('Loading intent classifier: domain=%r', self.domain)
         super().load(*args, **kwargs)
 
+    def evaluate(self, queries=None):
+        """Evaluates the classifier
+
+        Args:
+            queries (list of ProcessedQuery): The labeled queries to use as training data. If none
+                are provided, the heldout label set will be used.
+
+        Returns:
+            ModelEvaluation object
+
+        """
+        queries, classes = self._get_queries_and_labels(queries, label_set='heldout')
+        evaluation = self._model.evaluate(queries, classes)
+        return evaluation
+
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
