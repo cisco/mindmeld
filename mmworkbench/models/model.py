@@ -25,6 +25,7 @@ LIKELIHOOD_SCORING = 'log_loss'
 
 _NEG_INF = -1e10
 
+
 class ModelConfig(object):
     """A value object representing a model configuration
 
