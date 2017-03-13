@@ -10,6 +10,7 @@ import logging
 
 from sklearn.externals import joblib
 
+from ..exceptions import FileNotFoundError
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError

@@ -6,8 +6,7 @@ of text.
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-
-from builtins import range, zip
+from builtins import range, zip, super
 from past.utils import old_div
 
 from collections import Counter
