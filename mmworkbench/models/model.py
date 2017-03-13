@@ -125,9 +125,10 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     def __repr__(self):
         num_examples = len(self.results)
+        num_correct = len(list(self.correct_results()))
         accuracy = self.get_accuracy()
-        msg = "<{} score: {:.2%}, {} example{}>"
-        return msg.format(self.__class__.__name__, accuracy, num_examples,
+        msg = "<{} score: {:.2%}, {} of {} example{} correct>"
+        return msg.format(self.__class__.__name__, accuracy, num_correct, num_examples,
                           '' if num_examples == 1 else 's')
 
     def correct_results(self):
@@ -210,12 +211,21 @@ class Model(object):
                        for i, e in enumerate(examples)]
 
         # Create a model config object for the current effective config (after param selection)
+        config = self._get_effective_config()
+        model_eval = ModelEvaluation(config, evaluations)
+        return model_eval
+
+    def _get_effective_config(self):
+        """Create a model config object for the current effective config (after
+        param selection)
+
+        Returns:
+            ModelConfig
+        """
         config_dict = self.config.to_dict()
         config_dict.pop('param_selection')
         config_dict['params'] = self._current_params
-        config = ModelConfig(**config_dict)
-        model_eval = ModelEvaluation(config, evaluations)
-        return model_eval
+        return ModelConfig(**config_dict)
 
     def register_resources(self, **kwargs):
         """Registers resources which are accessible to feature extractors

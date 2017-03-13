@@ -177,6 +177,21 @@ class EntityRecognizer(Classifier):
         """
         raise NotImplementedError
 
+    def evaluate(self, queries=None):
+        """Evaluates the classifier
+
+        Args:
+            queries (list of ProcessedQuery): The labeled queries to use as training data. If none
+                are provided, the heldout label set will be used.
+
+        Returns:
+            ModelEvaluation object
+
+        """
+        queries, labels = self._get_queries_and_labels(queries, label_set='heldout')
+        evaluation = self._model.evaluate(queries, labels)
+        return evaluation
+
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 

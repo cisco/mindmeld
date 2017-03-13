@@ -105,6 +105,16 @@ class IntentClassifier(Classifier):
         super().load(*args, **kwargs)
 
     def evaluate(self, queries=None):
+        """Evaluates the classifier
+
+        Args:
+            queries (list of ProcessedQuery): The labeled queries to use as training data. If none
+                are provided, the heldout label set will be used.
+
+        Returns:
+            ModelEvaluation object
+
+        """
         queries, classes = self._get_queries_and_labels(queries, label_set='heldout')
         evaluation = self._model.evaluate(queries, classes)
         return evaluation

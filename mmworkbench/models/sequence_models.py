@@ -14,7 +14,7 @@ from sklearn.linear_model import LogisticRegression
 
 from . import tagging
 from .helpers import get_feature_extractor, register_model
-from .model import ModelConfig, SkLearnModel
+from .model import EvaluatedExample, ModelConfig, ModelEvaluation, SkLearnModel
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +157,6 @@ class MemmModel(SkLearnModel):
         return self
 
     def predict(self, examples):
-        labels = []
         if self._no_entities:
             return self._label_encoder.decode([[] for e in examples], examples=examples)
         return [self._predict_example(example) for example in examples]
@@ -180,12 +179,32 @@ class MemmModel(SkLearnModel):
         return self._label_encoder.decode([predicted_tags], examples=[example])[0]
 
     def predict_proba(self, examples):
-        # TODO: implement this
-        raise NotImplementedError
+        # TODO: figure out if we can support this somehow
+        raise NotImplementedError('This method is not supported for the memm')
 
     def predict_log_proba(self, examples):
-        # TODO: implement this
-        raise NotImplementedError
+        # TODO: figure out if we can support this somehow
+        raise NotImplementedError('This method is not supported for the memm')
+
+    def evaluate(self, examples, labels):
+        """Evaluates a model against the given examples and labels
+
+        Args:
+            examples: A list of examples to predict
+            labels: A list of expected labels
+
+        Returns:
+            ModelEvaluation: an object containing information about the
+                evaluation
+        """
+        # TODO: also expose feature weights?
+        predictions = self.predict(examples)
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i], None)
+                       for i, e in enumerate(examples)]
+
+        config = self._get_effective_config()
+        model_eval = ModelEvaluation(config, evaluations)
+        return model_eval
 
     def _convert_params(self, param_grid, y):
         return param_grid
