@@ -56,7 +56,7 @@ class MemmModel(SkLearnModel):
         we save the resources that are memory intensive
         """
         attributes = self.__dict__.copy()
-        resources_to_persist = set(['sys_types', 'gazetteers'])
+        resources_to_persist = set(['sys_types'])
         for key in list(attributes['_resources'].keys()):
             if key not in resources_to_persist:
                 del attributes['_resources'][key]

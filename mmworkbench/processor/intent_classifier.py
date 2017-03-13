@@ -115,6 +115,8 @@ class IntentClassifier(Classifier):
             ModelEvaluation object
 
         """
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
         queries, classes = self._get_queries_and_labels(queries, label_set='heldout')
         evaluation = self._model.evaluate(queries, classes)
         return evaluation
