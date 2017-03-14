@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import time
+import uuid
 
 from flask import Flask, Request, request, jsonify, g
 from flask_cors import CORS
@@ -78,7 +79,8 @@ class WorkbenchServer(object):
                 if key in request_json:
                     safe_request[key] = request_json[key]
             response = self._app_manager.parse(**safe_request)
-
+            # add query id to response
+            response['query_id'] = str(uuid.uuid4())
             return jsonify(response)
 
         @server.before_request
