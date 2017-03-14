@@ -139,6 +139,8 @@ class Classifier(object):
         """
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
         return self._model.predict([query])[0]
 
     def predict_proba(self, query):
@@ -153,6 +155,8 @@ class Classifier(object):
         """
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
         return list(zip(*self._model.predict_proba([query])))[0]
 
     def evaluate(self, use_blind=False):
