@@ -94,7 +94,7 @@ class WorkbenchServer(object):
 
             # add response time to response
             try:
-                data = json.loads(response.get_data())
+                data = json.loads(response.get_data(as_text=True))
                 data['response_time'] = g.response_time
                 data['version'] = '2.0'
                 response.set_data(json.dumps(data))
