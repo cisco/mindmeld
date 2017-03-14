@@ -160,6 +160,8 @@ class QuestionAnswerer(object):
 
         sort = kwargs.get('sort')
         location = kwargs.get('location')
+        if location and 'latitude' in location and 'longitude' in location:
+            location = {'lat': location['latitude'], 'lon': location['longitude']}
 
         if sort == 'location':
             es_query = {
