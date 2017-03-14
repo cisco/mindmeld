@@ -188,6 +188,8 @@ class EntityRecognizer(Classifier):
             ModelEvaluation object
 
         """
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
         queries, labels = self._get_queries_and_labels(queries, label_set='heldout')
         evaluation = self._model.evaluate(queries, labels)
         return evaluation
