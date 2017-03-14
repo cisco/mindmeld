@@ -11,6 +11,7 @@ import os
 import sys
 
 from .app_manager import ApplicationManager
+from .cli import cli
 from .server import WorkbenchServer
 
 logger = logging.getLogger(__name__)
@@ -79,6 +80,5 @@ class Application(object):
             self._dialogue_rules.append((name, handler, kwargs))
 
     def cli(self):
-        from .cli import cli
         # pylint:
         cli(obj={'app': self})

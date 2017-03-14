@@ -16,10 +16,12 @@ import time
 import click
 import click_log
 
-from . import __version__, Conversation, QuestionAnswerer, path
-
+from . import path
 from .exceptions import FileNotFoundError
-from .path import MALLARD_JAR_PATH
+from .dialogue import Conversation
+from .question_answerer import QuestionAnswerer
+from ._version import current as __version__
+
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +149,7 @@ def num_parser(ctx, start):
             return
 
         try:
-            mallard_service = subprocess.Popen(['java', '-jar', MALLARD_JAR_PATH])
+            mallard_service = subprocess.Popen(['java', '-jar', path.MALLARD_JAR_PATH])
             # mallard takes some time to start so sleep for a bit
             time.sleep(5)
             logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
@@ -165,7 +167,7 @@ def num_parser(ctx, start):
 
 
 def _get_mallard_pid():
-    _, filename = os.path.split(MALLARD_JAR_PATH)
+    _, filename = os.path.split(path.MALLARD_JAR_PATH)
     pid = []
     for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
         pid.append(line.split()[0])
