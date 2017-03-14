@@ -23,7 +23,7 @@ when does {duff gardens|location} store close {today|sys:time}?
 when will {duff gardens|location} open?
 opening hours of {springfield heights|location}
 tell me when I can enter {Diz-Nee Land|location} Store {tomorrow|sys:time}?
-is {e oak|location} open for {memorial day|sys:time}?
+is {e oak|location} open for {christmas day|sys:time}?
 what are the hours for kwikemart, the one on {rural route|location}
 What are the store's timings?
 What are the timings?
