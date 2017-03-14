@@ -88,7 +88,7 @@ def converse(ctx, session):
         responses = convo.say(message)
 
         for index, response in enumerate(responses):
-            prefix = 'App: ' if index == 0 else ''
+            prefix = 'App: ' if index == 0 else '...  '
             click.secho(prefix + response, fg='blue', bg='white')
 
 

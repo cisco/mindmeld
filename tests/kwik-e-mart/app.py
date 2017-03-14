@@ -70,6 +70,7 @@ def send_nearest_store(context, slots, responder):
     except KeyError:
         # request and session should always be here so assume location is the problem
         responder.reply("I'm not sure. You haven't told me where you are!")
+        responder.suggest([{'type': 'location', 'text': 'Share your location'}])
         return
 
     stores = app.question_answerer.get(index='stores', sort='location', location=user_location)

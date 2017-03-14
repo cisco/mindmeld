@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 SHOW_REPLY = 'show-reply'
 SHOW_PROMPT = 'show-prompt'
+SHOW_SUGGESTIONS = 'show-suggestions'
 
 
 class DialogueStateRule(object):
@@ -236,6 +237,13 @@ class DialogueResponder(object):
     def show(self, things):
         raise NotImplementedError
 
+    def suggest(self, suggestions=None):
+        suggestions = suggestions or []
+        self.respond({
+            'name': SHOW_SUGGESTIONS,
+            'message': suggestions
+        })
+
     def respond(self, action):
         """Sends an arbitrary client action.
 
@@ -325,8 +333,31 @@ class Conversation(object):
         try:
             if action['name'] in set((SHOW_REPLY, SHOW_PROMPT)):
                 msg = action['message']['text']
+            elif action['name'] == SHOW_SUGGESTIONS:
+                suggestions = action['message']
+                if not len(suggestions):
+                    raise ValueError
+                msg = 'Suggestion{}:'.format('' if len(suggestions) == 1 else 's')
+                texts = []
+                for idx, suggestion in enumerate(suggestions):
+                    if idx > 0:
+                        msg += ', {!r}'
+                    else:
+                        msg += ' {!r}'
 
+                    texts.append(self._generate_suggestion_text(suggestion))
+                msg = msg.format(*texts)
         except (KeyError, ValueError, AttributeError):
             msg = "Unsupported response: {!r}".format(action)
 
         return msg
+
+    @staticmethod
+    def _generate_suggestion_text(suggestion):
+        pieces = []
+        if 'text' in suggestion:
+            pieces.append(suggestion['text'])
+        if suggestion['type'] != 'text':
+            pieces.append('({})'.format(suggestion['type']))
+
+        return ' '.join(pieces)
