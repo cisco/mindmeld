@@ -20,7 +20,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-from .model import SkLearnModel
+from .model import EvaluatedExample, StandardModelEvaluation, SkLearnModel
 
 from .helpers import GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC, register_model, mask_numerics
 
@@ -179,6 +179,27 @@ class TextModel(SkLearnModel):
             self.compile_query_freq_dict(examples)
 
         return super().fit(examples, labels, params)
+
+    def evaluate(self, examples, labels):
+        """Evaluates a model against the given examples and labels
+
+        Args:
+            examples: A list of examples to predict
+            labels: A list of expected labels
+
+        Returns:
+            ModelEvaluation: an object containing information about the
+                evaluation
+        """
+        # TODO: also expose feature weights?
+        predictions = self.predict_proba(examples)
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1])
+                       for i, e in enumerate(examples)]
+
+        # Create a model config object for the current effective config (after param selection)
+        config = self._get_effective_config()
+        model_eval = StandardModelEvaluation(config, evaluations)
+        return model_eval
 
     def _convert_params(self, param_grid, y):
         """

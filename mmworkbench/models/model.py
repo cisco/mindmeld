@@ -14,6 +14,7 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuffleSplit,
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
+from sklearn.metrics import (f1_score, precision_recall_fscore_support as score)
 
 from .helpers import get_feature_extractor
 from .tagging import get_tags_from_entities, get_entities_from_tags
@@ -89,20 +90,20 @@ class ModelConfig(object):
         return "{}({})".format(self.__class__.__name__, args_str)
 
 
-class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
+class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'gold', 'pred',
                                                        'probas'])):
     """Represents the evaluation of a single example
 
     Attributes:
         example: The example being evaluated
-        expected: The expected label for the example
-        prediction: The predicted label for the example
+        gold: The expected label for the example
+        pred: The predicted label for the example
         proba (dict): Maps labels to their predicted probabilities
     """
 
     @property
     def is_correct(self):
-        return self.expected == self.predicted
+        return self.gold == self.pred
 
 
 class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
@@ -112,6 +113,8 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
     Attributes:
         config (ModelConfig): The model config used during evaluation
         results (list of EvaluatedExample): A list of the evaluated examples
+
+    TODO: update to test_results and train_results to calculate bias and variance
     """
     def get_accuracy(self):
         """The accuracy represents the share of examples whose predicted labels
@@ -149,6 +152,118 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         for result in self.results:
             if not result.is_correct:
                 yield result
+
+
+class StandardModelEvaluation(ModelEvaluation):
+    def raw_results(self):
+        """
+        Returns raw vectors of the predictions for data scientists to use for any additional
+        evaluation metrics or graph generation
+
+        Returns:
+            namedtuple of:
+                pred: vector of predicted classes (numeric value)
+                gold: vector of gold classes (numeric value)
+                label_mappings: two way dict of the text label to numeric value
+                numeric_labels: a list of all the numeric label values
+                text_labels: a list of all the text label values
+
+        TODO: check if numeric mappings should be passed in from prediction code/parser
+        """
+        label_mappings = {}
+        val = 1
+
+        pred = []
+        gold = []
+
+        for result in self.results:
+            if label_mappings.get(result.pred) is None:
+                label_mappings[result.pred] = val
+                val += 1
+            pred.append(label_mappings[result.pred])
+
+            if label_mappings.get(result.gold) is None:
+                label_mappings[result.gold] = val
+                val += 1
+            gold.append(label_mappings[result.gold])
+
+        label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
+
+        RawResults = namedtuple('RawResults',
+                                ['pred', 'gold', 'label_mappings', 'numeric_labels', 'text_labels'])
+        return RawResults(pred=pred, gold=gold, label_mappings=label_mappings,
+                          numeric_labels=range(1, val), text_labels=label_mappings.keys())
+
+    def stats(self):
+        """
+        Prints a stats table and returns a structured stats object
+
+        Returns:
+            A tuple of dictionaries. One of overall stats and one of class specific stats.
+            Contains precision, recall, f scores, support, bias, and variance
+
+        TODO: calculate bias and variance
+        """
+        raw_results = self.raw_results()
+        labels = raw_results.numeric_labels
+        precision, recall, f_beta, support = score(y_true=raw_results.gold, y_pred=raw_results.pred,
+                                                   labels=labels)
+
+        stats = {
+                    'precision': precision,
+                    'recall': recall,
+                    'f_beta': f_beta,
+                    'support': support,
+                }
+        self._print_stats_table(stats, labels, raw_results.label_mappings)
+
+        f1_weighted = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
+                               average='weighted')
+        f1_macro = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
+                            average='macro')
+        f1_micro = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
+                            average='micro')
+
+        stats_overall = {
+            'f1_weighted': f1_weighted,
+            'f1_macro': f1_macro,
+            'f1_micro': f1_micro
+        }
+        self._print_overall_stats_table(stats_overall)
+
+        return stats_overall, stats
+
+    def graphs(self):
+        """
+        Generates some useful graphs based on the evaluation data
+        TODO generate graphs from matplotlib/scikitlearn
+        """
+        return None
+
+    def _print_stats_table(self, stats, labels, label_mappings):
+        title_format = "{:>30}" + "{:>15}" * (len(stats))
+        stat_row_format = "{:>30}" + "{:>15.3f}" * (len(stats))
+        table_titles = stats.keys()
+        print("Statistics by Class: \n")
+        print(title_format.format("label", *table_titles))
+        for label in labels:
+            row = []
+            for stat in table_titles:
+                row.append(stats[stat][label-1])
+            print(stat_row_format.format(label_mappings[label], *row))
+        print("\n\n")
+
+    def _print_overall_stats_table(self, stats_overall):
+        title_format = "{:>15}" * (len(stats_overall))
+        stat_row_format = "{:>15.3f}" * (len(stats_overall))
+        table_titles = stats_overall.keys()
+        print("Overall Statistics: \n")
+        print(title_format.format(*table_titles))
+        row = []
+        for stat in table_titles:
+            row.append(stats_overall[stat])
+        print(stat_row_format.format(*row))
+        print("\n\n")
 
 
 class Model(object):
@@ -196,25 +311,7 @@ class Model(object):
         raise NotImplementedError
 
     def evaluate(self, examples, labels):
-        """Evaluates a model against the given examples and labels
-
-        Args:
-            examples: A list of examples to predict
-            labels: A list of expected labels
-
-        Returns:
-            ModelEvaluation: an object containing information about the
-                evaluation
-        """
-        # TODO: also expose feature weights?
-        predictions = self.predict_proba(examples)
-        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1])
-                       for i, e in enumerate(examples)]
-
-        # Create a model config object for the current effective config (after param selection)
-        config = self._get_effective_config()
-        model_eval = ModelEvaluation(config, evaluations)
-        return model_eval
+        raise NotImplementedError
 
     def _get_effective_config(self):
         """Create a model config object for the current effective config (after
