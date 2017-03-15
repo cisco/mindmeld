@@ -124,14 +124,14 @@ class QuestionAnswerer(object):
 
     def __init__(self, resource_loader, es_host=None):
         self._resource_loader = resource_loader
-        self._es_host = self._get_es_host(es_host)
+        self._es_host = es_host
         self.__es_client = None
 
     @property
     def _es_client(self):
         # Lazily connect to Elasticsearch
         if self.__es_client is None:
-            self.__es_client = Elasticsearch(self._es_host)
+            self.__es_client = self._create_es_client(self._es_host)
         return self.__es_client
 
     def get(self, query_string=None, **kwargs):
@@ -160,6 +160,8 @@ class QuestionAnswerer(object):
 
         sort = kwargs.get('sort')
         location = kwargs.get('location')
+        if location and 'latitude' in location and 'longitude' in location:
+            location = {'lat': location['latitude'], 'lon': location['longitude']}
 
         if sort == 'location':
             es_query = {
@@ -182,14 +184,18 @@ class QuestionAnswerer(object):
         raise NotImplementedError
 
     @staticmethod
-    def _get_es_host(es_host=None):
+    def _create_es_client(es_host=None, es_user=None, es_pass=None):
         es_host = es_host or os.environ.get('MM_ES_HOST')
-        return es_host
+        es_user = es_user or os.environ.get('MM_ES_USERNAME')
+        es_pass = es_pass or os.environ.get('MM_ES_PASSWORD')
+
+        http_auth = (es_user, es_pass) if es_user and es_pass else None
+        es_client = Elasticsearch(es_host, http_auth=http_auth, request_timeout=60, timeout=60)
+        return es_client
 
     @classmethod
     def create_index(cls, index_name, es_host=None, es_client=None):
-        es_host = cls._get_es_host(es_host)
-        es_client = es_client or Elasticsearch(es_host)
+        es_client = es_client or cls._create_es_client(es_host)
 
         mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
 
@@ -201,8 +207,7 @@ class QuestionAnswerer(object):
 
     @classmethod
     def load_index(cls, index_name, data_file, es_host=None, es_client=None):
-        es_host = cls._get_es_host(es_host)
-        es_client = es_client or Elasticsearch(es_host)
+        es_client = es_client or cls._create_es_client(es_host)
 
         with open(data_file) as data_fp:
             data = json.load(data_fp)
