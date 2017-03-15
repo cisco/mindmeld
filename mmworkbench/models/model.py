@@ -153,12 +153,31 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             if not result.is_correct:
                 yield result
 
+    def stats(self):
+        """
+        Returns statistics for evaluation.
+        """
+        raise NotImplementedError
+
+    def graphs(self):
+        """
+        Returns graphs for evaluation.
+        """
+        raise NotImplementedError
+
+    def raw_results(self):
+        """
+        Returns raw vectors of the predictions for data scientists to use for any additional
+        evaluation metrics or generate graphs of their choice
+        """
+        raise NotImplementedError
+
 
 class StandardModelEvaluation(ModelEvaluation):
     def raw_results(self):
         """
         Returns raw vectors of the predictions for data scientists to use for any additional
-        evaluation metrics or graph generation
+        evaluation metrics or generate graphs of their choice
 
         Returns:
             namedtuple of:
@@ -168,7 +187,8 @@ class StandardModelEvaluation(ModelEvaluation):
                 numeric_labels: a list of all the numeric label values
                 text_labels: a list of all the text label values
 
-        TODO: check if numeric mappings should be passed in from prediction code/parser
+        TODO: check if numeric mappings can be passed in from the model prediction code/parser
+              instead of re-generated here
         """
         label_mappings = {}
         val = 1
@@ -196,7 +216,7 @@ class StandardModelEvaluation(ModelEvaluation):
 
     def stats(self):
         """
-        Prints a stats table and returns a structured stats object
+        Prints a useful stats table and returns a structured stats object for evaluation
 
         Returns:
             A tuple of dictionaries. One of overall stats and one of class specific stats.
@@ -264,6 +284,25 @@ class StandardModelEvaluation(ModelEvaluation):
             row.append(stats_overall[stat])
         print(stat_row_format.format(*row))
         print("\n\n")
+
+
+class SequenceModelEvaluation(ModelEvaluation):
+    def raw_results(self):
+        for result in self.results:
+            from pprint import pprint
+            for entity in result.gold:
+                pprint(entity.text)
+        return None
+
+    def stats(self):
+        return None
+
+    def graphs(self):
+        """
+        Generates some useful graphs based on the evaluation data
+        TODO generate graphs from matplotlib/scikitlearn
+        """
+        return None
 
 
 class Model(object):
