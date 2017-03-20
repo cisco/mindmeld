@@ -11,6 +11,7 @@ from .. import path
 from ..core import ProcessedQuery
 from ..exceptions import ProcessorError
 from ..query_factory import QueryFactory
+from ..resource_loader import ResourceLoader
 from ..tokenizer import Tokenizer
 
 from .domain_classifier import DomainClassifier
@@ -18,7 +19,6 @@ from .intent_classifier import IntentClassifier
 from .entity_resolver import EntityResolver
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
-from .resource_loader import ResourceLoader
 from .role_classifier import RoleClassifier
 
 

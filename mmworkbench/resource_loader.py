@@ -13,9 +13,8 @@ import logging
 import os
 import time
 
-from .. import markup, path
-from ..exceptions import FileNotFoundError
-
+from . import markup, path
+from .exceptions import FileNotFoundError
 from .gazetteer import Gazetteer
 
 logger = logging.getLogger(__name__)
