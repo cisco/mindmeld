@@ -14,7 +14,7 @@ import pytest
 
 from mmworkbench.core import Entity
 
-from mmworkbench.processor.entity_resolver import EntityResolver
+from mmworkbench.components.entity_resolver import EntityResolver
 
 ENTITY_TYPE = 'location'
 
