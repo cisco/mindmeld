@@ -4,8 +4,10 @@ from __future__ import unicode_literals
 from builtins import object
 
 
-from .core import Query, TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED
 from . import ser as sys_ent_rec
+
+from .core import Query, TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED
+from .tokenizer import Tokenizer
 
 
 class QueryFactory(object):
@@ -70,3 +72,19 @@ class QueryFactory(object):
 
     def __repr__(self):
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))
+
+    @staticmethod
+    def create_query_factory(app_path, tokenizer=None, preprocessor=None):
+        """Creates a query factory for the app
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            tokenizer (Tokenizer, optional): The app's tokenizer. One will be
+                created if none is provided
+            preprocessor (Processor, optional): The app's preprocessor.
+
+        Returns:
+            QueryFactory: Description
+        """
+        tokenizer = tokenizer or Tokenizer.create_tokenizer(app_path)
+        return QueryFactory(tokenizer, preprocessor)

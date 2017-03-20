@@ -16,6 +16,7 @@ import time
 from . import markup, path
 from .exceptions import FileNotFoundError
 from .gazetteer import Gazetteer
+from .query_factory import QueryFactory
 
 logger = logging.getLogger(__name__)
 
@@ -341,3 +342,17 @@ class ResourceLoader(object):
                         intent_table[file] = new_intent_table[file]
                     else:
                         intent_table[file]['modified'] = new_intent_table[file]['modified']
+
+    @staticmethod
+    def create_resource_loader(app_path, query_factory=None):
+        """Creates the resource loader for the app at app path
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            query_factory (QueryFactory): The app's query factory
+
+        Returns:
+            ResourceLoader: a resource loader
+        """
+        query_factory = query_factory or QueryFactory.create_query_factory(app_path)
+        return ResourceLoader(app_path, query_factory)
