@@ -53,6 +53,17 @@ def get_feature_extractor(example_type, name):
     return FEATURE_MAP[example_type][name]
 
 
+def get_label_encoder(config, name):
+    from .model import LabelEncoder, EntityLabelEncoder
+    label_type = config.label_type
+    try:
+        return {'class': LabelEncoder,
+                'entities': EntityLabelEncoder}[label_type](config)
+    except KeyError:
+        msg = '{}: Unrecognized label type {!r}'.format(name, label_type)
+        raise ValueError(msg)
+
+
 def register_model(model_type, model_class):
     """Registers a model for use with `create_model()`
 

@@ -9,14 +9,14 @@ import logging
 import math
 import random
 
-import numpy
+import numpy as np
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuffleSplit,
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score)
 
-from .helpers import get_feature_extractor
+from .helpers import get_feature_extractor, get_label_encoder
 from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
@@ -116,6 +116,18 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     TODO: update to test_results and train_results to calculate bias and variance
     """
+    def __init__(self, config, results):
+        self.RawResults = namedtuple('RawResults', ['pred', 'gold', 'label_mappings',
+                                                    'numeric_labels', 'text_labels',
+                                                    'pred_flat', 'gold_flat'])
+        self.label_encoder = get_label_encoder(config, config.model_settings['classifier_type'])
+
+    def _make_raw_result(self, pred, gold, label_mappings, numeric_labels, text_labels,
+                         pred_flat=None, gold_flat=None):
+        return self.RawResults(pred=pred, gold=gold, label_mappings=label_mappings,
+                               numeric_labels=numeric_labels, text_labels=text_labels,
+                               pred_flat=pred_flat, gold_flat=gold_flat)
+
     def get_accuracy(self):
         """The accuracy represents the share of examples whose predicted labels
         exactly matched their expected labels.
@@ -172,95 +184,17 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         """
         raise NotImplementedError
 
-
-class StandardModelEvaluation(ModelEvaluation):
-    def raw_results(self):
+    def _update_raw_result(self, label, label_mappings, val, vec):
         """
-        Returns raw vectors of the predictions for data scientists to use for any additional
-        evaluation metrics or generate graphs of their choice
-
-        Returns:
-            namedtuple of:
-                pred: vector of predicted classes (numeric value)
-                gold: vector of gold classes (numeric value)
-                label_mappings: two way dict of the text label to numeric value
-                numeric_labels: a list of all the numeric label values
-                text_labels: a list of all the text label values
-
-        TODO: check if numeric mappings can be passed in from the model prediction code/parser
-              instead of re-generated here
+        Helper method for updating the text to numeric label mappings and numeric label vectors
         """
-        label_mappings = {}
-        val = 1
+        if label_mappings.get(label) is None:
+            label_mappings[label] = val
+            val += 1
+        vec.append(label_mappings[label])
+        return label_mappings, val, vec
 
-        pred = []
-        gold = []
-
-        for result in self.results:
-            if label_mappings.get(result.pred) is None:
-                label_mappings[result.pred] = val
-                val += 1
-            pred.append(label_mappings[result.pred])
-
-            if label_mappings.get(result.gold) is None:
-                label_mappings[result.gold] = val
-                val += 1
-            gold.append(label_mappings[result.gold])
-
-        label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
-
-        RawResults = namedtuple('RawResults',
-                                ['pred', 'gold', 'label_mappings', 'numeric_labels', 'text_labels'])
-        return RawResults(pred=pred, gold=gold, label_mappings=label_mappings,
-                          numeric_labels=range(1, val), text_labels=label_mappings.keys())
-
-    def stats(self):
-        """
-        Prints a useful stats table and returns a structured stats object for evaluation
-
-        Returns:
-            A tuple of dictionaries. One of overall stats and one of class specific stats.
-            Contains precision, recall, f scores, support, bias, and variance
-
-        TODO: calculate bias and variance
-        """
-        raw_results = self.raw_results()
-        labels = raw_results.numeric_labels
-        precision, recall, f_beta, support = score(y_true=raw_results.gold, y_pred=raw_results.pred,
-                                                   labels=labels)
-
-        stats = {
-                    'precision': precision,
-                    'recall': recall,
-                    'f_beta': f_beta,
-                    'support': support,
-                }
-        self._print_stats_table(stats, labels, raw_results.label_mappings)
-
-        f1_weighted = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
-                               average='weighted')
-        f1_macro = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
-                            average='macro')
-        f1_micro = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
-                            average='micro')
-
-        stats_overall = {
-            'f1_weighted': f1_weighted,
-            'f1_macro': f1_macro,
-            'f1_micro': f1_micro
-        }
-        self._print_overall_stats_table(stats_overall)
-
-        return stats_overall, stats
-
-    def graphs(self):
-        """
-        Generates some useful graphs based on the evaluation data
-        TODO generate graphs from matplotlib/scikitlearn
-        """
-        return None
-
-    def _print_stats_table(self, stats, labels, label_mappings):
+    def _print_label_stats_table(self, stats, labels, label_mappings):
         title_format = "{:>30}" + "{:>15}" * (len(stats))
         stat_row_format = "{:>30}" + "{:>15.3f}" * (len(stats))
         table_titles = stats.keys()
@@ -286,16 +220,154 @@ class StandardModelEvaluation(ModelEvaluation):
         print("\n\n")
 
 
-class SequenceModelEvaluation(ModelEvaluation):
+class StandardModelEvaluation(ModelEvaluation):
     def raw_results(self):
+        """
+        Returns raw vectors of the predictions for data scientists to use for any additional
+        evaluation metrics or generate graphs of their choice
+
+        Returns:
+            namedtuple of:
+                pred: vector of predicted classes (numeric value)
+                gold: vector of gold classes (numeric value)
+                label_mappings: two way dict of the text label to numeric value
+                numeric_labels: a list of all the numeric label values
+                text_labels: a list of all the text label values
+
+        TODO: check if numeric mappings can be passed in from the model prediction code/parser
+              instead of re-generated here
+        """
+        label_mappings, val = {}, 1
+        pred, gold = [], []
+
         for result in self.results:
-            from pprint import pprint
-            for entity in result.gold:
-                pprint(entity.text)
-        return None
+            label_mappings, val, pred = self._update_raw_result(result.pred, label_mappings, val,
+                                                                pred)
+            label_mappings, val, gold = self._update_raw_result(result.gold, label_mappings, val,
+                                                                gold)
+
+        text_labels = label_mappings.keys()
+        label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
+        return self._make_raw_result(pred=pred, gold=gold, label_mappings=label_mappings,
+                                     numeric_labels=range(1, val), text_labels=text_labels)
 
     def stats(self):
+        """
+        Prints a useful stats table and returns a structured stats object for evaluation
+
+        Returns:
+            A tuple of dictionaries. One of overall stats and one of class specific stats.
+            Contains precision, recall, f scores, support, bias, and variance
+
+        TODO: calculate bias and variance
+        """
+        raw_results = self.raw_results()
+        labels = raw_results.numeric_labels
+        precision, recall, f_beta, support = score(y_true=raw_results.gold, y_pred=raw_results.pred,
+                                                   labels=labels)
+
+        stats = {
+                    'precision': precision,
+                    'recall': recall,
+                    'f_beta': f_beta,
+                    'support': support,
+                }
+        self._print_label_stats_table(stats, labels, raw_results.label_mappings)
+
+        f1_weighted = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
+                               average='weighted')
+        f1_macro = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
+                            average='macro')
+        f1_micro = f1_score(y_true=raw_results.gold, y_pred=raw_results.pred, labels=labels,
+                            average='micro')
+
+        stats_overall = {
+            'f1_weighted': f1_weighted,
+            'f1_macro': f1_macro,
+            'f1_micro': f1_micro
+        }
+        self._print_overall_stats_table(stats_overall)
+
+        return stats_overall, stats
+
+    def graphs(self):
+        """
+        Generates some useful graphs based on the evaluation data
+        TODO generate graphs from matplotlib/scikit learn
+        """
         return None
+
+
+class SequenceModelEvaluation(ModelEvaluation):
+    def raw_results(self):
+        """
+        TODO: role evaluation?
+        """
+        label_mappings, val = {}, 1
+        pred, gold = [], []
+        pred_flat, gold_flat = [], []
+
+        for result in self.results:
+            raw_pred = self.label_encoder.encode([result.pred], examples=[result.example])
+            raw_gold = self.label_encoder.encode([result.gold], examples=[result.example])
+
+            vec = []
+            for entity in raw_pred:
+                label_mappings, val, vec = self._update_raw_result(entity, label_mappings, val, vec)
+            pred.append(vec)
+            pred_flat.extend(vec)
+            vec = []
+            for entity in raw_gold:
+                label_mappings, val, vec = self._update_raw_result(entity, label_mappings, val, vec)
+            gold.append(vec)
+            gold_flat.extend(vec)
+
+        text_labels = label_mappings.keys()
+        label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
+        return self._make_raw_result(pred=pred, gold=gold, label_mappings=label_mappings,
+                                     numeric_labels=range(1, val), text_labels=text_labels,
+                                     pred_flat=pred_flat, gold_flat=gold_flat)
+
+    def stats(self):
+        """
+        Prints a useful stats table and returns a structured stats object for evaluation
+
+        Returns:
+            A tuple of dictionaries. One of overall stats and one of class specific stats.
+            Contains precision, recall, f scores, support, bias, and variance
+
+        TODO: calculate bias and variance
+        """
+        raw_results = self.raw_results()
+
+        labels = raw_results.numeric_labels
+        precision, recall, f_beta, support = score(y_true=raw_results.gold_flat,
+                                                   y_pred=raw_results.pred_flat,
+                                                   labels=labels)
+
+        stats = {
+                    'precision': precision,
+                    'recall': recall,
+                    'f_beta': f_beta,
+                    'support': support,
+                }
+        self._print_label_stats_table(stats, labels, raw_results.label_mappings)
+
+        f1_weighted = f1_score(y_true=raw_results.gold_flat, y_pred=raw_results.pred_flat,
+                               labels=labels, average='weighted')
+        f1_macro = f1_score(y_true=raw_results.gold_flat, y_pred=raw_results.pred_flat,
+                            labels=labels, average='macro')
+        f1_micro = f1_score(y_true=raw_results.gold_flat, y_pred=raw_results.pred_flat,
+                            labels=labels, average='micro')
+
+        stats_overall = {
+            'f1_weighted': f1_weighted,
+            'f1_macro': f1_macro,
+            'f1_micro': f1_micro
+        }
+        self._print_overall_stats_table(stats_overall)
+
+        return stats_overall, stats
 
     def graphs(self):
         """
@@ -315,7 +387,7 @@ class Model(object):
 
     def __init__(self, config):
         self.config = config
-        self._label_encoder = self._get_label_encoder()
+        self._label_encoder = get_label_encoder(self.config, self.__class__.__name__)
         self._current_params = None
         self._resources = {}
         self._clf = None
@@ -375,15 +447,6 @@ class Model(object):
 
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
-
-    def _get_label_encoder(self):
-        label_type = self.config.label_type
-        try:
-            return {'class': LabelEncoder,
-                    'entities': EntityLabelEncoder}[label_type](self.config)
-        except KeyError:
-            msg = '{}: Unrecognized label type {!r}'.format(self.__class__.__name__, label_type)
-            raise ValueError(msg)
 
     def _extract_features(self, example):
         """Gets all features from an example.
@@ -616,7 +679,7 @@ class SkLearnModel(Model):
         for row in predictions:
             _, probas = row
             for label, proba in probas.items():
-                if proba == -numpy.Infinity:
+                if proba == -np.Infinity:
                     probas[label] = _NEG_INF
         return predictions
 
