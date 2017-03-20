@@ -17,9 +17,8 @@ import click
 import click_log
 
 from . import path
+from .components import Conversation, QuestionAnswerer
 from .exceptions import FileNotFoundError
-from .dialogue import Conversation
-from .question_answerer import QuestionAnswerer
 from ._version import current as __version__
 
 

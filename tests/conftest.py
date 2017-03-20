@@ -35,4 +35,5 @@ def query_factory(tokenizer):
 
 @pytest.fixture
 def resource_loader(query_factory):
+    """A resource loader"""
     return ResourceLoader(APP_PATH, query_factory)

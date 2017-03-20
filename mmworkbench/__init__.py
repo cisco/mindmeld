@@ -3,9 +3,7 @@ from __future__ import unicode_literals
 
 from .app import Application
 from .core import configure_logs
-from .dialogue import Conversation
-from .components import NaturalLanguageProcessor
-from .question_answerer import QuestionAnswerer
+from .components import Conversation, NaturalLanguageProcessor, QuestionAnswerer
 from ._version import current
 
 __author__ = 'MindMeld, Inc.'

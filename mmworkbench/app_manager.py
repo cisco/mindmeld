@@ -7,9 +7,7 @@ from builtins import object
 
 import copy
 
-from .dialogue import DialogueManager
-from .components import NaturalLanguageProcessor
-from .question_answerer import QuestionAnswerer
+from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 
 
 class ApplicationManager(object):
