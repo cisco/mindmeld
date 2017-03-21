@@ -13,10 +13,10 @@ from .question_answerer import QuestionAnswerer
 
 
 class ApplicationManager(object):
-    """This class provides the functionality to manage a workbench application.
-
-    The application manager is responsible for communicating between handling
-    conversation requests components, handling req
+    """The Application Manager is the core orchestrator of the MindMeld platform. It receives
+    a client request from the gateway, and processes that request by passing it through all the
+    necessary components of Workbench. Once processing is complete, the application manager
+    returns the final response back to the gateway.
     """
     def __init__(self, app_path, nlp=None, es_host=None):
         self._app_path = app_path
@@ -30,7 +30,7 @@ class ApplicationManager(object):
         return self.nlp.ready
 
     def load(self):
-        """Loads all resources required to run the application."""
+        """Loads all resources required to run a Workbench application."""
         if self.nlp.ready:
             # if we are ready, don't load again
             return

@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-This module contains the domain classifier component.
+This module contains the base class for all the machine-learned classifiers in Workbench.
 """
 
 from __future__ import unicode_literals
@@ -47,6 +47,7 @@ class ClassifierConfig(object):
 
     def __init__(self, model_type=None, features=None, model_settings=None, params=None,
                  param_selection=None):
+        """Initializes a classifier configuration"""
         for arg, val in {'model_type': model_type, 'features': features}.items():
             if val is None:
                 raise TypeError('__init__() missing required argument {!r}'.format(arg))

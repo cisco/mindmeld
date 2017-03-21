@@ -30,7 +30,7 @@ def get_tags_from_entities(query, entities, scheme='IOB'):
             parts separated by '|'. The first two are the IOB status for
             app entities followed by the type of app entity or
             '' if the IOB status is 'O'. The last two are like the first two,
-            but for system facets.
+            but for system entities.
     """
 
     # Normal entities
@@ -139,7 +139,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
             sys_entity_start = None
             prev_sys_type = ''
 
-        # Close regular facet and reset if the tag indicates a new facet
+        # Close regular entity and reset if the tag indicates a new entity
         if (entity_start is not None and
                 (iob in (O_TAG, B_TAG, S_TAG) or ent_type != prev_ent_type)):
             logger.debug("Entity closed at prev")
@@ -148,16 +148,16 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
             prev_ent_type = ''
             entity_tokens = []
 
-            # Cut short any numeric facet that might continue beyond the facet
+            # Cut short any numeric entity that might continue beyond the entity
             if sys_entity_start is not None:
                 _append_system_entity(sys_entity_start, tag_idx, prev_sys_type)
             sys_entity_start = None
             prev_sys_type = ''
 
-        # Check if a regular facet has started
+        # Check if a regular entity has started
         if iob in (B_TAG, S_TAG) or ent_type not in ('', prev_ent_type):
             entity_start = tag_idx
-        # Check if a numeric facet has started
+        # Check if a numeric entity has started
         if sys_iob in (B_TAG, S_TAG) or sys_type not in ('', prev_sys_type):
             sys_entity_start = tag_idx
 
@@ -165,7 +165,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         if iob != O_TAG and entity_start is not None:
             entity_tokens.append(normalized_tokens[tag_idx])
 
-        # Close the numeric facet if the tag indicates it closed
+        # Close the numeric entity if the tag indicates it closed
         if (sys_entity_start is not None and
                 sys_iob in (E_TAG, S_TAG)):
             logger.debug("System entity closed here")
@@ -173,7 +173,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
             sys_entity_start = None
             sys_type = ''
 
-        # Close the regular facet if the tag indicates it closed
+        # Close the regular entity if the tag indicates it closed
         if (entity_start is not None and
                 iob in (E_TAG, S_TAG)):
             logger.debug("Entity closed here")
@@ -182,7 +182,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
             ent_type = ''
             entity_tokens = []
 
-            # Cut short any numeric facet that might continue beyond the facet
+            # Cut short any numeric entity that might continue beyond the entity
             if sys_entity_start is not None:
                 _append_system_entity(sys_entity_start, tag_idx+1, sys_type)
             sys_entity_start = None
@@ -191,7 +191,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         prev_ent_type = ent_type
         prev_sys_type = sys_type
 
-    # Handle facets that end with the end of the query
+    # Handle entities that end with the end of the query
     if entity_start is not None:
         logger.debug("Entity closed at end: {}".format(entity_tokens))
         _append_entity(entity_start, prev_ent_type, entity_tokens)
