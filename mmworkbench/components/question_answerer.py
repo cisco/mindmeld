@@ -12,6 +12,9 @@ import os
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
 
+from ..resource_loader import ResourceLoader
+
+
 DOC_TYPE = 'document'
 
 logger = logging.getLogger(__name__)
@@ -122,8 +125,8 @@ class QuestionAnswerer(object):
         }
     }
 
-    def __init__(self, resource_loader, es_host=None):
-        self._resource_loader = resource_loader
+    def __init__(self, app_path, resource_loader=None, es_host=None):
+        self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
         self._es_host = es_host
         self.__es_client = None
 
