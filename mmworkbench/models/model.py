@@ -14,7 +14,8 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuffleSplit,
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
-from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, accuracy_score)
+from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, accuracy_score,
+                             confusion_matrix)
 
 from .helpers import get_feature_extractor, get_label_encoder
 from .tagging import get_tags_from_entities, get_entities_from_tags
@@ -257,6 +258,63 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         }
         return stats_overall
 
+    def _get_confusion_matrix_and_counts(self, y_gold, y_pred):
+        """
+        Generates the confusion matrix where each element Cij is the number of observations known to
+        be in group i predicted to be in group j
+
+        Returns:
+            dict: Contains 2d array of the confusion matrix, and an array of TP, TN, FP, FN values
+        """
+        confusion_mat = confusion_matrix(y_true=y_gold, y_pred=y_pred)
+        TP_arr, TN_arr, FP_arr, FN_arr = [], [], [], []
+
+        # binary class case
+        if len(confusion_mat) == 2:
+            TP = confusion_mat[1][1]
+            TP_arr.append(TP)
+            TN = confusion_mat[0][0]
+            TN_arr.append(TN)
+            FP = confusion_mat[0][1]
+            FP_arr.append(FP)
+            FN = confusion_mat[1][0]
+            FN_arr.append(FN)
+        # multi class case
+        else:
+            num_classes = len(confusion_mat)
+            for class_index in range(num_classes):
+                # TP is C_classindex, classindex
+                TP = confusion_mat[class_index][class_index]
+                TP_arr.append(TP)
+
+                # TN is the sum of Cij where i or j are not class_index
+                mask = np.ones((num_classes, num_classes))
+                mask[:, class_index] = 0
+                mask[class_index, :] = 0
+                TN = np.sum(mask*confusion_mat)
+                TN_arr.append(TN)
+
+                # FP is the sum of Cij where j is class_index but i is not
+                mask = np.zeros((num_classes, num_classes))
+                mask[:, class_index] = 1
+                mask[class_index, class_index] = 0
+                FP = np.sum(mask*confusion_mat)
+                FP_arr.append(FP)
+
+                # FN is the sum of Cij where i is class_index but j is not
+                mask = np.zeros((num_classes, num_classes))
+                mask[:, class_index] = 1
+                mask[class_index, class_index] = 0
+                FN = np.sum(mask*confusion_mat)
+                FN_arr.append(FN)
+
+        Counts = namedtuple('Counts', ['TP', 'TN', 'FP', 'FN'])
+        return {'confusion_matrix': confusion_mat,
+                'counts_by_class': Counts(TP_arr, TN_arr, FP_arr, FN_arr),
+                'counts_overall': Counts(sum(TP_arr), sum(TN_arr), sum(FP_arr),
+                                         sum(FN_arr))
+                }
+
     def _print_class_stats_table(self, stats, labels, label_mappings):
         """
         Helper for printing a human readable table for class statistics
@@ -264,16 +322,37 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns:
             None
         """
-        title_format = "{:>30}" + "{:>15}" * (len(stats))
-        stat_row_format = "{:>30}" + "{:>15.3f}" * (len(stats))
-        table_titles = stats.keys()
+        title_format = "{:>20}" + "{:>12}" * (len(stats))
+        standard_stats = ['f_beta', 'precision', 'recall', 'support', 'TP', 'TN', 'FP', 'FN']
+        stat_row_format = "{:>20}" + "{:>12.3f}" * 3 + "{:>12.0f}" * 5 + \
+                          "{:>12.3f}" * (len(stats) - len(standard_stats))
+        table_titles = standard_stats + [stat for stat in stats.keys()
+                                         if stat not in standard_stats]
         print("Statistics by Class: \n")
         print(title_format.format("class", *table_titles))
         for label in labels:
             row = []
             for stat in table_titles:
-                row.append(stats[stat][label-1])
-            print(stat_row_format.format(label_mappings[label], *row))
+                row.append(stats[stat][label])
+            print(stat_row_format.format(self._truncate_label(label_mappings[label], 18), *row))
+        print("\n\n")
+
+    def _print_class_matrix(self, matrix, labels, label_mappings):
+        """
+        Helper for printing a human readable class by class table for displaying
+        a confusion matrix
+
+        Returns:
+            None
+        """
+        title_format = "{:>15}" * (len(labels)+1)
+        stat_row_format = "{:>15}" + "{:>15}" * (len(labels))
+        table_titles = [self._truncate_label(label_mappings[label], 10) for label in labels]
+        print("Confusion Matrix: \n")
+        print(title_format.format("", *table_titles))
+        for label in labels:
+            print(stat_row_format.format(self._truncate_label(label_mappings[label], 10),
+                                         *matrix[label]))
         print("\n\n")
 
     def _print_overall_stats_table(self, stats_overall):
@@ -283,9 +362,12 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns:
             None
         """
-        title_format = "{:>15}" * (len(stats_overall))
-        stat_row_format = "{:>15.3f}" * (len(stats_overall))
-        table_titles = stats_overall.keys()
+        title_format = "{:>12}" * (len(stats_overall))
+        standard_stats = ['accuracy', 'f1_weighted', 'TP', 'TN', 'FP', 'FN']
+        stat_row_format = "{:>12.3f}" * 2 + "{:>12.0f}" * 4 + \
+                          "{:>12.3f}" * (len(stats_overall) - len(standard_stats))
+        table_titles = standard_stats + [stat for stat in stats_overall.keys()
+                                         if stat not in standard_stats]
         print("Overall Statistics: \n")
         print(title_format.format(*table_titles))
         row = []
@@ -294,10 +376,13 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         print(stat_row_format.format(*row))
         print("\n\n")
 
+    def _truncate_label(self, label, max_len):
+        return (label[:max_len] + '..') if len(label) > max_len else label
+
 
 class StandardModelEvaluation(ModelEvaluation):
     def raw_results(self):
-        label_mappings, val = {}, 1
+        label_mappings, val = {}, 0
         pred, gold = [], []
 
         for result in self.results:
@@ -309,21 +394,38 @@ class StandardModelEvaluation(ModelEvaluation):
         text_labels = label_mappings.keys()
         label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
         return self._make_raw_result(pred=pred, gold=gold, label_mappings=label_mappings,
-                                     numeric_labels=range(1, val), text_labels=text_labels)
+                                     numeric_labels=range(val-1), text_labels=text_labels)
 
     def stats(self):
         raw_results = self.raw_results()
         labels = raw_results.numeric_labels
-        stats = self._get_class_stats(y_gold=raw_results.gold, y_pred=raw_results.pred,
-                                      labels=labels)
-        self._print_class_stats_table(stats, labels, raw_results.label_mappings)
 
+        confusion_stats = self._get_confusion_matrix_and_counts(y_gold=raw_results.gold,
+                                                                y_pred=raw_results.pred)
         stats_overall = self._get_overall_stats(y_gold=raw_results.gold, y_pred=raw_results.pred,
                                                 labels=labels)
+        counts_overall = confusion_stats['counts_overall']
+        stats_overall['TP'] = counts_overall.TP
+        stats_overall['TN'] = counts_overall.TN
+        stats_overall['FP'] = counts_overall.FP
+        stats_overall['FN'] = counts_overall.FN
         self._print_overall_stats_table(stats_overall)
 
+        stats = self._get_class_stats(y_gold=raw_results.gold, y_pred=raw_results.pred,
+                                      labels=labels)
+        counts_by_class = confusion_stats['counts_by_class']
+        stats['TP'] = counts_by_class.TP
+        stats['TN'] = counts_by_class.TN
+        stats['FP'] = counts_by_class.FP
+        stats['FN'] = counts_by_class.FN
+        self._print_class_stats_table(stats, labels, raw_results.label_mappings)
+
+        self._print_class_matrix(confusion_stats['confusion_matrix'], labels,
+                                 raw_results.label_mappings)
+
         return {'stats_overall': stats_overall,
-                'stats': stats}
+                'stats': stats,
+                'confusion_matrix': confusion_stats['confusion_matrix']}
 
     def graphs(self):
         """
@@ -337,7 +439,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         """
         TODO: role evaluation?
         """
-        label_mappings, val = {}, 1
+        label_mappings, val = {}, 0
         pred, gold = [], []
         pred_flat, gold_flat = [], []
 
@@ -359,7 +461,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         text_labels = label_mappings.keys()
         label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
         return self._make_raw_result(pred=pred, gold=gold, label_mappings=label_mappings,
-                                     numeric_labels=range(1, val), text_labels=text_labels,
+                                     numeric_labels=range(val-1), text_labels=text_labels,
                                      pred_flat=pred_flat, gold_flat=gold_flat)
 
     def _get_sequence_stats(self, y_gold, y_pred, labels):
@@ -371,22 +473,37 @@ class SequenceModelEvaluation(ModelEvaluation):
     def stats(self):
         raw_results = self.raw_results()
         labels = raw_results.numeric_labels
-        stats = self._get_class_stats(y_gold=raw_results.gold_flat, y_pred=raw_results.pred_flat,
-                                      labels=labels)
-        self._print_class_stats_table(stats, labels, raw_results.label_mappings)
 
+        confusion_stats = self._get_confusion_matrix_and_counts(y_gold=raw_results.gold_flat,
+                                                                y_pred=raw_results.pred_flat)
         stats_overall = self._get_overall_stats(y_gold=raw_results.gold_flat,
                                                 y_pred=raw_results.pred_flat, labels=labels)
+        counts_overall = confusion_stats['counts_overall']
+        stats_overall['TP'] = counts_overall.TP
+        stats_overall['TN'] = counts_overall.TN
+        stats_overall['FP'] = counts_overall.FP
+        stats_overall['FN'] = counts_overall.FN
         stats_overall['token_accuracy'] = accuracy_score(y_true=raw_results.gold_flat,
                                                          y_pred=raw_results.pred_flat)
-
         self._print_overall_stats_table(stats_overall)
+        stats = self._get_class_stats(y_gold=raw_results.gold_flat, y_pred=raw_results.pred_flat,
+                                      labels=labels)
+        counts_by_class = confusion_stats['counts_by_class']
+        stats['TP'] = counts_by_class.TP
+        stats['TN'] = counts_by_class.TN
+        stats['FP'] = counts_by_class.FP
+        stats['FN'] = counts_by_class.FN
+        self._print_class_stats_table(stats, labels, raw_results.label_mappings)
+
+        self._print_class_matrix(confusion_stats['confusion_matrix'], labels,
+                                 raw_results.label_mappings)
 
         sequence_stats = self._get_sequence_stats(y_gold=raw_results.gold, y_pred=raw_results.pred,
                                                   labels=labels)
         return {'stats_overall': stats_overall,
                 'stats': stats,
-                'sequence_stats': sequence_stats}
+                'sequence_stats': sequence_stats,
+                'confusion_matrix': confusion_stats['confusion_matrix']}
 
     def graphs(self):
         """
