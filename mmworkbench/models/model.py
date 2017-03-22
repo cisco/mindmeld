@@ -17,7 +17,7 @@ from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, 
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, accuracy_score,
                              confusion_matrix)
 
-from .helpers import get_feature_extractor, get_label_encoder
+from .helpers import get_feature_extractor, get_label_encoder, register_label
 from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         self.RawResults = namedtuple('RawResults', ['predicted', 'expected', 'label_mappings',
                                                     'numeric_labels', 'text_labels',
                                                     'predicted_flat', 'expected_flat'])
-        self.label_encoder = get_label_encoder(config, config.model_type)
+        self.label_encoder = get_label_encoder(config)
 
     def get_accuracy(self):
         """The accuracy represents the share of examples whose predicted labels
@@ -528,7 +528,7 @@ class Model(object):
 
     def __init__(self, config):
         self.config = config
-        self._label_encoder = get_label_encoder(self.config, self.__class__.__name__)
+        self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
         self._resources = {}
         self._clf = None
@@ -960,3 +960,7 @@ class EntityLabelEncoder(LabelEncoder):
         labels = [get_entities_from_tags(examples[idx], tags, scheme)
                   for idx, tags in enumerate(tags_by_example)]
         return labels
+
+
+register_label('class', LabelEncoder)
+register_label('entities', EntityLabelEncoder)
