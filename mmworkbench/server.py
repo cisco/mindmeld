@@ -15,7 +15,7 @@ import uuid
 from flask import Flask, Request, request, jsonify, g
 from flask_cors import CORS
 
-# from . import __version__
+from ._version import current as __version__
 from .exceptions import BadWorkbenchRequestError
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,6 @@ class WorkbenchServer(object):
         server.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 16
 
         # Set the version for logging purposes
-        from . import __version__
         self._package_version = __version__
         self._app_version = None
         if os.environ.get('MM_APP_VERSION'):

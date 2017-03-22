@@ -10,15 +10,13 @@ from builtins import object, super
 from .. import path
 from ..core import ProcessedQuery
 from ..exceptions import ProcessorError
-from ..query_factory import QueryFactory
-from ..tokenizer import Tokenizer
+from ..resource_loader import ResourceLoader
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
 from .entity_resolver import EntityResolver
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
-from .resource_loader import ResourceLoader
 from .role_classifier import RoleClassifier
 
 
@@ -34,7 +32,7 @@ class Processor(object):
     """
     def __init__(self, app_path, resource_loader=None):
         self._app_path = app_path
-        self.resource_loader = resource_loader or create_resource_loader(app_path)
+        self.resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
 
         self._children = {}
         self.ready = False
@@ -107,6 +105,14 @@ class Processor(object):
         raise NotImplementedError
 
     def create_query(self, query_text):
+        """Creates a query with the given text
+
+        Args:
+            text (str): Text to create a query object for
+
+        Returns:
+            Query: A newly constructed query
+        """
         return self.resource_loader.query_factory.create_query(query_text)
 
     def __repr__(self):
@@ -393,50 +399,3 @@ class EntityProcessor(Processor):
         # Resolver entity
         entity.entity.value = self.entity_resolver.predict(entity.entity)
         return entity
-
-
-def create_tokenizer(app_path):
-    """Creates the preprocessor for the app at app path
-
-    Args:
-        app_path (str): The path to the directory containing the app's data
-
-    Returns:
-        Tokenizer: a tokenizer
-    """
-    return Tokenizer()
-
-
-def create_preprocessor(app_path):
-    """Creates the preprocessor for the app at app path
-
-    Args:
-        app_path (str): The path to the directory containing the app's data
-
-    Returns:
-        Preprocessor: a preprocessor
-    """
-    pass
-
-
-def create_query_factory(app_path, tokenizer=None, preprocessor=None):
-    tokenizer = tokenizer or create_tokenizer(app_path)
-    preprocessor = preprocessor or create_preprocessor(app_path)
-    return QueryFactory(tokenizer, preprocessor)
-
-
-def create_resource_loader(app_path, query_factory=None):
-    """Creates the resource loader for the app at app path
-
-    Args:
-        app_path (str): The path to the directory containing the app's data
-        query_factory (QueryFactory): The app's query factory
-
-    Returns:
-        ResourceLoader: a resource loader
-    """
-    return ResourceLoader(app_path, query_factory or create_query_factory(app_path))
-
-
-def create_parser(app_path):
-    pass

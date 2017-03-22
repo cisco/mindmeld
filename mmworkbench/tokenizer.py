@@ -329,3 +329,15 @@ class Tokenizer(object):
 
     def __repr__(self):
         return "<Tokenizer exclude_from_norm: {}>".format(self.exclude_from_norm.__repr__())
+
+    @staticmethod
+    def create_tokenizer(app_path):
+        """Creates the preprocessor for the app at app path
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+
+        Returns:
+            Tokenizer: a tokenizer
+        """
+        return Tokenizer()

@@ -6,7 +6,7 @@ from builtins import object, str
 import logging
 import random
 
-from . import path
+from .. import path
 
 logger = logging.getLogger(__name__)
 
