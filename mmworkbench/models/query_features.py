@@ -317,7 +317,8 @@ def extract_in_gaz_ngram_features():
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i-1, 2)])
                                         for g in gazes.values()]) + 1)
-                p_joint = math.log(len(gazes[entity_type]['index'][get_ngram(tokens, i - 1, 2)]) + 1)
+                p_joint = math.log(len(gazes[entity_type]['index']
+                                       [get_ngram(tokens, i - 1, 2)]) + 1)
                 feat_name = feat_prefix + '|pmi-2'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
                 feat_name = feat_prefix + '|p_fe-2'
@@ -337,7 +338,8 @@ def extract_in_gaz_ngram_features():
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i-1, 3)])
                                         for g in gazes.values()]) + 1)
-                p_joint = math.log(len(gazes[entity_type]['index'][get_ngram(tokens, i - 1, 3)]) + 1)
+                p_joint = math.log(len(gazes[entity_type]['index']
+                                       [get_ngram(tokens, i - 1, 3)]) + 1)
                 feat_name = feat_prefix + '|pmi_3'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
                 feat_name = feat_prefix + '|p_fe_3'
