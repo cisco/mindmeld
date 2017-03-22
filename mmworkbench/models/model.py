@@ -91,20 +91,20 @@ class ModelConfig(object):
         return "{}({})".format(self.__class__.__name__, args_str)
 
 
-class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'gold', 'pred',
+class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
                                                        'probas'])):
     """Represents the evaluation of a single example
 
     Attributes:
         example: The example being evaluated
-        gold: The expected label for the example
-        pred: The predicted label for the example
+        expected: The expected label for the example
+        predicted: The predicted label for the example
         proba (dict): Maps labels to their predicted probabilities
     """
 
     @property
     def is_correct(self):
-        return self.gold == self.pred
+        return self.expected == self.predicted
 
 
 class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
@@ -113,12 +113,12 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     Attributes:
         config (ModelConfig): The model config used during evaluation
-        results (list of EvaluatedExample): A list of the evaluated examples from the val set
+        results (list of EvaluatedExample): A list of the evaluated examples
     """
     def __init__(self, config, results):
-        self.RawResults = namedtuple('RawResults', ['pred', 'gold', 'label_mappings',
+        self.RawResults = namedtuple('RawResults', ['predicted', 'expected', 'label_mappings',
                                                     'numeric_labels', 'text_labels',
-                                                    'pred_flat', 'gold_flat'])
+                                                    'predicted_flat', 'expected_flat'])
         self.label_encoder = get_label_encoder(config, config.model_type)
 
     def get_accuracy(self):
@@ -158,7 +158,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             if not result.is_correct:
                 yield result
 
-    def stats(self):
+    def print_stats(self):
         """
          Prints a useful stats table and returns a structured stats object for evaluation.
 
@@ -168,7 +168,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         """
         raise NotImplementedError
 
-    def graphs(self):
+    def print_graphs(self):
         """
         Generates some graphs to help with evaluating of models.
 
@@ -179,21 +179,21 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     def raw_results(self):
         """
-        Exposes raw vectors of gold and pred for data scientists to use for any additional
+        Exposes raw vectors of expected and predicted for data scientists to use for any additional
         evaluation metrics or to generate graphs of their choice
 
         Returns:
             NamedTuple: RawResults named tuple containing
-                pred: vector of predicted classes (numeric value)
-                gold: vector of gold classes (numeric value)
+                expected: vector of predicted classes (numeric value)
+                predicted: vector of gold classes (numeric value)
                 label_mappings: two way dict of the text label to numeric value
                 numeric_labels: a list of all the numeric label values
                 text_labels: a list of all the text label values
         """
         raise NotImplementedError
 
-    def _make_raw_result(self, pred, gold, label_mappings, numeric_labels, text_labels,
-                         pred_flat=None, gold_flat=None):
+    def _make_raw_result(self, predicted, expected, label_mappings, numeric_labels, text_labels,
+                         predicted_flat=None, expected_flat=None):
         """
         Simple wrapper which returns a RawResults named tuple. This allows some parameters
         to be optional.
@@ -201,9 +201,10 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns:
             NamedTuple: RawResults named tuple populated with provided data
         """
-        return self.RawResults(pred=pred, gold=gold, label_mappings=label_mappings,
-                               numeric_labels=numeric_labels, text_labels=text_labels,
-                               pred_flat=pred_flat, gold_flat=gold_flat)
+        return self.RawResults(predicted=predicted, expected=expected,
+                               label_mappings=label_mappings, numeric_labels=numeric_labels,
+                               text_labels=text_labels, predicted_flat=predicted_flat,
+                               expected_flat=expected_flat)
 
     def _update_raw_result(self, label, label_mappings, val, vec):
         """
@@ -220,7 +221,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         vec.append(label_mappings[label])
         return label_mappings, val, vec
 
-    def _get_class_stats(self, y_gold, y_pred, labels):
+    def _get_class_stats(self, y_true, y_pred, labels):
         """
         Method for getting some basic statistics by class.
 
@@ -228,7 +229,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             dict: A structured dictionary containing precision, recall, f_beta, and support
                   vectors (1 x number of classes)
         """
-        precision, recall, f_beta, support = score(y_true=y_gold, y_pred=y_pred,
+        precision, recall, f_beta, support = score(y_true=y_true, y_pred=y_pred,
                                                    labels=labels)
         stats = {
                     'precision': precision,
@@ -238,7 +239,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
                 }
         return stats
 
-    def _get_overall_stats(self, y_gold, y_pred, labels):
+    def _get_overall_stats(self, y_true, y_pred, labels):
         """
         Method for getting some overall statistics.
 
@@ -246,9 +247,9 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             dict: A structured dictionary containing scalar values for f1 scores and overall
                   accuracy.
         """
-        f1_weighted = f1_score(y_true=y_gold, y_pred=y_pred, labels=labels, average='weighted')
-        f1_macro = f1_score(y_true=y_gold, y_pred=y_pred, labels=labels, average='macro')
-        f1_micro = f1_score(y_true=y_gold, y_pred=y_pred, labels=labels, average='micro')
+        f1_weighted = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='weighted')
+        f1_macro = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='macro')
+        f1_micro = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='micro')
 
         stats_overall = {
             'f1_weighted': f1_weighted,
@@ -258,7 +259,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         }
         return stats_overall
 
-    def _get_confusion_matrix_and_counts(self, y_gold, y_pred):
+    def _get_confusion_matrix_and_counts(self, y_true, y_pred):
         """
         Generates the confusion matrix where each element Cij is the number of observations known to
         be in group i predicted to be in group j
@@ -266,7 +267,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns:
             dict: Contains 2d array of the confusion matrix, and an array of TP, TN, FP, FN values
         """
-        confusion_mat = confusion_matrix(y_true=y_gold, y_pred=y_pred)
+        confusion_mat = confusion_matrix(y_true=y_true, y_pred=y_pred)
         TP_arr, TN_arr, FP_arr, FN_arr = [], [], [], []
 
         # binary class case
@@ -383,26 +384,29 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 class StandardModelEvaluation(ModelEvaluation):
     def raw_results(self):
         label_mappings, val = {}, 0
-        pred, gold = [], []
+        predicted, expected = [], []
 
         for result in self.results:
-            label_mappings, val, pred = self._update_raw_result(result.pred, label_mappings, val,
-                                                                pred)
-            label_mappings, val, gold = self._update_raw_result(result.gold, label_mappings, val,
-                                                                gold)
+            label_mappings, val, predicted = self._update_raw_result(result.predicted,
+                                                                     label_mappings, val,
+                                                                     predicted)
+            label_mappings, val, expected = self._update_raw_result(result.expected, label_mappings,
+                                                                    val, expected)
 
         text_labels = label_mappings.keys()
         label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
-        return self._make_raw_result(pred=pred, gold=gold, label_mappings=label_mappings,
-                                     numeric_labels=range(val-1), text_labels=text_labels)
+        return self._make_raw_result(predicted=predicted, expected=expected,
+                                     label_mappings=label_mappings, numeric_labels=range(val-1),
+                                     text_labels=text_labels)
 
-    def stats(self):
+    def print_stats(self):
         raw_results = self.raw_results()
         labels = raw_results.numeric_labels
 
-        confusion_stats = self._get_confusion_matrix_and_counts(y_gold=raw_results.gold,
-                                                                y_pred=raw_results.pred)
-        stats_overall = self._get_overall_stats(y_gold=raw_results.gold, y_pred=raw_results.pred,
+        confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_results.expected,
+                                                                y_pred=raw_results.predicted)
+        stats_overall = self._get_overall_stats(y_true=raw_results.expected,
+                                                y_pred=raw_results.predicted,
                                                 labels=labels)
         counts_overall = confusion_stats['counts_overall']
         stats_overall['TP'] = counts_overall.TP
@@ -411,7 +415,7 @@ class StandardModelEvaluation(ModelEvaluation):
         stats_overall['FN'] = counts_overall.FN
         self._print_overall_stats_table(stats_overall)
 
-        stats = self._get_class_stats(y_gold=raw_results.gold, y_pred=raw_results.pred,
+        stats = self._get_class_stats(y_true=raw_results.expected, y_pred=raw_results.predicted,
                                       labels=labels)
         counts_by_class = confusion_stats['counts_by_class']
         stats['TP'] = counts_by_class.TP
@@ -427,7 +431,7 @@ class StandardModelEvaluation(ModelEvaluation):
                 'stats': stats,
                 'confusion_matrix': confusion_stats['confusion_matrix']}
 
-    def graphs(self):
+    def print_graphs(self):
         """
         TODO generate graphs from matplotlib/scikit learn
         """
@@ -440,53 +444,55 @@ class SequenceModelEvaluation(ModelEvaluation):
         TODO: role evaluation?
         """
         label_mappings, val = {}, 0
-        pred, gold = [], []
-        pred_flat, gold_flat = [], []
+        predicted, expected = [], []
+        predicted_flat, expected_flat = [], []
 
         for result in self.results:
-            raw_pred = self.label_encoder.encode([result.pred], examples=[result.example])
-            raw_gold = self.label_encoder.encode([result.gold], examples=[result.example])
+            raw_predicted = self.label_encoder.encode([result.predicted], examples=[result.example])
+            raw_expected = self.label_encoder.encode([result.expected], examples=[result.example])
 
             vec = []
-            for entity in raw_pred:
+            for entity in raw_predicted:
                 label_mappings, val, vec = self._update_raw_result(entity, label_mappings, val, vec)
-            pred.append(vec)
-            pred_flat.extend(vec)
+            predicted.append(vec)
+            predicted_flat.extend(vec)
             vec = []
-            for entity in raw_gold:
+            for entity in raw_expected:
                 label_mappings, val, vec = self._update_raw_result(entity, label_mappings, val, vec)
-            gold.append(vec)
-            gold_flat.extend(vec)
+            expected.append(vec)
+            expected_flat.extend(vec)
 
         text_labels = label_mappings.keys()
         label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
-        return self._make_raw_result(pred=pred, gold=gold, label_mappings=label_mappings,
-                                     numeric_labels=range(val-1), text_labels=text_labels,
-                                     pred_flat=pred_flat, gold_flat=gold_flat)
+        return self._make_raw_result(predicted=predicted, expected=expected,
+                                     label_mappings=label_mappings, numeric_labels=range(val-1),
+                                     text_labels=text_labels, predicted_flat=predicted_flat,
+                                     expected_flat=expected_flat)
 
-    def _get_sequence_stats(self, y_gold, y_pred, labels):
+    def _get_sequence_stats(self, y_true, y_pred, labels):
         """
         Generates sequence specific statistics
         """
         return None
 
-    def stats(self):
+    def print_stats(self):
         raw_results = self.raw_results()
         labels = raw_results.numeric_labels
 
-        confusion_stats = self._get_confusion_matrix_and_counts(y_gold=raw_results.gold_flat,
-                                                                y_pred=raw_results.pred_flat)
-        stats_overall = self._get_overall_stats(y_gold=raw_results.gold_flat,
-                                                y_pred=raw_results.pred_flat, labels=labels)
+        confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_results.expected_flat,
+                                                                y_pred=raw_results.predicted_flat)
+        stats_overall = self._get_overall_stats(y_true=raw_results.expected_flat,
+                                                y_pred=raw_results.predicted_flat, labels=labels)
         counts_overall = confusion_stats['counts_overall']
         stats_overall['TP'] = counts_overall.TP
         stats_overall['TN'] = counts_overall.TN
         stats_overall['FP'] = counts_overall.FP
         stats_overall['FN'] = counts_overall.FN
-        stats_overall['token_accuracy'] = accuracy_score(y_true=raw_results.gold_flat,
-                                                         y_pred=raw_results.pred_flat)
+        stats_overall['token_accuracy'] = accuracy_score(y_true=raw_results.expected_flat,
+                                                         y_pred=raw_results.predicted_flat)
         self._print_overall_stats_table(stats_overall)
-        stats = self._get_class_stats(y_gold=raw_results.gold_flat, y_pred=raw_results.pred_flat,
+        stats = self._get_class_stats(y_true=raw_results.expected_flat,
+                                      y_pred=raw_results.predicted_flat,
                                       labels=labels)
         counts_by_class = confusion_stats['counts_by_class']
         stats['TP'] = counts_by_class.TP
@@ -498,14 +504,14 @@ class SequenceModelEvaluation(ModelEvaluation):
         self._print_class_matrix(confusion_stats['confusion_matrix'], labels,
                                  raw_results.label_mappings)
 
-        sequence_stats = self._get_sequence_stats(y_gold=raw_results.gold, y_pred=raw_results.pred,
-                                                  labels=labels)
+        sequence_stats = self._get_sequence_stats(y_true=raw_results.expected,
+                                                  y_pred=raw_results.predicted, labels=labels)
         return {'stats_overall': stats_overall,
                 'stats': stats,
                 'sequence_stats': sequence_stats,
                 'confusion_matrix': confusion_stats['confusion_matrix']}
 
-    def graphs(self):
+    def print_graphs(self):
         """
         TODO generate graphs from matplotlib/scikitlearn
         """
