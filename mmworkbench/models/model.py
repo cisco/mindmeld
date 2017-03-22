@@ -107,6 +107,35 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
         return self.expected == self.predicted
 
 
+class RawResults():
+    """Represents the raw results of a set of evaluated examples. Useful for generating
+    stats and graphs.
+
+    Attributes:
+        predicted (list): A list of predictions. For sequences this is a list of lists, and for
+                          standard classifieris this is a 1d array. All classes are in their numeric
+                          representations for ease of use with evaluation libraries and graphing.
+        expected (list): Same as predicted but contains the true or gold values.
+        label_mappings (dict): Two way dictionary with mappings from numeric label to text label and
+                               text label to numeric label
+        numeric_labels (list): A list of all possible numeric labels
+        text_labels (list): A list of all possible text labels
+        predicted_flat (list): (Optional): For sequence models this is a flattened list of all
+                                predicted tags (1d array)
+        expected_flat (list): (Optional): For sequence models this is a flattened list of all gold
+                              tags
+    """
+    def __init__(self, predicted, expected, label_mappings, numeric_labels, text_labels,
+                 predicted_flat=None, expected_flat=None):
+        self.predicted = predicted
+        self.expected = expected
+        self.label_mappings = label_mappings
+        self.numeric_labels = numeric_labels
+        self.text_labels = text_labels
+        self.predicted_flat = predicted_flat
+        self.expected_flat = expected_flat
+
+
 class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
     """Reprepresents the evaluation of a model at a specific configuration
     using a collection of examples and labels
@@ -116,9 +145,6 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         results (list of EvaluatedExample): A list of the evaluated examples
     """
     def __init__(self, config, results):
-        self.RawResults = namedtuple('RawResults', ['predicted', 'expected', 'label_mappings',
-                                                    'numeric_labels', 'text_labels',
-                                                    'predicted_flat', 'expected_flat'])
         self.label_encoder = get_label_encoder(config)
 
     def get_accuracy(self):
@@ -191,20 +217,6 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
                 text_labels: a list of all the text label values
         """
         raise NotImplementedError
-
-    def _make_raw_result(self, predicted, expected, label_mappings, numeric_labels, text_labels,
-                         predicted_flat=None, expected_flat=None):
-        """
-        Simple wrapper which returns a RawResults named tuple. This allows some parameters
-        to be optional.
-
-        Returns:
-            NamedTuple: RawResults named tuple populated with provided data
-        """
-        return self.RawResults(predicted=predicted, expected=expected,
-                               label_mappings=label_mappings, numeric_labels=numeric_labels,
-                               text_labels=text_labels, predicted_flat=predicted_flat,
-                               expected_flat=expected_flat)
 
     def _update_raw_result(self, label, label_mappings, val, vec):
         """
@@ -395,9 +407,9 @@ class StandardModelEvaluation(ModelEvaluation):
 
         text_labels = label_mappings.keys()
         label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
-        return self._make_raw_result(predicted=predicted, expected=expected,
-                                     label_mappings=label_mappings, numeric_labels=range(val-1),
-                                     text_labels=text_labels)
+        return RawResults(predicted=predicted, expected=expected,
+                          label_mappings=label_mappings, numeric_labels=range(val-1),
+                          text_labels=text_labels)
 
     def print_stats(self):
         raw_results = self.raw_results()
@@ -464,10 +476,10 @@ class SequenceModelEvaluation(ModelEvaluation):
 
         text_labels = label_mappings.keys()
         label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
-        return self._make_raw_result(predicted=predicted, expected=expected,
-                                     label_mappings=label_mappings, numeric_labels=range(val-1),
-                                     text_labels=text_labels, predicted_flat=predicted_flat,
-                                     expected_flat=expected_flat)
+        return RawResults(predicted=predicted, expected=expected,
+                          label_mappings=label_mappings, numeric_labels=range(val-1),
+                          text_labels=text_labels, predicted_flat=predicted_flat,
+                          expected_flat=expected_flat)
 
     def _get_sequence_stats(self, y_true, y_pred, labels):
         """
