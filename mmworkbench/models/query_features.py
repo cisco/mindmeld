@@ -44,21 +44,21 @@ def extract_in_gaz_span_features():
     """Returns a feature extractor for properties of spans in gazetteers
     """
     def _extractor(query, resources):
-        def _get_span_features(query, gazes, start, end, ftype, entity):
+        def _get_span_features(query, gazes, start, end, entity_type, entity):
             tokens = [re.sub(r'\d', '0', t) for t in query.normalized_tokens]
             feat_seq = [{} for _ in tokens]
 
-            pop = gazes[ftype]['pop_dict'][entity]
+            pop = gazes[entity_type]['pop_dict'][entity]
             p_total = old_div(math.log(sum([g['total_entities'] for g in gazes.values()]) + 1), 2)
 
-            p_ftype = math.log(gazes[ftype]['total_entities'] + 1)
+            p_entity_type = math.log(gazes[entity_type]['total_entities'] + 1)
             p_entity = math.log(sum([len(g['index'][entity])
                                      for g in gazes.values()]) + 1)
-            p_joint = math.log(len(gazes[ftype]['index'][entity]) + 1)
+            p_joint = math.log(len(gazes[entity_type]['index'][entity]) + 1)
             for i in range(start, end):
 
                 # Generic non-positional features
-                feat_prefix = 'in-gaz|type:{}'.format(ftype)
+                feat_prefix = 'in-gaz|type:{}'.format(entity_type)
 
                 # Basic existence features
                 feat_seq[i][feat_prefix] = 1
@@ -87,11 +87,11 @@ def extract_in_gaz_span_features():
 
                 # entity PMI and conditional prob
                 feat_name = feat_prefix + '|pmi'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype - p_entity
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_entity
                 feat_name = feat_prefix + '|p_fe'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity
                 feat_name = feat_prefix + '|p_ef'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 # Positional features
                 # Used to distinguish among B/I/E/S tags
@@ -102,7 +102,7 @@ def extract_in_gaz_span_features():
                 else:
                     pos_attr = 'cont'
 
-                feat_prefix = 'in-gaz|type:{}|pos:{}'.format(ftype, pos_attr)
+                feat_prefix = 'in-gaz|type:{}|pos:{}'.format(entity_type, pos_attr)
 
                 # Basic existence features
                 feat_seq[i][feat_prefix] = 1
@@ -130,15 +130,15 @@ def extract_in_gaz_span_features():
                                           len(' '.join(tokens))))
 
                 feat_name = feat_prefix + '|pmi'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype - p_entity
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_entity
                 feat_name = feat_prefix + '|p_fe'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity
                 feat_name = feat_prefix + '|p_ef'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
             # End of span feature
             if end < len(tokens):
-                feat_prefix = 'in-gaz|prev|type:{}'.format(ftype)
+                feat_prefix = 'in-gaz|prev|type:{}'.format(entity_type)
                 feat_name = feat_prefix
                 feat_seq[end][feat_name] = 1
                 feat_name = feat_prefix + '|log-char-len'
@@ -146,11 +146,11 @@ def extract_in_gaz_span_features():
                 feat_name = feat_prefix + '|pct-char-len'
                 feat_seq[end][feat_name] = old_div(float(len(entity)), len(' '.join(tokens)))
                 feat_name = feat_prefix + '|pmi'
-                feat_seq[end][feat_name] = p_total + p_joint - p_ftype - p_entity
+                feat_seq[end][feat_name] = p_total + p_joint - p_entity_type - p_entity
                 feat_name = feat_prefix + '|p_fe'
                 feat_seq[end][feat_name] = p_total + p_joint - p_entity
                 feat_name = feat_prefix + '|p_ef'
-                feat_seq[end][feat_name] = p_total + p_joint - p_ftype
+                feat_seq[end][feat_name] = p_total + p_joint - p_entity_type
 
             return feat_seq
 
@@ -183,7 +183,7 @@ def extract_in_gaz_span_features():
             return feat_seq
 
         def get_gaz_spans(query, gazetteers, sys_types):
-            """Collect tuples of (start index, end index, ngram, facet type)
+            """Collect tuples of (start index, end index, ngram, entity type)
             tracking ngrams that match with the entity gazetteer data
             """
             in_gaz_spans = []
@@ -198,49 +198,49 @@ def extract_in_gaz_span_features():
                             in_gaz_spans.append((start, end, gaz_name, ngram))
 
             # Check ngrams with flattened numerics against the gazetteer
-            # This algorithm iterates through each pair of numeric facets
-            # and through every ngram that includes the entire facet span.
-            # This limits regular facets to contain at most two numeric facets
+            # This algorithm iterates through each pair of numeric entities
+            # and through every ngram that includes the entire entity span.
+            # This limits regular entities to contain at most two numeric entities
             system_entities = query.get_system_entity_candidates(sys_types)
 
             for gaz_name, gaz in gazetteers.items():
-                for i, num_facet_i in enumerate(system_entities):
-                    if num_facet_i['type'] not in gaz['sys_types']:
+                for i, num_entity_i in enumerate(system_entities):
+                    if num_entity_i['type'] not in gaz['sys_types']:
                         continue
                     # logging.debug('Looking for [{}|num:{}] in {} gazetteer '
                     #               'with known numeric types {}'
-                    #               .format(num_facet_i['entity'],
-                    #                       num_facet_i['type'],
+                    #               .format(num_entity_i['entity'],
+                    #                       num_entity_i['type'],
                     #                       gaz_name, list(gaz['sys_types'])))
 
-                    # Collect ngrams that include all of num_facet_i
-                    for start in range(num_facet_i['start']+1):
-                        for end in range(num_facet_i['end']+1, len(tokens)+1):
-                            ngram, ntoks = get_flattened_ngram(tokens, start, end, num_facet_i, 0)
+                    # Collect ngrams that include all of num_entity_i
+                    for start in range(num_entity_i['start']+1):
+                        for end in range(num_entity_i['end']+1, len(tokens)+1):
+                            ngram, ntoks = get_flattened_ngram(tokens, start, end, num_entity_i, 0)
                             if ngram in gaz['pop_dict']:
                                 in_gaz_spans.append((start, end, gaz_name, ngram))
 
-                            # Check if we can fit any other num_facet_j between
-                            # num_facet_i and the edge of the ngram
-                            for j, num_facet_j in enumerate(system_entities[i+1:]):
-                                if (num_facet_j['type'] in gaz['sys_types']
-                                    and (start <= num_facet_j['start'])
-                                    and (num_facet_j['end'] < end)
-                                    and (num_facet_j['end'] < num_facet_i['start']
-                                         or num_facet_i['end'] < num_facet_j['start'])):
+                            # Check if we can fit any other num_entity_j between
+                            # num_entity_i and the edge of the ngram
+                            for j, num_entity_j in enumerate(system_entities[i+1:]):
+                                if (num_entity_j['type'] in gaz['sys_types']
+                                    and (start <= num_entity_j['start'])
+                                    and (num_entity_j['end'] < end)
+                                    and (num_entity_j['end'] < num_entity_i['start']
+                                         or num_entity_i['end'] < num_entity_j['start'])):
                                     ngram, ntoks2 = get_flattened_ngram(
-                                        ntoks, start, end, num_facet_j, start)
+                                        ntoks, start, end, num_entity_j, start)
                                     if ngram in gaz['pop_dict']:
                                         in_gaz_spans.append((start, end, gaz_name, ngram))
 
             return in_gaz_spans
 
-        def get_flattened_ngram(tokens, start, end, num_facet, offset):
-            flattened_token = '@' + num_facet['type'] + '@'
-            ntoks = (tokens[start-offset:num_facet['start']-offset] +
+        def get_flattened_ngram(tokens, start, end, num_entity, offset):
+            flattened_token = '@' + num_entity['type'] + '@'
+            ntoks = (tokens[start-offset:num_entity['start']-offset] +
                      [flattened_token] +
-                     [None]*(num_facet['end']-num_facet['start']) +
-                     tokens[num_facet['end']+1-offset:end-offset])
+                     [None]*(num_entity['end']-num_entity['start']) +
+                     tokens[num_entity['end']+1-offset:end-offset])
             ngram = ' '.join([t for t in ntoks if t is not None])
             return ngram, ntoks
 
@@ -285,65 +285,67 @@ def extract_in_gaz_ngram_features():
     """
     def _extractor(query, resources):
 
-        def get_ngram_gaz_features(query, gazes, ftype):
+        def get_ngram_gaz_features(query, gazes, entity_type):
             tokens = query.normalized_tokens
             feat_seq = [{} for _ in tokens]
 
             for i in range(len(feat_seq)):
-                feat_prefix = 'in-gaz-ngram|type:{}'.format(ftype)
+                feat_prefix = 'in-gaz-ngram|type:{}'.format(entity_type)
                 feat_name = feat_prefix + '|idf-0'
                 feat_seq[i][feat_name] = math.log(
-                    len(gazes[ftype]['index'][get_ngram(tokens, i, 1)]) + 1)
+                    len(gazes[entity_type]['index'][get_ngram(tokens, i, 1)]) + 1)
                 feat_name = feat_prefix + '|idf-1'
                 feat_seq[i][feat_name] = math.log(
-                    len(gazes[ftype]['index'][get_ngram(tokens, i-1, 2)]) + 1)
+                    len(gazes[entity_type]['index'][get_ngram(tokens, i - 1, 2)]) + 1)
                 feat_name = feat_prefix + '|idf+1'
                 feat_seq[i][feat_name] = math.log(
-                    len(gazes[ftype]['index'][get_ngram(tokens, i, 2)]) + 1)
+                    len(gazes[entity_type]['index'][get_ngram(tokens, i, 2)]) + 1)
 
                 # entity PMI and conditional prob
                 p_total = old_div(math.log(sum([g['total_entities']
                                                 for g in gazes.values()]) + 1), 2)
-                p_ftype = math.log(gazes[ftype]['total_entities'] + 1)
+                p_entity_type = math.log(gazes[entity_type]['total_entities'] + 1)
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i, 1)])
                                         for g in gazes.values()]) + 1)
-                p_joint = math.log(len(gazes[ftype]['index'][get_ngram(tokens, i, 1)]) + 1)
+                p_joint = math.log(len(gazes[entity_type]['index'][get_ngram(tokens, i, 1)]) + 1)
                 feat_name = feat_prefix + '|pmi_1'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype - p_ngram
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
                 feat_name = feat_prefix + '|p_fe_1'
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
                 feat_name = feat_prefix + '|p_ef_1'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i-1, 2)])
                                         for g in gazes.values()]) + 1)
-                p_joint = math.log(len(gazes[ftype]['index'][get_ngram(tokens, i-1, 2)]) + 1)
+                p_joint = math.log(len(gazes[entity_type]['index']
+                                       [get_ngram(tokens, i - 1, 2)]) + 1)
                 feat_name = feat_prefix + '|pmi-2'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype - p_ngram
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
                 feat_name = feat_prefix + '|p_fe-2'
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
                 feat_name = feat_prefix + '|p_ef-2'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i, 2)])
                                         for g in gazes.values()]) + 1)
-                p_joint = math.log(len(gazes[ftype]['index'][get_ngram(tokens, i, 2)]) + 1)
+                p_joint = math.log(len(gazes[entity_type]['index'][get_ngram(tokens, i, 2)]) + 1)
                 feat_name = feat_prefix + '|pmi+2'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype - p_ngram
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
                 feat_name = feat_prefix + '|p_fe+2'
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
                 feat_name = feat_prefix + '|p_ef+2'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i-1, 3)])
                                         for g in gazes.values()]) + 1)
-                p_joint = math.log(len(gazes[ftype]['index'][get_ngram(tokens, i-1, 3)]) + 1)
+                p_joint = math.log(len(gazes[entity_type]['index']
+                                       [get_ngram(tokens, i - 1, 3)]) + 1)
                 feat_name = feat_prefix + '|pmi_3'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype - p_ngram
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
                 feat_name = feat_prefix + '|p_fe_3'
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
                 feat_name = feat_prefix + '|p_ef_3'
-                feat_seq[i][feat_name] = p_total + p_joint - p_ftype
+                feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
             return feat_seq
 
@@ -351,8 +353,8 @@ def extract_in_gaz_ngram_features():
         tokens = query.normalized_tokens
         feat_seq = [{} for _ in tokens]
 
-        for ftype in gazetteers:
-            feats = get_ngram_gaz_features(query, gazetteers, ftype)
+        for entity_type in gazetteers:
+            feats = get_ngram_gaz_features(query, gazetteers, entity_type)
             update_features_sequence(feat_seq, feats)
 
         return feat_seq

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class Span(object):
-    """Simple named tuple representing a span: a start and an end"""
+    """Simple named tuple representing a span with start and end indices"""
     __slots__ = ['start', 'end']
 
     def __init__(self, start, end):
@@ -430,11 +430,12 @@ class QueryEntity(NestedEntity):
 
 
 class Entity(object):
-    """Summary
+    """An Entity is any important piece of text that provides more information about the user
+    intent.
 
     Attributes:
-        type (str): The type of entity
-        role (str): Description
+        type (str): The type of the entity
+        role (str): The role of the entity
         value (str): The resolved value of the entity
         display_text (str): A human readable text representation of the entity for use in natural
             language responses.
@@ -454,6 +455,14 @@ class Entity(object):
 
     @staticmethod
     def is_system_entity(entity_type):
+        """Checks whether the provided entity type is a Workbench-recognized system entity.
+
+        Args:
+            entity_type (str): An entity type
+
+        Returns:
+            bool: True if the entity is a system entity type, else False
+        """
         return entity_type.startswith('sys:')
 
     def to_dict(self):
@@ -483,12 +492,12 @@ def resolve_entity_conflicts(query_entities):
     """This method takes a list containing query entities for a query, and resolves
     any entity conflicts. The resolved list is returned.
 
-    If two facets in a query conflict with each other, use the following logic:
-        - If the target facet is a subset of another facet, then delete the
-          target facet.
-        - If the target facet shares the identical span as another facet,
+    If two entities in a query conflict with each other, use the following logic:
+        - If the target entity is a subset of another entity, then delete the
+          target entity.
+        - If the target entity shares the identical span as another entity,
           then keep the one with the highest confidence.
-        - If the target facet overlaps with another facet, then keep the one
+        - If the target entity overlaps with another entity, then keep the one
           with the highest confidence.
 
     Args:
@@ -507,24 +516,24 @@ def resolve_entity_conflicts(query_entities):
         while j < len(filtered):
             other = filtered[j]
             if _is_superset(target, other) and not _is_same_span(target, other):
-                logger.debug('Removing {{{1:s}|{2:s}}} facet in query {0:d} since it is a '
+                logger.debug('Removing {{{1:s}|{2:s}}} entity in query {0:d} since it is a '
                              'subset of another.'.format(i, other.text, other.entity.type))
                 del filtered[j]
                 continue
             elif _is_subset(target, other) and not _is_same_span(target, other):
-                logger.debug('Removing {{{1:s}|{2:s}}} facet in query {0:d} since it is a '
+                logger.debug('Removing {{{1:s}|{2:s}}} entity in query {0:d} since it is a '
                              'subset of another.'.format(i, target.text, target.entity.type))
                 del filtered[i]
                 include_target = False
                 break
             elif _is_same_span(target, other) or _is_overlapping(target, other):
                 if target.entity.confidence >= other.entity.confidence:
-                    logger.debug('Removing {{{1:s}|{2:s}}} facet in query {0:d} since it overlaps '
+                    logger.debug('Removing {{{1:s}|{2:s}}} entity in query {0:d} since it overlaps '
                                  'with another.'.format(i, other.text, other.entity.type))
                     del filtered[j]
                     continue
                 elif target.entity.confidence < other.entity.confidence:
-                    logger.debug('Removing {{{1:s}|{2:s}}} facet in query {0:d} since it overlaps '
+                    logger.debug('Removing {{{1:s}|{2:s}}} entity in query {0:d} since it overlaps '
                                  'with another.'.format(i, target.text, target.entity.type))
                     del filtered[i]
                     include_target = False

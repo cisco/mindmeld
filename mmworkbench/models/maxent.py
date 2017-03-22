@@ -68,24 +68,24 @@ class MaxentRoleModel(object):
         """
         self._resources.update(kwargs)
 
-    def extract_features(self, query, facets, facet_index):
+    def extract_features(self, query, entities, entity_index):
         """Extracts feature dicts for each token in a query."""
         features = {}
 
         for name, kwargs in self.feat_specs.items():
             feat_extractor = FEATURE_NAME_MAP[name](**kwargs)
-            features.update(feat_extractor(query, facets, facet_index, self._resources))
+            features.update(feat_extractor(query, entities, entity_index, self._resources))
         return features
 
-    def fit(self, labeled_queries, domain, intent, facet_names=None, verbose=False):
+    def fit(self, labeled_queries, domain, intent, entity_names=None, verbose=False):
         training_examples = {}
 
         for query in labeled_queries:
-            facets = query.get_gold_facets()
-            for i, facet in enumerate(facets):
-                if 'role' in facet:
-                    training_examples.setdefault(facet['type'], []).append(
-                        (self.extract_features(query, facets, i), facet['role']))
+            entities = query.get_gold_entities()
+            for i, entity in enumerate(entities):
+                if 'role' in entity:
+                    training_examples.setdefault(entity['type'], []).append(
+                        (self.extract_features(query, entities, i), entity['role']))
 
         for entity_type, examples in training_examples.items():
             feat_vectorizer = DictVectorizer()
@@ -102,26 +102,26 @@ class MaxentRoleModel(object):
                 self._class_encoders[entity_type] = class_encoder
                 self._feat_vectorizers[entity_type] = feat_vectorizer
 
-    def predict(self, query, domain, intent, facets, verbose=False):
+    def predict(self, query, domain, intent, entities, verbose=False):
         roles = []
-        for i, facet in enumerate(facets):
-            if facet['type'] in self._only_one_role:
-                roles.append(self._only_one_role[facet['type']])
-            elif facet['type'] not in self._clf:
+        for i, entity in enumerate(entities):
+            if entity['type'] in self._only_one_role:
+                roles.append(self._only_one_role[entity['type']])
+            elif entity['type'] not in self._clf:
                 roles.append(None)
             else:
-                features = self.extract_features(query, facets, i)
-                feat_vec = self._feat_vectorizers[facet['type']].transform(features)
-                Y = self._clf[facet['type']].predict(feat_vec)[0]
-                prediction = self._class_encoders[facet['type']].inverse_transform(Y)
+                features = self.extract_features(query, entities, i)
+                feat_vec = self._feat_vectorizers[entity['type']].transform(features)
+                Y = self._clf[entity['type']].predict(feat_vec)[0]
+                prediction = self._class_encoders[entity['type']].inverse_transform(Y)
                 roles.append(prediction)
         return roles
 
 
 def extract_in_gaz_features():
-    def extractor(query, facets, facet_index, resources):
+    def extractor(query, entities, entity_index, resources):
         features = {}
-        current_entity = facets[facet_index]
+        current_entity = entities[entity_index]
 
         domain_gazes = resources['gazetteers']
 
@@ -144,17 +144,17 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions):
     Returns:
         (function) The feature extractor.
     """
-    def extractor(query, facets, facet_index, resources):
+    def extractor(query, entities, entity_index, resources):
         features = {}
         tokens = query.get_normalized_tokens()
-        current_facet = facets[facet_index]
-        current_facet_index = current_facet['start']
+        current_entity = entities[entity_index]
+        current_entity_index = current_entity['start']
 
         for length, starts in ngram_lengths_to_start_positions.items():
             for start in starts:
                 feat_name = 'bag-of-words-before|length:{}|pos:{}'.format(
                         length, start)
-                features[feat_name] = get_ngram(tokens, current_facet_index + start, length)
+                features[feat_name] = get_ngram(tokens, current_entity_index + start, length)
 
         return features
 
@@ -170,17 +170,17 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions):
     Returns:
         (function) The feature extractor.
     """
-    def extractor(query, facets, facet_index, resources):
+    def extractor(query, entities, entity_index, resources):
         features = {}
         tokens = query.get_normalized_tokens()
-        current_facet = facets[facet_index]
-        current_facet_index = current_facet['end']
+        current_entity = entities[entity_index]
+        current_entity_index = current_entity['end']
 
         for length, starts in ngram_lengths_to_start_positions.items():
             for start in starts:
                 feat_name = 'bag-of-words-after|length:{}|pos:{}'.format(
                         length, start)
-                features[feat_name] = get_ngram(tokens, current_facet_index + start, length)
+                features[feat_name] = get_ngram(tokens, current_entity_index + start, length)
 
         return features
 
@@ -188,10 +188,10 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions):
 
 
 def extract_numeric_candidate_features():
-    def extractor(query, facet_index, resources):
+    def extractor(query, entity_index, resources):
         feat_seq = [{} for _ in query.get_normalized_tokens()]
-        num_facets = query.get_candidate_numeric_facets(['time', 'interval'])
-        for f in num_facets:
+        num_entities = query.get_candidate_numeric_entities(['time', 'interval'])
+        for f in num_entities:
             for i in range(f['start'], f['end']+1):
                 feat_name = 'num-candidate|type:{}'.format(f['type'])
                 feat_seq[i][feat_name] = 1
@@ -201,12 +201,12 @@ def extract_numeric_candidate_features():
 
 
 def extract_other_entities_features():
-    def extractor(query, facets, facet_index, resources):
+    def extractor(query, entities, entity_index, resources):
         features = {}
-        for i, facet in enumerate(facets):
-            if i == facet_index:
+        for i, entity in enumerate(entities):
+            if i == entity_index:
                 continue
-            feat_name = 'other-entities|entity_type:{}'.format(facet['type'])
+            feat_name = 'other-entities|entity_type:{}'.format(entity['type'])
             features[feat_name] = 1
 
         return features
@@ -215,13 +215,13 @@ def extract_other_entities_features():
 
 
 def extract_operator_value_features():
-    def extractor(query, facets, facet_index, resources):
+    def extractor(query, entities, entity_index, resources):
         features = {}
-        for i, facet in enumerate(facets):
-            if i == facet_index:
+        for i, entity in enumerate(entities):
+            if i == entity_index:
                 continue
-            if facet['type'] == 'operator':
-                feat_name = 'operator-entities|value:{}'.format(facet['entity'])
+            if entity['type'] == 'operator':
+                feat_name = 'operator-entities|value:{}'.format(entity['entity'])
                 features[feat_name] = 1
 
         return features
@@ -230,16 +230,16 @@ def extract_operator_value_features():
 
 
 # TODO: refactor to have an app level role classifier config and make
-# facet type/entity features more genaric. App specific features are
+# entity type/entity features more genaric. App specific features are
 # extract_operator_value_features, extract_age_features, and extract_artist_only_feature
 def extract_age_features():
-    def extractor(query, facets, facet_index, resources):
+    def extractor(query, entities, entity_index, resources):
         features = {}
-        for i, facet in enumerate(facets):
-            if i == facet_index:
+        for i, entity in enumerate(entities):
+            if i == entity_index:
                 continue
-            if facet['type'] == 'size':
-                feat_name = 'age-entities|value:{}'.format(facet['entity'])
+            if entity['type'] == 'size':
+                feat_name = 'age-entities|value:{}'.format(entity['entity'])
                 features[feat_name] = 1
 
         return features
