@@ -116,21 +116,16 @@ class RawResults():
                           standard classifieris this is a 1d array. All classes are in their numeric
                           representations for ease of use with evaluation libraries and graphing.
         expected (list): Same as predicted but contains the true or gold values.
-        label_mappings (dict): Two way dictionary with mappings from numeric label to text label and
-                               text label to numeric label
-        numeric_labels (list): A list of all possible numeric labels
-        text_labels (list): A list of all possible text labels
+        text_labels (list): A list of all the text label values, the index of the text label in
+                             this array is the numeric label
         predicted_flat (list): (Optional): For sequence models this is a flattened list of all
                                 predicted tags (1d array)
         expected_flat (list): (Optional): For sequence models this is a flattened list of all gold
                               tags
     """
-    def __init__(self, predicted, expected, label_mappings, numeric_labels, text_labels,
-                 predicted_flat=None, expected_flat=None):
+    def __init__(self, predicted, expected, text_labels, predicted_flat=None, expected_flat=None):
         self.predicted = predicted
         self.expected = expected
-        self.label_mappings = label_mappings
-        self.numeric_labels = numeric_labels
         self.text_labels = text_labels
         self.predicted_flat = predicted_flat
         self.expected_flat = expected_flat
@@ -212,26 +207,23 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             NamedTuple: RawResults named tuple containing
                 expected: vector of predicted classes (numeric value)
                 predicted: vector of gold classes (numeric value)
-                label_mappings: two way dict of the text label to numeric value
-                numeric_labels: a list of all the numeric label values
-                text_labels: a list of all the text label values
+                text_labels: a list of all the text label values, the index of the text label in
+                             this array is the numeric label
         """
         raise NotImplementedError
 
-    def _update_raw_result(self, label, label_mappings, val, vec):
+    def _update_raw_result(self, label, text_labels, vec):
         """
-        Helper method for updating the text to numeric label mappings and numeric label vectors
+        Helper method for updating the text to numeric label vectors
 
         Returns:
-            dict: The updated text to numeric label_mapping dict
-            val: The updated counter
+            text_labels: The updated text_labels array
             vec: The updated label vector with the given label appended
         """
-        if label_mappings.get(label) is None:
-            label_mappings[label] = val
-            val += 1
-        vec.append(label_mappings[label])
-        return label_mappings, val, vec
+        if label not in text_labels:
+            text_labels.append(label)
+        vec.append(text_labels.index(label))
+        return text_labels, vec
 
     def _get_class_stats(self, y_true, y_pred, labels):
         """
@@ -328,7 +320,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
                                          sum(FN_arr))
                 }
 
-    def _print_class_stats_table(self, stats, labels, label_mappings):
+    def _print_class_stats_table(self, stats, labels, text_labels):
         """
         Helper for printing a human readable table for class statistics
 
@@ -347,10 +339,10 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             row = []
             for stat in table_titles:
                 row.append(stats[stat][label])
-            print(stat_row_format.format(self._truncate_label(label_mappings[label], 18), *row))
+            print(stat_row_format.format(self._truncate_label(text_labels[label], 18), *row))
         print("\n\n")
 
-    def _print_class_matrix(self, matrix, labels, label_mappings):
+    def _print_class_matrix(self, matrix, labels, text_labels):
         """
         Helper for printing a human readable class by class table for displaying
         a confusion matrix
@@ -360,11 +352,11 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         """
         title_format = "{:>15}" * (len(labels)+1)
         stat_row_format = "{:>15}" + "{:>15}" * (len(labels))
-        table_titles = [self._truncate_label(label_mappings[label], 10) for label in labels]
+        table_titles = [self._truncate_label(text_labels[label], 10) for label in labels]
         print("Confusion Matrix: \n")
         print(title_format.format("", *table_titles))
         for label in labels:
-            print(stat_row_format.format(self._truncate_label(label_mappings[label], 10),
+            print(stat_row_format.format(self._truncate_label(text_labels[label], 10),
                                          *matrix[label]))
         print("\n\n")
 
@@ -395,25 +387,19 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
 class StandardModelEvaluation(ModelEvaluation):
     def raw_results(self):
-        label_mappings, val = {}, 0
+        text_labels = []
         predicted, expected = [], []
 
         for result in self.results:
-            label_mappings, val, predicted = self._update_raw_result(result.predicted,
-                                                                     label_mappings, val,
-                                                                     predicted)
-            label_mappings, val, expected = self._update_raw_result(result.expected, label_mappings,
-                                                                    val, expected)
+            text_labels, predicted = self._update_raw_result(result.predicted, text_labels,
+                                                             predicted)
+            text_labels, expected = self._update_raw_result(result.expected, text_labels, expected)
 
-        text_labels = label_mappings.keys()
-        label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
-        return RawResults(predicted=predicted, expected=expected,
-                          label_mappings=label_mappings, numeric_labels=range(val-1),
-                          text_labels=text_labels)
+        return RawResults(predicted=predicted, expected=expected, text_labels=text_labels)
 
     def print_stats(self):
         raw_results = self.raw_results()
-        labels = raw_results.numeric_labels
+        labels = range(len(raw_results.text_labels)-1)
 
         confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_results.expected,
                                                                 y_pred=raw_results.predicted)
@@ -434,10 +420,10 @@ class StandardModelEvaluation(ModelEvaluation):
         stats['TN'] = counts_by_class.TN
         stats['FP'] = counts_by_class.FP
         stats['FN'] = counts_by_class.FN
-        self._print_class_stats_table(stats, labels, raw_results.label_mappings)
+        self._print_class_stats_table(stats, labels, raw_results.text_labels)
 
         self._print_class_matrix(confusion_stats['confusion_matrix'], labels,
-                                 raw_results.label_mappings)
+                                 raw_results.text_labels)
 
         return {'stats_overall': stats_overall,
                 'stats': stats,
@@ -455,7 +441,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         """
         TODO: role evaluation?
         """
-        label_mappings, val = {}, 0
+        text_labels = []
         predicted, expected = [], []
         predicted_flat, expected_flat = [], []
 
@@ -465,19 +451,16 @@ class SequenceModelEvaluation(ModelEvaluation):
 
             vec = []
             for entity in raw_predicted:
-                label_mappings, val, vec = self._update_raw_result(entity, label_mappings, val, vec)
+                text_labels, vec = self._update_raw_result(entity, text_labels, vec)
             predicted.append(vec)
             predicted_flat.extend(vec)
             vec = []
             for entity in raw_expected:
-                label_mappings, val, vec = self._update_raw_result(entity, label_mappings, val, vec)
+                text_labels, vec = self._update_raw_result(entity, text_labels, vec)
             expected.append(vec)
             expected_flat.extend(vec)
 
-        text_labels = label_mappings.keys()
-        label_mappings.update(dict(reversed(item) for item in label_mappings.items()))
         return RawResults(predicted=predicted, expected=expected,
-                          label_mappings=label_mappings, numeric_labels=range(val-1),
                           text_labels=text_labels, predicted_flat=predicted_flat,
                           expected_flat=expected_flat)
 
@@ -489,7 +472,7 @@ class SequenceModelEvaluation(ModelEvaluation):
 
     def print_stats(self):
         raw_results = self.raw_results()
-        labels = raw_results.numeric_labels
+        labels = range(len(raw_results.text_labels)-1)
 
         confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_results.expected_flat,
                                                                 y_pred=raw_results.predicted_flat)
@@ -511,10 +494,10 @@ class SequenceModelEvaluation(ModelEvaluation):
         stats['TN'] = counts_by_class.TN
         stats['FP'] = counts_by_class.FP
         stats['FN'] = counts_by_class.FN
-        self._print_class_stats_table(stats, labels, raw_results.label_mappings)
+        self._print_class_stats_table(stats, labels, raw_results.text_labels)
 
         self._print_class_matrix(confusion_stats['confusion_matrix'], labels,
-                                 raw_results.label_mappings)
+                                 raw_results.text_labels)
 
         sequence_stats = self._get_sequence_stats(y_true=raw_results.expected,
                                                   y_pred=raw_results.predicted, labels=labels)
