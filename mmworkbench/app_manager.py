@@ -8,6 +8,7 @@ from builtins import object
 import copy
 
 from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
+from .resource_loader import ResourceLoader
 
 
 class ApplicationManager(object):
@@ -16,12 +17,24 @@ class ApplicationManager(object):
     necessary components of Workbench. Once processing is complete, the application manager
     returns the final response back to the gateway.
     """
-    def __init__(self, app_path, nlp=None, es_host=None):
+    def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None):
         self._app_path = app_path
-        self.nlp = nlp or NaturalLanguageProcessor(app_path)
-        self._query_factory = self.nlp.resource_loader.query_factory
+        # If NLP or QA were passed in, use the resource loader from there
+        if nlp:
+            resource_loader = nlp.resource_loader
+            if question_answerer:
+                question_answerer.resource_loader = resource_loader
+        elif question_answerer:
+            resource_loader = question_answerer.resource_loader
+        else:
+            resource_loader = ResourceLoader.create_resource_loader(app_path)
+
+        self._query_factory = resource_loader.query_factory
+
+        self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
         self.dialogue_manager = DialogueManager()
-        self.question_answerer = QuestionAnswerer(self.nlp.resource_loader, es_host)
+        self.question_answerer = question_answerer or QuestionAnswerer(app_path, resource_loader,
+                                                                       es_host)
 
     @property
     def ready(self):
