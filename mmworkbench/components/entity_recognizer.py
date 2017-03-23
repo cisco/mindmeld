@@ -175,8 +175,8 @@ class EntityRecognizer(Classifier):
         self.dirty = False
 
     def predict_proba(self, query):
-        """Uses the trained entity recognition model to run prediction on a given query and
-        generate multiple entity tagging hypotheses with their associated probabilities
+        """Runs prediction on a given query and generates multiple entity tagging hypotheses with
+        their associated probabilities using the trained entity recognition model
 
         Args:
             query (Query): The input query

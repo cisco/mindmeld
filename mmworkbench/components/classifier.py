@@ -131,7 +131,7 @@ class Classifier(object):
         self.dirty = True
 
     def predict(self, query):
-        """Uses the trained classification model to predict a class label for the given query
+        """Predicts a class label for the given query using the trained classification model
 
         Args:
             query (Query or str): The input query
@@ -146,8 +146,8 @@ class Classifier(object):
         return self._model.predict([query])[0]
 
     def predict_proba(self, query):
-        """Uses the trained classification model to run prediction on a given query and generate
-        multiple hypotheses with their associated probabilities
+        """Runs prediction on a given query and generates multiple hypotheses with their
+        associated probabilities using the trained classification model
 
         Args:
             query (Query): The input query
