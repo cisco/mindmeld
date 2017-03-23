@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the named entity resolver component.
+This module contains the entity resolver component of the Workbench natural language processor.
 """
 from __future__ import unicode_literals
 from builtins import object
@@ -14,11 +14,17 @@ logger = logging.getLogger(__name__)
 
 
 class EntityResolver(object):
-    """A named entity resolver which is used to resolve and link entities to their specific
-    values in a given query.
+    """An entity resolver is used to resolve entities in a given query to their canonical values
+    (usually linked to specific entries in a knowledge base).
     """
 
     def __init__(self, resource_loader, entity_type):
+        """Initializes an entity resolver
+
+        Args:
+            resource_loader (ResourceLoader): An object which can load resources for the resolver
+            entity_type: The entity type associated with this entity resolver
+        """
         self._resource_loader = resource_loader
         self._normalizer = resource_loader.query_factory.normalize
         self.type = entity_type
@@ -28,6 +34,14 @@ class EntityResolver(object):
 
     @staticmethod
     def process_mapping(entity_type, mapping, normalizer):
+        """
+        Description
+
+        Args:
+            entity_type: The entity type associated with this entity resolver
+            mapping: Description
+            normalizer: Description
+        """
         item_map = {}
         syn_map = {}
         for item in mapping:
@@ -50,19 +64,21 @@ class EntityResolver(object):
         return {'items': item_map, 'synonyms': syn_map}
 
     def fit(self):
-        """Trains the model"""
+        """Loads an entity mapping file (if one exists) or trains a machine-learned entity
+        resolution model using the provided training examples"""
         if not self._is_system_entity:
             mapping = self._resource_loader.get_entity_map(self.type)
             self._mapping = self.process_mapping(self.type, mapping, self._normalizer)
 
     def predict(self, entity):
-        """Predicts resolved values for the entities provided
+        """Predicts the resolved value for the given entity using the loaded entity map or the
+        trained entity resolution model
 
         Args:
             entity (Entity): An entity found in an input query
 
         Returns:
-            The value for the entity passed in
+            The resolved value for the provided entity
         """
         if self._is_system_entity:
             # system entities are already resolved
@@ -80,18 +96,20 @@ class EntityResolver(object):
         return value
 
     def predict_proba(self, entity):
-        """Generates multiple hypotheses and returns their associated probabilities
+        """Runs prediction on a given entity and generates multiple hypotheses with their
+        associated probabilities using the trained entity resolution model
 
         Args:
             entity (Entity): An entity found in an input query
 
         Returns:
-            list: a list of tuples of the form (str, float) grouping roles and their probabilities
+            list: a list of tuples of the form (str, float) grouping resolved values and their
+                probabilities
         """
         pass
 
     def evaluate(self, use_blind=False):
-        """Evaluates the model on the specified data
+        """Evaluates the trained entity resolution model on the given test data
 
         Returns:
             TYPE: Description
@@ -99,20 +117,18 @@ class EntityResolver(object):
         pass
 
     def dump(self, model_path):
-        """Persists the model to disk.
+        """Persists the trained entity resolution model to disk.
 
         Args:
             model_path (str): The location on disk where the model should be stored
-
         """
         # joblib.dump(self._model, model_path)
         pass
 
     def load(self):
-        """Loads the model from disk
+        """Loads the trained entity resolution model from disk
 
         Args:
             model_path (str): The location on disk where the model is stored
-
         """
         self.fit()

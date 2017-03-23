@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the role classifier component.
+This module contains the role classifier component of the Workbench natural language processor.
 """
 
 import os
@@ -10,15 +10,14 @@ import os
 
 class RoleClassifier(object):
     """A role classifier is used to determine the target role for entities in a given query. It is
-    trained using all the labeled queries for a particular intent. The labels are the role
-    names associated with each entity within each query.
+    trained using all the labeled queries for a particular intent. The labels are the role names
+    associated with each entity within each query.
 
     Attributes:
-        domain (str): The domain of this role classifier
-        intent (str): The intent of this role classifier
-        entity_type (str): The entity type of this role classifier
+        domain (str): The domain that this role classifier belongs to
+        intent (str): The intent that this role classifier belongs to
+        entity_type (str): The entity type that this role classifier is for
         roles (set): A set containing the roles which can be classified
-
     """
 
     DEFAULT_CONFIG = {
@@ -133,9 +132,9 @@ class RoleClassifier(object):
 
         Args:
             resource_loader (ResourceLoader): An object which can load resources for the classifier
-            domain (str): The domain of this role classifier
-            intent (str): The intent of this role classifier
-            entity_type (str): The entity type of this role classifier
+            domain (str): The domain that this role classifier belongs to
+            intent (str): The intent that this role classifier belongs to
+            entity_type (str): The entity type that this role classifier is for
         """
         self._resource_loader = resource_loader
         self.domain = domain
@@ -145,14 +144,18 @@ class RoleClassifier(object):
         self._model = None  # will be set when model is fit or loaded
 
     def fit(self, model_type=None, features=None, params_grid=None, cv=None):
-        """Trains the model
+        """Trains a statistical model for role classification using the provided training examples
 
         Args:
-            model_type (str): The type of model to use
-            features (None, optional): Description
-            params_grid (None, optional): Description
-            cv (None, optional): Description
-
+            model_type (str): The type of machine learning model to use. If omitted, the default
+                model type will be used.
+            features (dict): Features to extract from each example instance to form the feature
+                vector used for model training. If omitted, the default feature set for the model
+                type will be used.
+            params_grid (dict): The grid of hyper-parameters to search, for finding the optimal
+                hyper-parameter settings for the model. If omitted, the default hyper-parameter
+                search grid will be used.
+            cv (None, optional): Cross-validation settings
         """
         # query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
         #                                                        intent=self.intent)
@@ -160,7 +163,7 @@ class RoleClassifier(object):
         pass
 
     def predict(self, query, entities, entity):
-        """Predicts a role for the specified query
+        """Predicts a role for the given entity using the trained role classification model
 
         Args:
             query (Query): The input query
@@ -168,12 +171,13 @@ class RoleClassifier(object):
             entity (Entity): The entity whose role should be classified
 
         Returns:
-            list: a list containing the corresponding roles for the entities passed in
+            str: The predicted role for the provided entity
         """
         pass
 
     def predict_proba(self, query, entities, entity):
-        """Generates multiple hypotheses and returns their associated probabilities
+        """Runs prediction on a given entity and generates multiple role hypotheses with their
+        associated probabilities using the trained role classification model
 
         Args:
             query (Query): The input query
@@ -186,19 +190,18 @@ class RoleClassifier(object):
         pass
 
     def evaluate(self, use_blind=False):
-        """Evaluates the model on the specified data
+        """Evaluates the trained role classification model on the given test data
 
         Returns:
-            TYPE: Description
+            ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
         pass
 
     def dump(self, model_path):
-        """Persists the model to disk.
+        """Persists the trained role classification model to disk.
 
         Args:
             model_path (str): The location on disk where the model should be stored
-
         """
         folder, filename = os.path.split(model_path)
         if not os.path.isdir(folder):
@@ -207,11 +210,10 @@ class RoleClassifier(object):
         pass
 
     def load(self, model_path):
-        """Loads the model from disk
+        """Loads the trained role classification model from disk
 
         Args:
             model_path (str): The location on disk where the model is stored
-
         """
         # self._model = joblib.load(model_path)
         pass

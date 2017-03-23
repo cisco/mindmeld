@@ -31,6 +31,12 @@ class Processor(object):
             messages
     """
     def __init__(self, app_path, resource_loader=None):
+        """Initializes a processor
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            resource_loader (ResourceLoader): An object which can load resources for the processor
+        """
         self._app_path = app_path
         self.resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
 
@@ -40,7 +46,7 @@ class Processor(object):
         self.name = None
 
     def build(self):
-        """Builds all models for this processor and its children."""
+        """Builds all the natural language processing models for this processor and its children."""
         self._build()
 
         for child in self._children.values():
@@ -53,7 +59,8 @@ class Processor(object):
         raise NotImplementedError
 
     def dump(self):
-        """Saves all models for this processor and its children to disk."""
+        """Saves all the natural language processing models for this processor and its children to
+        disk."""
         self._dump()
 
         for child in self._children.values():
@@ -65,7 +72,8 @@ class Processor(object):
         raise NotImplementedError
 
     def load(self):
-        """Loads all models for this processor and its children from disk."""
+        """Loads all the natural language processing models for this processor and its children
+        from disk."""
         self._load()
 
         for child in self._children.values():
@@ -82,25 +90,29 @@ class Processor(object):
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
     def process(self, query_text):
-        """Processes the input text
+        """Processes the given input text using the trained natural language processing models
+        for this processor and its children
 
         Args:
             query_text (str): The raw user text input
 
         Returns:
-            ProcessedQuery: The processed query
+            ProcessedQuery: A processed query object that contains the results from the
+                application of this processor and its children to the input text
         """
         query = self.resource_loader.query_factory.create_query(query_text)
         return self.process_query(query).to_dict()
 
     def process_query(self, query):
-        """Processes the query object passed in
+        """Processes the given query using the trained natural language processing models for
+        this processor and its children
 
         Args:
             query (Query): The query object to process
 
         Returns:
-            ProcessedQuery: The resulting processed query
+            ProcessedQuery: A processed query object that contains the results from the
+                application of this processor and its children to the input query
         """
         raise NotImplementedError
 
@@ -121,12 +133,12 @@ class Processor(object):
 
 
 class NaturalLanguageProcessor(Processor):
-    """The natural language processor is the workbench component responsible for
-    all nlp.
+    """The natural language processor is the Workbench component responsible for understanding
+    the user input using a hierarchy of natural language processing models.
 
     Attributes:
-        domain_classifier (DomainClassifier): A classifier for domains
-        domains (dict): Processors for each domain
+        domain_classifier (DomainClassifier): The domain classifier for this application
+        domains (dict): The domains supported by this application
     """
 
     def __init__(self, app_path, resource_loader=None):
@@ -134,6 +146,7 @@ class NaturalLanguageProcessor(Processor):
 
         Args:
             app_path (str): The path to the directory containing the app's data
+            resource_loader (ResourceLoader): An object which can load resources for the processor
         """
         super().__init__(app_path, resource_loader)
         self._app_path = app_path
@@ -145,6 +158,7 @@ class NaturalLanguageProcessor(Processor):
 
     @property
     def domains(self):
+        """The domains supported by this application"""
         return self._children
 
     def _build(self):
@@ -164,13 +178,15 @@ class NaturalLanguageProcessor(Processor):
         self.domain_classifier.load(model_path)
 
     def process_query(self, query):
-        """Processes the query object passed in
+        """Processes the given query using the full hierarchy of natural language processing models
+        trained for this application
 
         Args:
             query (Query): The query object to process
 
         Returns:
-            ProcessedQuery: The resulting processed query
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the full hierarchy of natural language processing models to the input query
         """
         self._check_ready()
         if len(self.domains) > 1:
@@ -184,19 +200,28 @@ class NaturalLanguageProcessor(Processor):
 
 
 class DomainProcessor(Processor):
-    """Summary
+    """The domain processor houses the hierarchy of domain-specific natural language processing
+    models required for understanding the user input for a particular domain.
 
     Attributes:
         name (str): The name of the domain
-        intent_classifier (IntentClassifier): Description
-        intents (dict): Description
+        intent_classifier (IntentClassifier): The intent classifier for this domain
+        intents (dict): The intents supported within this domain
     """
 
     @property
     def intents(self):
+        """The intents supported within this domain"""
         return self._children
 
     def __init__(self, app_path, domain, resource_loader=None):
+        """Initializes a domain processor object
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            domain (str): The name of the domain
+            resource_loader (ResourceLoader): An object which can load resources for the processor
+        """
         super().__init__(app_path, resource_loader)
         self.name = domain
         self.intent_classifier = IntentClassifier(self.resource_loader, domain)
@@ -222,13 +247,15 @@ class DomainProcessor(Processor):
         self.intent_classifier.load(model_path)
 
     def process(self, query_text):
-        """Processes the input text for this domain
+        """Processes the given input text using the hierarchy of natural language processing models
+        trained for this domain
 
         Args:
             query_text (str): The raw user text input
 
         Returns:
-            ProcessedQuery: The processed query
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the hierarchy of natural language processing models to the input text
         """
         query = self.resource_loader.query_factory.create_query(query_text)
         processed_query = self.process_query(query)
@@ -236,13 +263,15 @@ class DomainProcessor(Processor):
         return processed_query.to_dict()
 
     def process_query(self, query):
-        """Processes the query object passed in for this domain
+        """Processes the given query using the hierarchy of natural language processing models
+        trained for this domain
 
         Args:
             query (Query): The query object to process
 
         Returns:
-            ProcessedQuery: The resulting processed query
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the hierarchy of natural language processing models to the input query
         """
         self._check_ready()
         if len(self.intents) > 1:
@@ -255,16 +284,25 @@ class DomainProcessor(Processor):
 
 
 class IntentProcessor(Processor):
-    """Summary
+    """The intent processor houses the hierarchy of intent-specific natural language processing
+    models required for understanding the user input for a particular intent.
 
     Attributes:
         domain (str): The domain this intent belongs to
         name (str): The name of this intent
-        entities (dict): Description
-        recognizer (EntityRecognizer): The
+        entities (dict): The entity types associated with this intent
+        recognizer (EntityRecognizer): The entity recognizer for this intent
     """
 
     def __init__(self, app_path, domain, intent, resource_loader=None):
+        """Initializes an intent processor object
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            domain (str): The domain this intent belongs to
+            name (str): The name of this intent
+            resource_loader (ResourceLoader): An object which can load resources for the processor
+        """
         super().__init__(app_path, resource_loader)
         self.domain = domain
         self.name = intent
@@ -274,6 +312,7 @@ class IntentProcessor(Processor):
 
     @property
     def entities(self):
+        """The entity types associated with this intent"""
         return self._children
 
     def _build(self):
@@ -311,13 +350,15 @@ class IntentProcessor(Processor):
             self._children[entity_type] = processor
 
     def process(self, query_text):
-        """Processes the input text for this intent
+        """Processes the given input text using the hierarchy of natural language processing models
+        trained for this intent
 
         Args:
             query_text (str): The raw user text input
 
         Returns:
-            ProcessedQuery: The processed query
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the hierarchy of natural language processing models to the input text
         """
         query = self.resource_loader.query_factory.create_query(query_text)
         processed_query = self.process_query(query)
@@ -326,13 +367,15 @@ class IntentProcessor(Processor):
         return processed_query.to_dict()
 
     def process_query(self, query):
-        """Processes the query object passed in for this intent
+        """Processes the given query using the hierarchy of natural language processing models
+        trained for this intent
 
         Args:
             query (Query): The query object to process
 
         Returns:
-            ProcessedQuery: The resulting processed query
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the hierarchy of natural language processing models to the input query
         """
         self._check_ready()
         entities = self.entity_recognizer.predict(query)
@@ -346,16 +389,26 @@ class IntentProcessor(Processor):
 
 
 class EntityProcessor(Processor):
-    """Summary
+    """The entity processor houses the hierarchy of entity-specific natural language processing
+    models required for analyzing a specific entity type in the user input
 
     Attributes:
         domain (str): The domain this entity belongs to
         intent (str): The intent this entity belongs to
         type (str): The type of this entity
-        role_classifier (TYPE): Description
+        role_classifier (RoleClassifier): The role classifier for this entity type
     """
 
     def __init__(self, app_path, domain, intent, entity_type, resource_loader=None):
+        """Initializes an entity processor object
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            domain (str): The domain this entity belongs to
+            intent (str): The intent this entity belongs to
+            entity_type (str): The type of this entity
+            resource_loader (ResourceLoader): An object which can load resources for the processor
+        """
         super().__init__(app_path, resource_loader)
         self.domain = domain
         self.intent = intent
@@ -384,12 +437,17 @@ class EntityProcessor(Processor):
                                   'Try `process_entity()`')
 
     def process_entity(self, query, entities, entity):
-        """Processes the given entity
+        """Processes the given entity using the hierarchy of natural language processing models
+        trained for this entity type
 
         Args:
             query (Query): The query the entity originated from
             entities (list): All entities recognized in the query
             entity (Entity): The entity to process
+
+        Returns:
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the hierarchy of natural language processing models to the input entity
         """
         self._check_ready()
 
