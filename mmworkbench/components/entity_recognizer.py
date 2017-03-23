@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the named entity recognizer component.
+This module contains the entity recognizer component of the Workbench natural language processor.
 """
 from __future__ import unicode_literals
 from builtins import super
@@ -19,14 +19,14 @@ logger = logging.getLogger(__name__)
 
 
 class EntityRecognizer(Classifier):
-    """A named entity recognizer which is used to identify the entities for a given query. It is
+    """An entity recognizer which is used to identify the entities for a given query. It is
     trained using all the labeled queries for a particular intent. The labels are the entity
     annotations for each query.
 
     Attributes:
-        domain (str): The domain of this named entity recognizer
-        intent (str): The intent of this named entity recognizer
-        entity_types (set): A set containing the entities which can be recognized
+        domain (str): The domain that this entity recognizer belongs to
+        intent (str): The intent that this entity recognizer belongs to
+        entity_types (set): A set containing the entity types which can be recognized
     """
 
     DEFAULT_CONFIG = {
@@ -78,12 +78,12 @@ class EntityRecognizer(Classifier):
     }
 
     def __init__(self, resource_loader, domain, intent):
-        """Initializes a named entity recognizer
+        """Initializes an entity recognizer
 
         Args:
             resource_loader (ResourceLoader): An object which can load resources for the classifier
-            domain (str): The domain of this named entity recognizer
-            intent (str): The intent of this named entity recognizer
+            domain (str): The domain that this entity recognizer belongs to
+            intent (str): The intent that this entity recognizer belongs to
         """
         super().__init__(resource_loader)
         self.domain = domain
@@ -91,18 +91,27 @@ class EntityRecognizer(Classifier):
         self.entity_types = set()
 
     def _get_model_config(self, config_name, **kwargs):
+        """Gets a machine learning model configuration
+
+        Args:
+             config_name: Name of the configuration
+
+        Returns:
+            ModelConfig: The model configuration corresponding to the provided config name
+        """
         kwargs['example_type'] = QUERY_EXAMPLE_TYPE
         kwargs['label_type'] = ENTITIES_LABEL_TYPE
         return super()._get_model_config(config_name, **kwargs)
 
     def fit(self, queries=None, config_name=None, label_set='train', **kwargs):
-        """Trains the model
+        """Trains the entity recognition model using the provided training queries
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
-            config_name (str): The type of model to use. If omitted, the default model type will
-                be used.
-
+            config_name (str): Name of the machine learning model configuration to use. If
+                omitted, the default model configuration will be used.
+            label_set (list, optional): A label set to load. If not specified, the default
+                training set will be loaded.
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
@@ -125,7 +134,7 @@ class EntityRecognizer(Classifier):
         self.dirty = True
 
     def dump(self, model_path):
-        """Persists the model to disk.
+        """Persists the trained entity recognition model to disk.
 
         Args:
             model_path (str): The location on disk where the model should be stored
@@ -143,7 +152,7 @@ class EntityRecognizer(Classifier):
         self.dirty = False
 
     def load(self, model_path):
-        """Loads the model from disk
+        """Loads the trained entity recognition model from disk
 
         Args:
             model_path (str): The location on disk where the model is stored
@@ -166,27 +175,27 @@ class EntityRecognizer(Classifier):
         self.dirty = False
 
     def predict_proba(self, query):
-        """Generates multiple hypotheses and returns their associated probabilities
+        """Uses the trained entity recognition model to run prediction on a given query and
+        generate multiple entity tagging hypotheses with their associated probabilities
 
         Args:
             query (Query): The input query
 `
         Returns:
-            list: a list of tuples of the form (Entity, float) grouping potential entities and their
-            probabilities
+            list: a list of tuples of the form (Entity list, float) grouping potential entity
+                tagging hypotheses and their probabilities
         """
         raise NotImplementedError
 
     def evaluate(self, queries=None):
-        """Evaluates the classifier
+        """Evaluates the trained entity recognition model on the given test data
 
         Args:
-            queries (list of ProcessedQuery): The labeled queries to use as training data. If none
+            queries (list of ProcessedQuery): The labeled queries to use as test data. If none
                 are provided, the heldout label set will be used.
 
         Returns:
-            ModelEvaluation object
-
+            ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
         gazetteers = self._resource_loader.get_gazetteers()
         self._model.register_resources(gazetteers=gazetteers)

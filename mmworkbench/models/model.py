@@ -106,7 +106,7 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
 
 
 class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
-    """Reprepresents the evaluation of a model at a specific configuration
+    """Represents the evaluation of a model at a specific configuration
     using a collection of examples and labels
 
     Attributes:

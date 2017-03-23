@@ -83,6 +83,11 @@ class ClassifierConfig(object):
 
 
 class Classifier(object):
+    """The base class for all the machine-learned classifiers in Workbench. A classifier is a
+    machine-learned model that categorizes input examples into one of the pre-determined class
+    labels. Among other functionality, each classifier provides means by which to fit a statistical
+    model on a given training dataset and then use the trained model to make predictions on new
+    unseen data."""
     DEFAULT_CONFIG = None
 
     def __init__(self, resource_loader):
@@ -98,23 +103,19 @@ class Classifier(object):
         self.config = None
 
     def fit(self, queries=None, config_name=None, label_set='train', **kwargs):
-        """Trains the model
+        """Trains a statistical model for classification using the provided training examples
 
         Args:
-            model_type (str): The type of model to use. If omitted, the default model type will
-                be used.
-            features (dict): If omitted, the default features for the model type will be used.
-            params_grid (dict): If omitted the default params will be used
-            cv (None, optional): Description
+            model_type (str): The type of machine learning model to use. If omitted, the default
+                model type will be used.
+            features (dict): Features to extract from each example instance to form the feature
+                vector used for model training. If omitted, the default feature set for the model
+                type will be used.
+            params_grid (dict): The grid of hyper-parameters to search, for finding the optimal
+                hyper-parameter settings for the model. If omitted, the default hyper-parameter
+                search grid will be used.
+            cv (None, optional): Cross-validation settings
             queries (list of ProcessedQuery): The labeled queries to use as training data
-
-        """
-        """Trains the model
-
-        Args:
-            queries (list of ProcessedQuery): The labeled queries to use as training data
-            config_name (str): The type of model to use. If omitted, the default model type will
-                be used.
 
         """
         queries, classes = self._get_queries_and_labels(queries, label_set)
@@ -130,13 +131,13 @@ class Classifier(object):
         self.dirty = True
 
     def predict(self, query):
-        """Predicts a domain for the specified query
+        """Uses the trained classification model to predict a class label for the given query
 
         Args:
             query (Query or str): The input query
 
         Returns:
-            str: the predicted domain
+            str: The predicted class label
         """
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
@@ -145,14 +146,15 @@ class Classifier(object):
         return self._model.predict([query])[0]
 
     def predict_proba(self, query):
-        """Generates multiple hypotheses and returns their associated probabilities
+        """Uses the trained classification model to run prediction on a given query and generate
+        multiple hypotheses with their associated probabilities
 
         Args:
             query (Query): The input query
 
         Returns:
-            list: a list of tuples of the form (str, float) grouping predictions and their
-                probabilities
+            list: a list of tuples of the form (str, float) grouping predicted class labels and
+                their probabilities
         """
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
@@ -161,25 +163,35 @@ class Classifier(object):
         return list(zip(*self._model.predict_proba([query])))[0]
 
     def evaluate(self, use_blind=False):
-        """Evaluates the model on the specified data
+        """Evaluates the trained classification model on the given test data
+
+        Args:
+            use_blind (bool): Description
 
         Returns:
-            TYPE: Description
+            ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
         raise NotImplementedError('Subclasses must implement this method')
 
     def _get_model_config(self, config_name, **kwargs):
+        """Gets a machine learning model configuration
+
+        Args:
+             config_name: Name of the configuration
+
+        Returns:
+            ModelConfig: The model configuration corresponding to the provided config name
+        """
         config_name = config_name or self.DEFAULT_CONFIG['default_model']
         model_config = copy.copy(self.DEFAULT_CONFIG['models'][config_name])
         model_config.update(kwargs)
         return ModelConfig(**model_config)
 
     def dump(self, model_path):
-        """Persists the model to disk.
+        """Persists the trained classification model to disk.
 
         Args:
             model_path (str): The location on disk where the model should be stored
-
         """
         # make directory if necessary
         folder = os.path.dirname(model_path)
@@ -191,11 +203,10 @@ class Classifier(object):
         self.dirty = False
 
     def load(self, model_path):
-        """Loads the model from disk
+        """Loads the trained classification model from disk
 
         Args:
             model_path (str): The location on disk where the model is stored
-
         """
         try:
             self._model = joblib.load(model_path)

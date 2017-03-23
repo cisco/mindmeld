@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
     This module contains the class which serves the workbench API.
-    ~~~~~~~~~~~~~~~~~~
-    :copyright: (c) 2017 MindMeld, Inc.
 """
 
 import logging
