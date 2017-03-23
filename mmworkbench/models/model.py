@@ -14,8 +14,7 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuffleSplit,
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
-from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, accuracy_score,
-                             confusion_matrix)
+from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix)
 
 from .helpers import get_feature_extractor, get_label_encoder, register_label
 from .tagging import get_tags_from_entities, get_entities_from_tags
@@ -225,6 +224,39 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         vec.append(text_labels.index(label))
         return text_labels, vec
 
+    def _get_common_stats(self, raw_expected, raw_predicted, text_labels):
+        """
+         Prints a useful stats table and returns a structured stats object for evaluation.
+
+        Returns:
+            dict: Structured dict containing evaluation statistics. Contains precision,
+                  recall, f scores, support, etc.
+        """
+        labels = range(len(text_labels)-1)
+
+        confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_expected,
+                                                                y_pred=raw_predicted)
+        stats_overall = self._get_overall_stats(y_true=raw_expected,
+                                                y_pred=raw_predicted,
+                                                labels=labels)
+        counts_overall = confusion_stats['counts_overall']
+        stats_overall['TP'] = counts_overall.TP
+        stats_overall['TN'] = counts_overall.TN
+        stats_overall['FP'] = counts_overall.FP
+        stats_overall['FN'] = counts_overall.FN
+
+        class_stats = self._get_class_stats(y_true=raw_expected, y_pred=raw_predicted,
+                                            labels=labels)
+        counts_by_class = confusion_stats['counts_by_class']
+        class_stats['TP'] = counts_by_class.TP
+        class_stats['TN'] = counts_by_class.TN
+        class_stats['FP'] = counts_by_class.FP
+        class_stats['FN'] = counts_by_class.FN
+
+        return {'stats_overall': stats_overall,
+                'class_stats': class_stats,
+                'confusion_matrix': confusion_stats['confusion_matrix']}
+
     def _get_class_stats(self, y_true, y_pred, labels):
         """
         Method for getting some basic statistics by class.
@@ -320,7 +352,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
                                          sum(FN_arr))
                 }
 
-    def _print_class_stats_table(self, stats, labels, text_labels):
+    def _print_class_stats_table(self, stats, text_labels):
         """
         Helper for printing a human readable table for class statistics
 
@@ -328,21 +360,21 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             None
         """
         title_format = "{:>20}" + "{:>12}" * (len(stats))
-        standard_stats = ['f_beta', 'precision', 'recall', 'support', 'TP', 'TN', 'FP', 'FN']
+        common_stats = ['f_beta', 'precision', 'recall', 'support', 'TP', 'TN', 'FP', 'FN']
         stat_row_format = "{:>20}" + "{:>12.3f}" * 3 + "{:>12.0f}" * 5 + \
-                          "{:>12.3f}" * (len(stats) - len(standard_stats))
-        table_titles = standard_stats + [stat for stat in stats.keys()
-                                         if stat not in standard_stats]
+                          "{:>12.3f}" * (len(stats) - len(common_stats))
+        table_titles = common_stats + [stat for stat in stats.keys()
+                                       if stat not in common_stats]
         print("Statistics by Class: \n")
         print(title_format.format("class", *table_titles))
-        for label in labels:
+        for label in range(len(text_labels)-1):
             row = []
             for stat in table_titles:
                 row.append(stats[stat][label])
             print(stat_row_format.format(self._truncate_label(text_labels[label], 18), *row))
         print("\n\n")
 
-    def _print_class_matrix(self, matrix, labels, text_labels):
+    def _print_class_matrix(self, matrix, text_labels):
         """
         Helper for printing a human readable class by class table for displaying
         a confusion matrix
@@ -350,12 +382,13 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns:
             None
         """
+        labels = range(len(text_labels)-1)
         title_format = "{:>15}" * (len(labels)+1)
         stat_row_format = "{:>15}" + "{:>15}" * (len(labels))
         table_titles = [self._truncate_label(text_labels[label], 10) for label in labels]
         print("Confusion Matrix: \n")
         print(title_format.format("", *table_titles))
-        for label in labels:
+        for label in range(len(text_labels)-1):
             print(stat_row_format.format(self._truncate_label(text_labels[label], 10),
                                          *matrix[label]))
         print("\n\n")
@@ -368,11 +401,11 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             None
         """
         title_format = "{:>12}" * (len(stats_overall))
-        standard_stats = ['accuracy', 'f1_weighted', 'TP', 'TN', 'FP', 'FN']
+        common_stats = ['accuracy', 'f1_weighted', 'TP', 'TN', 'FP', 'FN']
         stat_row_format = "{:>12.3f}" * 2 + "{:>12.0f}" * 4 + \
-                          "{:>12.3f}" * (len(stats_overall) - len(standard_stats))
-        table_titles = standard_stats + [stat for stat in stats_overall.keys()
-                                         if stat not in standard_stats]
+                          "{:>12.3f}" * (len(stats_overall) - len(common_stats))
+        table_titles = common_stats + [stat for stat in stats_overall.keys()
+                                       if stat not in common_stats]
         print("Overall Statistics: \n")
         print(title_format.format(*table_titles))
         row = []
@@ -399,35 +432,15 @@ class StandardModelEvaluation(ModelEvaluation):
 
     def print_stats(self):
         raw_results = self.raw_results()
-        labels = range(len(raw_results.text_labels)-1)
+        stats = self._get_common_stats(raw_results.expected,
+                                       raw_results.predicted,
+                                       raw_results.text_labels)
+        # Note can add any stats specific to the standard model to any of the tables here
 
-        confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_results.expected,
-                                                                y_pred=raw_results.predicted)
-        stats_overall = self._get_overall_stats(y_true=raw_results.expected,
-                                                y_pred=raw_results.predicted,
-                                                labels=labels)
-        counts_overall = confusion_stats['counts_overall']
-        stats_overall['TP'] = counts_overall.TP
-        stats_overall['TN'] = counts_overall.TN
-        stats_overall['FP'] = counts_overall.FP
-        stats_overall['FN'] = counts_overall.FN
-        self._print_overall_stats_table(stats_overall)
-
-        stats = self._get_class_stats(y_true=raw_results.expected, y_pred=raw_results.predicted,
-                                      labels=labels)
-        counts_by_class = confusion_stats['counts_by_class']
-        stats['TP'] = counts_by_class.TP
-        stats['TN'] = counts_by_class.TN
-        stats['FP'] = counts_by_class.FP
-        stats['FN'] = counts_by_class.FN
-        self._print_class_stats_table(stats, labels, raw_results.text_labels)
-
-        self._print_class_matrix(confusion_stats['confusion_matrix'], labels,
-                                 raw_results.text_labels)
-
-        return {'stats_overall': stats_overall,
-                'stats': stats,
-                'confusion_matrix': confusion_stats['confusion_matrix']}
+        self._print_overall_stats_table(stats['stats_overall'])
+        self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
+        self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
+        return stats
 
     def print_graphs(self):
         """
@@ -464,53 +477,55 @@ class SequenceModelEvaluation(ModelEvaluation):
                           text_labels=text_labels, predicted_flat=predicted_flat,
                           expected_flat=expected_flat)
 
-    def _get_sequence_stats(self, y_true, y_pred, labels):
+    def _get_sequence_stats(self, y_true, y_pred, text_labels):
         """
-        Generates sequence specific statistics
+        TODO: Generates statistics at the sequence level (vs token level)
         """
         return None
 
     def print_stats(self):
         raw_results = self.raw_results()
-        labels = range(len(raw_results.text_labels)-1)
-
-        confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_results.expected_flat,
-                                                                y_pred=raw_results.predicted_flat)
-        stats_overall = self._get_overall_stats(y_true=raw_results.expected_flat,
-                                                y_pred=raw_results.predicted_flat, labels=labels)
-        counts_overall = confusion_stats['counts_overall']
-        stats_overall['TP'] = counts_overall.TP
-        stats_overall['TN'] = counts_overall.TN
-        stats_overall['FP'] = counts_overall.FP
-        stats_overall['FN'] = counts_overall.FN
-        stats_overall['token_accuracy'] = accuracy_score(y_true=raw_results.expected_flat,
-                                                         y_pred=raw_results.predicted_flat)
-        self._print_overall_stats_table(stats_overall)
-        stats = self._get_class_stats(y_true=raw_results.expected_flat,
-                                      y_pred=raw_results.predicted_flat,
-                                      labels=labels)
-        counts_by_class = confusion_stats['counts_by_class']
-        stats['TP'] = counts_by_class.TP
-        stats['TN'] = counts_by_class.TN
-        stats['FP'] = counts_by_class.FP
-        stats['FN'] = counts_by_class.FN
-        self._print_class_stats_table(stats, labels, raw_results.text_labels)
-
-        self._print_class_matrix(confusion_stats['confusion_matrix'], labels,
-                                 raw_results.text_labels)
-
+        stats = self._get_common_stats(raw_results.expected_flat,
+                                       raw_results.predicted_flat,
+                                       raw_results.text_labels)
         sequence_stats = self._get_sequence_stats(y_true=raw_results.expected,
-                                                  y_pred=raw_results.predicted, labels=labels)
-        return {'stats_overall': stats_overall,
-                'stats': stats,
-                'sequence_stats': sequence_stats,
-                'confusion_matrix': confusion_stats['confusion_matrix']}
+                                                  y_pred=raw_results.predicted,
+                                                  text_labels=raw_results.text_labels)
+        stats['sequence_stats'] = sequence_stats
+
+        # Note: can add any stats specific to the sequence model to any of the tables here
+
+        self._print_overall_stats_table(stats['stats_overall'])
+        self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
+        self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
+        return stats
 
     def print_graphs(self):
         """
         TODO generate graphs from matplotlib/scikitlearn
         """
         return None
+
+
+class EntityModelEvaluation(SequenceModelEvaluation):
+    """Generates some statistics specific to entity recognition
+    """
+    def _get_entity_boundary_stats(self):
+        """
+        TODO: calculate le, be, and lbe as described here:
+        https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html
+        """
+        # raw_results = self.raw_results()
+        lbe = None
+        be = None
+        le = None
+        return lbe, be, le
+
+    def print_stats(self):
+        stats = super(EntityModelEvaluation, self).print_stats()
+        boundary_stats = self._get_entity_boundary_stats()
+        stats['boundary_stats'] = boundary_stats
+        return stats
 
 
 class Model(object):
