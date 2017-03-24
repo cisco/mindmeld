@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This module contains the dialogue manager"""
+"""This module contains the dialogue manager component of Workbench"""
 from __future__ import unicode_literals
 from builtins import object, str
 
@@ -16,16 +16,26 @@ SHOW_SUGGESTIONS = 'show-suggestions'
 
 
 class DialogueStateRule(object):
-    """A rule for resolving dialogue states
+    """A rule that determines a dialogue state. Each rule represents a pattern that must match in
+    order to invoke a particular dialogue state.
 
     Attributes:
         dialogue_state (str): The name of the dialogue state
-        domain (str): Description
-        entity_mappings (dict): Description
-        entity_types (set): Description
-        intent (str): Description
+        domain (str): The name of the domain to match against
+        entity_mappings (dict): The set of specific entity instantiations to match against
+        entity_types (set): The set of entity types to match against
+        intent (str): The name of the intent to match against
     """
     def __init__(self, dialogue_state, **kwargs):
+        """Initializes a dialogue state rule.
+
+        Args:
+            dialogue_state (str): The name of the dialogue state
+            domain (str): The name of the domain to match against
+            entity_mappings (dict): The set of specific entity instantiations to match against
+            entity_types (set): The set of entity types to match against
+            intent (str): The name of the intent to match against
+        """
 
         self.dialogue_state = dialogue_state
 
@@ -63,7 +73,7 @@ class DialogueStateRule(object):
                 raise ValueError(msg.format(entities))
 
     def apply(self, context):
-        """Applies the rule to the given context.
+        """Applies the dialogue state rule to the given context.
 
         Args:
             context (dict): A request context
@@ -107,13 +117,13 @@ class DialogueStateRule(object):
 
     @property
     def complexity(self):
-        """Returns an integer representing the complexity of this rule.
+        """Returns an integer representing the complexity of this dialogue state rule.
 
         Components of a rule in order of increasing complexity are as follows:
             domains, intents, entity types, entity mappings
 
         Returns:
-            int:
+            int: A number representing the rule complexity
         """
         complexity = 0
         if self.domain:
@@ -144,13 +154,12 @@ class DialogueManager(object):
         self.rules = []
 
     def add_dialogue_rule(self, name, handler, **kwargs):
-        """Adds a dialogue rule for the dialogue manager.
+        """Adds a dialogue state rule for the dialogue manager.
 
         Args:
             name (str): The name of the dialogue state
             handler (function): The dialogue state handler function
-            **kwargs (dict): A list of options to be passed to the
-                DialogueStateRule initializer
+            **kwargs (dict): A list of options to be passed to the DialogueStateRule initializer
         """
         if name is None:
             name = handler.__name__
@@ -167,7 +176,7 @@ class DialogueManager(object):
             self.handler_map[name] = handler
 
     def apply_handler(self, context):
-        """Applies the handler for the most complex matching rule
+        """Applies the dialogue state handler for the most complex matching rule
 
         Args:
             context (TYPE): Description
@@ -198,15 +207,21 @@ class DialogueManager(object):
 
 
 class DialogueResponder(object):
-    """The dialogue responder helps generate client actions and fill slots in
-    textual messages.
+    """The dialogue responder helps generate client actions and fill slots in the
+    system-generated natural language responses.
 
     Attributes:
-        client_actions (list): A list of client actions that the responder
-            has added
-        slots (dict): Slots to fill in format strings
+        client_actions (list): A list of client actions that the responder has added
+        slots (dict): Values to populate the placeholder slots in the natural language
+            response
     """
     def __init__(self, slots):
+        """Initializes a dialogue responder
+
+        Args:
+            slots (dict): Values to populate the placeholder slots in the natural language
+                response
+        """
         self.slots = slots
         self.client_actions = []
 
@@ -291,13 +306,12 @@ class Conversation(object):
     def __init__(self, app=None, app_path=None, nlp=None, session=None):
         """
         Args:
-            app (Application, optional): An initialized app object. Either app
-                or app_path must be given.
-            app_path (None, optional): The path to the app data. Used to create
-                an app object. Either app or app_path must be given.
-            nlp (NaturalLanguageProcessor, optional): A natural language
-                processor for the app. If passed, changes to this processor will
-                affect to `say()`
+            app (Application, optional): An initialized app object. Either app or app_path must
+                be given.
+            app_path (None, optional): The path to the app data. Used to create an app object.
+                Either app or app_path must be given.
+            nlp (NaturalLanguageProcessor, optional): A natural language processor for the app.
+                If passed, changes to this processor will affect the response from `say()`
             session (dict, optional): The session to be used in the conversation
         """
         app = app or _get_app_module(app_path)
@@ -308,8 +322,8 @@ class Conversation(object):
         self.frame = {}
 
     def say(self, text):
-        """Send a message in the conversation. The message will be processed by
-        the app based on the current state of the conversation.
+        """Send a message in the conversation. The message will be processed by the app based on
+        the current state of the conversation.
 
         Args:
             text (str): The text of a message
