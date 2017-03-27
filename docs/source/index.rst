@@ -75,14 +75,8 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Other
-   :name: other
+   :caption: Internal Documentation
+   :name: internal
 
+   api_reference
    history
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the question answerer component.
+This module contains the question answerer component of Workbench.
 """
 from __future__ import unicode_literals
 from builtins import object
@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 class QuestionAnswerer(object):
+    """The question answerer is primarily an information retrieval system that provides all the
+    necessary functionality for interacting with the application's knowledge base.
+    """
 
     # default ElasticSearch mapping to define text analysis settings for text fields
     DEFAULT_ES_MAPPING = {
@@ -126,6 +129,13 @@ class QuestionAnswerer(object):
     }
 
     def __init__(self, app_path, resource_loader=None, es_host=None):
+        """Initializes a question answerer
+
+        Args:
+            app_path (str): The path to the directory containing the app's data
+            resource_loader (ResourceLoader): An object which can load resources for the answerer
+            es_host (str): The Elasticsearch host server
+        """
         self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
         self._es_host = es_host
         self.__es_client = None
@@ -138,7 +148,8 @@ class QuestionAnswerer(object):
         return self.__es_client
 
     def get(self, query_string=None, **kwargs):
-        """Gets a collection of documents from the knowledge base.
+        """Gets a collection of documents from the knowledge base matching the provided search
+        criteria.
 
         Args:
             search_query (str, optional): Description
@@ -184,6 +195,11 @@ class QuestionAnswerer(object):
         return results
 
     def config(self, config):
+        """Summary
+
+        Args:
+            config: Description
+        """
         raise NotImplementedError
 
     @staticmethod
@@ -198,6 +214,13 @@ class QuestionAnswerer(object):
 
     @classmethod
     def create_index(cls, index_name, es_host=None, es_client=None):
+        """Creates a new index in the knowledge base.
+
+        Args:
+            index_name (str): The name of the new index to be created
+            es_host (str): The Elasticsearch host server
+            es_client: Description
+        """
         es_client = es_client or cls._create_es_client(es_host)
 
         mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
@@ -210,6 +233,17 @@ class QuestionAnswerer(object):
 
     @classmethod
     def load_index(cls, index_name, data_file, es_host=None, es_client=None):
+        """Loads documents from disk into the specified index in the knowledge base. If an index
+        with the specified name doesn't exist, a new index with that name will be created in the
+        knowledge base.
+
+        Args:
+            index_name (str): The name of the new index to be created
+            data_file (str): The path to the data file containing the documents to be imported
+                into the knowledge base index
+            es_host (str): The Elasticsearch host server
+            es_client: Description
+        """
         es_client = es_client or cls._create_es_client(es_host)
 
         with open(data_file) as data_fp:
