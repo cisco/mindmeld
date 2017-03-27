@@ -3,17 +3,17 @@ Step 9: Optimize Question Answering Performance
 
 The Workbench question answerer is a powerful component which streamlines the development of applications that need to answer questions in addition to understanding user requests. The question answerer relies on a knowledge base which encompasses all of the important world knowledge for a given application use case. For example, the question answerer might rely on a knowledge base which knows details about every product in a product catalog. Alternately, the question answerer might have a knowledge base containing detailed information about every song or album in a music library.
 
-To leverage the Workbench question answerer in your application, you must first create your knowledge base, as described in :doc:`step 5 </create_the_knowledge_base>`. With your knowledge base created, the question answerer can then be invoked in your dialogue state handlers, as illustrated in :doc:`step 4 </define_the_dialogue_handlers>`, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which could find nearby Kwik-E-Mart store locations might look like:
+To leverage the Workbench question answerer in your application, you must first create your knowledge base, as described in :doc:`Step 5 </create_the_knowledge_base>`. With the knowledge base created, your dialogue state handlers can invoke the question answerer, as illustrated in :doc:`Step 4 </define_the_dialogue_handlers>`, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which finds nearby Kwik-E-Mart store locations might resemble the snippet below. Notice that the application imports the :keyword:`QuestionAnswerer` component.
 
 .. code:: python
 
   from mmworkbench import Application, QuestionAnswerer, context, slots
   qa = QuestionAnswerer()
   app = Application(__name__, qa)
-  
+
   @app.handle(intent='get_nearest_store')
   def send_nearest_store():
-      loc = context.request.session.location 
+      loc = context.request.session.location
       stores = qa.indexes['stores'].get(sort='location', current_location=loc)
       slots['store_name'] = stores[0]['name']
       response = {
@@ -23,7 +23,7 @@ To leverage the Workbench question answerer in your application, you must first 
       }
       return response
 
-As illustrated above, the question answered can be utilized in your application by importing the :keyword:`QuestionAnswerer` component. Assuming you have already created an index, such as ``stores`` and uploaded the knowledge base data, the :keyword:`get()` method provides a flexible mechanism to retrieve relevant results.
+Assuming you have already created an index, such as ``stores``, and uploaded the knowledge base data, the :keyword:`get()` method provides a flexible mechanism for retrieving relevant results.
 
 .. code:: python
 
@@ -55,13 +55,12 @@ Similarly, to retrieve store locations on Market Street, you could use something
     "score": 0.8276352
   }
 
-By default, the :keyword:`get()` method utilizes a baseline ranking algorithm which displays the most relevant documents based on text similarity. Each result includes a :keyword:`score` containing the relevance score.  For some applications, the baseline ranking is sufficient. The Workbench question answerer also provides flexible options for customizing relevance to suit the needs of any application. 
-
+By default, the :keyword:`get()` method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity. Each result includes the relevance score in the :keyword:`score` property. For some applications, the baseline ranking is sufficient. For others, the Workbench question answerer provides flexible options for customizing relevance.
 
 Custom Ranking Configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Consider an application where we only want to show the least expensive products to users. For example, a user might ask 'show me your cheapest items', and your application will need to display products in ascending order by price. Let's say we have the following objects in the knowledge base for the question answerer index ``products``:
+Consider an application where we want to show only the least expensive products to users. For example, a user might ask 'show me your cheapest items', and your application then displays products in ascending order by price. Let's say we have the following objects in the knowledge base for the question answerer index ``products``:
 
 .. code-block:: javascript
 
@@ -87,7 +86,6 @@ Consider an application where we only want to show the least expensive products 
   }
   ...
 
-
 To retrieve the all products sorted in ascending order by price, you can specify the ranking configuration and then retrieve results as follows.
 
 .. code:: python
@@ -103,9 +101,9 @@ To retrieve the all products sorted in ascending order by price, you can specify
     "score": 0.89
   }
 
-As you can see, by configuring the ranking algorithm to return the least expensive products first, the item at the top of the list is the one with the lowest price. 
+As you can see, when we configure the ranking algorithm to return the least expensive products first, the item with the lowest price appears at the top of the list.
 
-While a single-field sort operation is very straightforward, most applications require a more sophisticated ranking algorithm which can blend many different signals to determine the most relevant result. As a simple example, let's say that your user is looking for the least expensive donut available. In this case, a simple sort by price will not work. Instead, you need to return inexpensive products that might also be described as a 'donut'. In this case, the ideal ranking algorithm should blend both price and the text relevance of the term 'donut'. The Workbench question answerer makes it easy to configure ranking algorithms which blend signals from many different knowledge base fields, as shown below.
+While a single-field sort operation is very straightforward, most applications require a more sophisticated ranking algorithm which blends many different signals to determine relevance. For example, suppose that your user is looking for the least expensive donut. In this case, a simple sort by price will not work. Instead, you need to return inexpensive products that can also be described as 'donuts.' In other words, the ideal ranking algorithm should blend both price and the text relevance of the term 'donut'. The Workbench question answerer makes it easy to configure ranking algorithms which blend signals from many different knowledge base fields, as shown below.
 
 .. code:: python
 
@@ -120,7 +118,7 @@ While a single-field sort operation is very straightforward, most applications r
     "score": 0.946598
   }
 
-As you can see, the least expensive donut in the catalog is returned as the top result. Once you have found a ranking configuration for an index that serves your needs, it can be easily saved to file as follows.
+Now the least expensive donut in the catalog is returned as the top result. Once you find a ranking configuration for an index that serves your needs, save it to file as follows.
 
 .. code:: python
 
@@ -132,15 +130,15 @@ Similarly, to load a previously saved ranking configuration, you can use:
 
   >>> qa.indexes['products'].load()
 
-Refer to the :ref:`User Manual <userguide>` for more details on how specify custom ranking configurations for your application.
+See the :ref:`User Manual <userguide>` for more about how to specify custom ranking configurations.
 
 
 Proximity-Based Ranking
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Location-based ranking is a fairly common capability for many mobile applications. As we already saw in our Kwik-E-Mart store information example, one of the supported intents is designed to provide the nearest Kwik-E-Mart retail locations for a given user. In this case, proximity-based ranking is required, and this is straightforward to accomplish using the Workbench question answerer.
+Location-based ranking is fairly common in mobile applications. We have already seen an intent designed to provide the nearest retail locations for a given user in our Kwik-E-Mart example. Going further, to support proximity-based ranking, is straightforward to accomplish using the Workbench question answerer.
 
-First, let's assume that you have created a knowledge base for the ``stores`` index which contains every retail location. Each store object also contains a field called :keyword:`location`, which contains latitude and longitude coordinates for each store. 
+First, let's assume that you have created a knowledge base for the ``stores`` index, which contains every retail location. Each store object also has a :keyword:`location` field which contains latitude and longitude coordinates for each store.
 
 .. code-block:: javascript
 
@@ -162,7 +160,7 @@ First, let's assume that you have created a knowledge base for the ``stores`` in
   }
   ...
 
-In this case, retrieving the nearest stores can be done as follows.
+We can now retrieve the nearest stores as follows.
 
 .. code:: python
 
@@ -181,7 +179,7 @@ In this case, retrieving the nearest stores can be done as follows.
     "distance": 0.231543
   }
 
-Note that each result includes a :keyword:`distance` attribute specifying how far the store is located from the user (in kilometers). Equivalently, you can also use the :keyword:`sort` argument of the :keyword:`get()` method to explicitly define the sort operation without relying on configuration beforehand.
+Each result includes a :keyword:`distance` field that says how far from the user the store is located (in kilometers). Equivalently, you can also use the :keyword:`sort` argument of the :keyword:`get()` method to explictly define the sort operation without relying on configuration beforehand.
 
 .. code:: python
 
@@ -203,9 +201,9 @@ Note that each result includes a :keyword:`distance` attribute specifying how fa
 Machine-Learned Ranking
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-State-of-the-art information retrieval systems today, such as search engines like Bing and Google, rely on sophisticated AI-powered ranking algorithms. These ranking algorithms leverage `machine learning <https://en.wikipedia.org/wiki/Learning_to_rank>`_ in order to learn the optimal ranking formula based on training data collected from live user traffic. For large knowledge domains which may contain millions or even billions of objects in a knowledge base, machine-learned ranking is typically the most effective path for delivering optimal ranking. The MindMeld question answerer component provides the capability not only to handle large knowledge bases but also to train machine-learned ranking algorithms.
+State-of-the-art information retrieval systems such as the Bing and Google search engines rely on sophisticated AI-powered ranking algorithms. These ranking algorithms leverage `machine learning <https://en.wikipedia.org/wiki/Learning_to_rank>`_ in order to learn the optimal ranking formula based on training data collected from live user traffic. For large knowledge domains which may contain millions or even billions of objects in a knowledge base, machine-learned ranking is typically the most effective path for delivering optimal ranking. The MindMeld question answerer component provides the capability not only to handle large knowledge bases but also to train machine-learned ranking algorithms.
 
-The training data for machine-learned ranking is captured in the index ranking files, which were discussed in :doc:`step 6 </generate_representative_training_data>`. These index ranking files specify the ideal rank for a knowledge base object given a specific query. For example, for the ``stores`` index, the training data file might look something like:
+The training data for machine-learned ranking is captured in the index ranking files discussed in :doc:`Step 6 </generate_representative_training_data>`. These index ranking files specify the ideal rank for a knowledge base object given a specific query. For example, for the ``stores`` index, the training data file might look something like:
 
 .. code-block:: javascript
 
@@ -226,7 +224,7 @@ The training data for machine-learned ranking is captured in the index ranking f
       'rank': 1
     },
     ...
-  
+
   ]
   ...
 
@@ -240,7 +238,7 @@ These training data examples can be generated using manual QA where human grader
   >>>
   >>> # Fit the ranking model using training data available in the application directory.
   ... store_index.fit()
-  
+
   >>> # Now retrieve results using the new ranking model.
   ... stores = store_index.get('ferry bldg')
   >>> stores[0]
@@ -252,9 +250,9 @@ These training data examples can be generated using manual QA where human grader
     "score": 0.874098
     ...
   }
-  
+
   >>> # To save the model to file.
   ... store_index.dump()
 
-For more details on how to train and evaluate machine-learned ranking models, refer to the :ref:`User Manual <userguide>`.
+For more about how to train and evaluate machine-learned ranking models, see the :ref:`User Manual <userguide>`.
 
