@@ -33,6 +33,7 @@ Contents
    intro/anatomy_of_a_conversational_ai_interaction
    intro/introducing_mindmeld_workbench
 
+
 .. toctree::
    :maxdepth: 2
    :caption: Step-by-Step Guide
@@ -50,33 +51,33 @@ Contents
    quickstart/optimize_question_answering_performance
    quickstart/deploy_to_production
 
+
 .. toctree::
    :maxdepth: 2
    :caption: Workbench User Manual
    :name: userguide
 
-   coming_soon
+   userguide/coming_soon
+   userguide/getting_started
+   userguide/architecture
+   userguide/key_concepts
+   userguide/directory_structure
+   userguide/interface
+   userguide/dialogue_manager
+   userguide/kb
+   userguide/domain_classification
+   userguide/intent_classification
+   userguide/entity_recognition
+   userguide/role_classification
+   userguide/entity_resolution
+   userguide/language_parsing
+   userguide/deployment
 
-..
-   getting_started
-   architecture
-   key_concepts
-   directory_structure
-   interface
-   dialogue_manager
-   kb
-   domain_classification
-   intent_classification
-   entity_recognition
-   role_classification
-   entity_resolution
-   language_parsing
-   deployment
 
 .. toctree::
    :maxdepth: 2
    :caption: Internal Documentation
    :name: internal
 
-   api_reference
-   history
+   internal/api_reference
+   internal/history

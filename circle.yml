@@ -19,7 +19,7 @@ test:
     - while ! nc -z localhost 2626; do sleep 5; done;:
         timeout: 150
   post:
-    - make docs
+    - MM_BRANCH=$CIRCLE_BRANCH make docs
 deployment:
   s3:
     branch: /(develop)|(staging)|(master)/

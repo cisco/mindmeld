@@ -73,7 +73,11 @@ apidoc: ## generate Sphinx HTML documentation, including API docs
 	$(MAKE) docs
 
 docs: ## generate Sphinx HTML documentation
-	$(MAKE) -C docs clean text html
+ifeq "$(MM_BRANCH)" "master"
+	SPHINXOPTS="-t public" $(MAKE) -C docs clean text html
+else
+	SPHINXOPTS="-t private" $(MAKE) -C docs clean text html
+endif
 	docs/scripts/process_source_files.sh
 	$(BROWSER) docs/build/html/index.html
 

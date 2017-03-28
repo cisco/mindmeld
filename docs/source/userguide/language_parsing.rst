@@ -1,3 +1,6 @@
+.. meta::
+    :scope: private
+
 Language Parser
 ===============
 
@@ -17,7 +20,7 @@ The entity groups can also be represented as parse trees:
 
 Our parser can be told to extract trees of this kind by providing a parser.config file that describes which entity types are the Heads, which ones are the Dependents, and which Dependents go with which Heads.
 
-E.g. Parser configuration representing the above two entity groups: 
+E.g. Parser configuration representing the above two entity groups:
 
 .. code-block:: javascript
 
@@ -117,7 +120,7 @@ Finally, you can define whether to prefer attachments on left or right in cases 
 	.	precedence: ['left' or 'right']		# Preferred attachment direction
 
 
-If the config-driven parser doesn't fully satisfy your use case or you need more flexibility in defining how the relations between entities should be extracted, Workbench provides the flexibility to drop in your own custom parsing logic. 
+If the config-driven parser doesn't fully satisfy your use case or you need more flexibility in defining how the relations between entities should be extracted, Workbench provides the flexibility to drop in your own custom parsing logic.
 
 [ Describe how to do that by adding logic in my_app.py ]
 

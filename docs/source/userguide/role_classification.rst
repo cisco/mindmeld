@@ -1,3 +1,6 @@
+.. meta::
+    :scope: private
+
 Role Classifier
 ===============
 

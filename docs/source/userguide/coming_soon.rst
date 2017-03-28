@@ -1,3 +1,6 @@
+.. meta::
+    :scope: public
+
 Coming Soon
 ===========
 
