@@ -67,10 +67,12 @@ coverage: ## check code coverage quickly with the default Python
 		coverage html
 		$(BROWSER) htmlcov/index.html
 
-docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/source/apidoc/mmworkbench.rst
-	rm -f docs/source/apidoc/modules.rst
+apidoc: ## generate Sphinx HTML documentation, including API docs
+	rm -rf docs/source/apidoc/
 	sphinx-apidoc -o docs/source/apidoc mmworkbench
+	$(MAKE) docs
+
+docs: ## generate Sphinx HTML documentation
 	$(MAKE) -C docs clean text html
 	docs/scripts/process_source_files.sh
 	$(BROWSER) docs/build/html/index.html
