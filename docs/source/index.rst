@@ -28,27 +28,27 @@ Contents
    :caption: Introduction
    :name: intro
 
-   introduction_to_conversational_applications
-   approaches_for_building_conversational_applications
-   anatomy_of_a_conversational_ai_interaction
-   introducing_mindmeld_workbench
+   intro/introduction_to_conversational_applications
+   intro/approaches_for_building_conversational_applications
+   intro/anatomy_of_a_conversational_ai_interaction
+   intro/introducing_mindmeld_workbench
 
 .. toctree::
    :maxdepth: 2
    :caption: Step-by-Step Guide
    :name: quickstart
 
-   overview
-   select_the_right_use_case
-   script_interactions
-   define_the_hierarchy
-   define_the_dialogue_handlers
-   create_the_knowledge_base
-   generate_representative_training_data
-   train_the_natural_language_processing_classifiers
-   configure_the_language_parser
-   optimize_question_answering_performance
-   deploy_to_production
+   quickstart/overview
+   quickstart/select_the_right_use_case
+   quickstart/script_interactions
+   quickstart/define_the_hierarchy
+   quickstart/define_the_dialogue_handlers
+   quickstart/create_the_knowledge_base
+   quickstart/generate_representative_training_data
+   quickstart/train_the_natural_language_processing_classifiers
+   quickstart/configure_the_language_parser
+   quickstart/optimize_question_answering_performance
+   quickstart/deploy_to_production
 
 .. toctree::
    :maxdepth: 2
