@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class Span(object):
-    """Simple named tuple representing a span with start and end indices"""
+    """Simple object representing a span with start and end indices"""
     __slots__ = ['start', 'end']
 
     def __init__(self, start, end):
