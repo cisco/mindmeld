@@ -5,9 +5,6 @@ Module contents
 ---------------
 
 .. automodule:: mmworkbench
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Subpackages
 -----------
