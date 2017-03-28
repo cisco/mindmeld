@@ -7,7 +7,7 @@ Consider the use case where you not only want to check the hours of your local K
 
 Consider the following sample query:
 
-.. image:: images/parse_tree2.png
+.. image:: /images/parse_tree2.png
     :width: 600px
     :align: center
 
@@ -29,7 +29,7 @@ Getting started with the parser merely requires specifying a parser configuratio
 Now that the parser is configured, we train your NLP models and then run the parser, as follows.
 
 .. code-block:: python
-  
+
   >>> Nlp.build()
   >>> Nlp.parse('Order one large squishee and a dozen donuts from the Elm Street Kwik-E-Mart?')
 

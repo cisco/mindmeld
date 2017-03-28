@@ -18,7 +18,7 @@ Six of the core supervised learning components in MindMeld Workbench rely on tra
 
 As described in :doc:`Step 3 <define_the_hierarchy>`, the structure of your application's root directory in Workbench organizes the training data files. For our example Kwik-E-Mart store information application, the application directory is shown below.
 
-.. image:: images/directory3.png
+.. image:: /images/directory3.png
     :width: 400px
     :align: center
 
@@ -40,7 +40,7 @@ Labeled Query Files
 
 Labeled query files are the primary source of training data for the Workbench natural language processing classifiers. They are text files containing annotated example queries, one per line. Each file should contain queries which apply to a single intent only. All the labeled query files for a given intent must be placed in the folder for that intent, which is a subfolder of the :keyword:`domains` folder. For our example Kwik-E-Mart application, the :keyword:`domains` directory could be organized as follows.
 
-.. image:: images/directory4.png
+.. image:: /images/directory4.png
     :width: 400px
     :align: center
 
@@ -107,7 +107,7 @@ Entity mapping files specify the training data required for entity resolution. E
 
 Production conversational applications today rely on training data sets and supervised learning models to perform entity resolution. The training data utilized by Workbench for this purpose resides in entity mapping files located in the :keyword:`entities` folder of the application root directory.
 
-.. image:: images/directory5.png
+.. image:: /images/directory5.png
     :width: 400px
     :align: center
 
@@ -148,7 +148,7 @@ Index ranking files must be placed in a standard location, which you find in the
 
 Consider the following sample directory structure.
 
-.. image:: images/directory6.png
+.. image:: /images/directory6.png
     :width: 400px
     :align: center
 

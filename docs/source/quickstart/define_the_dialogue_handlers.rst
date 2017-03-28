@@ -14,19 +14,19 @@ Specify the Superset of Dialogue States
 
 Before you can begin to implement dialogue state handlers, you must first define the dialogue states your application requires. For simple conversational interactions, the set of dialogue states can be straightforward, as illustrated in the flow diagram below.
 
-.. image:: images/simple_dialogue_states.png
+.. image:: /images/simple_dialogue_states.png
     :width: 700px
     :align: center
 
 The power of conversational applications lies in providing minimal constraints on what a user can say during an interaction. Users can shortcut directly to the functionality they want. They are also free to change topics or otherwise throw a curve ball at your application at any point in the interaction without warning. All of this means that in practice, dialogue flows can become quite convoluted, as suggested below.
 
-.. image:: images/complex_dialogue_states.png
+.. image:: /images/complex_dialogue_states.png
     :width: 700px
     :align: center
 
 For our example, we need to define the dialogue states that the scripted conversational interaction in :doc:`Step 2 <script_interactions>` requires. To capture the functionality we envision, we need four different dialogue states: ``welcome``, ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``, as shown in the diagram below.
 
-.. image:: images/quickstart_dialogue_states.png
+.. image:: /images/quickstart_dialogue_states.png
     :width: 700px
     :align: center
 
@@ -58,7 +58,7 @@ In MindMeld Workbench, the *application container* is a Python file which contai
 
 Your directory structure should now resemble the following.
 
-.. image:: images/directory2.png
+.. image:: /images/directory2.png
     :width: 350px
     :align: center
 

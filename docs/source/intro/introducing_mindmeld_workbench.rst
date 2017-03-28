@@ -5,7 +5,7 @@ The MindMeld Conversational AI platform is one of the most advanced AI platforms
 
 MindMeld Workbench is the only Conversational AI platform available today that provides tools and capabilities for every step in the workflow for a state-of-the-art conversational application. The architecture of MindMeld Workbench is illustrated below.
 
-.. image:: images/architecture1.png
+.. image:: /images/architecture1.png
 
 To summarize, the functionality available in Workbench includes:
 

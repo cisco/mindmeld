@@ -12,11 +12,11 @@ Each parse tree has a main entity (Head) and a set of related attribute entities
 
 E.g. Here are relations between entities in a query represented in the form of a dependency graph:
 
-.. image:: images/dependency_parse.png
+.. image:: /images/dependency_parse.png
 
 The entity groups can also be represented as parse trees:
 
-.. image:: images/parse_tree.png
+.. image:: /images/parse_tree.png
 
 Our parser can be told to extract trees of this kind by providing a parser.config file that describes which entity types are the Heads, which ones are the Dependents, and which Dependents go with which Heads.
 
