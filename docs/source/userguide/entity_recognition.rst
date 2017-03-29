@@ -1,3 +1,6 @@
+.. meta::
+    :scope: private
+
 Entity Recognizer
 =================
 

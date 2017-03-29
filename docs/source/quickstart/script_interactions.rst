@@ -7,7 +7,7 @@ It is important to think through not just the most obvious user flows, but also 
 
 At the conclusion of this design exercise, you should have a set of dialogue flows scripted and diagrammed in a form that's convenient for you. The diagram below is one dialogue flow that we have scripted to support our simple example use case.
 
-.. image:: images/quickstart_interaction.png
+.. image:: /images/quickstart_interaction.png
     :width: 400px
     :align: center
 

@@ -1,3 +1,6 @@
+.. meta::
+    :scope: private
+
 Domain Classifier
 =================
 
@@ -136,5 +139,5 @@ Finally, you can use the model to predict the domain for any new query input:
   print pred_domain
 
 .. code-block:: text
-  
+
   "times-and-dates"

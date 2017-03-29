@@ -1,3 +1,6 @@
+.. meta::
+    :scope: private
+
 Question Answerer
 =================
 
@@ -15,7 +18,7 @@ A robust Question Answering capability can sometimes be the linchpin that transf
 Answer Questions
 ~~~~~~~~~~~~~~~~
 
-As the name probably suggests, answering questions is the fundamental use of a Question Answering system in conversational applications. 
+As the name probably suggests, answering questions is the fundamental use of a Question Answering system in conversational applications.
 
 Validate Questions
 ~~~~~~~~~~~~~~~~~~

@@ -1,3 +1,6 @@
+.. meta::
+    :scope: private
+
 Getting Started
 ===============
 
@@ -9,7 +12,7 @@ Workbench was build specifically to accommodate a new generation of advanced con
     •	favor flexible SDKs rather than hardcoded, cloud-based APIs
     •	support versatile command-line utilities rather than rigid GUIs
     •	provide robust capabilities for large on-premise or VPC production deployments
-  
+
 MindMeld is intended to be a powerful tool for data scientists to build some of the most advanced voice and chat assistants possible today.
 
 
@@ -58,7 +61,7 @@ To check your installation, try to import every module like this:
 
     $ python3 -c "import jupyter, numpy, pandas, scipy, sklearn"
 
-There should be no output and no error. 
+There should be no output and no error.
 
 
 Install Workbench
@@ -114,7 +117,7 @@ A Jupyter server is now running in your terminal, listening to port 8888. You ca
     :width: 700px
     :align: center
 
-Now create a new Python notebook by clicking on the “New” button and selecting the appropriate Python version. This will create new notebook file called Untitled.ipynb in your workspace. Click on the notebook title to change the name to something like 'my_app'. 
+Now create a new Python notebook by clicking on the “New” button and selecting the appropriate Python version. This will create new notebook file called Untitled.ipynb in your workspace. Click on the notebook title to change the name to something like 'my_app'.
 
 A notebook contains a list of cells. Each cell can contain executable code or formatted text. Right now the notebook contains only one empty code cell, labeled “In [1]:”. Try typing print("Hello world!") in the cell, and click on the play button or type Shift-Enter. This sends the current cell to this notebook’s python kernel, which runs it and returns the output. The result is displayed below the cell, and since we reached the end of the notebook, a new cell is automatically created. Go through the User Interface Tour from Jupyter’s Help menu to learn the basics.
 
@@ -131,7 +134,7 @@ If you would like to work in an isolated environment (which is strongly recommen
     Collecting virtualenv
     [...]
     Successfully installed virtualenv
-  
+
 Now you can create an isolated python environment by typing:
 
 .. code-block:: console
@@ -142,13 +145,13 @@ Now you can create an isolated python environment by typing:
     New python executable in [...]/env/bin/python3.5
     Also creating executable in [...]/env/bin/python
     Installing setuptools, pip, wheel...done.
-    
+
 Now every time you want to activate this environment, just open a terminal and type:
 
 .. code-block:: console
 
     $ cd $WB_APP_ROOT
     $ source env/bin/activate
-    
+
 While the environment is active, any package you install using pip will be installed in this isolated environment, and python will only have access to these packages (if you also want access to the system’s site packages, you should create the environment using virtualenv’s --system-site-packages option). Check out virtualenv’s documentation for more information.
 

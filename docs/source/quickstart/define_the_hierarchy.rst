@@ -3,7 +3,7 @@ Step 3: Define the Domain, Intent, Entity, and Role Hierarchy
 
 To model and understand natural language, every conversational application relies on a hierarchy of machine learning classifiers. This family of machine learning models, broadly defined as the Natural Language Processing (NLP) component of an application, sits at the core of all conversational assistants in widespread production use today. While there are many different ways that machine learning techniques can be enlisted to dissect and understand human language, a set of best practices has emerged in recent years to systematize the sometimes challenging task of building accurate and useful natural language processing systems. Today, nearly all commercial conversational applications rely on the hierarchy of machine learning models illustrated below.
 
-.. image:: images/hierarchy.png
+.. image:: /images/hierarchy.png
     :width: 700px
     :align: center
 
@@ -24,7 +24,7 @@ The Example NLP Model Hierarchy
 
 We could design the NLP model hierarchy for our simple Kwik-E-Mart conversational application to resemble the illustration below.
 
-.. image:: images/hierarchy2.png
+.. image:: /images/hierarchy2.png
     :width: 700px
     :align: center
 
@@ -101,7 +101,7 @@ Workbench provides a faster way to create your application structure for common 
 
 Running the :keyword:`blueprint()` method for our simple example application produces the root directory structure illustrated below.
 
-.. image:: images/directory.png
+.. image:: /images/directory.png
     :width: 400px
     :align: center
 
@@ -112,7 +112,7 @@ Notice that there is no folder for the ``date`` entity. None is needed, because 
 
 Given the simple interaction proposed in the preceding section and hierarchy we have now defined, we would expect our trained natural language processing models to yield the results illustrated below.
 
-.. image:: images/quickstart_parse_output.png
+.. image:: /images/quickstart_parse_output.png
     :width: 600px
     :align: center
 

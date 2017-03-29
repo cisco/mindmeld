@@ -2,7 +2,7 @@
 History
 =======
 
-0.0.0 (2016-12-19)
-------------------
+3.0.0 (not yet released)
+------------------------
 
-* Placeholder.
+* This will be the initial release!

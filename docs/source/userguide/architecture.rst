@@ -1,10 +1,13 @@
-Workbench architecture
+.. meta::
+    :scope: private
+
+Workbench Architecture
 ======================
 
 The **MindMeld Deep-Domain Conversational AI Platform** consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.
 
-.. image:: images/architecture.png
-   :target: _images/architecture.png
+.. image:: /images/architecture.png
+   :target: ../_images/architecture.png
 
 This chapter will introduce you to the each of the modules in the MindMeld Workbench library.
 
@@ -42,13 +45,13 @@ The Natural Language Parser is tasked with comprehending the user's natural lang
 
 For example, if a user said :red:`"A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread."`, the parser would produce:
 
-.. image:: images/parser.png
-   :target: _images/parser.png
+.. image:: /images/parser.png
+   :target: ../_images/parser.png
 
 The MindMeld Parser analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the "search space".
 
-.. image:: images/classifier_hierarchy.png
-   :target: _images/classifier_hierarchy.png
+.. image:: /images/classifier_hierarchy.png
+   :target: ../_images/classifier_hierarchy.png
    :scale: 75%
 
 We next take a look at each of the classifiers within the MindMeld Parser one by one.

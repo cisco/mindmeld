@@ -1,7 +1,10 @@
+.. meta::
+    :scope: private
+
 Workbench Interface Specification
 =================================
 
-This section documents the specification for the request and response objects, which contain all of the data structures used by workbench and its REST API. For example: 
+This section documents the specification for the request and response objects, which contain all of the data structures used by workbench and its REST API. For example:
 
 .. code-block:: python
 

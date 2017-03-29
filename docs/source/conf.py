@@ -20,14 +20,18 @@ import os
 import sphinx_rtd_theme
 import sys
 
-# Get the project root dir, which is the parent dir of this
+# Insert our custom sphinx extensions
 cwd = os.getcwd()
+sys.path.insert(0, os.path.abspath(os.path.join(cwd, '..', 'sphinx_ext')))
+
+# Get the project root dir, which is the parent dir of this
 project_root = os.path.dirname(os.path.dirname(cwd))
 
 # Insert the project root dir as the first element in the PYTHONPATH.
 # This lets us ensure that the source package is imported, and that its
 # version is used.
 sys.path.insert(0, project_root)
+
 
 import mmworkbench
 
@@ -45,6 +49,7 @@ sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 def setup(app):
     app.add_stylesheet('custom.css')
+    app.add_config_value('release_visibility', 'public', 'env')
 
 # -- General configuration ------------------------------------------------
 
@@ -55,6 +60,7 @@ def setup(app):
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',  # Support Google Style docstrings
@@ -66,6 +72,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'nbsphinx',
+    'scope'
 ]
 
 autodoc_member_order = 'groupwise'
