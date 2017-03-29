@@ -14,7 +14,7 @@ from sklearn.linear_model import LogisticRegression
 
 from . import tagging
 from .helpers import get_feature_extractor, register_model
-from .model import EvaluatedExample, ModelConfig, ModelEvaluation, SkLearnModel
+from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, SkLearnModel
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +203,7 @@ class MemmModel(SkLearnModel):
                        for i, e in enumerate(examples)]
 
         config = self._get_effective_config()
-        model_eval = ModelEvaluation(config, evaluations)
+        model_eval = EntityModelEvaluation(config, evaluations)
         return model_eval
 
     def _convert_params(self, param_grid, y):

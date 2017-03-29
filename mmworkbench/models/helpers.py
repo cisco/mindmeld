@@ -5,6 +5,7 @@ import re
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
+LABEL_MAP = {}
 
 # Example types
 QUERY_EXAMPLE_TYPE = 'query'
@@ -53,13 +54,24 @@ def get_feature_extractor(example_type, name):
     return FEATURE_MAP[example_type][name]
 
 
+def get_label_encoder(config):
+    """Gets a label encoder given the label type from the config
+
+    Args:
+        config (ModelConfig): A model configuration
+
+    Returns:
+        LabelEncoder: The appropriate LabelEncoder object for the given config
+    """
+    return LABEL_MAP[config.label_type](config)
+
+
 def register_model(model_type, model_class):
     """Registers a model for use with `create_model()`
 
     Args:
         model_type (str): The model type as specified in model configs
         model_class (type): The model to register
-
     """
     if model_type in MODEL_MAP:
         raise ValueError('Model {!r} is already registered.'.format(model_type))
@@ -77,13 +89,30 @@ def register_features(example_type, features):
 
     Raises:
         ValueError: If the example type is already registered
-
     """
     if example_type in FEATURE_MAP:
         msg = 'Features for example type {!r} are already registered.'.format(example_type)
         raise ValueError(msg)
 
     FEATURE_MAP[example_type] = features
+
+
+def register_label(label_type, label_encoder):
+    """Register a label encoder for use with
+    `get_label_encoder()`
+
+    Args:
+        label_type (str): The label type of the label encoder
+        label_encoder (LabelEncoder): The label encoder class to register
+
+    Raises:
+        ValueError: If the label type is already registered
+    """
+    if label_type in LABEL_MAP:
+        msg = 'Label encoder for label type {!r} is already registered.'.format(label_type)
+        raise ValueError(msg)
+
+    LABEL_MAP[label_type] = label_encoder
 
 
 def mask_numerics(token):
