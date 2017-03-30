@@ -14,7 +14,7 @@ import os
 import time
 
 from . import markup, path
-from .exceptions import FileNotFoundError
+from .exceptions import FileNotFoundError, WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
 
@@ -149,9 +149,12 @@ class ResourceLoader(object):
         file_path = path.get_entity_map_path(self.app_path, entity_type)
         logger.debug("Loading entity map from file '{}'".format(file_path))
         if not os.path.isfile(file_path):
-            raise ValueError("Entity map file was not found at '{}'".format(file_path))
-        with open(file_path, 'r') as json_file:
-            json_data = json.load(json_file)
+            raise WorkbenchError('Entity map file was not found at {!r}'.format(file_path))
+        try:
+            with open(file_path, 'r') as json_file:
+                json_data = json.load(json_file)
+        except json.JSONDecodeError:
+            raise WorkbenchError('Could not load entity map (Invalid JSON): {!r}'.format(file_path))
 
         self._entity_files[entity_type]['mapping']['data'] = json_data
         self._entity_files[entity_type]['mapping']['loaded'] = time.time()
@@ -243,7 +246,7 @@ class ResourceLoader(object):
         try:
             file_pattern = LABEL_SETS[label_set]
         except KeyError:
-            raise ValueError("Unknown label set '{}'".format(label_set))
+            raise WorkbenchError("Unknown label set '{}'".format(label_set))
         self._update_query_file_dates(file_pattern)
 
         domains = [domain] if domain else self.labeled_query_files.keys()
@@ -275,8 +278,20 @@ class ResourceLoader(object):
         file_path = path.get_labeled_query_file_path(self.app_path, domain, intent, filename)
         queries = markup.load_query_file(file_path, self.query_factory, domain, intent,
                                          is_gold=True)
+        try:
+            self._check_query_entities(queries)
+        except WorkbenchError as exc:
+            logger.warning(exc.message)
         self.labeled_query_files[domain][intent][filename]['queries'] = queries
         self.labeled_query_files[domain][intent][filename]['loaded'] = time.time()
+
+    def _check_query_entities(self, queries):
+        entity_types = path.get_entity_types(self.app_path)
+        for query in queries:
+            for entity in query.entities:
+                if entity.entity.type not in entity_types:
+                    msg = 'Unknown entity {!r} found in query {!r}'
+                    raise WorkbenchError(msg.format(entity.entity.type, query.query.text))
 
     def _update_query_file_dates(self, file_pattern):
         query_tree = path.get_labeled_query_tree(self.app_path, [file_pattern])
