@@ -118,9 +118,10 @@ class Classifier(object):
             queries (list of ProcessedQuery): The labeled queries to use as training data
 
         """
-        queries, classes = self._get_queries_and_labels(queries, label_set)
+        # create model with given params
         model_config = self._get_model_config(config_name, **kwargs)
         model = create_model(model_config)
+        queries, classes = self._get_queries_and_labels(queries, label_set)
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)
@@ -182,9 +183,14 @@ class Classifier(object):
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
-        config_name = config_name or self.DEFAULT_CONFIG['default_model']
-        model_config = copy.copy(self.DEFAULT_CONFIG['models'][config_name])
-        model_config.update(kwargs)
+        try:
+            # If all params requred for model config were passed in, use kwargs
+            return ModelConfig(**kwargs)
+        except (TypeError, ValueError):
+            # Use specified or default config, customizing with provided kwargs
+            config_name = config_name or self.DEFAULT_CONFIG['default_model']
+            model_config = copy.copy(self.DEFAULT_CONFIG['models'][config_name])
+            model_config.update(kwargs)
         return ModelConfig(**model_config)
 
     def dump(self, model_path):
