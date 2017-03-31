@@ -8,6 +8,13 @@ except NameError:
 FileNotFoundError = FileNotFoundError
 
 
+class WorkbenchError(Exception):
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.message = args[0] if len(args) > 0 else None
+
+
 class BadWorkbenchRequestError(Exception):
     status_code = 400
 

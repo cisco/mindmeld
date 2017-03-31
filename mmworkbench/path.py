@@ -306,6 +306,20 @@ def get_entity_gaz_path(app_path, entity):
 
 
 @safe_path
+def get_entity_folder(app_path, entity):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        entity (str): An entity under the application.
+
+    Returns:
+        (str) The path for an entity folder
+
+    """
+    return ENTITY_FOLDER.format(app_path=app_path, entity=entity)
+
+
+@safe_path
 def get_entity_map_path(app_path, entity):
     """
     Args:
