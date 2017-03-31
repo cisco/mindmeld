@@ -550,16 +550,16 @@ class Model(object):
     def select_params(self, examples, labels, selection_settings=None):
         raise NotImplementedError
 
-    def _convert_params(self, param_grid, y):
+    def _convert_params(self, param_grid, y, is_grid=True):
         """Convert the params from the style given by the config to the style
         passed in to the actual classifier.
 
         Args:
-            params_grid (dict): lists of classifier parameter values, keyed by
+            param_grid (dict): lists of classifier parameter values, keyed by
                 parameter name
-
-        Returns:
-            (dict): revised params_grid
+            y (list): A list of labels
+            is_grid (bool, optional): Indicates whether param_grid is actually a grid
+                or a params dict.
         """
         raise NotImplementedError
 
@@ -759,7 +759,7 @@ class SkLearnModel(Model):
             params (dict): Parameters of the classifier
 
         """
-        params = self._convert_params(params, y)
+        params = self._convert_params(params, y, is_grid=False)
         model_class = self._get_model_constructor()
         return model_class(**params).fit(X, y)
 
