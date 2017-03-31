@@ -24,6 +24,7 @@ class DomainClassifier(Classifier):
         'default_model': 'main',
         'models': {
             'main': {
+                'model_type': 'text',
                 'model_settings': {
                     'classifier_type': 'logreg',
                 },
