@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains exceptions used by the mmworkbench package."""
+from builtins import super
 
 try:
     FileNotFoundError
