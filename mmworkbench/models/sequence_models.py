@@ -206,7 +206,7 @@ class MemmModel(SkLearnModel):
         model_eval = EntityModelEvaluation(config, evaluations)
         return model_eval
 
-    def _convert_params(self, param_grid, y):
+    def _convert_params(self, param_grid, y, is_grid=True):
         return param_grid
 
     def _get_system_types(self):

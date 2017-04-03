@@ -584,7 +584,6 @@ def extract_gaz_freq():
 
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_feature(scaling=1):
-
     def _extractor(query, resources):
         in_gaz_features = defaultdict(float)
 

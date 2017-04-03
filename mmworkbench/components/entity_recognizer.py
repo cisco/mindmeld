@@ -114,12 +114,18 @@ class EntityRecognizer(Classifier):
                 training set will be loaded.
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
-        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+
+        # create model with given params
         model_config = self._get_model_config(config_name, **kwargs)
         model = create_model(model_config)
+
+        # Load labeled data
+        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+
+        # Get gazetteers (they will be built if necessary)
         gazetteers = self._resource_loader.get_gazetteers()
 
-        # build  entity types set
+        # Build entity types set
         self.entity_types = set()
         for label in labels:
             for entity in label:

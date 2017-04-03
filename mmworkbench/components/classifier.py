@@ -103,24 +103,69 @@ class Classifier(object):
         self.config = None
 
     def fit(self, queries=None, config_name=None, label_set='train', **kwargs):
-        """Trains a statistical model for classification using the provided training examples
+        """Trains a statistical model for classification using the provided training examples and
+        model configuration.
 
         Args:
-            model_type (str): The type of machine learning model to use. If omitted, the default
-                model type will be used.
+            queries (list of ProcessedQuery): The labeled queries to use as training data
+            config_name (str): Name of the machine learning model configuration to use. If
+                omitted, the default model configuration will be used.
+            label_set (list, optional): A label set to load. If not specified, the default
+                training set will be loaded.
+            model_type (str, optional): The type of machine learning model to use. If omitted, the
+                default model type will be used.
+            model_settings (dict): Settings specific to the model type specified
             features (dict): Features to extract from each example instance to form the feature
                 vector used for model training. If omitted, the default feature set for the model
                 type will be used.
-            params_grid (dict): The grid of hyper-parameters to search, for finding the optimal
+            params (dict): Params to pass to the underlying classifier
+            params_selection (dict): The grid of hyper-parameters to search, for finding the optimal
                 hyper-parameter settings for the model. If omitted, the default hyper-parameter
                 search grid will be used.
-            cv (None, optional): Cross-validation settings
-            queries (list of ProcessedQuery): The labeled queries to use as training data
+            param_selection (dict): Configuration for param selection (using cross validation)
+                {'type': 'shuffle',
+                 'n': 3,
+                 'k': 10,
+                 'n_jobs': 2,
+                 'scoring': '',
+                 'grid': { 'C': [100, 10000, 1000000]}}
+            features (dict): The keys are the names of feature extractors and the
+                values are either a kwargs dict which will be passed into the
+                feature extractor function, or a callable which will be used as to
+                extract features
 
+        Examples:
+            Fit using default the configuration.
+
+                >>> clf.fit()
+
+            Fit using a 'special' label set.
+
+                >>> clf.fit(label_set='special')
+
+            Fit using given params, bypassing cross validation. This is useful for speeding up
+            train times if you are confident the params are optimized.
+
+                >>> clf.fit(params={'C': 10000000})
+
+            Fit using given parameter selection settings (also known as cross validation settings).
+
+                >>> clf.fit(param_selection={
+
+                    })
+
+            Fit using a custom set of features, including a custom feature extractor.
+            This is only for advanced users.
+
+                >>> clf.fit(features={
+                        'in-gaz': {}, // gazetteer features
+                        'contrived': lambda exa, res: {'contrived': len(exa.text) == 26}
+                    })
         """
-        queries, classes = self._get_queries_and_labels(queries, label_set)
+        # create model with given params
         model_config = self._get_model_config(config_name, **kwargs)
         model = create_model(model_config)
+        queries, classes = self._get_queries_and_labels(queries, label_set)
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)
@@ -182,9 +227,14 @@ class Classifier(object):
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
-        config_name = config_name or self.DEFAULT_CONFIG['default_model']
-        model_config = copy.copy(self.DEFAULT_CONFIG['models'][config_name])
-        model_config.update(kwargs)
+        try:
+            # If all params requred for model config were passed in, use kwargs
+            return ModelConfig(**kwargs)
+        except (TypeError, ValueError):
+            # Use specified or default config, customizing with provided kwargs
+            config_name = config_name or self.DEFAULT_CONFIG['default_model']
+            model_config = copy.copy(self.DEFAULT_CONFIG['models'][config_name])
+            model_config.update(kwargs)
         return ModelConfig(**model_config)
 
     def dump(self, model_path):
