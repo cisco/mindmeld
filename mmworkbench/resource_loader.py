@@ -243,6 +243,7 @@ class ResourceLoader(object):
 
     def _traverse_labeled_queries_files(self, domain=None, intent=None, label_set='train',
                                         force_reload=False):
+        provided_intent = intent
         try:
             file_pattern = LABEL_SETS[label_set]
         except KeyError:
@@ -252,7 +253,10 @@ class ResourceLoader(object):
         domains = [domain] if domain else self.labeled_query_files.keys()
 
         for domain in domains:
-            intents = [intent] if intent else self.labeled_query_files[domain].keys()
+            if provided_intent:
+                intents = [provided_intent]
+            else:
+                intents = self.labeled_query_files[domain].keys()
             for intent in intents:
                 files = self.labeled_query_files[domain][intent].keys()
                 # filter to files which belong to the label set
