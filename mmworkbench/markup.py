@@ -111,6 +111,7 @@ def _parse_entities(markup, query):
             role = None
         elif len(components) == 3:
             entity_text, entity_type, role = components
+            role = None
         else:
             raise MarkupError('Invalid entity mark up: too many pipes')
         end = start + len(entity_text) - 1
@@ -120,10 +121,9 @@ def _parse_entities(markup, query):
         nested = _parse_nested(marked_entity_text, query, start)
         value = {'children': nested} if len(nested) else None
         span = Span(start, end)
-        raw_entity = None
         if Entity.is_system_entity(entity_type):
             raw_entity = resolve_system_entity(query, entity_type, span).entity
-        if raw_entity is None:
+        else:
             raw_entity = Entity(entity_text, entity_type, role=role, value=value)
         entities.append(QueryEntity.from_query(query, span, entity=raw_entity))
     return entities
@@ -154,11 +154,11 @@ def _parse_nested(markup, query, offset):
             role = None
         elif len(components) == 3:
             entity_text, entity_type, role = components
+            role = None
         else:
             raise MarkupError('Invalid entity mark up: too many pipes')
         end = start + len(entity_text) - 1
         span = Span(start, end)
-        raw_entity = None
         if Entity.is_system_entity(entity_type):
             raw_entity = resolve_system_entity(query, entity_type, span.shift(offset)).entity
         else:
