@@ -248,6 +248,11 @@ class Tokenizer(object):
         m = len(raw_text)
         n = len(normalized_text)
 
+        # handle case where normalized text is the empty string
+        if n == 0:
+            raw_to_norm_mapping = dict([(i, 0) for i in range(m)])
+            return raw_to_norm_mapping, {0: 0}
+
         edit_dis = []
         for i in range(0, n+1):
             edit_dis.append([0] * (m+1))
