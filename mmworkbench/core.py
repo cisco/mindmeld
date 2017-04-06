@@ -393,7 +393,9 @@ class NestedEntity(object):
         return NotImplemented
 
     def __ne__(self, other):
-        return not self.__eq__(other)
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
 
     def __str__(self):
         return "{}{}{} '{}' {}-{} ".format(
