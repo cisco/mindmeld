@@ -60,7 +60,9 @@ class Span(object):
         return NotImplemented
 
     def __ne__(self, other):
-        return not self.__eq__(other)
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
 
     def __repr__(self):
         return "{}(start={}, end={})".format(self.__class__.__name__, self.start, self.end)
@@ -216,7 +218,9 @@ class Query(object):
         return NotImplemented
 
     def __ne__(self, other):
-        return not self.__eq__(other)
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
 
     def __repr__(self):
         return "<{} {!r}>".format(self.__class__.__name__, self.text)
@@ -259,7 +263,9 @@ class ProcessedQuery(object):
         return NotImplemented
 
     def __ne__(self, other):
-        return not self.__eq__(other)
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
 
     def __repr__(self):
         msg = "<{} {!r}, domain: {!r}, intent: {!r}, {!r} entities{}>"
@@ -483,7 +489,9 @@ class Entity(object):
         return NotImplemented
 
     def __ne__(self, other):
-        return not self.__eq__(other)
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
 
     def __repr__(self):
         text = self.display_text or self.text
