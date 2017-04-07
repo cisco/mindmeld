@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from mmworkbench.core import (Entity, QueryEntity, Span,
+from mmworkbench.core import (Entity, QueryEntity, Span, NestedEntity,
                               TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)
 
 
@@ -183,3 +183,22 @@ def test_entity_equality():
     entity_b = Entity('text', 'type', 'role', 'value', 'display')
 
     assert entity_a == entity_b
+
+
+def test_nested_and_query_entity_equality():
+    """Tests NestedEntity and QueryEntity equality operations"""
+    entity_a = NestedEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+                            Entity('text', 'type', 'role', 'value', 'display'))
+    entity_b = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+                           Entity('text', 'type', 'role', 'value', 'display'))
+
+    assert entity_a == entity_b
+    assert not entity_a != entity_b
+
+    entity_a = NestedEntity(('Entity123', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+                            Entity('text', 'type', 'role', 'value', 'display'))
+    entity_b = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+                           Entity('text', 'type', 'role', 'value', 'display'))
+
+    assert not entity_a == entity_b
+    assert entity_a != entity_b
