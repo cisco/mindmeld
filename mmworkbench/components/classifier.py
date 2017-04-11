@@ -4,7 +4,7 @@ This module contains the base class for all the machine-learned classifiers in W
 """
 
 from __future__ import unicode_literals
-from builtins import object, zip
+from builtins import object
 
 import copy
 import logging
@@ -166,6 +166,9 @@ class Classifier(object):
         model_config = self._get_model_config(config_name, **kwargs)
         model = create_model(model_config)
         queries, classes = self._get_queries_and_labels(queries, label_set)
+        if len(set(classes)) <= 1:
+            logger.warning('Not doing anything for fit since there is only one class')
+            return
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)
@@ -184,6 +187,9 @@ class Classifier(object):
         Returns:
             str: The predicted class label
         """
+        if not self._model:
+            logger.error('You must fit or load the model before running predict')
+            return
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
@@ -201,11 +207,17 @@ class Classifier(object):
             list: a list of tuples of the form (str, float) grouping predicted class labels and
                 their probabilities
         """
+        if not self._model:
+            logger.error('You must fit or load the model before running predict_proba')
+            return
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
         self._model.register_resources(gazetteers=gazetteers)
-        return list(zip(*self._model.predict_proba([query])))[0]
+
+        predict_proba_result = self._model.predict_proba([query])
+        class_proba_tuples = list(predict_proba_result[0][1].items())
+        return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
     def evaluate(self, use_blind=False):
         """Evaluates the trained classification model on the given test data
