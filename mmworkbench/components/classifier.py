@@ -205,7 +205,10 @@ class Classifier(object):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
         self._model.register_resources(gazetteers=gazetteers)
-        return list(zip(*self._model.predict_proba([query])))[0]
+
+        predict_proba_result = self._model.predict_proba([query])
+        class_proba_tuples = list(predict_proba_result[0][1].items())
+        return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
     def evaluate(self, use_blind=False):
         """Evaluates the trained classification model on the given test data
