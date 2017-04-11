@@ -166,6 +166,9 @@ class Classifier(object):
         model_config = self._get_model_config(config_name, **kwargs)
         model = create_model(model_config)
         queries, classes = self._get_queries_and_labels(queries, label_set)
+        if len(set(classes)) <= 1:
+            logger.warning('Not doing anything for fit since there is only one class')
+            return
         gazetteers = self._resource_loader.get_gazetteers()
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, classes)
@@ -184,6 +187,9 @@ class Classifier(object):
         Returns:
             str: The predicted class label
         """
+        if not self._model:
+            logger.error('You must fit or load the model before running predict')
+            return
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
@@ -201,6 +207,9 @@ class Classifier(object):
             list: a list of tuples of the form (str, float) grouping predicted class labels and
                 their probabilities
         """
+        if not self._model:
+            logger.error('You must fit or load the model before running predict_proba')
+            return
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
