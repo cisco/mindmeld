@@ -14,6 +14,44 @@ TEXT_FORMS = [TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED]
 logger = logging.getLogger(__name__)
 
 
+class Bunch(dict):
+    """Dictionary-like object that exposes its keys as attributes.
+
+    Inspired by scikit learn's Bunches
+
+    >>> b = Bunch(a=1, b=2)
+    >>> b['b']
+    2
+    >>> b.b
+    2
+    >>> b.a = 3
+    >>> b['a']
+    3
+    >>> b.c = 6
+    >>> b['c']
+    6
+
+    """
+
+    def __init__(self, **kwargs):
+        super(Bunch, self).__init__(kwargs)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def __dir__(self):
+        return self.keys()
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(key)
+
+    def __setstate__(self, state):
+        pass
+
+
 class Span(object):
     """Simple object representing a span with start and end indices"""
     __slots__ = ['start', 'end']

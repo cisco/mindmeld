@@ -8,7 +8,7 @@ from builtins import object, super
 
 
 from .. import path
-from ..core import ProcessedQuery
+from ..core import ProcessedQuery, Bunch
 from ..exceptions import ProcessorError
 from ..resource_loader import ResourceLoader
 
@@ -40,7 +40,7 @@ class Processor(object):
         self._app_path = app_path
         self.resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
 
-        self._children = {}
+        self._children = Bunch()
         self.ready = False
         self.dirty = False
         self.name = None
