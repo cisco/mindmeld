@@ -45,8 +45,9 @@ INDEXES_FOLDER = os.path.join(APP_PATH, 'indexes')
 INDEX_FOLDER = os.path.join(INDEXES_FOLDER, '{index}')
 RANKING_FILE_PATH = os.path.join(INDEX_FOLDER, 'ranking.json')
 
-
+# App level files
 APP_MODULE_PATH = os.path.join(APP_PATH, 'app.py')
+CONFIG_MODULE_PATH = os.path.join(APP_PATH, 'config.py')
 
 # Default config files
 RESOURCES_FOLDER = os.path.join(PACKAGE_ROOT, 'resources')
@@ -357,3 +358,15 @@ def get_app_module_path(app_path):
         str: The path of the app module file.
     """
     return APP_MODULE_PATH.format(app_path=app_path)
+
+
+@safe_path
+def get_config_module_path(app_path):
+    """
+    Args:
+        app_path (str): The path to the app data.
+
+    Returns:
+        str: The path of the config module file.
+    """
+    return CONFIG_MODULE_PATH.format(app_path=app_path)

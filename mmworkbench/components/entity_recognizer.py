@@ -14,6 +14,7 @@ from ..exceptions import FileNotFoundError
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
+from ._config import DEFAULT_ENTITY_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -29,53 +30,7 @@ class EntityRecognizer(Classifier):
         entity_types (set): A set containing the entity types which can be recognized
     """
 
-    DEFAULT_CONFIG = {
-        'default_model': 'memm-cv',
-        'models': {
-            'main': {
-                'model_type': 'memm',
-                'model_settings': {
-                    'tag_scheme': 'IOB',
-                    'feature_scaler': 'none'
-                },
-                'params': {
-                    'penalty': 'l2',
-                    'C': 100
-                },
-                'features': {}  # use default
-            },
-            'sparse': {
-                'model_type': 'memm',
-                'model_settings': {
-                    'tag_scheme': 'IOB',
-                    'feature_scaler': 'max-abs',
-                    'feature_selector': 'l1'
-                },
-                'params': {
-                    'penalty': 'l2',
-                    'C': 100
-                },
-                'features': {}  # use default
-            },
-            'memm-cv': {
-                'model_type': 'memm',
-                'model_settings': {
-                    'tag_scheme': 'IOB',
-                    'feature_scaler': 'max-abs'
-                },
-                'param_selection': {
-                    'type': 'k-fold',
-                    'k': 5,
-                    'scoring': 'accuracy',
-                    'grid': {
-                        'penalty': ['l1', 'l2'],
-                        'C': [0.01, 1, 100, 10000, 1000000, 100000000]
-                    },
-                },
-                'features': {}  # use default
-            }
-        }
-    }
+    DEFAULT_CONFIG = DEFAULT_ENTITY_CONFIG
 
     def __init__(self, resource_loader, domain, intent):
         """Initializes an entity recognizer

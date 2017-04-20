@@ -10,6 +10,7 @@ import logging
 from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 
 from .classifier import Classifier
+from ._config import DEFAULT_DOMAIN_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -20,32 +21,7 @@ class DomainClassifier(Classifier):
     labels for the training data are the domain names associated with each query.
     """
 
-    DEFAULT_CONFIG = {
-        'default_model': 'main',
-        'models': {
-            'main': {
-                'model_type': 'text',
-                'model_settings': {
-                    'classifier_type': 'logreg',
-                },
-                'param_selection': {
-                    'type': 'k-fold',
-                    'k': 10,
-                    'grid': {
-                        'fit_intercept': [True, False],
-                        'C': [10, 100, 1000, 10000, 100000]
-                    },
-                },
-                'features': {
-                    'bag-of-words': {
-                        'lengths': [1]
-                    },
-                    'freq': {'bins': 5},
-                    'in-gaz': {}
-                }
-            }
-        }
-    }
+    DEFAULT_CONFIG = DEFAULT_DOMAIN_CONFIG
 
     def _get_model_config(self, config_name, **kwargs):
         """Gets a machine learning model configuration
