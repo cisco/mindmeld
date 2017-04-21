@@ -18,6 +18,7 @@ requirements = [
     'Flask>=0.12',
     'Flask-Cors>=3.0.2',
     'future>=0.16.0',
+    'nltk==3.2.2',
     'numpy>=1.10.1',
     'requests>=2.13.0',
     'scipy>=0.9',

@@ -284,6 +284,7 @@ class ProcessedQuery(object):
         self.domain = domain
         self.intent = intent
         self.entities = entities
+        self.parse_tree = None
         self.is_gold = is_gold
 
     def to_dict(self):
@@ -293,6 +294,7 @@ class ProcessedQuery(object):
             'domain': self.domain,
             'intent': self.intent,
             'entities': [e.to_dict() for e in self.entities],
+            'parse_tree': [g.to_dict() for g in self.parse_tree] if self.parse_tree else None
         }
 
     def __eq__(self, other):

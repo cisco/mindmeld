@@ -2,16 +2,23 @@
 """
 This module contains the language parser component of the Workbench natural language processor
 """
-
 from __future__ import unicode_literals
 from builtins import object
+
+from collections import defaultdict, namedtuple
+
+from nltk import FeatureChartParser
+from nltk.grammar import FeatureGrammar
+from nltk.featstruct import Feature
 
 from ._config import get_parser_config
 
 START_SYMBOL = 'S'
 HEAD_SYMBOL = 'H'
 
-START_SYMBOLS = set(START_SYMBOL, HEAD_SYMBOL)
+TYPE_FEATURE = Feature('type', display='prefix')
+
+START_SYMBOLS = set((START_SYMBOL, HEAD_SYMBOL))
 
 
 class Parser(object):
@@ -23,6 +30,114 @@ class Parser(object):
         self.domain = domain
         self.intent = intent
         self.config = get_parser_config(resource_loader.app_path, config)
+        self._grammar = FeatureGrammar.fromstring(generate_grammar(self.config))
+        self._parser = FeatureChartParser(self._grammar)
+
+    def parse_entities(self, query, entities):
+        """
+        """
+        return self._parse(query, entities)
+
+    def _parse(self, query, entities):
+        entity_type_count = defaultdict(int)
+        entity_dict = {}
+        tokens = []  # tokens to be parsed
+
+        # assumes tokens are sorted
+        for entity in entities:
+            entity_type = entity.entity.type
+            entity_id = '{}{}'.format(entity_type, entity_type_count[entity_type])
+            entity_type_count[entity_type] += 1
+            entity_dict[entity_id] = entity
+            tokens.append(entity_id)
+
+        parses = self._parser.parse(tokens)
+        resolved_parses = set((self._resolve_parse(p) for p in parses))
+
+        # Prefer parses with fewer groups
+        resolved_parses = sorted(resolved_parses, key=len)
+
+        # TODO: score these somehow and return the winner
+
+        # short term hack: choose the first one
+        for p in resolved_parses:
+            return [EntityGroup.from_node(g, entity_dict) for g in p]
+
+    @classmethod
+    def _resolve_parse(cls, node):
+        groups = set()
+        for child in node:
+            child_symbol = child.label()[TYPE_FEATURE]
+            if child_symbol in START_SYMBOLS:
+                groups.update(cls._resolve_parse(child))
+            else:
+                group = cls._resolve_group(child).freeze()
+                groups.add(group)
+        return frozenset(groups)
+
+    @classmethod
+    def _resolve_group(cls, node):
+        symbol = node.label()[TYPE_FEATURE]
+        if not symbol[0].isupper():
+            # this is a generic entity of type {symbol}, its child is the terminal
+            return _EntityNode(symbol, node[0], None)
+
+        # if first char is capitalized, this is a group!
+        group_type = symbol.lower()
+        dependents = set()
+        for child in node:
+            child_symbol = child.label()[TYPE_FEATURE]
+            if child_symbol == symbol:
+                # this is the ancestor of this group
+                group = cls._resolve_group(child)
+            elif child_symbol == group_type:
+                # this is the root ancestor of this group
+                group = cls._resolve_group(child)
+                group = _EntityNode(group.type, group.id, set())
+            else:
+                dependents.add(cls._resolve_group(child).freeze())
+
+        group.dependents.update(dependents)
+        return group
+
+
+class EntityGroup(object):
+
+    def __init__(self, head, dependents):
+        self.head = head
+        self.dependents = dependents
+
+    @classmethod
+    def from_node(cls, node, entity_dict):
+        if not node.dependents:
+            return entity_dict[node.id]
+
+        dependents = [cls.from_node(c, entity_dict) for c in node.dependents]
+        return cls(entity_dict[node.id], dependents)
+
+    def to_dict(self):
+        return {
+            'head': self.head.to_dict(),
+            'dependents': [d.to_dict() for d in self.dependents]
+        }
+
+
+class _EntityNode(namedtuple('EntityNode', ('type', 'id', 'dependents'))):
+
+    def freeze(self):
+        if self.dependents is None:
+            return self
+
+        frozen_dependents = frozenset((d.freeze() for d in self.dependents))
+        return _EntityNode(self.type, self.id, frozen_dependents)
+
+    def pretty(self, indent=0):
+        text = ('  ' * indent) + self.id
+
+        if not self.dependents:
+            return text
+
+        return text + '\n' + '\n'.join(dep.pretty(indent+1) for dep in self.dependents)
 
 
 def _build_symbol_template(group, features):
