@@ -50,7 +50,7 @@ class EntityResolver(object):
             item_id = item.get('id')
             if cname in item_map:
                 msg = 'Canonical name {!r} specified in {!r} entity map multiple times'
-                logger.info(msg.format(cname, entity_type))
+                logger.debug(msg.format(cname, entity_type))
             if item_id:
                 if item_id in seen_ids:
                     msg = 'Item id {!r} specified in {!r} entity map multiple times'
@@ -65,7 +65,7 @@ class EntityResolver(object):
                 norm_alias = normalizer(alias)
                 if norm_alias in syn_map:
                     msg = 'Synonym {!r} specified in {!r} entity map multiple times'
-                    logger.info(msg.format(cname, entity_type))
+                    logger.debug(msg.format(cname, entity_type))
                 cnames_for_syn = syn_map.get(norm_alias, [])
                 cnames_for_syn.append(cname)
                 syn_map[norm_alias] = list(set(cnames_for_syn))
