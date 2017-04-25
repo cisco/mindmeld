@@ -163,7 +163,7 @@ Let's follow this same approach to define handlers for the dialogue states ``sen
   def default():
       return {
           'replies': [
-              'I did not understand. Please you rephrase your request.'
+              'I did not understand. Please rephrase your request.'
           ]
       }
 
