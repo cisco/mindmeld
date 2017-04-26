@@ -385,9 +385,7 @@ class IntentProcessor(Processor):
 
         entity_groups = self.parser.parse_entities(query, entities)
 
-        pquery = ProcessedQuery(query, entities=entities)
-        pquery.parse_tree = entity_groups
-        return pquery
+        return ProcessedQuery(query, entities=entities, entity_groups=entity_groups)
 
 
 class EntityProcessor(Processor):

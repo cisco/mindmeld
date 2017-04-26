@@ -13,6 +13,8 @@ from nltk.featstruct import Feature
 
 from ._config import get_parser_config
 
+from ..core import EntityGroup
+
 START_SYMBOL = 'S'
 HEAD_SYMBOL = 'H'
 
@@ -60,8 +62,8 @@ class Parser(object):
         # TODO: score these somehow and return the winner
 
         # short term hack: choose the first one
-        for p in resolved_parses:
-            return [EntityGroup.from_node(g, entity_dict) for g in p]
+        for parse in resolved_parses:
+            return [g.to_entity_group(entity_dict) for g in parse]
 
     @classmethod
     def _resolve_parse(cls, node):
@@ -79,7 +81,7 @@ class Parser(object):
     def _resolve_group(cls, node):
         symbol = node.label()[TYPE_FEATURE]
         if not symbol[0].isupper():
-            # this is a generic entity of type {symbol}, its child is the terminal
+            # this node is a generic entity of type {symbol}, its child is the terminal
             return _EntityNode(symbol, node[0], None)
 
         # if first char is capitalized, this is a group!
@@ -101,30 +103,15 @@ class Parser(object):
         return group
 
 
-class EntityGroup(object):
-
-    def __init__(self, head, dependents):
-        self.head = head
-        self.dependents = dependents
-
-    @classmethod
-    def from_node(cls, node, entity_dict):
-        if not node.dependents:
-            return entity_dict[node.id]
-
-        dependents = [cls.from_node(c, entity_dict) for c in node.dependents]
-        return cls(entity_dict[node.id], dependents)
-
-    def to_dict(self):
-        return {
-            'head': self.head.to_dict(),
-            'dependents': [d.to_dict() for d in self.dependents]
-        }
-
-
 class _EntityNode(namedtuple('EntityNode', ('type', 'id', 'dependents'))):
+    """A private tree data structure used to parse queries
+
+    EntityNodes use sets and are conditionally hashable. This makes it easy to check the
+    equivalence of parse trees represented as entity nodes.
+    """
 
     def freeze(self):
+        """Converts to a 'frozen' representation that can be hashed"""
         if self.dependents is None:
             return self
 
@@ -132,12 +119,28 @@ class _EntityNode(namedtuple('EntityNode', ('type', 'id', 'dependents'))):
         return _EntityNode(self.type, self.id, frozen_dependents)
 
     def pretty(self, indent=0):
+        """Pretty prints the entity node.
+
+        Primarily useful for debugging."""
         text = ('  ' * indent) + self.id
 
         if not self.dependents:
             return text
 
         return text + '\n' + '\n'.join(dep.pretty(indent+1) for dep in self.dependents)
+
+    def to_entity_group(self, entity_dict, is_root=True):
+        """Converts a node to an EntityGroup
+
+        Args:
+            entity_dict (dict): A mapping from entity ids to the corresponding QueryEntity objects
+
+        """
+        if not self.dependents and not is_root:
+            return entity_dict[self.id]
+
+        dependents = tuple((c.to_entity_group(entity_dict, is_root=False) for c in self.dependents))
+        return EntityGroup(entity_dict[self.id], dependents)
 
 
 def _build_symbol_template(group, features):

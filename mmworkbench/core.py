@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains a collection of the core data structures used in workbench."""
 from __future__ import unicode_literals
-from builtins import object, range
+from builtins import object, range, super
 
 import logging
 
@@ -34,7 +34,7 @@ class Bunch(dict):
     """
 
     def __init__(self, **kwargs):
-        super(Bunch, self).__init__(kwargs)
+        super().__init__(kwargs)
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -115,8 +115,9 @@ class Query(object):
     Attributes:
         text (str): the original input text
         processed_text (str): the text after it has been preprocessed. TODO: better description here
-        normalized_tokens (list of str): a list of normalized tokens
+        normalized_tokens (tuple of str): a list of normalized tokens
         normalized_text (str): the normalized text. TODO: better description here
+        system_entity_candidates (tuple): Description
     """
 
     # TODO: look into using __slots__
@@ -136,7 +137,7 @@ class Query(object):
         norm_text = ' '.join([t['entity'] for t in self._normalized_tokens])
         self._texts = (raw_text, processed_text, norm_text)
         self._char_maps = char_maps
-        self.system_entity_candidates = None
+        self.system_entity_candidates = ()
 
     @property
     def text(self):
@@ -156,7 +157,7 @@ class Query(object):
     @property
     def normalized_tokens(self):
         """The tokens of the normalized input text"""
-        return [token['entity'] for token in self._normalized_tokens]
+        return tuple((token['entity'] for token in self._normalized_tokens))
 
     def get_text_form(self, form):
         """Programmatically retrieves text by form
@@ -279,22 +280,24 @@ class ProcessedQuery(object):
 
     # TODO: look into using __slots__
 
-    def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False):
+    def __init__(self, query, domain=None, intent=None, entities=None, entity_groups=None,
+                 is_gold=False):
         self.query = query
         self.domain = domain
         self.intent = intent
         self.entities = entities
-        self.parse_tree = None
+        self.entity_groups = entity_groups
         self.is_gold = is_gold
 
     def to_dict(self):
         """Converts the processed query into a dictionary"""
+        entity_groups = [g.to_dict() for g in self.entity_groups] if self.entity_groups else None
         return {
             'text': self.query.text,
             'domain': self.domain,
             'intent': self.intent,
-            'entities': [e.to_dict() for e in self.entities],
-            'parse_tree': [g.to_dict() for g in self.parse_tree] if self.parse_tree else None
+            'entities': [e.to_dict() for e in self.entities] if self.entities else None,
+            'entity_groups': entity_groups
         }
 
     def __eq__(self, other):
@@ -536,6 +539,30 @@ class Entity(object):
     def __repr__(self):
         text = self.display_text or self.text
         return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.type)
+
+
+class EntityGroup(object):
+    """An object which represents the relationship between entities.
+
+    Attributes:
+        head (QueryEntity): The head of this entity group
+        dependents (tuple of QueryEntity or EntityGroup): A list of entities which describe the head
+    """
+
+    def __init__(self, head, dependents):
+        self.head = head
+        self.dependents = dependents
+
+    def __repr__(self):
+        text = self.head.display_text or self.head.text
+        return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.head.type)
+
+    def to_dict(self):
+        """Converts the entity group into a dictionary"""
+        return {
+            'head': self.head.to_dict(),
+            'dependents': [d.to_dict() for d in self.dependents]
+        }
 
 
 def resolve_entity_conflicts(query_entities):
