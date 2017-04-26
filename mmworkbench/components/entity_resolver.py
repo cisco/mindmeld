@@ -44,22 +44,31 @@ class EntityResolver(object):
         """
         item_map = {}
         syn_map = {}
+        seen_ids = []
         for item in mapping:
             cname = item['cname']
+            item_id = item.get('id')
             if cname in item_map:
                 msg = 'Canonical name {!r} specified in {!r} entity map multiple times'
-                # TODO: is there a better exception type for this?
-                raise ValueError(msg.format(cname, entity_type))
+                logger.debug(msg.format(cname, entity_type))
+            if item_id:
+                if item_id in seen_ids:
+                    msg = 'Item id {!r} specified in {!r} entity map multiple times'
+                    raise ValueError(msg.format(item_id, entity_type))
+                seen_ids.append(item_id)
 
             aliases = [cname] + item.pop('whitelist', [])
-            item_map[cname] = item
+            items_for_cname = item_map.get(cname, [])
+            items_for_cname.append(item)
+            item_map[cname] = items_for_cname
             for alias in aliases:
                 norm_alias = normalizer(alias)
                 if norm_alias in syn_map:
                     msg = 'Synonym {!r} specified in {!r} entity map multiple times'
-                    # TODO: is there a better exception type for this?
-                    raise ValueError(msg.format(cname, entity_type))
-                syn_map[norm_alias] = cname
+                    logger.debug(msg.format(cname, entity_type))
+                cnames_for_syn = syn_map.get(norm_alias, [])
+                cnames_for_syn.append(cname)
+                syn_map[norm_alias] = list(set(cnames_for_syn))
 
         return {'items': item_map, 'synonyms': syn_map}
 
@@ -71,7 +80,7 @@ class EntityResolver(object):
             self._mapping = self.process_mapping(self.type, mapping, self._normalizer)
 
     def predict(self, entity):
-        """Predicts the resolved value for the given entity using the loaded entity map or the
+        """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model
 
         Args:
@@ -86,14 +95,23 @@ class EntityResolver(object):
 
         normed = self._normalizer(entity.text)
         try:
-            cname = self._mapping['synonyms'][normed]
+            cnames = self._mapping['synonyms'][normed]
         except KeyError:
             logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.type)
             return entity.text
 
-        value = copy.copy(self._mapping['items'][cname])
-        value.pop('whitelist', None)
-        return value
+        if len(cnames) > 1:
+            logger.info('Multiple possible canonical names for %r entity for type %r',
+                        entity.text, entity.type)
+
+        values = []
+        for cname in cnames:
+            for item in self._mapping['items'][cname]:
+                item_value = copy.copy(item)
+                item_value.pop('whitelist', None)
+                values.append(item_value)
+
+        return values
 
     def predict_proba(self, entity):
         """Runs prediction on a given entity and generates multiple hypotheses with their
