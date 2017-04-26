@@ -9,7 +9,7 @@ from builtins import object, super
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
-from ..exceptions import ProcessorError
+from ..exceptions import FileNotFoundError, ProcessorError
 from ..resource_loader import ResourceLoader
 
 from .domain_classifier import DomainClassifier
@@ -308,7 +308,10 @@ class IntentProcessor(Processor):
         self.name = intent
 
         self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
-        self.parser = Parser(self.resource_loader, domain, intent)
+        try:
+            self.parser = Parser(self.resource_loader, domain, intent)
+        except FileNotFoundError:
+            self.parser = None
 
     @property
     def entities(self):
@@ -383,7 +386,7 @@ class IntentProcessor(Processor):
         for entity in entities:
             self.entities[entity.entity.type].process_entity(query, entities, entity)
 
-        entity_groups = self.parser.parse_entities(query, entities)
+        entity_groups = self.parser.parse_entities(query, entities) if self.parser else None
 
         return ProcessedQuery(query, entities=entities, entity_groups=entity_groups)
 

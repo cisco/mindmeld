@@ -291,14 +291,15 @@ class ProcessedQuery(object):
 
     def to_dict(self):
         """Converts the processed query into a dictionary"""
-        entity_groups = [g.to_dict() for g in self.entity_groups] if self.entity_groups else None
-        return {
+        base = {
             'text': self.query.text,
             'domain': self.domain,
             'intent': self.intent,
-            'entities': [e.to_dict() for e in self.entities] if self.entities else None,
-            'entity_groups': entity_groups
+            'entities': None if self.entities is None else [e.to_dict() for e in self.entities],
         }
+        if self.entity_groups is not None:
+            base['entity_groups'] = [g.to_dict() for g in self.entity_groups]
+        return base
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
