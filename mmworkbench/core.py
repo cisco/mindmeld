@@ -318,7 +318,6 @@ class ProcessedQuery(object):
 
 
 class NestedEntity(object):
-
     def __init__(self, texts, spans, token_spans, entity):
         """Initializes an entity node object
 
@@ -555,8 +554,8 @@ class EntityGroup(object):
         self.dependents = dependents
 
     def __repr__(self):
-        text = self.head.display_text or self.head.text
-        return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.head.type)
+        text = self.head.entity.display_text or self.head.text
+        return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.head.entity.type)
 
     def to_dict(self):
         """Converts the entity group into a dictionary"""
