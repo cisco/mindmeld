@@ -59,11 +59,13 @@ class Parser(object):
         # Prefer parses with fewer groups
         resolved_parses = sorted(resolved_parses, key=len)
 
+        # TODO: apply precedence
         # TODO: score these somehow and return the winner
 
         # short term hack: choose the first one
         for parse in resolved_parses:
-            return [g.to_entity_group(entity_dict) for g in parse]
+            return [g.to_entity_group(entity_dict) for g in parse if g.dependents]
+
 
     @classmethod
     def _resolve_parse(cls, node):
