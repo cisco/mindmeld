@@ -318,7 +318,7 @@ def _mark_up_entities(query_str, entities, groups):
         return ann['start']
 
     def _close_ann(ann, cursor):
-        if cursor < ann['end']:
+        if cursor < ann['end'] + 1:
             tokens.append(query_str[cursor:ann['end'] + 1])
         tokens.append(META_SPLIT)
         tokens.append(ann['type'])

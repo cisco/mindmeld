@@ -529,7 +529,6 @@ def test_dump_group(query_factory):
     assert markup.dump_query(processed_query) == markup_text
 
 
-@pytest.mark.focus
 @pytest.mark.dump
 @pytest.mark.group
 def test_dump_group_nested(query_factory):
@@ -595,3 +594,35 @@ def test_dump_groups(query_factory):
                    '[{Philz|store} in {Downtown Sunnyvale|location}|store]')
 
     assert markup.dump_query(processed_query) == markup_text
+
+
+@pytest.mark.load
+@pytest.mark.dump
+@pytest.mark.group
+def test_load_dump_groups(query_factory):
+    """Tests that load_query and dump_query are reversible"""
+    text = ('Order [{one|quantity} {large|size} {Tesora|product} with '
+            '[{medium|size} {cream|option}|option]|product] from '
+            '[{Philz|store} in {Downtown Sunnyvale|location}|store]')
+
+    processed_query = markup.load_query(text, query_factory)
+
+    markup_text = markup.dump_query(processed_query)
+
+    assert text == markup_text
+
+
+@pytest.mark.load
+@pytest.mark.dump
+def test_load_dump_2(query_factory):
+    """Tests that load_query and dump_query are reversible"""
+    text = ("i'm extra hungry get me a {chicken leg|dish}, [{1|quantity} "
+            "{kheema nan|dish}|dish] [{2|quantity} regular {nans|dish}|dish] "
+            "[{one|quantity} {chicken karahi|dish}|dish], [{1|quantity} "
+            "{saag paneer|dish}|dish] and [{1|quantity} {chicken biryani|dish}|dish]")
+
+    processed_query = markup.load_query(text, query_factory)
+
+    markup_text = markup.dump_query(processed_query)
+
+    assert text == markup_text
