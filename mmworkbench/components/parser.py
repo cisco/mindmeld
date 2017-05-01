@@ -146,6 +146,18 @@ class _EntityNode(namedtuple('EntityNode', ('type', 'id', 'dependents'))):
 
 
 def _build_symbol_template(group, features):
+    """Builds a template for a symbol in a feature CFG.
+
+    Args:
+        group (str): The group the template is for
+        features (iterable): The names of features which should be included in
+            the template
+
+    Example:
+    >>> _build_symbol_template('Group', {'feat1', 'feat2'})
+    "Group[feat1={feat1}, feat2={feat2}]"
+
+    """
     symbol_template = group
     for feature in features:
         if symbol_template is group:
@@ -159,6 +171,17 @@ def _build_symbol_template(group, features):
 
 
 def _generate_dependent_rules(config, symbol_template, features, head_types):
+    """Generates the rules for a dependent entity
+
+    Args:
+        config (dict): A dictionary containing the configuration for this dependent
+        symbol_template (str): A symbol template
+        features (iterable): A list of features for this symbol
+        head_types (set): All symbols which have dependents
+
+    Yields:
+        str: A rule for the dependent
+    """
     dep_type = config['type']
     # If dependent is a group, its symbol should be capitalized
     dep_symbol = dep_type.capitalize() if dep_type in head_types else dep_type
@@ -189,7 +212,7 @@ def _generate_dependent_rules(config, symbol_template, features, head_types):
 
 
 def generate_grammar(config, unique_entities=20):
-    """Generates a context free grammar from the provided parser config
+    """Generates a feature context free grammar from the provided parser config
 
     Args:
         config (dict): The parser configuration
