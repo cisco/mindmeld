@@ -15,9 +15,14 @@ GROUP_START = '['
 GROUP_END = ']'
 META_SPLIT = '|'
 
-START_CHARACTERS = frozenset((ENTITY_START, GROUP_START))
-END_CHARACTERS = frozenset((ENTITY_END, GROUP_END))
-SPECIAL_CHARACTERS = frozenset((ENTITY_START, ENTITY_END, GROUP_START, GROUP_END, META_SPLIT))
+START_CHARACTERS = frozenset({ENTITY_START, GROUP_START})
+END_CHARACTERS = frozenset({ENTITY_END, GROUP_END})
+SPECIAL_CHARACTERS = frozenset({ENTITY_START, ENTITY_END, GROUP_START, GROUP_END, META_SPLIT})
+
+
+MINDMELD_FORMAT = 'mindmeld'
+BRAT_FORMAT = 'brat'
+MARKUP_FORMATS = frozenset({MINDMELD_FORMAT, BRAT_FORMAT})
 
 
 def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
@@ -53,12 +58,48 @@ def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
     """Loads the queries from the specified file
 
     Args:
+        file_path (str): The path of the file to load
+        query_factory (TYPE): Description
         domain (str): The domain of the query file
         intent (str): The intent of the query file
-        filename (str): The name of the query file
+        is_gold (bool, optional): Description
 
     """
     queries = []
+    for query_text in _read_query_file(file_path):
+        if query_text[0] == '-':
+            continue
+        query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
+        queries.append(query)
+    return queries
+
+
+def convert_query_file(file_path, query_factory, input_format, output_format):
+    if not (input_format == MINDMELD_FORMAT and output_format == BRAT_FORMAT):
+        # TODO implement conversion from brat to mindmeld
+        raise ValueError('The requested conversion is not supported at this time')
+    pass
+
+
+def mark_down_file(file_path):
+    """
+
+    Args:
+        file_path (str): The path of the file to load
+    """
+    for markup in _read_query_file(file_path):
+        yield mark_down(markup)
+
+
+def _read_query_file(file_path):
+    """Summary
+
+    Args:
+        file_path (str): The path of the file to load
+
+    Yields:
+        str: query text for each line
+    """
     import codecs
     with codecs.open(file_path, encoding='utf-8') as queries_file:
         for line in queries_file:
@@ -66,12 +107,7 @@ def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
             # only create query if line is not empty string
             query_text = line.split('\t')[0].strip()
             if query_text:
-                if query_text[0] == '-':
-                    continue
-
-            query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
-            queries.append(query)
-    return queries
+                yield query_text
 
 
 def _process_annotations(query, annotations):
@@ -255,15 +291,108 @@ def _tokenize_markup(markup):
         yield token
 
 
-def dump_query(processed_query):
+def dump_query(processed_query, markup_format=MINDMELD_FORMAT, **kwargs):
     """Converts a processed query into marked up query text.
 
     Args:
         processed_query (ProcessedQuery): The query to convert
+        markup_format (str, optional): The format to use. Valid formats include
+            'mindmeld' and 'brat'. Defaults to 'mindmeld'
+        **kwargs: additional format specific parameters may be passed in as
+            keyword arguments.
 
     Returns:
         str: A marked up representation of the query
+
+    Raises:
+        ValueError: Description
     """
+    if markup_format not in MARKUP_FORMATS:
+        raise ValueError('Invalid markup format {!r}'.format(markup_format))
+    return {
+        MINDMELD_FORMAT: _dump_mindmeld,
+        BRAT_FORMAT: _dump_brat
+    }[markup_format](processed_query, **kwargs)
+
+
+def dump_queries(queries, markup_format=MINDMELD_FORMAT, **kwargs):
+    """Converts a collection of processed queries to marked up query text
+
+    Args:
+        queries (iterable): A collection of processed queries
+        markup_format (str, optional): The format to use. Valid formats include
+            'mindmeld' and 'brat'. Defaults to 'mindmeld'
+        **kwargs: additional format specific parameters may be passed in as
+            keyword arguments.
+
+    Yields:
+        str or tuple: A marked up representation of the query
+    """
+    if markup_format == BRAT_FORMAT:
+        for result in _dump_brat_queries(queries, **kwargs):
+            yield result
+        return
+
+    for query in queries:
+        yield dump_query(query, markup_format, **kwargs)
+
+
+def _dump_brat_queries(queries, **kwargs):
+    entity_offset = kwargs.get('entity_offset', 0)
+    relation_offset = kwargs.get('relation_offset', 0)
+    char_offset = kwargs.get('char_offset', 0)
+
+    for query in queries:
+        text, annotations = _dump_brat(query, char_offset=char_offset, entity_offset=entity_offset,
+                                       relation_offset=relation_offset)
+        yield text, annotations
+
+        char_offset += len(text) + 1
+        entity_offset += len(query.entities)
+        relation_offset += len(annotations.split('\n')) - len(query.entities)
+
+
+def _dump_brat(processed_query, **kwargs):
+    # TODO: support nested entities
+    entity_offset = kwargs.get('entity_offset', 0)
+    relation_offset = kwargs.get('relation_offset', 0)
+    char_offset = kwargs.get('char_offset', 0)
+    text = processed_query.query.text
+    annotations = []
+    entity_dict = {}
+    for index, entity in enumerate(processed_query.entities):
+        params = {
+            'index': entity_offset + index + 1,
+            'entity': entity.entity.type.capitalize(),
+            'start': char_offset + entity.span.start,
+            'end': char_offset + entity.span.end + 1,
+            'text': entity.entity.text
+        }
+        entity_dict[(entity.entity.type, entity.span.start)] = params['index']
+        annotations.append('T{index}\t{entity} {start} {end}\t{text}'.format(**params))
+
+    stack = list(reversed(processed_query.entity_groups))
+    while stack:
+        group = stack.pop()
+        for dep in group.dependents:
+            if isinstance(dep, EntityGroup):
+                stack.append(dep)
+                continue
+
+            relation_offset += 1  # increment this first so first index is 1
+            params = {
+                'index': relation_offset,
+                'entity': dep.entity.type,
+                'head': entity_dict[(group.head.entity.type, group.head.span.start)],
+                'dependent': entity_dict[(dep.entity.type, dep.span.start)]
+            }
+            annotation = 'R{index}\t{entity} Arg1:T{head} Arg2:T{dependent}\t'.format(**params)
+            annotations.append(annotation)
+
+    return (text, '\n'.join(annotations))
+
+
+def _dump_mindmeld(processed_query, **kwargs):
     raw_text = processed_query.query.text
     markup = _mark_up_entities(raw_text, processed_query.entities, processed_query.entity_groups)
     return markup
