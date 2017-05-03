@@ -97,7 +97,8 @@ class EntityResolver(object):
         try:
             cnames = self._mapping['synonyms'][normed]
         except KeyError:
-            logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.entity.type)
+            logger.warning('Failed to resolve entity %r for type %r',
+                           entity.text, entity.entity.type)
             return entity.text
 
         if len(cnames) > 1:
