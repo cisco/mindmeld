@@ -377,7 +377,7 @@ def _dump_brat(processed_query, **kwargs):
         for dep in group.dependents:
             if isinstance(dep, EntityGroup):
                 stack.append(dep)
-                continue
+                dep = dep.head
 
             relation_offset += 1  # increment this first so first index is 1
             params = {
