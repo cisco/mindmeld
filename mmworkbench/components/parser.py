@@ -24,23 +24,42 @@ START_SYMBOLS = set((START_SYMBOL, HEAD_SYMBOL))
 
 
 class Parser(object):
-    """A language parser which is used to extract relations between entities in a given query and
-    group related entities together."""
+    """
+    A language parser which is used to extract relations between entities in a
+    given query and group related entities together.
 
-    def __init__(self, resource_loader, domain, intent, config=None):
+    The parser uses a context free grammar based on a configuration to generate
+    candidate entity groupings. Heuristics are then used to rank and select a
+    grouping.
+
+    This rule based parser will be helpful in many situations, but if you have
+    a sufficiently sophisticated entity hierarchy, you may benefit from using a
+    statistical approach.
+    """
+
+    def __init__(self, resource_loader, config=None):
+        """Summary
+
+        Args:
+            resource_loader (ResourceLoader): An object which can load resources for the parser
+            config (dict, optional): The configuration for the parser
+        """
         self._resource_loader = resource_loader
-        self.domain = domain
-        self.intent = intent
         self.config = get_parser_config(resource_loader.app_path, config)
         self._grammar = FeatureGrammar.fromstring(generate_grammar(self.config))
         self._parser = FeatureChartParser(self._grammar)
 
     def parse_entities(self, query, entities):
-        """
-        """
-        return self._parse(query, entities)
+        """Finds groupings of entities for the given query.
 
-    def _parse(self, query, entities):
+        Args:
+            query (Query): The query being parsed
+            entities (list of QueryEntity): The entities to find groupings for
+
+        """
+        return self._parse(entities)
+
+    def _parse(self, entities):
         entity_type_count = defaultdict(int)
         entity_dict = {}
         tokens = []  # tokens to be parsed
@@ -54,18 +73,46 @@ class Parser(object):
             tokens.append(entity_id)
 
         parses = self._parser.parse(tokens)
-        resolved_parses = set((self._resolve_parse(p) for p in parses))
+        if not parses:
+            return []
+        filtered = (p for p in set((self._resolve_parse(p) for p in parses)))
 
         # Prefer parses with fewer groups
-        resolved_parses = sorted(resolved_parses, key=len)
+        parses = list(sorted(filtered, key=len))
+        if not parses:
+            return []
+        filtered = (p for p in parses if len(p) <= len(parses[0]))
+
+        # Prefer parses with minimal distance from dependents to heads`
+        parses = list(sorted(filtered, key=lambda p: self._parse_distance(p, entity_dict)))
+        if not parses:
+            return []
+        min_parse_dist = self._parse_distance(parses[0], entity_dict)
+        filtered = (p for p in parses if self._parse_distance(p, entity_dict) <= min_parse_dist)
 
         # TODO: apply precedence
-        # TODO: score these somehow and return the winner
 
-        # short term hack: choose the first one
-        for parse in resolved_parses:
+        # if we still have more than one, choose the first
+        for parse in parses:
             return [g.to_entity_group(entity_dict) for g in parse if g.dependents]
 
+    @staticmethod
+    def _parse_distance(parse, entity_dict):
+        total_link_distance = 0
+        stack = list(parse)
+        while stack:
+            node = stack.pop()
+            head = entity_dict[node.id]
+            for dep in node.dependents:
+                if dep.dependents:
+                    stack.append(dep)
+                    continue
+                child = entity_dict[dep.id]
+                link_distance = min(abs(child.token_span.start - head.token_span.end),
+                                    abs(head.token_span.start - child.token_span.end))
+                total_link_distance += link_distance
+
+        return total_link_distance
 
     @classmethod
     def _resolve_parse(cls, node):

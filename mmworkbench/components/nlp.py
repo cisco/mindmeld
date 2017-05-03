@@ -309,8 +309,9 @@ class IntentProcessor(Processor):
 
         self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
         try:
-            self.parser = Parser(self.resource_loader, domain, intent)
+            self.parser = Parser(self.resource_loader)
         except FileNotFoundError:
+            # Unable to load parser config -> no parser
             self.parser = None
 
     @property
@@ -324,8 +325,6 @@ class IntentProcessor(Processor):
         # train entity recognizer
         self.entity_recognizer.fit()
 
-        # TODO: something for the parser?
-
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
@@ -337,13 +336,9 @@ class IntentProcessor(Processor):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.entity_recognizer.dump(model_path)
 
-        # TODO: something with parser?
-
     def _load(self):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.entity_recognizer.load(model_path)
-
-        # TODO: something with parser?
 
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
