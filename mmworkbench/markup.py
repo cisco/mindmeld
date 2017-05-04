@@ -510,7 +510,7 @@ def _annotations_for_entity(entity, depth=0, parent_offset=0):
     }]
 
     if entity.entity.value and isinstance(entity.entity.value, dict):
-        entity.entity.value.get('children', [])
+        children = entity.entity.value.get('children', [])
     else:
         children = []
 
