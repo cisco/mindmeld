@@ -191,11 +191,11 @@ def _parse_tokens(tokens):
         if token in START_CHARACTERS:
             annotation = {
                 'start': len(text),
-                'ann_type': 'group' if token is GROUP_START else 'entity',
+                'ann_type': 'group' if token == GROUP_START else 'entity',
                 'depth': len(stack)
             }
             stack.append(annotation)
-        elif token is META_SPLIT:
+        elif token == META_SPLIT:
             token_is_meta = True
         elif token in END_CHARACTERS:
             annotation = stack.pop()
@@ -247,12 +247,12 @@ def _tokenize_markup(markup):
                 if token:
                     yield token
                     token = ''
-                if char is GROUP_START:
+                if char == GROUP_START:
                     open_annotations['group'] += 1
                 else:
                     open_annotations['entity'] += 1
                 yield char
-            elif char is META_SPLIT:
+            elif char == META_SPLIT:
                 # TODO: improve this check
                 # if not token:
                 #     raise MarkupError('Entity or group text is empty at position {}'.format(idx))
@@ -262,7 +262,7 @@ def _tokenize_markup(markup):
                 token_is_meta = True
                 yield char
             elif char in END_CHARACTERS:
-                if char is GROUP_END:
+                if char == GROUP_END:
                     key = 'group'
                 else:
                     key = 'entity'
