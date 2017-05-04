@@ -5,7 +5,7 @@ This module contains the language parser component of the Workbench natural lang
 from __future__ import unicode_literals
 from builtins import object
 
-from collections import defaultdict, namedtuple
+from collections import defaultdict, namedtuple, OrderedDict
 
 from nltk import FeatureChartParser
 from nltk.grammar import FeatureGrammar
@@ -20,7 +20,7 @@ HEAD_SYMBOL = 'H'
 
 TYPE_FEATURE = Feature('type', display='prefix')
 
-START_SYMBOLS = set((START_SYMBOL, HEAD_SYMBOL))
+START_SYMBOLS = frozenset({START_SYMBOL, HEAD_SYMBOL})
 
 
 class Parser(object):
@@ -41,8 +41,10 @@ class Parser(object):
         """Summary
 
         Args:
-            resource_loader (ResourceLoader): An object which can load resources for the parser
-            config (dict, optional): The configuration for the parser
+            resource_loader (ResourceLoader): An object which can load
+                resources for the parser.
+            config (dict, optional): The configuration for the parser. If none
+                is provided the app config will be loaded.
         """
         self._resource_loader = resource_loader
         self.config = get_parser_config(resource_loader.app_path, config)
@@ -75,7 +77,10 @@ class Parser(object):
         parses = self._parser.parse(tokens)
         if not parses:
             return []
-        filtered = (p for p in set((self._resolve_parse(p) for p in parses)))
+        resolved = OrderedDict()
+        for parse in parses:
+            resolved[self._resolve_parse(parse)] = None
+        filtered = (p for p in resolved.keys())
 
         # Prefer parses with fewer groups
         parses = list(sorted(filtered, key=len))
