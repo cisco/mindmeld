@@ -13,7 +13,7 @@ from nltk.featstruct import Feature
 
 from ._config import get_parser_config
 
-from ..core import EntityGroup
+from ..core import EntityGroup, Span
 
 START_SYMBOL = 'S'
 HEAD_SYMBOL = 'H'
@@ -21,6 +21,7 @@ HEAD_SYMBOL = 'H'
 TYPE_FEATURE = Feature('type', display='prefix')
 
 START_SYMBOLS = frozenset({START_SYMBOL, HEAD_SYMBOL})
+LINKING_TOKENS = frozenset({'with'})
 
 
 class Parser(object):
@@ -59,9 +60,9 @@ class Parser(object):
             entities (list of QueryEntity): The entities to find groupings for
 
         """
-        return self._parse(entities)
+        return self._parse(query, entities)
 
-    def _parse(self, entities):
+    def _parse(self, query, entities):
         entity_type_count = defaultdict(int)
         entity_dict = {}
         tokens = []  # tokens to be parsed
@@ -88,12 +89,13 @@ class Parser(object):
             return []
         filtered = (p for p in parses if len(p) <= len(parses[0]))
 
-        # Prefer parses with minimal distance from dependents to heads`
-        parses = list(sorted(filtered, key=lambda p: self._parse_distance(p, entity_dict)))
+        # Prefer parses with minimal distance from dependents to heads
+        parses = list(sorted(filtered, key=lambda p: self._parse_distance(p, query, entity_dict)))
         if not parses:
             return []
-        min_parse_dist = self._parse_distance(parses[0], entity_dict)
-        filtered = (p for p in parses if self._parse_distance(p, entity_dict) <= min_parse_dist)
+        min_parse_dist = self._parse_distance(parses[0], query, entity_dict)
+        filtered = (p for p in parses 
+                    if self._parse_distance(p, query, entity_dict) <= min_parse_dist)
 
         # TODO: apply precedence
 
@@ -102,7 +104,7 @@ class Parser(object):
             return [g.to_entity_group(entity_dict) for g in parse if g.dependents]
 
     @staticmethod
-    def _parse_distance(parse, entity_dict):
+    def _parse_distance(parse, query, entity_dict):
         total_link_distance = 0
         stack = list(parse)
         while stack:
@@ -113,8 +115,16 @@ class Parser(object):
                     stack.append(dep)
                     continue
                 child = entity_dict[dep.id]
-                link_distance = min(abs(child.token_span.start - head.token_span.end),
-                                    abs(head.token_span.start - child.token_span.end))
+                if child.token_span.start > head.token_span.start:
+                    intra_entity_span = Span(head.token_span.end, child.token_span.start)
+                else:
+                    intra_entity_span = Span(child.token_span.end, head.token_span.start)
+                link_distance = 0
+                for token in intra_entity_span.slice(query.text.split(' ')):
+                    if token in LINKING_TOKENS:
+                        link_distance -= 0.5
+                    else:
+                        link_distance += 1
                 total_link_distance += link_distance
 
         return total_link_distance
