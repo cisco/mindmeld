@@ -9,6 +9,7 @@ import logging
 from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 
 from .classifier import Classifier
+from ._config import DEFAULT_INTENT_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -22,58 +23,7 @@ class IntentClassifier(Classifier):
         domain (str): The domain that this intent classifier belongs to
 
     """
-    DEFAULT_CONFIG = {
-        'default_model': 'main',
-        'models': {
-            'main': {
-                'model_type': 'text',
-                'model_settings': {
-                    'classifier_type': 'logreg'
-                },
-                'param_selection': {
-                    'type': 'k-fold',
-                    'k': 10,
-                    'grid': {
-                        'fit_intercept': [True, False],
-                        'C': [0.01, 1, 100, 10000, 1000000],
-                        'class_bias': [1, 0.7, 0.3, 0]
-                    }
-                },
-                'features': {
-                    'bag-of-words': {
-                        'lengths': [1]
-                    },
-                    'in-gaz': {},
-                    'freq': {'bins': 5},
-                    'length': {}
-                }
-            },
-            'rforest': {
-                'model_type': 'text',
-                'model_settings': {
-                    'classifier_type': 'rforest'
-                },
-                'param_selection': {
-                    'type': 'k-fold',
-                    'k': 10,
-                    'grid': {
-                        'n_estimators': [10],
-                        'max_features': ['auto'],
-                        'n_jobs': [-1]
-                    },
-                },
-                'features': {
-                    'bag-of-words': {
-                        'lengths': [1, 2, 3]
-                    },
-                    'edge-ngrams': {'lengths': [1, 2, 3]},
-                    'in-gaz': {},
-                    'freq': {'bins': 5},
-                    'length': {}
-                }
-            }
-        }
-    }
+    DEFAULT_CONFIG = DEFAULT_INTENT_CONFIG
 
     def __init__(self, resource_loader, domain):
         """Initializes an intent classifier

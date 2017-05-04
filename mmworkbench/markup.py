@@ -5,14 +5,24 @@ representing annotations of query text inline.
 from __future__ import unicode_literals
 from future.utils import raise_from
 
-import re
-
-from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
+from .core import Entity, EntityGroup, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
 from .ser import resolve_system_entity
 
-ENTITY_PATTERN = re.compile(r'\{(.*?)\}')
-NESTED_ENTITY_PATTERN = re.compile(r'\[(.*?)\]')
+ENTITY_START = '{'
+ENTITY_END = '}'
+GROUP_START = '['
+GROUP_END = ']'
+META_SPLIT = '|'
+
+START_CHARACTERS = frozenset({ENTITY_START, GROUP_START})
+END_CHARACTERS = frozenset({ENTITY_END, GROUP_END})
+SPECIAL_CHARACTERS = frozenset({ENTITY_START, ENTITY_END, GROUP_START, GROUP_END, META_SPLIT})
+
+
+MINDMELD_FORMAT = 'mindmeld'
+BRAT_FORMAT = 'brat'
+MARKUP_FORMATS = frozenset({MINDMELD_FORMAT, BRAT_FORMAT})
 
 
 def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
@@ -29,27 +39,67 @@ def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
         ProcessedQuery: a processed query
     """
 
-    raw_text = mark_down(markup)
-    query = query_factory.create_query(raw_text)
     try:
-        entities = _parse_entities(markup, query=query)
+        raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
+    except MarkupError as exc:
+        msg = 'Invalid markup in query {!r}: {}'
+        raise_from(MarkupError(msg.format(markup, exc)), exc)
     except SystemEntityResolutionError as exc:
         msg = "Unable to load query {!r}: {}"
         raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
+    query = query_factory.create_query(raw_text)
+    entities, entity_groups = _process_annotations(query, annotations)
 
-    return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
+    return ProcessedQuery(query, domain=domain, intent=intent, entities=entities,
+                          entity_groups=entity_groups, is_gold=is_gold)
 
 
 def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
     """Loads the queries from the specified file
 
     Args:
+        file_path (str): The path of the file to load
+        query_factory (TYPE): Description
         domain (str): The domain of the query file
         intent (str): The intent of the query file
-        filename (str): The name of the query file
+        is_gold (bool, optional): Description
 
     """
     queries = []
+    for query_text in _read_query_file(file_path):
+        if query_text[0] == '-':
+            continue
+        query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
+        queries.append(query)
+    return queries
+
+
+def convert_query_file(file_path, query_factory, input_format, output_format):
+    if not (input_format == MINDMELD_FORMAT and output_format == BRAT_FORMAT):
+        # TODO implement conversion from brat to mindmeld
+        raise ValueError('The requested conversion is not supported at this time')
+    pass
+
+
+def mark_down_file(file_path):
+    """
+
+    Args:
+        file_path (str): The path of the file to load
+    """
+    for markup in _read_query_file(file_path):
+        yield mark_down(markup)
+
+
+def _read_query_file(file_path):
+    """Summary
+
+    Args:
+        file_path (str): The path of the file to load
+
+    Yields:
+        str: query text for each line
+    """
     import codecs
     with codecs.open(file_path, encoding='utf-8') as queries_file:
         for line in queries_file:
@@ -57,25 +107,294 @@ def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
             # only create query if line is not empty string
             query_text = line.split('\t')[0].strip()
             if query_text:
-                if query_text[0] == '-':
-                    continue
-
-            query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
-            queries.append(query)
-    return queries
+                yield query_text
 
 
-def dump_query(processed_query):
+def _process_annotations(query, annotations):
+    entities = []
+    groups = []
+    stack = []
+
+    def _close_ann(ann):
+        if ann['ann_type'] == 'group':
+            group = EntityGroup(ann['head'], ann['children'])
+            if ann.get('parent'):
+                parent = ann.get('parent')
+                children = parent.get('children', [])
+                children.append(group)
+                parent['children'] = children
+            else:
+                groups.append(group)
+
+        if ann['ann_type'] == 'entity':
+            span = Span(ann['start'], ann['end'])
+            if Entity.is_system_entity(ann['type']):
+                raw_entity = resolve_system_entity(query, ann['type'], span).entity
+            else:
+                try:
+                    value = {'children': ann['children']}
+                except KeyError:
+                    value = None
+                raw_entity = Entity(ann['text'], ann['type'], role=ann.get('role'), value=value)
+
+            if ann.get('parent'):
+                parent = ann.get('parent')
+                if parent['ann_type'] == 'entity':
+                    children = parent.get('children', [])
+                    children.append(NestedEntity.from_query(query, span.shift(-parent['start']),
+                                                            entity=raw_entity,
+                                                            parent_offset=parent['start']))
+                    parent['children'] = children
+                if parent['ann_type'] == 'group':
+                    entity = QueryEntity.from_query(query, span, entity=raw_entity)
+                    entities.append(entity)
+
+                    if parent['type'] == ann['type']:
+                        # this is the head
+                        parent['head'] = entity
+                    else:
+                        children = parent.get('children', [])
+                        children.append(entity)
+                        parent['children'] = children
+
+            else:
+                entities.append(QueryEntity.from_query(query, span, entity=raw_entity))
+
+    def _open_ann(ann):
+        if stack:
+            ann['parent'] = stack[-1]
+        stack.append(ann)
+
+    for ann in annotations:
+        while stack and stack[-1]['depth'] >= ann['depth']:
+            # if there are annotations on the stack of the same or greater depth,
+            # they have no more children so close them
+            _close_ann(stack.pop())
+
+        _open_ann(ann)
+
+    while stack:
+        _close_ann(stack.pop())
+
+    entities = sorted(entities, key=lambda e: e.span.start)
+    groups = sorted(groups, key=lambda g: g.head.span.start)
+
+    return entities, groups
+
+
+def _parse_tokens(tokens):
+    text = ''
+    annotations = []
+    stack = []
+    token_is_meta = False
+    for token in tokens:
+        if token in START_CHARACTERS:
+            annotation = {
+                'start': len(text),
+                'ann_type': 'group' if token == GROUP_START else 'entity',
+                'depth': len(stack)
+            }
+            stack.append(annotation)
+        elif token == META_SPLIT:
+            token_is_meta = True
+        elif token in END_CHARACTERS:
+            annotation = stack.pop()
+            annotation['end'] = len(text) - 1  # the index of the last character
+            annotation['text'] = text[annotation['start']:annotation['end'] + 1]
+            token_is_meta = False
+            annotations.append(annotation)
+        elif token_is_meta:
+            annotation = stack[-1]
+            if annotation['ann_type'] == 'group':
+                key = 'type'
+            else:
+                key = 'role' if 'type' in annotation else 'type'
+            annotation[key] = token
+        else:
+            text += token
+
+    annotations = sorted(annotations, key=lambda a: a['depth'])
+    annotations = sorted(annotations, key=lambda a: a['start'])
+
+    return text, annotations
+
+
+def _tokenize_markup(markup):
+    """Converts markup into a series of 'tokens'.
+
+    A token can fall into one of 5 general categories:
+     - raw text
+     - a marker indicating the start of an entity or entity group
+     - a marker indicating the end of an entity or entity group
+     - a marker indicating the start of a label for an entity or entity group
+     - a label for an entity or entity group
+
+    Args:
+        markup (str): The markup text
+
+    Raises:
+        MarkupError: When markup is invalid
+    """
+    token = ''
+    token_is_meta = False
+    open_annotations = {
+        'group': 0,
+        'entity': 0
+    }
+    for idx, char in enumerate(markup):
+        if char in SPECIAL_CHARACTERS:
+            if char in START_CHARACTERS:
+                if token:
+                    yield token
+                    token = ''
+                if char == GROUP_START:
+                    open_annotations['group'] += 1
+                else:
+                    open_annotations['entity'] += 1
+                yield char
+            elif char == META_SPLIT:
+                # TODO: improve this check
+                # if not token:
+                #     raise MarkupError('Entity or group text is empty at position {}'.format(idx))
+                if token:
+                    yield token
+                    token = ''
+                token_is_meta = True
+                yield char
+            elif char in END_CHARACTERS:
+                if char == GROUP_END:
+                    key = 'group'
+                else:
+                    key = 'entity'
+                if open_annotations[key] == 0:
+                    raise MarkupError('Mismatched end for {} at position {}'.format(key, idx))
+                if not token_is_meta:
+                    raise MarkupError('Missing label for {} at position {}'.format(key, idx))
+                if not token:
+                    raise MarkupError('Empty label for {} at position {}'.format(key, idx))
+                open_annotations[key] -= 1
+
+                yield token
+                token = ''
+                token_is_meta = False
+                yield char
+
+            continue
+
+        token += char
+
+    for key in open_annotations:
+        if open_annotations[key]:
+            raise MarkupError('Mismatched start for {}'.format(key))
+
+    if token:
+        yield token
+
+
+def dump_query(processed_query, markup_format=MINDMELD_FORMAT, **kwargs):
     """Converts a processed query into marked up query text.
 
     Args:
         processed_query (ProcessedQuery): The query to convert
+        markup_format (str, optional): The format to use. Valid formats include
+            'mindmeld' and 'brat'. Defaults to 'mindmeld'
+        **kwargs: additional format specific parameters may be passed in as
+            keyword arguments.
 
     Returns:
         str: A marked up representation of the query
+
+    Raises:
+        ValueError: Description
     """
+    if markup_format not in MARKUP_FORMATS:
+        raise ValueError('Invalid markup format {!r}'.format(markup_format))
+    return {
+        MINDMELD_FORMAT: _dump_mindmeld,
+        BRAT_FORMAT: _dump_brat
+    }[markup_format](processed_query, **kwargs)
+
+
+def dump_queries(queries, markup_format=MINDMELD_FORMAT, **kwargs):
+    """Converts a collection of processed queries to marked up query text
+
+    Args:
+        queries (iterable): A collection of processed queries
+        markup_format (str, optional): The format to use. Valid formats include
+            'mindmeld' and 'brat'. Defaults to 'mindmeld'
+        **kwargs: additional format specific parameters may be passed in as
+            keyword arguments.
+
+    Yields:
+        str or tuple: A marked up representation of the query
+    """
+    if markup_format == BRAT_FORMAT:
+        for result in _dump_brat_queries(queries, **kwargs):
+            yield result
+        return
+
+    for query in queries:
+        yield dump_query(query, markup_format, **kwargs)
+
+
+def _dump_brat_queries(queries, **kwargs):
+    entity_offset = kwargs.get('entity_offset', 0)
+    relation_offset = kwargs.get('relation_offset', 0)
+    char_offset = kwargs.get('char_offset', 0)
+
+    for query in queries:
+        text, annotations = _dump_brat(query, char_offset=char_offset, entity_offset=entity_offset,
+                                       relation_offset=relation_offset)
+        yield text, annotations
+
+        char_offset += len(text) + 1
+        entity_offset += len(query.entities)
+        relation_offset += len(annotations.split('\n')) - len(query.entities)
+
+
+def _dump_brat(processed_query, **kwargs):
+    # TODO: support nested entities
+    entity_offset = kwargs.get('entity_offset', 0)
+    relation_offset = kwargs.get('relation_offset', 0)
+    char_offset = kwargs.get('char_offset', 0)
+    text = processed_query.query.text
+    annotations = []
+    entity_dict = {}
+    for index, entity in enumerate(processed_query.entities):
+        params = {
+            'index': entity_offset + index + 1,
+            'entity': entity.entity.type.capitalize(),
+            'start': char_offset + entity.span.start,
+            'end': char_offset + entity.span.end + 1,
+            'text': entity.entity.text
+        }
+        entity_dict[(entity.entity.type, entity.span.start)] = params['index']
+        annotations.append('T{index}\t{entity} {start} {end}\t{text}'.format(**params))
+
+    stack = list(reversed(processed_query.entity_groups))
+    while stack:
+        group = stack.pop()
+        for dep in group.dependents:
+            if isinstance(dep, EntityGroup):
+                stack.append(dep)
+                dep = dep.head
+
+            relation_offset += 1  # increment this first so first index is 1
+            params = {
+                'index': relation_offset,
+                'entity': dep.entity.type,
+                'head': entity_dict[(group.head.entity.type, group.head.span.start)],
+                'dependent': entity_dict[(dep.entity.type, dep.span.start)]
+            }
+            annotation = 'R{index}\t{entity} Arg1:T{head} Arg2:T{dependent}\t'.format(**params)
+            annotations.append(annotation)
+
+    return (text, '\n'.join(annotations))
+
+
+def _dump_mindmeld(processed_query, **kwargs):
     raw_text = processed_query.query.text
-    markup = _mark_up_entities(raw_text, processed_query.entities)
+    markup = _mark_up_entities(raw_text, processed_query.entities, processed_query.entity_groups)
     return markup
 
 
@@ -92,133 +411,116 @@ def validate_markup(markup, query_factory):
     return NotImplemented
 
 
-def _mark_up(raw_text, entities=None, numerics=None):
-    entities = entities or []
-    numerics = numerics or []
-    # TODO: also mark up nested entities
-    return _mark_up_entities(raw_text, entities)
+def _mark_up_entities(query_str, entities, groups):
+    annotations = []
+    for group in groups or tuple():
+        annotations.extend(_annotations_for_group(group)[2])
 
+    for entity in entities or tuple():
+        annotations.extend(_annotations_for_entity(entity)[2])
 
-def _parse_entities(markup, query):
-    entities = []
-    for match in ENTITY_PATTERN.finditer(markup):
-        start = len(mark_down(markup[:match.start()]))
-        match_text = match.group(1)
-        clean_match_str = mark_down_nested(match_text)
-        components = clean_match_str.split('|')
-        if len(components) == 2:
-            entity_text, entity_type = components
-            role = None
-        elif len(components) == 3:
-            entity_text, entity_type, role = components
-            role = None
-        else:
-            raise MarkupError('Invalid entity mark up: too many pipes')
-        end = start + len(entity_text) - 1
+    # remove duplicates from annotations
+    ann_map = {}
+    for ann in annotations:
+        ann_key = (ann['ann_type'], ann['start'], ann['end'], ann['type'])
+        if ann_key in ann_map:
+            # a similar annotation has already been found
+            if ann['depth'] < ann_map[ann_key]['depth']:
+                # keep the annotation already in the map
+                ann = ann_map[ann_key]
 
-        # get entity text excluding type and role
-        marked_entity_text = match_text[:match_text.find('|', match_text.rfind(']'))]
-        nested = _parse_nested(marked_entity_text, query, start)
-        value = {'children': nested} if len(nested) else None
-        span = Span(start, end)
-        if Entity.is_system_entity(entity_type):
-            raw_entity = resolve_system_entity(query, entity_type, span).entity
-        else:
-            raw_entity = Entity(entity_text, entity_type, role=role, value=value)
-        entities.append(QueryEntity.from_query(query, span, entity=raw_entity))
-    return entities
+        ann_map[ann_key] = ann
 
+    annotations = ann_map.values()
+    annotations = sorted(annotations, key=lambda a: a['depth'])
+    annotations = sorted(annotations, key=lambda a: a['start'])
 
-def _parse_nested(markup, query, offset):
-    """Parses the markup within an entity for nested entities
-
-    Args:
-        markup (str): The text inside an entity to be parsed for nested entities
-        query (Query): A query object for the cleaned up markup
-        offset (int): The offset from the start of the raw query text to the
-            start of the markup
-
-    Returns:
-        TYPE: Description
-
-    Raises:
-        ValueError: Description
-    """
-    entities = []
-    for match in NESTED_ENTITY_PATTERN.finditer(markup):
-        prefix = mark_down(markup[:match.start()])
-        start = len(prefix)
-        components = match.group(1).split('|')
-        if len(components) == 2:
-            entity_text, entity_type = components
-            role = None
-        elif len(components) == 3:
-            entity_text, entity_type, role = components
-            role = None
-        else:
-            raise MarkupError('Invalid entity mark up: too many pipes')
-        end = start + len(entity_text) - 1
-        span = Span(start, end)
-        if Entity.is_system_entity(entity_type):
-            raw_entity = resolve_system_entity(query, entity_type, span.shift(offset)).entity
-        else:
-            raw_entity = Entity(entity_text, entity_type, role=role)
-
-        entities.append(NestedEntity.from_query(query, span, entity=raw_entity,
-                                                parent_offset=offset))
-
-    return entities
-
-
-def _mark_up_entities(query_str, entities):
-    entities = entities or []
-
-    # remove existing markup just in case
-    query_str = mark_down_entities(query_str)
-
-    # make sure entities are sorted
-    sorted_entities = sorted(entities, key=lambda x: x.span.start)
-    marked_text = ''
+    stack = []
     cursor = 0
+    tokens = []
 
-    # add each entity
-    for entity in sorted_entities:
-        marked_text += query_str[cursor:entity.span.start]
-        entity_text = _mark_up_nested(entity)
-        if entity.entity.role is None:
-            marked_text += "{{{}|{}}}".format(entity_text, entity.entity.type)
-        else:
-            marked_text += "{{{}|{}|{}}}".format(entity_text, entity.entity.type,
-                                                 entity.entity.role)
-        cursor = entity.span.end + 1
-    marked_text += query_str[cursor:]
-    return marked_text
+    def _open_ann(ann, cursor):
+        if cursor < ann['start']:
+            tokens.append(query_str[cursor:ann['start']])
+        tokens.append(GROUP_START if ann['ann_type'] == 'group' else ENTITY_START)
+        stack.append(ann)
+        return ann['start']
+
+    def _close_ann(ann, cursor):
+        if cursor < ann['end'] + 1:
+            tokens.append(query_str[cursor:ann['end'] + 1])
+        tokens.append(META_SPLIT)
+        tokens.append(ann['type'])
+        if ann.get('role') is not None:
+            tokens.append(META_SPLIT)
+            tokens.append(ann['role'])
+        tokens.append(GROUP_END if ann['ann_type'] == 'group' else ENTITY_END)
+        cursor = ann['end'] + 1
+        return cursor
+
+    for ann in annotations:
+        while stack and stack[-1]['depth'] >= ann['depth']:
+            # if there are annotations on the stack of the same depth, they have no more children
+            # so finish them
+            cursor = _close_ann(stack.pop(), cursor)
+
+        cursor = _open_ann(ann, cursor)
+
+    while stack:
+        cursor = _close_ann(stack.pop(), cursor)
+
+    tokens.append(query_str[cursor:])
+    return ''.join(tokens)
 
 
-def _mark_up_nested(entity):
-    outer_text = entity.text
-    nested_entities = []
-    if isinstance(entity.entity.value, dict):
-        nested_entities = entity.entity.value.get('children', [])
+def _annotations_for_group(group, depth=0):
+    if isinstance(group, (NestedEntity, QueryEntity)):
+        return _annotations_for_entity(group, depth)
+    ann = {
+        'ann_type': 'group',
+        'type': group.head.entity.type,
+        'depth': depth
+    }
+    annotations = [ann]
 
-    # remove existing markup just in case
-    outer_text = mark_down(outer_text)
+    start = group.head.span.start
+    end = group.head.span.end
+    for child in tuple(group.dependents) + (group.head,):
+        ch_start, ch_end, ch_anns = _annotations_for_group(child, depth+1)
+        start = min(start, ch_start)
+        end = max(end, ch_end)
+        annotations.extend(ch_anns)
 
-    # make sure entities are sorted
-    sorted_entities = sorted(nested_entities, key=lambda x: x.span.start)
-    marked_text = ''
-    cursor = 0
+    ann['start'] = start
+    ann['end'] = end
 
-    # add each entity
-    for entity in sorted_entities:
-        marked_text += outer_text[cursor:entity.span.start]
-        if entity.entity.role is None:
-            marked_text += "[{}|{}]".format(entity.text, entity.entity.type)
-        else:
-            marked_text += "[{}|{}|{}]".format(entity.text, entity.entity.type, entity.entity.role)
-        cursor = entity.span.end + 1
-    marked_text += outer_text[cursor:]
-    return marked_text
+    return start, end, annotations
+
+
+def _annotations_for_entity(entity, depth=0, parent_offset=0):
+    start = entity.span.start + parent_offset
+    end = entity.span.end + parent_offset
+    annotations = [{
+        'ann_type': 'entity',
+        'type': entity.entity.type,
+        'role': entity.entity.role,
+        'start': start,
+        'end': end,
+        'depth': depth
+    }]
+
+    if entity.entity.value and isinstance(entity.entity.value, dict):
+        children = entity.entity.value.get('children', [])
+    else:
+        children = []
+
+    for child in children:
+        annotations.extend(_annotations_for_entity(child, depth+1, start)[2])
+
+    annotations = sorted(annotations, key=lambda a: a['depth'])
+    annotations = sorted(annotations, key=lambda a: a['start'])
+
+    return start, end, annotations
 
 
 def mark_down(markup):
@@ -230,37 +532,5 @@ def mark_down(markup):
     Returns:
         str: A clean string with no mark up
     """
-    return mark_down_entities(mark_down_nested(markup))
-
-
-def mark_down_entities(markup):
-    """Removes top level entity mark up from a string
-
-    Args:
-        markup (str): A marked up string
-
-    Returns:
-        str: A clean string with no top level entity mark up
-    """
-    return _mark_down(markup)
-
-
-def mark_down_nested(markup):
-    """Removes nested entity mark up from a string
-
-    Args:
-        markup (str): A marked up string
-
-    Returns:
-        str: A clean string with no nested entities marked up
-    """
-    return _mark_down(markup, nested=True)
-
-
-def _mark_down(markup, nested=False):
-    def _replace(match):
-        entity = match.group(1)
-        pattern = r'\|[^]]*$'
-        return re.sub(pattern, '', entity)
-    pattern = NESTED_ENTITY_PATTERN if nested else ENTITY_PATTERN
-    return re.sub(pattern, _replace, markup)
+    text, _ = _parse_tokens(_tokenize_markup(markup))
+    return text

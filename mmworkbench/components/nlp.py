@@ -9,7 +9,7 @@ from builtins import object, super
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
-from ..exceptions import ProcessorError
+from ..exceptions import FileNotFoundError, ProcessorError
 from ..resource_loader import ResourceLoader
 
 from .domain_classifier import DomainClassifier
@@ -308,7 +308,11 @@ class IntentProcessor(Processor):
         self.name = intent
 
         self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
-        self.parser = Parser(self.resource_loader, domain, intent)
+        try:
+            self.parser = Parser(self.resource_loader)
+        except FileNotFoundError:
+            # Unable to load parser config -> no parser
+            self.parser = None
 
     @property
     def entities(self):
@@ -321,8 +325,6 @@ class IntentProcessor(Processor):
         # train entity recognizer
         self.entity_recognizer.fit()
 
-        # TODO: something for the parser?
-
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
@@ -334,13 +336,9 @@ class IntentProcessor(Processor):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.entity_recognizer.dump(model_path)
 
-        # TODO: something with parser?
-
     def _load(self):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.entity_recognizer.load(model_path)
-
-        # TODO: something with parser?
 
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
@@ -383,9 +381,9 @@ class IntentProcessor(Processor):
         for entity in entities:
             self.entities[entity.entity.type].process_entity(query, entities, entity)
 
-        # TODO: parse query
+        entity_groups = self.parser.parse_entities(query, entities) if self.parser else None
 
-        return ProcessedQuery(query, entities=entities)
+        return ProcessedQuery(query, entities=entities, entity_groups=entity_groups)
 
 
 class EntityProcessor(Processor):
