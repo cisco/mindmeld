@@ -393,6 +393,13 @@ class EntityResolver(object):
                                     "query": normed
                                 }
                             }
+                        },
+                        {
+                            "match": {
+                                "cname": {
+                                    "query": normed
+                                }
+                            }
                         }
                     ]
                 }
