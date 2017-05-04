@@ -3,7 +3,6 @@
 This module contains the Config class.
 """
 from __future__ import unicode_literals
-from builtins import object
 
 import copy
 import logging

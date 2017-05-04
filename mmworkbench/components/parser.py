@@ -94,7 +94,7 @@ class Parser(object):
         if not parses:
             return []
         min_parse_dist = self._parse_distance(parses[0], query, entity_dict)
-        filtered = (p for p in parses 
+        filtered = (p for p in parses
                     if self._parse_distance(p, query, entity_dict) <= min_parse_dist)
 
         # TODO: apply precedence
