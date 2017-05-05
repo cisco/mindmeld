@@ -41,14 +41,14 @@ def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
 
     try:
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
+        query = query_factory.create_query(raw_text)
+        entities, entity_groups = _process_annotations(query, annotations)
     except MarkupError as exc:
         msg = 'Invalid markup in query {!r}: {}'
         raise_from(MarkupError(msg.format(markup, exc)), exc)
     except SystemEntityResolutionError as exc:
         msg = "Unable to load query {!r}: {}"
         raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
-    query = query_factory.create_query(raw_text)
-    entities, entity_groups = _process_annotations(query, annotations)
 
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities,
                           entity_groups=entity_groups, is_gold=is_gold)
@@ -117,7 +117,17 @@ def _process_annotations(query, annotations):
 
     def _close_ann(ann):
         if ann['ann_type'] == 'group':
-            group = EntityGroup(ann['head'], ann['children'])
+            try:
+                head = ann['head']
+            except KeyError as exc:
+                msg = 'Group between {} and {} missing head'.format(ann['start'], ann['end'])
+                raise_from(MarkupError(msg), exc)
+            try:
+                children = ann['children']
+            except KeyError as exc:
+                msg = 'Group between {} and {} missing children'.format(ann['start'], ann['end'])
+                raise_from(MarkupError(msg), exc)
+            group = EntityGroup(head, children)
             if ann.get('parent'):
                 parent = ann.get('parent')
                 children = parent.get('children', [])
