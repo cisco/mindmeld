@@ -232,7 +232,7 @@ def _build_symbol_template(group, features):
     return symbol_template
 
 
-def _generate_dependent_rules(config, symbol_template, features, head_types):
+def _generate_dependent_rules(dep_type, config, symbol_template, features, head_types):
     """Generates the rules for a dependent entity
 
     Args:
@@ -244,7 +244,6 @@ def _generate_dependent_rules(config, symbol_template, features, head_types):
     Yields:
         str: A rule for the dependent
     """
-    dep_type = config['type']
     # If dependent is a group, its symbol should be capitalized
     dep_symbol = dep_type.capitalize() if dep_type in head_types else dep_type
 
@@ -292,7 +291,7 @@ def generate_grammar(config, unique_entities=20):
     head_types = set(config.keys())
 
     # the set of all dependents
-    dependent_types = set((d['type'] for g in config.values() for d in g['dependents']))
+    dependent_types = set((t for g in config.values() for t in g))
 
     all_types = head_types.union(dependent_types)
 
@@ -302,17 +301,17 @@ def generate_grammar(config, unique_entities=20):
         group = entity.capitalize()
         rules.append('H -> {}'.format(group))
 
-        dep_configs = config[entity]['dependents']
+        dep_configs = config[entity]
         # If a dependent has a max number of instances, we will track it as a feature
-        features = [d['type'] for d in dep_configs if d.get('max_instances') is not None]
+        features = [t for t, d in dep_configs.items() if d.get('max_instances') is not None]
 
         symbol_template = _build_symbol_template(group, features)
 
         # basic rule with features initialized to 0
         rules.append('{} -> {}'.format(symbol_template.format(**{f: 0 for f in features}), entity))
 
-        for dep_config in dep_configs:
-            rules.extend(_generate_dependent_rules(dep_config, symbol_template,
+        for dep_type, dep_config in dep_configs.items():
+            rules.extend(_generate_dependent_rules(dep_type, dep_config, symbol_template,
                                                    features, head_types))
     for entity in all_types:
         for idx in range(unique_entities):
