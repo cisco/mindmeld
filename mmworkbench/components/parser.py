@@ -260,7 +260,7 @@ def _generate_dependent_rules(config, symbol_template, features, head_types):
             yield '{lhs} -> {rhs} {dep}'.format(lhs=lhs, rhs=rhs, dep=dep_symbol)
     else:
         for dep_count in range(max_instances):
-            feature_dict = {f: '%' + str(i) for i, f in enumerate(features)
+            feature_dict = {f: '?' + chr(ord('a') + i) for i, f in enumerate(features)
                             if f is not dep_type}
             feature_dict[dep_type] = dep_count
             rhs = symbol_template.format(**feature_dict)
