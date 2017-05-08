@@ -74,17 +74,19 @@ class QueryFactory(object):
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))
 
     @staticmethod
-    def create_query_factory(app_path, tokenizer=None, preprocessor=None):
+    def create_query_factory(app_path=None, tokenizer=None, preprocessor=None):
         """Creates a query factory for the app
 
         Args:
-            app_path (str): The path to the directory containing the app's data
+            app_path (str, optional): The path to the directory containing the
+                app's data. If None is passed, a default query factory will be
+                returned.
             tokenizer (Tokenizer, optional): The app's tokenizer. One will be
                 created if none is provided
             preprocessor (Processor, optional): The app's preprocessor.
 
         Returns:
-            QueryFactory: Description
+            QueryFactory:
         """
         tokenizer = tokenizer or Tokenizer.create_tokenizer(app_path)
         return QueryFactory(tokenizer, preprocessor)

@@ -8,6 +8,7 @@ from future.utils import raise_from
 from .core import Entity, EntityGroup, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
 from .ser import resolve_system_entity
+from .query_factory import QueryFactory
 
 ENTITY_START = '{'
 ENTITY_END = '}'
@@ -25,20 +26,22 @@ BRAT_FORMAT = 'brat'
 MARKUP_FORMATS = frozenset({MINDMELD_FORMAT, BRAT_FORMAT})
 
 
-def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
+def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=False):
     """Creates a processed query object from marked up query text.
 
     Args:
-        markup (str): The marked up query text
-        query_factory (QueryFactory): An object which can create queries
-        domain (str): The name of the domain annotated for the query
-        intent (str): The name of the intent annotated for the query
-        is_gold (bool): True if the markup passed in is a reference, human-labeled example
+        markup (str): The marked up query text.
+        query_factory (QueryFactory, optional): An object which can create
+            queries.
+        domain (str, optional): The name of the domain annotated for the query.
+        intent (str, optional): The name of the intent annotated for the query.
+        is_gold (bool, optional): True if the markup passed in is a reference,
+            human-labeled example. Defaults to False.
 
     Returns:
         ProcessedQuery: a processed query
     """
-
+    query_factory = query_factory or QueryFactory.create_query_factory()
     try:
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
         query = query_factory.create_query(raw_text)
@@ -54,17 +57,23 @@ def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
                           entity_groups=entity_groups, is_gold=is_gold)
 
 
-def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
+def load_query_file(file_path, query_factory=None, domain=None, intent=None, is_gold=False):
     """Loads the queries from the specified file
 
     Args:
         file_path (str): The path of the file to load
-        query_factory (TYPE): Description
-        domain (str): The domain of the query file
-        intent (str): The intent of the query file
-        is_gold (bool, optional): Description
+        query_factory (QueryFactory, optional): An object which can create
+            queries.
+        domain (str, optional): The name of the domain annotated for the query.
+        intent (str, optional): The name of the intent annotated for the query.
+        is_gold (bool, optional): True if the markup passed in is a reference,
+            human-labeled example. Defaults to False.
 
+    Returns:
+        ProcessedQuery: a processed query
     """
+    query_factory = query_factory or QueryFactory.create_query_factory()
+
     queries = []
     for query_text in _read_query_file(file_path):
         if query_text[0] == '-':
@@ -72,13 +81,6 @@ def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
         query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
         queries.append(query)
     return queries
-
-
-def convert_query_file(file_path, query_factory, input_format, output_format):
-    if not (input_format == MINDMELD_FORMAT and output_format == BRAT_FORMAT):
-        # TODO implement conversion from brat to mindmeld
-        raise ValueError('The requested conversion is not supported at this time')
-    pass
 
 
 def mark_down_file(file_path):

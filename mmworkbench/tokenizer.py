@@ -337,11 +337,13 @@ class Tokenizer(object):
         return "<Tokenizer exclude_from_norm: {}>".format(self.exclude_from_norm.__repr__())
 
     @staticmethod
-    def create_tokenizer(app_path):
+    def create_tokenizer(app_path=None):
         """Creates the preprocessor for the app at app path
 
         Args:
-            app_path (str): The path to the directory containing the app's data
+            app_path (str, Optional): The path to the directory containing the
+                app's data. If None is passed, a default tokenizer will be
+                returned.
 
         Returns:
             Tokenizer: a tokenizer
