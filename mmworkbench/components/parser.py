@@ -37,7 +37,7 @@ class Parser(object):
     statistical approach.
     """
 
-    def __init__(self, resource_loader, config=None):
+    def __init__(self, resource_loader=None, config=None):
         """Summary
 
         Args:
@@ -46,8 +46,11 @@ class Parser(object):
             config (dict, optional): The configuration for the parser. If none
                 is provided the app config will be loaded.
         """
+        if not resource_loader and not config:
+            raise ValueError('Parser requires either a configuration or a resource loader')
+        app_path = resource_loader.app_path if resource_loader else None
         self._resource_loader = resource_loader
-        self.config = get_parser_config(resource_loader.app_path, config)
+        self.config = get_parser_config(app_path, config)
         self._grammar = FeatureGrammar.fromstring(generate_grammar(self.config))
         self._parser = FeatureChartParser(self._grammar)
 

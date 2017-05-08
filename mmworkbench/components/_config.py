@@ -265,7 +265,7 @@ def get_classifier_config(clf_type, domain=None, intent=None, entity=None):
     pass
 
 
-def get_parser_config(app_path, config=None):
+def get_parser_config(app_path=None, config=None):
     try:
         config = config or _get_config_module(app_path).PARSER_CONFIG
     except AttributeError:
