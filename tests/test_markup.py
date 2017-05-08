@@ -371,10 +371,10 @@ def test_load_group_nested(query_factory):
     assert len(product_group.dependents) == 4
 
     assert product_group.dependents[2].head == entities[4]
-    assert product_group.dependents[2].dependents == [entities[3]]
+    assert product_group.dependents[2].dependents == (entities[3],)
 
     assert product_group.dependents[3].head == entities[6]
-    assert product_group.dependents[3].dependents == [entities[5]]
+    assert product_group.dependents[3].dependents == (entities[5],)
 
 
 @pytest.mark.load
@@ -430,12 +430,12 @@ def test_load_groups(query_factory):
     assert len(product_group.dependents) == 3
 
     assert product_group.dependents[2].head == entities[4]
-    assert product_group.dependents[2].dependents == [entities[3]]
+    assert product_group.dependents[2].dependents == (entities[3],)
 
     store_group = processed_query.entity_groups[1]
 
     assert store_group.head == entities[5]
-    assert store_group.dependents == [entities[6]]
+    assert store_group.dependents == (entities[6],)
 
 
 @pytest.mark.dump

@@ -285,8 +285,8 @@ class ProcessedQuery(object):
         self.query = query
         self.domain = domain
         self.intent = intent
-        self.entities = entities
-        self.entity_groups = entity_groups
+        self.entities = None if entities is None else tuple(entities)
+        self.entity_groups = None if entity_groups is None else tuple(entity_groups)
         self.is_gold = is_gold
 
     def to_dict(self):
