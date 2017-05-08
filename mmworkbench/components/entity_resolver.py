@@ -40,6 +40,10 @@ class EntityResolver(object):
                             "normalized_keyword": {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer"
+                            },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer"
                             }
                         },
                         "analyzer": "default_analyzer"
@@ -57,6 +61,10 @@ class EntityResolver(object):
                             "normalized_keyword": {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer"
+                            },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer"
                             }
                         },
                         "analyzer": "default_analyzer"
@@ -84,8 +92,7 @@ class EntityResolver(object):
                         "filter": [
                             "lowercase",
                             "asciifolding",
-                            "token_shingle",
-                            "autocomplete_filter"
+                            "token_shingle"
                         ],
                         "char_filter": [
                             "remove_comma",
@@ -119,6 +126,26 @@ class EntityResolver(object):
                         ],
                         "type": "custom",
                         "tokenizer": "keyword"
+                    },
+                    "char_ngram_analyzer": {
+                        "filter": [
+                            "lowercase",
+                            "asciifolding",
+                            "autocomplete_filter"
+                        ],
+                        "char_filter": [
+                            "remove_comma",
+                            "remove_tm_and_r",
+                            "remove_loose_apostrophes",
+                            "space_possessive_apostrophes",
+                            "remove_special_beginning",
+                            "remove_special_end",
+                            "remove_special1",
+                            "remove_special2",
+                            "remove_special3"
+                        ],
+                        "type": "custom",
+                        "tokenizer": "whitespace"
                     }
                 },
                 "char_filter": {
@@ -379,7 +406,8 @@ class EntityResolver(object):
                         }
                     ]
                 }
-            }
+            },
+            "size": 10
         }
 
         # ES query for finding exact match on CNAME and synonyms
@@ -400,10 +428,18 @@ class EntityResolver(object):
                                     "query": normed
                                 }
                             }
+                        },
+                        {
+                            "match": {
+                                "whitelist.char_ngram": {
+                                    "query": normed
+                                }
+                            }
                         }
                     ]
                 }
-            }
+            },
+            "size": 10
         }
 
         response = self._es_client.search(index=self._es_index_name, body=exact_match_query)
