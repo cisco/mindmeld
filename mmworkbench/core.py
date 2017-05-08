@@ -551,17 +551,26 @@ class EntityGroup(object):
 
     def __init__(self, head, dependents):
         self.head = head
-        self.dependents = dependents
+        self.dependents = tuple(sorted(dependents, key=lambda d: d.span.start))
+        start = head.span.start
+        end = head.span.end
+        for dep in dependents:
+            start = min(start, dep.span.start)
+            end = max(end, dep.span.end)
+        self.span = Span(start, end)
 
     def __repr__(self):
         text = self.head.entity.display_text or self.head.text
-        return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.head.entity.type)
+        msg = '<{} {!r} ({!r}) [{!r}-{!r}]>'
+        return msg.format(self.__class__.__name__, text, self.head.entity.type,
+                          self.span.start, self.span.end)
 
     def to_dict(self):
         """Converts the entity group into a dictionary"""
         return {
             'head': self.head.to_dict(),
-            'dependents': [d.to_dict() for d in self.dependents]
+            'dependents': [d.to_dict() for d in self.dependents],
+            'span': self.span.to_dict()
         }
 
 
