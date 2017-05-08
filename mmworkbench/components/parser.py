@@ -21,7 +21,6 @@ HEAD_SYMBOL = 'H'
 TYPE_FEATURE = Feature('type', display='prefix')
 
 START_SYMBOLS = frozenset({START_SYMBOL, HEAD_SYMBOL})
-LINKING_TOKENS = frozenset({'with'})
 
 
 class Parser(object):
@@ -101,15 +100,16 @@ class Parser(object):
 
         # if we still have more than one, choose the first
         for parse in parses:
-            return [g.to_entity_group(entity_dict) for g in parse if g.dependents]
+            return sorted((g.to_entity_group(entity_dict) for g in parse if g.dependents),
+                          key=lambda g: g.span.start)
 
-    @staticmethod
-    def _parse_distance(parse, query, entity_dict):
+    def _parse_distance(self, parse, query, entity_dict):
         total_link_distance = 0
         stack = list(parse)
         while stack:
             node = stack.pop()
             head = entity_dict[node.id]
+
             for dep in node.dependents:
                 if dep.dependents:
                     stack.append(dep)
@@ -121,7 +121,7 @@ class Parser(object):
                     intra_entity_span = Span(child.token_span.end, head.token_span.start)
                 link_distance = 0
                 for token in intra_entity_span.slice(query.text.split(' ')):
-                    if token in LINKING_TOKENS:
+                    if token in self.config[node.type][dep.type]['linking_words']:
                         link_distance -= 0.5
                     else:
                         link_distance += 1
