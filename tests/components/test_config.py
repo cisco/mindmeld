@@ -9,10 +9,6 @@ Tests for config module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 
-import os
-
-import pytest
-
 from mmworkbench.components._config import _expand_parser_config
 
 BASIC_PARSER_CONFIG = {
