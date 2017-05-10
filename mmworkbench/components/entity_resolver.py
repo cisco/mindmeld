@@ -73,6 +73,13 @@ class EntityResolver(object):
             }
         },
         "settings": {
+            # "similarity": {
+            #     "default": {
+            #         "type": "BM25",
+            #         "k1": "0",
+            #         "b": "1"
+            #     }
+            # },
             "analysis": {
                 "filter": {
                     "token_shingle": {
@@ -416,6 +423,28 @@ class EntityResolver(object):
                 "bool": {
                     "should": [
                         {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "match": {
+                                            "whitelist.normalized_keyword": {
+                                                "query": normed,
+                                                "boost": 10
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "cname.normalized_keyword": {
+                                                "query": normed,
+                                                "boost": 10
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
                             "match": {
                                 "whitelist": {
                                     "query": normed
@@ -431,6 +460,13 @@ class EntityResolver(object):
                         },
                         {
                             "match": {
+                                "cname.char_ngram": {
+                                    "query": normed
+                                }
+                            }
+                        },
+                        {
+                            "match": {
                                 "whitelist.char_ngram": {
                                     "query": normed
                                 }
@@ -439,11 +475,12 @@ class EntityResolver(object):
                     ]
                 }
             },
-            "size": 10
+            "size": 20
         }
 
-        response = self._es_client.search(index=self._es_index_name, body=exact_match_query)
-        results = [hit['_source'] for hit in response['hits']['hits']]
+        # response = self._es_client.search(index=self._es_index_name, body=exact_match_query)
+        # results = [hit['_source'] for hit in response['hits']['hits']]
+        results = []
 
         # no exact match on CNAME or synonym names found.
         # Continue to fall back to find matches based on text relevance score.
