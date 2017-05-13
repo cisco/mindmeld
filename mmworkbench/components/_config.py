@@ -313,7 +313,6 @@ def _expand_group_config(group_config):
                     'role': None,
                     'left': True,
                     'right': True,
-                    'right_distance': 1
                     'precedence': 'left',
                     'min_instances': 0,
                     'max_instances': 3

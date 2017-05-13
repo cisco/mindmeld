@@ -124,10 +124,12 @@ class TestMaxInstancesParser:
         """Tests that parser respects the max instances constraint"""
         text = '{light|size} [{medium|size} {latte|dish}|dish]'
         query = markup.load_query(text)
+
         parse = self.parser.parse_entities(query.query, query.entities)
 
-        # TODO: fix partial parsing :-/
-        assert len(parse) == 0
+        assert len(parse) == 1
+        assert parse[0].head == query.entities[2]
+        assert parse[0].dependents == (query.entities[1],)
 
     def test_distance_override(self):
         """Tests that parser correctly allocates one size per dish,

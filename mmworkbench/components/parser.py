@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 from builtins import object
 
 from collections import defaultdict, namedtuple, OrderedDict
+import logging
+import time
 
 from nltk import FeatureChartParser
 from nltk.grammar import FeatureGrammar
@@ -14,6 +16,10 @@ from nltk.featstruct import Feature
 from ._config import get_parser_config
 
 from ..core import EntityGroup, Span
+from ..exceptions import ParserTimeout
+from .. import path
+
+logger = logging.getLogger(__name__)
 
 START_SYMBOL = 'S'
 HEAD_SYMBOL = 'H'
@@ -21,6 +27,8 @@ HEAD_SYMBOL = 'H'
 TYPE_FEATURE = Feature('type', display='prefix')
 
 START_SYMBOLS = frozenset({START_SYMBOL, HEAD_SYMBOL})
+
+MAX_PARSE_TIME = 2.0
 
 
 class Parser(object):
@@ -37,8 +45,8 @@ class Parser(object):
     statistical approach.
     """
 
-    def __init__(self, resource_loader=None, config=None):
-        """Summary
+    def __init__(self, resource_loader=None, config=None, allow_relaxed=True):
+        """Initializes the parser
 
         Args:
             resource_loader (ResourceLoader): An object which can load
@@ -49,12 +57,24 @@ class Parser(object):
         if not resource_loader and not config:
             raise ValueError('Parser requires either a configuration or a resource loader')
         app_path = resource_loader.app_path if resource_loader else None
+        try:
+            entity_types = path.get_entity_types(app_path)
+        except TypeError:
+            entity_types = None
         self._resource_loader = resource_loader
         self.config = get_parser_config(app_path, config)
-        self._grammar = FeatureGrammar.fromstring(generate_grammar(self.config))
+        rules = generate_grammar(self.config, entity_types)
+        self._grammar = FeatureGrammar.fromstring(rules)
         self._parser = FeatureChartParser(self._grammar)
+        if allow_relaxed:
+            relaxed_rules = generate_grammar(self.config, entity_types, relaxed=True)
+            self._relaxed_grammar = FeatureGrammar.fromstring(relaxed_rules)
+            self._relaxed_parser = FeatureChartParser(self._relaxed_grammar)
+        else:
+            self._relaxed_grammar = None
+            self._relaxed_parser = None
 
-    def parse_entities(self, query, entities):
+    def parse_entities(self, query, entities, all_candidates=False):
         """Finds groupings of entities for the given query.
 
         Args:
@@ -62,14 +82,18 @@ class Parser(object):
             entities (list of QueryEntity): The entities to find groupings for
 
         """
-        return self._parse(query, entities)
+        try:
+            return self._parse(query, entities, all_candidates=all_candidates)
+        except ParserTimeout:
+            logger.warning('Parser timed out parsing query %r', query.text)
+            return []
 
-    def _parse(self, query, entities):
+    def _parse(self, query, entities, all_candidates):
         entity_type_count = defaultdict(int)
         entity_dict = {}
         tokens = []  # tokens to be parsed
 
-        # assumes tokens are sorted
+        # generate sententical form (assumes entities are sorted)
         for entity in entities:
             entity_type = entity.entity.type
             entity_id = '{}{}'.format(entity_type, entity_type_count[entity_type])
@@ -77,11 +101,39 @@ class Parser(object):
             entity_dict[entity_id] = entity
             tokens.append(entity_id)
 
-        parses = self._parser.parse(tokens)
+        logger.debug('Parsing sentential form: %r', ' '.join(tokens))
+        start_time = time.time()
+        parses = []
+        for parse in self._parser.parse(tokens):
+            parses.append(parse)
+            if (time.time() - start_time) > MAX_PARSE_TIME:
+                raise ParserTimeout('Parsing took too long')
+
+        if not parses and self._relaxed_parser:
+            for parse in self._relaxed_parser.parse(tokens):
+                parses.append(parse)
+                if (time.time() - start_time) > MAX_PARSE_TIME:
+                    raise ParserTimeout('Parsing took too long')
+
         if not parses:
             return []
+
+        ranked_parses = self._rank_parses(query, entity_dict, parses, start_time=start_time)
+        if all_candidates:
+            return ranked_parses
+
+        # if we still have more than one, choose the first
+        for parse in ranked_parses:
+            return sorted((g.to_entity_group(entity_dict) for g in parse if g.dependents),
+                          key=lambda g: g.span.start)
+
+    def _rank_parses(self, query, entity_dict, parses, start_time=None):
+        start_time = start_time or time.time()
         resolved = OrderedDict()
+
         for parse in parses:
+            if time.time() - start_time > MAX_PARSE_TIME:
+                raise ParserTimeout('Parsing took too long')
             resolved[self._resolve_parse(parse)] = None
         filtered = (p for p in resolved.keys())
 
@@ -101,10 +153,7 @@ class Parser(object):
 
         # TODO: apply precedence
 
-        # if we still have more than one, choose the first
-        for parse in parses:
-            return sorted((g.to_entity_group(entity_dict) for g in parse if g.dependents),
-                          key=lambda g: g.span.start)
+        return list(filtered)
 
     def _parse_distance(self, parse, query, entity_dict):
         total_link_distance = 0
@@ -112,8 +161,7 @@ class Parser(object):
         while stack:
             node = stack.pop()
             head = entity_dict[node.id]
-
-            for dep in node.dependents:
+            for dep in node.dependents or set():
                 if dep.dependents:
                     stack.append(dep)
                     continue
@@ -275,7 +323,7 @@ def _generate_dependent_rules(dep_type, config, symbol_template, features, head_
                 yield '{lhs} -> {rhs} {dep}'.format(lhs=lhs, rhs=rhs, dep=dep_symbol)
 
 
-def generate_grammar(config, unique_entities=20):
+def generate_grammar(config, entity_types=None, relaxed=False, unique_entities=20):
     """Generates a feature context free grammar from the provided parser config
 
     Args:
@@ -286,6 +334,7 @@ def generate_grammar(config, unique_entities=20):
     Returns:
         str: a string containing the grammar with rules separated by line
     """
+    entity_types = set(entity_types or ())
     # start rules
     rules = ['{} -> {}'.format(START_SYMBOL, HEAD_SYMBOL),  # The start rule
              '{0} -> {0} {0}'.format(HEAD_SYMBOL)]  # Allow multiple heads
@@ -296,7 +345,15 @@ def generate_grammar(config, unique_entities=20):
     # the set of all dependents
     dependent_types = set((t for g in config.values() for t in g))
 
-    all_types = head_types.union(dependent_types)
+    all_types = head_types.union(dependent_types).union(entity_types)
+
+    for entity in all_types:
+        if entity not in head_types and entity not in dependent_types:
+            # Add entities which are not mentioned in config as standalones
+            rules.append('H -> {}'.format(entity))
+        elif relaxed and entity not in head_types and entity in dependent_types:
+            # Add dependent entities as standalones in relaxed mode
+            rules.append('H -> {}'.format(entity))
 
     # create rules for each group
     for entity in head_types:
