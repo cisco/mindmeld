@@ -10,10 +10,12 @@ Tests for parser module.
 # pylint: disable=locally-disabled,redefined-outer-name
 from __future__ import unicode_literals
 
+import pytest
 
 from mmworkbench import markup
 from mmworkbench.core import EntityGroup
 from mmworkbench.components.parser import Parser
+from mmworkbench.exceptions import ParserTimeout
 
 
 class TestBasicParser:
@@ -178,3 +180,28 @@ class TestParserLinkWords:
         assert len(parse) == 1
         assert parse[0].head == query.entities[2]
         assert parse[0].dependents == (query.entities[1],)
+
+
+def test_parser_timeout():
+    """Tests that the parser throws a ParserTimeout exception on very ambiguous queries
+    which take long to parse.
+    """
+    config = {
+        'name': {
+            'form': {'max_instances': 1},
+            'size': {'max_instances': 1},
+            'number': {'max_instances': 1, 'right': False},
+            'option': {'linking_words': ['with']}
+        }
+    }
+    parser = Parser(config=config)
+
+    text = ('[{venti|size} {jade citrus|name}|name] with [{one|number} bag of '
+            '{peach tranquility|name}|name] and [{one|number} bag {jade citrus|name} '
+            '{2 pumps peppermint|option} {no hot water|option} sub {steamed|option} '
+            '{lemonade|option} {4|number} {honeys|option}|name]')
+
+    query = markup.load_query(text)
+
+    with pytest.raises(ParserTimeout):
+        parser.parse_entities(query.query, query.entities, handle_timeout=False)

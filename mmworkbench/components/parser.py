@@ -74,7 +74,7 @@ class Parser(object):
             self._relaxed_grammar = None
             self._relaxed_parser = None
 
-    def parse_entities(self, query, entities, all_candidates=False):
+    def parse_entities(self, query, entities, all_candidates=False, handle_timeout=True):
         """Finds groupings of entities for the given query.
 
         Args:
@@ -82,6 +82,9 @@ class Parser(object):
             entities (list of QueryEntity): The entities to find groupings for
 
         """
+        if handle_timeout is False:
+            return self._parse(query, entities, all_candidates=all_candidates)
+
         try:
             return self._parse(query, entities, all_candidates=all_candidates)
         except ParserTimeout:
