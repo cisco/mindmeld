@@ -304,19 +304,17 @@ def test_load_group(query_factory):
     assert entities[0].text == 'large'
     assert entities[0].entity.type == 'size'
     assert entities[0].span == Span(2, 6)
+    assert entities[0].parent == entities[1]
 
     assert entities[1].text == 'latte'
     assert entities[1].entity.type == 'product'
     assert entities[1].span == Span(8, 12)
+    assert entities[1].children == (entities[0], entities[2])
 
     assert entities[2].text == 'nonfat milk'
     assert entities[2].entity.type == 'option'
     assert entities[2].span == Span(19, 29)
-
-    assert len(processed_query.entity_groups) == 1
-
-    assert processed_query.entity_groups[0].head == entities[1]
-    assert len(processed_query.entity_groups[0].dependents) == 2
+    assert entities[2].parent == entities[1]
 
 
 @pytest.mark.load
@@ -334,47 +332,39 @@ def test_load_group_nested(query_factory):
     assert entities[0].text == 'one'
     assert entities[0].entity.type == 'quantity'
     assert entities[0].span == Span(6, 8)
+    assert entities[0].parent == entities[2]
 
     assert entities[1].text == 'large'
     assert entities[1].entity.type == 'size'
     assert entities[1].span == Span(10, 14)
+    assert entities[1].parent == entities[2]
 
     assert entities[2].text == 'Tesora'
     assert entities[2].entity.type == 'product'
     assert entities[2].span == Span(16, 21)
+    assert entities[2].children == (entities[0], entities[1], entities[4], entities[6])
 
     assert entities[3].text == 'medium'
     assert entities[3].entity.type == 'size'
     assert entities[3].span == Span(28, 33)
+    assert entities[3].parent == entities[4]
 
     assert entities[4].text == 'cream'
     assert entities[4].entity.type == 'option'
     assert entities[4].span == Span(35, 39)
+    assert entities[4].parent == entities[2]
+    assert entities[4].children == (entities[3],)
 
     assert entities[5].text == 'medium'
     assert entities[5].entity.type == 'size'
     assert entities[5].span == Span(45, 50)
+    assert entities[5].parent == entities[6]
 
     assert entities[6].text == 'sugar'
     assert entities[6].entity.type == 'option'
     assert entities[6].span == Span(52, 56)
-
-    assert len(processed_query.entity_groups) == 1
-
-    product_group = processed_query.entity_groups[0]
-
-    assert product_group.head == entities[2]
-
-    assert product_group.dependents[0] == entities[0]
-    assert product_group.dependents[1] == entities[1]
-
-    assert len(product_group.dependents) == 4
-
-    assert product_group.dependents[2].head == entities[4]
-    assert product_group.dependents[2].dependents == (entities[3],)
-
-    assert product_group.dependents[3].head == entities[6]
-    assert product_group.dependents[3].dependents == (entities[5],)
+    assert entities[6].parent == entities[2]
+    assert entities[6].children == (entities[5],)
 
 
 @pytest.mark.load
@@ -393,49 +383,38 @@ def test_load_groups(query_factory):
     assert entities[0].text == 'one'
     assert entities[0].entity.type == 'quantity'
     assert entities[0].span == Span(6, 8)
+    assert entities[0].parent == entities[2]
 
     assert entities[1].text == 'large'
     assert entities[1].entity.type == 'size'
     assert entities[1].span == Span(10, 14)
+    assert entities[1].parent == entities[2]
 
     assert entities[2].text == 'Tesora'
     assert entities[2].entity.type == 'product'
     assert entities[2].span == Span(16, 21)
+    assert entities[2].children == (entities[0], entities[1], entities[4])
 
     assert entities[3].text == 'medium'
     assert entities[3].entity.type == 'size'
     assert entities[3].span == Span(28, 33)
+    assert entities[3].parent == entities[4]
 
     assert entities[4].text == 'cream'
     assert entities[4].entity.type == 'option'
     assert entities[4].span == Span(35, 39)
+    assert entities[4].parent == entities[2]
+    assert entities[4].children == (entities[3],)
 
     assert entities[5].text == 'Philz'
     assert entities[5].entity.type == 'store'
     assert entities[5].span == Span(46, 50)
+    assert entities[5].children == (entities[6],)
 
     assert entities[6].text == 'Downtown Sunnyvale'
     assert entities[6].entity.type == 'location'
     assert entities[6].span == Span(55, 72)
-
-    assert len(processed_query.entity_groups) == 2
-
-    product_group = processed_query.entity_groups[0]
-
-    assert product_group.head == entities[2]
-
-    assert product_group.dependents[0] == entities[0]
-    assert product_group.dependents[1] == entities[1]
-
-    assert len(product_group.dependents) == 3
-
-    assert product_group.dependents[2].head == entities[4]
-    assert product_group.dependents[2].dependents == (entities[3],)
-
-    store_group = processed_query.entity_groups[1]
-
-    assert store_group.head == entities[5]
-    assert store_group.dependents == (entities[6],)
+    assert entities[6].parent == entities[5]
 
 
 @pytest.mark.dump
@@ -517,13 +496,11 @@ def test_dump_group(query_factory):
     query = query_factory.create_query(query_text)
 
     size = QueryEntity.from_query(query, Span(2, 6), entity_type='size')
-    product = QueryEntity.from_query(query, Span(8, 12), entity_type='product')
     option = QueryEntity.from_query(query, Span(19, 29), entity_type='option')
+    product = QueryEntity.from_query(query, Span(8, 12), entity_type='product',
+                                     children=(size, option))
 
-    group = EntityGroup(product, [size, option])
-
-    processed_query = ProcessedQuery(query, entities=[size, product, option],
-                                     entity_groups=[group])
+    processed_query = ProcessedQuery(query, entities=[size, product, option])
     markup_text = "a [{large|size} {latte|product} with {nonfat milk|option}|product] please"
 
     assert markup.dump_query(processed_query) == markup_text
@@ -545,16 +522,11 @@ def test_dump_group_nested(query_factory):
         QueryEntity.from_query(query, Span(45, 50), entity_type='size'),
         QueryEntity.from_query(query, Span(52, 56), entity_type='option')
     ]
-    groups = [
-        EntityGroup(entities[2], [
-            entities[0],
-            entities[1],
-            EntityGroup(entities[4], [entities[3]]),
-            EntityGroup(entities[6], [entities[5]])
-        ])
-    ]
+    entities[4] = entities[4].with_children((entities[3],))
+    entities[6] = entities[6].with_children((entities[5],))
+    entities[2] = entities[2].with_children((entities[0], entities[1], entities[4], entities[6]))
 
-    processed_query = ProcessedQuery(query, entities=entities, entity_groups=groups)
+    processed_query = ProcessedQuery(query, entities=entities)
 
     markup_text = ('Order [{one|quantity} {large|size} {Tesora|product} with [{medium|size} '
                    '{cream|option}|option] and [{medium|size} {sugar|option}|option]|product]')
@@ -578,6 +550,10 @@ def test_dump_groups(query_factory):
         QueryEntity.from_query(query, Span(46, 50), entity_type='store'),
         QueryEntity.from_query(query, Span(55, 72), entity_type='location')
     ]
+    entities[4] = entities[4].with_children((entities[3],))
+    entities[5] = entities[5].with_children((entities[6],))
+    entities[2] = entities[2].with_children((entities[0], entities[1], entities[4]))
+
     groups = [
         EntityGroup(entities[2], [
             entities[0],
@@ -587,7 +563,7 @@ def test_dump_groups(query_factory):
         EntityGroup(entities[5], [entities[6]])
     ]
 
-    processed_query = ProcessedQuery(query, entities=entities, entity_groups=groups)
+    processed_query = ProcessedQuery(query, entities=entities)
 
     markup_text = ('Order [{one|quantity} {large|size} {Tesora|product} with '
                    '[{medium|size} {cream|option}|option]|product] from '
