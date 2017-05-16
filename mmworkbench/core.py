@@ -280,13 +280,11 @@ class ProcessedQuery(object):
 
     # TODO: look into using __slots__
 
-    def __init__(self, query, domain=None, intent=None, entities=None, entity_groups=None,
-                 is_gold=False):
+    def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False):
         self.query = query
         self.domain = domain
         self.intent = intent
         self.entities = None if entities is None else tuple(entities)
-        self.entity_groups = None if entity_groups is None else tuple(entity_groups)
         self.is_gold = is_gold
 
     def to_dict(self):
@@ -297,8 +295,6 @@ class ProcessedQuery(object):
             'intent': self.intent,
             'entities': None if self.entities is None else [e.to_dict() for e in self.entities],
         }
-        if self.entity_groups is not None:
-            base['entity_groups'] = [g.to_dict() for g in self.entity_groups]
         return base
 
     def __eq__(self, other):
@@ -318,7 +314,7 @@ class ProcessedQuery(object):
 
 
 class NestedEntity(object):
-    def __init__(self, texts, spans, token_spans, entity):
+    def __init__(self, texts, spans, token_spans, entity, children=None):
         """Initializes an entity node object
 
         Args:
@@ -327,15 +323,30 @@ class NestedEntity(object):
                 text for this entity for each text form
             token_spans (tuple): Tuple containing the token index spans of the
                 text for this entity for each text form
+            entity (Entity): Description
+            parent (NestedEntity): Description
+            children (tuple of NestedEntity): Description
         """
         self._texts = texts
         self._spans = spans
         self._token_spans = token_spans
         self.entity = entity
+        self.parent = None
+
+        for child in children or ():
+            child.parent = self
+        if children:
+            self.children = tuple(sorted(children, key=lambda c: c.span.start))
+        else:
+            self.children = None
+
+    def with_children(self, children):
+        """Creates a copy of this entity with the provided children"""
+        return self.__class__(self._texts, self._spans, self._token_spans, self.entity, children)
 
     @classmethod
     def from_query(cls, query, span=None, normalized_span=None, entity_type=None,
-                   entity=None, parent_offset=0):
+                   entity=None, parent_offset=0, children=None):
         """Creates an entity node using a parent entity node
 
         Args:
@@ -383,12 +394,14 @@ class NestedEntity(object):
                 raise ValueError("Either 'entity' or 'entity_type' must be specified")
             entity = Entity(texts[0], entity_type)
 
-        return cls(texts, spans, tok_spans, entity)
+        return cls(texts, spans, tok_spans, entity, children)
 
     def to_dict(self):
         """Converts the query entity into a dictionary"""
         base = self.entity.to_dict()
-        base.update({'span': self.span.to_dict()})
+        base['span'] = self.span.to_dict()
+        if base.children:
+            base['children'] = [c.to_dict() for c in self.children]
         return base
 
     @property
