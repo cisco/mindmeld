@@ -5,7 +5,7 @@ representing annotations of query text inline.
 from __future__ import unicode_literals
 from future.utils import raise_from
 
-from .core import Entity, EntityGroup, NestedEntity, ProcessedQuery, QueryEntity, Span
+from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
 from .ser import resolve_system_entity
 from .query_factory import QueryFactory
@@ -191,8 +191,7 @@ def _process_annotations(query, annotations):
     while stack:
         _close_ann(stack.pop())
 
-    entities = sorted(entities, key=lambda e: e.span.start)
-
+    entities = tuple(sorted(entities, key=lambda e: e.span.start))
     return entities
 
 
@@ -385,23 +384,19 @@ def _dump_brat(processed_query, **kwargs):
         entity_dict[(entity.entity.type, entity.span.start)] = params['index']
         annotations.append('T{index}\t{entity} {start} {end}\t{text}'.format(**params))
 
-    stack = list(reversed(processed_query.entity_groups))
-    while stack:
-        group = stack.pop()
-        for dep in group.dependents:
-            if isinstance(dep, EntityGroup):
-                stack.append(dep)
-                dep = dep.head
-
-            relation_offset += 1  # increment this first so first index is 1
-            params = {
-                'index': relation_offset,
-                'entity': dep.entity.type,
-                'head': entity_dict[(group.head.entity.type, group.head.span.start)],
-                'dependent': entity_dict[(dep.entity.type, dep.span.start)]
-            }
-            annotation = 'R{index}\t{entity} Arg1:T{head} Arg2:T{dependent}\t'.format(**params)
-            annotations.append(annotation)
+    # Loop again for dependents
+    for entity in enumerate(processed_query.entities):
+        if entity.parent is None:
+            continue
+        relation_offset += 1  # increment this first so first index is 1
+        params = {
+            'index': relation_offset,
+            'entity': entity.entity.type,
+            'head': entity_dict[(entity.parent.entity.type, entity.parent.span.start)],
+            'dependent': entity_dict[(entity.entity.type, entity.span.start)]
+        }
+        annotation = 'R{index}\t{entity} Arg1:T{head} Arg2:T{dependent}\t'.format(**params)
+        annotations.append(annotation)
 
     return (text, '\n'.join(annotations))
 

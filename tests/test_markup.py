@@ -13,7 +13,7 @@ import pytest
 
 from mmworkbench import markup
 
-from mmworkbench.core import Entity, EntityGroup, NestedEntity, ProcessedQuery, QueryEntity, Span
+from mmworkbench.core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 
 MARKED_UP_STRS = [
     'show me houses under {[600,000|sys:number] dollars|price}',
@@ -551,17 +551,8 @@ def test_dump_groups(query_factory):
         QueryEntity.from_query(query, Span(55, 72), entity_type='location')
     ]
     entities[4] = entities[4].with_children((entities[3],))
-    entities[5] = entities[5].with_children((entities[6],))
     entities[2] = entities[2].with_children((entities[0], entities[1], entities[4]))
-
-    groups = [
-        EntityGroup(entities[2], [
-            entities[0],
-            entities[1],
-            EntityGroup(entities[4], [entities[3]]),
-        ]),
-        EntityGroup(entities[5], [entities[6]])
-    ]
+    entities[5] = entities[5].with_children((entities[6],))
 
     processed_query = ProcessedQuery(query, entities=entities)
 

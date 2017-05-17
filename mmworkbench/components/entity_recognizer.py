@@ -144,7 +144,8 @@ class EntityRecognizer(Classifier):
         Returns:
             str: The predicted class label
         """
-        return sorted(super().predict(query), key=lambda e: e.span.start)
+        prediction = super().predict(query) or ()
+        return tuple(sorted(prediction, key=lambda e: e.span.start))
 
     def predict_proba(self, query):
         """Runs prediction on a given query and generates multiple entity tagging hypotheses with

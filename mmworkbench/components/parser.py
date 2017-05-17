@@ -15,7 +15,7 @@ from nltk.featstruct import Feature
 
 from ._config import get_parser_config
 
-from ..core import EntityGroup, Span
+from ..core import QueryEntity, Span
 from ..exceptions import ParserTimeout
 from .. import path
 
@@ -74,29 +74,39 @@ class Parser(object):
             self._relaxed_grammar = None
             self._relaxed_parser = None
 
-    def parse_entities(self, query, entities, all_candidates=False, handle_timeout=True):
-        """Finds groupings of entities for the given query.
+    def parse_entities(self, query, entities, all_candidates=False, handle_timeout=True,
+                       timeout=MAX_PARSE_TIME):
+        """Determines groupings of entities for the given query.
 
         Args:
             query (Query): The query being parsed
-            entities (list of QueryEntity): The entities to find groupings for
+            entities (iterable of QueryEntity): The entities to find groupings for
+            all_candidates (bool, optional): Description
+            handle_timeout (bool, optional): False if an exception should be raised in the event of
+                a parsing times out. Defaults to True.
+            timeout (float, optional): The amount of time to wait for the parsing to complete.
+                By default this is set to MAX_PARSE_TIME. If None is passed, the passing will never
+                time out
 
+        Returns:
+            tuple of QueryEntity: An updated version of the entities collection passed in with
+                their parent and children attributes set appropriately.
         """
-        if handle_timeout is False:
-            return self._parse(query, entities, all_candidates=all_candidates)
+        if not handle_timeout:
+            return self._parse(query, entities, all_candidates=all_candidates, timeout=timeout)
 
         try:
-            return self._parse(query, entities, all_candidates=all_candidates)
+            return self._parse(query, entities, all_candidates=all_candidates, timeout=timeout)
         except ParserTimeout:
             logger.warning('Parser timed out parsing query %r', query.text)
-            return []
+            return entities
 
-    def _parse(self, query, entities, all_candidates):
+    def _parse(self, query, entities, all_candidates, timeout):
         entity_type_count = defaultdict(int)
         entity_dict = {}
         tokens = []  # tokens to be parsed
 
-        # generate sententical form (assumes entities are sorted)
+        # generate sentential form (assumes entities are sorted)
         for entity in entities:
             entity_type = entity.entity.type
             entity_id = '{}{}'.format(entity_type, entity_type_count[entity_type])
@@ -109,47 +119,44 @@ class Parser(object):
         parses = []
         for parse in self._parser.parse(tokens):
             parses.append(parse)
-            if (time.time() - start_time) > MAX_PARSE_TIME:
+            if timeout is not None and (time.time() - start_time) > timeout:
                 raise ParserTimeout('Parsing took too long')
 
         if not parses and self._relaxed_parser:
             for parse in self._relaxed_parser.parse(tokens):
                 parses.append(parse)
-                if (time.time() - start_time) > MAX_PARSE_TIME:
+                if timeout is not None and (time.time() - start_time) > MAX_PARSE_TIME:
                     raise ParserTimeout('Parsing took too long')
 
         if not parses:
-            return []
+            if all_candidates:
+                return []
+            return entities
 
-        ranked_parses = self._rank_parses(query, entity_dict, parses, start_time=start_time)
+        ranked_parses = self._rank_parses(query, entity_dict, parses, timeout, start_time)
         if all_candidates:
             return ranked_parses
 
         # if we still have more than one, choose the first
-        for parse in ranked_parses:
-            return sorted((g.to_entity_group(entity_dict) for g in parse if g.dependents),
-                          key=lambda g: g.span.start)
+        entities = self._get_flat_entities(ranked_parses[0], entities, entity_dict)
+        return tuple(sorted(entities, key=lambda e: e.span.start))
 
-    def _rank_parses(self, query, entity_dict, parses, start_time=None):
+    def _rank_parses(self, query, entity_dict, parses, timeout, start_time=None):
         start_time = start_time or time.time()
         resolved = OrderedDict()
 
         for parse in parses:
-            if time.time() - start_time > MAX_PARSE_TIME:
+            if timeout is not None and time.time() - start_time > timeout:
                 raise ParserTimeout('Parsing took too long')
             resolved[self._resolve_parse(parse)] = None
         filtered = (p for p in resolved.keys())
 
         # Prefer parses with fewer groups
         parses = list(sorted(filtered, key=len))
-        if not parses:
-            return []
         filtered = (p for p in parses if len(p) <= len(parses[0]))
 
         # Prefer parses with minimal distance from dependents to heads
         parses = list(sorted(filtered, key=lambda p: self._parse_distance(p, query, entity_dict)))
-        if not parses:
-            return []
         min_parse_dist = self._parse_distance(parses[0], query, entity_dict)
         filtered = (p for p in parses
                     if self._parse_distance(p, query, entity_dict) <= min_parse_dist)
@@ -182,6 +189,19 @@ class Parser(object):
                 total_link_distance += link_distance
 
         return total_link_distance
+
+    @staticmethod
+    def _get_flat_entities(parse, entities, entity_dict):
+        stack = [g.to_query_entity(entity_dict) for g in parse]
+        new_dict = {}
+        while stack:
+            entity = stack.pop()
+            new_dict[(entity.entity.type, entity.span.start)] = entity
+
+            for child in entity.children or ():
+                stack.append(child)
+
+        return [new_dict.get((e.entity.type, e.span.start), e) for e in entities]
 
     @classmethod
     def _resolve_parse(cls, node):
@@ -247,18 +267,21 @@ class _EntityNode(namedtuple('EntityNode', ('type', 'id', 'dependents'))):
 
         return text + '\n' + '\n'.join(dep.pretty(indent+1) for dep in self.dependents)
 
-    def to_entity_group(self, entity_dict, is_root=True):
-        """Converts a node to an EntityGroup
+    def to_query_entity(self, entity_dict, is_root=True):
+        """Converts a node to an QueryEntity
 
         Args:
-            entity_dict (dict): A mapping from entity ids to the corresponding QueryEntity objects
-
+            entity_dict (dict): A mapping from entity ids to the corresponding
+                original QueryEntity objects
         """
         if not self.dependents and not is_root:
             return entity_dict[self.id]
 
-        dependents = tuple((c.to_entity_group(entity_dict, is_root=False) for c in self.dependents))
-        return EntityGroup(entity_dict[self.id], dependents)
+        head = entity_dict[self.id]
+        if self.dependents is None:
+            return head
+        dependents = tuple((c.to_query_entity(entity_dict, is_root=False) for c in self.dependents))
+        return head.with_children(dependents)
 
 
 def _build_symbol_template(group, features):

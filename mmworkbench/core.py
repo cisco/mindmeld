@@ -554,39 +554,6 @@ class Entity(object):
         return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.type)
 
 
-class EntityGroup(object):
-    """An object which represents the relationship between entities.
-
-    Attributes:
-        head (QueryEntity): The head of this entity group
-        dependents (tuple of QueryEntity or EntityGroup): A list of entities which describe the head
-    """
-
-    def __init__(self, head, dependents):
-        self.head = head
-        self.dependents = tuple(sorted(dependents, key=lambda d: d.span.start))
-        start = head.span.start
-        end = head.span.end
-        for dep in dependents:
-            start = min(start, dep.span.start)
-            end = max(end, dep.span.end)
-        self.span = Span(start, end)
-
-    def __repr__(self):
-        text = self.head.entity.display_text or self.head.text
-        msg = '<{} {!r} ({!r}) [{!r}-{!r}]>'
-        return msg.format(self.__class__.__name__, text, self.head.entity.type,
-                          self.span.start, self.span.end)
-
-    def to_dict(self):
-        """Converts the entity group into a dictionary"""
-        return {
-            'head': self.head.to_dict(),
-            'dependents': [d.to_dict() for d in self.dependents],
-            'span': self.span.to_dict()
-        }
-
-
 def resolve_entity_conflicts(query_entities):
     """This method takes a list containing query entities for a query, and resolves
     any entity conflicts. The resolved list is returned.
