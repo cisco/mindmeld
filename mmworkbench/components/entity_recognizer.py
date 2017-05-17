@@ -135,6 +135,18 @@ class EntityRecognizer(Classifier):
         self.ready = True
         self.dirty = False
 
+    def predict(self, query):
+        """Predicts entities for the given query using the trained recognition model
+
+        Args:
+            query (Query or str): The input query
+
+        Returns:
+            str: The predicted class label
+        """
+        prediction = super().predict(query) or ()
+        return tuple(sorted(prediction, key=lambda e: e.span.start))
+
     def predict_proba(self, query):
         """Runs prediction on a given query and generates multiple entity tagging hypotheses with
         their associated probabilities using the trained entity recognition model

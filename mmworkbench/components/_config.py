@@ -251,8 +251,9 @@ DEFAULT_PARSER_DEPENDENT_CONFIG = {
     'left': True,
     'right': True,
     'min_instances': 0,
-    'max_instances': 1,
-    'precedence': 'left'
+    'max_instances': None,
+    'precedence': 'left',
+    'linking_words': frozenset()
 }
 
 
@@ -264,7 +265,7 @@ def get_classifier_config(clf_type, domain=None, intent=None, entity=None):
     pass
 
 
-def get_parser_config(app_path, config=None):
+def get_parser_config(app_path=None, config=None):
     try:
         config = config or _get_config_module(app_path).PARSER_CONFIG
     except AttributeError:
@@ -277,24 +278,25 @@ def _expand_parser_config(config):
 
 
 def _expand_group_config(group_config):
-    """Expands the group config.
+    """Expands a parser group configuration.
 
-    A group config can either be a list of dependents or an object with a
-    'dependents' field containing that list.
+    A group config can either be a list of dependents or a dictionary with a
+    field for each dependent.
 
-    A dependent can either be a string containing the name of the entity type
-    or an object with at least a type field.
+    In the list a dependent can be a string containing the name of the
+    entity-role type identifier or a dictionary with at least a type field.
 
+    In the dictionary the dependent must be another dictionary.
 
-    Some example parser configs follow
+    Some example parser configs follow below.
 
-    A very simple configuration
+    A very simple configuration:
 
        {
            'head': ['dependent']
        }
 
-    A more realistic simple config
+    A more realistic simple config:
 
         {
             'product|beverage': ['size', 'quantity', 'option|beverage'],
@@ -303,95 +305,77 @@ def _expand_group_config(group_config):
             'option': ['size']
         }
 
-    A fully specified config
+    A fully specified config:
 
         {
             'product': {
-                'role': None,
-                'dependents': [{
-                    'type': 'quantity',
+                'quantity': {
                     'role': None,
                     'left': True,
                     'right': True,
-                    'right_distance': 1
                     'precedence': 'left',
                     'min_instances': 0,
                     'max_instances': 3
-                }, {
-                    'type': 'size',
+                },
+                'size': {
                     'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',
                     'min_instances': 0,
                     'max_instances': 1
-                }, {
-                    'type': 'option',
+                },
+                'option': {
                     'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',
                     'min_instances': 0,
                     'max_instances': 1
-                    'dependents': [ {
-                        'type': 'size',
-                        'role': None,
-                        'left': True,
-                        'right': True,
-                        'precedence': 'left',
-                        'min_instances': 0,
-                        'max_instances': 1
-                    } ]
-                }],
+                }
             },
             'store': {
-                'role': None,
-                'dependents': [{
-                    'type': 'location',
+                'location': {
                     'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',
                     'min_instances': 0,
                     'max_instances': 1
-                }],
-            }
+                }
+            },
             'option': {
-                'role': None,
-                'dependents': [{
-                    'type': 'size',
+                'size': {
                     'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',
                     'min_instances': 0,
                     'max_instances': 1
-                }]
+                }
             }
         }
     """
-
-    if isinstance(group_config, (tuple, list)):
-        dependents = group_config
-        group_config = {
-            'dependents': dependents
-        }
+    group_config = copy.deepcopy(group_config)
+    expanded = {}
+    if isinstance(group_config, (tuple, list, set)):
+        for dependent in group_config:
+            config = copy.copy(DEFAULT_PARSER_DEPENDENT_CONFIG)
+            try:
+                dep_type = dependent.pop('type')
+                config.update(dependent)
+            except (AttributeError, ValueError):
+                # simple style config -- dependent is a str
+                dep_type = dependent
+                pass
+            expanded[dep_type] = config
     else:
-        dependents = group_config['dependents']
-
-    exp_dependents = []
-    for dependent in dependents:
-        config = copy.copy(DEFAULT_PARSER_DEPENDENT_CONFIG)
-        config['type'] = dependent
-        try:
-            config.update(dependent)
-        except ValueError:
-            # simple style config -- dependent is a str
-            pass
-        exp_dependents.append(config)
-
-    group_config['dependents'] = exp_dependents
-    return copy.deepcopy(group_config)
+        for dep_type, dep_config in group_config.items():
+            config = copy.copy(DEFAULT_PARSER_DEPENDENT_CONFIG)
+            dep_config.pop('type', None)
+            config.update(dep_config)
+            expanded[dep_type] = config
+    return expanded
 
 
 def _get_config_module(app_path):

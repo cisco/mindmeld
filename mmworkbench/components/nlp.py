@@ -381,9 +381,9 @@ class IntentProcessor(Processor):
         for entity in entities:
             self.entities[entity.entity.type].process_entity(query, entities, entity)
 
-        entity_groups = self.parser.parse_entities(query, entities) if self.parser else None
+        entities = self.parser.parse_entities(query, entities) if self.parser else entities
 
-        return ProcessedQuery(query, entities=entities, entity_groups=entity_groups)
+        return ProcessedQuery(query, entities=entities)
 
 
 class EntityProcessor(Processor):

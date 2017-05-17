@@ -5,9 +5,10 @@ representing annotations of query text inline.
 from __future__ import unicode_literals
 from future.utils import raise_from
 
-from .core import Entity, EntityGroup, NestedEntity, ProcessedQuery, QueryEntity, Span
+from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
 from .ser import resolve_system_entity
+from .query_factory import QueryFactory
 
 ENTITY_START = '{'
 ENTITY_END = '}'
@@ -25,24 +26,26 @@ BRAT_FORMAT = 'brat'
 MARKUP_FORMATS = frozenset({MINDMELD_FORMAT, BRAT_FORMAT})
 
 
-def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
+def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=False):
     """Creates a processed query object from marked up query text.
 
     Args:
-        markup (str): The marked up query text
-        query_factory (QueryFactory): An object which can create queries
-        domain (str): The name of the domain annotated for the query
-        intent (str): The name of the intent annotated for the query
-        is_gold (bool): True if the markup passed in is a reference, human-labeled example
+        markup (str): The marked up query text.
+        query_factory (QueryFactory, optional): An object which can create
+            queries.
+        domain (str, optional): The name of the domain annotated for the query.
+        intent (str, optional): The name of the intent annotated for the query.
+        is_gold (bool, optional): True if the markup passed in is a reference,
+            human-labeled example. Defaults to False.
 
     Returns:
         ProcessedQuery: a processed query
     """
-
+    query_factory = query_factory or QueryFactory.create_query_factory()
     try:
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
         query = query_factory.create_query(raw_text)
-        entities, entity_groups = _process_annotations(query, annotations)
+        entities = _process_annotations(query, annotations)
     except MarkupError as exc:
         msg = 'Invalid markup in query {!r}: {}'
         raise_from(MarkupError(msg.format(markup, exc)), exc)
@@ -50,21 +53,26 @@ def load_query(markup, query_factory, domain=None, intent=None, is_gold=False):
         msg = "Unable to load query {!r}: {}"
         raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
 
-    return ProcessedQuery(query, domain=domain, intent=intent, entities=entities,
-                          entity_groups=entity_groups, is_gold=is_gold)
+    return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
 
-def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
+def load_query_file(file_path, query_factory=None, domain=None, intent=None, is_gold=False):
     """Loads the queries from the specified file
 
     Args:
         file_path (str): The path of the file to load
-        query_factory (TYPE): Description
-        domain (str): The domain of the query file
-        intent (str): The intent of the query file
-        is_gold (bool, optional): Description
+        query_factory (QueryFactory, optional): An object which can create
+            queries.
+        domain (str, optional): The name of the domain annotated for the query.
+        intent (str, optional): The name of the intent annotated for the query.
+        is_gold (bool, optional): True if the markup passed in is a reference,
+            human-labeled example. Defaults to False.
 
+    Returns:
+        ProcessedQuery: a processed query
     """
+    query_factory = query_factory or QueryFactory.create_query_factory()
+
     queries = []
     for query_text in _read_query_file(file_path):
         if query_text[0] == '-':
@@ -72,13 +80,6 @@ def load_query_file(file_path, query_factory, domain, intent, is_gold=False):
         query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
         queries.append(query)
     return queries
-
-
-def convert_query_file(file_path, query_factory, input_format, output_format):
-    if not (input_format == MINDMELD_FORMAT and output_format == BRAT_FORMAT):
-        # TODO implement conversion from brat to mindmeld
-        raise ValueError('The requested conversion is not supported at this time')
-    pass
 
 
 def mark_down_file(file_path):
@@ -111,8 +112,12 @@ def _read_query_file(file_path):
 
 
 def _process_annotations(query, annotations):
+    """
+
+    Returns:
+        list of ProcessedQuery:
+    """
     entities = []
-    groups = []
     stack = []
 
     def _close_ann(ann):
@@ -127,14 +132,14 @@ def _process_annotations(query, annotations):
             except KeyError as exc:
                 msg = 'Group between {} and {} missing children'.format(ann['start'], ann['end'])
                 raise_from(MarkupError(msg), exc)
-            group = EntityGroup(head, children)
+            entity = head.with_children(children)
+            entities.remove(head)
+            entities.append(entity)
             if ann.get('parent'):
                 parent = ann.get('parent')
                 children = parent.get('children', [])
-                children.append(group)
+                children.append(entity)
                 parent['children'] = children
-            else:
-                groups.append(group)
 
         if ann['ann_type'] == 'entity':
             span = Span(ann['start'], ann['end'])
@@ -186,10 +191,8 @@ def _process_annotations(query, annotations):
     while stack:
         _close_ann(stack.pop())
 
-    entities = sorted(entities, key=lambda e: e.span.start)
-    groups = sorted(groups, key=lambda g: g.head.span.start)
-
-    return entities, groups
+    entities = tuple(sorted(entities, key=lambda e: e.span.start))
+    return entities
 
 
 def _parse_tokens(tokens):
@@ -381,30 +384,26 @@ def _dump_brat(processed_query, **kwargs):
         entity_dict[(entity.entity.type, entity.span.start)] = params['index']
         annotations.append('T{index}\t{entity} {start} {end}\t{text}'.format(**params))
 
-    stack = list(reversed(processed_query.entity_groups))
-    while stack:
-        group = stack.pop()
-        for dep in group.dependents:
-            if isinstance(dep, EntityGroup):
-                stack.append(dep)
-                dep = dep.head
-
-            relation_offset += 1  # increment this first so first index is 1
-            params = {
-                'index': relation_offset,
-                'entity': dep.entity.type,
-                'head': entity_dict[(group.head.entity.type, group.head.span.start)],
-                'dependent': entity_dict[(dep.entity.type, dep.span.start)]
-            }
-            annotation = 'R{index}\t{entity} Arg1:T{head} Arg2:T{dependent}\t'.format(**params)
-            annotations.append(annotation)
+    # Loop again for dependents
+    for entity in enumerate(processed_query.entities):
+        if entity.parent is None:
+            continue
+        relation_offset += 1  # increment this first so first index is 1
+        params = {
+            'index': relation_offset,
+            'entity': entity.entity.type,
+            'head': entity_dict[(entity.parent.entity.type, entity.parent.span.start)],
+            'dependent': entity_dict[(entity.entity.type, entity.span.start)]
+        }
+        annotation = 'R{index}\t{entity} Arg1:T{head} Arg2:T{dependent}\t'.format(**params)
+        annotations.append(annotation)
 
     return (text, '\n'.join(annotations))
 
 
 def _dump_mindmeld(processed_query, **kwargs):
     raw_text = processed_query.query.text
-    markup = _mark_up_entities(raw_text, processed_query.entities, processed_query.entity_groups)
+    markup = _mark_up_entities(raw_text, processed_query.entities)
     return markup
 
 
@@ -421,13 +420,10 @@ def validate_markup(markup, query_factory):
     return NotImplemented
 
 
-def _mark_up_entities(query_str, entities, groups):
+def _mark_up_entities(query_str, entities):
     annotations = []
-    for group in groups or tuple():
-        annotations.extend(_annotations_for_group(group)[2])
-
     for entity in entities or tuple():
-        annotations.extend(_annotations_for_entity(entity)[2])
+        annotations.extend(_annotations_for_entity(entity))
 
     # remove duplicates from annotations
     ann_map = {}
@@ -483,54 +479,47 @@ def _mark_up_entities(query_str, entities, groups):
     return ''.join(tokens)
 
 
-def _annotations_for_group(group, depth=0):
-    if isinstance(group, (NestedEntity, QueryEntity)):
-        return _annotations_for_entity(group, depth)
-    ann = {
-        'ann_type': 'group',
-        'type': group.head.entity.type,
-        'depth': depth
-    }
-    annotations = [ann]
-
-    start = group.head.span.start
-    end = group.head.span.end
-    for child in tuple(group.dependents) + (group.head,):
-        ch_start, ch_end, ch_anns = _annotations_for_group(child, depth+1)
-        start = min(start, ch_start)
-        end = max(end, ch_end)
-        annotations.extend(ch_anns)
-
-    ann['start'] = start
-    ann['end'] = end
-
-    return start, end, annotations
-
-
 def _annotations_for_entity(entity, depth=0, parent_offset=0):
+    annotations = []
     start = entity.span.start + parent_offset
     end = entity.span.end + parent_offset
-    annotations = [{
+    if entity.children:
+        # This entity is the head of a group. Add an annotation for the group.
+        g_start = min(start, entity.children[0].span.start)
+        g_end = max(end, entity.children[-1].span.end)
+        annotations.append({
+            'ann_type': 'group',
+            'type': entity.entity.type,
+            'start': g_start,
+            'end': g_end,
+            'depth': depth
+        })
+        depth += 1
+        for child in entity.children:
+            # Add annotations for each of the dependents
+            annotations.extend(_annotations_for_entity(child, depth))
+    annotations.append({
         'ann_type': 'entity',
         'type': entity.entity.type,
         'role': entity.entity.role,
         'start': start,
         'end': end,
         'depth': depth
-    }]
+    })
 
+    # Iterate over 'nested' entities
     if entity.entity.value and isinstance(entity.entity.value, dict):
         children = entity.entity.value.get('children', [])
     else:
         children = []
 
     for child in children:
-        annotations.extend(_annotations_for_entity(child, depth+1, start)[2])
+        annotations.extend(_annotations_for_entity(child, depth+1, start))
 
     annotations = sorted(annotations, key=lambda a: a['depth'])
     annotations = sorted(annotations, key=lambda a: a['start'])
 
-    return start, end, annotations
+    return annotations
 
 
 def mark_down(markup):
