@@ -15,7 +15,7 @@ from nltk.featstruct import Feature
 
 from ._config import get_parser_config
 
-from ..core import QueryEntity, Span
+from ..core import Span
 from ..exceptions import ParserTimeout
 from .. import path
 
