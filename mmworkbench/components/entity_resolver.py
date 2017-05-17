@@ -5,10 +5,9 @@ This module contains the entity resolver component of the Workbench natural lang
 from __future__ import unicode_literals
 from builtins import object
 
-import copy
 import logging
 import os
-import json
+import copy
 
 from ..core import Entity
 
@@ -18,15 +17,16 @@ from elasticsearch.helpers import streaming_bulk
 logger = logging.getLogger(__name__)
 
 DOC_TYPE = "document"
+ES_SYNONYM_INDEX_PREFIX = "synonym"
 
 
 class EntityResolver(object):
     """An entity resolver is used to resolve entities in a given query to their canonical values
     (usually linked to specific entries in a knowledge base).
     """
-    ES_SYNONYM_INDEX_PREFIX = "synonym"
 
-    DEFAULT_SYNC_ES_MAPPING = {
+    # default ElasticSearch mapping to define text analysis settings for text fields
+    DEFAULT_SYN_ES_MAPPING = {
         "mappings": {
             "document": {
                 "properties": {
@@ -73,13 +73,6 @@ class EntityResolver(object):
             }
         },
         "settings": {
-            # "similarity": {
-            #     "default": {
-            #         "type": "BM25",
-            #         "k1": "0",
-            #         "b": "1"
-            #     }
-            # },
             "analysis": {
                 "filter": {
                     "token_shingle": {
@@ -341,22 +334,27 @@ class EntityResolver(object):
     #
     #     return {'items': item_map, 'synonyms': syn_map}
 
-    def fit(self):
+    def fit(self, clean=False):
         """Loads an entity mapping file (if one exists) or trains a machine-learned entity
-        resolution model using the provided training examples"""
+        resolution model using the provided training examples
+
+        Args:
+            clean (bool): If True, deletes and recreates the index from scratch instead of
+                          updating the existing index with synonyms in the mapping.json
+        """
         if not self._is_system_entity:
             mapping = self._resource_loader.get_entity_map(self.type)
-            #self._mapping = self.process_mapping(self.type, mapping, self._normalizer)
+            # self._mapping = self.process_mapping(self.type, mapping, self._normalizer)
 
             # create index if specified index does not exist
             # TODO: refactor things around ES calls.
             if not self._es_client.indices.exists(index=self._es_index_name):
                 EntityResolver.create_index(self._es_index_name, es_client=self._es_client)
 
-            print ('importing to ES')
+            logger.info("Importing synonym data to ES index '{}'".format(self._es_index_name))
             EntityResolver.ingest_synonym(self._es_index_name, mapping)
 
-    def predict(self, entity):
+    def predict(self, entity, exact_match_only=False):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model
 
@@ -373,51 +371,26 @@ class EntityResolver(object):
         # TODO: revisit the normalization behavior
         normed = self._normalizer(entity.text)
 
-        # try:
-        #     cnames = self._mapping['synonyms'][normed]
-        # except KeyError:
-        #     logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.type)
-        #     return entity.text
-        #
-        # if len(cnames) > 1:
-        #     logger.info('Multiple possible canonical names for %r entity for type %r',
-        #                 entity.text, entity.type)
-        #
-        # values = []
-        # for cname in cnames:
-        #     for item in self._mapping['items'][cname]:
-        #         item_value = copy.copy(item)
-        #         item_value.pop('whitelist', None)
-        #         values.append(item_value)
-        #
-        # return values
+        if exact_match_only:
+            try:
+                cnames = self._mapping['synonyms'][normed]
+            except KeyError:
+                logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.type)
+                return entity.text
 
-        # ES query for finding exact match on CNAME and synonyms
-        exact_match_query = {
-            "query": {
-                "bool": {
-                    "should": [
-                        {
-                            "match": {
-                                "whitelist.normalized_keyword": {
-                                    "query": normed
-                                }
-                            }
-                        },
-                        {
-                            "match": {
-                                "cname.normalized_keyword": {
-                                    "query": normed
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            "size": 10
-        }
+            if len(cnames) > 1:
+                logger.info('Multiple possible canonical names for %r entity for type %r',
+                            entity.text, entity.type)
 
-        # ES query for finding exact match on CNAME and synonyms
+            values = []
+            for cname in cnames:
+                for item in self._mapping['items'][cname]:
+                    item_value = copy.copy(item)
+                    item_value.pop('whitelist', None)
+                    values.append(item_value)
+
+            return values
+
         full_text_query = {
             "query": {
                 "bool": {
@@ -475,20 +448,39 @@ class EntityResolver(object):
                     ]
                 }
             },
-            "size": 20
+            "size": 0,
+            "aggs": {
+                "limit_results": {
+                    "sampler": {
+                        "shard_size": 20
+                    },
+                    "aggs": {
+                        "top_cnames": {
+                            "terms": {
+                                "field": "cname.raw",
+                                "size": 100
+                            },
+                            "aggs": {
+                                "top_text_rel_match": {
+                                    "top_hits": {
+                                        "size": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        # response = self._es_client.search(index=self._es_index_name, body=exact_match_query)
-        # results = [hit['_source'] for hit in response['hits']['hits']]
-        results = []
-
-        # no exact match on CNAME or synonym names found.
-        # Continue to fall back to find matches based on text relevance score.
-        if len(results) == 0:
-            response = self._es_client.search(index=self._es_index_name, body=full_text_query)
-            results = [hit['_source'] for hit in response['hits']['hits']]
-
-        return results
+        response = self._es_client.search(index=self._es_index_name, body=full_text_query)
+        buckets = response['aggregations']['limit_results']['top_cnames']['buckets']
+        results = [{'cname': bucket['key'],
+                    'max_score': bucket['top_text_rel_match']['hits']['max_score'],
+                    'num_hits': bucket['top_text_rel_match']['hits']['total']}
+                   for bucket in buckets]
+        results.sort(key=lambda x: x['max_score'], reverse=True)
+        return results[0:10]
 
     def predict_proba(self, entity):
         """Runs prediction on a given entity and generates multiple hypotheses with their
