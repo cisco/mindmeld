@@ -400,7 +400,7 @@ class NestedEntity(object):
         """Converts the query entity into a dictionary"""
         base = self.entity.to_dict()
         base['span'] = self.span.to_dict()
-        if base.children:
+        if self.children:
             base['children'] = [c.to_dict() for c in self.children]
         return base
 
