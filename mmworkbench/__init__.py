@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from .app import Application
-from .core import configure_logs
+from ._util import configure_logs
 from .components import Conversation, NaturalLanguageProcessor, QuestionAnswerer
 from ._version import current
 
