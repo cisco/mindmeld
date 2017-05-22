@@ -57,6 +57,12 @@ ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, 'ascii_folding_dict.txt
 MALLARD_JAR_PATH = os.path.join(RESOURCES_FOLDER, 'mindmeld-mallard.jar')
 
 
+# User specific directories
+USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mmworkbench')
+BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, 'blueprints')
+BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, '{name}')
+
+
 # Helpers
 def safe_path(func):
     """A decorator to make the path safe by replacing unsafe characters"""
@@ -370,3 +376,7 @@ def get_config_module_path(app_path):
         str: The path of the config module file.
     """
     return CONFIG_MODULE_PATH.format(app_path=app_path)
+
+
+def get_cached_blueprint_path(name):
+    return BLUEPRINT_PATH.format(name=name)
