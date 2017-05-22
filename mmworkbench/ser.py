@@ -138,7 +138,7 @@ def _mallard_item_to_entity(query, item, offset=0):
     else:
         num_type = str(item['dimension'])
         value['value'] = str(item['value'][0])
-    entity_type = "sys:{}".format(num_type)
+    entity_type = "sys_{}".format(num_type)
 
     entity = Entity(item['entity']['text'], entity_type, value=value, confidence=confidence)
     return QueryEntity.from_query(query, Span(start + offset, end + offset), entity=entity)
@@ -146,7 +146,7 @@ def _mallard_item_to_entity(query, item, offset=0):
 
 def _dimensions_from_entity_types(entity_types):
     entity_types = entity_types or []
-    dims = [et.split(':')[1] for et in (entity_types or []) if et.startswith('sys:')]
+    dims = [et.split('_')[1] for et in (entity_types or []) if et.startswith('sys_')]
     if len(dims) == 0:
         dims = None
     return dims

@@ -527,7 +527,7 @@ class Entity(object):
         Returns:
             bool: True if the entity is a system entity type, else False
         """
-        return entity_type.startswith('sys:')
+        return entity_type.startswith('sys_')
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
