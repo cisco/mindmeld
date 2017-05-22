@@ -17,7 +17,6 @@ from elasticsearch.helpers import streaming_bulk
 logger = logging.getLogger(__name__)
 
 DOC_TYPE = "document"
-ES_SYNONYM_INDEX_PREFIX = "synonym"
 
 
 class EntityResolver(object):
@@ -26,6 +25,7 @@ class EntityResolver(object):
     """
 
     # default ElasticSearch mapping to define text analysis settings for text fields
+    ES_SYNONYM_INDEX_PREFIX = "synonym"
     DEFAULT_SYN_ES_MAPPING = {
         "mappings": {
             "document": {
@@ -243,7 +243,7 @@ class EntityResolver(object):
         """
         es_client = es_client or cls._create_es_client()
 
-        mapping = EntityResolver.DEFAULT_SYNC_ES_MAPPING
+        mapping = EntityResolver.DEFAULT_SYN_ES_MAPPING
 
         if not es_client.indices.exists(index=index_name):
             logger.info("Creating index '{}'".format(index_name))
@@ -480,7 +480,7 @@ class EntityResolver(object):
                     'num_hits': bucket['top_text_rel_match']['hits']['total']}
                    for bucket in buckets]
         results.sort(key=lambda x: x['max_score'], reverse=True)
-        return results[0:10]
+        return results[0:20]
 
     def predict_proba(self, entity):
         """Runs prediction on a given entity and generates multiple hypotheses with their
