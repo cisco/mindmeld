@@ -9,7 +9,7 @@ import json
 import logging
 import os
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
 from elasticsearch.helpers import streaming_bulk
 
 from ._config import get_app_name
@@ -231,11 +231,15 @@ class QuestionAnswerer(object):
         mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
         scoped_index_name = '{}${}'.format(app_name, index_name)
 
-        if not es_client.indices.exists(index=scoped_index_name):
-            logger.info("Creating index '{}'".format(index_name))
-            es_client.indices.create(scoped_index_name, body=mapping)
-        else:
-            logger.error("Index '{}' already exists.".format(index_name))
+        try:
+            if not es_client.indices.exists(index=scoped_index_name):
+                logger.info("Creating index '{}'".format(index_name))
+                es_client.indices.create(scoped_index_name, body=mapping)
+            else:
+                logger.error("Index '{}' already exists.".format(index_name))
+        except ESConnectionError as ex:
+            logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
+            raise ex
 
     @classmethod
     def load_index(cls, app_name, index_name, data_file, es_host=None, es_client=None):
@@ -264,21 +268,26 @@ class QuestionAnswerer(object):
         scoped_index_name = '{}${}'.format(app_name, index_name)
 
         # create index if specified index does not exist
-        if not es_client.indices.exists(index=scoped_index_name):
-            QuestionAnswerer.create_index(app_name, index_name, es_host=es_host,
-                                          es_client=es_client)
+        try:
+            if not es_client.indices.exists(index=scoped_index_name):
+                QuestionAnswerer.create_index(app_name, index_name, es_host=es_host,
+                                              es_client=es_client)
 
-        count = 0
-        for okay, result in streaming_bulk(es_client, _doc_generator(data), index=scoped_index_name,
-                                           doc_type=DOC_TYPE, chunk_size=50):
+            count = 0
+            for okay, result in streaming_bulk(es_client, _doc_generator(data),
+                                               index=scoped_index_name, doc_type=DOC_TYPE,
+                                               chunk_size=50):
 
-            action, result = result.popitem()
-            doc_id = '/%s/%s/%s' % (index_name, DOC_TYPE, result['_id'])
-            # process the information from ES whether the document has been
-            # successfully indexed
-            if not okay:
-                logger.error('Failed to %s document %s: %r', action, doc_id, result)
-            else:
-                count += 1
-                logger.debug('Loaded document: %s', doc_id)
-        logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
+                action, result = result.popitem()
+                doc_id = '/%s/%s/%s' % (index_name, DOC_TYPE, result['_id'])
+                # process the information from ES whether the document has been
+                # successfully indexed
+                if not okay:
+                    logger.error('Failed to %s document %s: %r', action, doc_id, result)
+                else:
+                    count += 1
+                    logger.debug('Loaded document: %s', doc_id)
+            logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
+        except ESConnectionError as ex:
+            logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
+            raise ex
