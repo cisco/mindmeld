@@ -19,6 +19,7 @@ import click_log
 from . import path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import FileNotFoundError
+from ._util import blueprint
 from ._version import current as __version__
 
 
@@ -173,6 +174,13 @@ def _get_mallard_pid():
     for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
         pid.append(line.split()[0])
     return pid
+
+
+@cli.command('blueprint', context_settings=CONTEXT_SETTINGS)
+@click.option('-n', '--es-host', required=True)
+@click.argument('app_name', required=True)
+def setup_blueprint(es_host, app_name):
+    blueprint(app_name, es_host=es_host)
 
 
 if __name__ == '__main__':
