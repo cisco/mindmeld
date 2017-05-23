@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 DOC_TYPE = "document"
 
-
 class EntityResolver(object):
     """An entity resolver is used to resolve entities in a given query to their canonical values
     (usually linked to specific entries in a knowledge base).
@@ -52,22 +51,27 @@ class EntityResolver(object):
                         "type": "keyword"
                     },
                     "whitelist": {
-                        "type": "text",
-                        "fields": {
-                            "raw": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            },
-                            "normalized_keyword": {
+                        "type": "nested",
+                        "properties": {
+                            "name": {
                                 "type": "text",
-                                "analyzer": "keyword_match_analyzer"
-                            },
-                            "char_ngram": {
-                                "type": "text",
-                                "analyzer": "char_ngram_analyzer"
+                                "fields": {
+                                    "raw": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                    },
+                                    "normalized_keyword": {
+                                        "type": "text",
+                                        "analyzer": "keyword_match_analyzer"
+                                    },
+                                    "char_ngram": {
+                                        "type": "text",
+                                        "analyzer": "char_ngram_analyzer"
+                                    }
+                                },
+                                "analyzer": "default_analyzer"
                             }
-                        },
-                        "analyzer": "default_analyzer"
+                        }
                     }
                 }
             }
@@ -272,6 +276,11 @@ class EntityResolver(object):
         def _doc_generator(docs):
             for doc in docs:
                 base = {'_id': doc['id']}
+                whitelist = doc['whitelist']
+                new_list = []
+                for syn in whitelist:
+                    new_list.append({"name": syn})
+                doc['whitelist'] = new_list
                 base.update(doc)
                 yield base
 
@@ -391,6 +400,91 @@ class EntityResolver(object):
 
             return values
 
+        # full_text_query = {
+        #     "query": {
+        #         "bool": {
+        #             "should": [
+        #                 {
+        #                     "bool": {
+        #                         "should": [
+        #                             {
+        #                                 "match": {
+        #                                     "whitelist.normalized_keyword": {
+        #                                         "query": normed,
+        #                                         "boost": 10
+        #                                     }
+        #                                 }
+        #                             },
+        #                             {
+        #                                 "match": {
+        #                                     "cname.normalized_keyword": {
+        #                                         "query": normed,
+        #                                         "boost": 10
+        #                                     }
+        #                                 }
+        #                             }
+        #                         ]
+        #                     }
+        #                 },
+        #                 {
+        #                     "match": {
+        #                         "whitelist": {
+        #                             "query": normed
+        #                         }
+        #                     }
+        #                 },
+        #                 {
+        #                     "match": {
+        #                         "cname": {
+        #                             "query": normed
+        #                         }
+        #                     }
+        #                 },
+        #                 {
+        #                     "match": {
+        #                         "cname.char_ngram": {
+        #                             "query": normed
+        #                         }
+        #                     }
+        #                 },
+        #                 {
+        #                     "match": {
+        #                         "whitelist.char_ngram": {
+        #                             "query": normed
+        #                         }
+        #                     }
+        #                 }
+        #             ]
+        #         }
+        #     },
+        #     "size": 0,
+        #     "aggs": {
+        #         "top_cnames": {
+        #             "terms": {
+        #                 "field": "cname.raw",
+        #                 "size": 100,
+        #                 "order": {
+        #                     "top_hit": "desc"
+        #                 }
+        #             },
+        #             "aggs": {
+        #                 "top_text_rel_match": {
+        #                     "top_hits": {
+        #                         "size": 1
+        #                     }
+        #                 },
+        #                 "top_hit": {
+        #                     "max": {
+        #                         "script": {
+        #                             "inline": "_score"
+        #                         }
+        #                     }
+        #                 }
+        #             }
+        #         }
+        #     }
+        # }
+
         full_text_query = {
             "query": {
                 "bool": {
@@ -400,7 +494,7 @@ class EntityResolver(object):
                                 "should": [
                                     {
                                         "match": {
-                                            "whitelist.normalized_keyword": {
+                                            "cname.normalized_keyword": {
                                                 "query": normed,
                                                 "boost": 10
                                             }
@@ -408,9 +502,16 @@ class EntityResolver(object):
                                     },
                                     {
                                         "match": {
-                                            "cname.normalized_keyword": {
+                                            "cname": {
                                                 "query": normed,
-                                                "boost": 10
+                                                "boost": 3
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "cname.char_ngram": {
+                                                "query": normed
                                             }
                                         }
                                     }
@@ -418,30 +519,36 @@ class EntityResolver(object):
                             }
                         },
                         {
-                            "match": {
-                                "whitelist": {
-                                    "query": normed
-                                }
-                            }
-                        },
-                        {
-                            "match": {
-                                "cname": {
-                                    "query": normed
-                                }
-                            }
-                        },
-                        {
-                            "match": {
-                                "cname.char_ngram": {
-                                    "query": normed
-                                }
-                            }
-                        },
-                        {
-                            "match": {
-                                "whitelist.char_ngram": {
-                                    "query": normed
+                            "nested": {
+                                "path": "whitelist",
+                                "score_mode": "max",
+                                "query": {
+                                    "bool": {
+                                        "should": [
+                                            {
+                                                "match": {
+                                                    "whitelist.name.normalized_keyword": {
+                                                        "query": normed,
+                                                        "boost": 10
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "whitelist.name": {
+                                                        "query": normed
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "whitelist.name.char_ngram": {
+                                                        "query": normed
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             }
                         }
@@ -450,21 +557,24 @@ class EntityResolver(object):
             },
             "size": 0,
             "aggs": {
-                "limit_results": {
-                    "sampler": {
-                        "shard_size": 20
+                "top_cnames": {
+                    "terms": {
+                        "field": "cname.raw",
+                        "size": 100,
+                        "order": {
+                            "top_hit": "desc"
+                        }
                     },
                     "aggs": {
-                        "top_cnames": {
-                            "terms": {
-                                "field": "cname.raw",
-                                "size": 100
-                            },
-                            "aggs": {
-                                "top_text_rel_match": {
-                                    "top_hits": {
-                                        "size": 1
-                                    }
+                        "top_text_rel_match": {
+                            "top_hits": {
+                                "size": 1
+                            }
+                        },
+                        "top_hit": {
+                            "max": {
+                                "script": {
+                                    "inline": "_score"
                                 }
                             }
                         }
@@ -473,13 +583,15 @@ class EntityResolver(object):
             }
         }
 
+
         response = self._es_client.search(index=self._es_index_name, body=full_text_query)
-        buckets = response['aggregations']['limit_results']['top_cnames']['buckets']
+        buckets = response['aggregations']['top_cnames']['buckets']
         results = [{'cname': bucket['key'],
                     'max_score': bucket['top_text_rel_match']['hits']['max_score'],
                     'num_hits': bucket['top_text_rel_match']['hits']['total']}
                    for bucket in buckets]
-        results.sort(key=lambda x: x['max_score'], reverse=True)
+
+        #results.sort(key=lambda x: x['max_score'], reverse=True)
         return results[0:20]
 
     def predict_proba(self, entity):
