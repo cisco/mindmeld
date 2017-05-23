@@ -17,7 +17,7 @@ from mmworkbench.tokenizer import Tokenizer
 from mmworkbench.query_factory import QueryFactory
 from mmworkbench.resource_loader import ResourceLoader
 
-APP_NAME = 'kwik-e-mart'
+APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
 
 

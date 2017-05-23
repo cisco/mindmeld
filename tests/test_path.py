@@ -12,7 +12,7 @@ import os
 
 from mmworkbench import path
 
-APP_NAME = 'kwik-e-mart'
+APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
 
 DOMAIN_NAME = 'store_info'
