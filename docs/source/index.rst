@@ -54,6 +54,17 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :caption: Blueprint Applications
+   :name: blueprints
+
+   blueprints/overview
+   blueprints/food_ordering
+   blueprints/music_discovery
+   blueprints/meeting_assistant
+
+
+.. toctree::
+   :maxdepth: 2
    :caption: Workbench User Manual
    :name: userguide
 
