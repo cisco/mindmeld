@@ -1,4 +1,4 @@
-Music Search and Discovery
-==========================
+Meeting Assistant
+=================
 
 Coming soon
