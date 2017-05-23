@@ -12,6 +12,8 @@ import os
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
 
+from ._config import get_app_name
+
 from ..resource_loader import ResourceLoader
 
 
@@ -139,6 +141,7 @@ class QuestionAnswerer(object):
         self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
         self._es_host = es_host
         self.__es_client = None
+        self._app_name = get_app_name(app_path)
 
     @property
     def _es_client(self):
@@ -152,10 +155,11 @@ class QuestionAnswerer(object):
         criteria.
 
         Args:
-            search_query (str, optional): Description
+            query_string (str, optional): A lucene style query string
             index (str): The name of an index
-            sort (TYPE): Description
-            location (TYPE): Description
+            sort (str): The sort method that should be used
+            location (dict): A location to use in the query
+            id (str): The id of a particular document to retrieve
 
         Returns:
             list: list of matching documents
@@ -163,6 +167,7 @@ class QuestionAnswerer(object):
         es_query = {}
         try:
             index = kwargs['index']
+            index = '{}${}'.format(self._app_name, index)
         except KeyError:
             raise TypeError("get() missing required keyword argument 'index'")
 
@@ -213,7 +218,7 @@ class QuestionAnswerer(object):
         return es_client
 
     @classmethod
-    def create_index(cls, index_name, es_host=None, es_client=None):
+    def create_index(cls, app_name, index_name, es_host=None, es_client=None):
         """Creates a new index in the knowledge base.
 
         Args:
@@ -224,15 +229,16 @@ class QuestionAnswerer(object):
         es_client = es_client or cls._create_es_client(es_host)
 
         mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
+        scoped_index_name = '{}${}'.format(app_name, index_name)
 
-        if not es_client.indices.exists(index=index_name):
+        if not es_client.indices.exists(index=scoped_index_name):
             logger.info("Creating index '{}'".format(index_name))
-            es_client.indices.create(index_name, body=mapping)
+            es_client.indices.create(scoped_index_name, body=mapping)
         else:
             logger.error("Index '{}' already exists.".format(index_name))
 
     @classmethod
-    def load_index(cls, index_name, data_file, es_host=None, es_client=None):
+    def load_index(cls, app_name, index_name, data_file, es_host=None, es_client=None):
         """Loads documents from disk into the specified index in the knowledge base. If an index
         with the specified name doesn't exist, a new index with that name will be created in the
         knowledge base.
@@ -255,12 +261,15 @@ class QuestionAnswerer(object):
                 base.update(doc)
                 yield base
 
+        scoped_index_name = '{}${}'.format(app_name, index_name)
+
         # create index if specified index does not exist
-        if not es_client.indices.exists(index=index_name):
-            QuestionAnswerer.create_index(index_name, es_host=es_host, es_client=es_client)
+        if not es_client.indices.exists(index=scoped_index_name):
+            QuestionAnswerer.create_index(app_name, index_name, es_host=es_host,
+                                          es_client=es_client)
 
         count = 0
-        for okay, result in streaming_bulk(es_client, _doc_generator(data), index=index_name,
+        for okay, result in streaming_bulk(es_client, _doc_generator(data), index=scoped_index_name,
                                            doc_type=DOC_TYPE, chunk_size=50):
 
             action, result = result.popitem()
