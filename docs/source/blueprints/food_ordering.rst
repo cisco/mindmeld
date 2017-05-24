@@ -134,12 +134,12 @@ For a more realistic implementation of ``build_order`` that deals with varied us
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-Our food ordering app leverages publicly available information about San Francisco restaurants, scraped from the `Amazon Restaurants <https://primenow.amazon.com/restaurants>`_ website. Specifically, the knowledge base comprises of two indexes in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
+Our food ordering app leverages publicly available information about San Francisco restaurants, scraped from the `Amazon Restaurants <https://primenow.amazon.com/restaurants>`_ website. Specifically, our knowledge base comprises of two indexes in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
 
-   - ``restaurants`` — Each entry describes a unique restaurant location
-   - ``menu_items`` — Each entry describes a unique dish on a specific restaurant's menu
+   - ``restaurants`` — Stores information about restaurant locations
+   - ``menu_items`` — Stores information about dishes on different restaurants' menus
 
-For example, here's the knowledge base entry for a Thai restaurant in San Francisco named "Thoughts Style Cuisine Showroom" in the ``restaurants`` index:
+For example, here's the knowledge base entry in the ``restaurants`` index for a Thai restaurant in San Francisco named "Thoughts Style Cuisine Showroom":
 
 .. code:: javascript
 
@@ -191,7 +191,7 @@ Similarly, here's an example of a knowledge base entry in the ``menu_items`` ind
         'size_prices': []}
     }
 
-Assuming you have Elasticsearch installed on your machine, running the :keyword:`blueprint()` command described above should build the knowledge base for your app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, you can use the Question Answerer to query your indexes.
+Assuming you have Elasticsearch installed on your machine, running the :keyword:`blueprint()` command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, you can use the Question Answerer to query your indexes.
 
 For example:
 
@@ -240,7 +240,6 @@ The labeled data for training our NLP pipeline was created using a combination o
 
    (start_over) "How would you ask the app to cancel your current selections and start over?"
 
-
 3. Targeted query annotation for training Entity Recognizer
 
 .. code:: text
@@ -263,6 +262,7 @@ The training data for intent classification and entity recognition can be found 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The fastest way to build a baseline NLP system is by 
 
 
 
