@@ -126,7 +126,7 @@ class Blueprint(object):
         cache_dir = path.get_cached_blueprint_path(name)
         try:
             os.makedirs(cache_dir)
-        except FileExistsError:
+        except IOError:
             # dir already exists -- no worries
             pass
 
@@ -139,7 +139,7 @@ class Blueprint(object):
         remote_modified = datetime(*parsedate(req.headers.get('last-modified'))[:6])
         try:
             local_modified = datetime.fromtimestamp(os.path.getmtime(local_archive))
-        except FileNotFoundError:
+        except IOError:
             local_modified = datetime.min
 
         if remote_modified < local_modified:
