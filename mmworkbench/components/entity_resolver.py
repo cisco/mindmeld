@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 DOC_TYPE = "document"
 
+
 class EntityResolver(object):
     """An entity resolver is used to resolve entities in a given query to their canonical values
     (usually linked to specific entries in a knowledge base).
@@ -25,6 +26,7 @@ class EntityResolver(object):
 
     # default ElasticSearch mapping to define text analysis settings for text fields
     ES_SYNONYM_INDEX_PREFIX = "synonym"
+
     DEFAULT_SYN_ES_MAPPING = {
         "mappings": {
             "document": {
@@ -278,6 +280,7 @@ class EntityResolver(object):
                 base = {'_id': doc['id']}
                 whitelist = doc['whitelist']
                 new_list = []
+                new_list.append({"name": doc['cname']})
                 for syn in whitelist:
                     new_list.append({"name": syn})
                 doc['whitelist'] = new_list
@@ -499,22 +502,22 @@ class EntityResolver(object):
                                                 "boost": 10
                                             }
                                         }
-                                    },
-                                    {
-                                        "match": {
-                                            "cname": {
-                                                "query": normed,
-                                                "boost": 3
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "match": {
-                                            "cname.char_ngram": {
-                                                "query": normed
-                                            }
-                                        }
                                     }
+                                    # {
+                                    #     "match": {
+                                    #         "cname": {
+                                    #             "query": normed,
+                                    #             "boost": 1
+                                    #         }
+                                    #     }
+                                    # },
+                                    # {
+                                    #     "match": {
+                                    #         "cname.char_ngram": {
+                                    #             "query": normed
+                                    #         }
+                                    #     }
+                                    # }
                                 ]
                             }
                         },
@@ -582,7 +585,6 @@ class EntityResolver(object):
                 }
             }
         }
-
 
         response = self._es_client.search(index=self._es_index_name, body=full_text_query)
         buckets = response['aggregations']['top_cnames']['buckets']
