@@ -19,6 +19,7 @@ import click_log
 from . import path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import FileNotFoundError
+from ._util import blueprint
 from ._version import current as __version__
 
 
@@ -119,19 +120,21 @@ def clean(ctx):
 
 @cli.command('create-index', context_settings=CONTEXT_SETTINGS)
 @click.option('-n', '--es-host', required=True)
+@click.argument('app_name', required=True)
 @click.argument('index_name', required=True)
-def create_index(es_host, index_name):
+def create_index(es_host, app_name, index_name):
     """Create a new question answerer index"""
-    QuestionAnswerer.create_index(index_name, es_host)
+    QuestionAnswerer.create_index(app_name, index_name, es_host)
 
 
 @cli.command('load-index', context_settings=CONTEXT_SETTINGS)
 @click.option('-n', '--es-host', required=True)
+@click.argument('app_name', required=True)
 @click.argument('index_name', required=True)
 @click.argument('data_file', required=True)
-def load_index(es_host, index_name, data_file):
+def load_index(es_host, app_name, index_name, data_file):
     """Load data into a question answerer index"""
-    QuestionAnswerer.load_index(index_name, data_file, es_host)
+    QuestionAnswerer.load_index(app_name, index_name, data_file, es_host)
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
@@ -171,6 +174,13 @@ def _get_mallard_pid():
     for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
         pid.append(line.split()[0])
     return pid
+
+
+@cli.command('blueprint', context_settings=CONTEXT_SETTINGS)
+@click.option('-n', '--es-host', required=True)
+@click.argument('app_name', required=True)
+def setup_blueprint(es_host, app_name):
+    blueprint(app_name, es_host=es_host)
 
 
 if __name__ == '__main__':

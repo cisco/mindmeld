@@ -17,7 +17,7 @@ import pytest
 from mmworkbench.exceptions import ProcessorError
 from mmworkbench.components import NaturalLanguageProcessor
 
-APP_NAME = 'kwik-e-mart'
+APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME)
 
 

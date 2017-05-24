@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import copy
 import logging
+import os
 
 from .. import path
 
@@ -257,8 +258,12 @@ DEFAULT_PARSER_DEPENDENT_CONFIG = {
 }
 
 
-def __init__(self, app_path):
-    self._config = _get_config_module(app_path)
+def get_app_name(app_path):
+    try:
+        app_name = _get_config_module(app_path).APP_NAME
+    except AttributeError:
+        app_name = os.path.split(app_path)[1]
+    return app_name
 
 
 def get_classifier_config(clf_type, domain=None, intent=None, entity=None):
