@@ -218,3 +218,51 @@ For example:
      {'id': 'B06XB12GH5', 'name': 'Xlarge-16', 'price': 29.95},
      {'id': 'B06X9XZPJ1', 'name': 'Huge-18', 'price': 33.95}]
   }
+
+
+6. Training Data
+^^^^^^^^^^^^^^^^
+
+The labeled data for training our NLP pipeline was created using a combination of in-house data generation and crowdsourcing techniques. This is an iterative process that is described in more detail in the :doc:`user guide <../userguide/training_data>`. But briefly, it requires at least the following data generation tasks:
+
+1. Exploratory data generation for guiding the app design
+
+.. code:: text
+
+   "How would you talk to a conversational app to place orders for food delivery?"
+
+2. Targeted query generation for training the Intent Classifier
+
+.. code:: text
+
+   (build_order) "What would you say to the app to make food or restaurant selections and
+                  create your delivery order?"
+
+   (start_over) "How would you ask the app to cancel your current selections and start over?"
+
+
+3. Targeted query annotation for training Entity Recognizer
+
+.. code:: text
+
+   (build_order) "Annotate all occurrences of restaurant, cuisine, category, dish and
+                  option names in the given query."
+
+4. Targeted synonym generation for training Entity Resolver
+
+.. code:: text
+
+   (restaurant) "What are the different ways in which you would refer to this
+                 restaurant location?"
+
+   (dish) "What names would you use to refer to this dish on a restaurant's menu?"
+
+The training data for intent classification and entity recognition can be found in the :keyword:`domains` directory, whereas the data for entity resolution is in the :keyword:`entities` directory, both at the root level of the blueprint folder.
+
+
+7. Training the NLP Classifiers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
