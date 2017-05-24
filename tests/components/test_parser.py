@@ -69,6 +69,13 @@ class TestBasicParser:
         assert entities[1].parent == entities[0]
         assert entities[2].children is None
 
+    def test_unconfigured(self):
+        """Tests the parser functions when unconfigured entities are present"""
+        query = markup.load_query('{Hello|head} {there|other}')
+        entities = self.parser.parse_entities(query.query, query.entities)
+
+        assert entities
+
 
 class TestNestedParser:
     """A set of tests for a parser which has nested groups"""
@@ -84,7 +91,7 @@ class TestNestedParser:
 
     def test_standalone_option(self):
         """Tests that an option can exist as a standalone group"""
-        query = markup.load_query('[{light|size} {ice|option}|option]')
+        query = markup.load_query('{light|size} {ice|option}')
         entities = self.parser.parse_entities(query.query, query.entities)
 
         assert len(entities) == 2
@@ -93,7 +100,7 @@ class TestNestedParser:
 
     def test_nested(self):
         """Tests that an option can exist as a standalone group"""
-        text = '[{large|size} {latte|dish} [{light|size} {ice|option}|option]|dish]'
+        text = '{large|size} {latte|dish} {light|size} {ice|option}'
         query = markup.load_query(text)
         entities = self.parser.parse_entities(query.query, query.entities)
 
@@ -123,7 +130,7 @@ class TestMaxInstancesParser:
 
     def test_max_instances(self):
         """Tests that parser respects the max instances constraint"""
-        text = '{light|size} [{medium|size} {latte|dish}|dish]'
+        text = '{light|size} {medium|size} {latte|dish}'
         query = markup.load_query(text)
 
         entities = self.parser.parse_entities(query.query, query.entities)
@@ -137,7 +144,7 @@ class TestMaxInstancesParser:
         """Tests that parser correctly allocates one size per dish,
         overriding distance in the process.
         """
-        text = '[{latte|dish} size {medium|size}|dish], [{mocha|dish} size {large|size}|dish]'
+        text = '{latte|dish} size {medium|size}, {mocha|dish} size {large|size}'
         query = markup.load_query(text)
         entities = self.parser.parse_entities(query.query, query.entities)
 
@@ -164,7 +171,7 @@ class TestParserLinkWords:
 
     def test_link_word(self):
         """Tests that parser considers link words, overriding default distance calculation."""
-        text = 'A [{pizza|dish} with {olives|option}|dish], {breadsticks|dish} and a {coke|dish}'
+        text = 'A {pizza|dish} with {olives|option}, {breadsticks|dish} and a {coke|dish}'
         query = markup.load_query(text)
         entities = self.parser.parse_entities(query.query, query.entities)
 
@@ -176,7 +183,7 @@ class TestParserLinkWords:
 
     def test_link_word_negative(self):
         """Tests that parser does not apply link words for other dependent types."""
-        text = 'A {pepperoni pizza|dish} with [{large|size} {coke|dish}|dish]'
+        text = 'A {pepperoni pizza|dish} with {large|size} {coke|dish}'
         query = markup.load_query(text)
         entities = self.parser.parse_entities(query.query, query.entities)
 
@@ -200,10 +207,10 @@ def test_parser_timeout():
     }
     parser = Parser(config=config)
 
-    text = ('[{venti|size} {jade citrus|name}|name] with [{one|number} bag of '
-            '{peach tranquility|name}|name] and [{one|number} bag {jade citrus|name} '
+    text = ('{venti|size} {jade citrus|name} with {one|number} bag of '
+            '{peach tranquility|name} and {one|number} bag {jade citrus|name} '
             '{2 pumps peppermint|option} {no hot water|option} sub {steamed|option} '
-            '{lemonade|option} {4|number} {honeys|option}|name]')
+            '{lemonade|option} {4|number} {honeys|option}')
 
     query = markup.load_query(text)
 

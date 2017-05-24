@@ -315,7 +315,6 @@ def _expand_group_config(group_config):
         {
             'product': {
                 'quantity': {
-                    'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',
@@ -323,7 +322,6 @@ def _expand_group_config(group_config):
                     'max_instances': 3
                 },
                 'size': {
-                    'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',
@@ -331,7 +329,6 @@ def _expand_group_config(group_config):
                     'max_instances': 1
                 },
                 'option': {
-                    'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',
@@ -341,7 +338,6 @@ def _expand_group_config(group_config):
             },
             'store': {
                 'location': {
-                    'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',
@@ -351,7 +347,6 @@ def _expand_group_config(group_config):
             },
             'option': {
                 'size': {
-                    'role': None,
                     'left': True,
                     'right': True,
                     'precedence': 'left',

@@ -58,11 +58,17 @@ class Parser(object):
             raise ValueError('Parser requires either a configuration or a resource loader')
         app_path = resource_loader.app_path if resource_loader else None
         try:
-            entity_types = path.get_entity_types(app_path)
+            entity_types = path.get_entity_types(app_path) + ['unk']
         except TypeError:
-            entity_types = None
+            entity_types = {'unk'}
         self._resource_loader = resource_loader
         self.config = get_parser_config(app_path, config)
+        configured_entities = set()
+        for entity_type, config in self.config.items():
+            configured_entities.add(entity_type)
+            configured_entities.update(config.keys())
+
+        self._configured_entities = configured_entities
         rules = generate_grammar(self.config, entity_types)
         self._grammar = FeatureGrammar.fromstring(rules)
         self._parser = FeatureChartParser(self._grammar)
@@ -109,6 +115,8 @@ class Parser(object):
         # generate sentential form (assumes entities are sorted)
         for entity in entities:
             entity_type = entity.entity.type
+            if entity_type not in self._configured_entities:
+                entity_type = 'unk'
             entity_id = '{}{}'.format(entity_type, entity_type_count[entity_type])
             entity_type_count[entity_type] += 1
             entity_dict[entity_id] = entity
