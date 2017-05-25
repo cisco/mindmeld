@@ -191,33 +191,33 @@ Similarly, here's an example of a knowledge base entry in the ``menu_items`` ind
         'size_prices': []}
     }
 
-Assuming you have Elasticsearch installed on your machine, running the :keyword:`blueprint()` command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, you can use the Question Answerer to query your indexes.
+Assuming you have Elasticsearch installed on your machine, running the :keyword:`blueprint()` command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, you can use the Question Answerer to query the indexes.
 
 For example:
 
 .. code:: python
 
-  >>> from mmworkbench.components.question_answerer import QuestionAnswerer
-  >>> qa = QuestionAnswerer(app_path='food_ordering')
-  >>> qa.get(index='menu_items')[0]
-  {
-    'category': 'Signature Pizza',
-    'description': 'Fresh mushroom, red onion, artichoke heart, green pepper, vine tomato, broccoli, fresh basil, tomato sauce, mozzarella & sprinkle of cheddar',
-    'id': 'B06XB2DFDV',
-    'img_url': None,
-    'menu_id': 'f5f5e585-d56b-45de-b592-c453eaf1f082',
-    'name': 'Drag It Thru The Garden',
-    'option_groups': ['crust', 'signature toppings2'],
-    'popular': False,
-    'price': 10.95,
-    'restaurant_id': 'B06WRPJ21G',
-    'size_group': 'Size',
-    'size_prices': [{'id': 'B06X9XWPTV', 'name': 'Indee-8', 'price': 10.95},
-     {'id': 'B06XB3FXNZ', 'name': 'Medium-12', 'price': 21.95},
-     {'id': 'B06X9ZX74N', 'name': 'Large-14', 'price': 25.95},
-     {'id': 'B06XB12GH5', 'name': 'Xlarge-16', 'price': 29.95},
-     {'id': 'B06X9XZPJ1', 'name': 'Huge-18', 'price': 33.95}]
-  }
+   >>> from mmworkbench.components.question_answerer import QuestionAnswerer
+   >>> qa = QuestionAnswerer(app_path='food_ordering')
+   >>> qa.get(index='menu_items')[0]
+   {
+     'category': 'Signature Pizza',
+     'description': 'Fresh mushroom, red onion, artichoke heart, green pepper, vine tomato, broccoli, fresh basil, tomato sauce, mozzarella & sprinkle of cheddar',
+     'id': 'B06XB2DFDV',
+     'img_url': None,
+     'menu_id': 'f5f5e585-d56b-45de-b592-c453eaf1f082',
+     'name': 'Drag It Thru The Garden',
+     'option_groups': ['crust', 'signature toppings2'],
+     'popular': False,
+     'price': 10.95,
+     'restaurant_id': 'B06WRPJ21G',
+     'size_group': 'Size',
+     'size_prices': [{'id': 'B06X9XWPTV', 'name': 'Indee-8', 'price': 10.95},
+      {'id': 'B06XB3FXNZ', 'name': 'Medium-12', 'price': 21.95},
+      {'id': 'B06X9ZX74N', 'name': 'Large-14', 'price': 25.95},
+      {'id': 'B06XB12GH5', 'name': 'Xlarge-16', 'price': 29.95},
+      {'id': 'B06X9XZPJ1', 'name': 'Huge-18', 'price': 33.95}]
+   }
 
 
 6. Training Data
@@ -262,7 +262,121 @@ The training data for intent classification and entity recognition can be found 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The fastest way to build a baseline NLP system is by 
+To put the training data to use and train a baseline NLP system using Workbench's default machine learning settings, use the :keyword:`build()` method of the :keyword:`NaturalLanguageProcessor` class:
+
+.. code:: python
+
+   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+   >>> nlp = NaturalLanguageProcessor('food_ordering')
+   >>> nlp.build()
+   Fitting intent classifier: domain='ordering'
+   Loading queries from file ordering/build_order/train.txt
+   Loading queries from file ordering/exit/train.txt
+   Loading queries from file ordering/greet/train.txt
+   Loading queries from file ordering/help/train.txt
+   Loading queries from file ordering/place_order/train.txt
+   Loading queries from file ordering/start_over/train.txt
+   Loading queries from file ordering/unsupported/train.txt
+   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Best accuracy: 98.11%, params: {'C': 100, 'class_weight': {0: 1.7987394957983194, 1: 3.0125475285171097, 2: 0.89798826487845773, 3: 4.4964705882352938, 4: 2.5018518518518515, 5: 1.7559183673469387, 6: 0.46913229018492181}, 'fit_intercept': True}
+   Fitting entity recognizer: domain='ordering', intent='place_order'
+   Fitting entity recognizer: domain='ordering', intent='unsupported'
+   Fitting entity recognizer: domain='ordering', intent='greet'
+   Fitting entity recognizer: domain='ordering', intent='exit'
+   Fitting entity recognizer: domain='ordering', intent='build_order'
+   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Best accuracy: 92.46%, params: {'C': 1000000, 'penalty': 'l2'}
+   Fitting entity recognizer: domain='ordering', intent='start_over'
+   Fitting entity recognizer: domain='ordering', intent='help'
+
+.. tip::
+
+  During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+
+You should see an out-of-the-box cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classification>` and about 92% for the :doc:`Entity Recognizer <../userguide/entity_recognition>`. To see how the trained NLP pipeline performs on a test query, use the :keyword:`process()` method.
+
+.. code:: python
+
+   >>> nlp.process("I'd like a mujaddara wrap and two chicken kebab from palmyra")
+   {
+    'domain': 'ordering',
+    'entities': [{'role': None,
+      'span': {'end': 24, 'start': 11},
+      'text': 'mujaddara wrap',
+      'type': 'dish',
+      'value': [{'cname': 'Mujaddara Wrap', 'id': 'B01DEFNIRY'}]},
+     {'confidence': 0.15634607039069398,
+      'role': None,
+      'span': {'end': 32, 'start': 30},
+      'text': 'two',
+      'type': 'sys_number',
+      'value': {'value': 2}},
+     {'children': [{'confidence': 0.15634607039069398,
+        'role': None,
+        'span': {'end': 32, 'start': 30},
+        'text': 'two',
+        'type': 'sys_number',
+        'value': {'value': 2}}],
+      'role': None,
+      'span': {'end': 46, 'start': 34},
+      'text': 'chicken kebab',
+      'type': 'dish',
+      'value': [{'cname': 'Chicken Kebab', 'id': 'B01DEFMUSW'}]},
+     {'role': None,
+      'span': {'end': 59, 'start': 53},
+      'text': 'palmyra',
+      'type': 'restaurant',
+      'value': [{'cname': 'Palmyra', 'id': 'B01DEFLJIO'}]}],
+    'intent': 'build_order',
+    'text': "I'd like a mujaddara wrap and two chicken kebab from palmyra"
+   }
+
+For the data distributed with this blueprint, the baseline performance is already high enough to be usable out-of-the-box. However, when extending the blueprint with your own custom food ordering data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.
+
+A good place to start is by inspecting the baseline configuration used by the different classifiers. The user guide lists and describes all of the available configuration options in detail. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.
+
+.. code:: python
+
+   >>> ic = nlp.domains['ordering'].intent_classifier
+   >>> ic.config.model_settings['classifier_type']
+   'logreg'
+   >>> ic.config.features
+   {
+    'bag-of-words': {'lengths': [1]},
+    'freq': {'bins': 5},
+    'in-gaz': {},
+    'length': {}
+   }
+
+You can experiment with different learning algorithms (model types), features, hyperparameters and cross-validation settings by passing the appropriate parameters to the classifier's :keyword:`fit()` method. Here are a couple of examples.
+
+Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
+
+.. code:: python
 
 
+   >>> features = {
+   ...             'bag-of-words': {'lengths': [1, 2]},
+   ...             'freq': {'bins': 5},
+   ...             'in-gaz': {},
+   ...             'length': {}
+   ...            }
+   >>> ic.fit(features=features)
+   Fitting intent classifier: domain='ordering'
+   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Best accuracy: 98.36%, params: {'C': 10000, 'class_weight': {0: 1.0, 1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0}, 'fit_intercept': False}
 
+Change the classification model to random forest instead of the default logistic regression:
+
+.. code:: python
+
+   >>> ic.fit(config_name='rforest')
+   Fitting intent classifier: domain='ordering'
+   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Best accuracy: 97.31%, params: {'max_features': 'auto', 'n_estimators': 10, 'n_jobs': -1}
+
+Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is a highly iterative process consisting of several rounds of model training (with varying configurations), testing and error analysis. Refer to the appropriate sections in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
+
+
+8. Configure the Language Parser
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
