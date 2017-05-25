@@ -191,7 +191,7 @@ Similarly, here's an example of a knowledge base entry in the ``menu_items`` ind
         'size_prices': []}
     }
 
-Assuming you have Elasticsearch installed on your machine, running the :keyword:`blueprint()` command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, you can use the Question Answerer to query the indexes.
+Assuming you have Elasticsearch installed on your machine, running the :keyword:`blueprint()` command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, you can use the :doc:`Question Answerer <../userguide/question_answering>` to query the indexes.
 
 For example:
 
@@ -267,7 +267,7 @@ To put the training data to use and train a baseline NLP system using Workbench'
 .. code:: python
 
    >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
-   >>> nlp = NaturalLanguageProcessor('food_ordering')
+   >>> nlp = NaturalLanguageProcessor(app_path='food_ordering')
    >>> nlp.build()
    Fitting intent classifier: domain='ordering'
    Loading queries from file ordering/build_order/train.txt
@@ -458,5 +458,67 @@ Lastly, the restaurant "Palmyra" is a standalone entity without any dependents a
    }
 
 When extending the blueprint to your custom application data, the parser should work fine out-of-the-box for most queries as long as the head — dependent relations are properly set in the configuration file. Generally speaking, you should be able to improve its accuracy even further by experimenting with the parser constraints and optimizing them for what makes the best sense for your data. Read the :doc:`Language Parser user guide <../userguide/language_parsing>` for a more detailed discussion.
+
+
+9. Using the Question Answerer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :doc:`Question Answerer <../userguide/question_answering>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top three entries in our ``restaurants`` index and present their names as suggestions to the user.
+
+.. code:: python
+
+   >>> restaurants = app.question_answerer.get(index='restaurants')[0:3]
+   >>> [restaurant['name'] for restaurant in restaurants]
+   [
+    'Curry Up Now',
+    "Ganim's Deli",
+    'Firetrail Pizza'
+   ]
+
+The ``build_order`` handler retrieves details about the user's restaurant and dish selections from the knowledge base, and uses the information to:
+
+  #. Suggest restaurants to the user that offer their requested dishes.
+  #. Resolve the requested dish name to the most likely entry on a restaurant's menu.
+  #. Verify that a requested dish is offered at the selected restaurant.
+  #. Verify that a requested option is applicable for the selected dish.
+  #. Get pricing for the requested dish and options.
+
+Look at the ``build_order`` handler in the application container (:keyword:`app.py`) for the full implementation.
+
+When customizing the blueprint for your food ordering application, some obvious extensions to consider are adding popularity and location information to the knowledge base, to faciliate smarter selection of restaurants and dishes. Refer to the :doc:`user guide <../userguide/question_answering>` to learn about the different retrieval and ranking functionalities available in the Question Answerer.
+
+
+10. Testing and Deployment
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational app using the :keyword:`Conversation` class in Workbench.
+
+For instance:
+
+.. code:: python
+
+   >>> from mmworkbench.components.dialogue import Conversation
+   >>> conv = Conversation(nlp=nlp, app_path='food_ordering')
+   >>> conv.say("Get me a saag paneer and garlic naan from urban curry")
+   ['Sure, I got Saag Paneer, Garlic Naan from Urban Curry for a total price of $14.70. Would you like to place the order?']
+
+The :keyword:`say()` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested a couple of dishes from a restaurant and the app responded, as expected, with a preview of the order details and a confirmation prompt.
+
+You can also try out multi-turn dialogues:
+
+.. code:: python
+
+   >>> conv.say('Hi there!')
+   ['Hello. Some nearby popular restaurants you can order delivery from are Dinosaurs Vietnamese Sandwiches - Boardman Pl, Dinosaurs Vietnamese Sandwiches - Market St, Pera']
+   >>> conv.say("I'd like to order from Saffron 685 today")
+   ['Great, what would you like to order from Saffron 685?']
+   >>> conv.say("I would like two dolmas and a meza appetizer plate")
+   ['Sure, I got 2 Dolmas, 1 Meza Appetizer Plate from Saffron 685 for a total price of $18.75. Would you like to place the order?']
+   >>> conv.say("I almost forgot! Could you also add a baklava please?")
+   ['Sure, I got 2 Dolmas, 1 Meza Appetizer Plate, 1 Baklava from Saffron 685 for a total price of $22. Would you like to place the order?']
+   >>> conv.say("Yes")
+   ['Great, your order from Saffron 685 will be delivered in 30-45 minutes.']
+
+Refer to the user guide for more tips and best practices on testing your app before launch. Once you're satisfied with the performance of your app, you can deploy it to production using MindMeld's cloud deployment offerings. Read more about the different available options in :doc:`deployment <../userguide/deployment>` section of the user guide. 
 
 
