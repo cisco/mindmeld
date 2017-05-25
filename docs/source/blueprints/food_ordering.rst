@@ -293,7 +293,7 @@ To put the training data to use and train a baseline NLP system using Workbench'
 
   During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
 
-You should see an out-of-the-box cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classification>` and about 92% for the :doc:`Entity Recognizer <../userguide/entity_recognition>`. To see how the trained NLP pipeline performs on a test query, use the :keyword:`process()` method.
+You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classification>` and about 92% for the :doc:`Entity Recognizer <../userguide/entity_recognition>`. To see how the trained NLP pipeline performs on a test query, use the :keyword:`process()` method.
 
 .. code:: python
 
@@ -331,7 +331,7 @@ You should see an out-of-the-box cross validation accuracy of around 98% for the
     'text': "I'd like a mujaddara wrap and two chicken kebab from palmyra"
    }
 
-For the data distributed with this blueprint, the baseline performance is already high enough to be usable out-of-the-box. However, when extending the blueprint with your own custom food ordering data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.
+For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom food ordering data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.
 
 A good place to start is by inspecting the baseline configuration used by the different classifiers. The user guide lists and describes all of the available configuration options in detail. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.
 
@@ -353,7 +353,6 @@ You can experiment with different learning algorithms (model types), features, h
 Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
 
 .. code:: python
-
 
    >>> features = {
    ...             'bag-of-words': {'lengths': [1, 2]},
@@ -378,5 +377,86 @@ Change the classification model to random forest instead of the default logistic
 Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is a highly iterative process consisting of several rounds of model training (with varying configurations), testing and error analysis. Refer to the appropriate sections in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
 
 
-8. Configure the Language Parser
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+8. Parser Configuration
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Once the NLP classification models are trained, you can configure and run the Workbench :doc:`Language Parser <../userguide/language_parsing>` to link related entities into meaningful entity groups. The application configuration file, :keyword:`config.py`, at the top level of blueprint folder contains the following parser configuration:
+
+.. code:: javascript
+
+   PARSER_CONFIG = {
+       'dish': {
+           'option': {'linking_words': {'with'}},
+           'sys_number': {'max_instances': 1, 'right': False}
+       },
+       'option': {
+           'sys_number': {'max_instances': 1, 'right': False}
+       }
+   }
+
+In simple terms, the configuration for our food ordering app specifies that a dish entity can have a numeric quantity entity and an option entity as its attributes, and an option can in turn have another quantity entity associated with it. In addition to defining the head — dependent relations between the entities, the config also defines constraints such as the number of allowed dependents of a certain kind, the allowed attachment directions, etc. These constraints improve parsing accuracy by helping to eliminate potentially incorrect parse hypotheses. A full list of configurable constraints can be found in the :doc:`user guide <../userguide/language_parsing>`.
+
+Since the parser runs as the last step in the NLP pipeline, the easiest way to test it is using the Natural Language Processor's :keyword:`process()` method.
+
+.. code:: python
+
+   >>> query = "Two chicken kebab and a kibbi platter with a side of mujadara from palmyra"
+   >>> entities = nlp.process(query)['entities']
+
+You can then look at the :keyword:`children` property of each entity to see its dependent entities. For example, you can verify that the numeric quantity "two" gets attached to the dish "chicken kebab":
+
+.. code:: python
+
+   >>> entities[1]
+   {
+    'children': [{
+        'confidence': 0.15634607039069398,
+        'role': None,
+        'span': {'end': 2, 'start': 0},
+        'text': 'Two',
+        'type': 'sys_number',
+        'value': {'value': 2}
+    }],
+    'role': None,
+    'span': {'end': 16, 'start': 4},
+    'text': 'chicken kebab',
+    'type': 'dish',
+    'value': [{'cname': 'Chicken Kebab', 'id': 'B01DEFMUSW'}]
+   }
+
+Similarly, the option "mujadara" should apply to the second dish, "kibbi platter":
+
+.. code:: python
+
+   >>> entities[2]
+   {
+    'children': [{
+        'role': None,
+        'span': {'end': 60, 'start': 53},
+        'text': 'mujadara',
+        'type': 'option',
+        'value': [{'cname': 'Mujadara', 'id': 'B01DEFLSN0'}]
+    }],
+    'role': None,
+    'span': {'end': 36, 'start': 24},
+    'text': 'kibbi platter',
+    'type': 'dish',
+    'value': [{'cname': 'Kibbi Platter', 'id': 'B01DEFLCL8'}]
+   }
+
+Lastly, the restaurant "Palmyra" is a standalone entity without any dependents and hence has no :keyword:`children`:
+
+.. code:: python
+
+   >>> entities[4]
+   {
+    'role': None,
+    'span': {'end': 73, 'start': 67},
+    'text': 'palmyra',
+    'type': 'restaurant',
+    'value': [{'cname': 'Palmyra', 'id': 'B01DEFLJIO'}]
+   }
+
+When extending the blueprint to your custom application data, the parser should work fine out-of-the-box for most queries as long as the head — dependent relations are properly set in the configuration file. Generally speaking, you should be able to improve its accuracy even further by experimenting with the parser constraints and optimizing them for what makes the best sense for your data. Read the :doc:`Language Parser user guide <../userguide/language_parsing>` for a more detailed discussion.
+
+
