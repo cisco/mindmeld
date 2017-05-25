@@ -60,8 +60,23 @@ class Blueprint(object):
     blueprint.
     """
     def __call__(self, name, app_path=None, es_host=None):
+        """
+
+        Args:
+            name (str): The name of the blueprint
+            app_path (str, optional): The path to the app
+            es_host (str, optional): The hostname of the elasticsearch cluster
+                for the knowledge base. If no value is passed, value will be
+                read from the environment.
+
+        Returns:
+            str: The path where the blueprint was created
+
+        Raises:
+            ValueError: When an unknown blueprint is specified.
+        """
         if name not in BLUEPRINTS:
-            raise ValueError('Unknown blueprint name : {!r}'.format(name))
+            raise ValueError('Unknown blueprint name: {!r}'.format(name))
         app_path = self.setup_app(name, app_path)
         self.setup_kb(name, app_path, es_host=es_host)
         return app_path
@@ -72,12 +87,13 @@ class Blueprint(object):
 
         Args:
             name (str): The name of the blueprint
+            app_path (str, optional): The path to the app
 
         Raises:
             ValueError: When an unknown blueprint is specified
         """
         if name not in BLUEPRINTS:
-            raise ValueError('Unknown blueprint name : {!r}'.format(name))
+            raise ValueError('Unknown blueprint name: {!r}'.format(name))
 
         app_path = app_path or os.path.join(os.getcwd(), name)
         app_path = os.path.abspath(app_path)
@@ -92,12 +108,18 @@ class Blueprint(object):
 
         Args:
             name (str): The name of the blueprint
+            app_path (str, optional): The path to the app
+            es_host (str, optional): The hostname of the elasticsearch cluster
+                for the knowledge base. If no value is passed, value will be
+                read from the environment.
 
         Raises:
-            ValueError: When an unknown blueprint is specified
+            EnvironmentError: When no Elasticsearch host is specified directly
+                or in the environment.
+            ValueError: When an unknown blueprint is specified.
         """
         if name not in BLUEPRINTS:
-            raise ValueError('Unknown blueprint name : {!r}'.format(name))
+            raise ValueError('Unknown blueprint name: {!r}'.format(name))
 
         app_path = app_path or os.path.join(os.getcwd(), name)
         app_path = os.path.abspath(app_path)
@@ -107,7 +129,9 @@ class Blueprint(object):
             try:
                 es_host = os.environ['MM_ES_HOST']
             except KeyError:
-                raise ValueError('Set the MM_ES_HOST env var or pass in es_host')
+                raise EnvironmentError('Cannot set up knowledge base. No Elasticsearch host was '
+                                       'specified. Specify it with the es_host keyword argument '
+                                       'or the MM_ES_HOST environment variable')
 
         cache_dir = path.get_cached_blueprint_path(name)
         local_archive = cls._fetch_archive(name, 'kb')

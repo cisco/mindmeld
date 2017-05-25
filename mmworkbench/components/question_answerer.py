@@ -233,10 +233,10 @@ class QuestionAnswerer(object):
 
         try:
             if not es_client.indices.exists(index=scoped_index_name):
-                logger.info("Creating index '{}'".format(index_name))
+                logger.info('Creating index %r', index_name)
                 es_client.indices.create(scoped_index_name, body=mapping)
             else:
-                logger.error("Index '{}' already exists.".format(index_name))
+                logger.error('Index %r already exists.', index_name)
         except ESConnectionError as ex:
             logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
             raise ex
@@ -269,7 +269,9 @@ class QuestionAnswerer(object):
 
         # create index if specified index does not exist
         try:
-            if not es_client.indices.exists(index=scoped_index_name):
+            if es_client.indices.exists(index=scoped_index_name):
+                logger.info('Loading index %r', index_name)
+            else:
                 QuestionAnswerer.create_index(app_name, index_name, es_host=es_host,
                                               es_client=es_client)
 
