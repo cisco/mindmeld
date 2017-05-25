@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 from builtins import object, str
 
-from functools import cmp_to_key
 import logging
 import random
 
@@ -49,9 +48,9 @@ class DialogueStateRule(object):
                     msg = 'Only one of {!r} and {!r} can be specified for a dialogue state rule'
                     raise ValueError(msg.format(single, plural, self.__class__.__name__))
                 if single in kwargs:
-                    resolved[plural] = {kwargs[single]}
+                    resolved[plural] = frozenset((kwargs[single],))
                 if plural in kwargs:
-                    resolved[plural] = set(kwargs[plural])
+                    resolved[plural] = frozenset(kwargs[plural])
             elif keys[0] in kwargs:
                 resolved[keys[0]] = kwargs[keys[0]]
 
@@ -97,9 +96,9 @@ class DialogueStateRule(object):
             # TODO cache entity types
             entity_types = set()
             for entity in context['entities']:
-                entity_types.add(entity['type'])
+                entity_types.update(entity['type'])
 
-            if len(self.entity_types & entity_types) < len(self.entity_types):
+            if len(self.entity_types & context.entity_types) < len(self.entity_types):
                 return False
 
         # check entity mapping
@@ -126,19 +125,18 @@ class DialogueStateRule(object):
         Returns:
             int: A number representing the rule complexity
         """
-        complexity = [0] * 4
+        complexity = 0
         if self.domain:
-            complexity[0] = 1
-
+            complexity += 1
         if self.intent:
-            complexity[1] = 1
+            complexity += 1 << 1
         # TODO: handle specification of multiple entity types or entity mappings
         if self.entity_types:
-            complexity[2] = len(self.entity_types)
+            complexity += 1 << 2
         if self.entity_mappings:
-            complexity[3] = len(self.entity_mappings)
+            complexity += 1 << 3
 
-        return tuple(complexity)
+        return complexity
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -149,24 +147,6 @@ class DialogueStateRule(object):
         if isinstance(other, self.__class__):
             return not self.__eq__(other)
         return NotImplemented
-
-    def __repr__(self):
-        return '<{} {!r}>'.format(self.__class__.__name__, self.dialogue_state)
-
-    @staticmethod
-    def compare(this, that):
-        if not (isinstance(this, DialogueStateRule) and isinstance(that, DialogueStateRule)):
-            return NotImplemented
-        this_comp = this.complexity
-        that_comp = that.complexity
-
-        for idx in range(len(this_comp)-1, -1, -1):
-            this_val = this_comp[idx]
-            that_val = that_comp[idx]
-            if this_val == that_val:
-                continue
-            return this_val - that_val
-        return 0
 
 
 class DialogueManager(object):
@@ -189,7 +169,7 @@ class DialogueManager(object):
         rule = DialogueStateRule(name, **kwargs)
 
         self.rules.append(rule)
-        self.rules.sort(key=cmp_to_key(DialogueStateRule.compare), reverse=True)
+        self.rules.sort(key=lambda x: -x.complexity)
         if handler is not None:
             old_handler = self.handler_map.get(name)
             if old_handler is not None and old_handler != handler:
@@ -201,10 +181,10 @@ class DialogueManager(object):
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
-            context (dict): Description
+            context (TYPE): Description
 
         Returns:
-            dict: A dict containing the dialogue datae and client actions
+            TYPE: Description
         """
         dialogue_state = None
         for rule in self.rules:
