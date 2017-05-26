@@ -1,6 +1,9 @@
 Food Ordering
 =============
 
+This page documents the Workbench blueprint for a conversational application that allows users to order food for delivery from nearby restaurants.
+
+
 Quick Start
 -----------
 
@@ -15,6 +18,7 @@ Open a python shell and type the following commands to download and set up the f
 
    >>> import mmworkbench as wb
    >>> wb.blueprint('food_ordering')
+
 
 2. Run the blueprint
 ^^^^^^^^^^^^^^^^^^^^
@@ -426,7 +430,7 @@ Similar options are available for inspecting and experimenting with the Entity R
 
 .. todo::
 
-   Experiment with different models, features and hyperparameter selection settings to see how they affect the classifier performance. It's helpful to have a held-out validation set to evaluate your trained NLP models and perform error analysis on the misclassified test instances. You could then use observations from your analysis to inform your machine learning experimentation. For more examples and discussion on this topic, refer to the :doc:`user guide <../userguide/nlp>`.
+   Experiment with different models, features and hyperparameter selection settings to see how they affect the classifier performance. It's helpful to have a held-out validation set to evaluate your trained NLP models and analyze the misclassified test instances. You could then use observations from the error analysis to inform your machine learning experimentation. For more examples and discussion on this topic, refer to the :doc:`user guide <../userguide/nlp>`.
 
 
 8. Parser Configuration
@@ -446,7 +450,7 @@ Once the NLP classification models are trained, you can configure and run the Wo
        }
    }
 
-In simple terms, the configuration for our food ordering app specifies that a dish entity can have a numeric quantity entity and an option entity as its attributes, and an option can in turn have another quantity entity associated with it. In addition to defining the head — dependent relations between the entities, the config also defines constraints such as the number of allowed dependents of a certain kind, the allowed attachment directions, etc. These constraints improve parsing accuracy by helping to eliminate potentially incorrect parse hypotheses. A full list of configurable constraints can be found in the :doc:`user guide <../userguide/language_parsing>`.
+In simple terms, the configuration for our food ordering app specifies that a dish entity can have a numeric quantity entity and an option entity as its attributes, and an option can in turn have another quantity entity associated with it. In addition to defining the head - dependent relations between the entities, the config also defines constraints such as the number of allowed dependents of a certain kind, the allowed attachment directions, etc. These constraints improve parsing accuracy by helping to eliminate potentially incorrect parse hypotheses. A full list of configurable constraints can be found in the :doc:`user guide <../userguide/language_parsing>`.
 
 Since the parser runs as the last step in the NLP pipeline, the easiest way to test it is using the Natural Language Processor's :keyword:`process()` method.
 
@@ -509,7 +513,7 @@ Lastly, the restaurant "Palmyra" is a standalone entity without any dependents a
     'value': [{'cname': 'Palmyra', 'id': 'B01DEFLJIO'}]
    }
 
-When extending the blueprint to your custom application data, the parser should work fine out-of-the-box for most queries as long as the head — dependent relations are properly set in the configuration file. Generally speaking, you should be able to improve its accuracy even further by experimenting with the parser constraints and optimizing them for what makes the best sense for your data. Read the :doc:`Language Parser user guide <../userguide/language_parsing>` for a more detailed discussion.
+When extending the blueprint to your custom application data, the parser should work fine out-of-the-box for most queries as long as the head - dependent relations are properly set in the configuration file. Generally speaking, you should be able to improve its accuracy even further by experimenting with the parser constraints and optimizing them for what makes the best sense for your data. Read the :doc:`Language Parser user guide <../userguide/language_parsing>` for a more detailed discussion.
 
 .. todo::
 
@@ -541,13 +545,13 @@ The ``build_order`` handler retrieves details about the user's restaurant and di
   #. Verify that a requested option is applicable for the selected dish.
   #. Get pricing for the requested dish and options.
 
-Look at the ``build_order`` implementation in :keyword:`app.py` to better understand the different ways in which the knowledge base and question answerer can be used. Also refer to the :doc:`user guide <../userguide/question_answering>` for an in-depth explanation of the retrieval and ranking mechanisms offered by the Question Answerer.
+Look at the ``build_order`` implementation in :keyword:`app.py` to better understand the different ways in which the knowledge base and Question Answerer can be leveraged to provide intelligent responses to the user. Also refer to the :doc:`user guide <../userguide/question_answering>` for an in-depth explanation of the retrieval and ranking mechanisms offered by the Question Answerer.
 
 .. todo::
 
    - Use the Question Answerer within the ``build_order`` state handler to add support for searching for restaurants by ``cuisine`` and searching for dishes by ``category``. 
 
-   - When customizing the blueprint for your own app, consider adding location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. You could then use the Question Answerer to rank restaurant and dish results using those factors to provide a smarter list of suggestions to the user. 
+   - When customizing the blueprint for your own app, consider adding location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. You could then use the Question Answerer to rank restaurant and dish results using those factors to provide a more relevant list of suggestions to the user. 
 
    - Think of other important data that would be useful to have in the knowledge base for a food ordering use case and how it could be leveraged to provide a more intelligent user experience.
 
@@ -582,10 +586,12 @@ You can also try out multi-turn dialogues:
    ['Sure, I got 2 Dolmas, 1 Meza Appetizer Plate, 1 Baklava from Saffron 685 for a total price of $22. Would you like to place the order?']
    >>> conv.say("Yes")
    ['Great, your order from Saffron 685 will be delivered in 30-45 minutes.']
+   >>> conv.say("Thank you!")
+   ['Have a nice day.']
 
 .. todo::
 
-   Test the app multiple times with different conversational flows and keep track of all the cases where the app response doesn't make sense. Then, analyze those cases in detail to attribute each error to a specific step in our end-to-end processing (e.g. incorrect intent classification, missed entity recognition, unideal natural language response, etc.). Categorizing your errors in this manner helps in understanding the strength of each component in your conversational AI pipeline and informs you about the possible next steps you can take to improve the performance of each individual module.
+   Test the app multiple times with different conversational flows and keep track of all the cases where the response doesn't make sense. Then, analyze those cases in detail to attribute each error to a specific step in our end-to-end processing (e.g. incorrect intent classification, missed entity recognition, unideal natural language response, etc.). Categorizing your errors in this manner helps in understanding the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.
 
 
 Refer to the user guide for tips and best practices on testing your app before launch. Once you're satisfied with the performance of your app, you can deploy it to production using MindMeld's cloud deployment offerings. Read more about the different available options in :doc:`deployment <../userguide/deployment>` section of the user guide.
