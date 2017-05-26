@@ -238,45 +238,37 @@ For example:
 
 .. todo::
 
-   All the blueprints come with a pre-configured, pre-populated knowledge base to help you get up and running with an end-to-end working application quickly. To learn how you can set up knowledge base indexes from scratch for your own data, read the user guide section on :doc:`Question Answerer <../userguide/question_answering>`.
+   The blueprint comes with a pre-configured, pre-populated knowledge base to help you get up and running with an end-to-end working application quickly. To learn how you can set up knowledge base indexes from scratch for your own data, read the user guide section on :doc:`Question Answerer <../userguide/question_answering>`.
+
 
 6. Training Data
 ^^^^^^^^^^^^^^^^
 
-The labeled data for training our NLP pipeline was created using a combination of in-house data generation and crowdsourcing techniques. This is an iterative process that is described in more detail in the :doc:`user guide <../userguide/training_data>`. But briefly, it requires at least the following data generation tasks:
+The labeled data for training our NLP pipeline was created using a combination of in-house data generation and crowdsourcing techniques. This is a highly important multi-step process that is described in more detail in the :doc:`user guide <../userguide/training_data>`. But briefly, it requires at least the following data generation tasks:
 
-1. Exploratory data generation for guiding the app design
-
-.. code:: text
-
-   "How would you talk to a conversational app to place orders for food delivery?"
-
-2. Targeted query generation for training the Intent Classifier
-
-.. code:: text
-
-   (build_order) "What would you say to the app to make food or restaurant selections and
-                  create your delivery order?"
-
-   (start_over) "How would you ask the app to cancel your current selections and start over?"
-
-3. Targeted query annotation for training Entity Recognizer
-
-.. code:: text
-
-   (build_order) "Annotate all occurrences of restaurant, cuisine, category, dish and
-                  option names in the given query."
-
-4. Targeted synonym generation for training Entity Resolver
-
-.. code:: text
-
-   (restaurant) "What are the different ways in which you would refer to this
-                 restaurant location?"
-
-   (dish) "What names would you use to refer to this item on the restaurant menu?"
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Purpose                                                      | Question posed to data annotators                                                                                       |
++==============================================================+=========================================================================================================================+
+| Exploratory data generation for guiding the app design       | "How would you talk to a conversational app to place orders for food delivery?"                                         |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Targeted query generation for training the Intent Classifier | ``build_order``: "What would you say to the app to make food or restaurant selections and create your delivery order?"  |
+|                                                              |                                                                                                                         |
+|                                                              | ``start_over``: "How would you ask the app to cancel your current selections and start over?"                           |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Targeted query annotation for training the Entity Recognizer | ``build_order``: "Annotate all occurrences of restaurant, cuisine, category, dish and option names in the given query." |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Targeted synonym generation for training the Entity Resolver | ``restaurant``: "What are the different ways in which you would refer to this restaurant location?"                     |
+|                                                              |                                                                                                                         |
+|                                                              | ``dish``: "What names would you use to refer to this item on the restaurant menu?"                                      |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
 
 The training data for intent classification and entity recognition can be found in the :keyword:`domains` directory, whereas the data for entity resolution is in the :keyword:`entities` directory, both located at the root level of the blueprint folder.
+
+.. todo::
+
+   Read the :doc:`user guide <../userguide/training_data>` for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out test data for evaluating your app. Measuring performance on a held-out test set is often more indicative of real-world app performance than cross validation accuracy. Read more about :doc:`machine learning model evaluatation <../userguide/nlp>` in the user guide.
+
+   To train NLP models for your own food ordering app, you can start by reusing the blueprint data for generic intents like ``greet``, ``exit`` and ``help``. However, for core intents like ``build_order``, it's recommended that you collect new training data that is tailored towards the entities (restaurants, dishes, etc.) that your app needs to support. Follow the same approach to gather new training data for the ``build_order`` intent or any additional intents and entities needed for your app.
 
 
 7. Training the NLP Classifiers
@@ -395,6 +387,10 @@ Change the classification model to random forest instead of the default logistic
    Best accuracy: 97.31%, params: {'max_features': 'auto', 'n_estimators': 10, 'n_jobs': -1}
 
 Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing and error analysis. Refer to the appropriate sections in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
+
+.. todo::
+
+   Try out different configurations for the Intent Classifier and the Entity Recognizer. Experiment with different models, features and hyperparameter selection settings.
 
 
 8. Parser Configuration
