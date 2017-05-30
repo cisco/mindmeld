@@ -62,7 +62,7 @@ class Parser(object):
         except TypeError:
             entity_types = {'unk'}
         self._resource_loader = resource_loader
-        self.config = get_parser_config(app_path, config)
+        self.config = get_parser_config(app_path, config) or {}
         configured_entities = set()
         for entity_type, config in self.config.items():
             configured_entities.add(entity_type)
@@ -98,6 +98,9 @@ class Parser(object):
             tuple of QueryEntity: An updated version of the entities collection passed in with
                 their parent and children attributes set appropriately.
         """
+        if not self._configured_entities:
+            return entities
+
         if not handle_timeout:
             return self._parse(query, entities, all_candidates=all_candidates, timeout=timeout)
 
