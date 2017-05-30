@@ -88,7 +88,7 @@ class Classifier(object):
     labels. Among other functionality, each classifier provides means by which to fit a statistical
     model on a given training dataset and then use the trained model to make predictions on new
     unseen data."""
-    DEFAULT_CONFIG = None
+    CLF_TYPE = None
 
     def __init__(self, resource_loader):
         """Initializes a classifier
@@ -102,14 +102,12 @@ class Classifier(object):
         self.dirty = False
         self.config = None
 
-    def fit(self, queries=None, config_name=None, label_set='train', **kwargs):
+    def fit(self, queries=None, label_set='train', **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
-            config_name (str): Name of the machine learning model configuration to use. If
-                omitted, the default model configuration will be used.
             label_set (list, optional): A label set to load. If not specified, the default
                 training set will be loaded.
             model_type (str, optional): The type of machine learning model to use. If omitted, the
@@ -163,7 +161,7 @@ class Classifier(object):
                     })
         """
         # create model with given params
-        model_config = self._get_model_config(config_name, **kwargs)
+        model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
         queries, classes = self._get_queries_and_labels(queries, label_set)
         if len(set(classes)) <= 1:
@@ -230,11 +228,8 @@ class Classifier(object):
         """
         raise NotImplementedError('Subclasses must implement this method')
 
-    def _get_model_config(self, config_name, **kwargs):
+    def _get_model_config(self, default_config=None, **kwargs):
         """Gets a machine learning model configuration
-
-        Args:
-             config_name: Name of the configuration
 
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
@@ -244,8 +239,7 @@ class Classifier(object):
             return ModelConfig(**kwargs)
         except (TypeError, ValueError):
             # Use specified or default config, customizing with provided kwargs
-            config_name = config_name or self.DEFAULT_CONFIG['default_model']
-            model_config = copy.copy(self.DEFAULT_CONFIG['models'][config_name])
+            model_config = default_config
             model_config.update(kwargs)
         return ModelConfig(**model_config)
 

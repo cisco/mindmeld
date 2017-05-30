@@ -9,7 +9,7 @@ import logging
 from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 
 from .classifier import Classifier
-from ._config import DEFAULT_INTENT_CONFIG
+from ._config import get_classifier_config
 
 logger = logging.getLogger(__name__)
 
@@ -23,31 +23,30 @@ class IntentClassifier(Classifier):
         domain (str): The domain that this intent classifier belongs to
 
     """
-    DEFAULT_CONFIG = DEFAULT_INTENT_CONFIG
+    CLF_TYPE = 'intent'
 
     def __init__(self, resource_loader, domain):
         """Initializes an intent classifier
 
         Args:
-            resource_loader (ResourceLoader): An object which can load resources for the classifier
+        resource_loader (ResourceLoader): An object which can load resources for the classifier
             domain (str): The domain that this intent classifier belongs to
 
         """
         super().__init__(resource_loader)
         self.domain = domain
 
-    def _get_model_config(self, config_name, **kwargs):
+    def _get_model_config(self, **kwargs):
         """Gets a machine learning model configuration
-
-        Args:
-             config_name: Name of the configuration
 
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
         kwargs['example_type'] = QUERY_EXAMPLE_TYPE
         kwargs['label_type'] = CLASS_LABEL_TYPE
-        return super()._get_model_config(config_name, **kwargs)
+        default_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
+                                               domain=self.domain)
+        return super()._get_model_config(default_config, **kwargs)
 
     def fit(self, *args, **kwargs):
         """Trains the intent classification model using the provided training queries
