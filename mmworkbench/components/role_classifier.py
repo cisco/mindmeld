@@ -56,7 +56,7 @@ class RoleClassifier(Classifier):
         kwargs['example_type'] = ENTITY_EXAMPLE_TYPE
         kwargs['label_type'] = CLASS_LABEL_TYPE
         default_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
-                                               domain=self.domain, intent=self.intent, 
+                                               domain=self.domain, intent=self.intent,
                                                entity=self.entity_type)
         return super()._get_model_config(default_config, **kwargs)
 
@@ -68,6 +68,7 @@ class RoleClassifier(Classifier):
             label_set (list, optional): A label set to load. If not specified, the default
                 training set will be loaded.
         """
+
         logger.info('Fitting role classifier: domain=%r, intent=%r, entity_type=%r',
                     self.domain, self.intent, self.entity_type)
 
@@ -171,13 +172,29 @@ class RoleClassifier(Classifier):
         """
         raise NotImplementedError
 
-    def evaluate(self, use_blind=False):
-        """Evaluates the trained role classification model on the given test data
+    def evaluate(self, queries=None):
+        """Evaluates the trained entity recognition model on the given test data
+
+        Args:
+            queries (list of ProcessedQuery): The labeled queries to use as test data. If none
+                are provided, the heldout label set will be used.
 
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
-        raise NotImplementedError
+        if self._model is None:
+            return
+
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
+        queries, labels = self._get_queries_and_labels(queries, label_set='heldout')
+
+        if not queries:
+            logger.info('Could not evaluate model. No relevant examples in evaluation set.')
+            return
+
+        evaluation = self._model.evaluate(queries, labels)
+        return evaluation
 
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
@@ -209,7 +226,6 @@ class RoleClassifier(Classifier):
             return (), ()
         if None in unique_labels:
             bad_examples = [e for i, e in enumerate(examples) if labels[i] is None]
-            import pdb; pdb.set_trace()  # breakpoint 015f096c //
             for example in bad_examples:
                 logger.error('Invalid entity annotation, expecting role in query %r', example[0])
             raise ValueError('One or more invalid entity annotations, expecting role')

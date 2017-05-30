@@ -378,8 +378,8 @@ class IntentProcessor(Processor):
         self._check_ready()
         entities = self.entity_recognizer.predict(query)
 
-        for entity in entities:
-            self.entities[entity.entity.type].process_entity(query, entities, entity)
+        for idx, entity in enumerate(entities):
+            self.entities[entity.entity.type].process_entity(query, entities, idx)
 
         entities = self.parser.parse_entities(query, entities) if self.parser else entities
 
@@ -434,7 +434,7 @@ class EntityProcessor(Processor):
         raise NotImplementedError('EntityProcessor objects do not support `process()`. '
                                   'Try `process_entity()`')
 
-    def process_entity(self, query, entities, entity):
+    def process_entity(self, query, entities, entity_index):
         """Processes the given entity using the hierarchy of natural language processing models
         trained for this entity type
 
@@ -448,10 +448,11 @@ class EntityProcessor(Processor):
                 applying the hierarchy of natural language processing models to the input entity
         """
         self._check_ready()
+        entity = entities[entity_index]
 
         # Classify role
-        entity.entity.role = self.role_classifier.predict(query, entities, entity)
+        entity.entity.role = self.role_classifier.predict(query, entities, entity_index)
 
-        # Resolver entity
+        # Resolve entity
         entity.entity.value = self.entity_resolver.predict(entity.entity)
         return entity
