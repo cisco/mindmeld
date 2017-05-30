@@ -57,7 +57,7 @@ The conversational user flows for a food ordering app can get highly complex, d
     :width: 700px
     :align: center
 
-.. todo::
+.. admonition:: Exercise
 
    Pick a representation (textual or graphical) that's convenient to you and try to design as many user flows as you can, in each case, capturing the entire dialogue from start to finish. Think of scenarios other than the examples above, such as a user asking to order from a specific restaurant without choosing a dish, requesting a dish that is not available at the selected restaurant, asking for a restaurant location that doesn't exist, choosing a customization option that is not applicable for the chosen dish, etc.
 
@@ -90,7 +90,7 @@ For this app, only the ``build_order`` intent requires entity recognition. This 
    - ``option`` — The name of an available option (customization, add-on, etc.) for a dish
    - ``sys:number`` — The quantity of a given dish, captured by the :doc:`number system entity <../userguide/entity_recognition>`
 
-.. todo::
+.. admonition:: Exercise
 
    While the intents and entities in the blueprint provide a good starting point, you may need additional ones to cover the desired scope of your app. Enumerate some other intents (e.g. ``check_order_status``, ``get_calories``, etc.) and entities (e.g. ``location``, ``price_level``, etc.) you may need in a food ordering use case.
 
@@ -179,7 +179,7 @@ The code above assumes that every user query contains a ``restaurant`` entity an
 
 For a more realistic implementation of ``build_order`` that deals with varied user flows and the full code behind all the dialogue state handlers, see the :keyword:`app.py` file in the blueprint folder. 
 
-.. todo::
+.. admonition:: Exercise
 
    Extend the ``build_order`` dialogue state handler in :keyword:`app.py` to handle more user flows or handle the existing ones in a smarter way. There are many suggestions for improvements in the comments accompanying the code in the :keyword:`app.py` file. Here are a few more:
 
@@ -276,7 +276,7 @@ For example:
       {'id': 'B06X9XZPJ1', 'name': 'Huge-18', 'price': 33.95}]
    }
 
-.. todo::
+.. admonition:: Exercise
 
    The blueprint comes with a pre-configured, pre-populated knowledge base to help you get up and running with an end-to-end working application quickly. To learn how you can set up knowledge base indexes from scratch for your own data, read the user guide section on :doc:`Question Answerer <../userguide/question_answering>`.
 
@@ -304,7 +304,7 @@ The labeled data for training our NLP pipeline was created using a combination o
 
 The training data for intent classification and entity recognition can be found in the :keyword:`domains` directory, whereas the data for entity resolution is in the :keyword:`entities` directory, both located at the root level of the blueprint folder.
 
-.. todo::
+.. admonition:: Exercise
 
    - Read the :doc:`user guide <../userguide/training_data>` for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluatation and error analysis <../userguide/nlp>` in the user guide.
 
@@ -428,7 +428,7 @@ Change the classification model to random forest instead of the default logistic
 
 Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing and error analysis. Refer to the appropriate sections in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
 
-.. todo::
+.. admonition:: Exercise
 
    Experiment with different models, features and hyperparameter selection settings to see how they affect the classifier performance. It's helpful to have a held-out validation set to evaluate your trained NLP models and analyze the misclassified test instances. You could then use observations from the error analysis to inform your machine learning experimentation. For more examples and discussion on this topic, refer to the :doc:`user guide <../userguide/nlp>`.
 
@@ -515,7 +515,7 @@ Lastly, the restaurant "Palmyra" is a standalone entity without any dependents a
 
 When extending the blueprint to your custom application data, the parser should work fine out-of-the-box for most queries as long as the head - dependent relations are properly set in the configuration file. Generally speaking, you should be able to improve its accuracy even further by experimenting with the parser constraints and optimizing them for what makes the best sense for your data. Read the :doc:`Language Parser user guide <../userguide/language_parsing>` for a more detailed discussion.
 
-.. todo::
+.. admonition:: Exercise
 
    - Experiment with the different constraints in the parser configuration and observe how it affects the parsing accuracy.
 
@@ -547,7 +547,7 @@ The ``build_order`` handler retrieves details about the user's restaurant and di
 
 Look at the ``build_order`` implementation in :keyword:`app.py` to better understand the different ways in which the knowledge base and Question Answerer can be leveraged to provide intelligent responses to the user. Also refer to the :doc:`user guide <../userguide/question_answering>` for an in-depth explanation of the retrieval and ranking mechanisms offered by the Question Answerer.
 
-.. todo::
+.. admonition:: Exercise
 
    - Use the Question Answerer within the ``build_order`` state handler to add support for searching for restaurants by ``cuisine`` and searching for dishes by ``category``. 
 
@@ -589,7 +589,7 @@ You can also try out multi-turn dialogues:
    >>> conv.say("Thank you!")
    ['Have a nice day.']
 
-.. todo::
+.. admonition:: Exercise
 
    Test the app multiple times with different conversational flows and keep track of all the cases where the response doesn't make sense. Then, analyze those cases in detail to attribute each error to a specific step in our end-to-end processing (e.g. incorrect intent classification, missed entity recognition, unideal natural language response, etc.). Categorizing your errors in this manner helps in understanding the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.
 
