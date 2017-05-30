@@ -261,7 +261,7 @@ DEFAULT_PARSER_DEPENDENT_CONFIG = {
 def get_app_name(app_path):
     try:
         app_name = _get_config_module(app_path).APP_NAME
-    except AttributeError:
+    except (IOError, AttributeError):
         app_name = os.path.split(app_path)[1]
     return app_name
 
