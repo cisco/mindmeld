@@ -265,8 +265,8 @@ class Classifier(object):
         """
         try:
             self._model = joblib.load(model_path)
-        except FileNotFoundError:
-            msg = 'Unable to load {}. Pickle file not found at {!r}'
+        except IOError:
+            msg = 'Unable to load {}. Pickle at {!r} cannot be read.'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()
