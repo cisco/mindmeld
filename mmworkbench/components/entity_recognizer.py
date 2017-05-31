@@ -10,11 +10,10 @@ import logging
 
 from sklearn.externals import joblib
 
-from ..exceptions import FileNotFoundError
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
-from ._config import DEFAULT_ENTITY_CONFIG
+from ._config import get_classifier_config
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class EntityRecognizer(Classifier):
         entity_types (set): A set containing the entity types which can be recognized
     """
 
-    DEFAULT_CONFIG = DEFAULT_ENTITY_CONFIG
+    CLF_TYPE = 'entity'
 
     def __init__(self, resource_loader, domain, intent):
         """Initializes an entity recognizer
@@ -45,46 +44,43 @@ class EntityRecognizer(Classifier):
         self.intent = intent
         self.entity_types = set()
 
-    def _get_model_config(self, config_name, **kwargs):
+    def _get_model_config(self, **kwargs):
         """Gets a machine learning model configuration
-
-        Args:
-             config_name: Name of the configuration
 
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
         kwargs['example_type'] = QUERY_EXAMPLE_TYPE
         kwargs['label_type'] = ENTITIES_LABEL_TYPE
-        return super()._get_model_config(config_name, **kwargs)
+        default_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
+                                               domain=self.domain, intent=self.intent)
+        return super()._get_model_config(default_config, **kwargs)
 
-    def fit(self, queries=None, config_name=None, label_set='train', **kwargs):
+    def fit(self, queries=None, label_set='train', **kwargs):
         """Trains the entity recognition model using the provided training queries
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
-            config_name (str): Name of the machine learning model configuration to use. If
-                omitted, the default model configuration will be used.
             label_set (list, optional): A label set to load. If not specified, the default
                 training set will be loaded.
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
         # create model with given params
-        model_config = self._get_model_config(config_name, **kwargs)
+        model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
 
         # Load labeled data
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
-
-        # Get gazetteers (they will be built if necessary)
-        gazetteers = self._resource_loader.get_gazetteers()
 
         # Build entity types set
         self.entity_types = set()
         for label in labels:
             for entity in label:
                 self.entity_types.add(entity.entity.type)
+
+        # Get gazetteers (they will be built if necessary)
+        gazetteers = self._resource_loader.get_gazetteers()
 
         model.register_resources(gazetteers=gazetteers)
         model.fit(queries, labels)
@@ -124,8 +120,8 @@ class EntityRecognizer(Classifier):
             er_data = joblib.load(model_path)
             self._model = er_data['model']
             self.entity_types = er_data['entity_types']
-        except FileNotFoundError:
-            msg = 'Unable to load {}. Pickle file not found at {!r}'
+        except IOError:
+            msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()

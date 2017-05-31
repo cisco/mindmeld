@@ -2,7 +2,7 @@
 """
 This module contains the Config class.
 """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import copy
 import logging
@@ -13,238 +13,104 @@ from .. import path
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_DOMAIN_CONFIG = {
-    'default_model': 'main',
-    'models': {
-        'main': {
-            'model_type': 'text',
-            'model_settings': {
-                'classifier_type': 'logreg',
-            },
-            'param_selection': {
-                'type': 'k-fold',
-                'k': 10,
-                'grid': {
-                    'fit_intercept': [True, False],
-                    'C': [10, 100, 1000, 10000, 100000]
-                },
-            },
-            'features': {
-                'bag-of-words': {
-                    'lengths': [1]
-                },
-                'freq': {'bins': 5},
-                'in-gaz': {}
+DEFAULT_DOMAIN_MODEL_CONFIG = {
+    'model_type': 'text',
+    'model_settings': {
+        'classifier_type': 'logreg',
+    },
+    'param_selection': {
+        'type': 'k-fold',
+        'k': 10,
+        'grid': {
+            'fit_intercept': [True, False],
+            'C': [10, 100, 1000, 10000, 100000]
+        },
+    },
+    'features': {
+        'bag-of-words': {
+            'lengths': [1]
+        },
+        'freq': {'bins': 5},
+        'in-gaz': {}
+    }
+}
+
+DEFAULT_INTENT_MODEL_CONFIG = {
+    'model_type': 'text',
+    'model_settings': {
+        'classifier_type': 'logreg'
+    },
+    'param_selection': {
+        'type': 'k-fold',
+        'k': 10,
+        'grid': {
+            'fit_intercept': [True, False],
+            'C': [0.01, 1, 100, 10000, 1000000],
+            'class_bias': [1, 0.7, 0.3, 0]
+        }
+    },
+    'features': {
+        'bag-of-words': {
+            'lengths': [1]
+        },
+        'in-gaz': {},
+        'freq': {'bins': 5},
+        'length': {}
+    }
+}
+
+DEFAULT_ENTITY_MODEL_CONFIG = {
+    'model_type': 'memm',
+    'model_settings': {
+        'tag_scheme': 'IOB',
+        'feature_scaler': 'max-abs'
+    },
+    'param_selection': {
+        'type': 'k-fold',
+        'k': 5,
+        'scoring': 'accuracy',
+        'grid': {
+            'penalty': ['l1', 'l2'],
+            'C': [0.01, 1, 100, 10000, 1000000, 100000000]
+        },
+    },
+    'features': {
+        'bag-of-words-seq': {
+            'ngram_lengths_to_start_positions': {
+                1: [-2, -1, 0, 1, 2],
+                2: [-2, -1, 0, 1]
             }
+        },
+        'in-gaz-span-seq': {},
+        'sys-candidates-seq': {
+            'start_positions': [-1, 0, 1]
         }
     }
 }
 
-DEFAULT_INTENT_CONFIG = {
-    'default_model': 'main',
-    'models': {
-        'main': {
-            'model_type': 'text',
-            'model_settings': {
-                'classifier_type': 'logreg'
-            },
-            'param_selection': {
-                'type': 'k-fold',
-                'k': 10,
-                'grid': {
-                    'fit_intercept': [True, False],
-                    'C': [0.01, 1, 100, 10000, 1000000],
-                    'class_bias': [1, 0.7, 0.3, 0]
-                }
-            },
-            'features': {
-                'bag-of-words': {
-                    'lengths': [1]
-                },
-                'in-gaz': {},
-                'freq': {'bins': 5},
-                'length': {}
+DEFAULT_ROLE_MODEL_CONFIG = {
+    'model_type': 'maxent',
+    'params': {
+        'C': 100,
+        'penalty': 'l1'
+    },
+    'features': {
+        'bag-of-words-before': {
+            'ngram_lengths_to_start_positions': {
+                1: [-2, -1],
+                2: [-2, -1]
             }
         },
-        'rforest': {
-            'model_type': 'text',
-            'model_settings': {
-                'classifier_type': 'rforest'
-            },
-            'param_selection': {
-                'type': 'k-fold',
-                'k': 10,
-                'grid': {
-                    'n_estimators': [10],
-                    'max_features': ['auto'],
-                    'n_jobs': [-1]
-                },
-            },
-            'features': {
-                'bag-of-words': {
-                    'lengths': [1, 2, 3]
-                },
-                'edge-ngrams': {'lengths': [1, 2, 3]},
-                'in-gaz': {},
-                'freq': {'bins': 5},
-                'length': {}
+        'bag-of-words-after': {
+            'ngram_lengths_to_start_positions': {
+                1: [0, 1],
+                2: [0, 1]
             }
-        }
-    }
-}
-
-DEFAULT_ENTITY_CONFIG = {
-    'default_model': 'memm-cv',
-    'models': {
-        'main': {
-            'model_type': 'memm',
-            'model_settings': {
-                'tag_scheme': 'IOB',
-                'feature_scaler': 'none'
-            },
-            'params': {
-                'penalty': 'l2',
-                'C': 100
-            },
-            'features': {}  # use default
         },
-        'sparse': {
-            'model_type': 'memm',
-            'model_settings': {
-                'tag_scheme': 'IOB',
-                'feature_scaler': 'max-abs',
-                'feature_selector': 'l1'
-            },
-            'params': {
-                'penalty': 'l2',
-                'C': 100
-            },
-            'features': {}  # use default
-        },
-        'memm-cv': {
-            'model_type': 'memm',
-            'model_settings': {
-                'tag_scheme': 'IOB',
-                'feature_scaler': 'max-abs'
-            },
-            'param_selection': {
-                'type': 'k-fold',
-                'k': 5,
-                'scoring': 'accuracy',
-                'grid': {
-                    'penalty': ['l1', 'l2'],
-                    'C': [0.01, 1, 100, 10000, 1000000, 100000000]
-                },
-            },
-            'features': {}  # use default
-        }
-    }
-}
-
-DEFAULT_ROLE_CONFIG = {
-    'default_model': 'main',
-    'main': {
-        "classifier_type": "memm",
-        "params_grid": {
-            "C": [100]
-        },
-        'features': {
-            'bag-of-words-before': {
-                'ngram_lengths_to_start_positions': {
-                    1: [-2, -1],
-                    2: [-2, -1]
-                }
-            },
-            'bag-of-words-after': {
-                'ngram_lengths_to_start_positions': {
-                    1: [0, 1],
-                    2: [0, 1]
-                }
-            },
-            'in-gaz': {},
-            'other-entities': {},
-            'operator-entities': {},
-            'age-entities': {}
-        }
-    },
-    "sparse": {
-        "classifier_type": "memm",
-        "params_grid": {
-            "penalty": ["l1"],
-            "C": [1]
-        },
-        'features': {
-            'bag-of-words-before': {
-                'ngram_lengths_to_start_positions': {
-                    1: [-2, -1],
-                    2: [-2, -1]
-                }
-            },
-            'bag-of-words-after': {
-                'ngram_lengths_to_start_positions': {
-                    1: [0, 1],
-                    2: [0, 1]
-                }
-            },
-            'in-gaz': {},
-            'other-entities': {},
-            'operator-entities': {},
-            'age-entities': {}
-        }
-    },
-    "memm-cv": {
-        "classifier_type": "memm",
-        "params_grid": {
-            "penalty": ["l1", "l2"],
-            "C": [0.01, 1, 100, 10000, 1000000, 100000000]
-        },
-        "cv": {
-            "type": "k-fold",
-            "k": 5,
-            "metric": "accuracy"
-        },
-        'features': {
-            'bag-of-words-before': {
-                'ngram_lengths_to_start_positions': {
-                    1: [-2, -1],
-                    2: [-2, -1]
-                }
-            },
-            'bag-of-words-after': {
-                'ngram_lengths_to_start_positions': {
-                    1: [0, 1],
-                    2: [0, 1]
-                }
-            },
-            'in-gaz': {},
-            'other-entities': {},
-            'operator-entities': {},
-            'age-entities': {}
-        }
-    },
-    "ngram": {
-        "classifier_type": "ngram",
-        "params_grid": {
-            "C": [100]
-        },
-        'features': {
-            'bag-of-words-before': {
-                'ngram_lengths_to_start_positions': {
-                    1: [-2, -1],
-                    2: [-2, -1]
-                }
-            },
-            'bag-of-words-after': {
-                'ngram_lengths_to_start_positions': {
-                    1: [0, 1],
-                    2: [0, 1]
-                }
-            },
-            'in-gaz': {},
-            'other-entities': {},
-            'operator-entities': {},
-            'age-entities': {}
-        }
+        'in-gaz': {},
+        'other-entities': {},
+        'operator-entities': {},
+        'age-entities': {}
     }
 }
 
@@ -259,15 +125,38 @@ DEFAULT_PARSER_DEPENDENT_CONFIG = {
 
 
 def get_app_name(app_path):
+    """Returns the name of the application at app_path"""
     try:
-        app_name = _get_config_module(app_path).APP_NAME
+        return _get_config_module(app_path).APP_NAME
+    except IOError:
+        logger.debug('No app configuration file found')
     except AttributeError:
-        app_name = os.path.split(app_path)[1]
-    return app_name
+        logger.debug('App name not set in app configuration')
+    return os.path.split(app_path)[1]
 
 
-def get_classifier_config(clf_type, domain=None, intent=None, entity=None):
-    pass
+def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):
+    try:
+        module_conf = _get_config_module(app_path)
+        attribute = {
+            'domain': 'DOMAIN_MODEL_CONFIG',
+            'intent': 'INTENT_MODEL_CONFIG',
+            'entity': 'ENTITY_MODEL_CONFIG',
+            'role': 'ROLE_MODEL_CONFIG',
+        }[clf_type]
+        return copy.deepcopy(getattr(module_conf, attribute))
+    except IOError:
+        logger.info('No app configuration file found. Using default %s model configuration',
+                    clf_type)
+    except AttributeError:
+        logger.info('No %s model configuration set. Using default.', clf_type)
+
+    return copy.deepcopy({
+        'domain': DEFAULT_DOMAIN_MODEL_CONFIG,
+        'intent': DEFAULT_INTENT_MODEL_CONFIG,
+        'entity': DEFAULT_ENTITY_MODEL_CONFIG,
+        'role': DEFAULT_ROLE_MODEL_CONFIG
+    }[clf_type])
 
 
 def get_parser_config(app_path=None, config=None):

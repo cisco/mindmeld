@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This module contains feature extractors for sequence models"""
+"""This module contains feature extractors for queries"""
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import division
@@ -11,33 +11,10 @@ import math
 import re
 
 from ..core import resolve_entity_conflicts
-from .helpers import GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC, register_features, mask_numerics
+from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC, register_features,
+                      mask_numerics, get_ngram)
 
 # TODO: clean this up a LOT
-
-OUT_OF_BOUNDS_TOKEN = '<$>'
-
-
-def get_ngram(tokens, start, length):
-    """Gets a ngram from a list of tokens.
-
-    Handles out-of-bounds token positions with a special character.
-
-    Args:
-        tokens (list of str): Word tokens.
-        start (int): The index of the desired ngram's start position.
-        length (int): The length of the n-gram, e.g. 1 for unigram, etc.
-
-    Returns:
-        (str) An n-gram in the input token list.
-    """
-
-    ngram_tokens = []
-    for index in range(start, start+length):
-        token = (OUT_OF_BOUNDS_TOKEN if index < 0 or index >= len(tokens)
-                 else tokens[index])
-        ngram_tokens.append(token)
-    return ' '.join(ngram_tokens)
 
 
 def extract_in_gaz_span_features():

@@ -14,7 +14,7 @@ import os
 import time
 
 from . import markup, path
-from .exceptions import FileNotFoundError, WorkbenchError
+from .exceptions import WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
 
@@ -192,17 +192,27 @@ class ResourceLoader(object):
 
         # update entity data
         entity_data_path = path.get_entity_gaz_path(self.app_path, entity_type)
-        file_table['entity_data']['modified'] = os.path.getmtime(entity_data_path)
+        try:
+            file_table['entity_data']['modified'] = os.path.getmtime(entity_data_path)
+        except IOError:
+            # required file doesnt exist -- notify and error out
+            logger.error('Entity data file not found at %r', entity_data_path)
+            raise WorkbenchError('Entity data file not found at {!r}'.format(entity_data_path))
 
         # update mapping
         mapping_path = path.get_entity_map_path(self.app_path, entity_type)
-        file_table['mapping']['modified'] = os.path.getmtime(mapping_path)
+        try:
+            file_table['mapping']['modified'] = os.path.getmtime(mapping_path)
+        except IOError:
+            # required file doesnt exist -- notify and error out
+            logger.warning('Entity mapping file not found at %r', mapping_path)
+            raise WorkbenchError('Entity mapping file not found at {!r}'.format(mapping_path))
 
         # update gaz data
         gazetteer_path = path.get_gazetteer_data_path(self.app_path, entity_type)
         try:
             file_table['gazetteer']['modified'] = os.path.getmtime(gazetteer_path)
-        except (FileNotFoundError, OSError):
+        except (IOError, OSError):
             # gaz not yet built so set to a time impossibly long ago
             file_table['gazetteer']['modified'] = 0.0
 
