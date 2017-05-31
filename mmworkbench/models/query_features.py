@@ -16,6 +16,7 @@ from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC, register_fea
 
 # TODO: clean this up a LOT
 
+
 def extract_in_gaz_span_features():
     """Returns a feature extractor for properties of spans in gazetteers
     """

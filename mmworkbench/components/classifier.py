@@ -6,13 +6,12 @@ This module contains the base class for all the machine-learned classifiers in W
 from __future__ import unicode_literals
 from builtins import object
 
-import copy
 import logging
 import os
 
 from sklearn.externals import joblib
 
-from ..exceptions import ClassifierLoadError, FileNotFoundError
+from ..exceptions import ClassifierLoadError
 from ..core import Query
 
 from ..models import create_model, ModelConfig

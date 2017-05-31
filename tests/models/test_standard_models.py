@@ -12,16 +12,14 @@ from __future__ import unicode_literals
 
 import os
 
-import pytest
-
-from mmworkbench import markup, path
-from mmworkbench.query_factory import QueryFactory
+from mmworkbench import markup
 from mmworkbench.models import ModelConfig, CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE
 from mmworkbench.models.standard_models import TextModel
 
 
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME)
+
 
 class TestTextModel:
 

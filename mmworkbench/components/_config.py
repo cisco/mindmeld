@@ -144,19 +144,19 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
             'entity': 'ENTITY_MODEL_CONFIG',
             'role': 'ROLE_MODEL_CONFIG',
         }[clf_type]
-        return getattr(module_conf, attribute)
+        return copy.deepcopy(getattr(module_conf, attribute))
     except IOError:
         logger.info('No app configuration file found. Using default %s model configuration',
                     clf_type)
     except AttributeError:
         logger.info('No %s model configuration set. Using default.', clf_type)
 
-    return {
+    return copy.deepcopy({
         'domain': DEFAULT_DOMAIN_MODEL_CONFIG,
         'intent': DEFAULT_INTENT_MODEL_CONFIG,
         'entity': DEFAULT_ENTITY_MODEL_CONFIG,
         'role': DEFAULT_ROLE_MODEL_CONFIG
-    }[clf_type]
+    }[clf_type])
 
 
 def get_parser_config(app_path=None, config=None):
