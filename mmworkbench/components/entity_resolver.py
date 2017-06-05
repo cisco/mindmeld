@@ -272,9 +272,6 @@ class EntityResolver(object):
         """
         es_client = es_client or cls._create_es_client()
 
-        # with open(data_file) as data_fp:
-        #     data = json.load(data_fp)
-
         def _doc_generator(docs):
             for doc in docs:
                 base = {'_id': doc['id']}
@@ -305,46 +302,6 @@ class EntityResolver(object):
                 count += 1
                 logger.debug('Loaded document: %s', doc_id)
         logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
-
-    # @staticmethod
-    # def process_mapping(entity_type, mapping, normalizer):
-    #     """
-    #     Description
-    #
-    #     Args:
-    #         entity_type: The entity type associated with this entity resolver
-    #         mapping: Description
-    #         normalizer: Description
-    #     """
-    #     item_map = {}
-    #     syn_map = {}
-    #     seen_ids = []
-    #     for item in mapping:
-    #         cname = item['cname']
-    #         item_id = item.get('id')
-    #         if cname in item_map:
-    #             msg = 'Canonical name {!r} specified in {!r} entity map multiple times'
-    #             logger.debug(msg.format(cname, entity_type))
-    #         if item_id:
-    #             if item_id in seen_ids:
-    #                 msg = 'Item id {!r} specified in {!r} entity map multiple times'
-    #                 raise ValueError(msg.format(item_id, entity_type))
-    #             seen_ids.append(item_id)
-    #
-    #         aliases = [cname] + item.pop('whitelist', [])
-    #         items_for_cname = item_map.get(cname, [])
-    #         items_for_cname.append(item)
-    #         item_map[cname] = items_for_cname
-    #         for alias in aliases:
-    #             norm_alias = normalizer(alias)
-    #             if norm_alias in syn_map:
-    #                 msg = 'Synonym {!r} specified in {!r} entity map multiple times'
-    #                 logger.debug(msg.format(cname, entity_type))
-    #             cnames_for_syn = syn_map.get(norm_alias, [])
-    #             cnames_for_syn.append(cname)
-    #             syn_map[norm_alias] = list(set(cnames_for_syn))
-    #
-    #     return {'items': item_map, 'synonyms': syn_map}
 
     def fit(self, clean=False):
         """Loads an entity mapping file (if one exists) or trains a machine-learned entity
@@ -403,91 +360,6 @@ class EntityResolver(object):
 
             return values
 
-        # full_text_query = {
-        #     "query": {
-        #         "bool": {
-        #             "should": [
-        #                 {
-        #                     "bool": {
-        #                         "should": [
-        #                             {
-        #                                 "match": {
-        #                                     "whitelist.normalized_keyword": {
-        #                                         "query": normed,
-        #                                         "boost": 10
-        #                                     }
-        #                                 }
-        #                             },
-        #                             {
-        #                                 "match": {
-        #                                     "cname.normalized_keyword": {
-        #                                         "query": normed,
-        #                                         "boost": 10
-        #                                     }
-        #                                 }
-        #                             }
-        #                         ]
-        #                     }
-        #                 },
-        #                 {
-        #                     "match": {
-        #                         "whitelist": {
-        #                             "query": normed
-        #                         }
-        #                     }
-        #                 },
-        #                 {
-        #                     "match": {
-        #                         "cname": {
-        #                             "query": normed
-        #                         }
-        #                     }
-        #                 },
-        #                 {
-        #                     "match": {
-        #                         "cname.char_ngram": {
-        #                             "query": normed
-        #                         }
-        #                     }
-        #                 },
-        #                 {
-        #                     "match": {
-        #                         "whitelist.char_ngram": {
-        #                             "query": normed
-        #                         }
-        #                     }
-        #                 }
-        #             ]
-        #         }
-        #     },
-        #     "size": 0,
-        #     "aggs": {
-        #         "top_cnames": {
-        #             "terms": {
-        #                 "field": "cname.raw",
-        #                 "size": 100,
-        #                 "order": {
-        #                     "top_hit": "desc"
-        #                 }
-        #             },
-        #             "aggs": {
-        #                 "top_text_rel_match": {
-        #                     "top_hits": {
-        #                         "size": 1
-        #                     }
-        #                 },
-        #                 "top_hit": {
-        #                     "max": {
-        #                         "script": {
-        #                             "inline": "_score"
-        #                         }
-        #                     }
-        #                 }
-        #             }
-        #         }
-        #     }
-        # }
-
         full_text_query = {
             "query": {
                 "bool": {
@@ -502,22 +374,15 @@ class EntityResolver(object):
                                                 "boost": 10
                                             }
                                         }
+                                    },
+                                    {
+                                        "match": {
+                                            "cname.raw": {
+                                                "query": entity.text,
+                                                "boost": 10
+                                            }
+                                        }
                                     }
-                                    # {
-                                    #     "match": {
-                                    #         "cname": {
-                                    #             "query": normed,
-                                    #             "boost": 1
-                                    #         }
-                                    #     }
-                                    # },
-                                    # {
-                                    #     "match": {
-                                    #         "cname.char_ngram": {
-                                    #             "query": normed
-                                    #         }
-                                    #     }
-                                    # }
                                 ]
                             }
                         },
@@ -590,10 +455,11 @@ class EntityResolver(object):
         buckets = response['aggregations']['top_cnames']['buckets']
         results = [{'cname': bucket['key'],
                     'max_score': bucket['top_text_rel_match']['hits']['max_score'],
-                    'num_hits': bucket['top_text_rel_match']['hits']['total']}
+                    'num_hits': bucket['top_text_rel_match']['hits']['total'],
+                    'synonym': bucket['top_text_rel_match']['hits']['hits'][0]['inner_hits']
+                                     ['whitelist']['hits']['hits'][0]['_source']['name']}
                    for bucket in buckets]
 
-        #results.sort(key=lambda x: x['max_score'], reverse=True)
         return results[0:20]
 
     def predict_proba(self, entity):
