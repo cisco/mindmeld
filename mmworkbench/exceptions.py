@@ -41,6 +41,11 @@ class ProcessorError(Exception):
     pass
 
 
+class ParserTimeout(Exception):
+    """An exception for when parsing takes an unexpected length of time"""
+    pass
+
+
 class MarkupError(Exception):
     pass
 

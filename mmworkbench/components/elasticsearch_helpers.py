@@ -1,7 +1,7 @@
 import os
 import logging
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
 from elasticsearch.helpers import streaming_bulk
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
     return es_client
 
 
-def create_index(index_name, mapping, es_host=None, es_client=None):
+def create_index(index_name, scoped_index_name, mapping, es_host=None, es_client=None):
     """Creates a new index in the knowledge base.
 
     Args:
@@ -27,14 +27,18 @@ def create_index(index_name, mapping, es_host=None, es_client=None):
     """
     es_client = es_client or create_es_client(es_host)
 
-    if not es_client.indices.exists(index=index_name):
-        logger.info("Creating index '{}'".format(index_name))
-        es_client.indices.create(index_name, body=mapping)
-    else:
-        logger.error("Index '{}' already exists.".format(index_name))
+    try:
+        if not es_client.indices.exists(index=scoped_index_name):
+            logger.info('Creating index %r', index_name)
+            es_client.indices.create(scoped_index_name, body=mapping)
+        else:
+            logger.error('Index %r already exists.', index_name)
+    except ESConnectionError as ex:
+        logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
+        raise ex
 
 
-def load_index(index_name, data, doc_generator, mapping, doc_type, es_host=None,
+def load_index(app_name, index_name, data, doc_generator, mapping, doc_type, es_host=None,
                es_client=None):
     """Loads documents from disk into the specified index in the knowledge base. If an index
     with the specified name doesn't exist, a new index with that name will be created in the
@@ -47,23 +51,32 @@ def load_index(index_name, data, doc_generator, mapping, doc_type, es_host=None,
         es_host (str): The Elasticsearch host server
         es_client: Description
     """
+    scoped_index_name = '{}${}'.format(app_name, index_name)
     es_client = es_client or create_es_client(es_host)
 
     # create index if specified index does not exist
-    if not es_client.indices.exists(index=index_name):
-        create_index(index_name, mapping, es_host=es_host, es_client=es_client)
-
-    count = 0
-    for okay, result in streaming_bulk(es_client, doc_generator(data), index=index_name,
-                                       doc_type=doc_type, chunk_size=50):
-
-        action, result = result.popitem()
-        doc_id = '/%s/%s/%s' % (index_name, doc_type, result['_id'])
-        # process the information from ES whether the document has been
-        # successfully indexed
-        if not okay:
-            logger.error('Failed to %s document %s: %r', action, doc_id, result)
+    try:
+        if es_client.indices.exists(index=scoped_index_name):
+            logger.info('Loading index %r', index_name)
         else:
-            count += 1
-            logger.debug('Loaded document: %s', doc_id)
-    logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
+            create_index(index_name, scoped_index_name, mapping, es_host=es_host,
+                         es_client=es_client)
+
+        count = 0
+        for okay, result in streaming_bulk(es_client, doc_generator(data),
+                                           index=scoped_index_name, doc_type=doc_type,
+                                           chunk_size=50):
+
+            action, result = result.popitem()
+            doc_id = '/%s/%s/%s' % (index_name, doc_type, result['_id'])
+            # process the information from ES whether the document has been
+            # successfully indexed
+            if not okay:
+                logger.error('Failed to %s document %s: %r', action, doc_id, result)
+            else:
+                count += 1
+                logger.debug('Loaded document: %s', doc_id)
+        logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
+    except ESConnectionError as ex:
+        logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
+        raise ex

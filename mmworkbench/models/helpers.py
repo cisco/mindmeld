@@ -22,6 +22,9 @@ WORD_FREQ_RSC = "w_freq"
 QUERY_FREQ_RSC = "q_freq"
 
 
+OUT_OF_BOUNDS_TOKEN = '<$>'
+
+
 def create_model(config):
     """Creates a model instance using the provided configuration
 
@@ -121,3 +124,25 @@ def mask_numerics(token):
         return '#NUM'
     else:
         return re.sub(r'\d', '8', token)
+
+
+def get_ngram(tokens, start, length):
+    """Gets a ngram from a list of tokens.
+
+    Handles out-of-bounds token positions with a special character.
+
+    Args:
+        tokens (list of str): Word tokens.
+        start (int): The index of the desired ngram's start position.
+        length (int): The length of the n-gram, e.g. 1 for unigram, etc.
+
+    Returns:
+        (str) An n-gram in the input token list.
+    """
+
+    ngram_tokens = []
+    for index in range(start, start+length):
+        token = (OUT_OF_BOUNDS_TOKEN if index < 0 or index >= len(tokens)
+                 else tokens[index])
+        ngram_tokens.append(token)
+    return ' '.join(ngram_tokens)

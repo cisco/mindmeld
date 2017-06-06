@@ -2460,3 +2460,56 @@ n:first-child:before,
     margin-right: 4px
 }
 
+/* Added by Karthik (review with Nan/Christian) to customize new admonition type (admonition-exercise) */
+
+.rst-content .admonition-exercise {
+  -webkit-font-smoothing: antialiased;
+}
+.rst-content .admonition-exercise {
+  padding: 12px;
+  line-height: 24px;
+  margin-bottom: 24px;
+  background: #e7f2fa;
+}
+.rst-content .wy-alert-danger.admonition-exercise {
+  background: #fdf3f2;
+}
+.rst-content .wy-alert-danger.admonition-exercise .wy-alert-title, .rst-content .wy-alert-danger.admonition-exercise .admonition-title {
+  background: #f29f97;
+}
+.rst-content .admonition-exercise {
+  background: #ffedcc;
+}
+.rst-content .admonition-exercise .wy-alert-title, .rst-content .admonition-exercise .admonition-title {
+  background: #f0b37e;
+}
+.rst-content .wy-alert-info.admonition-exercise {
+  background: #e7f2fa;
+}
+.rst-content .wy-alert-info.admonition-exercise .wy-alert-title, .rst-content .wy-alert-info.admonition-exercise .admonition-title {
+  background: #6ab0de;
+}
+.rst-content .wy-alert-success.admonition-exercise {
+  background: #dbfaf4;
+}
+.rst-content .wy-alert-success.admonition-exercise .wy-alert-title, .rst-content .wy-alert-success.admonition-exercise .admonition-title {
+  background: #1abc9c;
+}
+
+.rst-content .wy-alert-neutral.admonition-exercise {
+  background: #f3f6f6;
+}
+.rst-content .wy-alert-neutral.admonition-exercise .wy-alert-title, .rst-content .wy-alert-neutral.admonition-exercise .admonition-title {
+  color: #404040;
+  background: #e1e4e5;
+}
+.rst-content .wy-alert-neutral.admonition-exercise a {
+  color: #2980B9;
+}
+.rst-content .admonition-exercise p:last-child {
+  margin-bottom: 0;
+}
+.rst-content .admonition-exercise .last {
+  margin-bottom: 0;
+}
+

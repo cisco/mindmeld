@@ -240,3 +240,82 @@ class TextModel(SkLearnModel):
 
 
 register_model('text', TextModel)
+
+
+class MaxentModel(SkLearnModel):
+
+    def evaluate(self, examples, labels):
+        """Evaluates a model against the given examples and labels
+
+        Args:
+            examples: A list of examples to predict
+            labels: A list of expected labels
+
+        Returns:
+            ModelEvaluation: an object containing information about the
+                evaluation
+        """
+        # TODO: also expose feature weights?
+        predictions = self.predict_proba(examples)
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1])
+                       for i, e in enumerate(examples)]
+
+        # Create a model config object for the current effective config (after param selection)
+        config = self._get_effective_config()
+        model_eval = StandardModelEvaluation(config, evaluations)
+        return model_eval
+
+    def __getstate__(self):
+        """Returns the information needed pickle an instance of this class.
+
+        By default, pickling removes attributes with names starting with
+        underscores. This overrides that behavior.
+        """
+        attributes = self.__dict__.copy()
+        attributes['_resources'] = {WORD_FREQ_RSC: self._resources.get(WORD_FREQ_RSC, {}),
+                                    QUERY_FREQ_RSC: self._resources.get(QUERY_FREQ_RSC, {})}
+        return attributes
+
+    def _convert_params(self, param_grid, y, is_grid=True):
+        """
+        Convert the params from the style given by the config to the style
+        passed in to the actual classifier.
+
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by parameter name
+
+        Returns:
+            (dict): revised param_grid
+        """
+        if 'class_weight' in param_grid:
+            raw_weights = param_grid['class_weight'] if is_grid else [param_grid['class_weight']]
+            weights = [{k if isinstance(k, int) else self._class_encoder.transform((k,))[0]: v
+                        for k, v in cw_dict.items()} for cw_dict in raw_weights]
+            param_grid['class_weight'] = weights if is_grid else weights[0]
+        elif 'class_bias' in param_grid:
+            # interpolate between class_bias=0 => class_weight=None
+            # and class_bias=1 => class_weight='balanced'
+            class_count = bincount(y)
+            classes = self._class_encoder.classes_
+            weights = []
+            raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]
+            for class_bias in raw_bias:
+                # these weights are same as sklearn's class_weight='balanced'
+                balanced_w = [old_div(len(y), (float(len(classes)) * c)) for c in class_count]
+                balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
+
+                weights.append({c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples})
+            param_grid['class_weight'] = weights if is_grid else weights[0]
+            del param_grid['class_bias']
+
+        return param_grid
+
+    def _get_feature_selector(self):
+        return None
+
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        return LogisticRegression
+
+
+register_model('maxent', MaxentModel)

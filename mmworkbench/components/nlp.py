@@ -9,7 +9,7 @@ from builtins import object, super
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
-from ..exceptions import ProcessorError
+from ..exceptions import FileNotFoundError, ProcessorError
 from ..resource_loader import ResourceLoader
 
 from .domain_classifier import DomainClassifier
@@ -308,7 +308,11 @@ class IntentProcessor(Processor):
         self.name = intent
 
         self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
-        self.parser = Parser(self.resource_loader, domain, intent)
+        try:
+            self.parser = Parser(self.resource_loader)
+        except FileNotFoundError:
+            # Unable to load parser config -> no parser
+            self.parser = None
 
     @property
     def entities(self):
@@ -321,8 +325,6 @@ class IntentProcessor(Processor):
         # train entity recognizer
         self.entity_recognizer.fit()
 
-        # TODO: something for the parser?
-
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
         for entity_type in entity_types:
@@ -334,13 +336,9 @@ class IntentProcessor(Processor):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.entity_recognizer.dump(model_path)
 
-        # TODO: something with parser?
-
     def _load(self):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
         self.entity_recognizer.load(model_path)
-
-        # TODO: something with parser?
 
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
@@ -380,10 +378,10 @@ class IntentProcessor(Processor):
         self._check_ready()
         entities = self.entity_recognizer.predict(query)
 
-        for entity in entities:
-            self.entities[entity.entity.type].process_entity(query, entities, entity)
+        for idx, entity in enumerate(entities):
+            self.entities[entity.entity.type].process_entity(query, entities, idx)
 
-        # TODO: parse query
+        entities = self.parser.parse_entities(query, entities) if self.parser else entities
 
         return ProcessedQuery(query, entities=entities)
 
@@ -416,7 +414,7 @@ class EntityProcessor(Processor):
         self.name = self.type
 
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
-        self.entity_resolver = EntityResolver(self.resource_loader, entity_type)
+        self.entity_resolver = EntityResolver(app_path, self.resource_loader, entity_type)
 
     def _build(self):
         """Builds the models for this entity type"""
@@ -436,7 +434,7 @@ class EntityProcessor(Processor):
         raise NotImplementedError('EntityProcessor objects do not support `process()`. '
                                   'Try `process_entity()`')
 
-    def process_entity(self, query, entities, entity):
+    def process_entity(self, query, entities, entity_index):
         """Processes the given entity using the hierarchy of natural language processing models
         trained for this entity type
 
@@ -450,10 +448,11 @@ class EntityProcessor(Processor):
                 applying the hierarchy of natural language processing models to the input entity
         """
         self._check_ready()
+        entity = entities[entity_index]
 
         # Classify role
-        entity.entity.role = self.role_classifier.predict(query, entities, entity)
+        entity.entity.role = self.role_classifier.predict(query, entities, entity_index)
 
-        # Resolver entity
+        # Resolve entity
         entity.entity.value = self.entity_resolver.predict(entity.entity)
         return entity

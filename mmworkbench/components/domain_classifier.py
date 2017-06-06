@@ -11,6 +11,9 @@ from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 
 from .classifier import Classifier
 
+from ._config import get_classifier_config
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,45 +23,18 @@ class DomainClassifier(Classifier):
     labels for the training data are the domain names associated with each query.
     """
 
-    DEFAULT_CONFIG = {
-        'default_model': 'main',
-        'models': {
-            'main': {
-                'model_type': 'text',
-                'model_settings': {
-                    'classifier_type': 'logreg',
-                },
-                'param_selection': {
-                    'type': 'k-fold',
-                    'k': 10,
-                    'grid': {
-                        'fit_intercept': [True, False],
-                        'C': [10, 100, 1000, 10000, 100000]
-                    },
-                },
-                'features': {
-                    'bag-of-words': {
-                        'lengths': [1]
-                    },
-                    'freq': {'bins': 5},
-                    'in-gaz': {}
-                }
-            }
-        }
-    }
+    CLF_TYPE = 'domain'
 
-    def _get_model_config(self, config_name, **kwargs):
+    def _get_model_config(self, **kwargs):
         """Gets a machine learning model configuration
-
-        Args:
-             config_name: Name of the configuration
 
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
         kwargs['example_type'] = QUERY_EXAMPLE_TYPE
         kwargs['label_type'] = CLASS_LABEL_TYPE
-        return super()._get_model_config(config_name, **kwargs)
+        default_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path)
+        return super()._get_model_config(default_config, **kwargs)
 
     def fit(self, *args, **kwargs):
         """Trains the domain classification model using the provided training queries

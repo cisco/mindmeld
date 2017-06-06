@@ -9,7 +9,7 @@ import logging
 import copy
 
 from ..core import Entity
-
+from ._config import get_app_name
 from .elasticsearch_helpers import create_es_client, load_index
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class EntityResolver(object):
     """
 
     # default ElasticSearch mapping to define text analysis settings for text fields
-    ES_SYNONYM_INDEX_PREFIX = "synonym_test"
+    ES_SYNONYM_INDEX_PREFIX = "synonym"
 
     DEFAULT_SYN_ES_MAPPING = {
         "mappings": {
@@ -203,7 +203,7 @@ class EntityResolver(object):
         }
     }
 
-    def __init__(self, resource_loader, entity_type, es_host=None):
+    def __init__(self, app_path, resource_loader, entity_type, es_host=None):
         """Initializes an entity resolver
 
         Args:
@@ -219,6 +219,7 @@ class EntityResolver(object):
         self.__es_client = None
         self._es_index_name = EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + entity_type
         self._mapping = EntityResolver.DEFAULT_SYN_ES_MAPPING
+        self._app_name = get_app_name(app_path)
 
     @property
     def _es_client(self):
@@ -228,7 +229,7 @@ class EntityResolver(object):
         return self.__es_client
 
     @classmethod
-    def ingest_synonym(cls, index_name, data, es_host=None, es_client=None):
+    def ingest_synonym(cls, app_name, index_name, data, es_host=None, es_client=None):
         """Loads documents from disk into the specified index in the knowledge base. If an index
         with the specified name doesn't exist, a new index with that name will be created in the
         knowledge base.
@@ -254,7 +255,7 @@ class EntityResolver(object):
                 base.update(doc)
                 yield base
 
-        load_index(index_name, data, _doc_generator, cls.DEFAULT_SYN_ES_MAPPING, DOC_TYPE,
+        load_index(app_name, index_name, data, _doc_generator, cls.DEFAULT_SYN_ES_MAPPING, DOC_TYPE,
                    es_host, es_client)
 
     def fit(self, clean=False):
@@ -295,7 +296,7 @@ class EntityResolver(object):
                 cnames = self._mapping['synonyms'][normed]
             except KeyError:
                 logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.type)
-                return entity.text
+                return None
 
             if len(cnames) > 1:
                 logger.info('Multiple possible canonical names for %r entity for type %r',

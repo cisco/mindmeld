@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains a collection of the core data structures used in workbench."""
 from __future__ import unicode_literals
-from builtins import object, range
+from builtins import object, range, super
 
 import logging
 
@@ -34,7 +34,7 @@ class Bunch(dict):
     """
 
     def __init__(self, **kwargs):
-        super(Bunch, self).__init__(kwargs)
+        super().__init__(kwargs)
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -115,8 +115,9 @@ class Query(object):
     Attributes:
         text (str): the original input text
         processed_text (str): the text after it has been preprocessed. TODO: better description here
-        normalized_tokens (list of str): a list of normalized tokens
+        normalized_tokens (tuple of str): a list of normalized tokens
         normalized_text (str): the normalized text. TODO: better description here
+        system_entity_candidates (tuple): Description
     """
 
     # TODO: look into using __slots__
@@ -136,7 +137,7 @@ class Query(object):
         norm_text = ' '.join([t['entity'] for t in self._normalized_tokens])
         self._texts = (raw_text, processed_text, norm_text)
         self._char_maps = char_maps
-        self.system_entity_candidates = None
+        self.system_entity_candidates = ()
 
     @property
     def text(self):
@@ -156,7 +157,7 @@ class Query(object):
     @property
     def normalized_tokens(self):
         """The tokens of the normalized input text"""
-        return [token['entity'] for token in self._normalized_tokens]
+        return tuple((token['entity'] for token in self._normalized_tokens))
 
     def get_text_form(self, form):
         """Programmatically retrieves text by form
@@ -283,17 +284,18 @@ class ProcessedQuery(object):
         self.query = query
         self.domain = domain
         self.intent = intent
-        self.entities = entities
+        self.entities = None if entities is None else tuple(entities)
         self.is_gold = is_gold
 
     def to_dict(self):
         """Converts the processed query into a dictionary"""
-        return {
+        base = {
             'text': self.query.text,
             'domain': self.domain,
             'intent': self.intent,
-            'entities': [e.to_dict() for e in self.entities],
+            'entities': None if self.entities is None else [e.to_dict() for e in self.entities],
         }
+        return base
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -312,8 +314,7 @@ class ProcessedQuery(object):
 
 
 class NestedEntity(object):
-
-    def __init__(self, texts, spans, token_spans, entity):
+    def __init__(self, texts, spans, token_spans, entity, children=None):
         """Initializes an entity node object
 
         Args:
@@ -322,15 +323,30 @@ class NestedEntity(object):
                 text for this entity for each text form
             token_spans (tuple): Tuple containing the token index spans of the
                 text for this entity for each text form
+            entity (Entity): Description
+            parent (NestedEntity): Description
+            children (tuple of NestedEntity): Description
         """
         self._texts = texts
         self._spans = spans
         self._token_spans = token_spans
         self.entity = entity
+        self.parent = None
+
+        for child in children or ():
+            child.parent = self
+        if children:
+            self.children = tuple(sorted(children, key=lambda c: c.span.start))
+        else:
+            self.children = None
+
+    def with_children(self, children):
+        """Creates a copy of this entity with the provided children"""
+        return self.__class__(self._texts, self._spans, self._token_spans, self.entity, children)
 
     @classmethod
     def from_query(cls, query, span=None, normalized_span=None, entity_type=None,
-                   entity=None, parent_offset=0):
+                   entity=None, parent_offset=0, children=None):
         """Creates an entity node using a parent entity node
 
         Args:
@@ -378,12 +394,14 @@ class NestedEntity(object):
                 raise ValueError("Either 'entity' or 'entity_type' must be specified")
             entity = Entity(texts[0], entity_type)
 
-        return cls(texts, spans, tok_spans, entity)
+        return cls(texts, spans, tok_spans, entity, children)
 
     def to_dict(self):
         """Converts the query entity into a dictionary"""
         base = self.entity.to_dict()
-        base.update({'span': self.span.to_dict()})
+        base['span'] = self.span.to_dict()
+        if self.children:
+            base['children'] = [c.to_dict() for c in self.children]
         return base
 
     @property
@@ -509,7 +527,7 @@ class Entity(object):
         Returns:
             bool: True if the entity is a system entity type, else False
         """
-        return entity_type.startswith('sys:')
+        return entity_type.startswith('sys_')
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
@@ -613,16 +631,3 @@ def _is_overlapping(target, other):
     overlap = set(target_range).intersection(predicted_range)
     return (overlap and not _is_subset(target, other) and
             not _is_superset(target, other))
-
-
-def configure_logs(**kwargs):
-    """Helper method for easily configuring logs from the python shell.
-    Args:
-        level (TYPE, optional): A logging level recognized by python's logging module.
-    """
-    import sys
-    level = kwargs.get('level', logging.INFO)
-    log_format = kwargs.get('format', '%(message)s')
-    logging.basicConfig(stream=sys.stdout, format=log_format)
-    package_logger = logging.getLogger(__package__)
-    package_logger.setLevel(level)
