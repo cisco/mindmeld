@@ -9,19 +9,32 @@ Quick Start
 
 |
 
-1. Download the blueprint
-^^^^^^^^^^^^^^^^^^^^^^^^^
+1. Download
+^^^^^^^^^^^
 
 Open a python shell and type the following commands to download and set up the food ordering blueprint application.
 
-.. code-block:: console
+.. code:: python
 
    >>> import mmworkbench as wb
+   >>> wb.configure_logs()
    >>> wb.blueprint('food_ordering')
 
 
-2. Run the blueprint
-^^^^^^^^^^^^^^^^^^^^
+2. Build
+^^^^^^^^
+
+Build the Natural Language Processing models that power the app.
+
+.. code:: python
+
+   >>> from mmworkbench.components import NaturalLanguageProcessor
+   >>> nlp = NaturalLanguageProcessor('food_ordering')
+   >>> nlp.build()
+
+
+3. Run
+^^^^^^
 
 Interact with the app in the python shell using the commands below. Try out the examples shown here as well as some queries of your own.
 
