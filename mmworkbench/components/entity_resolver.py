@@ -6,13 +6,11 @@ from __future__ import unicode_literals
 from builtins import object
 
 import logging
-import os
 import copy
 
 from ..core import Entity
 
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk
+from .elastic_search_helpers import create_es_client, create_index, load_index
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +23,7 @@ class EntityResolver(object):
     """
 
     # default ElasticSearch mapping to define text analysis settings for text fields
-    ES_SYNONYM_INDEX_PREFIX = "synonym_arushi"
+    ES_SYNONYM_INDEX_PREFIX = "synonym_test"
 
     DEFAULT_SYN_ES_MAPPING = {
         "mappings": {
@@ -205,7 +203,7 @@ class EntityResolver(object):
         }
     }
 
-    def __init__(self, resource_loader, entity_type):
+    def __init__(self, resource_loader, entity_type, es_host=None):
         """Initializes an entity resolver
 
         Args:
@@ -216,49 +214,21 @@ class EntityResolver(object):
         self._normalizer = resource_loader.query_factory.normalize
         self.type = entity_type
 
-        self._mapping = None
         self._is_system_entity = Entity.is_system_entity(self.type)
+        self._es_host = es_host
         self.__es_client = None
         self._es_index_name = EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + entity_type
+        self._mapping = EntityResolver.DEFAULT_SYN_ES_MAPPING
 
     @property
     def _es_client(self):
         # Lazily connect to Elasticsearch
         if self.__es_client is None:
-            self.__es_client = self._create_es_client()
+            self.__es_client = create_es_client()
         return self.__es_client
 
-    @staticmethod
-    def _create_es_client(es_host=None, es_user=None, es_pass=None):
-        es_host = es_host or os.environ.get('MM_ES_HOST')
-        es_user = es_user or os.environ.get('MM_ES_USERNAME')
-        es_pass = es_pass or os.environ.get('MM_ES_PASSWORD')
-
-        http_auth = (es_user, es_pass) if es_user and es_pass else None
-        es_client = Elasticsearch(es_host, http_auth=http_auth, request_timeout=60, timeout=60)
-        return es_client
-
     @classmethod
-    def create_index(cls, index_name, es_client=None):
-        """Creates a new index in the knowledge base.
-
-        Args:
-            index_name (str): The name of the new index to be created
-            es_host (str): The Elasticsearch host server
-            es_client: Description
-        """
-        es_client = es_client or cls._create_es_client()
-
-        mapping = EntityResolver.DEFAULT_SYN_ES_MAPPING
-
-        if not es_client.indices.exists(index=index_name):
-            logger.info("Creating index '{}'".format(index_name))
-            es_client.indices.create(index_name, body=mapping)
-        else:
-            logger.error("Index '{}' already exists.".format(index_name))
-
-    @classmethod
-    def ingest_synonym(cls, index_name, mapping, es_client=None):
+    def ingest_synonym(cls, index_name, data, es_host=None, es_client=None):
         """Loads documents from disk into the specified index in the knowledge base. If an index
         with the specified name doesn't exist, a new index with that name will be created in the
         knowledge base.
@@ -270,8 +240,6 @@ class EntityResolver(object):
             es_host (str): The Elasticsearch host server
             es_client: Description
         """
-        es_client = es_client or cls._create_es_client()
-
         def _doc_generator(docs):
             for doc in docs:
                 base = {'_id': doc['id']}
@@ -284,24 +252,8 @@ class EntityResolver(object):
                 base.update(doc)
                 yield base
 
-        # create index if specified index does not exist
-        if not es_client.indices.exists(index=index_name):
-            EntityResolver.create_index(index_name, es_client=es_client)
-
-        count = 0
-        for okay, result in streaming_bulk(es_client, _doc_generator(mapping), index=index_name,
-                                           doc_type=DOC_TYPE, chunk_size=50):
-
-            action, result = result.popitem()
-            doc_id = '/%s/%s/%s' % (index_name, DOC_TYPE, result['_id'])
-            # process the information from ES whether the document has been
-            # successfully indexed
-            if not okay:
-                logger.error('Failed to %s document %s: %r', action, doc_id, result)
-            else:
-                count += 1
-                logger.debug('Loaded document: %s', doc_id)
-        logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
+        load_index(index_name, data, _doc_generator, cls.DEFAULT_SYN_ES_MAPPING, DOC_TYPE,
+                   es_host, es_client)
 
     def fit(self, clean=False):
         """Loads an entity mapping file (if one exists) or trains a machine-learned entity
@@ -312,16 +264,14 @@ class EntityResolver(object):
                           updating the existing index with synonyms in the mapping.json
         """
         if not self._is_system_entity:
-            mapping = self._resource_loader.get_entity_map(self.type)
-            # self._mapping = self.process_mapping(self.type, mapping, self._normalizer)
-
             # create index if specified index does not exist
             # TODO: refactor things around ES calls.
-            if not self._es_client.indices.exists(index=self._es_index_name):
-                EntityResolver.create_index(self._es_index_name, es_client=self._es_client)
+            # if not self._es_client.indices.exists(index=self._es_index_name):
+            #     create_index(self._es_index_name, self._mapping, es_client=self._es_client)
 
+            data = self._resource_loader.get_entity_map(self.type)
             logger.info("Importing synonym data to ES index '{}'".format(self._es_index_name))
-            EntityResolver.ingest_synonym(self._es_index_name, mapping)
+            EntityResolver.ingest_synonym(self._es_index_name, data, self._es_host, self._es_client)
 
     def predict(self, entity, exact_match_only=False):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the

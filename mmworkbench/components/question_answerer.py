@@ -7,13 +7,9 @@ from builtins import object
 
 import json
 import logging
-import os
-
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk
 
 from ..resource_loader import ResourceLoader
-
+from .elastic_search_helpers import create_es_client, load_index
 
 DOC_TYPE = 'document'
 
@@ -137,14 +133,13 @@ class QuestionAnswerer(object):
             es_host (str): The Elasticsearch host server
         """
         self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
-        self._es_host = es_host
         self.__es_client = None
 
     @property
     def _es_client(self):
         # Lazily connect to Elasticsearch
         if self.__es_client is None:
-            self.__es_client = self._create_es_client(self._es_host)
+            self.__es_client = create_es_client(self._es_host)
         return self.__es_client
 
     def get(self, query_string=None, **kwargs):
@@ -202,37 +197,8 @@ class QuestionAnswerer(object):
         """
         raise NotImplementedError
 
-    @staticmethod
-    def _create_es_client(es_host=None, es_user=None, es_pass=None):
-        es_host = es_host or os.environ.get('MM_ES_HOST')
-        es_user = es_user or os.environ.get('MM_ES_USERNAME')
-        es_pass = es_pass or os.environ.get('MM_ES_PASSWORD')
-
-        http_auth = (es_user, es_pass) if es_user and es_pass else None
-        es_client = Elasticsearch(es_host, http_auth=http_auth, request_timeout=60, timeout=60)
-        return es_client
-
     @classmethod
-    def create_index(cls, index_name, es_host=None, es_client=None):
-        """Creates a new index in the knowledge base.
-
-        Args:
-            index_name (str): The name of the new index to be created
-            es_host (str): The Elasticsearch host server
-            es_client: Description
-        """
-        es_client = es_client or cls._create_es_client(es_host)
-
-        mapping = QuestionAnswerer.DEFAULT_ES_MAPPING
-
-        if not es_client.indices.exists(index=index_name):
-            logger.info("Creating index '{}'".format(index_name))
-            es_client.indices.create(index_name, body=mapping)
-        else:
-            logger.error("Index '{}' already exists.".format(index_name))
-
-    @classmethod
-    def load_index(cls, index_name, data_file, es_host=None, es_client=None):
+    def load_knowledge_base(cls, index_name, data_file, es_host=None, es_client=None):
         """Loads documents from disk into the specified index in the knowledge base. If an index
         with the specified name doesn't exist, a new index with that name will be created in the
         knowledge base.
@@ -244,8 +210,6 @@ class QuestionAnswerer(object):
             es_host (str): The Elasticsearch host server
             es_client: Description
         """
-        es_client = es_client or cls._create_es_client(es_host)
-
         with open(data_file) as data_fp:
             data = json.load(data_fp)
 
@@ -255,21 +219,5 @@ class QuestionAnswerer(object):
                 base.update(doc)
                 yield base
 
-        # create index if specified index does not exist
-        if not es_client.indices.exists(index=index_name):
-            QuestionAnswerer.create_index(index_name, es_host=es_host, es_client=es_client)
-
-        count = 0
-        for okay, result in streaming_bulk(es_client, _doc_generator(data), index=index_name,
-                                           doc_type=DOC_TYPE, chunk_size=50):
-
-            action, result = result.popitem()
-            doc_id = '/%s/%s/%s' % (index_name, DOC_TYPE, result['_id'])
-            # process the information from ES whether the document has been
-            # successfully indexed
-            if not okay:
-                logger.error('Failed to %s document %s: %r', action, doc_id, result)
-            else:
-                count += 1
-                logger.debug('Loaded document: %s', doc_id)
-        logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
+        load_index(index_name, data, _doc_generator, cls.DEFAULT_ES_MAPPING, DOC_TYPE, es_host,
+                   es_client)
