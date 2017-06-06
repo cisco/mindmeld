@@ -10,7 +10,7 @@ import copy
 
 from ..core import Entity
 
-from .elastic_search_helpers import create_es_client, create_index, load_index
+from .elastic_search_helpers import create_es_client, load_index
 
 logger = logging.getLogger(__name__)
 
@@ -371,43 +371,18 @@ class EntityResolver(object):
                         }
                     ]
                 }
-            },
-            "size": 0,
-            "aggs": {
-                "top_cnames": {
-                    "terms": {
-                        "field": "cname.raw",
-                        "size": 100,
-                        "order": {
-                            "top_hit": "desc"
-                        }
-                    },
-                    "aggs": {
-                        "top_text_rel_match": {
-                            "top_hits": {
-                                "size": 1
-                            }
-                        },
-                        "top_hit": {
-                            "max": {
-                                "script": {
-                                    "inline": "_score"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
 
         response = self._es_client.search(index=self._es_index_name, body=text_relevance_query)
-        buckets = response['aggregations']['top_cnames']['buckets']
-        results = [{'cname': bucket['key'],
-                    'max_score': bucket['top_text_rel_match']['hits']['max_score'],
-                    'num_hits': bucket['top_text_rel_match']['hits']['total'],
-                    'synonym': bucket['top_text_rel_match']['hits']['hits'][0]['inner_hits']
-                                     ['whitelist']['hits']['hits'][0]['_source']['name']}
-                   for bucket in buckets]
+        results = response['hits']['hits']
+        results = [{'id': result['_source']['id'],
+                    'cname': result['_source']['cname'],
+                    'score': result['_score'],
+                    'top_synonym': result['inner_hits']['whitelist']['hits']['hits'][0]['_source']
+                                         ['name'],
+                    'all_synonyms': result['_source']['whitelist']}
+                   for result in results]
 
         return results[0:20]
 
