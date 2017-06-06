@@ -68,22 +68,16 @@ Contents
    :caption: Workbench User Manual
    :name: userguide
 
-   userguide/coming_soon
+   userguide/introduction
    userguide/getting_started
-   userguide/architecture
    userguide/key_concepts
-   userguide/directory_structure
-   userguide/interface
-   userguide/dialogue_manager
+   userguide/architecture
+   userguide/workbench_apps
    userguide/kb
-   userguide/domain_classification
-   userguide/intent_classification
-   userguide/entity_recognition
-   userguide/role_classification
-   userguide/entity_resolution
-   userguide/language_parsing
+   userguide/nlp
+   userguide/dialogue_manager
    userguide/deployment
-
+   userguide/integration
 
 .. toctree::
    :maxdepth: 2

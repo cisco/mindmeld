@@ -4,6 +4,21 @@
 Workbench Architecture
 ======================
 
+Show the workbench architecture diagram and introduce each of the components.
+4.3.1 Natural Language Processor
+  4.3.1.1 Domain Classifier
+  4.3.1.2 Intent Classifier
+  4.3.1.3 Entity Recognizer
+  4.3.1.4 Role Classifier
+  4.3.1.5 Entity Recognizer
+  4.3.1.6 Language Parser
+4.3.2 Question Answerer
+4.3.3 Dialogue Manager
+4.3.4 Application Manager
+4.3.5 Gateway
+
+[ARCHIVED CONTENT BELOW]
+
 The **MindMeld Deep-Domain Conversational AI Platform** consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.
 
 .. image:: /images/architecture.png
