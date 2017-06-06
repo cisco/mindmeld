@@ -25,7 +25,7 @@ class EntityResolver(object):
     """
 
     # default ElasticSearch mapping to define text analysis settings for text fields
-    ES_SYNONYM_INDEX_PREFIX = "synonym"
+    ES_SYNONYM_INDEX_PREFIX = "synonym_arushi"
 
     DEFAULT_SYN_ES_MAPPING = {
         "mappings": {
@@ -335,12 +335,10 @@ class EntityResolver(object):
         """
         if self._is_system_entity:
             # system entities are already resolved
-            return entity.value
-
-        # TODO: revisit the normalization behavior
-        normed = self._normalizer(entity.text)
+            return [entity.value]
 
         if exact_match_only:
+            normed = self._normalizer(entity.text)
             try:
                 cnames = self._mapping['synonyms'][normed]
             except KeyError:
@@ -360,7 +358,7 @@ class EntityResolver(object):
 
             return values
 
-        full_text_query = {
+        text_relevance_query = {
             "query": {
                 "bool": {
                     "should": [
@@ -370,7 +368,7 @@ class EntityResolver(object):
                                     {
                                         "match": {
                                             "cname.normalized_keyword": {
-                                                "query": normed,
+                                                "query": entity.text,
                                                 "boost": 10
                                             }
                                         }
@@ -396,7 +394,7 @@ class EntityResolver(object):
                                             {
                                                 "match": {
                                                     "whitelist.name.normalized_keyword": {
-                                                        "query": normed,
+                                                        "query": entity.text,
                                                         "boost": 10
                                                     }
                                                 }
@@ -404,20 +402,21 @@ class EntityResolver(object):
                                             {
                                                 "match": {
                                                     "whitelist.name": {
-                                                        "query": normed
+                                                        "query": entity.text
                                                     }
                                                 }
                                             },
                                             {
                                                 "match": {
                                                     "whitelist.name.char_ngram": {
-                                                        "query": normed
+                                                        "query": entity.text
                                                     }
                                                 }
                                             }
                                         ]
                                     }
-                                }
+                                },
+                                "inner_hits": {}
                             }
                         }
                     ]
@@ -451,7 +450,7 @@ class EntityResolver(object):
             }
         }
 
-        response = self._es_client.search(index=self._es_index_name, body=full_text_query)
+        response = self._es_client.search(index=self._es_index_name, body=text_relevance_query)
         buckets = response['aggregations']['top_cnames']['buckets']
         results = [{'cname': bucket['key'],
                     'max_score': bucket['top_text_rel_match']['hits']['max_score'],
