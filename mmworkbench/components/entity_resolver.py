@@ -10,7 +10,7 @@ import copy
 
 from ..core import Entity
 
-from .elastic_search_helpers import create_es_client, load_index
+from .elasticsearch_helpers import create_es_client, load_index
 
 logger = logging.getLogger(__name__)
 
@@ -242,7 +242,9 @@ class EntityResolver(object):
         """
         def _doc_generator(docs):
             for doc in docs:
-                base = {'_id': doc['id']}
+                base = {}
+                if doc.get('id'):
+                    base['_id'] = doc['id']
                 whitelist = doc['whitelist']
                 new_list = []
                 new_list.append({"name": doc['cname']})

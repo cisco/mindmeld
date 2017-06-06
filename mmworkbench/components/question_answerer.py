@@ -9,7 +9,7 @@ import json
 import logging
 
 from ..resource_loader import ResourceLoader
-from .elastic_search_helpers import create_es_client, load_index
+from .elasticsearch_helpers import create_es_client, load_index
 
 DOC_TYPE = 'document'
 
@@ -133,6 +133,7 @@ class QuestionAnswerer(object):
             es_host (str): The Elasticsearch host server
         """
         self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
+        self._es_host = es_host
         self.__es_client = None
 
     @property
