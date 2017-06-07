@@ -4,23 +4,20 @@
 Getting Started
 ===============
 
-Workbench was build specifically to accommodate a new generation of advanced conversational assistants which need to by powered by large, dynamic custom data sets.  As a result MindMeld is optimized for the following guiding principles:
+Describe how to get a license to workbench, how to install the package, and how to set up a new project with the correct directory structure and dependencies.
+4.2.1 Obtain a license
+4.2.2 Preparation: Install dependencies, setup environment (virtualenv, etc.)
+4.2.3 Install Workbench
+4.2.4 Create a Workbench project (from blueprint)
 
-    •	be adaptable to handle the diverse requirements of large applications
-    •	facilitate large, custom data sets and rather than pre-trained, generic models
-    •	favor power and flexibility rather than simplicity and ease-of-use
-    •	favor flexible SDKs rather than hardcoded, cloud-based APIs
-    •	support versatile command-line utilities rather than rigid GUIs
-    •	provide robust capabilities for large on-premise or VPC production deployments
 
-MindMeld is intended to be a powerful tool for data scientists to build some of the most advanced voice and chat assistants possible today.
+[ARCHIVED CONTENT BELOW]
 
 
 Obtain a License
 ~~~~~~~~~~~~~~~~
 
 MindMeld Workbench is a commercial software product which requires a license to use. For more information or to inquire about obtaining a license for MindMeld Workbench, please `contact MindMeld sales <mailto:info@mindmeld.com>`_.
-
 
 
 Set Up Your Environment
