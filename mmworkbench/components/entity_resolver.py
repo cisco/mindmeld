@@ -22,6 +22,7 @@ class EntityResolver(object):
     """
     # prefix for Elasticsearch indices used to store synonyms for entity resolution
     ES_SYNONYM_INDEX_PREFIX = "synonym"
+
     # default Elasticsearch mapping to define text analysis settings for text fields
     DEFAULT_SYN_ES_MAPPING = {
         "mappings": {
@@ -83,10 +84,10 @@ class EntityResolver(object):
                         "output_unigrams": "true",
                         "type": "shingle"
                     },
-                    "autocomplete_filter": {
-                        "type": "edge_ngram",
-                        "min_gram": "4",
-                        "max_gram": "20"
+                    "ngram_filter": {
+                        "type": "ngram",
+                        "min_gram": "3",
+                        "max_gram": "3"
                     }
                 },
                 "analyzer": {
@@ -133,7 +134,7 @@ class EntityResolver(object):
                         "filter": [
                             "lowercase",
                             "asciifolding",
-                            "autocomplete_filter"
+                            "ngram_filter"
                         ],
                         "char_filter": [
                             "remove_comma",
