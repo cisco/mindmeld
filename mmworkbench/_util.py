@@ -143,7 +143,7 @@ class Blueprint(object):
         for index in index_files:
             index_name, _ = os.path.splitext(index)
             data_file = os.path.join(kb_dir, index)
-            QuestionAnswerer.load_index(app_name, index_name, data_file, es_host)
+            QuestionAnswerer.load_kb(app_name, index_name, data_file, es_host)
 
     @staticmethod
     def _fetch_archive(name, archive_type):

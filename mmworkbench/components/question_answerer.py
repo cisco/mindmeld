@@ -204,7 +204,7 @@ class QuestionAnswerer(object):
         raise NotImplementedError
 
     @classmethod
-    def load_knowledge_base(cls, app_name, index_name, data_file, es_host=None, es_client=None):
+    def load_kb(cls, app_name, index_name, data_file, es_host=None, es_client=None):
         """Loads documents from disk into the specified index in the knowledge base. If an index
         with the specified name doesn't exist, a new index with that name will be created in the
         knowledge base.
