@@ -3,6 +3,8 @@ machine:
     version: 3.6.0
   post:
     - pyenv global 3.6.0 3.5.1 3.4.4 2.7.12
+  environment:
+    _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 dependencies:
   cache_directories:
     - ~/$CIRCLE_PROJECT_REPONAME/.tox
