@@ -11,7 +11,7 @@ import logging
 from ._config import get_app_name
 
 from ..resource_loader import ResourceLoader
-from .elasticsearch_helpers import create_es_client, load_index
+from .elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name
 
 DOC_TYPE = 'document'
 
@@ -163,7 +163,7 @@ class QuestionAnswerer(object):
         es_query = {}
         try:
             index = kwargs['index']
-            index = '{}${}'.format(self._app_name, index)
+            index = get_scoped_index_name(self._app_name, index)
         except KeyError:
             raise TypeError("get() missing required keyword argument 'index'")
 
@@ -210,6 +210,7 @@ class QuestionAnswerer(object):
         knowledge base.
 
         Args:
+            app_name (str): The name of the app
             index_name (str): The name of the new index to be created
             data_file (str): The path to the data file containing the documents to be imported
                 into the knowledge base index
