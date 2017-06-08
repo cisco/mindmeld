@@ -12,6 +12,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
+    'boto3==1.4.4',
     'Click>=6.0',
     'click-log>=0.1.8',
     'elasticsearch>=5.1.0',
@@ -20,6 +21,7 @@ requirements = [
     'future>=0.16.0',
     'nltk==3.2.2',
     'numpy>=1.10.1',
+    'python-dateutil>=2.6.0',
     'requests>=2.13.0',
     'scipy>=0.9',
     'scikit-learn>=0.18.1',
