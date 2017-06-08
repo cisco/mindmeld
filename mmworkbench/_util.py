@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 from builtins import object
 
 import datetime
-from email.utils import parsedate
 import logging
 import os
 import shutil
@@ -28,7 +27,7 @@ BLUEPRINT_S3_KEY_BASE = 'workbench-data/blueprints'
 BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
 BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
-    'quick_start': {},
+    'quickstart': {},
     'food_ordering': {}
 }
 
@@ -42,7 +41,7 @@ class Blueprint(object):
        |-food_ordering
        |  |-app.tar.gz
        |  |-kb.tar.gz
-       |-quick_start
+       |-quickstart
           |-app.tar.gz
           |-kb.tar.gz
 
@@ -155,11 +154,11 @@ class Blueprint(object):
 
         local_archive = os.path.join(cache_dir, filename)
 
-        s3 = boto3.resource('s3')
+        s3_service = boto3.resource('s3')
         object_key = '/'.join((BLUEPRINT_S3_KEY_BASE, name, filename))
 
         try:
-            object_summary = s3.ObjectSummary(BLUEPRINT_S3_BUCKET, object_key)
+            object_summary = s3_service.ObjectSummary(BLUEPRINT_S3_BUCKET, object_key)
             remote_modified = object_summary.last_modified
         except botocore.exceptions.NoCredentialsError as ex:
             msg = 'Unable to locate AWS credentials. Cannot download blueprint.'
@@ -172,17 +171,17 @@ class Blueprint(object):
             raise
 
         try:
-            local_modified = datetime.datetime.fromtimestamp(os.path.getmtime(local_archive), tz.tzlocal())
+            local_modified = datetime.datetime.fromtimestamp(os.path.getmtime(local_archive),
+                                                             tz.tzlocal())
         except IOError:
             # Minimum possible time
             local_modified = datetime.datetime(datetime.MINYEAR, 1, 1, tzinfo=datetime.timezone.utc)
-
 
         if remote_modified < local_modified:
             logger.info('Using cached %r %s archive', name, archive_type)
         else:
             logger.info('Fetching %s archive from %r', archive_type, object_key)
-            s3.Bucket(BLUEPRINT_S3_BUCKET).download_file(object_key, local_archive)
+            s3_service.Bucket(BLUEPRINT_S3_BUCKET).download_file(object_key, local_archive)
         return local_archive
 
 
