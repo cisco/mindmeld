@@ -16,12 +16,12 @@ from mmworkbench.core import Entity
 
 from mmworkbench.components.entity_resolver import EntityResolver
 
-ENTITY_TYPE = 'location'
+ENTITY_TYPE = 'store_name'
 
 
 @pytest.fixture
 def resolver(resource_loader):
-    """An entity resolver for 'location' on the Kwik-E-Mart app"""
+    """An entity resolver for 'store_name' on the Kwik-E-Mart app"""
     resolver = EntityResolver(resource_loader, ENTITY_TYPE)
     resolver.fit()
     return resolver

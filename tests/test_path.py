@@ -41,7 +41,7 @@ def test_get_labeled_query_tree():
 def test_get_entity_types():
     entity_types = path.get_entity_types(APP_PATH)
     assert len(entity_types) == 1
-    assert 'location' in entity_types
+    assert 'store_name' in entity_types
 
 
 def test_get_indexes():
