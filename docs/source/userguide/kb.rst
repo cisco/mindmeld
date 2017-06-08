@@ -1,8 +1,19 @@
 .. meta::
     :scope: private
 
-Question Answerer
-=================
+Knowledge Base and Question Answerering
+=======================================
+
+Describe the knowledge base and question answerer in detail. Describe why KB data is important, why it’s one of the first things the app developer needs to prepare, how it helps with NLP and QA, and what are some potential sources to get this data from.
+
+Introduce the concept of KB indexes. Show how to import JSON data into a KB index using the Question Answerer. Show how to use the Question Answerer to retrieve and rank results, given some search constraints.
+
+[Assume we are using ElasticSearch, but try to obfuscate as much of the ES complexity as we can. For example, our blueprint apps should have pre-built es-mapping.json files which already have the optimal settings for each app.]
+
+Show examples of KBs from different blueprint apps.
+
+
+[ARCHIVED CONTENT BELOW]
 
 The foundations of Question Answering began back in the 60's and early 70's with knowledge bases targeted at narrow domains of knowledge. With computational linguistics emerging and evolving over the decades, modern day Question Answering systems have relied on statistical processing of broader domain, large vocabulary document collections. These systems especially started gaining popularity in mainstream media in the last 8-10 years. The IBM Watson Jeopardy! challenge revealed the beginnings of the true potential of broad vocabulary Question Answering systems that could be deployed in real world production applications.
 

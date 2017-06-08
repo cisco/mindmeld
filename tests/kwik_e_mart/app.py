@@ -35,7 +35,7 @@ def provide_help(context, slots, responder):
 @app.handle(intent='get_store_hours')
 def send_store_hours(context, slots, responder):
     active_store = None
-    store_entity = next((e for e in context['entities'] if e['type'] == 'location'), None)
+    store_entity = next((e for e in context['entities'] if e['type'] == 'store_name'), None)
     if store_entity:
         try:
             stores = app.question_answerer.get(index='stores', id=store_entity['value']['id'])

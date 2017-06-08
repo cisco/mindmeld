@@ -169,9 +169,10 @@ def _get_mallard_pid():
 
 @cli.command('blueprint', context_settings=CONTEXT_SETTINGS)
 @click.option('-n', '--es-host', required=True)
-@click.argument('app_name', required=True)
-def setup_blueprint(es_host, app_name):
-    blueprint(app_name, es_host=es_host)
+@click.argument('blueprint_name', required=True)
+@click.argument('app_path', required=False)
+def setup_blueprint(es_host, blueprint_name, app_path):
+    blueprint(blueprint_name, app_path, es_host=es_host)
 
 
 if __name__ == '__main__':

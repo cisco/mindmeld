@@ -6,20 +6,15 @@ project structure.
 from __future__ import unicode_literals
 from builtins import object
 
-from datetime import datetime
-from email.utils import parsedate
+import datetime
 import logging
 import os
 import shutil
 
-try:
-    from urllib.request import urlretrieve
-    from urllib.parse import urljoin
-except ImportError:
-    from urllib import urlretrieve
-    from urlparse import urljoin
+import boto3
+import botocore
+from dateutil import tz
 
-import requests
 
 from . import path
 from .components import QuestionAnswerer
@@ -27,11 +22,12 @@ from .components import QuestionAnswerer
 
 logger = logging.getLogger(__name__)
 
-BLUEPRINT_S3_URL_BASE = 'https://s3-us-west-2.amazonaws.com/mindmeld/workbench-data/blueprints/'
+BLUEPRINT_S3_BUCKET = 'mindmeld'
+BLUEPRINT_S3_KEY_BASE = 'workbench-data/blueprints'
 BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
 BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
-    'quick_start': {},
+    'quickstart': {},
     'food_ordering': {}
 }
 
@@ -45,7 +41,7 @@ class Blueprint(object):
        |-food_ordering
        |  |-app.tar.gz
        |  |-kb.tar.gz
-       |-quick_start
+       |-quickstart
           |-app.tar.gz
           |-kb.tar.gz
 
@@ -155,22 +151,37 @@ class Blueprint(object):
             pass
 
         filename = {'app': BLUEPRINT_APP_ARCHIVE, 'kb': BLUEPRINT_KB_ARCHIVE}.get(archive_type)
-        local_archive = os.path.join(cache_dir, filename)
-        blueprint_dir = urljoin(BLUEPRINT_S3_URL_BASE, name + '/')
 
-        remote_archive = urljoin(blueprint_dir, filename)
-        req = requests.head(remote_archive)
-        remote_modified = datetime(*parsedate(req.headers.get('last-modified'))[:6])
+        local_archive = os.path.join(cache_dir, filename)
+
+        s3_service = boto3.resource('s3')
+        object_key = '/'.join((BLUEPRINT_S3_KEY_BASE, name, filename))
+
         try:
-            local_modified = datetime.fromtimestamp(os.path.getmtime(local_archive))
+            object_summary = s3_service.ObjectSummary(BLUEPRINT_S3_BUCKET, object_key)
+            remote_modified = object_summary.last_modified
+        except botocore.exceptions.NoCredentialsError as ex:
+            msg = 'Unable to locate AWS credentials. Cannot download blueprint.'
+            logger.error(msg)
+            raise EnvironmentError(msg)
+        except botocore.exceptions.ClientError as ex:
+            if ex.response['Error']['Code'] == "404":
+                logger.error('Unable to locate the requested blueprint.')
+
+            raise
+
+        try:
+            local_modified = datetime.datetime.fromtimestamp(os.path.getmtime(local_archive),
+                                                             tz.tzlocal())
         except IOError:
-            local_modified = datetime.min
+            # Minimum possible time
+            local_modified = datetime.datetime(datetime.MINYEAR, 1, 1, tzinfo=datetime.timezone.utc)
 
         if remote_modified < local_modified:
             logger.info('Using cached %r %s archive', name, archive_type)
         else:
-            logger.info('Fetching %s archive from %r', archive_type, remote_archive)
-            urlretrieve(remote_archive, local_archive)
+            logger.info('Fetching %s archive from %r', archive_type, object_key)
+            s3_service.Bucket(BLUEPRINT_S3_BUCKET).download_file(object_key, local_archive)
         return local_archive
 
 

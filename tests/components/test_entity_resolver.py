@@ -17,7 +17,7 @@ from mmworkbench.core import Entity
 from mmworkbench.components.entity_resolver import EntityResolver
 from mmworkbench.components.elasticsearch_helpers import create_es_client
 
-ENTITY_TYPE = 'location'
+ENTITY_TYPE = 'store_name'
 APP_PATH = '../kwik_e_mart'
 
 
