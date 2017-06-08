@@ -15,16 +15,24 @@ import pytest
 from mmworkbench.core import Entity
 
 from mmworkbench.components.entity_resolver import EntityResolver
+from mmworkbench.components.elasticsearch_helpers import create_es_client
 
 ENTITY_TYPE = 'location'
 APP_PATH = '../kwik_e_mart'
 
 
 @pytest.fixture
-def resolver(resource_loader):
+def es_client():
+    """An Elasticsearch client"""
+    return create_es_client()
+
+
+@pytest.fixture
+def resolver(resource_loader, es_client):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
-    resolver = EntityResolver(APP_PATH, resource_loader, ENTITY_TYPE)
+    resolver = EntityResolver(APP_PATH, resource_loader, ENTITY_TYPE, es_client=es_client)
     resolver.fit()
+    es_client.indices.flush(index='_all')
     return resolver
 
 

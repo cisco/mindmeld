@@ -202,7 +202,7 @@ class EntityResolver(object):
         }
     }
 
-    def __init__(self, app_path, resource_loader, entity_type, es_host=None):
+    def __init__(self, app_path, resource_loader, entity_type, es_host=None, es_client=None):
         """Initializes an entity resolver
 
         Args:
@@ -217,7 +217,7 @@ class EntityResolver(object):
 
         self._is_system_entity = Entity.is_system_entity(self.type)
         self._es_host = es_host
-        self.__es_client = None
+        self.__es_client = es_client
         self._es_index_name = EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + entity_type
         self._app_name = get_app_name(app_path)
 
