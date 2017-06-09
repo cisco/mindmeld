@@ -5,12 +5,14 @@ This module contains the entity resolver component of the Workbench natural lang
 from __future__ import unicode_literals
 from builtins import object
 
+import copy
 import logging
 
 from ..core import Entity
 from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
+
 from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name,\
-                                    delete_index
+                                    delete_index, ES_ENABLED
 
 logger = logging.getLogger(__name__)
 
@@ -31,15 +33,17 @@ class EntityResolver(object):
             entity_type: The entity type associated with this entity resolver
             es_host (str): The Elasticsearch host server
         """
+        self._app_name = get_app_name(app_path)
         self._resource_loader = resource_loader
         self._normalizer = resource_loader.query_factory.normalize
         self.type = entity_type
-
         self._is_system_entity = Entity.is_system_entity(self.type)
+
+        self._exact_match_mapping = None
+
         self._es_host = es_host
         self.__es_client = es_client
         self._es_index_name = EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + entity_type
-        self._app_name = get_app_name(app_path)
 
     @property
     def _es_client(self):
@@ -84,13 +88,67 @@ class EntityResolver(object):
             clean (bool): If True, deletes and recreates the index from scratch instead of
                           updating the existing index with synonyms in the mapping.json
         """
-        if not self._is_system_entity:
-            if clean:
-                delete_index(self._app_name, self._es_index_name, self._es_host, self._es_client)
-            data = self._resource_loader.get_entity_map(self.type)
-            logger.info("Importing synonym data to ES index '{}'".format(self._es_index_name))
-            EntityResolver.ingest_synonym(self._app_name, self._es_index_name, data, self._es_host,
-                                          self._es_client)
+        if self._is_system_entity:
+            return
+
+        if not ES_ENABLED:
+            self._fit_exact_match()
+            return
+
+        if clean:
+            delete_index(self._app_name, self._es_index_name, self._es_host,
+                         self._es_client)
+        entity_map = self._resource_loader.get_entity_map(self.type)
+        logger.info("Importing synonym data to ES index '{}'".format(self._es_index_name))
+        EntityResolver.ingest_synonym(self._app_name, self._es_index_name, entity_map,
+                                      self._es_host, self._es_client)
+
+    @staticmethod
+    def _process_entity_map(entity_type, entity_map, normalizer):
+        """Loads in the mapping.json file and stores the synonym mappings in a item_map and a
+        synonym_map for exact match entity resolution when Elasticsearch is unavailable
+
+        Args:
+            entity_type: The entity type associated with this entity resolver
+            entity_map: The loaded mapping.json file for the given entity type
+            normalizer: The normalizer to use
+        """
+        item_map = {}
+        syn_map = {}
+        seen_ids = []
+        for item in entity_map:
+            cname = item['cname']
+            item_id = item.get('id')
+            if cname in item_map:
+                msg = 'Canonical name {!r} specified in {!r} entity map multiple times'
+                logger.debug(msg.format(cname, entity_type))
+            if item_id:
+                if item_id in seen_ids:
+                    msg = 'Item id {!r} specified in {!r} entity map multiple times'
+                    raise ValueError(msg.format(item_id, entity_type))
+                seen_ids.append(item_id)
+
+            aliases = [cname] + item.pop('whitelist', [])
+            items_for_cname = item_map.get(cname, [])
+            items_for_cname.append(item)
+            item_map[cname] = items_for_cname
+            for alias in aliases:
+                norm_alias = normalizer(alias)
+                if norm_alias in syn_map:
+                    msg = 'Synonym {!r} specified in {!r} entity map multiple times'
+                    logger.debug(msg.format(cname, entity_type))
+                cnames_for_syn = syn_map.get(norm_alias, [])
+                cnames_for_syn.append(cname)
+                syn_map[norm_alias] = list(set(cnames_for_syn))
+
+        return {'items': item_map, 'synonyms': syn_map}
+
+    def _fit_exact_match(self):
+        """Fits a simple exact match entity resolution model when Elasticsearch is not available.
+        """
+        entity_map = self._resource_loader.get_entity_map(self.type)
+        self._exact_match_mapping = self._process_entity_map(self.type, entity_map,
+                                                             self._normalizer)
 
     def predict(self, entity):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
@@ -105,6 +163,9 @@ class EntityResolver(object):
         if self._is_system_entity:
             # system entities are already resolved
             return [entity.value]
+
+        if not ES_ENABLED:
+            return self._predict_exact_match(entity)
 
         text_relevance_query = {
             "query": {
@@ -178,11 +239,37 @@ class EntityResolver(object):
         results = [{'id': result['_source']['id'],
                     'cname': result['_source']['cname'],
                     'score': result['_score'],
-                    'top_synonym': result['inner_hits']['whitelist']['hits']['hits'][0]['_source']
-                                         ['name']}
+                    'top_synonym': result['inner_hits']['whitelist']['hits']['hits'][0]
+                                         ['_source']['name']}
                    for result in results]
 
         return results[0:20]
+
+    def _predict_exact_match(self, entity):
+        """Predicts the resolved value(s) for the given entity using the loaded entity map.
+
+        Args:
+            entity (Entity): An entity found in an input query
+        """
+        normed = self._normalizer(entity.text)
+        try:
+            cnames = self._exact_match_mapping['synonyms'][normed]
+        except KeyError:
+            logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.type)
+            return None
+
+        if len(cnames) > 1:
+            logger.info('Multiple possible canonical names for %r entity for type %r',
+                        entity.text, entity.type)
+
+        values = []
+        for cname in cnames:
+            for item in self._exact_match_mapping['items'][cname]:
+                item_value = copy.copy(item)
+                item_value.pop('whitelist', None)
+                values.append(item_value)
+
+        return values
 
     def predict_proba(self, entity):
         """Runs prediction on a given entity and generates multiple hypotheses with their
@@ -219,6 +306,9 @@ class EntityResolver(object):
         Args:
             model_path (str): The location on disk where the model is stored
         """
-        scoped_index_name = get_scoped_index_name(self._app_name, self._es_index_name)
-        if not self._es_client.indices.exists(index=scoped_index_name):
+        if ES_ENABLED:
+            scoped_index_name = get_scoped_index_name(self._app_name, self._es_index_name)
+            if not self._es_client.indices.exists(index=scoped_index_name):
+                self.fit()
+        else:
             self.fit()
