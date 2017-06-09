@@ -8,12 +8,10 @@ from builtins import object
 import json
 import logging
 
-from ._config import get_app_name
+from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_QA_MAPPING
 
 from ..resource_loader import ResourceLoader
 from .elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name
-
-DOC_TYPE = 'document'
 
 logger = logging.getLogger(__name__)
 
@@ -22,110 +20,6 @@ class QuestionAnswerer(object):
     """The question answerer is primarily an information retrieval system that provides all the
     necessary functionality for interacting with the application's knowledge base.
     """
-
-    # default ElasticSearch mapping to define text analysis settings for text fields
-    DEFAULT_ES_MAPPING = {
-        "mappings": {
-            DOC_TYPE: {
-                "dynamic_templates": [
-                    {
-                        "default_text": {
-                            "match": "*",
-                            "match_mapping_type": "string",
-                            "mapping": {
-                                "type": "text",
-                                "analyzer": "default_analyzer",
-                                "fields": {
-                                    "raw": {
-                                        "type": "keyword",
-                                        "ignore_above": 256
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ],
-                "properties": {
-                    "location": {
-                        "type": "geo_point"
-                    },
-                    "id": {
-                        "type": "keyword"
-                    }
-                }
-            }
-        },
-        "settings": {
-            "analysis": {
-                "char_filter": {
-                    "remove_loose_apostrophes": {
-                        "pattern": " '|' ",
-                        "type": "pattern_replace",
-                        "replacement": ""
-                    },
-                    "space_possessive_apostrophes": {
-                        "pattern": "([^\\p{N}\\s]+)'s ",
-                        "type": "pattern_replace",
-                        "replacement": "$1 's "
-                    },
-                    "remove_special_beginning": {
-                        "pattern": "^[^\\p{L}\\p{N}\\p{Sc}&']+",
-                        "type": "pattern_replace",
-                        "replacement": ""
-                    },
-                    "remove_special_end": {
-                        "pattern": "[^\\p{L}\\p{N}&']+$",
-                        "type": "pattern_replace",
-                        "replacement": ""
-                    },
-                    "remove_special1": {
-                        "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{N}\\s]+)",
-                        "type": "pattern_replace",
-                        "replacement": "$1 "
-                    },
-                    "remove_special2": {
-                        "pattern": "([\\p{N}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}\\s]+)",
-                        "type": "pattern_replace",
-                        "replacement": "$1 "
-                    },
-                    "remove_special3": {
-                        "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
-                        "type": "pattern_replace",
-                        "replacement": "$1 "
-                    }
-                },
-                "analyzer": {
-                    "default_analyzer": {
-                        "type": "custom",
-                        "tokenizer": "whitespace",
-                        "char_filter": [
-                            "remove_loose_apostrophes",
-                            "space_possessive_apostrophes",
-                            "remove_special_beginning",
-                            "remove_special_end",
-                            "remove_special1",
-                            "remove_special2",
-                            "remove_special3"
-                        ],
-                        "filter": [
-                            "lowercase",
-                            "asciifolding",
-                            "shingle"
-                        ]
-                    }
-                },
-                "filter": {
-                    "token_shingle": {
-                        "type": "shingle",
-                        "max_shingle_size": 4,
-                        "min_shingle_size": 2,
-                        "output_unigrams": "true"
-                    }
-                }
-            }
-        }
-    }
-
     def __init__(self, app_path, resource_loader=None, es_host=None):
         """Initializes a question answerer
 
@@ -226,5 +120,5 @@ class QuestionAnswerer(object):
                 base.update(doc)
                 yield base
 
-        load_index(app_name, index_name, data, _doc_generator, cls.DEFAULT_ES_MAPPING, DOC_TYPE,
+        load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_QA_MAPPING, DOC_TYPE,
                    es_host, es_client)
