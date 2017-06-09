@@ -8,7 +8,7 @@ from builtins import object
 import logging
 
 from ..core import Entity
-from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_SYN_MAPPING
+from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
 from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name,\
                                     delete_index
 
@@ -74,7 +74,7 @@ class EntityResolver(object):
                 base.update(doc)
                 yield base
 
-        load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_SYN_MAPPING, DOC_TYPE,
+        load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE,
                    es_host, es_client)
 
     def fit(self, clean=False):
