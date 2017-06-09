@@ -18,4 +18,3 @@ nbsphinx==0.2.11
 git+ssh://git@github.com/expectlabs/sphinx_rtd_theme.git@0.1.10-mm#egg=sphinx_rtd_theme-0.1.10-mm
 pandoc==1.0.0b2
 mock==2.0.0
-boto3==1.0.0
