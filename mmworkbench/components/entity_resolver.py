@@ -9,7 +9,8 @@ import logging
 
 from ..core import Entity
 from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_SYN_MAPPING
-from .elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name, delete_index
+from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name,\
+                                    delete_index
 
 logger = logging.getLogger(__name__)
 

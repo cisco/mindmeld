@@ -11,7 +11,7 @@ import logging
 from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_QA_MAPPING
 
 from ..resource_loader import ResourceLoader
-from .elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name
+from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name
 
 logger = logging.getLogger(__name__)
 
