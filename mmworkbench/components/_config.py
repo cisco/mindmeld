@@ -88,6 +88,7 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
     }
 }
 
+USE_TEXT_REL_ENTITY_RESOLUTION = True
 DOC_TYPE = 'document'
 
 # ElasticSearch mapping to define text analysis settings for text fields
@@ -417,6 +418,20 @@ def get_app_name(app_path):
     except AttributeError:
         logger.debug('App name not set in app configuration')
     return os.path.split(app_path)[1]
+
+
+def get_entity_resolution_flag(app_path):
+    """Returns the True to use text relevance entity resolution, returns False to use exact
+     mat
+    """
+    try:
+        return _get_config_module(app_path).USE_TEXT_REL_ENTITY_RESOLUTION
+    except IOError:
+        logger.debug('No app configuration file found')
+    except AttributeError:
+        logger.debug("Entity resolution flag 'USE_TEXT_REL_ENTITY_RESOLUTION' not set in app"
+                     " configuration")
+    return USE_TEXT_REL_ENTITY_RESOLUTION
 
 
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):

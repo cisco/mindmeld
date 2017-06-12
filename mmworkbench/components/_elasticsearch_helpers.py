@@ -1,11 +1,7 @@
 import os
 import logging
 
-try:
-    from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
-    ES_ENABLED = True
-except ImportError:
-    ES_ENABLED = False
+from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
 from elasticsearch.helpers import streaming_bulk
 
 logger = logging.getLogger(__name__)

@@ -9,10 +9,10 @@ import copy
 import logging
 
 from ..core import Entity
-from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
+from ._config import get_app_name, get_entity_resolution_flag, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
 
-from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name,\
-                                    delete_index, ES_ENABLED
+from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
+                                     delete_index)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +41,8 @@ class EntityResolver(object):
 
         self._exact_match_mapping = None
 
+        self._use_text_rel = get_entity_resolution_flag(app_path)
+        print(self._use_text_rel)
         self._es_host = es_host
         self.__es_client = es_client
         self._es_index_name = EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + entity_type
@@ -91,7 +93,7 @@ class EntityResolver(object):
         if self._is_system_entity:
             return
 
-        if not ES_ENABLED:
+        if not self._use_text_rel:
             self._fit_exact_match()
             return
 
@@ -164,7 +166,7 @@ class EntityResolver(object):
             # system entities are already resolved
             return [entity.value]
 
-        if not ES_ENABLED:
+        if not self._use_text_rel:
             return self._predict_exact_match(entity)
 
         text_relevance_query = {
@@ -306,7 +308,7 @@ class EntityResolver(object):
         Args:
             model_path (str): The location on disk where the model is stored
         """
-        if ES_ENABLED:
+        if self._use_text_rel:
             scoped_index_name = get_scoped_index_name(self._app_name, self._es_index_name)
             if not self._es_client.indices.exists(index=scoped_index_name):
                 self.fit()
