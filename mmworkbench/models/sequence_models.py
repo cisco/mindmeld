@@ -199,7 +199,7 @@ class MemmModel(SkLearnModel):
         """
         # TODO: also expose feature weights?
         predictions = self.predict(examples)
-        evaluations = [EvaluatedExample(e, list(labels[i]), predictions[i], None)
+        evaluations = [EvaluatedExample(e, labels[i], tuple(predictions[i]), None)
                        for i, e in enumerate(examples)]
 
         config = self._get_effective_config()
