@@ -105,7 +105,7 @@ Running the :keyword:`blueprint()` method for our simple example application pro
     :width: 400px
     :align: center
 
-See the :ref:`User Manual <userguide>` for more about blueprints, and root folder organization and structure.
+See the :ref:`User Guide <userguide>` for more about blueprints, and root folder organization and structure.
 
 
 Notice that there is no folder for the ``date`` entity. None is needed, because ``date`` is a *system entity*, meaning that it is already built into the Workbench platform. Workbench provides several different system entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <userguide>` for details.
