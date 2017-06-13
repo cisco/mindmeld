@@ -9,7 +9,7 @@ import copy
 import logging
 
 from ..core import Entity
-from ._config import get_app_name, get_entity_resolution_flag, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
+from ._config import get_app_name, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
 
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      delete_index)
@@ -41,8 +41,8 @@ class EntityResolver(object):
 
         self._exact_match_mapping = None
 
-        self._use_text_rel = get_entity_resolution_flag(app_path)
-        print(self._use_text_rel)
+        er_config = get_classifier_config('entity_resolution', app_path=app_path)
+        self._use_text_rel = er_config['model_type'] == 'text_relevance'
         self._es_host = es_host
         self.__es_client = es_client
         self._es_index_name = EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + entity_type

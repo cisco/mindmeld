@@ -88,7 +88,10 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
     }
 }
 
-USE_TEXT_REL_ENTITY_RESOLUTION = True
+DEFAULT_ENTITY_RESOLUTION_CONFIG = {
+    'model_type': 'text_relevance'
+}
+
 DOC_TYPE = 'document'
 
 # ElasticSearch mapping to define text analysis settings for text fields
@@ -420,20 +423,6 @@ def get_app_name(app_path):
     return os.path.split(app_path)[1]
 
 
-def get_entity_resolution_flag(app_path):
-    """Returns the True to use text relevance entity resolution, returns False to use exact
-     mat
-    """
-    try:
-        return _get_config_module(app_path).USE_TEXT_REL_ENTITY_RESOLUTION
-    except IOError:
-        logger.debug('No app configuration file found')
-    except AttributeError:
-        logger.debug("Entity resolution flag 'USE_TEXT_REL_ENTITY_RESOLUTION' not set in app"
-                     " configuration")
-    return USE_TEXT_REL_ENTITY_RESOLUTION
-
-
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):
     try:
         module_conf = _get_config_module(app_path)
@@ -441,6 +430,7 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
             'domain': 'DOMAIN_MODEL_CONFIG',
             'intent': 'INTENT_MODEL_CONFIG',
             'entity': 'ENTITY_MODEL_CONFIG',
+            'entity_resolution': 'ENTITY_RESOLUTION_CONFIG',
             'role': 'ROLE_MODEL_CONFIG',
         }[clf_type]
         return copy.deepcopy(getattr(module_conf, attribute))
@@ -454,6 +444,7 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
         'domain': DEFAULT_DOMAIN_MODEL_CONFIG,
         'intent': DEFAULT_INTENT_MODEL_CONFIG,
         'entity': DEFAULT_ENTITY_MODEL_CONFIG,
+        'entity_resolution': DEFAULT_ENTITY_RESOLUTION_CONFIG,
         'role': DEFAULT_ROLE_MODEL_CONFIG
     }[clf_type])
 
