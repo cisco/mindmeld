@@ -200,4 +200,4 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
     if sys_entity_start is not None:
         _append_system_entity(sys_entity_start, len(tags), prev_sys_type)
 
-    return entities
+    return tuple(entities)
