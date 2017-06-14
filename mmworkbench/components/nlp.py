@@ -414,7 +414,7 @@ class EntityProcessor(Processor):
         self.name = self.type
 
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
-        self.entity_resolver = EntityResolver(self.resource_loader, entity_type)
+        self.entity_resolver = EntityResolver(app_path, self.resource_loader, entity_type)
 
     def _build(self):
         """Builds the models for this entity type"""
