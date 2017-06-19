@@ -712,8 +712,8 @@ class SkLearnModel(Model):
             (SkLearnModel): Returns self to match classifier scikit-learn
                 interfaces.
         """
-        skip_param_selection = params is not None or self.config.param_selection is None
         params = params or self.config.params
+        skip_param_selection = params is not None or self.config.param_selection is None
 
         # Prepare resources
 
