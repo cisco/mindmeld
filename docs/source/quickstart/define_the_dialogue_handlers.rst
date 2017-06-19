@@ -78,7 +78,7 @@ First, consider the handler for the ``welcome`` dialogue state.
 
 .. code:: python
 
-  from mmworkbench import Application, context, slots
+  from mmworkbench import Application
 
   app = Application(__name__)
 
