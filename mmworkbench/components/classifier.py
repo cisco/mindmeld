@@ -265,7 +265,7 @@ class Classifier(object):
         """
         try:
             self._model = joblib.load(model_path)
-        except IOError:
+        except (OSError, IOError):
             msg = 'Unable to load {}. Pickle at {!r} cannot be read.'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:

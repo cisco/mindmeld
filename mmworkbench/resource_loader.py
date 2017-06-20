@@ -194,7 +194,7 @@ class ResourceLoader(object):
         entity_data_path = path.get_entity_gaz_path(self.app_path, entity_type)
         try:
             file_table['entity_data']['modified'] = os.path.getmtime(entity_data_path)
-        except IOError:
+        except (OSError, IOError):
             # required file doesnt exist -- notify and error out
             logger.error('Entity data file not found at %r', entity_data_path)
             raise WorkbenchError('Entity data file not found at {!r}'.format(entity_data_path))
@@ -203,7 +203,7 @@ class ResourceLoader(object):
         mapping_path = path.get_entity_map_path(self.app_path, entity_type)
         try:
             file_table['mapping']['modified'] = os.path.getmtime(mapping_path)
-        except IOError:
+        except (OSError, IOError):
             # required file doesnt exist -- notify and error out
             logger.warning('Entity mapping file not found at %r', mapping_path)
             raise WorkbenchError('Entity mapping file not found at {!r}'.format(mapping_path))
@@ -212,7 +212,7 @@ class ResourceLoader(object):
         gazetteer_path = path.get_gazetteer_data_path(self.app_path, entity_type)
         try:
             file_table['gazetteer']['modified'] = os.path.getmtime(gazetteer_path)
-        except (IOError, OSError):
+        except (OSError, IOError):
             # gaz not yet built so set to a time impossibly long ago
             file_table['gazetteer']['modified'] = 0.0
 

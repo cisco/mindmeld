@@ -146,7 +146,7 @@ class Blueprint(object):
         cache_dir = path.get_cached_blueprint_path(name)
         try:
             os.makedirs(cache_dir)
-        except IOError:
+        except (OSError, IOError):
             # dir already exists -- no worries
             pass
 
@@ -173,7 +173,7 @@ class Blueprint(object):
         try:
             local_modified = datetime.datetime.fromtimestamp(os.path.getmtime(local_archive),
                                                              tz.tzlocal())
-        except IOError:
+        except (OSError, IOError):
             # Minimum possible time
             local_modified = datetime.datetime(datetime.MINYEAR, 1, 1, tzinfo=datetime.timezone.utc)
 

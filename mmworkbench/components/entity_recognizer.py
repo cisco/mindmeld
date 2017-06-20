@@ -120,7 +120,7 @@ class EntityRecognizer(Classifier):
             er_data = joblib.load(model_path)
             self._model = er_data['model']
             self.entity_types = er_data['entity_types']
-        except IOError:
+        except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:

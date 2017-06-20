@@ -416,7 +416,7 @@ def get_app_name(app_path):
     """Returns the name of the application at app_path"""
     try:
         return _get_config_module(app_path).APP_NAME
-    except IOError:
+    except (OSError, IOError):
         logger.debug('No app configuration file found')
     except AttributeError:
         logger.debug('App name not set in app configuration')
@@ -434,7 +434,7 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
             'role': 'ROLE_MODEL_CONFIG',
         }[clf_type]
         return copy.deepcopy(getattr(module_conf, attribute))
-    except IOError:
+    except (OSError, IOError):
         logger.info('No app configuration file found. Using default %s model configuration',
                     clf_type)
     except AttributeError:

@@ -126,7 +126,7 @@ class RoleClassifier(Classifier):
             rc_data = joblib.load(model_path)
             self._model = rc_data['model']
             self.roles = rc_data['roles']
-        except IOError:
+        except (OSError, IOError):
             logger.error('Unable to load %s. Pickle file cannot be read from %r',
                          self.__class__.__name__, model_path)
             return
