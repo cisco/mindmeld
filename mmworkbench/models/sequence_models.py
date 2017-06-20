@@ -122,8 +122,8 @@ class MemmModel(SkLearnModel):
         system_types = self._get_system_types()
         self.register_resources(sys_types=system_types)
 
-        skip_param_selection = params is not None or self.config.param_selection is None
         params = params or self.config.params
+        skip_param_selection = params is not None or self.config.param_selection is None
 
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
