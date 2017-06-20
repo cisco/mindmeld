@@ -76,7 +76,7 @@ We test the trained classifier on a new query using the :keyword:`predict()` met
   >>> nlp.domain_classifier.predict('Play my jazz playlist.')
   'music'
 
-To view the predicted probability distribution over all domains, we can use the :keyword:`predict_proba()` method.
+To view the classification probabilities associated with all available domains, we can use the :keyword:`predict_proba()` method.
 
 .. code-block:: python
 
@@ -88,7 +88,7 @@ To view the predicted probability distribution over all domains, we can use the 
     ('finance', 0.026346)
   ]
 
-The model output includes the predicted target domain along with the classification probabilities associated with all available domains. In addition to the `model` parameter we used above, the :keyword:`fit()` method also takes parameters we can use to improve upon the baseline SVM model trained by default. These include parameters for features, cross-validation settings, and other model-specific configuration. See the :ref:`User Guide <userguide>` for details.
+In addition to the `model` parameter we used above, the :keyword:`fit()` method also takes parameters we can use to improve upon the baseline SVM model trained by default. These include parameters for features, cross-validation settings, and other model-specific configuration. See the :ref:`User Guide <userguide>` for details.
 
 Intent Classification
 ~~~~~~~~~~~~~~~~~~~~~
@@ -295,7 +295,6 @@ If an entity mapping file is specified, as illustrated in :doc:`Step 6 </generat
   >>> nlp = NaturalLanguageProcessor('my_app')
   >>> nlp.build()
   >>> nlp.process("When does the one on elm open?")
-  Failed to resolve entity 'elm' for type 'store_name'
   {
     'domain': 'store_info',
     'entities': [
@@ -310,7 +309,6 @@ If an entity mapping file is specified, as illustrated in :doc:`Step 6 </generat
     'intent': 'get_store_hours',
     'text': 'When does the one on elm open?'
   }
-
 
 As with the other NLP components in Workbench, you can access the individual resolvers for each entity type.
 
