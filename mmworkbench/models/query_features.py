@@ -221,7 +221,7 @@ def extract_in_gaz_span_features():
             ngram = ' '.join([t for t in ntoks if t is not None])
             return ngram, ntoks
 
-        gazetteers = resources['gazetteers']
+        gazetteers = resources[GAZETTEER_RSC]
         feat_seq = [{} for _ in query.normalized_tokens]
         sys_types = set()
         for gaz in gazetteers.values():
@@ -326,7 +326,7 @@ def extract_in_gaz_ngram_features():
 
             return feat_seq
 
-        gazetteers = resources['gazetteers']
+        gazetteers = resources[GAZETTEER_RSC]
         tokens = query.normalized_tokens
         feat_seq = [{} for _ in tokens]
 

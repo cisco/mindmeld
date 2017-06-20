@@ -17,7 +17,7 @@ ENTITIES_LABEL_TYPE = 'entities'
 
 
 # resource/requirements names
-GAZETTEER_RSC = "gaz"
+GAZETTEER_RSC = "gazetteers"
 WORD_FREQ_RSC = "w_freq"
 QUERY_FREQ_RSC = "q_freq"
 
