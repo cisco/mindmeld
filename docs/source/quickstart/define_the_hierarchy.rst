@@ -102,7 +102,7 @@ Workbench provides a faster way to create your application structure for common 
 Running the :keyword:`blueprint()` method for our simple example application produces the root directory structure illustrated below.
 
 .. image:: /images/directory.png
-    :width: 400px
+    :width: 350px
     :align: center
 
 See the :ref:`User Guide <userguide>` for more about blueprints, and root folder organization and structure.

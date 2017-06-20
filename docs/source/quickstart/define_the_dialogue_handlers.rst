@@ -55,7 +55,7 @@ In MindMeld Workbench, the *application container* is a Python file which contai
 Your directory structure should now resemble the following.
 
 .. image:: /images/directory2.png
-    :width: 350px
+    :width: 400px
     :align: center
 
 The above code snippet illustrates the conventions for implementing dialogue state tracking and dialogue state handling logic in Workbench. The code is written to perform four steps:
