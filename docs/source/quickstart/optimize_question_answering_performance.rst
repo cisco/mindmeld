@@ -127,7 +127,7 @@ Similarly, to load a previously saved ranking configuration, you can use:
 
   >>> qa.indexes['products'].load()
 
-See the :ref:`User Manual <userguide>` for more about how to specify custom ranking configurations.
+See the :ref:`User Guide <userguide>` for more about how to specify custom ranking configurations.
 
 
 Proximity-Based Ranking
@@ -251,5 +251,5 @@ These training data examples can be generated using manual QA where human grader
   >>> # To save the model to file.
   ... store_index.dump()
 
-For more about how to train and evaluate machine-learned ranking models, see the :ref:`User Manual <userguide>`.
+For more about how to train and evaluate machine-learned ranking models, see the :ref:`User Guide <userguide>`.
 

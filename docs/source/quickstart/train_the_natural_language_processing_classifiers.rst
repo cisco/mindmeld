@@ -66,7 +66,8 @@ The :keyword:`NaturalLanguageProcessor` class in Workbench exposes methods for t
 
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('my_app')
-  >>> nlp.domain_classifier.fit(model='svm')
+  >>> nlp.domain_classifier.fit(model_settings={'classifier_type': 'svm'},
+  ...                           params={'kernel': 'linear'})
 
 We test the trained classifier on a new query using the :keyword:`predict()` method.
 
@@ -94,15 +95,14 @@ Intent Classification
 
 Intent classifiers (also called intent models) are text classification models that are trained, one-per-domain, using the labeled queries in each intent folder. Our Kwik-E-Mart app supports multiple intents (e.g. ``greet``, ``get_store_hours``, ``find_nearest_store``, etc.) within the ``store_info`` domain. We will now see how to train an intent classifier that correctly maps user queries to one of these supported intents.
 
-Training our intent model is similar to training the domain model using the :keyword:`NaturalLanguageProcessor` class, but this time we explicitly define the features and cross-validation settings we want to use. For our intent classifier, let us assume that we want to build a `logistic regression <https://en.wikipedia.org/wiki/Logistic_regression>`_ model and use `bag of words <https://en.wikipedia.org/wiki/Bag-of-words_model>`_ and `edge n-grams <https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-edgengram-tokenizer.html>`_ as features. Also, we would like to do `k-fold cross validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation>`_  with 20 splits.
+Training our intent model is similar to training the domain model using the :keyword:`NaturalLanguageProcessor` class, but this time we explicitly define the features and cross-validation settings we want to use. For our intent classifier, let us assume that we want to build a `logistic regression <https://en.wikipedia.org/wiki/Logistic_regression>`_ model and use `bag of words <https://en.wikipedia.org/wiki/Bag-of-words_model>`_ and `edge n-grams <https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-edgengram-tokenizer.html>`_ as features. Also, we would like to do `k-fold cross validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation>`_  with 10 splits to find the ideal `hyperparameter <https://en.wikipedia.org/wiki/Hyperparameter_optimization>`_ values.
 
-We start as before by instantiating a :keyword:`NaturalLanguageProcessor` object. In addition, we import the :keyword:`KFold` module from the :keyword:`scikit-learn` library to define cross-validation settings.
+We start as before by instantiating a :keyword:`NaturalLanguageProcessor` object.
 
 .. code-block:: python
 
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('my_app')
-  >>> from sklearn.model_selection import KFold
 
 Next, we define the feature dictionary that lists all the feature types along with the feature-specific settings. Let's say we want bag-of-n-grams up to size 2 and edge-ngrams up to length 2.
 
@@ -114,18 +114,29 @@ Next, we define the feature dictionary that lists all the feature types along wi
   ... }
 
 
-We then define a cross-validation iterator with the desired number of splits.
+We then define the hyperparameter selection settings.
 
 .. code-block:: python
 
-  >>> kf = KFold(n_splits=20)
+  >>> search_grid = {
+  ...   'C': [0.01, 1, 10, 100, 1000],
+  ...   'class_bias': [0, 0.3, 0.7, 1]
+  ... }
+  >>> hyperparam_settings = {
+  ...   'type': 'k-fold',
+  ...   'k': 10,
+  ...   'grid': search_grid
+  ... }
 
 Finally, we fetch the :keyword:`intent_classifier` for the domain we are interested in and call its :keyword:`fit()` method to train the model. The code below shows how to train an intent classifier for the ``store_info`` domain in our Kwik-E-Mart app.
 
 .. code-block:: python
 
   >>> clf = nlp.domains['store_info'].intent_classifier
-  >>> clf.fit(model='logreg', features=feature_dict, cv=kf)
+  >>> clf.fit(model_settings={'classifier_type': 'logreg'},
+  ...         features=feature_dict, 
+  ...         param_selection=hyperparam_settings) 
+
 
 We have now successfully trained an intent classifier for the ``store_info`` domain. If our app had more domains, we would follow the same procedure for those other domains. We can test the trained intent model on a new query by calling its :keyword:`predict()` and :keyword:`predict_proba()` methods.
 
@@ -177,28 +188,41 @@ In this example we use a `Maximum Entropy Markov Model <https://en.wikipedia.org
 
 If we had more entity types, we would have gazetteer lists for them, too.
 
-When words in a query fully or partly match a gazetteer entry, that can be used to derive features. This makes gazetteers particularly helpful for detecting entities which might otherwise seem to be a sequence of common nouns, such as `main street`, `main and market`, and so on. Apart from using gazetteer-based features, we'll also use bag-of-words features like we did earlier. The length of the current token can also be a useful feature for entity recognition, so we'll add that too. Finally, we'll continue using 20-fold cross validation as before.
+When words in a query fully or partly match a gazetteer entry, that can be used to derive features. This makes gazetteers particularly helpful for detecting entities which might otherwise seem to be a sequence of common nouns, such as `main street`, `main and market`, and so on. Apart from using gazetteer-based features, we'll use the bag of n-grams surrounding the token as additional features. Finally, we'll continue using 10-fold cross validation as before.
 
-Below is the code to instantiate a :keyword:`NaturalLanguageProcessor` object, define the features, and initialize a k-fold iterator.
+Below is the code to instantiate a :keyword:`NaturalLanguageProcessor` object, define the features, and the hyperparameter selection settings.
 
 .. code-block:: python
 
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('my_app')
-  >>> from sklearn.model_selection import KFold
   >>> feature_dict = {
-  ...   'in-gaz': {},
-  ...   'bag-of-words': { 'lengths': [1, 2] },
-  ...   'length': {}
+  ...   'in-gaz-span-seq': {},
+  ...   'bag-of-words-seq':{
+  ...       'ngram_lengths_to_start_positions': {
+  ...           1: [-1, 0, 1],
+  ...           2: [-1, 0, 1]
+  ...       }
+  ...   }
   ... }
-  >>> kf = KFold(n_splits=20)
+  >>> search_grid = {
+  ...   'C': [0.01, 1, 10, 100, 1000],
+  ...   'penalty': ['l1', 'l2']
+  ... }
+  >>> hyperparam_settings = {
+  ...   'type': 'k-fold',
+  ...   'k': 10,
+  ...   'grid': search_grid
+  ... }
 
 Next, we get the entity recognizer for the desired intent and invoke its :keyword:`fit()` method. We also serialize the trained model to disk for future use.
 
 .. code-block:: python
 
   >>> recognizer = nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer
-  >>> recognizer.fit(model='memm', features=feature_dict, cv=kfold_cv)
+  >>> recognizer.fit(model_settings={'classifier_type': 'memm'},
+  ...                features=feature_dict, 
+  ...                param_selection=hyperparam_settings)
   >>> recognizer.dump('models/experimentation/entity_model_memm.pkl')
 
 We have now trained and saved the ``get_name`` entity recognizer for the ``get_store_hours`` intent. If more entity recognizers were required, we would have repeated the same procedure for each entity in each intent. We test the trained entity recognizer using its :keyword:`predict()` method.
@@ -215,14 +239,15 @@ Role Classification
 
 Role classifiers (also called role models) are trained per entity using all the annotated queries in a particular intent folder. Roles offer a way to assign an additional distinguishing label to entities of the same type. Our simple Kwik-E-Mart application does not need a role classification layer. However, consider a possible extension to our app, where users can search for stores that open and close at specific times. As we saw in the example in :ref:`Step 6 <roles_example>`, this would require us to differentiate between the two ``sys_time`` entities by recognizing one as an ``open_time`` and the other as a ``close_time``. This can be accomplished by training an entity-specific role classifier that assigns the correct role label for each such ``sys_time`` entity detected by the Entity Recognizer.
 
-Let us see how Workbench can be used for training a role classifier for the ``sys_time`` entity type. As with the previous classifiers, this involves the predictable workflow of instantiating a :keyword:`NaturalLanguageProcessor` object, accessing the classifier of interest (in this case, the :keyword:`role_classifier` for the ``sys_time`` entity), defining the machine learning settings and calling the :keyword:`fit()` method of the classifier. For this example, we just train a baseline `Maximum Entropy model <http://repository.upenn.edu/cgi/viewcontent.cgi?article=1083&context=ircs_reports>`_ without specifying any additional training settings. For the sake of code readability, we retrieve the classifier of interest in two steps: first get the object representing the current intent, then fetch the :keyword:`role_classifier` object of the appropriate entity under that intent.
+Let us see how Workbench can be used for training a role classifier for the ``sys_time`` entity type. As with the previous classifiers, this involves the predictable workflow of instantiating a :keyword:`NaturalLanguageProcessor` object, accessing the classifier of interest (in this case, the :keyword:`role_classifier` for the ``sys_time`` entity), defining the machine learning settings and calling the :keyword:`fit()` method of the classifier. For this example, we will just use Workbench's default configuration (`Maximum Entropy model <http://repository.upenn.edu/cgi/viewcontent.cgi?article=1083&context=ircs_reports>`_) to train a baseline role classifier without specifying any additional training settings. For the sake of code readability, we retrieve the classifier of interest in two steps: first get the object representing the current intent, then fetch the :keyword:`role_classifier` object of the appropriate entity under that intent.
 
 .. code-block:: python
 
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('my_app')
-  >>> clf = nlp.domains['store_info'].intents['get_store_hours'].entities['sys_time'].role_classifier
-  >>> clf.fit(model='memm')
+  >>> get_hours_intent = nlp.domains['store_info'].intents['get_store_hours'] 
+  >>> clf = get_hours_intent.entities['sys_time'].role_classifier
+  >>> clf.fit()
 
 Once the classifier is trained, we test it on a new query using the familiar :keyword:`predict()` method. The :keyword:`predict()` method of the role classifier requires both the full input query and the set of entities predicted by the entity recognizer.
 
