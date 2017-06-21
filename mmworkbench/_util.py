@@ -9,7 +9,7 @@ from builtins import object
 import datetime
 import logging
 import os
-import shutil
+import tarfile
 
 import boto3
 import botocore
@@ -95,7 +95,8 @@ class Blueprint(object):
         app_path = os.path.abspath(app_path)
 
         local_archive = cls._fetch_archive(name, 'app')
-        shutil.unpack_archive(local_archive, app_path)
+        tarball = tarfile.open(local_archive)
+        tarball.extractall(path=app_path)
         return app_path
 
     @classmethod
@@ -132,7 +133,8 @@ class Blueprint(object):
         cache_dir = path.get_cached_blueprint_path(name)
         local_archive = cls._fetch_archive(name, 'kb')
         kb_dir = os.path.join(cache_dir, 'kb')
-        shutil.unpack_archive(local_archive, kb_dir)
+        tarball = tarfile.open(local_archive)
+        tarball.extractall(path=kb_dir)
 
         _, _, index_files = next(os.walk(kb_dir))
 
@@ -175,7 +177,7 @@ class Blueprint(object):
                                                              tz.tzlocal())
         except (OSError, IOError):
             # Minimum possible time
-            local_modified = datetime.datetime(datetime.MINYEAR, 1, 1, tzinfo=datetime.timezone.utc)
+            local_modified = datetime.datetime(datetime.MINYEAR, 1, 1, tzinfo=tz.tzutc())
 
         if remote_modified < local_modified:
             logger.info('Using cached %r %s archive', name, archive_type)
