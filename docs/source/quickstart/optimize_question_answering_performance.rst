@@ -7,29 +7,27 @@ To leverage the Workbench question answerer in your application, you must first 
 
 .. code:: python
 
-  from mmworkbench import Application, QuestionAnswerer, context, slots
-  qa = QuestionAnswerer()
-  app = Application(__name__, qa)
+  from mmworkbench import Application
 
-  @app.handle(intent='get_nearest_store')
-  def send_nearest_store():
-      loc = context.request.session.location
-      stores = qa.indexes['stores'].get(sort='location', current_location=loc)
-      slots['store_name'] = stores[0]['name']
-      response = {
-          'replies': [
-              'Your nearest Kwik-E-Mart is located at {store_name}.'
-          ]
-      }
-      return response
+  app = Application(__name__)
+
+  @app.handle(intent='find_nearest_store')
+  def send_nearest_store(context, slots, responder):
+      user_location = context['request']['session']['location']
+      stores = app.question_answerer.get(index='stores', sort='location', location=user_location)
+      target_store = stores[0]
+      slots['store_name'] = target_store['store_name']
+
+      context['frame']['target_store'] = target_store
+      responder.reply('Your nearest Kwik-E-Mart is located at {store_name}.')
 
 Assuming you have already created an index, such as ``stores``, and uploaded the knowledge base data, the :keyword:`get()` method provides a flexible mechanism for retrieving relevant results.
 
 .. code:: python
 
-  >>> from mmworkbench import QuestionAnswerer
-  >>> qa = QuestionAnswerer()
-  >>> stores = qa.indexes['stores'].get()
+  >>> from mmworkbench.components import QuestionAnswerer
+  >>> qa = QuestionAnswerer('my_app')
+  >>> stores = qa.get(index='stores')
   >>> stores[0]
   {
     "store_name": "23 Elm Street",
@@ -44,15 +42,14 @@ Similarly, to retrieve store locations on Market Street, you could use something
 
 .. code:: python
 
-  >>> stores = qa.indexes['stores'].get('market')
+  >>> stores = qa.get(index='stores', 'market')
   >>> stores[0]
   {
     "store_name": "Pine and Market",
     "open_time": "6am",
     "close_time": "10pm",
     "address": "750 Market Street, Capital City, CA 94001",
-    "phone_number": "(+1) 650-555-4500",
-    "score": 0.8276352
+    "phone_number": "(+1) 650-555-4500"
   }
 
 By default, the :keyword:`get()` method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity. Each result includes the relevance score in the :keyword:`score` property. For some applications, the baseline ranking is sufficient. For others, the Workbench question answerer provides flexible options for customizing relevance.
@@ -130,7 +127,7 @@ Similarly, to load a previously saved ranking configuration, you can use:
 
   >>> qa.indexes['products'].load()
 
-See the :ref:`User Manual <userguide>` for more about how to specify custom ranking configurations.
+See the :ref:`User Guide <userguide>` for more about how to specify custom ranking configurations.
 
 
 Proximity-Based Ranking
@@ -254,5 +251,5 @@ These training data examples can be generated using manual QA where human grader
   >>> # To save the model to file.
   ... store_index.dump()
 
-For more about how to train and evaluate machine-learned ranking models, see the :ref:`User Manual <userguide>`.
+For more about how to train and evaluate machine-learned ranking models, see the :ref:`User Guide <userguide>`.
 

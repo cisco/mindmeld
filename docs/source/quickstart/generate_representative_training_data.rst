@@ -108,7 +108,7 @@ Entity mapping files specify the training data required for entity resolution. E
 Production conversational applications today rely on training data sets and supervised learning models to perform entity resolution. The training data utilized by Workbench for this purpose resides in entity mapping files located in the :keyword:`entities` folder of the application root directory.
 
 .. image:: /images/directory5.png
-    :width: 400px
+    :width: 350px
     :align: center
 
 In this example, :keyword:`store_name_mapping.json` is the mapping file for the ``store_name`` entity. Here is what :keyword:`store_name_mapping.json` looks like:

@@ -21,60 +21,89 @@ The language parser in Workbench supports everything from the simplest rule-base
 
 Getting started with the parser merely requires specifying a parser configuration which defines the entity hierarchy in your application. For the simple example above, the parser configuration can be defined as follows.
 
-.. code-block:: python
-
-  >>> from mmworkbench import NaturalLanguageProcessor as Nlp
-  >>> Nlp.parser.config({'product': ['quantity', 'size']})
-
-Now that the parser is configured, we train your NLP models and then run the parser, as follows.
-
-.. code-block:: python
-
-  >>> Nlp.build()
-  >>> Nlp.parse('Order one large squishee and a dozen donuts from the Elm Street Kwik-E-Mart?')
+.. code-block:: javascript
 
   {
-    ...
-    'parse_tree': [
-      {
-        'id': 7628,
-        'type': 'product',
-        'name': 'squishee',
-        'children': [
-          'size': {'name': 'large', 'value': {'sku': 8128}},
-          'quantity': {'name': 'one', 'value': 1}
-        ]
-      },
-      {
-        'id': 15231,
-        'type': 'product',
-        'name': 'donut',
-        'children': [
-          'quantity': {'name': 'a dozen', 'value': 12}
-        ]
-      },
-      {
-        'id': 32109,
-        'type': 'store_name',
-        'name': 'Elm Street'
-      }
-    ]
-    ...
+    'product': ['quantity', 'size']
   }
 
-The output of the parser now includes the :keyword:`parse_tree` data structure that captures the relationship between entities detected in the query. If you are satisfied with this parser configuration, you can save it to a file.
+With the parser configuration in place, we train the NLP models and then test the parser, as follows.
 
 .. code-block:: python
 
-  >>> Nlp.parser.dump()
+  >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+  >>> nlp = NaturalLanguageProcessor('my_app')
+  >>> nlp.build()
+  >>> nlp.process('Order one large squishee and a dozen donuts from the Elm Street Kwik-E-Mart.')
+  {
+     ...
+     'entities': [
+        {
+          'children': [
+            {
+              'role': None,
+              'span': {'end': 8, 'start': 6},
+              'text': 'one',
+              'type': 'quantity',
+              'value': [{'value': 1}]
+            },
+            {
+              'role': None,
+              'span': {'end': 14, 'start': 10},
+              'text': 'large',
+              'type': 'size',
+              'value': [{'cname': 'Large', 'id': '8128'}]
+            }
+          ],
+          'role': None,
+          'span': {'end': 23, 'start': 16},
+          'text': 'squishee',
+          'type': 'product',
+          'value': [{'cname': 'Signature Squishee', 'id': '7628'}]
+        },
+        {
+          'children': [
+            {
+              'role': None,
+              'span': {'end': 35, 'start': 29},
+              'text': 'a dozen',
+              'type': 'quantity',
+              'value': [{'value': 12}]
+            }
+          ],
+          'role': None,
+          'span': {'end': 42, 'start': 37},
+          'text': 'donuts',
+          'type': 'product',
+          'value': [{'cname': 'Glazed Donut', 'id': '15231'}]
+        },
+        {
+          'role': None,
+          'span': {'end': 62, 'start': 53},
+          'text': 'Elm Street',
+          'type': 'store_name',
+          'value': [{'cname': '23 Elm Street', 'id': '32109'}]
+        }
+     ],
+     ...
+  }
 
-To load a previously saved parser configuration, use the following.
+Some of the entities in the Natural Language Processor's output now include a :keyword:`children` field that contains a list of all dependent entities related to that head entity.
 
-.. code-block:: python
+.. If you are satisfied with this parser configuration, you can save it to a file.
 
-  >>> Nlp.parser.load()
+  .. code-block:: python
 
-The Workbench language parser is a versatile component which can be used to implement a variety of parsing strategies for your application. The :ref:`User Manual <userguide>` explains the different options available to fine-tune the behavior of the parser, and covers how to define your own custom parsing logic and train a state-of-the-art statistical parser using annotated data.
+    >>> Nlp.parser.dump()
+
+  To load a previously saved parser configuration, use the following.
+
+  .. code-block:: python
+
+    >>> Nlp.parser.load()
+
+
+The Workbench language parser is a versatile component which can be used to implement a variety of parsing strategies for your application. The :ref:`User Guide <userguide>` explains the different options available to fine-tune the behavior of the parser, and covers how to define your own custom parsing logic and train a state-of-the-art statistical parser using annotated data.
 
 Not every scenario warrants using the language parser. For instance, in our simple Kwik-E-Mart store information app, the two kinds of entities, ``date`` and ``store_name``, are distinct and unrelated pieces of information. Running the parser would only yield two singleton entity groups with heads but no dependents.
 
