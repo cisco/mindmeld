@@ -7,7 +7,7 @@ machine:
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 dependencies:
   cache_directories:
-    - ~/$CIRCLE_PROJECT_REPONAME/.tox
+    - ~/mindmeld-workbench3/.tox
   override:
     - pip install -r dev-requirements.txt
     - tox --notest
