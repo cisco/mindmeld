@@ -13,7 +13,7 @@ from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 
 from . import tagging
-from .helpers import get_feature_extractor, register_model
+from .helpers import GAZETTEER_RSC, get_feature_extractor, register_model
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, SkLearnModel
 
 logger = logging.getLogger(__name__)
@@ -122,8 +122,8 @@ class MemmModel(SkLearnModel):
         system_types = self._get_system_types()
         self.register_resources(sys_types=system_types)
 
-        skip_param_selection = params is not None or self.config.param_selection is None
         params = params or self.config.params
+        skip_param_selection = params is not None or self.config.param_selection is None
 
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
@@ -211,7 +211,7 @@ class MemmModel(SkLearnModel):
 
     def _get_system_types(self):
         sys_types = set()
-        for gaz in self._resources['gazetteers'].values():
+        for gaz in self._resources[GAZETTEER_RSC].values():
             sys_types.update(gaz['sys_types'])
         return sys_types
 

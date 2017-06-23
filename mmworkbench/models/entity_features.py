@@ -2,7 +2,7 @@
 """This module contains feature extractors for entities"""
 from __future__ import absolute_import, unicode_literals
 
-from .helpers import register_features, get_ngram
+from .helpers import GAZETTEER_RSC, register_features, get_ngram
 
 
 def extract_in_gaz_features():
@@ -11,7 +11,7 @@ def extract_in_gaz_features():
         features = {}
         current_entity = entities[entity_index]
 
-        domain_gazes = resources['gazetteers']
+        domain_gazes = resources[GAZETTEER_RSC]
 
         for gaz_name, gaz in domain_gazes.items():
             if current_entity.normalized_text in gaz['pop_dict']:
