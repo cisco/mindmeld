@@ -79,11 +79,11 @@ The :keyword:`get_store_hours_queries.txt` file captures ways that a user might 
   What are the hours for the Kwik-E-Mart on {Main Street|store_name}?
   Is the {Central Plaza|name} Kwik-E-Mart open now?
   The store at {Pine & Market|store_name} - is it open?
-  Is the {Rockefeller|store_name} Kwik-E-Mart open for business {tomorrow|sys:date}?
-  Can you check if the {Main St|store_name} store is open on {Sunday|sys:date}?
+  Is the {Rockefeller|store_name} Kwik-E-Mart open for business {tomorrow|sys_time}?
+  Can you check if the {Main St|store_name} store is open on {Sunday|sys_time}?
   ...
 
-As the example shows, each inline entity is appended by the pipe character followed by its associated entity type, then the entire expression is enclosed in curly braces. Annotations for names of *system entities*, which are built into Workbench, begin with :keyword:`sys:`. In the example, :keyword:`date` is a system entity. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
+As the example shows, each inline entity is appended by the pipe character followed by its associated entity type, then the entire expression is enclosed in curly braces. Annotations for names of *system entities*, which are built into Workbench, begin with :keyword:`sys_`. In the example, :keyword:`date` is a system entity. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
 
 .. _roles_example:
 
@@ -91,12 +91,12 @@ Labeled queries can also be used to train role classification models. This is no
 
   * "Show me all Kwik-E-Mart stores open between 8am and 6pm."
 
-Here, both :keyword:`8am` and :keyword:`6pm` could be defined as entities, perhaps of type :keyword:`sys:time`. While the two entities share the same type, they play different *roles* in the query; one reflects the store opening time and the other is the store closing time. Workbench provides the capability to train models to perform this role classification. Simply supplement your labeled queries with additional role annotation, as shown below.
+Here, both :keyword:`8am` and :keyword:`6pm` could be defined as entities, perhaps of type :keyword:`sys_time`. While the two entities share the same type, they play different *roles* in the query; one reflects the store opening time and the other is the store closing time. Workbench provides the capability to train models to perform this role classification. Simply supplement your labeled queries with additional role annotation, as shown below.
 
 .. code-block:: text
 
-  Show me all Kwik-E-Mart stores open between {8am|sys:time|open_time} and {6pm|sys:time|close_time}.
-  Are there any Kwik-E-Mart stores open after {3pm|sys:time|open_time}?
+  Show me all Kwik-E-Mart stores open between {8am|sys_time|open_time} and {6pm|sys_time|close_time}.
+  Are there any Kwik-E-Mart stores open after {3pm|sys_time|open_time}?
   ...
 
 
