@@ -2,8 +2,7 @@
 """
 This module contains the processor resource loader.
 """
-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 from builtins import object
 
 from copy import deepcopy

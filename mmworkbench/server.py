@@ -2,6 +2,7 @@
 """
     This module contains the class which serves the workbench API.
 """
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import json

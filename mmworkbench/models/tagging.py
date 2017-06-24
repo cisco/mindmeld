@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains constants and functions for sequence tagging."""
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 from builtins import zip
 
 import logging

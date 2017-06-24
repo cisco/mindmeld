@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains the dialogue manager component of Workbench"""
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 from builtins import object, str
 
 from functools import cmp_to_key

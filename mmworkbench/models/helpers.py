@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains some helper functions for the models package"""
+from __future__ import unicode_literals
 
 import re
 

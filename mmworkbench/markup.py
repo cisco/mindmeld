@@ -2,7 +2,7 @@
 """The markup module contains functions for interacting with the MindMeld Markup language for
 representing annotations of query text inline.
 """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 from future.utils import raise_from
 
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span

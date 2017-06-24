@@ -1,9 +1,9 @@
+# -*- coding: utf-8 -*-
 """A module containing various utility functions for Workbench.
 These are capabilities that do not have an obvious home within the existing
 project structure.
 """
-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 from builtins import object
 
 import datetime
