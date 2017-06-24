@@ -58,3 +58,8 @@ class SystemEntityMarkupError(MarkupError):
 class SystemEntityResolutionError(Exception):
     """An exception representing an error resolving a system entity"""
     pass
+
+
+class KnowledgeBaseConnectionError(WorkbenchError):
+    """An exception representing an issue connecting to a knowledge base"""
+    pass
