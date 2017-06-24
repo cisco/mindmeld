@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains the system entity recognizer."""
-from __future__ import unicode_literals, print_function
+from __future__ import absolute_import, unicode_literals
 from builtins import str
 
 import logging
@@ -62,12 +62,11 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
     except requests.ConnectionError:
         logger.error('Unable to connect to Mallard.')
         raise RuntimeError('Unable to connect to Mallard. Is it running?')
-    except Exception as e:
-        print('Numerical Entity Recognizer Error: ' + str(e))
-        print('URL: ' + url)
-        print('Data: ' + json.dumps(data))
+    except Exception as ex:
+        logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
+                     json.dumps(data))
         sys.exit('\nThe numerical parser service encountered the following ' +
-                 'error:\n' + str(e) + '\nURL: ' + url + '\nRaw data: ' + str(data) +
+                 'error:\n' + str(ex) + '\nURL: ' + url + '\nRaw data: ' + str(data) +
                  '\nPlease check your data and ensure Mallard is running. You may ' +
                  "run Mallard with 'python start-nparse.py'.")
 

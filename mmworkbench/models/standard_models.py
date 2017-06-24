@@ -3,9 +3,7 @@
 This module contains all code required to perform multinomial classification
 of text.
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, unicode_literals
 from builtins import range, zip, super
 from past.utils import old_div
 

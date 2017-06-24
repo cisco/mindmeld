@@ -2,8 +2,7 @@
 """
 This module contains the base class for all the machine-learned classifiers in Workbench.
 """
-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 from builtins import object
 
 import logging

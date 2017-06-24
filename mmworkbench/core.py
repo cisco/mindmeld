@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains a collection of the core data structures used in workbench."""
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 from builtins import object, range, super
 
 import logging

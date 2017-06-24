@@ -2,7 +2,7 @@
 """
 This module contains the entity recognizer component of the Workbench natural language processor.
 """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 from builtins import super
 
 import os
