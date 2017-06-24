@@ -58,8 +58,8 @@ def create_index(app_name, index_name, mapping, es_host=None, es_client=None, co
             es_client.indices.create(scoped_index_name, body=mapping)
         else:
             logger.error('Index %r already exists.', index_name)
-    except ESConnectionError as ex:
-        logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
+    except ESConnectionError:
+        logger.error('Unable to connect to Elasticsearch cluster at %r', es_host)
         raise KnowledgeBaseConnectionError()
 
 
