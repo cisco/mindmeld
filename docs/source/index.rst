@@ -59,7 +59,8 @@ Contents
 
    blueprints/overview
    blueprints/food_ordering
-   blueprints/music_discovery
+   blueprints/video_discovery
+   blueprints/home_assistant
    blueprints/meeting_assistant
 
 

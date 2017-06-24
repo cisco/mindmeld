@@ -13,8 +13,9 @@ In :doc:`Step 3 <../quickstart/define_the_hierarchy>` of the :ref:`Step-by-Step 
 
 == ===
 1  :doc:`Food Ordering <food_ordering>`
-2  :doc:`Music Search and Discovery <music_discovery>`
-3  :doc:`Meeting Assistant <meeting_assistant>`
+2  :doc:`Video Discovery <video_discovery>`
+3  :doc:`Home Assistant <home_assistant>`
+4  :doc:`Meeting Assistant <meeting_assistant>`
 == ===
 
 These blueprints are covered in depth in the following sections. The goal of each section is to guide you through all the steps involved in using Workbench for building an app that addresses a specific real-world use case.

@@ -101,7 +101,7 @@ For this app, only the ``build_order`` intent requires entity recognition. This 
    - ``category`` — The name of a food category on a restaurant menu
    - ``dish`` — The name of a dish on a restaurant menu
    - ``option`` — The name of an available option (customization, add-on, etc.) for a dish
-   - ``sys:number`` — The quantity of a given dish, captured by the :doc:`number system entity <../userguide/entity_recognition>`
+   - ``sys_number`` — The quantity of a given dish, captured by the :doc:`number system entity <../userguide/entity_recognition>`
 
 .. admonition:: Exercise
 
