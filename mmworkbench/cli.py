@@ -119,7 +119,7 @@ def clean(ctx):
 
 
 @cli.command('load-kb', context_settings=CONTEXT_SETTINGS)
-@click.option('-n', '--es-host', required=True)
+@click.option('-n', '--es-host', required=False)
 @click.argument('app_name', required=True)
 @click.argument('index_name', required=True)
 @click.argument('data_file', required=True)
@@ -168,10 +168,11 @@ def _get_mallard_pid():
 
 
 @cli.command('blueprint', context_settings=CONTEXT_SETTINGS)
-@click.option('-n', '--es-host', required=True)
+@click.option('-n', '--es-host', required=False)
 @click.argument('blueprint_name', required=True)
 @click.argument('app_path', required=False)
 def setup_blueprint(es_host, blueprint_name, app_path):
+    """Sets up a blueprint application"""
     blueprint(blueprint_name, app_path, es_host=es_host)
 
 

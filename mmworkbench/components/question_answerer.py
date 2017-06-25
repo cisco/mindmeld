@@ -9,9 +9,9 @@ import json
 import logging
 
 from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_QA_MAPPING
+from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name
 
 from ..resource_loader import ResourceLoader
-from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +41,8 @@ class QuestionAnswerer(object):
         return self.__es_client
 
     def get(self, query_string=None, **kwargs):
-        """Gets a collection of documents from the knowledge base matching the provided search
-        criteria.
+        """Gets a collection of documents from the knowledge base matching the provided
+        search criteria.
 
         Args:
             query_string (str, optional): A lucene style query string
@@ -98,7 +98,8 @@ class QuestionAnswerer(object):
         raise NotImplementedError
 
     @classmethod
-    def load_kb(cls, app_name, index_name, data_file, es_host=None, es_client=None):
+    def load_kb(cls, app_name, index_name, data_file, es_host=None, es_client=None,
+                connect_timeout=2):
         """Loads documents from disk into the specified index in the knowledge base. If an index
         with the specified name doesn't exist, a new index with that name will be created in the
         knowledge base.
@@ -109,7 +110,9 @@ class QuestionAnswerer(object):
             data_file (str): The path to the data file containing the documents to be imported
                 into the knowledge base index
             es_host (str): The Elasticsearch host server
-            es_client: Description
+            es_client (Elasticsearch): The Elasticsearch client
+            connect_timeout (int, optional): The amount of time for a connection to the
+            Elasticsearch host
         """
         with open(data_file) as data_fp:
             data = json.load(data_fp)
@@ -121,4 +124,4 @@ class QuestionAnswerer(object):
                 yield base
 
         load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_QA_MAPPING, DOC_TYPE,
-                   es_host, es_client)
+                   es_host, es_client, connect_timeout=connect_timeout)

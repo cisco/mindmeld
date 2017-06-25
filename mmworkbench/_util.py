@@ -17,6 +17,7 @@ from dateutil import tz
 
 
 from . import path
+from .exceptions import KnowledgeBaseConnectionError
 from .components import QuestionAnswerer
 
 
@@ -28,7 +29,8 @@ BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
 BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
     'quickstart': {},
-    'food_ordering': {}
+    'food_ordering': {},
+    'template': {}
 }
 
 
@@ -97,6 +99,7 @@ class Blueprint(object):
         local_archive = cls._fetch_archive(name, 'app')
         tarball = tarfile.open(local_archive)
         tarball.extractall(path=app_path)
+        logger.info('Created %r app at %r', name, app_path)
         return app_path
 
     @classmethod
@@ -122,16 +125,16 @@ class Blueprint(object):
         app_path = os.path.abspath(app_path)
         _, app_name = os.path.split(app_path)
 
-        if not es_host:
-            try:
-                es_host = os.environ['MM_ES_HOST']
-            except KeyError:
-                raise EnvironmentError('Cannot set up knowledge base. No Elasticsearch host was '
-                                       'specified. Specify it with the es_host keyword argument '
-                                       'or the MM_ES_HOST environment variable')
-
+        es_host = es_host or os.environ.get('MM_ES_HOST', 'localhost')
         cache_dir = path.get_cached_blueprint_path(name)
-        local_archive = cls._fetch_archive(name, 'kb')
+        try:
+            local_archive = cls._fetch_archive(name, 'kb')
+        except botocore.exceptions.ClientError as ex:
+            if ex.response['Error']['Code'] == "404":
+                logger.warning('No knowledge base to set up.')
+                return
+            raise ex
+
         kb_dir = os.path.join(cache_dir, 'kb')
         tarball = tarfile.open(local_archive)
         tarball.extractall(path=kb_dir)
@@ -141,10 +144,32 @@ class Blueprint(object):
         for index in index_files:
             index_name, _ = os.path.splitext(index)
             data_file = os.path.join(kb_dir, index)
-            QuestionAnswerer.load_kb(app_name, index_name, data_file, es_host)
+
+            try:
+                QuestionAnswerer.load_kb(app_name, index_name, data_file, es_host)
+            except KnowledgeBaseConnectionError as ex:
+                logger.error('Cannot set up knowledge base. Unable to connect to Elasticsearch '
+                             'instance at %r. Confirm it is running or specify an alternate '
+                             'instance with the MM_ES_HOST environment variable', es_host)
+
+                raise ex
+
+        logger.info('Created %r knowledge base at %r', name, es_host)
 
     @staticmethod
     def _fetch_archive(name, archive_type):
+        """Fetches a blueprint archive from S3.
+
+        Args:
+            name (str): The name of the blueprint.
+            archive_type (str): The type or the archive. Can be 'app' or 'kb'.
+
+        Returns:
+            str: The path of the local archive after it is downloaded.
+
+        Raises:
+            EnvironmentError: When AWS credentials are not available
+        """
         cache_dir = path.get_cached_blueprint_path(name)
         try:
             os.makedirs(cache_dir)
@@ -162,15 +187,10 @@ class Blueprint(object):
         try:
             object_summary = s3_service.ObjectSummary(BLUEPRINT_S3_BUCKET, object_key)
             remote_modified = object_summary.last_modified
-        except botocore.exceptions.NoCredentialsError as ex:
+        except botocore.exceptions.NoCredentialsError:
             msg = 'Unable to locate AWS credentials. Cannot download blueprint.'
             logger.error(msg)
             raise EnvironmentError(msg)
-        except botocore.exceptions.ClientError as ex:
-            if ex.response['Error']['Code'] == "404":
-                logger.error('Unable to locate the requested blueprint.')
-
-            raise
 
         try:
             local_modified = datetime.datetime.fromtimestamp(os.path.getmtime(local_archive),
