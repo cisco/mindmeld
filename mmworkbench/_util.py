@@ -57,15 +57,16 @@ class Blueprint(object):
     is downloaded. The archive is then extracted into a directory named for the
     blueprint.
     """
-    def __call__(self, name, app_path=None, es_host=None):
+    def __call__(self, name, app_path=None, es_host=None, skip_kb=False):
         """
-
         Args:
             name (str): The name of the blueprint
             app_path (str, optional): The path to the app
             es_host (str, optional): The hostname of the elasticsearch cluster
                 for the knowledge base. If no value is passed, value will be
                 read from the environment.
+            skip_kb (bool, optional): If True, the blueprint knowledge base
+                will not be set up.
 
         Returns:
             str: The path where the blueprint was created
@@ -76,7 +77,8 @@ class Blueprint(object):
         if name not in BLUEPRINTS:
             raise ValueError('Unknown blueprint name: {!r}'.format(name))
         app_path = self.setup_app(name, app_path)
-        self.setup_kb(name, app_path, es_host=es_host)
+        if not skip_kb:
+            self.setup_kb(name, app_path, es_host=es_host)
         return app_path
 
     @classmethod

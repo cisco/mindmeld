@@ -168,12 +168,13 @@ def _get_mallard_pid():
 
 
 @cli.command('blueprint', context_settings=CONTEXT_SETTINGS)
-@click.option('-n', '--es-host', required=False)
+@click.option('-n', '--es-host')
+@click.option('--skip-kb', is_flag=True, help="Skip setting up the knowledge base")
 @click.argument('blueprint_name', required=True)
 @click.argument('app_path', required=False)
-def setup_blueprint(es_host, blueprint_name, app_path):
+def setup_blueprint(es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application"""
-    blueprint(blueprint_name, app_path, es_host=es_host)
+    blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
 
 
 if __name__ == '__main__':

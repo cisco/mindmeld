@@ -5,7 +5,6 @@ This module contains the natural language processor.
 from __future__ import absolute_import, unicode_literals
 from builtins import object, super
 
-
 from .. import path
 from ..core import ProcessedQuery, Bunch
 from ..exceptions import FileNotFoundError, ProcessorError
