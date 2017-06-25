@@ -92,6 +92,35 @@ def test_load_system(query_factory):
     assert entity.entity.value == {'unit': '$', 'value': 600000}
 
 
+@pytest.mark.dump
+@pytest.mark.system
+@pytest.mark.role
+def test_load_system_role(query_factory):
+    """Tests loading a basic query with an entity with a role"""
+    text = ('What stores are open between {3|sys_time|open_hours} and '
+            '{5|sys_time|close_hours}')
+
+    processed_query = markup.load_query(text, query_factory)
+
+    assert len(processed_query.entities) == 2
+
+    entity = processed_query.entities[0]
+    assert entity.span.start == 29
+    assert entity.span.end == 29
+    assert entity.normalized_text == '3'
+    assert entity.entity.type == 'sys_time'
+    assert entity.entity.text == '3'
+    assert entity.entity.role == 'open_hours'
+
+    entity = processed_query.entities[1]
+    assert entity.span.start == 35
+    assert entity.span.end == 35
+    assert entity.normalized_text == '5'
+    assert entity.entity.type == 'sys_time'
+    assert entity.entity.text == '5'
+    assert entity.entity.role == 'close_hours'
+
+
 @pytest.mark.load
 @pytest.mark.system
 @pytest.mark.nested
@@ -436,6 +465,22 @@ def test_dump_entity(query_factory):
     processed_query = ProcessedQuery(query, entities=entities)
 
     markup_text = 'When does the {Elm Street|store_name} store close?'
+    assert markup.dump_query(processed_query) == markup_text
+
+
+@pytest.mark.dump
+def test_dump_role(query_factory):
+    """Tests dumping a basic query with an entity with a role"""
+    query_text = 'What stores are open between 3 and 5'
+    query = query_factory.create_query(query_text)
+    entities = [
+        QueryEntity.from_query(query, Span(29, 29), entity_type='sys_time', role='open_hours'),
+        QueryEntity.from_query(query, Span(35, 35), entity_type='sys_time', role='close_hours')
+    ]
+    processed_query = ProcessedQuery(query, entities=entities)
+
+    markup_text = ('What stores are open between {3|sys_time|open_hours} and '
+                   '{5|sys_time|close_hours}')
     assert markup.dump_query(processed_query) == markup_text
 
 

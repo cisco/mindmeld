@@ -145,6 +145,10 @@ def _process_annotations(query, annotations):
             span = Span(ann['start'], ann['end'])
             if Entity.is_system_entity(ann['type']):
                 raw_entity = resolve_system_entity(query, ann['type'], span).entity
+                try:
+                    raw_entity.role = ann['role']
+                except KeyError:
+                    pass
             else:
                 try:
                     value = {'children': ann['children']}

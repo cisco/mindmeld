@@ -302,7 +302,8 @@ class ResourceLoader(object):
         entity_types = path.get_entity_types(self.app_path)
         for query in queries:
             for entity in query.entities:
-                if entity.entity.type not in entity_types:
+                if (entity.entity.type not in entity_types and
+                        not entity.entity.is_system_entity):
                     msg = 'Unknown entity {!r} found in query {!r}'
                     raise WorkbenchError(msg.format(entity.entity.type, query.query.text))
 

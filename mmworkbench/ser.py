@@ -72,6 +72,19 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
 
 
 def resolve_system_entity(query, entity_type, span):
+    """Resolves a system entity in the provided query at the specified span
+
+    Args:
+        query (Query): The query containing the entity
+        entity_type (str): The type of the entity
+        span (Span): The character span of the entity in the query
+
+    Returns:
+        Entity: The resolved entity
+
+    Raises:
+        SystemEntityResolutionError:
+    """
     for candidate in query.get_system_entity_candidates(set((entity_type,))):
         if candidate.span == span and candidate.entity.type == entity_type:
             return candidate

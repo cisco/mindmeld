@@ -345,20 +345,22 @@ class NestedEntity(object):
         return self.__class__(self._texts, self._spans, self._token_spans, self.entity, children)
 
     @classmethod
-    def from_query(cls, query, span=None, normalized_span=None, entity_type=None,
+    def from_query(cls, query, span=None, normalized_span=None, entity_type=None, role=None,
                    entity=None, parent_offset=0, children=None):
         """Creates an entity node using a parent entity node
 
         Args:
             query (Query): Description
-            parent_offset (int): The offset of the parent in the query
             span (Span): The span of the entity in the query's raw text
             normalized_span (None, optional): The span of the entity in the
                 query's normalized text
             entity_type (str, optional): The entity type. One of this and entity
                 must be provided
+            role (str, optional): The entity role. Ignored if entity is provided.
             entity (Entity, optional): The entity. One of this and entity must
                 be provided
+            parent_offset (int): The offset of the parent in the query
+            children (None, optional): Description
 
         Returns:
             the created entity
@@ -392,7 +394,7 @@ class NestedEntity(object):
         if entity is None:
             if entity_type is None:
                 raise ValueError("Either 'entity' or 'entity_type' must be specified")
-            entity = Entity(texts[0], entity_type)
+            entity = Entity(texts[0], entity_type, role=role)
 
         return cls(texts, spans, tok_spans, entity, children)
 
