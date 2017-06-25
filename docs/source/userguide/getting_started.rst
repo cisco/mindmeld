@@ -4,42 +4,151 @@
 Getting Started
 ===============
 
-Describe how to get a license to workbench, how to install the package, and how to set up a new project with the correct directory structure and dependencies.
-4.2.1 Obtain a license
-4.2.2 Preparation: Install dependencies, setup environment (virtualenv, etc.)
-4.2.3 Install Workbench
-4.2.4 Create a Workbench project (from blueprint)
-
-
-[ARCHIVED CONTENT BELOW]
-
-
-Obtain a License
-~~~~~~~~~~~~~~~~
+Obtain a token
+----------------
 
 **TODO: Revisit this section -- talk more about user name and password**
 
-MindMeld Workbench is a commercial software product which requires a license to use. For more information or to inquire about obtaining a license for MindMeld Workbench, please `contact MindMeld sales <mailto:info@mindmeld.com>`_. You will recieve credentials which can be used to install MindMeld Workbench and related files.
+MindMeld Workbench is a commercial software product which requires a license to use. For more
+information or to inquire about obtaining access to MindMeld Workbench, please
+`contact MindMeld <mailto:info@mindmeld.com>`_. Once approved, you will receive credentials which
+can be used to access install MindMeld Workbench and retrieve related files.
 
 Install Java 8
-~~~~~~~~~~~~~~
+--------------
 
-**TODO: Add section about installing Java 8.**
+Workbench has a numerical parsing component that runs in Java. Java 8 or newer is required. You can
+use the following command to confirm that Java 8 is installed on your system.
 
-Set Up Your Environment
-~~~~~~~~~~~~~~~~~~~~~~~
+.. code-block:: console
 
-Workbench is a Python-based machine learning library. To use Workbench, you will need to have Python installed. If Python is not already installed on your system, you can get it at `www.python.org <https://www.python.org/>`_ or use `pyenv <https://github.com/pyenv/pyenv>`_ to manage multiple versions of Python. The latest version of Python 3 is recommended. Python 2.7+ should work fine too, but it is deprecated.
+    $ java -version
+    java version "1.8.0_131"
+    Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
+    Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
 
-The simplest way to install workbench is using pip, Python’s packaging system which is included by default with the Python binary installers (since Python 2.7.9). You can check to see if pip is installed by typing the following command:
+If the command fails, or your java version begins with 1.7, you need to install Java 8. Visit
+`java.com <https://www.java.com/inc/BrowserRedirect1.jsp?locale=en>`_ for detailed instructions.
+
+Set up Elasticsearch
+---------------------
+
+`Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ is a highly scalable open-source
+full-text search and analytics engine. It allows you to store, search, and analyze big volumes of
+data quickly and in near real time. Workbench leverages Elasticsearch for information retrieval
+based components. Generally, the latest version of Elasticsearch is recommended, but 5.0 or newer
+is required.
+
+Local Elasticsearch Cluster
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the best performance with smaller applications, Elasticsearch should be installed locally. On
+Mac OS X systems with `homebrew <https://brew.sh/>`_ installed, the simplest way to install
+Elasticsearch is with the following set of commands.
+
+.. code-block:: console
+
+    $ brew update
+    $ brew install elasticsearch
+
+For other systems, or for more information on configuring Elasticsearch, go
+`here <https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html>`_.
+
+After Elasticsearch has been configured simply run ``elasticsearch`` to start the process.
+
+Remote Elasticsearch Cluster
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you have configured a remote Elasticsearch cluster to host Elasticsearch, you will need to set
+the ``MM_ES_HOST`` environment variable accordingly. Add this to your shell's profile
+(``.bash_profile`` or equivalent):
+
+.. code-block:: bash
+
+    export MM_ES_HOST="my-es-host.com"
+
+Install Python
+--------------
+
+Workbench is a Python-based machine learning library. To use Workbench, you will need to have
+Python installed. If Python is not already installed on your system, you can get it at
+`www.python.org <https://www.python.org/>`_ or use `pyenv <https://github.com/pyenv/pyenv>`_ to
+manage multiple versions of Python. For workbench, Python 3.4 and newer are actively supported.
+The latest version of Python 3 is recommended. Python 2.7+ should work fine too, but it is
+deprecated.
+
+Using a Virtual Environment
+---------------------------
+
+If you would like to work in an isolated environment (which is strongly recommended so you can work
+on different projects without having conflicting library versions) you can use venv or virtualenv.
+
+Virtual Environments with Pyenv
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using pyenv you can easily create a virtual environment for any environment. For example
+to create an environment using Python 3.6.1 named ``my-env`` use the following command:
+
+
+.. code-block:: console
+
+    $ pyenv virtualenv 3.6.1 my-env
+
+If you would like to automatically activate the environment upon entering a project directory, use
+the following command while at the root of the project directory:
+
+.. code-block:: console
+
+    $ pyenv local my-env
+
+If instead you would like to use the environment (or any particular Python version) for the active
+shell session only, use the following command:
+
+.. code-block:: console
+
+    $ pyenv shell my-env
+
+Check out the `pyenv command reference <https://github.com/pyenv/pyenv/blob/master/COMMANDS.md>`_
+for more details on how to use pyenv in general and the
+`pyenv-virtualenv usage <https://github.com/pyenv/pyenv-virtualenv#usage>`_ for usage with
+virtualenv specifically.
+
+Manual Virtual Environments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you would like to manage your virtual environment directly, the method for doing so varies
+slightly on various versions of Python as documented for Python 3.3+
+`here <https://docs.python.org/3/library/venv.html>`_ and for earlier versions
+`here <https://virtualenv.pypa.io>`_. In Python 3.6 and later you can use the following command.
+
+.. code-block:: console
+
+    $ python -m venv /path/to/venv/
+
+Now every time you want to activate this environment, just open a terminal and type:
+
+.. code-block:: console
+
+    $ cd $WB_APP_ROOT
+    $ source /path/to/venv/env/bin/activate
+
+While the environment is active, any package you install using pip will be installed in this
+isolated environment, and python will only have access to these packages.
+
+Configure Pip
+-------------
+
+The simplest way to install workbench is using pip, Python’s packaging system which is included by
+default with the Python binary installers (since Python 2.7.9). You can check to see if pip is
+installed by typing the following command:
 
 .. code-block:: console
 
     $ pip --version
     pip 8.1.2 from [...]/lib/python3.5/site-packages (python 3.5)
 
-
-You should make sure you have a recent version of pip installed, at the very least >1.4 to support binary module installation (a.k.a. wheels). To upgrade the pip module, type:
+You should make sure you have a recent version of pip installed, at the very least >1.4 to support
+binary module installation (a.k.a. wheels). To upgrade the pip module, type:
 
 .. code-block:: console
 
@@ -48,55 +157,45 @@ You should make sure you have a recent version of pip installed, at the very lea
     [...]
     Successfully installed pip-9.0.1
 
-Once you have confirmed pip is installed, you need to modify the config file so it will work with MindMeld's private Python Package Index (PyPI). On Mac OS X the pip config file is located at ``~/.pip/pip.conf``. You can read more about configuring pip on your platform, including where config files are located in the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
+MindMeld Workbench is not publicly available, and can only be installed from MindMeld's private Python
+Package Index (PyPI). Once you have confirmed pip is installed, you need to configure it so that it
+will work with the MindMeld PyPI. On Mac OS X the pip config file is located at ``~/.pip/pip.conf``.
+You can read more about configuring pip on your platform, including where config files are located
+in the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
 
-MindMeld's private Python Package Index is hosted at https://pypi.mindmeld.com/simple/. In order to access it you will need to authenticate using your username and password. Add the following lines to your pip config file.
+The MindMeld PyPI is hosted at https://pypi.mindmeld.com/simple/. In order to access it you will
+need to authenticate using your username and password. Add the following lines to your pip
+config file.
 
 .. code-block:: text
 
   [global]
   extra-index-url = https://username:password@pypi.mindmeld.com/simple/
 
-
 Install Workbench
-~~~~~~~~~~~~~~~~~
+-----------------
 
-Now that your environment is set up, you can install MindMeld Workbench just as you would any other Python package. This may take a few minutes if some of workbench's larger dependencies such as `NumPy <http://www.numpy.org>`_, `SciPy <http://www.scipy.org>`_, and `scikit-learn <http://scikit-learn.org/>`_ have not previously been installed.
-
+Now that your environment is set up, you can install MindMeld Workbench just as you would any other
+Python package. This may take a few minutes if some of workbench's larger dependencies such as
+`NumPy <http://www.numpy.org>`_, `SciPy <http://www.scipy.org>`_, and
+`scikit-learn <http://scikit-learn.org/>`_ have not previously been installed.
 
 .. code-block:: console
 
   $ pip install mmworkbench
 
-You can check that installation was successful if the following command returns no error:
+If the following command returns no error, the installation was successful:
 
 .. code-block:: console
 
     $ mmworkbench
-    Usage: mmworkbench [OPTIONS] COMMAND [ARGS]...
-
-      Command line interface for mmworkbench.
-
-    Options:
-      -V, --version        Show the version and exit.
-      -v, --verbosity LVL  Either CRITICAL, ERROR, WARNING, INFO or DEBUG
-      -h, --help           Show this message and exit.
-
-    Commands:
-      blueprint
-      build         Builds the app with default config
-      clean         Delete all built data, undoing `build`
-      converse      Starts a conversation with the app
-      create-index  Create a new question answerer index
-      load-index    Load data into a question answerer index
-      num-parse     Starts or stops the numerical parser service
-      run           Starts the workbench service
-
 
 Install Jupyter Notebook (Optional)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
-The recommended way of interacting with Workbench is via `Jupyter Notebook <http://jupyter.org/>`_, an open-source web application that allows you to create and share documents with code, visualizations, and explanatory text. You can install Jupyter using the following command.
+The recommended way of interacting with Workbench is via `Jupyter Notebook <http://jupyter.org/>`_,
+an open-source web application that allows you to create and share documents with code,
+visualizations, and explanatory text. You can install Jupyter using the following command.
 
 .. code-block:: console
 
@@ -109,34 +208,34 @@ Next, you can confirm the installation was successful using the following comman
 
   $ jupyter notebook
 
-**TODO: Add more detail on benefits of Jupyter Notebook**
-
-
 Begin a New Project
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
-**TODO: Revisit this section**
+To begin a new project, you can use workbench's built-in blueprint functionality. There is a
+``template`` blueprint which will create a new app with the basic skeleton, ready for you to extend.
 
-To begin a project, the first step is to create your application's root directory.
-
-.. code-block:: console
-
-    $ export WB_APP_ROOT="$HOME/my_app"
-    $ mkdir -p $WB_APP_ROOT
-    $ cd $WB_APP_ROOT
-
-Your new project is now empty. The fastest way to set up the directory structure and data files for your project is to use one of Workbench's pre-configured blueprint applications. To set up a basic application skeleton, you can use the ``blueprint()`` method to set up a baseline configuration:
+The blueprint utility is available via the command line or from the python shell.
 
 .. code-block:: console
+    :caption: Console
 
-    $ mmworkbench blueprint baseline
+    $ mmworkbench blueprint template my_first_app
 
-Workbench provides several different blueprint applications to support many common use cases for converational applications.
+
+.. code-block:: python
+    :caption: Python shell
+
+    >>> import mmworkbench
+    >>> mmworkbench.blueprint('template', 'my_first_app')
+
+Workbench provides several different blueprint applications to support many common use cases for
+conversational applications.
 
 Now you can fire up a Jupyter interactive workbook by typing:
 
 .. code-block:: console
 
+    $ cd my_first_app
     $ jupyter notebook
     [I 13:00 NotebookApp] Writing notebook server cookie secret to [...]
     [I 13:00 NotebookApp] Serving notebooks from local directory: [...]
@@ -145,9 +244,12 @@ Now you can fire up a Jupyter interactive workbook by typing:
     [I 13:00 NotebookApp] Use Control-C to stop this server and shut down all kernels [...]
     [...]
 
-A Jupyter server is now running in your terminal, listening to port 8888. You can visit this server by opening your Web browser to the URL displayed in the console readout (this usually happens automatically when the server starts). You should see your workspace root directory populated with the directories and files of your application blueprint.
+A Jupyter notebook server is now running in your terminal, listening to port 8888. You can visit
+this server by opening your Web browser to the URL displayed in the console readout (this usually
+happens automatically when the server starts). You should see your workspace root directory
+populated with the directories and files of your application blueprint.
 
-.. image:: images/jupyter1.png
+.. image:: ../images/jupyter1.png
     :width: 700px
     :align: center
 
@@ -156,38 +258,3 @@ Now create a new Python notebook by clicking on the “New” button and selecti
 A notebook contains a list of cells. Each cell can contain executable code or formatted text. Right now the notebook contains only one empty code cell, labeled “In [1]:”. Try typing print("Hello world!") in the cell, and click on the play button or type Shift-Enter. This sends the current cell to this notebook’s python kernel, which runs it and returns the output. The result is displayed below the cell, and since we reached the end of the notebook, a new cell is automatically created. Go through the User Interface Tour from Jupyter’s Help menu to learn the basics.
 
 You are now ready to begin training and evaluating machine learning models for your application. The following sections describe the modules and functionality available in Workbench to build and evaluate state-of-the-art models to understand language, answer questions and power a conversational interface.
-
-Using a Virtual Environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**TODO: Revisit this section**
-
-If you would like to work in an isolated environment (which is strongly recommended so you can work on different projects without having conflicting library versions), you should install virtualenv by running the following pip command:
-
-.. code-block:: console
-
-    $ pip install --user --upgrade virtualenv
-    Collecting virtualenv
-    [...]
-    Successfully installed virtualenv
-
-Now you can create an isolated python environment by typing:
-
-.. code-block:: console
-
-    $ cd $WB_APP_ROOT
-    $ virtualenv env
-    Using base prefix '[...]'
-    New python executable in [...]/env/bin/python3.5
-    Also creating executable in [...]/env/bin/python
-    Installing setuptools, pip, wheel...done.
-
-Now every time you want to activate this environment, just open a terminal and type:
-
-.. code-block:: console
-
-    $ cd $WB_APP_ROOT
-    $ source env/bin/activate
-
-While the environment is active, any package you install using pip will be installed in this isolated environment, and python will only have access to these packages (if you also want access to the system’s site packages, you should create the environment using virtualenv’s --system-site-packages option). Check out virtualenv’s documentation for more information.
-
