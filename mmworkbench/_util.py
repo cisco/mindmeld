@@ -158,6 +158,18 @@ class Blueprint(object):
 
     @staticmethod
     def _fetch_archive(name, archive_type):
+        """Fetches a blueprint archive from S3.
+
+        Args:
+            name (str): The name of the blueprint.
+            archive_type (str): The type or the archive. Can be 'app' or 'kb'.
+
+        Returns:
+            str: The path of the local archive after it is downloaded.
+
+        Raises:
+            EnvironmentError: When AWS credentials are not available
+        """
         cache_dir = path.get_cached_blueprint_path(name)
         try:
             os.makedirs(cache_dir)
