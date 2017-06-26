@@ -95,6 +95,10 @@ class IntentClassifier(Classifier):
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
+        if not self._model:
+            logger.warning('Model is not available. Please use the fit command correctly to generate the model.')
+            return
+
         gazetteers = self._resource_loader.get_gazetteers()
         self._model.register_resources(gazetteers=gazetteers)
         queries, classes = self._get_queries_and_labels(queries, label_set='heldout')
@@ -111,6 +115,6 @@ class IntentClassifier(Classifier):
                 the default training set will be loaded.
         """
         if not queries:
-            query_tree = self._resource_loader.get_labeled_queries(label_set=label_set)
+            query_tree = self._resource_loader.get_labeled_queries(label_set=label_set, domain=self.domain)
             queries = self._resource_loader.flatten_query_tree(query_tree)
         return list(zip(*[(q.query, q.intent) for q in queries]))
