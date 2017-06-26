@@ -96,7 +96,8 @@ class IntentClassifier(Classifier):
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
         if not self._model:
-            logger.warning('Model is not available. Please use the fit command correctly to generate the model.')
+            logger.warning('Model does not exist. You must fit or load the model before '
+                           'running evaluate.')
             return
 
         gazetteers = self._resource_loader.get_gazetteers()
