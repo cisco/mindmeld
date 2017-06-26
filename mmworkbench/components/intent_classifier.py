@@ -116,6 +116,7 @@ class IntentClassifier(Classifier):
                 the default training set will be loaded.
         """
         if not queries:
-            query_tree = self._resource_loader.get_labeled_queries(label_set=label_set, domain=self.domain)
+            query_tree = self._resource_loader.get_labeled_queries(
+                label_set=label_set, domain=self.domain)
             queries = self._resource_loader.flatten_query_tree(query_tree)
         return list(zip(*[(q.query, q.intent) for q in queries]))
