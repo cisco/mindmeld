@@ -106,9 +106,13 @@ def resolve_system_entity(query, entity_type, span):
     Raises:
         SystemEntityResolutionError:
     """
-    for candidate in query.get_system_entity_candidates(set((entity_type,))):
-        if candidate.span == span and candidate.entity.type == entity_type:
-            return candidate
+    alternates = []
+    for candidate in query.system_entity_candidates:
+        if candidate.span == span:
+            if candidate.entity.type == entity_type:
+                return candidate
+            else:
+                alternates.append(candidate)
 
     # If no matching candidate was found, try parsing only this entity
     for raw_candidate in parse_numerics(span.slice(query.text))['data']:
@@ -118,8 +122,13 @@ def resolve_system_entity(query, entity_type, span):
         if candidate.span == span and candidate.entity.type == entity_type:
             return candidate
 
-    msg = 'Unable to resolve system entity of type {!r} for {!r}'
-    raise SystemEntityResolutionError(msg.format(entity_type, span.slice(query.text)))
+    msg = 'Unable to resolve system entity of type {!r} for {!r}.'
+    msg = msg.format(entity_type, span.slice(query.text))
+    if alternates:
+        msg += ' Entities found for the following types {!r}'.format([a.entity.type
+                                                                      for a in alternates])
+
+    raise SystemEntityResolutionError(msg)
 
 
 def _mallard_item_to_query_entity(query, item, offset=0):
