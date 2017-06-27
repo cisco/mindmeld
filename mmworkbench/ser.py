@@ -26,12 +26,33 @@ def get_candidates(query, entity_types=None, span=None):
         entity_types (list of str): The entity types to consider
 
     Returns:
-        list of QueryEntity: The system entities found in this
+        list of QueryEntity: The system entities found in the query
     """
 
     dims = _dimensions_from_entity_types(entity_types)
     response = parse_numerics(query.text, dimensions=dims)
-    return [_mallard_item_to_entity(query, item) for item in response['data']]
+    return [_mallard_item_to_query_entity(query, item) for item in response['data']]
+
+
+def get_candidates_for_text(text, entity_types=None, span=None):
+    """Identifies candidate system entities in the given text
+
+    Args:
+        text (str): The text to examine
+        entity_types (list of str): The entity types to consider
+
+    Returns:
+        list of dict: The system entities found in the text
+    """
+
+    dims = _dimensions_from_entity_types(entity_types)
+    response = parse_numerics(text, dimensions=dims)
+    items = []
+    for item in response['data']:
+        entity = _mallard_item_to_entity(item)
+        item['entity_type'] = entity.type
+        items.append(item)
+    return items
 
 
 def parse_numerics(sentence, dimensions=None, language='eng', reference_time=''):
@@ -52,7 +73,7 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
         'language': language
     }
     if dimensions is not None:
-        data["dimensions"] = dimensions
+        data['dimensions'] = dimensions
     if reference_time:
         data['reference_time'] = reference_time
 
@@ -91,7 +112,8 @@ def resolve_system_entity(query, entity_type, span):
 
     # If no matching candidate was found, try parsing only this entity
     for raw_candidate in parse_numerics(span.slice(query.text))['data']:
-        candidate = _mallard_item_to_entity(query, raw_candidate, offset=span.start)
+        candidate = _mallard_item_to_query_entity(query, raw_candidate, offset=span.start)
+
         # If the candidate matches the entire entity, return it
         if candidate.span == span and candidate.entity.type == entity_type:
             return candidate
@@ -100,7 +122,7 @@ def resolve_system_entity(query, entity_type, span):
     raise SystemEntityResolutionError(msg.format(entity_type, span.slice(query.text)))
 
 
-def _mallard_item_to_entity(query, item, offset=0):
+def _mallard_item_to_query_entity(query, item, offset=0):
     """Converts an item from mallard into a QueryEntity
 
     Args:
@@ -112,10 +134,25 @@ def _mallard_item_to_entity(query, item, offset=0):
     Returns:
         QueryEntity: The query entity described by the mallard item
     """
-    value = {}
+    start = int(item['entity']['start']) + offset
+    end = int(item['entity']['end']) - 1 + offset
+    entity = _mallard_item_to_entity(item)
+    return QueryEntity.from_query(query, Span(start, end), entity=entity)
 
-    start = int(item['entity']['start'])
-    end = int(item['entity']['end']) - 1
+
+def _mallard_item_to_entity(item):
+    """Converts an item from mallard into an Entity
+
+    Args:
+        query (Query): The query
+        item (dict): The mallard item
+        offset (int, optional): The offset into the query that the item's
+            indexing begins
+
+    Returns:
+        Entity: The entity described by the mallard item
+    """
+    value = {}
 
     confidence = -float(item['likelihood']) * int(item['rule_count'])
 
@@ -152,13 +189,12 @@ def _mallard_item_to_entity(query, item, offset=0):
         value['value'] = str(item['value'][0])
     entity_type = "sys_{}".format(num_type)
 
-    entity = Entity(item['entity']['text'], entity_type, value=value, confidence=confidence)
-    return QueryEntity.from_query(query, Span(start + offset, end + offset), entity=entity)
+    return Entity(item['entity']['text'], entity_type, value=value, confidence=confidence)
 
 
 def _dimensions_from_entity_types(entity_types):
     entity_types = entity_types or []
     dims = [et.split('_')[1] for et in (entity_types or []) if et.startswith('sys_')]
-    if len(dims) == 0:
+    if not dims:
         dims = None
     return dims
