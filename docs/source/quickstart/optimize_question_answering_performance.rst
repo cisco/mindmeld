@@ -25,10 +25,8 @@ Assuming you have already created an index, such as ``stores``, and uploaded the
 
 .. code:: python
 
-  >>> import os
   >>> from mmworkbench.components import QuestionAnswerer
-  >>> app_path = os.getcwd()
-  >>> qa = QuestionAnswerer(app_path)
+  >>> qa = QuestionAnswerer(app_path='my_app')
   >>> stores = qa.get(index='stores')
   >>> stores[0]
   {
