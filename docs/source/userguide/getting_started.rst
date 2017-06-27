@@ -12,7 +12,7 @@ Obtain a token
 MindMeld Workbench is a commercial software product which requires a license to use. For more
 information or to inquire about obtaining access to MindMeld Workbench, please
 `contact MindMeld <mailto:info@mindmeld.com>`_. Once approved, you will receive credentials which
-can be used to access install MindMeld Workbench and retrieve related files.
+can be used to install MindMeld Workbench and retrieve related files.
 
 Install Java 8
 --------------
@@ -66,6 +66,13 @@ the ``MM_ES_HOST`` environment variable accordingly. Add this to your shell's pr
 .. code-block:: bash
 
     export MM_ES_HOST="my-es-host.com"
+
+Before attempting use workbench, make sure to re-source so the environment variable is set.
+
+.. code-block:: console
+
+    source ~/.bash_profile
+
 
 Install Python
 --------------
@@ -219,14 +226,14 @@ The blueprint utility is available via the command line or from the python shell
 .. code-block:: console
     :caption: Console
 
-    $ mmworkbench blueprint template my_first_app
+    $ mmworkbench blueprint template my_app
 
 
 .. code-block:: python
     :caption: Python shell
 
     >>> import mmworkbench
-    >>> mmworkbench.blueprint('template', 'my_first_app')
+    >>> mmworkbench.blueprint('template', 'my_app')
 
 Workbench provides several different blueprint applications to support many common use cases for
 conversational applications.
@@ -235,7 +242,7 @@ Now you can fire up a Jupyter interactive workbook by typing:
 
 .. code-block:: console
 
-    $ cd my_first_app
+    $ cd my_app
     $ jupyter notebook
     [I 13:00 NotebookApp] Writing notebook server cookie secret to [...]
     [I 13:00 NotebookApp] Serving notebooks from local directory: [...]
@@ -257,4 +264,4 @@ Now create a new Python notebook by clicking on the “New” button and selecti
 
 A notebook contains a list of cells. Each cell can contain executable code or formatted text. Right now the notebook contains only one empty code cell, labeled “In [1]:”. Try typing print("Hello world!") in the cell, and click on the play button or type Shift-Enter. This sends the current cell to this notebook’s python kernel, which runs it and returns the output. The result is displayed below the cell, and since we reached the end of the notebook, a new cell is automatically created. Go through the User Interface Tour from Jupyter’s Help menu to learn the basics.
 
-You are now ready to begin training and evaluating machine learning models for your application. The following sections describe the modules and functionality available in Workbench to build and evaluate state-of-the-art models to understand language, answer questions and power a conversational interface.
+You are now ready to begin training and evaluating machine learning models for your application. The following sections describe the modules and functionality available in Workbench to build and evaluate state-of-the-art models to understand language, answer questions and power an advanced conversational interface.
