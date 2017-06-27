@@ -51,7 +51,7 @@ Similarly, to retrieve store locations on Market Street, you could use something
     "phone_number": "(+1) 650-555-4500"
   }
 
-By default, the :keyword:`get()` method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity. Each result includes the relevance score in the ``score`` property.
+By default, the :keyword:`get()` method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity.
 
 Proximity-Based Ranking
 ~~~~~~~~~~~~~~~~~~~~~~~
