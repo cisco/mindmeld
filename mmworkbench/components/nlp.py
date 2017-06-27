@@ -448,8 +448,9 @@ class EntityProcessor(Processor):
         self._check_ready()
         entity = entities[entity_index]
 
-        # Classify role
-        entity.entity.role = self.role_classifier.predict(query, entities, entity_index)
+        if self.role_classifier.roles:
+            # Only run role classifier if there are roles!
+            entity.entity.role = self.role_classifier.predict(query, entities, entity_index)
 
         # Resolve entity
         entity.entity.value = self.entity_resolver.predict(entity.entity)
