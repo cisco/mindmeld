@@ -83,6 +83,9 @@ class DomainClassifier(Classifier):
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
+        if not self._model:
+            logger.error('You must fit or load the model before running evaluate.')
+            return
         gazetteers = self._resource_loader.get_gazetteers()
         self._model.register_resources(gazetteers=gazetteers)
         queries, classes = self._get_queries_and_labels(queries, label_set='heldout')

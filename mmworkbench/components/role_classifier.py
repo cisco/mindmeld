@@ -182,7 +182,8 @@ class RoleClassifier(Classifier):
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
-        if self._model is None:
+        if not self._model:
+            logger.error('You must fit or load the model before running evaluate.')
             return
 
         gazetteers = self._resource_loader.get_gazetteers()
