@@ -3,9 +3,10 @@
 
 # You can set these variables from the command line.
 # SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-PAPER         =
-BUILDDIR      = build
+SPHINXBUILD     = sphinx-build
+PAPER           =
+BUILDDIR        = build
+SPHINXAUTOBUILD = sphinx-autobuild
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -18,6 +19,7 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html       to make standalone HTML files"
+	@echo "  auto-html  to make standalone HTML files, and auto refresh them as changes occur"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
 	@echo "  pickle     to make pickle files"
@@ -51,6 +53,12 @@ clean:
 .PHONY: html
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+.PHONY: auto-html
+auto-html:
+	$(SPHINXAUTOBUILD) -B -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
