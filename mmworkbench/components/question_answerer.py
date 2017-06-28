@@ -157,16 +157,16 @@ class QuestionAnswerer(object):
             connect_timeout (int, optional): The amount of time for a connection to the
             Elasticsearch host
         """
-        with open(data_file) as data_fp:
-            data = json.load(data_fp)
 
-        def _doc_generator(docs):
-            for doc in docs:
-                base = {'_id': doc['id']}
-                base.update(doc)
-                yield base
+        def _doc_generator(data_file):
+            with open(data_file) as data_fp:
+                for line in data_fp:
+                    doc = json.loads(line)
+                    base = {'_id': doc['id']}
+                    base.update(doc)
+                    yield base
 
-        load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_QA_MAPPING, DOC_TYPE,
+        load_index(app_name, index_name, data_file, _doc_generator, DEFAULT_ES_QA_MAPPING, DOC_TYPE,
                    es_host, es_client, connect_timeout=connect_timeout)
 
 

@@ -89,7 +89,7 @@ def delete_index(app_name, index_name, es_host=None, es_client=None, connect_tim
         raise KnowledgeBaseConnectionError()
 
 
-def load_index(app_name, index_name, data, doc_generator, mapping, doc_type, es_host=None,
+def load_index(app_name, index_name, data_file, doc_generator, mapping, doc_type, es_host=None,
                es_client=None, connect_timeout=2):
     """Loads documents from data into the specified index. If an index with the specified name
     doesn't exist, a new index with that name will be created.
@@ -97,8 +97,8 @@ def load_index(app_name, index_name, data, doc_generator, mapping, doc_type, es_
     Args:
         app_name (str): The name of the app
         index_name (str): The name of the new index to be created
-        data (list): A list of the documents loaded from disk to be imported into the index
-        doc_generator (func): A generator which processes the loaded documents and yeilds them in
+        data_file (str): The path to the data file containing the documents to be imported
+        doc_generator (func): A generator which processes the loaded documents and yields them in
                               the correct format to insert into Elasticsearch
         mapping (str): The Elasticsearch index mapping to use
         doc_type (str): The document type
@@ -121,7 +121,7 @@ def load_index(app_name, index_name, data, doc_generator, mapping, doc_type, es_
             create_index(app_name, index_name, mapping, es_host=es_host, es_client=es_client)
 
         count = 0
-        for okay, result in streaming_bulk(es_client, doc_generator(data),
+        for okay, result in streaming_bulk(es_client, doc_generator(data_file),
                                            index=scoped_index_name, doc_type=doc_type,
                                            chunk_size=50):
 
