@@ -63,6 +63,7 @@ target/
 
 # PyCharm
 .idea/
+.iml
 
 # Workbench Models
 .generated/
