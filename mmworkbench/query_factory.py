@@ -45,7 +45,7 @@ class QueryFactory(object):
         else:
             processed_text = raw_text
 
-        normalized_tokens = self.tokenizer.tokenize(processed_text, False)
+        normalized_tokens = self.tokenizer.tokenize(processed_text)
         normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
 
         # create normalized maps
