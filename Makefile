@@ -81,8 +81,12 @@ endif
 	docs/scripts/process_source_files.sh
 	$(BROWSER) docs/build/html/index.html
 
-servedocs: docs ## compile the docs watching for changes
-	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
+servedocs: ## compile the docs watching for changes
+ifeq "$(MM_BRANCH)" "master"
+	SPHINXOPTS="-t public" $(MAKE) -C docs auto-html
+else
+	SPHINXOPTS="-t private" $(MAKE) -C docs auto-html
+endif
 
 # release: clean ## package and upload a release
 	# python setup.py sdist upload
