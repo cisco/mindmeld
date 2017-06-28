@@ -22,7 +22,7 @@ blueprint
 
 |
 
-query
+query / request
   A user's spoken or typed natural language input to the conversational app. A Workbench app uses statistical `natural language processing <https://en.wikipedia.org/wiki/Natural_language_processing>`_ models to understand the query and determine what the user wants.
 
 |
@@ -84,23 +84,13 @@ entity group
 
 |
 
-head
+head / parent
   The principal entity being described in an entity group. For instance, the entity 'squishee' is the head of the group {'one', 'large', 'squishee'}. Similarly, 'donuts' heads the entity group {'a dozen', 'donuts'}. See also, `head (linguistics) <https://en.wikipedia.org/wiki/Head_(linguistics)>`_.
 
 |
 
-dependent
+dependent / child
   An entity that describes or `modifies <https://en.wikipedia.org/wiki/Grammatical_modifier>`_ the principal entity (head) in an entity group. For instance, the entities 'one' and 'large' are the dependents of the head entity 'squishee' in the group {'one', 'large', 'squishee'}. Similarly, 'a dozen' depends on the head 'donuts' in the entity group {'a dozen', 'donuts'}. See also, `dependent (linguistics) <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_.
-
-|
-
-parent
-  An alternate term for the **head** in an entity group.
-
-|
-
-child
-  An alternate term for a **dependent** in an entity group.
 
 |
 
@@ -117,28 +107,18 @@ natural language response (NLR)
 
 |
 
-template
-  See **natural language response**.
-
-|
-
-slot
-  See **natural language response**.
-
-|
-
 conversational turn
   A single instance of either dialogue participant (the user or the app) communicating with the other. The dialogue between a user and the app proceeds as a series of back and forth communication with each party `taking turns <https://en.wikipedia.org/wiki/Turn-taking>`_ to advance the conversation.
 
 |
 
 dialogue state
-  The state that the application is in at each step of the dialogue. The app transitions from one dialogue state to another with every turn in the conversation. Each dialogue state has a corresponding **dialogue state handler** that determines the appropriate form of response, and the necessary logic to be invoked to determine the content of the response.
+  The state that the application is in at each step of the dialogue. The app transitions from one dialogue state to another with every turn in the conversation.
 
 |
 
 dialogue state handler
-  See **dialogue state**.
+  The code to be executed when the app is in a particular dialogue state. It determines the appropriate form of response for that state, and invokes any logic necessary to determine the content of the response.
 
 |
 
