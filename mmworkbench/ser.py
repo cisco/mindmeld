@@ -31,7 +31,8 @@ def get_candidates(query, entity_types=None, span=None):
 
     dims = _dimensions_from_entity_types(entity_types)
     response = parse_numerics(query.text, dimensions=dims)
-    return [_mallard_item_to_query_entity(query, item) for item in response['data']]
+    return [e for e in [_mallard_item_to_query_entity(query, item) for item in response['data']]
+            if entity_types is None or e.entity.type in entity_types]
 
 
 def get_candidates_for_text(text, entity_types=None, span=None):
@@ -50,8 +51,9 @@ def get_candidates_for_text(text, entity_types=None, span=None):
     items = []
     for item in response['data']:
         entity = _mallard_item_to_entity(item)
-        item['entity_type'] = entity.type
-        items.append(item)
+        if entity_types is None or entity.type in entity_types:
+            item['entity_type'] = entity.type
+            items.append(item)
     return items
 
 
@@ -203,7 +205,13 @@ def _mallard_item_to_entity(item):
 
 def _dimensions_from_entity_types(entity_types):
     entity_types = entity_types or []
-    dims = [et.split('_')[1] for et in (entity_types or []) if et.startswith('sys_')]
+    dims = set()
+    for entity_type in entity_types:
+        if entity_type == 'sys_interval':
+            dims.add('time')
+        if entity_type.startswith('sys_'):
+            dims.add(entity_type.split('_')[1])
+
     if not dims:
         dims = None
     return dims
