@@ -24,7 +24,7 @@ The power of conversational applications lies in providing minimal constraints o
     :width: 700px
     :align: center
 
-For our example, we need to define the dialogue states that the scripted conversational interaction in :doc:`Step 2 <script_interactions>` requires. To capture the functionality we envision, we need four different dialogue states: ``welcome``, ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``, as shown in the diagram below.
+For our example, we need to define the dialogue states that the scripted conversational interaction in :doc:`Step 2 <02_script_interactions>` requires. To capture the functionality we envision, we need four different dialogue states: ``welcome``, ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``, as shown in the diagram below.
 
 .. image:: /images/quickstart_dialogue_states.png
     :width: 700px
@@ -63,14 +63,14 @@ The above code snippet illustrates the conventions for implementing dialogue sta
    1. Import the Application class from the MindMeld Workbench package.
    2. Define an Application instance to serve as the parent container for the application.
    3. Using the :keyword:`@app.handle()` decorator, define a pattern which, when matched, invokes the associated handler function.
-   4. Specify the handler function :keyword:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <script_interactions>`. For now, we are responding with a simple "Hello".
+   4. Specify the handler function :keyword:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <02_script_interactions>`. For now, we are responding with a simple "Hello".
 
 The patterns and associated handlers which you enumerate using this straighforward application structure will comprise the core interaction logic for your application.
 
 Implement the Dialogue State Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We have already defined the dialogue handlers that the interaction in :doc:`Step 2 <script_interactions>` requires.
+We have already defined the dialogue handlers that the interaction in :doc:`Step 2 <02_script_interactions>` requires.
 
 Now, to finish implementing the dialogue handlers, we need to add the desired response for each dialogue state. As we do so, we will learn about capabilities of Workbench which are explained further in the :ref:`User Guide <userguide>`.
 

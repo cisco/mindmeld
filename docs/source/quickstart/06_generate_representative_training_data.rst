@@ -16,7 +16,7 @@ Six of the core supervised learning components in MindMeld Workbench rely on tra
   - Entity Resolution
   - Question Answerer Ranking
 
-As described in :doc:`Step 3 <define_the_hierarchy>`, the structure of your application's root directory in Workbench organizes the training data files. For our example Kwik-E-Mart store information application, the application directory is shown below.
+As described in :doc:`Step 3 <03_define_the_hierarchy>`, the structure of your application's root directory in Workbench organizes the training data files. For our example Kwik-E-Mart store information application, the application directory is shown below.
 
 .. image:: /images/directory3.png
     :width: 400px
@@ -71,7 +71,7 @@ The :keyword:`exit_queries.txt` file captures many of the different ways a user 
   sayonara
   ...
 
-The :keyword:`get_store_hours_queries.txt` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``date``, as you might recall from :doc:`Step 3 <define_the_hierarchy>`.
+The :keyword:`get_store_hours_queries.txt` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``date``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
 
 .. code-block:: text
 

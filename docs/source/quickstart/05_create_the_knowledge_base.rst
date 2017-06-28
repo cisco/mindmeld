@@ -16,7 +16,7 @@ MindMeld Workbench makes it straightforward to leverage a custom knowledge base 
 
 Creating the knowledge base is the first step in utilizing the Question Answerer capabilities in Workbench. The knowledge base contains one or more indexes. Each index holds a collection of objects of the same type. For example, one index may contain a collection of retail store locations and another index might contain a collection of products in a product catalog. Each index is built using data from one or more JSON files. These JSON data files can be stored either locally or remotely, for example in an `AWS S3 <https://aws.amazon.com/s3/>`_ bucket.
 
-As shown in :doc:`Step 4 <define_the_dialogue_handlers>`, our example application provides information about Kwik-E-Mart stores, relying on a knowledge base which contains information about all retail store locations. In our example, let's assume that each store object contains the following attributes:
+As shown in :doc:`Step 4 <04_define_the_dialogue_handlers>`, our example application provides information about Kwik-E-Mart stores, relying on a knowledge base which contains information about all retail store locations. In our example, let's assume that each store object contains the following attributes:
 
     * ``store_name``
     * ``open_time``

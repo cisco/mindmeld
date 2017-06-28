@@ -3,7 +3,7 @@ Step 7: Train the Natural Language Processing Classifiers
 
 The Natural Language Processor (NLP) in Workbench is tasked with understanding the user's natural language input. It analyzes the input using a hierarchy of classification models. Each model assists the next tier of models by narrowing the problem scope, or in other words successively narrowing down the 'solution space.'
 
-As introduced in :doc:`Step 3 </define_the_hierarchy>`, Workbench applies four layers of classifiers in the following order:
+As introduced in :doc:`Step 3 <03_define_the_hierarchy>`, Workbench applies four layers of classifiers in the following order:
 
 #. **Domain Classifier** classifies input into one of a pre-defined set of conversational domains. Only necessary for apps that handle conversations across varied topics, each with its own specialized vocabulary.
 
@@ -13,7 +13,7 @@ As introduced in :doc:`Step 3 </define_the_hierarchy>`, Workbench applies four l
 
 #. **Role Classifiers** assign a differentiating label, called a *role*, to the extracted entities. This level of categorization is only necessary where an entity of a particular type can have multiple meanings depending on the context.
 
-To train the NLP classifiers for our Kwik-E-Mart store information app, we must first gather the necessary training data as described in :doc:`Step 6 </generate_representative_training_data>`. Once the data is ready, we open a Python shell and start building the components of our natural language processor.
+To train the NLP classifiers for our Kwik-E-Mart store information app, we must first gather the necessary training data as described in :doc:`Step 6 <06_generate_representative_training_data>`. Once the data is ready, we open a Python shell and start building the components of our natural language processor.
 
 .. code-block:: console
 
@@ -134,8 +134,8 @@ Finally, we fetch the :keyword:`intent_classifier` for the domain we are interes
 
   >>> clf = nlp.domains['store_info'].intent_classifier
   >>> clf.fit(model_settings={'classifier_type': 'logreg'},
-  ...         features=feature_dict, 
-  ...         param_selection=hyperparam_settings) 
+  ...         features=feature_dict,
+  ...         param_selection=hyperparam_settings)
 
 
 We have now successfully trained an intent classifier for the ``store_info`` domain. If our app had more domains, we would follow the same procedure for those other domains. We can test the trained intent model on a new query by calling its :keyword:`predict()` and :keyword:`predict_proba()` methods.
@@ -221,7 +221,7 @@ Next, we get the entity recognizer for the desired intent and invoke its :keywor
 
   >>> recognizer = nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer
   >>> recognizer.fit(model_settings={'classifier_type': 'memm'},
-  ...                features=feature_dict, 
+  ...                features=feature_dict,
   ...                param_selection=hyperparam_settings)
   >>> recognizer.dump('models/experimentation/entity_model_memm.pkl')
 
@@ -245,7 +245,7 @@ Let us see how Workbench can be used for training a role classifier for the ``sy
 
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('my_app')
-  >>> get_hours_intent = nlp.domains['store_info'].intents['get_store_hours'] 
+  >>> get_hours_intent = nlp.domains['store_info'].intents['get_store_hours']
   >>> clf = get_hours_intent.entities['sys_time'].role_classifier
   >>> clf.fit()
 
@@ -266,7 +266,7 @@ Entity Resolution
 
 The entity resolver component of MindMeld Workbench maps each identified entity to a canonical value. For example, if your application is used for browsing TV shows, you may want to map both entity strings `funny` and `hilarious` to a pre-defined genre code like `Comedy`. Similarly, in a music app, you may want to resolve both `Elvis` and `The King` to the artist `Elvis Presley (ID=20192)`, while making sure not to get confused by `Elvis Costello (ID=139028)`. Entity resolution can be straightforward for some classes of entities. For others, it can be complex enough to constitute the dominant factor limiting the overall accuracy of your application.
 
-MindMeld Workbench provides advanced capabilities for building a state-of-the-art entity resolver. As discussed in :doc:`Step 6 </generate_representative_training_data>`, each entity type can be associated with an optional entity mapping file. This file specifies, for each canonical concept, the alternate names or synonyms with which a user may refer to this concept. In the absence of an entity mapping file, the entity resolver cannot resolve the entity. Instead, it logs a warning and skips adding a :keyword:`value` attribute to the entity. For example, the following code illustrates the output of the natural language processor when an entity mapping data file is absent for the ``store_name`` entity:
+MindMeld Workbench provides advanced capabilities for building a state-of-the-art entity resolver. As discussed in :doc:`Step 6 <06_generate_representative_training_data>`, each entity type can be associated with an optional entity mapping file. This file specifies, for each canonical concept, the alternate names or synonyms with which a user may refer to this concept. In the absence of an entity mapping file, the entity resolver cannot resolve the entity. Instead, it logs a warning and skips adding a :keyword:`value` attribute to the entity. For example, the following code illustrates the output of the natural language processor when an entity mapping data file is absent for the ``store_name`` entity:
 
 .. code-block:: python
 
@@ -289,7 +289,7 @@ MindMeld Workbench provides advanced capabilities for building a state-of-the-ar
     'text': 'When does the one on elm open?'
   }
 
-If an entity mapping file is specified, as illustrated in :doc:`Step 6 </generate_representative_training_data>`, the entity resolver resolves the entity to a defined ID and canonical name. It assigns these to the :keyword:`value` attribute of the entity, in the form of an object. Then the output of the natural language processor could resemble the following.
+If an entity mapping file is specified, as illustrated in :doc:`Step 6 <06_generate_representative_training_data>`, the entity resolver resolves the entity to a defined ID and canonical name. It assigns these to the :keyword:`value` attribute of the entity, in the form of an object. Then the output of the natural language processor could resemble the following.
 
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('my_app')

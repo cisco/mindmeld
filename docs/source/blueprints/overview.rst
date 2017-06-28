@@ -9,7 +9,7 @@ The Workbench blueprints thus have a dual purpose:
 
   #. They provide a fast and easy way to bootstrap your app on Workbench for many typical use cases.
 
-In :doc:`Step 3 <../quickstart/define_the_hierarchy>` of the :ref:`Step-by-Step Guide <quickstart>`, we briefly saw how the :keyword:`Quick Start` blueprint could be used to quickly set up the Workbench app directory structure for our Kwik-E-Mart store information app. In addition to that example store assistant scenario, Workbench provides blueprints for a growing list of common use cases:
+In :doc:`Step 3 <../quickstart/03_define_the_hierarchy>` of the :ref:`Step-by-Step Guide <quickstart>`, we briefly saw how the :keyword:`Quick Start` blueprint could be used to quickly set up the Workbench app directory structure for our Kwik-E-Mart store information app. In addition to that example store assistant scenario, Workbench provides blueprints for a growing list of common use cases:
 
 == ===
 1  :doc:`Food Ordering <food_ordering>`

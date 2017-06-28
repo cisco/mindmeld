@@ -9,7 +9,7 @@ To model and understand natural language, every conversational application relie
 
 The topmost layer in the model hierarchy is the *domain classifier*. The domain classifier performs the first-pass categorization, assigning each incoming query into one of a set of pre-defined buckets or *domains*.
 
-For any given domain, there may be one or more intents, like "order drink" or "cancel order," which reflect what the user is trying to accomplish. You define the intents for your application by abstracting them from the dialogue states you scripted in :doc:`Step 2 </script_interactions>`. The *intent classifiers* predict which of the intents is expressed in a given request.
+For any given domain, there may be one or more intents, like "order drink" or "cancel order," which reflect what the user is trying to accomplish. You define the intents for your application by abstracting them from the dialogue states you scripted in :doc:`Step 2 <02_script_interactions>`. The *intent classifiers* predict which of the intents is expressed in a given request.
 
 Next, the *entity recognizers* discern the words and phrases that must be identified to understand and fulfill the request. These identified words and phrases are called *entities*, and each intent may have zero or more types of entities which must be recognized.
 

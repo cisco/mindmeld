@@ -39,17 +39,17 @@ Contents
    :caption: Step-by-Step Guide
    :name: quickstart
 
-   quickstart/overview
-   quickstart/select_the_right_use_case
-   quickstart/script_interactions
-   quickstart/define_the_hierarchy
-   quickstart/define_the_dialogue_handlers
-   quickstart/create_the_knowledge_base
-   quickstart/generate_representative_training_data
-   quickstart/train_the_natural_language_processing_classifiers
-   quickstart/configure_the_language_parser
-   quickstart/optimize_question_answering_performance
-   quickstart/deploy_to_production
+   quickstart/00_overview
+   quickstart/01_select_the_right_use_case
+   quickstart/02_script_interactions
+   quickstart/03_define_the_hierarchy
+   quickstart/04_define_the_dialogue_handlers
+   quickstart/05_create_the_knowledge_base
+   quickstart/06_generate_representative_training_data
+   quickstart/07_train_the_natural_language_processing_classifiers
+   quickstart/08_configure_the_language_parser
+   quickstart/09_optimize_question_answering_performance
+   quickstart/10_deploy_to_production
 
 
 .. toctree::
