@@ -153,7 +153,7 @@ def _process_annotations(query, annotations):
                     pass
                 except SystemEntityResolutionError as error:
                     msg = "Unable to load query: {}"
-                    logger.error(msg.format(error))
+                    logger.warn(msg.format(error))
                     return
             else:
                 try:
