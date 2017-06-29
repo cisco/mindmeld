@@ -117,9 +117,11 @@ def resolve_system_entity(query, entity_type, span):
                 alternates.append(candidate)
 
     mallard_candidates = parse_numerics(span.slice(query.text))['data']
-    mallard_text_to_candidate = {}
+    mallard_text_val_to_candidate = {}
 
     # If no matching candidate was found, try parsing only this entity
+    # Refer to this ticket for how we prioritize mallard candidates:
+    # https://mindmeldinc.atlassian.net/browse/WB3-54
     for raw_candidate in mallard_candidates:
         candidate = _mallard_item_to_query_entity(query, raw_candidate, offset=span.start)
 
@@ -128,16 +130,24 @@ def resolve_system_entity(query, entity_type, span):
             if candidate.span == span:
                 return candidate
             else:
-                mallard_text_to_candidate.setdefault(candidate.text, []).append(candidate)
+                mallard_text_val_to_candidate.setdefault(candidate.text, []).append(candidate)
 
-    best_mallard_candidate_names = list(mallard_text_to_candidate.keys())
+    # Sort mallard matching candidates by the length of the value
+    best_mallard_candidate_names = list(mallard_text_val_to_candidate.keys())
+    best_mallard_candidate_names.sort(key=len, reverse=True)
 
     if len(best_mallard_candidate_names) != 0:
-        best_mallard_candidate_names.sort(key=len, reverse=True)
+
+        default_mallard_candidate = None
         longest_matched_mallard_candidate = best_mallard_candidate_names[0]
-        for candidate in mallard_text_to_candidate[longest_matched_mallard_candidate]:
+
+        for candidate in mallard_text_val_to_candidate[longest_matched_mallard_candidate]:
             if candidate.span.start == span.start or candidate.span.end == span.end:
                 return candidate
+            else:
+                default_mallard_candidate = candidate
+
+        return default_mallard_candidate
 
     msg = 'Unable to resolve system entity of type {!r} for {!r}.'
     msg = msg.format(entity_type, span.slice(query.text))

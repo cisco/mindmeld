@@ -9,6 +9,8 @@ from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
 from .ser import resolve_system_entity
 from .query_factory import QueryFactory
+import logging
+logger = logging.getLogger(__name__)
 
 ENTITY_START = '{'
 ENTITY_END = '}'
@@ -149,7 +151,9 @@ def _process_annotations(query, annotations):
                     raw_entity.role = ann['role']
                 except KeyError:
                     pass
-                except SystemEntityResolutionError:
+                except SystemEntityResolutionError as error:
+                    msg = "Unable to load query: {}"
+                    logger.error(msg.format(error))
                     return
             else:
                 try:
