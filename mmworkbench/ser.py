@@ -116,20 +116,34 @@ def resolve_system_entity(query, entity_type, span):
             else:
                 alternates.append(candidate)
 
+    mallard_candidates = parse_numerics(span.slice(query.text))['data']
+    mallard_text_to_candidate = {}
+
     # If no matching candidate was found, try parsing only this entity
-    for raw_candidate in parse_numerics(span.slice(query.text))['data']:
+    for raw_candidate in mallard_candidates:
         candidate = _mallard_item_to_query_entity(query, raw_candidate, offset=span.start)
 
-        # If the candidate matches the entire entity, return it
-        if candidate.span == span and candidate.entity.type == entity_type:
-            return candidate
+        if candidate.entity.type == entity_type:
+            # If the candidate matches the entire entity, return it
+            if candidate.span == span:
+                return candidate
+            else:
+                mallard_text_to_candidate.setdefault(candidate.text, []).append(candidate)
+
+    best_mallard_candidate_names = list(mallard_text_to_candidate.keys())
+
+    if len(best_mallard_candidate_names) != 0:
+        best_mallard_candidate_names.sort(key=len, reverse=True)
+        longest_matched_mallard_candidate = best_mallard_candidate_names[0]
+        for candidate in mallard_text_to_candidate[longest_matched_mallard_candidate]:
+            if candidate.span.start == span.start or candidate.span.end == span.end:
+                return candidate
 
     msg = 'Unable to resolve system entity of type {!r} for {!r}.'
     msg = msg.format(entity_type, span.slice(query.text))
     if alternates:
         msg += ' Entities found for the following types {!r}'.format([a.entity.type
                                                                       for a in alternates])
-
     raise SystemEntityResolutionError(msg)
 
 
