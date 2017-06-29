@@ -102,7 +102,6 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
 
     @property
     def is_correct(self):
-        import pdb; pdb.set_trace()
         return self.expected == self.predicted
 
 

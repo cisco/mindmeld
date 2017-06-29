@@ -154,6 +154,7 @@ def resolve_system_entity(query, entity_type, span):
     if alternates:
         msg += ' Entities found for the following types {!r}'.format([a.entity.type
                                                                       for a in alternates])
+
     raise SystemEntityResolutionError(msg)
 
 
