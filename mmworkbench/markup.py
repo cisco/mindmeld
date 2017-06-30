@@ -5,11 +5,13 @@ representing annotations of query text inline.
 from __future__ import absolute_import, unicode_literals
 from future.utils import raise_from
 
+import logging
+
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
 from .ser import resolve_system_entity
 from .query_factory import QueryFactory
-import logging
+
 logger = logging.getLogger(__name__)
 
 ENTITY_START = '{'
@@ -148,13 +150,15 @@ def _process_annotations(query, annotations):
             if Entity.is_system_entity(ann['type']):
                 try:
                     raw_entity = resolve_system_entity(query, ann['type'], span).entity
+                except SystemEntityResolutionError as e:
+                    msg = "Unable to load query: {}"
+                    logger.warn(msg.format(e))
+                    return
+
+                try:
                     raw_entity.role = ann['role']
                 except KeyError:
                     pass
-                except SystemEntityResolutionError as error:
-                    msg = "Unable to load query: {}"
-                    logger.warn(msg.format(error))
-                    return
             else:
                 try:
                     value = {'children': ann['children']}
