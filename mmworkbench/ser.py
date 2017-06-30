@@ -116,13 +116,45 @@ def resolve_system_entity(query, entity_type, span):
             else:
                 alternates.append(candidate)
 
+    mallard_candidates = parse_numerics(span.slice(query.text))['data']
+    mallard_text_val_to_candidate = {}
+
     # If no matching candidate was found, try parsing only this entity
-    for raw_candidate in parse_numerics(span.slice(query.text))['data']:
+    # Refer to this ticket for how we prioritize mallard candidates:
+    # https://mindmeldinc.atlassian.net/browse/WB3-54
+    #
+    # For secondary candidate picking, we prioritize candidates as follows:
+    # a) candidate matches both span range and entity type
+    # b) candidate with the most number of matching characters to the user
+    # annotation
+    # c) candidate whose span matches either the start or end user annotation
+    # span
+
+    for raw_candidate in mallard_candidates:
         candidate = _mallard_item_to_query_entity(query, raw_candidate, offset=span.start)
 
-        # If the candidate matches the entire entity, return it
-        if candidate.span == span and candidate.entity.type == entity_type:
-            return candidate
+        if candidate.entity.type == entity_type:
+            # If the candidate matches the entire entity, return it
+            if candidate.span == span:
+                return candidate
+            else:
+                mallard_text_val_to_candidate.setdefault(candidate.text, []).append(candidate)
+
+    # Sort mallard matching candidates by the length of the value
+    best_mallard_candidate_names = list(mallard_text_val_to_candidate.keys())
+    best_mallard_candidate_names.sort(key=len, reverse=True)
+
+    if best_mallard_candidate_names:
+        default_mallard_candidate = None
+        longest_matched_mallard_candidate = best_mallard_candidate_names[0]
+
+        for candidate in mallard_text_val_to_candidate[longest_matched_mallard_candidate]:
+            if candidate.span.start == span.start or candidate.span.end == span.end:
+                return candidate
+            else:
+                default_mallard_candidate = candidate
+
+        return default_mallard_candidate
 
     msg = 'Unable to resolve system entity of type {!r} for {!r}.'
     msg = msg.format(entity_type, span.slice(query.text))
