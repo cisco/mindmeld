@@ -154,7 +154,6 @@ def _process_annotations(query, annotations):
                     msg = "Unable to load query: {}"
                     logger.warn(msg.format(e))
                     return
-
                 try:
                     raw_entity.role = ann['role']
                 except KeyError:
