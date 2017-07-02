@@ -1,4 +1,0 @@
-Mallard
-=======
-
-Coming soon!
