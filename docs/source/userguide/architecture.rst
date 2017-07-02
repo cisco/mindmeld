@@ -1,12 +1,53 @@
 .. meta::
     :scope: private
 
-Workbench Architecture
-======================
+Platform Architecture
+=====================
 
-Show the workbench architecture diagram and introduce each of the components.
-4.3.1 Natural Language Processor
-  4.3.1.1 Domain Classifier
+The MindMeld Deep-Domain Conversational AI Platform provides a robust end-to-end pipeline for building and deploying intelligent data-driven conversational apps. The high level architecture of the platform is illustrated in the figure below.
+
+.. image:: /images/architecture.png
+    :align: center
+    :name: architecture_diagram
+
+We will now take a look at each of the components in the MindMeld platform.
+
+
+Natural Language Processor
+--------------------------
+
+The Natural Language Processor (NLP) is tasked with understanding the user's natural language input. This involves processing the user query using a combination of techniques such as `pattern matching <https://en.wikipedia.org/wiki/Pattern_matching#Pattern_matching_and_strings>`_, `text classification <https://en.wikipedia.org/wiki/Text_classification>`_, `information extraction <https://en.wikipedia.org/wiki/Information_extraction>`_, and `parsing <https://en.wikipedia.org/wiki/Parsing>`_. The end goal is to produce a representation that captures all the salient pieces of information in the query. This summarized representation is then used by the app to decide on a suitable action or response to satisfy the user's goals.
+
+The figure below shows the NLP output on a sample user input.
+
+.. image:: /images/nlp.png
+    :align: center
+
+
+The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in Steps :doc:`3 <../quickstart/03_define_the_hierarchy>`, :doc:`6 <../quickstart/06_generate_representative_training_data>` and :doc:`7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-by-Step Guide. In addition to the four layers of classifiers, the NLP also has modules for entity resolution and language parsing. The user query is processed sequentially by each of these six subcomponents in the left-to-right order shown in the :ref:`architecture diagram <architecture_diagram>` above. The role of each step in the NLP pipeline is described below.
+
+Domain Classifier
+~~~~~~~~~~~~~~~~~
+
+The Domain Classifier performs the first level of categorization on a user query by classifying it into one of a pre-defined set of domains that can be handled by the app. Each domain is a unique area of knowledge with its own vocabulary and specialized terminology.
+
+For instance, a conversational app serving as a "Smart Home Assistant" would be expected to handle several distinct tasks such as:
+
+* Setting the temperature on the thermostat
+* Toggling the light fixtures in different rooms
+* Locking and unlocking different doors
+* Controlling multimedia devices around the home
+* Answering informational queries about time, weather, etc.
+
+The vocabulary used for instructing the app to change the settings on a thermostat is very different from interacting with the television. These could therefore be modeled as separate domains - a ``thermostat`` domain for handling all interactions related to the thermostat and a ``multimedia`` domain for talking to media devices in the house. Personal assistants like Siri, Cortana, Google Assistant and Alexa are trained to handle more than a dozen different domains like ``weather``, ``navigation``, ``sports``, ``music``, ``calendar``, etc.
+
+On the opposite end of the spectrum are apps with just one de facto domain. This is usually the case if all the functions that the app provides are conceptually related and span a single realm of knowledge. For instance, a "Food Ordering" app could potentially handle multiple tasks like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing all of these tasks are highly shared, and hence could be modeled as one single domain called ``food``.
+
+The number of domains thus depends on the scope of the conversational application. For apps with multiple domains, the :doc:`Domain Classifier User Guide <>` describes how Workbench can be used to train a machine-learned domain classification model.
+
+
+
+
   4.3.1.2 Intent Classifier
   4.3.1.3 Entity Recognizer
   4.3.1.4 Role Classifier
@@ -19,18 +60,8 @@ Show the workbench architecture diagram and introduce each of the components.
 
 [ARCHIVED CONTENT BELOW]
 
-The **MindMeld Deep-Domain Conversational AI Platform** consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.
-
-.. image:: /images/architecture.png
-   :target: ../_images/architecture.png
-
-This chapter will introduce you to the each of the modules in the MindMeld Workbench library.
 
 
-Natural Language Parser
------------------------
-
-The Natural Language Parser is tasked with comprehending the user's natural language input. This involves processing the input text using a combination of techniques such as pattern matching, text classification, information extraction and parsing. The end goal is to produce an actionable semantic representation that can be used to satisfy the dialogue task.
 
 .. raw:: html
 
@@ -58,41 +89,9 @@ The Natural Language Parser is tasked with comprehending the user's natural lang
 .. role:: indigo
 .. role:: orange
 
-For example, if a user said :red:`"A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread."`, the parser would produce:
-
-.. image:: /images/parser.png
-   :target: ../_images/parser.png
-
-The MindMeld Parser analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the "search space".
-
-.. image:: /images/classifier_hierarchy.png
-   :target: ../_images/classifier_hierarchy.png
-   :scale: 75%
 
 We next take a look at each of the classifiers within the MindMeld Parser one by one.
 
-Domain Classifier
-~~~~~~~~~~~~~~~~~
-
-The first level of categorization is done by the Domain Classifier, which classifies the input into one of the predetermined set of domains that can be handled by the conversational system. A **domain** can be thought of as a broad category covering multiple related user intents. Generally, each domain would have its own specialized vocabulary or terminology, that sets it apart from other domains.
-
-For instance, a conversational system built for "Smart Home Automation" would be expected to handle several distinct tasks such as -
-
-* Setting the temperature on the thermostat
-* Toggling the light fixtures in different rooms
-* Locking/unlocking different doors
-* Controlling multimedia devices around the home
-* ...
-
-The vocabulary for changing the settings on the thermostat is very specific and completely different from interacting with the television. You could therefore consider modeling them under separate domains - a "thermostat" domain for handling all interactions related to the thermostat and similarly a "multimedia" domain.
-
-On the other hand, you can also have applications where you just have one de facto domain. This is usually the case if all the tasks that your system can handle are conceptually related and share the same vocabulary. For instance, a Food Ordering app could potentially handle multiple intents like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing any of these tasks would be shared to a large extent.
-
-The number of domains thus depends on the scope of your application. Personal assistants like Siri, Cortana, Google Assistant and Alexa are capable of handling several different domains.
-
-The Domain Classifier uses a Machine-Learned text classification model trained on many examples of user queries along with their true domain labels. At runtime, the classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.
-
-See the chapter on :doc:`Training data </training_data>` for a discussion on generating the labelled data for training. In the :doc:`Domain Classifier </domain_classification>` chapter, we will take a closer look at training and evaluating the domain classification model.
 
 
 Intent Classifier
