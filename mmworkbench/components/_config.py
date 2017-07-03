@@ -315,6 +315,14 @@ DEFAULT_ES_QA_MAPPING = {
                                 "raw": {
                                     "type": "keyword",
                                     "ignore_above": 256
+                                },
+                                "normalized_keyword": {
+                                    "type": "text",
+                                    "analyzer": "keyword_match_analyzer"
+                                },
+                                "char_ngram": {
+                                    "type": "text",
+                                    "analyzer": "char_ngram_analyzer"
                                 }
                             }
                         }
@@ -370,11 +378,29 @@ DEFAULT_ES_QA_MAPPING = {
                     "replacement": "$1 "
                 }
             },
+            "filter": {
+                "token_shingle": {
+                    "max_shingle_size": "4",
+                    "min_shingle_size": "2",
+                    "output_unigrams": "true",
+                    "type": "shingle"
+                },
+                "ngram_filter": {
+                    "type": "ngram",
+                    "min_gram": "3",
+                    "max_gram": "3"
+                }
+            },
             "analyzer": {
                 "default_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "whitespace",
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "token_shingle"
+                    ],
                     "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
                         "remove_loose_apostrophes",
                         "space_possessive_apostrophes",
                         "remove_special_beginning",
@@ -383,19 +409,47 @@ DEFAULT_ES_QA_MAPPING = {
                         "remove_special2",
                         "remove_special3"
                     ],
+                    "type": "custom",
+                    "tokenizer": "whitespace"
+                },
+                "keyword_match_analyzer": {
+                    "filter": [
+                        "lowercase",
+                        "asciifolding"
+                    ],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3"
+                    ],
+                    "type": "custom",
+                    "tokenizer": "keyword"
+                },
+                "char_ngram_analyzer": {
                     "filter": [
                         "lowercase",
                         "asciifolding",
-                        "shingle"
-                    ]
-                }
-            },
-            "filter": {
-                "token_shingle": {
-                    "type": "shingle",
-                    "max_shingle_size": 4,
-                    "min_shingle_size": 2,
-                    "output_unigrams": "true"
+                        "ngram_filter"
+                    ],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3"
+                    ],
+                    "type": "custom",
+                    "tokenizer": "whitespace"
                 }
             }
         }
@@ -409,6 +463,10 @@ DEFAULT_PARSER_DEPENDENT_CONFIG = {
     'max_instances': None,
     'precedence': 'left',
     'linking_words': frozenset()
+}
+
+DEFAULT_RANKING_CONFIG = {
+    'query_clauses_operator': 'or'
 }
 
 
