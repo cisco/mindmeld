@@ -7,7 +7,7 @@ A supervised learning model is only as smart as its underlying training data. Th
 
 Many different strategies exist for generating training data. Which approach is best depends on the stage of development your application is in and the scope of your particular use case. For new applications that are not yet receiving any production traffic, training data sets are typically generated using manual data entry or crowdsourcing. In some cases, data sets can be derived by mining the web. For live applications with production traffic, data sets can sometimes be generated either from customer traffic logs or by instrumenting the application to collect user interaction signals. In all cases, multiple layers of quality assurance are typically required to ensure that the training data is high-quality, error-free, and representative of desired application performance.
 
-Six of the core supervised learning components in MindMeld Workbench rely on training data. Depending on the use case, a given application may need data for some or all of these components:
+Five of the core supervised learning components in MindMeld Workbench rely on training data. Depending on the use case, a given application may need data for some or all of these components:
 
   - Domain Classification
   - Intent Classification
