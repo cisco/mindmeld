@@ -146,7 +146,7 @@ The Natural Language Processor gets half of the job done, namely, understanding 
 Question Answerer
 -----------------
 
-Most of the modern conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the important world knowledge for a given application use case. The component responsible for interfacing with the knowledge base is called the Question Answerer. Refer to Steps :doc:`5 <../quickstart/05_create_the_knowledge_base>` and :doc:`9 <../quickstart/09_optimize_question_answering_performance>` of the Step-By-Step Guide for an introduction to the topics of Knowledge Base and Question Answering.
+Most of the modern conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the important world knowledge for a given application use case. The component responsible for interfacing with the knowledge base is called the Question Answerer. See Steps :doc:`5 <../quickstart/05_create_the_knowledge_base>` and :doc:`9 <../quickstart/09_optimize_question_answering_performance>` of the Step-By-Step Guide for an introduction to the topics of Knowledge Base and Question Answering.
 
 The question answerer uses information retrieval techniques to identify the best answer candidates from the knowledge base that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify the user requested dishes and answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.
 
@@ -156,17 +156,20 @@ The MindMeld Question Answerer provides a flexible mechanism for retrieving and 
 Dialogue Manager
 ----------------
 
-The Dialogue Manager is responsible for directing the flow of the conversation. In contrast to other parts of the system that are stateless, the Dialogue Manager is stateful and maintains information about each state or step in the dialogue flow. It is therefore able to use historical context from previous conversation turns to move the dialogue along towards the end goal of satisfying the user's intent.
+The Dialogue Manager is a stateful component responsible for directing the flow of the conversation. It analyzes each incoming request and assigns it to a dialogue state handler which then executes the required logic and returns a response to the user.
 
-The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in Natural Language Generator chapter.
+Architecting the dialogue manager correctly is often one of the most challenging software engineering tasks when building a conversational app for a non-trivial use case. Workbench offers a simple solution by abstracting away many of the underlying complexities of dialogue management and offering developers a simple but powerful mechanism for defining their application logic. Workbench provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. It also allows dialogue state handlers to invoke any arbitrary code for taking a specific action, completing a transaction or getting the information necessary for formulating a response.
+
+Refer to Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide for a practical introduction to dialogue state tracking using Workbench. We will see more examples in the :doc:`Dialogue Manager User Guide <dm>`. 
+
+.. 
+  Application Manager
+  -------------------
+
+  Gateway
+  -------
 
 
 
 
-Application Manager
--------------------
-
-
-Gateway
--------
-
+That concludes our quick tour of the MindMeld Conversational AI platform. Now that we are familiar with all its components, the rest of this user guide will focus on hands-on tutorials using Workbench to build modern data-driven conversational apps that run on the MindMeld platform.

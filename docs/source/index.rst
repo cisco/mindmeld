@@ -81,7 +81,7 @@ Contents
    userguide/role_classifier
    userguide/entity_resolver
    userguide/language_parser
-   userguide/dialogue_manager
+   userguide/dm
    userguide/deployment
    userguide/integration
 
