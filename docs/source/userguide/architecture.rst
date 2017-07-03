@@ -22,6 +22,7 @@ The figure below shows the NLP output on a sample user input.
 
 .. image:: /images/nlp.png
     :align: center
+    :name: nlp_output
 
 
 The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in Steps :doc:`3 <../quickstart/03_define_the_hierarchy>`, :doc:`6 <../quickstart/06_generate_representative_training_data>` and :doc:`7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-by-Step Guide. In addition to the four layers of classifiers, the NLP also has modules for entity resolution and language parsing. The user query is processed sequentially by each of these six subcomponents in the left-to-right order shown in the :ref:`architecture diagram <architecture_diagram>` above. The role of each step in the NLP pipeline is described below.
@@ -94,87 +95,64 @@ Since the set of relevant entity types might differ for each intent (even within
 Role Classifier
 ~~~~~~~~~~~~~~~
 
-Role Classification is the task of identifying predicates and predicate arguments. A **semantic role** in language is the relationship that a syntactic constituent has with a predicate. In Conversational NLU, a **role** represents the semantic theme a given entity can take. It can also be used to define how a named entity should be used for fulfilling a query intent. For example, in the query :red:`"Play Black Sabbath by Black Sabbath"`, the **title** entity :green:`"Black Sabbath"` has different semantic themes - **song** and **artist** respectively.
+The Role Classifier is the last level in the 4-layer NLP classification hierarchy. It assigns a differentiating label, called a role, to the entities extracted by the entity recognizer. Sub-categorizing entities in this manner is only necessary where an entity of a particular type can have multiple meanings depending on the context. For example, “9 AM” and “5 PM” could both be classified as time entities, but one might need to be interpreted as playing the role of an opening time and the other as playing the role of a closing time. The role classifiers label such entities with the appropriate roles.
 
-Treating Named Entity Recognition (NER) and Semantic Role Labeling (SRL) as separate tasks has a few advantages -
+Here are examples of some entity types that might require role classification when dealing with certain intents.
 
-* NER models are hurt by splitting examples across fairly similar categories. Grouping entities with significantly overlapping entities and similar surrounding natural language will lead to better parsing and let us use more powerful models.
-* Joint NER & SRL needs global dependencies, but fast & good NER models only do local. NER models (MEMM, CRF) quickly become intractable with long-distance dependencies. Separating NER from SRL let us use local dependencies for NER and long-distance dependencies in SRL.
-* Role labeling might be a multi-label problem. With multi-label roles, we can use the same entity to query multiple fields.
++---------+------------------+-------------+----------------------+
+| Domain  | Intent           | Entity Type | Role Types           |
++=========+==================+=============+======================+
+| meeting | schedule_meeting | time        | start_time, end_time |
++---------+------------------+-------------+----------------------+
+| travel  | book_flight      | location    | origin, destination  |
++---------+------------------+-------------+----------------------+
+| retail  | search_product   | price       | min_price, max_price |
++---------+------------------+-------------+----------------------+
+| banking | transfer_funds   | account_num | sender, recipient    |
++---------+------------------+-------------+----------------------+
+
+Role classifiers are trained separately for each entity that requires the additional categorization. We describe how to build role classification models with Workbench in the :doc:`Role Classifier User Guide <role_classifier>`.
+
+Once the domain, intent, entities and roles have been determined by the 4-level classifier hierarchy discussed above, the processed query is sent to the Entity Resolver and the Language Parser modules to complete the natural language understanding of the user input.
+
+
+Entity Resolver
+~~~~~~~~~~~~~~~
+
+The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity-resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" might be resolved to "San Francisco, CA". 
+
+In conversational interactions, users generally refer to entities in informal terms, using abbreviations, nicknames, and other aliases, rather than their official standardized names. Robust entity resolution is hence key to a seamless conversational experience. The MindMeld Entity Resolver leverages advanced text relevance algorithms, similar to the ones used in state-of-the-art information retrieval systems to ensure high resolution accuracies.
+
+Each entity has its own resolver that is trained to capture all the name variations specific to that entity. We will learn more about how to build about entity resolvers using Workbench in the :doc:`Entity Resolver User Guide <entity_resolver>`.
+
+
+Language Parser
+~~~~~~~~~~~~~~~
+
+As described in the :doc:`Step-By-Step Guide <../quickstart/08_configure_the_language_parser>`, the Language Parser is the final module in the NLP pipeline. The parser finds relationships between the extracted entities and clusters them into meaningful entity groups. Each entity group has an inherent hierarchy, representing a real-world organizational structure.
+
+In the :ref:`example <nlp_output>` above, the resolved entities have been arranged into three separate entity groups, with each group describing a distinct real-world concept. The first two groups represent the products to be ordered, whereas the last group contains the store information. This structured representation of the natural language input can then be interpreted by the app to decide on the next action and/or response. E.g. submitting the order to a point-of-sale system to complete the user's order.
+
+Most parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The MindMeld Language Parser, on the other hand, is a config-driven rule-based parser which works out-of-the-box without the need for training. Refer to the :doc:`User Guide <language_parser>` for details on how Workbench can be used to configure the parser for optimum performance for a specific app.
+
+
+Question Answerer
+-----------------
 
 
 
-We describe how to build role classification models with Workbench in :doc:`Role Classifier </role_classifier>`.
+In the context of Deep-Domain Conversational AI, Question Answering is the task of retrieving relevant documents from a large content catalog in response to a natural language question. A large-vocabulary content catalog is first imported into a **Knowledge Base**. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. Finally, these candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.
+
+The parameters and weights assigned to the various entity types determine the effect of those entities on the final ranking. More context is provided in the chapter on :doc:`Question Answerer </question_answering>`.
 
 
 
-
-
-  4.3.1.4 Role Classifier
-  4.3.1.5 Entity Recognizer
-  4.3.1.6 Language Parser
 4.3.2 Question Answerer
 4.3.3 Dialogue Manager
 4.3.4 Application Manager
 4.3.5 Gateway
 
 [ARCHIVED CONTENT BELOW]
-
-
-
-
-.. raw:: html
-
-    <style> .red {color:red} </style>
-
-.. raw:: html
-
-    <style> .green {color:green} </style>
-
-.. raw:: html
-
-    <style> .orange {color:orange} </style>
-
-.. raw:: html
-
-    <style> .pink {color:#DB7093} </style>
-
-.. raw:: html
-
-   <style> .indigo {color:#4B0082} </style>
-
-.. role:: red
-.. role:: green
-.. role:: pink
-.. role:: indigo
-.. role:: orange
-
-
-We next take a look at each of the classifiers within the MindMeld Parser one by one.
-
-
-
-
-
-
-
-
-Entity Resolver
-~~~~~~~~~~~~~~~
-
-The Entity Resolver transforms the entity spans extracted by the Entity Recognizer into canonical forms that can be looked up in a catalog or a Knowledge Base. For instance, the extracted entity :red:`"lemon bread"` may get resolved to :red:`"Iced Lemon Pound Cake"` and :green:`"SF"` may get resolved to :green:`"San Francisco"`. This problem of entity resolution is also referred to as `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ in NLP literature.
-
-The MindMeld Entity Resolver uses a resource called an **Entity Map** to transform extracted entities into their desired normalized forms. The chapters on :doc:`Entity Map </entity_map>` and :doc:`Entity Resolver </entity_resolution>` provide more details on the entity resolution step.
-
-
-
-
-Language Parser
-~~~~~~~~~~~~~~~
-
-The Semantic Parser is the last subcomponent within the MindMeld Natural Language Parser. It takes all the resolved entities and groups them into semantically related items. Each item represents a single real-world entity or concept along with all its describing attributes.
-
-We provide more details in :doc:`Language Parser </language_parsing>`.
 
 
 Dialogue Manager
@@ -184,9 +162,3 @@ The Dialogue Manager is responsible for directing the flow of the conversation. 
 
 The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in Natural Language Generator chapter.
 
-Question Answerer
------------------
-
-In the context of Deep-Domain Conversational AI, Question Answering is the task of retrieving relevant documents from a large content catalog in response to a natural language question. A large-vocabulary content catalog is first imported into a **Knowledge Base**. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. Finally, these candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.
-
-The parameters and weights assigned to the various entity types determine the effect of those entities on the final ranking. More context is provided in the chapter on :doc:`Question Answerer </question_answering>`.

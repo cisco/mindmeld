@@ -96,6 +96,7 @@ Here, both :keyword:`8am` and :keyword:`6pm` could be defined as entities, perha
   Are there any Kwik-E-Mart stores open after {3pm|sys_time|open_time}?
   ...
 
+.. _entity-mapping-files:
 
 Entity Mapping Files
 ~~~~~~~~~~~~~~~~~~~~
