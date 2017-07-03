@@ -113,7 +113,7 @@ Here are examples of some entity types that might require role classification wh
 
 Role classifiers are trained separately for each entity that requires the additional categorization. We describe how to build role classification models with Workbench in the :doc:`Role Classifier User Guide <role_classifier>`.
 
-Once the domain, intent, entities and roles have been determined by the 4-level classifier hierarchy discussed above, the processed query is sent to the Entity Resolver and the Language Parser modules to complete the natural language understanding of the user input.
+After the domain, intent, entities and roles have been determined by the 4-level classifier hierarchy discussed above, the processed query is sent to the Entity Resolver and the Language Parser modules to complete the natural language understanding of the user input.
 
 
 Entity Resolver
@@ -131,28 +131,26 @@ Language Parser
 
 As described in the :doc:`Step-By-Step Guide <../quickstart/08_configure_the_language_parser>`, the Language Parser is the final module in the NLP pipeline. The parser finds relationships between the extracted entities and clusters them into meaningful entity groups. Each entity group has an inherent hierarchy, representing a real-world organizational structure.
 
-In the :ref:`example <nlp_output>` above, the resolved entities have been arranged into three separate entity groups, with each group describing a distinct real-world concept. The first two groups represent the products to be ordered, whereas the last group contains the store information. This structured representation of the natural language input can then be interpreted by the app to decide on the next action and/or response. E.g. submitting the order to a point-of-sale system to complete the user's order.
+In the :ref:`example <nlp_output>` above, the resolved entities have been arranged into three separate entity groups, with each group describing a distinct real-world concept:
 
-Most parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The MindMeld Language Parser, on the other hand, is a config-driven rule-based parser which works out-of-the-box without the need for training. Refer to the :doc:`User Guide <language_parser>` for details on how Workbench can be used to configure the parser for optimum performance for a specific app.
+.. image:: /images/entity_groups.png
+    :align: center
+
+The first two groups represent the products to be ordered, whereas the last group contains the store information. The main entity at the top in each group is called the parent or the `head <https://en.wikipedia.org/wiki/Head_(linguistics)>`_, whereas the other entities are called its children or `dependents <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_. This structured representation of the user's natural language input can then be interpreted by the app to decide on the next action and/or response. E.g. submitting the order to a point-of-sale system to complete the user's order.
+
+Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The MindMeld Language Parser, on the other hand, is a config-driven rule-based parser which works out-of-the-box without the need for training. Refer to the :doc:`User Guide <language_parser>` for details on how Workbench can be used to configure the parser for optimum performance for a specific app.
+
+The Natural Language Processor gets half of the job done, namely, understanding what the user wants. The next two components in the MindMeld pipeline address the other half by responding appropriately to the user and advancing the conversation.
 
 
 Question Answerer
 -----------------
 
+Most of the modern conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the important world knowledge for a given application use case. The component responsible for interfacing with the knowledge base is called the Question Answerer. Refer to Steps :doc:`5 <../quickstart/05_create_the_knowledge_base>` and :doc:`9 <../quickstart/09_optimize_question_answering_performance>` of the Step-By-Step Guide for an introduction to the topics of Knowledge Base and Question Answering.
 
+The question answerer uses information retrieval techniques to identify the best answer candidates from the knowledge base that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify the user requested dishes and answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.
 
-In the context of Deep-Domain Conversational AI, Question Answering is the task of retrieving relevant documents from a large content catalog in response to a natural language question. A large-vocabulary content catalog is first imported into a **Knowledge Base**. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. Finally, these candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.
-
-The parameters and weights assigned to the various entity types determine the effect of those entities on the final ranking. More context is provided in the chapter on :doc:`Question Answerer </question_answering>`.
-
-
-
-4.3.2 Question Answerer
-4.3.3 Dialogue Manager
-4.3.4 Application Manager
-4.3.5 Gateway
-
-[ARCHIVED CONTENT BELOW]
+The MindMeld Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches. Refer to the :doc:`Question Answerer User Guide <kb>` for detailed documentation along with examples.
 
 
 Dialogue Manager
@@ -161,4 +159,14 @@ Dialogue Manager
 The Dialogue Manager is responsible for directing the flow of the conversation. In contrast to other parts of the system that are stateless, the Dialogue Manager is stateful and maintains information about each state or step in the dialogue flow. It is therefore able to use historical context from previous conversation turns to move the dialogue along towards the end goal of satisfying the user's intent.
 
 The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in Natural Language Generator chapter.
+
+
+
+
+Application Manager
+-------------------
+
+
+Gateway
+-------
 
