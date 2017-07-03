@@ -14,7 +14,6 @@ Six of the core supervised learning components in MindMeld Workbench rely on tra
   - Entity Recognition
   - Role Classification
   - Entity Resolution
-  - Question Answerer Ranking
 
 As described in :doc:`Step 3 <03_define_the_hierarchy>`, the structure of your application's root directory in Workbench organizes the training data files. For our example Kwik-E-Mart store information application, the application directory is shown below.
 
@@ -22,17 +21,15 @@ As described in :doc:`Step 3 <03_define_the_hierarchy>`, the structure of your a
     :width: 400px
     :align: center
 
-While training data is always stored in text files, there are three different types of data files used for training in Workbench. These types of training data files, and their mandatory locations, are described in the table below.
+While training data is always stored in text files, there are two different types of data files used for training in Workbench. These types of training data files, and their mandatory locations, are described in the table below.
 
 ==================== ====
 **Labeled Queries**  Labeled query files are text files containing example user queries. Workbench uses them to train the domain and intent classification models. Labeled query files also support an inline markup syntax for annotating entities and entity roles within each query. These annotations are used to train both the entity and role classification models. All labeled query files belong in the :keyword:`domains` folder. Each domain and intent subfolder should contain labeled query files that apply only to that intent. The hierarchical structure of the :keyword:`domains` folder provides the classification labels used to train the domain and intent classification models.
 
 **Entity Mappings**  Entity mappings are JSON files which associate whitelisted and blacklisted alternate names, or synonyms, with individual entities. Workbench uses entity mappings to train the models required for entity resolution. These files belong in the :keyword:`entities` folder.
-
-**Index Rankings**   Index rankings are JSON files which specify ranking scores for optimizing question answering ranking performance. Each entry in an index ranking file specifies the ranking score associated with a query-object pair, for a given object in the question answering knowledge base. These files belong in the :keyword:`indexes` folder within the subdirectory named for the relevant knowledge base index.
 ==================== ====
 
-We will now illustrate the typical structure for these three types of training data files.
+We will now illustrate the typical structure for these two types of training data files.
 
 
 Labeled Query Files
@@ -71,7 +68,7 @@ The :keyword:`exit_queries.txt` file captures many of the different ways a user 
   sayonara
   ...
 
-The :keyword:`get_store_hours_queries.txt` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``date``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
+The :keyword:`get_store_hours_queries.txt` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``sys_time``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
 
 .. code-block:: text
 
@@ -83,7 +80,7 @@ The :keyword:`get_store_hours_queries.txt` file captures ways that a user might 
   Can you check if the {Main St|store_name} store is open on {Sunday|sys_time}?
   ...
 
-As the example shows, each inline entity is appended by the pipe character followed by its associated entity type, then the entire expression is enclosed in curly braces. Annotations for names of *system entities*, which are built into Workbench, begin with :keyword:`sys_`. In the example, :keyword:`date` is a system entity. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
+As the example shows, each inline entity is appended by the pipe character followed by its associated entity type, then the entire expression is enclosed in curly braces. Annotations for names of *system entities*, which are built into Workbench, begin with :keyword:`sys_`. In the example, :keyword:`time` is a system entity. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
 
 .. _roles_example:
 
@@ -136,45 +133,4 @@ In this example, :keyword:`store_name_mapping.json` is the mapping file for the 
   ]
   ...
 
-The entity mapping file specifies a canonical name, or ``cname``, and a unique object ``id`` for the entity. Alternate names or synonyms by which users might refer to the entity are specified as items in the ``whitelist`` array. Workbench relies on the data specified in this file in order to associate each natural language entity with a unique and unambiguous concept. See the :ref:`User Manual <userguide>` for details.
-
-
-Index Ranking Files
-~~~~~~~~~~~~~~~~~~~
-
-Applications which use the Question Answerer component can optionally optimize the ranking of its underlying knowledge base. To do this, they need additional training data in the form of text files called *index ranking files*.
-
-Index ranking files must be placed in a standard location, which you find in the following way: In the application root directory, go into the :keyword:`indexes` folder, and there create a subfolder for each knowledge base index used by the question answerer. You can create one index ranking file in each subfolder. If Workbench finds an index ranking file in the standard location, Workbench uses the file to optimize the knowledge base ranking.
-
-Consider the following sample directory structure.
-
-.. image:: /images/directory6.png
-    :width: 400px
-    :align: center
-
-In this example, the ``stores`` index has the ranking file :keyword:`stores_ranking.json` shown below.
-
-.. code-block:: javascript
-
-  [
-    {
-      'query': 'Kwik-E-Marts in Springfield',
-      'id': '152323',
-      'rank': 3
-    },
-    {
-      'query': 'Kwik-E-Marts in Springfield',
-      'id': '102843',
-      'rank': 1
-    },
-    {
-      'query': 'stores downtown',
-      'id': '207492',
-      'rank': 1
-    },
-    ...
-
-  ]
-  ...
-
-For each specified ``query``, the ranking file provides a way to identify the ideal ``rank`` for the knowledge base object specified by its unique ``id``. See the :ref:`User Manual <userguide>` for more about optimizing Workbench question answering performance.
+The entity mapping file specifies a canonical name, or ``cname``, and a unique object ``id`` for the entity. Alternate names or synonyms by which users might refer to the entity are specified as items in the ``whitelist`` array. Workbench relies on the data specified in this file in order to associate each natural language entity with a unique and unambiguous concept. See the :ref:`User Guide <userguide>` for details.

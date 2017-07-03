@@ -66,7 +66,7 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Workbench User Manual
+   :caption: Workbench User Guide
    :name: userguide
 
    userguide/introduction

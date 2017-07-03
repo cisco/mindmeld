@@ -108,7 +108,7 @@ Running the :keyword:`blueprint()` method for our simple example application pro
 See the :ref:`User Guide <userguide>` for more about blueprints, and root folder organization and structure.
 
 
-Notice that there is no folder for the ``date`` entity. None is needed, because ``date`` is a *system entity*, meaning that it is already built into the Workbench platform. Workbench provides several different system entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <userguide>` for details.
+Notice that there is no folder for the ``date`` entity. None is needed, because we can use the Workbench *system entity* for time expressions, ``sys_time``, to capture the date information. A system entity is one that it is already built into the Workbench platform. Workbench provides several different system entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <userguide>` for details.
 
 Given the simple interaction proposed in the preceding section and hierarchy we have now defined, we would expect our trained natural language processing models to yield the results illustrated below.
 
