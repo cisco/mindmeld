@@ -237,13 +237,19 @@ class EntityResolver(object):
 
         index = get_scoped_index_name(self._app_name, self._es_index_name)
         response = self._es_client.search(index=index, body=text_relevance_query)
-        results = response['hits']['hits']
-        results = [{'id': result['_source']['id'],
-                    'cname': result['_source']['cname'],
-                    'score': result['_score'],
-                    'top_synonym': result['inner_hits']['whitelist']['hits']['hits'][0]
-                                         ['_source']['name']}
-                   for result in results]
+        hits = response['hits']['hits']
+
+        results = []
+        for hit in hits:
+            result = {
+                'cname': hit['_source']['cname'],
+                'score': hit['_score'],
+                'top_synonym': hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
+
+            if hit['_source'].get('id'):
+                result['id'] = hit['_source'].get('id')
+
+            results.append(result)
 
         return results[0:20]
 
