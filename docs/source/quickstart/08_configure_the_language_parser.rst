@@ -105,6 +105,6 @@ Some of the entities in the Natural Language Processor's output now include a :k
 
 The Workbench language parser is a versatile component which can be used to implement a variety of parsing strategies for your application. The :ref:`User Guide <userguide>` explains the different options available to fine-tune the behavior of the parser, and covers how to define your own custom parsing logic and train a state-of-the-art statistical parser using annotated data.
 
-Not every scenario warrants using the language parser. For instance, in our simple Kwik-E-Mart store information app, the two kinds of entities, ``date`` and ``store_name``, are distinct and unrelated pieces of information. Running the parser would only yield two singleton entity groups with heads but no dependents.
+Not every scenario warrants using the language parser. For instance, in our simple Kwik-E-Mart store information app, the two kinds of entities, ``sys_time`` and ``store_name``, are distinct and unrelated pieces of information. Running the parser would only yield two singleton entity groups with heads but no dependents.
 
 The parser matters when your application supports more complex natural language queries like the parse tree example discussed above. Once the language parser identifies the heads and their dependents, and links them together into logical units (entity groups), downstream components can use this information to determine appropriate actions and generate responses that fulfill the user's request.

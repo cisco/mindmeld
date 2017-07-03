@@ -71,7 +71,7 @@ The :keyword:`exit_queries.txt` file captures many of the different ways a user 
   sayonara
   ...
 
-The :keyword:`get_store_hours_queries.txt` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``date``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
+The :keyword:`get_store_hours_queries.txt` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``sys_time``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
 
 .. code-block:: text
 
@@ -83,7 +83,7 @@ The :keyword:`get_store_hours_queries.txt` file captures ways that a user might 
   Can you check if the {Main St|store_name} store is open on {Sunday|sys_time}?
   ...
 
-As the example shows, each inline entity is appended by the pipe character followed by its associated entity type, then the entire expression is enclosed in curly braces. Annotations for names of *system entities*, which are built into Workbench, begin with :keyword:`sys_`. In the example, :keyword:`date` is a system entity. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
+As the example shows, each inline entity is appended by the pipe character followed by its associated entity type, then the entire expression is enclosed in curly braces. Annotations for names of *system entities*, which are built into Workbench, begin with :keyword:`sys_`. In the example, :keyword:`time` is a system entity. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
 
 .. _roles_example:
 
