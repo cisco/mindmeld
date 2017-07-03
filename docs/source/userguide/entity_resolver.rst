@@ -28,3 +28,7 @@ Describe collection of synonyms and the synonym mapping file.
 4.6.6 The Language Parser
 
 Describe our approach to language parsing, what a parser configuration looks like and how it can be used to improve parser accuracy.  Show code examples for parsing and how to inspect the parser output.
+===
+
+This problem of entity resolution is also referred to as `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ in NLP literature.
+===
