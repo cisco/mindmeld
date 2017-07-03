@@ -77,7 +77,7 @@ To test using any REST client (such as Postman or Advanced Rest Client), send `P
 
 The web service responds with a JSON data structure containing the application response along with the detailed output for all of the machine learning components of the Workbench platform.
 
-See the :ref:`User Manual <userguide>` for more about the Workbench request and response interface format.
+See the :ref:`User Guide <userguide>` for more about the Workbench request and response interface format.
 
 MindMeld Cloud Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~
