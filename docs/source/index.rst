@@ -76,7 +76,8 @@ Contents
    userguide/workbench_apps
    userguide/kb
    userguide/nlp
-   userguide/domain_intent_classifiers
+   userguide/domain_classifier
+   userguide/intent_classifier
    userguide/entity_recognizer
    userguide/role_classifier
    userguide/entity_resolver

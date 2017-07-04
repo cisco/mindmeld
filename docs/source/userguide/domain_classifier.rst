@@ -1,8 +1,8 @@
 .. meta::
     :scope: private
 
-Domain and Intent Classifiers
-=============================
+Domain Classifier
+=================
 
 Introduce the general ML techniques and methodology common to all NLP classifiers:
 Getting the right kind of training data using in-house data generation and crowdsourcing, QAing and analyzing the data
