@@ -93,13 +93,13 @@ This folder structure organizes the training data for the machine learning model
     $ cd entities
     $ mkdir store_name
 
-Workbench provides a faster way to create your application structure for common use cases. These are called application *blueprints*. A blueprint is a pre-configured application structure. Starting with an empty root directory, you can set up your initial application structure using the :keyword:`blueprint()` method, as shown below.
+Workbench provides a faster way to create your application structure for common use cases. These are called application *blueprints*. A blueprint is a pre-configured application structure. Starting with an empty root directory, you can set up your initial application structure using the :func:`blueprint()` method, as shown below.
 
 .. code-block:: console
 
     $ python -c "import mmworkbench as wb; wb.blueprint('quickstart', 'my_app');"
 
-Running the :keyword:`blueprint()` method for our simple example application produces the root directory structure illustrated below.
+Running the :func:`blueprint()` method for our simple example application produces the root directory structure illustrated below.
 
 .. image:: /images/directory.png
     :width: 350px

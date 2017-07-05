@@ -9,7 +9,7 @@ The Workbench blueprints thus have a dual purpose:
 
   #. They provide a fast and easy way to bootstrap your app on Workbench for many typical use cases.
 
-In :doc:`Step 3 <../quickstart/03_define_the_hierarchy>` of the :ref:`Step-by-Step Guide <quickstart>`, we briefly saw how the :keyword:`Quick Start` blueprint could be used to quickly set up the Workbench app directory structure for our Kwik-E-Mart store information app. In addition to that example store assistant scenario, Workbench provides blueprints for a growing list of common use cases:
+In :doc:`Step 3 <../quickstart/03_define_the_hierarchy>` of the :ref:`Step-by-Step Guide <quickstart>`, we briefly saw how the ``quickstart`` blueprint could be used to quickly set up the Workbench app directory structure for our Kwik-E-Mart store information app. In addition to that example store assistant scenario, Workbench provides blueprints for a growing list of common use cases:
 
 == ===
 1  :doc:`Food Ordering <food_ordering>`
@@ -37,11 +37,11 @@ Blueprint Setup
 
 To get started with any of the blueprints, you must have Workbench and all of its required dependencies installed. Please refer to the :doc:`Getting Started <../userguide/getting_started>` page for more information on acquiring the Workbench toolkit and installing it on your system.
 
-With Workbench installed, you can use the :keyword:`blueprint()` method to set up a blueprint application.
+With Workbench installed, you can use the :func:`blueprint()` method to set up a blueprint application.
 
 .. code-block:: console
 
     $ python -c "import mmworkbench as wb; wb.blueprint('BLUEPRINT_NAME');"
 
-Here, :keyword:`BLUEPRINT_NAME` refers to one of the Workbench-supported blueprints. Running the above command will set up a Workbench project in your current directory for working with the requested blueprint app. Refer to the individual blueprint sections for more details.
+Here, ``BLUEPRINT_NAME`` refers to one of the Workbench-supported blueprints. Running the above command will set up a Workbench project in your current directory for working with the requested blueprint app. Refer to the individual blueprint sections for more details.
 

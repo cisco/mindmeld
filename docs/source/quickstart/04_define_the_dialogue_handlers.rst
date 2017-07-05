@@ -62,8 +62,8 @@ The above code snippet illustrates the conventions for implementing dialogue sta
 
    1. Import the Application class from the MindMeld Workbench package.
    2. Define an Application instance to serve as the parent container for the application.
-   3. Using the :keyword:`@app.handle()` decorator, define a pattern which, when matched, invokes the associated handler function.
-   4. Specify the handler function :keyword:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <02_script_interactions>`. For now, we are responding with a simple "Hello".
+   3. Using the ``@app.handle()`` decorator, define a pattern which, when matched, invokes the associated handler function.
+   4. Specify the handler function :func:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <02_script_interactions>`. For now, we are responding with a simple "Hello".
 
 The patterns and associated handlers which you enumerate using this straighforward application structure will comprise the core interaction logic for your application.
 
@@ -88,13 +88,13 @@ First, consider the handler for the ``welcome`` dialogue state.
       responder.prompt('Hello, {name}. I can help you find store hours '
                        'for your local Kwik-E-Mart. How can I help?')
 
-Following convention, we use the dialogue state name, ``welcome``, as the method name of the dialogue state handler, :keyword:`welcome()`.
+Following convention, we use the dialogue state name, ``welcome``, as the method name of the dialogue state handler, :func:`welcome()`.
 
-The :keyword:`@app.handle()` decorator specifies the pattern which must be matched to invoke the handler method. Here, the pattern specified is simply :keyword:`intent='greet'`. In other words, if the natural language processor predicts that the intent of the incoming request is ``greet``, the :keyword:`welcome()` handler is invoked.
+The ``@app.handle()`` decorator specifies the pattern which must be matched to invoke the handler method. Here, the pattern specified is simply ``intent='greet'``. In other words, if the natural language processor predicts that the intent of the incoming request is ``greet``, the :func:`welcome()` handler is invoked.
 
-Every dialogue handler returns a :keyword:`response` object that specifies the natural language text and any other data to be returned in the response. Text strings contained in this response can use templated expressions in standard Python string formatting syntax, like :keyword:`'Hello, {name}.'` in our example. Templated expressions are populated with real values before the response is returned to the client. Workbench uses the :keyword:`slots` object to store the named string values which populate the templates.
+Every dialogue handler returns a ``response`` object that specifies the natural language text and any other data to be returned in the response. Text strings contained in this response can use templated expressions in standard Python string formatting syntax, like ``'Hello, {name}.'`` in our example. Templated expressions are populated with real values before the response is returned to the client. Workbench uses the :data:`slots` object to store the named string values which populate the templates.
 
-The code snippet also introduces the :keyword:`context` object, which Workbench uses to keep track of all of the state information associated with the conversational interaction as it progresses. This state information can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information. The contents of the :keyword:`context` can be very useful for implementing custom dialogue state handling logic. See the :ref:`User Guide <userguide>` for details.
+The code snippet also introduces the :data:`context` object, which Workbench uses to keep track of all of the state information associated with the conversational interaction as it progresses. This state information can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information. The contents of the :data:`context` can be very useful for implementing custom dialogue state handling logic. See the :ref:`User Guide <userguide>` for details.
 
 Let's follow this same approach to define handlers for the dialogue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting `app.py` file looks like the following.
 
@@ -151,7 +151,7 @@ Let's follow this same approach to define handlers for the dialogue states ``sen
 
 This code snippet introduces the `QuestionAnswerer` class. In Workbench, `QuestionAnswerer` is the module that creates and searches across a knowledge base of information relevant to your application. In this example, the ``send_nearest_store`` dialogue state relies on the `QuestionAnswerer` component to retrieve the closest retail store location from the knowledge base. The `QuestionAnswerer` is discussed further in the next section.
 
-The snippet also demonstrates the use of a default handler. The :keyword:`@app.handle()` decorator serves as a 'catchall' pattern that returns a default response if no other specified patterns are matched.
+The snippet also demonstrates the use of a default handler. The ``@app.handle()`` decorator serves as a 'catchall' pattern that returns a default response if no other specified patterns are matched.
 
 Now that our initial set of dialogue handlers are in place, we can begin building a knowledge base and training machine learning models to understand natural language requests.
 

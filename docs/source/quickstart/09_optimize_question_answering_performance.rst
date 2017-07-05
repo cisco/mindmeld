@@ -3,7 +3,7 @@ Step 9: Optimize Question Answering Performance
 
 The Workbench question answerer is a powerful component which streamlines the development of applications that need to answer questions in addition to understanding user requests. The question answerer relies on a knowledge base which encompasses all of the important world knowledge for a given application use case. For example, the question answerer might rely on a knowledge base which knows details about every product in a product catalog. Alternately, the question answerer might have a knowledge base containing detailed information about every song or album in a music library.
 
-To leverage the Workbench question answerer in your application, you must first create your knowledge base, as described in :doc:`Step 5 <05_create_the_knowledge_base>`. With the knowledge base created, your dialogue state handlers can invoke the question answerer, as illustrated in :doc:`Step 4 <04_define_the_dialogue_handlers>`, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which finds nearby Kwik-E-Mart store locations might resemble the snippet below. Notice that the application imports the :keyword:`QuestionAnswerer` component.
+To leverage the Workbench question answerer in your application, you must first create your knowledge base, as described in :doc:`Step 5 <05_create_the_knowledge_base>`. With the knowledge base created, your dialogue state handlers can invoke the question answerer, as illustrated in :doc:`Step 4 <04_define_the_dialogue_handlers>`, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which finds nearby Kwik-E-Mart store locations might resemble the snippet below. Notice that the application imports the :class:`QuestionAnswerer` component.
 
 .. code:: python
 
@@ -21,7 +21,7 @@ To leverage the Workbench question answerer in your application, you must first 
       context['frame']['target_store'] = target_store
       responder.reply('Your nearest Kwik-E-Mart is located at {store_name}.')
 
-Assuming you have already created an index, such as ``stores``, and uploaded the knowledge base data, the :keyword:`get()` method provides a flexible mechanism for retrieving relevant results.
+Assuming you have already created an index, such as ``stores``, and uploaded the knowledge base data, the :meth:`get()` method provides a flexible mechanism for retrieving relevant results.
 
 .. code:: python
 
@@ -51,7 +51,7 @@ Similarly, to retrieve store locations on Market Street, you could use something
     "phone_number": "(+1) 650-555-4500"
   }
 
-By default, the :keyword:`get()` method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity.
+By default, the :meth:`get()` method uses a baseline ranking algorithm which displays the most relevant documents based on text similarity.
 
 Proximity-Based Ranking
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,7 +80,7 @@ First, let's assume that you have created a knowledge base for the ``stores`` in
   }
   ...
 
-We can now retrieve the nearest stores using the ``sort`` argument of the :keyword:`get()` method
+We can now retrieve the nearest stores using the ``sort`` argument of the :meth:`get()` method
 as follows:
 
 .. code:: python
