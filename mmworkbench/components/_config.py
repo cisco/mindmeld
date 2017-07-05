@@ -376,6 +376,16 @@ DEFAULT_ES_QA_MAPPING = {
                     "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
                     "type": "pattern_replace",
                     "replacement": "$1 "
+                },
+                "remove_comma": {
+                    "pattern": ",",
+                    "type": "pattern_replace",
+                    "replacement": ""
+                },
+                "remove_tm_and_r": {
+                    "pattern": "™|®",
+                    "type": "pattern_replace",
+                    "replacement": ""
                 }
             },
             "filter": {
