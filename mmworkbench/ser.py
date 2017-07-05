@@ -243,7 +243,7 @@ def _dimensions_from_entity_types(entity_types):
             dims.add('time')
         if entity_type.startswith('sys_'):
             dims.add(entity_type.split('_')[1])
-
+    dims = list(dims)
     if not dims:
         dims = None
     return dims
