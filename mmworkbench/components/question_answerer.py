@@ -209,8 +209,18 @@ class Search:
             key, value = six.next(six.iteritems(kwargs))
             clause = Search.QueryClause(key, value)
         elif type == "filter":
-            key, value = six.next(six.iteritems(kwargs))
-            clause = Search.FilterClause(key, value)
+            filter_type = kwargs.pop('filter_type')
+            if filter_type == 'text':
+                key, value = six.next(six.iteritems(kwargs))
+                clause = Search.FilterClause(field=key, value=value)
+            else:
+                field = kwargs.get('field')
+                gt = kwargs.get('gt')
+                gte = kwargs.get('gte')
+                lt = kwargs.get('lt')
+                lte = kwargs.get('lte')
+
+                clause = Search.FilterClause(field=field, range_gt=gt, range_gte=gte, range_lt=lt, range_lte=lte)
         elif type == "sort":
             sort_field = kwargs.get('field')
             sort_type = kwargs.get('sort_type')
@@ -244,26 +254,39 @@ class Search:
 
         return new_search
 
-    def filter(self, **kwargs):
-        """Specify filter condition to be applied to specified knowledge base text field.
+    def filter(self, filter_type='text', **kwargs):
+        """Specify filter condition to be applied to specified knowledge base field. In Workbench two types of filters
+        are supported: text filter and range filters.
+
+        Text filters are used to apply hard filters on specified knowledge base text fields.
         The filter text value is normalized and matched using entire text span against the knowledge base field.
         It's common to have filter conditions based on other resolved canonical entities.
         For example, in food ordering domain the resolved restaurant entity can be used as a filter to resolve
         dish entities. The exact knowledge base field to apply these filters depends on
         the knowledge base data model of the application.
 
+        Range filters are used to filter with a value range on specified knowledge base number or date fields. Common
+        use cases include price range filters and release date range filters.
+
+
         Examples:
 
+        add text filter:
         s = question_answerer.build_search(index='menu_items')
         s.filter(restaurant_id='B01CGKGQ40')
 
+        add range filter:
+        s = question_answerer.build_search(index='menu_items')
+        s.filter(filter_type='range', field='price', gte=1, lt=10)
+
         Args:
+            filter_type(str): type of filter. Valid values are 'text' and 'range'.
             a keyword argument to specify the filter text and the knowledge base document field.
         Returns:
             Search: a new Search object with added search criteria.
         """
         new_search = self._clone()
-        new_search._build_clause("filter", **kwargs)
+        new_search._build_clause("filter", filter_type=filter_type, **kwargs)
 
         return new_search
 
@@ -412,25 +435,66 @@ class Search:
     class FilterClause(Clause):
         """This class models a knowledge base filter clause.
         """
-        def __init__(self, field, value):
+        def __init__(self, field, value=None, range_gt=None, range_gte=None, range_lt=None, range_lte=None):
             self.field = field
             self.value = value
+            self.range_gt = range_gt
+            self.range_gte = range_gte
+            self.range_lt = range_lt
+            self.range_lte = range_lte
+
+            if self.value:
+                self.filter_type = 'text'
+            else:
+                self.filter_type = 'range'
 
             self.clause_type = 'filter'
 
         def build_query(self):
-            clause = {
-                "match": {
-                    self.field + ".normalized_keyword": {
-                        "query": self.value
+            clause = {}
+            if self.filter_type == 'text':
+                clause = {
+                    "match": {
+                        self.field + ".normalized_keyword": {
+                            "query": self.value
+                        }
                     }
                 }
-            }
+            elif self.filter_type == 'range':
+                lower_bound = None
+                upper_bound = None
+                if self.range_gt:
+                    lower_bound = ('gt', self.range_gt)
+                elif self.range_gte:
+                    lower_bound = ('gte', self.range_gte)
+
+                if self.range_lt:
+                    upper_bound = ('lt', self.range_lt)
+                elif self.range_lte:
+                    upper_bound = ('lte', self.range_lte)
+
+                clause = {
+                    "range": {
+                        self.field: {}
+                    }
+                }
+
+                if lower_bound:
+                    clause['range'][self.field][lower_bound[0]] = lower_bound[1]
+
+                if upper_bound:
+                    clause['range'][self.field][upper_bound[0]] = upper_bound[1]
 
             return clause
 
         def _validate(self):
-            pass
+            if self.filter_type == 'range':
+                if not self.range_gt and not self.range_gte and not self.range_lt and not self.range_lte:
+                    raise ValueError('No range parameter is specified')
+                elif self.range_gte and self.range_gt:
+                    raise ValueError('Invalid range parameters. Cannot specify both \'gte\' and \'gt\'.')
+                elif self.range_lte and self.range_lt:
+                    raise ValueError('Invalid range parameters. Cannot specify both \'lte\' and \'lt\'.')
 
     class SortClause(Clause):
         """This class models a knowledge base sort clause.
