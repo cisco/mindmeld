@@ -44,7 +44,7 @@ The corresponding JSON data file could look like this:
   }
   ...
 
-Assuming that this file is named :keyword:`stores.json` and is in the :keyword:`data` subdirectory of the application root directory, you would create the knowledge base as follows.
+Assuming that this file is named ``stores.json`` and is in the ``data`` subdirectory of the application root directory, you would create the knowledge base as follows.
 
 .. code:: python
 
@@ -52,7 +52,7 @@ Assuming that this file is named :keyword:`stores.json` and is in the :keyword:`
   >>> qa = QuestionAnswerer(app_path='my_app')
   >>> qa.load_kb('my_app', 'stores', 'my_app/data/stores.json')
 
-This code loads the Question Answerer module from Workbench, then loads the :keyword:`data/stores.json` JSON file into the index named :keyword:`stores`. To check that your knowledge base was created successfully, use the Question Answerer to retrieve store information from your index:
+This code loads the Question Answerer module from Workbench, then loads the ``data/stores.json`` JSON file into the index named ``stores``. To check that your knowledge base was created successfully, use the Question Answerer to retrieve store information from your index:
 
 .. code:: python
 

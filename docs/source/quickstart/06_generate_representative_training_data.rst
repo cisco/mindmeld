@@ -24,9 +24,9 @@ As described in :doc:`Step 3 <03_define_the_hierarchy>`, the structure of your a
 While training data is always stored in text files, there are two different types of data files used for training in Workbench. These types of training data files, and their mandatory locations, are described in the table below.
 
 ==================== ====
-**Labeled Queries**  Labeled query files are text files containing example user queries. Workbench uses them to train the domain and intent classification models. Labeled query files also support an inline markup syntax for annotating entities and entity roles within each query. These annotations are used to train both the entity and role classification models. All labeled query files belong in the :keyword:`domains` folder. Each domain and intent subfolder should contain labeled query files that apply only to that intent. The hierarchical structure of the :keyword:`domains` folder provides the classification labels used to train the domain and intent classification models.
+**Labeled Queries**  Labeled query files are text files containing example user queries. Workbench uses them to train the domain and intent classification models. Labeled query files also support an inline markup syntax for annotating entities and entity roles within each query. These annotations are used to train both the entity and role classification models. All labeled query files belong in the ``domains`` folder. Each domain and intent subfolder should contain labeled query files that apply only to that intent. The hierarchical structure of the ``domains`` folder provides the classification labels used to train the domain and intent classification models.
 
-**Entity Mappings**  Entity mappings are JSON files which associate whitelisted and blacklisted alternate names, or synonyms, with individual entities. Workbench uses entity mappings to train the models required for entity resolution. These files belong in the :keyword:`entities` folder.
+**Entity Mappings**  Entity mappings are JSON files which associate whitelisted and blacklisted alternate names, or synonyms, with individual entities. Workbench uses entity mappings to train the models required for entity resolution. These files belong in the ``entities`` folder.
 ==================== ====
 
 We will now illustrate the typical structure for these two types of training data files.
@@ -35,7 +35,7 @@ We will now illustrate the typical structure for these two types of training dat
 Labeled Query Files
 ~~~~~~~~~~~~~~~~~~~
 
-Labeled query files are the primary source of training data for the Workbench natural language processing classifiers. They are text files containing annotated example queries, one per line. Each file should contain queries which apply to a single intent only. All the labeled query files for a given intent must be placed in the folder for that intent, which is a subfolder of the :keyword:`domains` folder. For our example Kwik-E-Mart application, the :keyword:`domains` directory could be organized as follows.
+Labeled query files are the primary source of training data for the Workbench natural language processing classifiers. They are text files containing annotated example queries, one per line. Each file should contain queries which apply to a single intent only. All the labeled query files for a given intent must be placed in the folder for that intent, which is a subfolder of the ``domains`` folder. For our example Kwik-E-Mart application, the ``domains`` directory could be organized as follows.
 
 .. image:: /images/directory4.png
     :width: 400px
@@ -45,7 +45,7 @@ Since this application contains only a single domain, ``store_info``, a domain c
 
 Since the ``store_info`` domain contains multiple intents, we will use the labeled query text files to train the intent classifier for this domain. The example queries in each individual file should illustrate the typical language patterns associated with each intent.
 
-For example, the :keyword:`greet_queries.txt` file captures many of the different ways you might expect your users to express a greeting:
+For example, the ``greet_queries.txt`` file captures many of the different ways you might expect your users to express a greeting:
 
 .. code-block:: text
 
@@ -57,7 +57,7 @@ For example, the :keyword:`greet_queries.txt` file captures many of the differen
   What's up?
   ...
 
-The :keyword:`exit_queries.txt` file captures many of the different ways a user might exit your application:
+The ``exit_queries.txt`` file captures many of the different ways a user might exit your application:
 
 .. code-block:: text
 
@@ -68,7 +68,7 @@ The :keyword:`exit_queries.txt` file captures many of the different ways a user 
   sayonara
   ...
 
-The :keyword:`get_store_hours_queries.txt` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``sys_time``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
+The ``get_store_hours_queries.txt`` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``sys_time``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
 
 .. code-block:: text
 
@@ -80,7 +80,7 @@ The :keyword:`get_store_hours_queries.txt` file captures ways that a user might 
   Can you check if the {Main St|store_name} store is open on {Sunday|sys_time}?
   ...
 
-As the example shows, each inline entity is appended by the pipe character followed by its associated entity type, then the entire expression is enclosed in curly braces. Annotations for names of *system entities*, which are built into Workbench, begin with :keyword:`sys_`. In the example, :keyword:`time` is a system entity. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
+As the example shows, each inline entity is appended by the pipe character followed by its associated entity type, then the entire expression is enclosed in curly braces. Annotations for names of *system entities*, which are built into Workbench, begin with ``sys_``. In the example, ``time`` is a system entity. This simple annotation scheme provides a convenient way to label entities in order to derive the training data required to train the entity recognizer models.
 
 .. _roles_example:
 
@@ -88,7 +88,7 @@ Labeled queries can also be used to train role classification models. This is no
 
   * "Show me all Kwik-E-Mart stores open between 8am and 6pm."
 
-Here, both :keyword:`8am` and :keyword:`6pm` could be defined as entities, perhaps of type :keyword:`sys_time`. While the two entities share the same type, they play different *roles* in the query; one reflects the store opening time and the other is the store closing time. Workbench provides the capability to train models to perform this role classification. Simply supplement your labeled queries with additional role annotation, as shown below.
+Here, both ``8am`` and ``6pm`` could be defined as entities, perhaps of type ``sys_time``. While the two entities share the same type, they play different *roles* in the query; one reflects the store opening time and the other is the store closing time. Workbench provides the capability to train models to perform this role classification. Simply supplement your labeled queries with additional role annotation, as shown below.
 
 .. code-block:: text
 
@@ -102,13 +102,13 @@ Entity Mapping Files
 
 Entity mapping files specify the training data required for entity resolution. Entity resolution is the task of mapping each entity to a unique and unambiguous concept, such as a product with a specific ID or an attribute with a specific SKU number. In some cases, this mapping may be obvious. For example, the phrase 'Eiffel Tower' may always unambiguously refer to famous Paris landmark. In most applications, though, users describe the same object in many varied ways. For example, some people might refer to 'Bruce Springsteen' as 'The Boss.' The word 'Tesla' might refer to the famous scientist or the electric car company. Customers ordering a 'diet cola,' 'diet coke,' or a 'diet soda' might all expect to be served the same beverage. In Workbench, the entity resolver identifies the unique and unambiguous concept associated with each entity.
 
-Production conversational applications today rely on training data sets and supervised learning models to perform entity resolution. The training data utilized by Workbench for this purpose resides in entity mapping files located in the :keyword:`entities` folder of the application root directory.
+Production conversational applications today rely on training data sets and supervised learning models to perform entity resolution. The training data utilized by Workbench for this purpose resides in entity mapping files located in the ``entities`` folder of the application root directory.
 
 .. image:: /images/directory5.png
     :width: 350px
     :align: center
 
-In this example, :keyword:`store_name_mapping.json` is the mapping file for the ``store_name`` entity. Here is what :keyword:`store_name_mapping.json` looks like:
+In this example, ``store_name_mapping.json`` is the mapping file for the ``store_name`` entity. Here is what ``store_name_mapping.json`` looks like:
 
 .. code-block:: javascript
 

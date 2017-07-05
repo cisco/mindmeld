@@ -46,7 +46,7 @@ To launch the web service use the ``run`` command:
     ...
      * Running on http://0.0.0.0:7150/ (Press CTRL+C to quit)
 
-To test using any REST client (such as Postman or Advanced Rest Client), send `POST` requests to the web service endpoint at ``http://localhost:7150/parse``. Alternately, you can use a :keyword:`curl` command from your terminal as follows:
+To test using any REST client (such as Postman or Advanced Rest Client), send `POST` requests to the web service endpoint at ``http://localhost:7150/parse``. Alternately, you can use a :manpage:`curl` command from your terminal as follows:
 
 .. code-block:: console
 

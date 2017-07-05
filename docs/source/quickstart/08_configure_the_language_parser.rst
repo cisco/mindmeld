@@ -88,7 +88,7 @@ With the parser configuration in place, we train the NLP models and then test th
      ...
   }
 
-Some of the entities in the Natural Language Processor's output now include a :keyword:`children` field that contains a list of all dependent entities related to that head entity.
+Some of the entities in the Natural Language Processor's output now include a ``children`` field that contains a list of all dependent entities related to that head entity.
 
 .. If you are satisfied with this parser configuration, you can save it to a file.
 
