@@ -261,6 +261,8 @@ Once the classifier is trained, we test it on a new query using the familiar :ke
 
 We can further optimize our baseline role classifier using the training and evaluation options detailed in the :ref:`User Guide <userguide>`.
 
+.. _entity-resolution:
+
 Entity Resolution
 ~~~~~~~~~~~~~~~~~
 

@@ -76,7 +76,12 @@ Contents
    userguide/workbench_apps
    userguide/kb
    userguide/nlp
-   userguide/dialogue_manager
+   userguide/domain_intent_classifiers
+   userguide/entity_recognizer
+   userguide/role_classifier
+   userguide/entity_resolver
+   userguide/language_parser
+   userguide/dm
    userguide/deployment
    userguide/integration
 

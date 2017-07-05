@@ -1,187 +1,175 @@
 .. meta::
     :scope: private
 
-Workbench Architecture
-======================
+Platform Architecture
+=====================
 
-Show the workbench architecture diagram and introduce each of the components.
-4.3.1 Natural Language Processor
-  4.3.1.1 Domain Classifier
-  4.3.1.2 Intent Classifier
-  4.3.1.3 Entity Recognizer
-  4.3.1.4 Role Classifier
-  4.3.1.5 Entity Recognizer
-  4.3.1.6 Language Parser
-4.3.2 Question Answerer
-4.3.3 Dialogue Manager
-4.3.4 Application Manager
-4.3.5 Gateway
-
-[ARCHIVED CONTENT BELOW]
-
-The **MindMeld Deep-Domain Conversational AI Platform** consists of several state-of-the-art Natural Language Processing modules, that work together to provide an intelligent end-to-end conversational experience.
+The MindMeld Deep-Domain Conversational AI Platform provides a robust end-to-end pipeline for building and deploying intelligent data-driven conversational apps. The high level architecture of the platform is illustrated in the figure below.
 
 .. image:: /images/architecture.png
-   :target: ../_images/architecture.png
+    :align: center
+    :name: architecture_diagram
 
-This chapter will introduce you to the each of the modules in the MindMeld Workbench library.
+We will now take a look at each of the components in the MindMeld platform.
 
 
-Natural Language Parser
------------------------
+Natural Language Processor
+--------------------------
 
-The Natural Language Parser is tasked with comprehending the user's natural language input. This involves processing the input text using a combination of techniques such as pattern matching, text classification, information extraction and parsing. The end goal is to produce an actionable semantic representation that can be used to satisfy the dialogue task.
+The Natural Language Processor (NLP) is tasked with understanding the user's natural language input. This involves processing the user query using a combination of techniques such as `pattern matching <https://en.wikipedia.org/wiki/Pattern_matching#Pattern_matching_and_strings>`_, `text classification <https://en.wikipedia.org/wiki/Text_classification>`_, `information extraction <https://en.wikipedia.org/wiki/Information_extraction>`_, and `parsing <https://en.wikipedia.org/wiki/Parsing>`_. The end goal is to produce a representation that captures all the salient pieces of information in the query. This summarized representation is then used by the app to decide on a suitable action or response to satisfy the user's goals.
 
-.. raw:: html
+The figure below shows the NLP output on a sample user input.
 
-    <style> .red {color:red} </style>
+.. image:: /images/nlp.png
+    :align: center
+    :name: nlp_output
 
-.. raw:: html
 
-    <style> .green {color:green} </style>
+The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in Steps :doc:`3 <../quickstart/03_define_the_hierarchy>`, :doc:`6 <../quickstart/06_generate_representative_training_data>` and :doc:`7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-by-Step Guide. In addition to the four layers of classifiers, the NLP also has modules for entity resolution and language parsing. The user query is processed sequentially by each of these six subcomponents in the left-to-right order shown in the :ref:`architecture diagram <architecture_diagram>` above. The role of each step in the NLP pipeline is described below.
 
-.. raw:: html
-
-    <style> .orange {color:orange} </style>
-
-.. raw:: html
-
-    <style> .pink {color:#DB7093} </style>
-
-.. raw:: html
-
-   <style> .indigo {color:#4B0082} </style>
-
-.. role:: red
-.. role:: green
-.. role:: pink
-.. role:: indigo
-.. role:: orange
-
-For example, if a user said :red:`"A medium soy milk latte with hazelnut and caramel syrups and two slices of lemon bread."`, the parser would produce:
-
-.. image:: /images/parser.png
-   :target: ../_images/parser.png
-
-The MindMeld Parser analyzes the input using a hierarchy of classification models, with each model assisting the next tier of models by narrowing the problem scope, or in other words, by successively narrowing down the "search space".
-
-.. image:: /images/classifier_hierarchy.png
-   :target: ../_images/classifier_hierarchy.png
-   :scale: 75%
-
-We next take a look at each of the classifiers within the MindMeld Parser one by one.
 
 Domain Classifier
 ~~~~~~~~~~~~~~~~~
 
-The first level of categorization is done by the Domain Classifier, which classifies the input into one of the predetermined set of domains that can be handled by the conversational system. A **domain** can be thought of as a broad category covering multiple related user intents. Generally, each domain would have its own specialized vocabulary or terminology, that sets it apart from other domains.
+The Domain Classifier performs the first level of categorization on a user query by classifying it into one of a pre-defined set of domains that can be handled by the app. Each domain is a unique area of knowledge with its own vocabulary and specialized terminology.
 
-For instance, a conversational system built for "Smart Home Automation" would be expected to handle several distinct tasks such as -
+For instance, a conversational app serving as a "Smart Home Assistant" would be expected to handle several distinct tasks such as:
 
 * Setting the temperature on the thermostat
 * Toggling the light fixtures in different rooms
-* Locking/unlocking different doors
+* Locking and unlocking different doors
 * Controlling multimedia devices around the home
-* ...
+* Answering informational queries about time, weather, etc.
 
-The vocabulary for changing the settings on the thermostat is very specific and completely different from interacting with the television. You could therefore consider modeling them under separate domains - a "thermostat" domain for handling all interactions related to the thermostat and similarly a "multimedia" domain.
+The vocabulary used for instructing the app to change the settings on a thermostat is very different from interacting with the television. These could therefore be modeled as separate domains - a ``thermostat`` domain for handling all interactions related to the thermostat and a ``multimedia`` domain for talking to media devices in the house. Personal assistants like Siri, Cortana, Google Assistant and Alexa are trained to handle more than a dozen different domains like ``weather``, ``navigation``, ``sports``, ``music``, ``calendar``, etc.
 
-On the other hand, you can also have applications where you just have one de facto domain. This is usually the case if all the tasks that your system can handle are conceptually related and share the same vocabulary. For instance, a Food Ordering app could potentially handle multiple intents like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing any of these tasks would be shared to a large extent.
+On the opposite end of the spectrum are apps with just one de facto domain. This is usually the case if all the functions that the app provides are conceptually related and span a single realm of knowledge. For instance, a "Food Ordering" app could potentially handle multiple tasks like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing all of these tasks are highly shared, and hence could be modeled as one single domain called ``food``.
 
-The number of domains thus depends on the scope of your application. Personal assistants like Siri, Cortana, Google Assistant and Alexa are capable of handling several different domains.
-
-The Domain Classifier uses a Machine-Learned text classification model trained on many examples of user queries along with their true domain labels. At runtime, the classifier analyzes the user input and assigns it a domain, based on the most likely one predicted by the trained model.
-
-See the chapter on :doc:`Training data </training_data>` for a discussion on generating the labelled data for training. In the :doc:`Domain Classifier </domain_classification>` chapter, we will take a closer look at training and evaluating the domain classification model.
+The number of domains thus depends on the scope of the application. For apps with multiple domains, the :doc:`Domain Classifier User Guide <domain_intent_classifiers>` describes how Workbench can be used to train a machine-learned domain classification model.
 
 
 Intent Classifier
 ~~~~~~~~~~~~~~~~~
 
-Once the domain for the user input has been determined, the next level of categorization is provided by the Intent Classifier. An **intent** refers to a very specific kind of informational or transactional user need. The user may want to book a flight, search for movies from a catalog, know about the weather conditions somewhere or set the temperature on their home thermostat. Each of these is an example of a user intent.
+Once the domain has been determined, the Intent Classifier provides the next level of categorization by assigning each query to one of the intents defined for the app. The intent reflects what the user is trying to accomplish. For instance, the user may want to book a flight, search for movies from a catalog, know about the weather conditions or set the temperature on their home thermostat. Each of these is an example of a user intent. The intent also prescribes a specific action or answer type which defines the desired outcome for the query.
 
-A domain can, and usually has multiple intents. For instance, the de facto "food" domain in a Food Ordering app would at least contain intents such as:
+Each domain in a conversational app usually has multiple intents. By convention, intent names are verbs that describe what the user is trying accomplish. Here are some example intents from the ``food`` domain in a "Food Ordering" app.
 
-  +--------------------+------------------------------------------------------------------------------------------------+
-  |    Intent          |  Description                                                                                   |
-  +====================+================================================================================================+
-  |search_restaurant   | Searching for restaurants matching a particular set of criteria                                |
-  +--------------------+------------------------------------------------------------------------------------------------+
-  |get_restaurant_info | Get general information about a selected restaurant like hours, cuisine, price range, etc.     |
-  +--------------------+------------------------------------------------------------------------------------------------+
-  |list_dishes         | List all the dishes available at a selected restaurant, optionally filtered by certain criteria|
-  +--------------------+------------------------------------------------------------------------------------------------+
-  |place_order         | Place an order for pick up or delivery                                                         |
-  +--------------------+------------------------------------------------------------------------------------------------+
++---------------------+-------------------------------------------------------------------------------------------+
+| Intent              | Description                                                                               |
++=====================+===========================================================================================+
+| search_restaurant   | Searching for restaurants matching a particular set of criteria                           |
++---------------------+-------------------------------------------------------------------------------------------+
+| get_restaurant_info | Get information about a selected restaurant like hours, cuisine, price range, etc         |
++---------------------+-------------------------------------------------------------------------------------------+
+| browse_dish         | List dishes available at a selected restaurant, filtered by given criteria                |
++---------------------+-------------------------------------------------------------------------------------------+
+| place_order         | Place an order for pick up or delivery                                                    |
++---------------------+-------------------------------------------------------------------------------------------+
 
-By convention, we use verbs to name our intents as they inherently refer to an action that needs to be taken.
-
-The Intent Classifier, similar to the Domain Classifier uses a Machine-Learned text classification model that is trained using labelled training data. We train one intent classification model per domain and the system chooses the appropriate classifier model at runtime, based on the predicted domain for the input query. The output of the Intent Classifier is an intent label which allows us to identify the exact task that the user is trying to solve.
-
-We describe how to build intent classification models in :doc:`Intent Classifier </intent_classification>`.
+Every domain has its own separate intent classifier for categorizing the query into one of the intent defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query. Refer to the :doc:`Intent Classifier User Guide <domain_intent_classifiers>` for details on training intent classification models using Workbench.
 
 
 Entity Recognizer
 ~~~~~~~~~~~~~~~~~
 
-After the user intent has been established by the Intent Classifier, the next step is to identify all the entities relevant to satisfying the user intent. An **entity** is any important word or phrase that provides further information about the user's end goal. For instance, if the user intent was to search for a movie, the relevant entities would be things like movie titles, genre, cast names, etc. If the intent was to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.
+The next step in the NLP pipeline, the Entity Recognizer, identifies all the entities that are relevant to a given intent. An entity is any important word or phrase that provides the necessary information to understand and fulfill the user's end goal. For instance, if the user intent is to search for a movie, the relevant entities would be movie titles, genre, cast names, etc. If the intent is to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.
 
-For programmers, a good analogy is to think of intents as functions and entities as the arguments you pass into the function call. E.g:
+Each intent within a domain usually has multiple entities. By convention, entity names are nouns that describe the entity type. Here are some examples of entity types that might be required for different conversational intents.
 
-* Set_thermostat (:red:`temperature` = 70)
-* Get_weather_info (:green:`city` = 'San Francisco')
-* Find_movies (:indigo:`release_year` = '2016', :pink:`actor` = 'Tom Hanks', :orange:`genre` = 'Drama').
++---------+-------------------+-----------------------------------------------------------------------+
+| Domain  | Intent            | Entity Types                                                          |
++=========+===================+=======================================================================+
+| weather | check_weather     | location, day                                                         |
++---------+-------------------+-----------------------------------------------------------------------+
+| movies  | find_movie        | movie_title, genre, cast, director, release_date, rating              |
++---------+-------------------+-----------------------------------------------------------------------+
+| food    | search_restaurant | restaurant_name, cuisine, dish_name, location, price_range, rating    |
++---------+-------------------+-----------------------------------------------------------------------+
+| food    | browse_dish       | dish_name, category, ingredient, spice_level, price_range             |
++---------+-------------------+-----------------------------------------------------------------------+
 
-The Entity Recognizer's job is to analyze the user input and extract all the entities relevant to the current intent. In NLP literature, this problem is commonly referred to as `Named Entity Recognition <https://en.wikipedia.org/wiki/Named-entity_recognition>`_.
-
-The problem essentially consists of two parts:
-
-1. Detect which spans of words within the input text correspond to entities of interest
-2. Classify those detected text spans into a pre-determined set of entity types
-
-The Entity Recognizer uses a Machine-Learned Sequence Labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in :doc:`Entity Recognizer </entity_recognition>`.
-
-At runtime, the Entity Recognizer loads the appropriate model, based on the predicted intent for the query. Once this step is done and we have extracted the relevant entities, we will finally have all the raw ingredients required to make sense out of the user input. The next step would be to put those together to build a semantic representation that encapsulates all the information necessary to execute the user's intended action.
-
-
-Entity Resolver
-~~~~~~~~~~~~~~~
-
-The Entity Resolver transforms the entity spans extracted by the Entity Recognizer into canonical forms that can be looked up in a catalog or a Knowledge Base. For instance, the extracted entity :red:`"lemon bread"` may get resolved to :red:`"Iced Lemon Pound Cake"` and :green:`"SF"` may get resolved to :green:`"San Francisco"`. This problem of entity resolution is also referred to as `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ in NLP literature.
-
-The MindMeld Entity Resolver uses a resource called an **Entity Map** to transform extracted entities into their desired normalized forms. The chapters on :doc:`Entity Map </entity_map>` and :doc:`Entity Resolver </entity_resolution>` provide more details on the entity resolution step.
+Since the set of relevant entity types might differ for each intent (even within the same domain), every intent has its own separate entity recognizer. Once the domain and intent have been established at runtime, the app uses the appropriate entity model to detect entities in the query that are specific to the predicted intent. We will get into the details of building machine-learned entity recognition models using Workbench in the :doc:`Entity Recognizer User Guide <entity_recognizer>`.
 
 
 Role Classifier
 ~~~~~~~~~~~~~~~
 
-Role Classification is the task of identifying predicates and predicate arguments. A **semantic role** in language is the relationship that a syntactic constituent has with a predicate. In Conversational NLU, a **role** represents the semantic theme a given entity can take. It can also be used to define how a named entity should be used for fulfilling a query intent. For example, in the query :red:`"Play Black Sabbath by Black Sabbath"`, the **title** entity :green:`"Black Sabbath"` has different semantic themes - **song** and **artist** respectively.
+The Role Classifier is the last level in the 4-layer NLP classification hierarchy. It assigns a differentiating label, called a role, to the entities extracted by the entity recognizer. Sub-categorizing entities in this manner is only necessary where an entity of a particular type can have multiple meanings depending on the context. For example, “9 AM” and “5 PM” could both be classified as time entities, but one might need to be interpreted as playing the role of an opening time and the other as playing the role of a closing time. The role classifiers label such entities with the appropriate roles.
 
-Treating Named Entity Recognition (NER) and Semantic Role Labeling (SRL) as separate tasks has a few advantages -
+Here are examples of some entity types that might require role classification when dealing with certain intents.
 
-* NER models are hurt by splitting examples across fairly similar categories. Grouping entities with significantly overlapping entities and similar surrounding natural language will lead to better parsing and let us use more powerful models.
-* Joint NER & SRL needs global dependencies, but fast & good NER models only do local. NER models (MEMM, CRF) quickly become intractable with long-distance dependencies. Separating NER from SRL let us use local dependencies for NER and long-distance dependencies in SRL.
-* Role labeling might be a multi-label problem. With multi-label roles, we can use the same entity to query multiple fields.
++---------+------------------+-------------+----------------------+
+| Domain  | Intent           | Entity Type | Role Types           |
++=========+==================+=============+======================+
+| meeting | schedule_meeting | time        | start_time, end_time |
++---------+------------------+-------------+----------------------+
+| travel  | book_flight      | location    | origin, destination  |
++---------+------------------+-------------+----------------------+
+| retail  | search_product   | price       | min_price, max_price |
++---------+------------------+-------------+----------------------+
+| banking | transfer_funds   | account_num | sender, recipient    |
++---------+------------------+-------------+----------------------+
+
+Role classifiers are trained separately for each entity that requires the additional categorization. We describe how to build role classification models with Workbench in the :doc:`Role Classifier User Guide <role_classifier>`.
+
+After the domain, intent, entities and roles have been determined by the 4-level classifier hierarchy discussed above, the processed query is sent to the Entity Resolver and the Language Parser modules to complete the natural language understanding of the user input.
+
+
+Entity Resolver
+~~~~~~~~~~~~~~~
+
+The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity-resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" might be resolved to "San Francisco, CA". 
+
+In conversational interactions, users generally refer to entities in informal terms, using abbreviations, nicknames, and other aliases, rather than their official standardized names. Robust entity resolution is hence key to a seamless conversational experience. The MindMeld Entity Resolver leverages advanced text relevance algorithms, similar to the ones used in state-of-the-art information retrieval systems to ensure high resolution accuracies.
+
+Each entity has its own resolver that is trained to capture all the name variations specific to that entity. We will learn more about how to build about entity resolvers using Workbench in the :doc:`Entity Resolver User Guide <entity_resolver>`.
 
 
 Language Parser
 ~~~~~~~~~~~~~~~
 
-The Semantic Parser is the last subcomponent within the MindMeld Natural Language Parser. It takes all the resolved entities and groups them into semantically related items. Each item represents a single real-world entity or concept along with all its describing attributes.
+As described in the :doc:`Step-By-Step Guide <../quickstart/08_configure_the_language_parser>`, the Language Parser is the final module in the NLP pipeline. The parser finds relationships between the extracted entities and clusters them into meaningful entity groups. Each entity group has an inherent hierarchy, representing a real-world organizational structure.
 
-We provide more details in :doc:`Language Parser </language_parsing>`.
+In the :ref:`example <nlp_output>` above, the resolved entities have been arranged into three separate entity groups, with each group describing a distinct real-world concept:
+
+.. image:: /images/entity_groups.png
+    :align: center
+
+The first two groups represent the products to be ordered, whereas the last group contains the store information. The main entity at the top in each group is called the parent or the `head <https://en.wikipedia.org/wiki/Head_(linguistics)>`_, whereas the other entities are called its children or `dependents <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_. This structured representation of the user's natural language input can then be interpreted by the app to decide on the next action and/or response. E.g. submitting the order to a point-of-sale system to complete the user's order.
+
+Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The MindMeld Language Parser, on the other hand, is a config-driven rule-based parser which works out-of-the-box without the need for training. Refer to the :doc:`User Guide <language_parser>` for details on how Workbench can be used to configure the parser for optimum performance for a specific app.
+
+The Natural Language Processor gets half of the job done, namely, understanding what the user wants. The next two components in the MindMeld pipeline address the other half by responding appropriately to the user and advancing the conversation.
+
+
+Question Answerer
+-----------------
+
+Most of the modern conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the important world knowledge for a given application use case. The component responsible for interfacing with the knowledge base is called the Question Answerer. See Steps :doc:`5 <../quickstart/05_create_the_knowledge_base>` and :doc:`9 <../quickstart/09_optimize_question_answering_performance>` of the Step-By-Step Guide for an introduction to the topics of Knowledge Base and Question Answering.
+
+The question answerer uses information retrieval techniques to identify the best answer candidates from the knowledge base that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify the user requested dishes and answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.
+
+The MindMeld Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches. Refer to the :doc:`Question Answerer User Guide <kb>` for detailed documentation along with examples.
 
 
 Dialogue Manager
 ----------------
 
-The Dialogue Manager is responsible for directing the flow of the conversation. In contrast to other parts of the system that are stateless, the Dialogue Manager is stateful and maintains information about each state or step in the dialogue flow. It is therefore able to use historical context from previous conversation turns to move the dialogue along towards the end goal of satisfying the user's intent.
+The Dialogue Manager is a stateful component responsible for directing the flow of the conversation. It analyzes each incoming request and assigns it to a dialogue state handler which then executes the required logic and returns a response to the user.
 
-The Natural Language Generator (NLG) component frames the natural language response to be output to the user. It receives information about how the user's intent has been processed and uses that in conjunction with a set of pre-defined templates to construct a fluent natural language text response. We will go into further details in Natural Language Generator chapter.
+Architecting the dialogue manager correctly is often one of the most challenging software engineering tasks when building a conversational app for a non-trivial use case. Workbench offers a simple solution by abstracting away many of the underlying complexities of dialogue management and offering developers a simple but powerful mechanism for defining their application logic. Workbench provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. It also allows dialogue state handlers to invoke any arbitrary code for taking a specific action, completing a transaction or getting the information necessary for formulating a response.
 
-Question Answerer
------------------
+Refer to Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide for a practical introduction to dialogue state tracking using Workbench. We will see more examples in the :doc:`Dialogue Manager User Guide <dm>`. 
 
-In the context of Deep-Domain Conversational AI, Question Answering is the task of retrieving relevant documents from a large content catalog in response to a natural language question. A large-vocabulary content catalog is first imported into a **Knowledge Base**. The Question Answerer uses the structured output of the Language Parser to first construct a database query. The query is then executed on the Knowledge Base to retrieve a wide net of candidate answers to the query. Finally, these candidate answers are scored and ranked, and the top ranked results are returned as the most relevant documents to the natural language query.
+.. 
+  Application Manager
+  -------------------
 
-The parameters and weights assigned to the various entity types determine the effect of those entities on the final ranking. More context is provided in the chapter on :doc:`Question Answerer </question_answering>`.
+  Gateway
+  -------
+
+
+
+
+That concludes our quick tour of the MindMeld Conversational AI platform. Now that we are familiar with all its components, the rest of this user guide will focus on hands-on tutorials using Workbench to build modern data-driven conversational apps that run on the MindMeld platform.
