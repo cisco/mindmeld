@@ -235,10 +235,10 @@ The :meth:`process` method executes the following steps:
 The chapters on the individual NLP components provide more details on the above steps, along with documentation on their outputs and advanced features like batch testing and evaluation.
 
 
-Save Models for Future Use
+Save models for future use
 --------------------------
 
-Once you have trained an NLP pipeline and are satisfied with its accuracy, you can save it to disk using the :meth:`NaturalLanguageProcessor.dump` method. The :meth:`dump` method saves all the trained models to a Workbench-generated cache folder within your project.
+Once you have trained an NLP pipeline and are satisfied with its accuracy, you can save it to disk using the :meth:`NaturalLanguageProcessor.dump` method. The :meth:`dump` method saves all the trained models to a cache folder within your Workbench project.
 
 .. code:: python
 
@@ -247,7 +247,7 @@ Once you have trained an NLP pipeline and are satisfied with its accuracy, you c
    Saving entity recognizer: domain='ordering', intent='build_order'
    ...
 
- The saved models can then be loaded anytime in the future using the :meth:`NaturalLanguageProcess.load` method.
+The saved models can then be loaded anytime using the :meth:`NaturalLanguageProcess.load` method.
 
 .. code:: python
 
@@ -255,6 +255,4 @@ Once you have trained an NLP pipeline and are satisfied with its accuracy, you c
    Loading intent classifier: domain='ordering'
    ...
 
-Refer to the chapters
-
-
+In addition to saving the models all at once, you can also choose to save just one specific NLP model. This is useful when you are actively experimenting with the classifiers individually and want to checkpoint your work or save multiple model versions for comparison. This can be accomplished using the :meth:`dump` and :meth:`load` methods exposed by each classifier. Refer to the chapter for the appropriate classifier to learn more.
