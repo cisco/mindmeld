@@ -196,10 +196,11 @@ class MemmModel(SkLearnModel):
         """
         # TODO: also expose feature weights?
         predictions = self.predict(examples)
-        evaluations = [EvaluatedExample(e, labels[i], predictions[i], None)
+        config = self._get_effective_config()
+
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i], None, config.label_type)
                        for i, e in enumerate(examples)]
 
-        config = self._get_effective_config()
         model_eval = EntityModelEvaluation(config, evaluations)
         return model_eval
 

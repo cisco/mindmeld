@@ -90,7 +90,7 @@ class ModelConfig(object):
 
 
 class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
-                                                       'probas'])):
+                                                       'probas', 'label_type'])):
     """Represents the evaluation of a single example
 
     Attributes:
@@ -98,11 +98,25 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
         expected: The expected label for the example
         predicted: The predicted label for the example
         proba (dict): Maps labels to their predicted probabilities
+        label_type (str): One of domain, intent, or entities
     """
 
     @property
     def is_correct(self):
-        return self.expected == self.predicted
+        # For entities compare just the span and text.
+        # Todo: Update mallard to take a reference time so times are consistent and we can
+        # do a full object comparison for entities like we do for domain and intent
+        if self.label_type == 'entities':
+            if len(self.expected) != len(self.predicted):
+                return False
+            for i in range(len(self.expected)):
+                if self.expected[i].text != self.predicted[i].text:
+                    return False
+                if self.expected[i].span != self.predicted[i].span:
+                    return False
+            return True
+        else:
+            return self.expected == self.predicted
 
 
 class RawResults():
