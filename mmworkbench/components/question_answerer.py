@@ -218,11 +218,8 @@ class Search:
             key, value = six.next(six.iteritems(kwargs))
             clause = Search.QueryClause(key, value)
         elif type == "filter":
-            filter_type = kwargs.pop('filter_type')
-            if filter_type == 'text':
-                key, value = six.next(six.iteritems(kwargs))
-                clause = Search.FilterClause(field=key, value=value)
-            else:
+            # set the filter type to be 'range' if any range operator is specified.
+            if kwargs.get('gt') or kwargs.get('gte') or kwargs.get('lt') or kwargs.get('lte'):
                 field = kwargs.get('field')
                 gt = kwargs.get('gt')
                 gte = kwargs.get('gte')
@@ -234,6 +231,10 @@ class Search:
                                              range_gte=gte,
                                              range_lt=lt,
                                              range_lte=lte)
+            else:
+                key, value = six.next(six.iteritems(kwargs))
+                clause = Search.FilterClause(field=key, value=value)
+
         elif type == "sort":
             sort_field = kwargs.get('field')
             sort_type = kwargs.get('sort_type')
@@ -270,7 +271,7 @@ class Search:
 
         return new_search
 
-    def filter(self, filter_type='text', **kwargs):
+    def filter(self, **kwargs):
         """Specify filter condition to be applied to specified knowledge base field. In Workbench
         two types of filters are supported: text filter and range filters.
 
@@ -304,11 +305,11 @@ class Search:
             Search: a new Search object with added search criteria.
         """
         new_search = self._clone()
-        new_search._build_clause("filter", filter_type=filter_type, **kwargs)
+        new_search._build_clause("filter", **kwargs)
 
         return new_search
 
-    def sort(self, field, sort_type, location):
+    def sort(self, field, sort_type, location=None):
         """Specify custom sort criteria.
 
         Args:
@@ -324,7 +325,14 @@ class Search:
         return new_search
 
     def _get_field_stats(self, field):
-        """Get knowledge field statistics for custom sort functions.
+        """Get knowledge field statistics for custom sort functions. The field statistics is
+        only available for number and date typed fields.
+
+        Args:
+            field(str): knowledge base field name
+
+        Returns:
+            dict: dictionary that contains knowledge base field statistics.
         """
 
         stats_query = {"aggs": {}, "size": 0}
@@ -394,6 +402,8 @@ class Search:
         return results
 
     class Clause:
+        """This class models an abstract knowledge base clause."""
+
         def __init__(self):
             self.clause_type = None
 
@@ -407,9 +417,10 @@ class Search:
             return self.clause_type
 
     class QueryClause(Clause):
-        """This class models a knowledge base query clause.
-        """
+        """This class models a knowledge base query clause."""
+
         def __init__(self, field, value):
+            """Initialize a knowledge base query clause."""
             self.field = field
             self.value = value
 
@@ -448,14 +459,15 @@ class Search:
 
             return clause
 
-        def _validate(self):
-            pass
-
     class FilterClause(Clause):
-        """This class models a knowledge base filter clause.
-        """
+        """This class models a knowledge base filter clause."""
+
         def __init__(self, field, value=None, range_gt=None, range_gte=None, range_lt=None,
                      range_lte=None):
+            """Initialize a knowledge base filter clause. The filter type is determined by whether
+            the range operators or value is passed in.
+            """
+
             self.field = field
             self.value = value
             self.range_gt = range_gt
@@ -520,9 +532,10 @@ class Search:
                         'Invalid range parameters. Cannot specify both \'lte\' and \'lt\'.')
 
     class SortClause(Clause):
-        """This class models a knowledge base sort clause.
-        """
+        """This class models a knowledge base sort clause."""
+
         def __init__(self, field, sort_type='desc', field_stats=None, location=None):
+            """Initialize a knowledge base sort clause"""
             self.field = field
             self.type = type
             self.location = location
@@ -561,5 +574,3 @@ class Search:
 
             return sort_clause
 
-        def _validate(self):
-            pass
