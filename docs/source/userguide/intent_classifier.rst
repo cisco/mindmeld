@@ -4,6 +4,9 @@
 Intent Classifier
 =================
 
+The Intent Classifier is run as the second step in the natural language processing pipeline to determine the target intent for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the intents in a given domain. The name of each intent folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Intent classification models are trained per domain. A Workbench app hence has one intent classifier for every domain that has multiple intents.
+
+
 Introduce the general ML techniques and methodology common to all NLP classifiers:
 Getting the right kind of training data using in-house data generation and crowdsourcing, QAing and analyzing the data
 Training a Workbench classifier, using k-fold cross-validation for hyperparameter selection

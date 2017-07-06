@@ -45,7 +45,7 @@ The vocabulary used for instructing the app to change the settings on a thermost
 
 On the opposite end of the spectrum are apps with just one de facto domain. This is usually the case if all the functions that the app provides are conceptually related and span a single realm of knowledge. For instance, a "Food Ordering" app could potentially handle multiple tasks like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing all of these tasks are highly shared, and hence could be modeled as one single domain called ``food``.
 
-The number of domains thus depends on the scope of the application. For apps with multiple domains, the :doc:`Domain Classifier User Guide <domain_intent_classifiers>` describes how Workbench can be used to train a machine-learned domain classification model.
+The number of domains thus depends on the scope of the application. For apps with multiple domains, the :doc:`Domain Classifier User Guide <domain_classifier>` describes how Workbench can be used to train a machine-learned domain classification model.
 
 
 Intent Classifier
@@ -67,7 +67,7 @@ Each domain in a conversational app usually has multiple intents. By convention,
 | place_order         | Place an order for pick up or delivery                                                    |
 +---------------------+-------------------------------------------------------------------------------------------+
 
-Every domain has its own separate intent classifier for categorizing the query into one of the intent defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query. Refer to the :doc:`Intent Classifier User Guide <domain_intent_classifiers>` for details on training intent classification models using Workbench.
+Every domain has its own separate intent classifier for categorizing the query into one of the intent defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query. Refer to the :doc:`Intent Classifier User Guide <intent_classifier>` for details on training intent classification models using Workbench.
 
 
 Entity Recognizer
