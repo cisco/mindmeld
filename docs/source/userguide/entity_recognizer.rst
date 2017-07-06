@@ -4,6 +4,9 @@
 Entity Recognizer
 =================
 
+The Entity Recognizer is run as the third step in the natural language processing pipeline to detect all the relevant entities in a given query. It is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the entity types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Entity recognition models are trained per intent. A Workbench app hence has one entity recognizer for every intent that requires entity detection.
+
+
 Introduce the general ML techniques and methodology common to all NLP classifiers:
 Getting the right kind of training data using in-house data generation and crowdsourcing, QAing and analyzing the data
 Training a Workbench classifier, using k-fold cross-validation for hyperparameter selection

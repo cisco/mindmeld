@@ -4,6 +4,12 @@
 Role Classifier
 ===============
 
+The Role Classifier is run as the fourth step in the natural language processing pipeline to determine the target roles for entities in a given query. It is a machine-learned :doc:`classification <https://en.wikipedia.org/wiki/Statistical_classification>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the role types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Role classification models are trained per entity type. A Workbench app hence has one role classifier for every entity type with associated roles.
+
+
+
+
+
 Introduce the general ML techniques and methodology common to all NLP classifiers:
 Getting the right kind of training data using in-house data generation and crowdsourcing, QAing and analyzing the data
 Training a Workbench classifier, using k-fold cross-validation for hyperparameter selection

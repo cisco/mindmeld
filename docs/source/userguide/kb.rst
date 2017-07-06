@@ -1,8 +1,8 @@
 .. meta::
     :scope: private
 
-Knowledge Base and Question Answerering
-=======================================
+Knowledge Base and Question Answerer
+====================================
 
 Describe the knowledge base and question answerer in detail. Describe why KB data is important, why it’s one of the first things the app developer needs to prepare, how it helps with NLP and QA, and what are some potential sources to get this data from.
 
