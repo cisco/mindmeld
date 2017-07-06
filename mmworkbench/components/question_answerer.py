@@ -44,23 +44,28 @@ class QuestionAnswerer(object):
 
     def get(self, index, **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided
-        search criteria. This API provides a simple interface for developers to specify a list of knowledge base field
-        and query string pairs to find best matches in a similar way as in common Web search interfaces.
-        The knowledge base fields to be used depend on the mapping between NLU entity types and corresponding
-        knowledge base objects, e.g. “cuisine” entity type can be mapped to a knowledge base object or an attribute
-        of a knowledge base object. The mapping is often application specific and is dependent on the data model
-        developers choose to use when building knowledge base.
+        search criteria. This API provides a simple interface for developers to specify a list of
+        knowledge base field and query string pairs to find best matches in a similar way as in
+        common Web search interfaces. The knowledge base fields to be used depend on the mapping
+        between NLU entity types and corresponding knowledge base objects, e.g. “cuisine” entity
+        type can be mapped to a knowledge base object or an attribute of a knowledge base object.
+        The mapping is often application specific and is dependent on the data model developers
+        choose to use when building knowledge base.
 
         Examples:
 
-        question_answerer.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40',
-                              _sort='price', _sort_type='asc')
+        question_answerer.get(index='menu_items',
+                              name='pork and shrimp',
+                              restaurant_id='B01CGKGQ40',
+                              _sort='price',
+                              _sort_type='asc')
 
         Args:
             index (str): The name of an index
-            id (str): The id of a particular document to retrieve
+            id (str): The id of a particular document to retrieve.
             _sort (str): Specify the knowledge base field for custom sort.
-            _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and 'distance'
+            _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
+                              'distance'.
             _sort_location (dict): The origin location to be used when sorting by distance.
 
         Returns:
@@ -83,7 +88,8 @@ class QuestionAnswerer(object):
         sort_clause = {}
         query_clauses = []
 
-        # iterate through keyword arguments to get KB field and value pairs for search and custom sort criteria
+        # iterate through keyword arguments to get KB field and value pairs for search and custom
+        # sort criteria
         for key, value in kwargs.items():
             logger.debug("Processing argument: key= {} value= {}.".format(key, value))
             if key == '_sort':
@@ -98,7 +104,8 @@ class QuestionAnswerer(object):
 
         logger.debug("Custom sort criteria {}.".format(sort_clause))
 
-        # build Search object with overriding ranking setting to require all query clauses are matched.
+        # build Search object with overriding ranking setting to require all query clauses are
+        # matched.
         s = self.build_search(index, {'query_clauses_operator': 'and'})
 
         # add query clauses to Search object.
@@ -107,7 +114,9 @@ class QuestionAnswerer(object):
 
         # add custom sort clause if specified.
         if sort_clause:
-            s = s.sort(field=sort_clause['field'], sort_type=sort_clause['type'], location=sort_clause.get('location'))
+            s = s.sort(field=sort_clause['field'],
+                       sort_type=sort_clause['type'],
+                       location=sort_clause.get('location'))
 
         results = s.execute()
         return results
@@ -162,8 +171,8 @@ class QuestionAnswerer(object):
 
 
 class Search:
-    """This class models a generic filtered search in knowledge base. It allows developers to construct more complex
-    knowledge base search criteria based on the application requirements.
+    """This class models a generic filtered search in knowledge base. It allows developers to
+    construct more complex knowledge base search criteria based on the application requirements.
 
     """
     def __init__(self, client, index, ranking_config=None):
@@ -220,29 +229,36 @@ class Search:
                 lt = kwargs.get('lt')
                 lte = kwargs.get('lte')
 
-                clause = Search.FilterClause(field=field, range_gt=gt, range_gte=gte, range_lt=lt, range_lte=lte)
+                clause = Search.FilterClause(field=field,
+                                             range_gt=gt,
+                                             range_gte=gte,
+                                             range_lt=lt,
+                                             range_lte=lte)
         elif type == "sort":
             sort_field = kwargs.get('field')
             sort_type = kwargs.get('sort_type')
             sort_location = kwargs.get('location')
 
-            clause = Search.SortClause(sort_field, sort_type, self._get_field_stats(sort_field), sort_location)
+            clause = Search.SortClause(sort_field,
+                                       sort_type,
+                                       self._get_field_stats(sort_field),
+                                       sort_location)
 
         clause.validate()
         self._clauses[clause.get_type()].append(clause)
 
     def query(self, **kwargs):
-        """Specify the query text to match on a knowledge base text field. The query text is normalized and processed
-        to find matches in knowledge base using several text relevance scoring factors including exact matches,
-        phrase matches and partial matches.
+        """Specify the query text to match on a knowledge base text field. The query text is
+        normalized and processed to find matches in knowledge base using several text relevance
+        scoring factors including exact matches, phrase matches and partial matches.
 
         Examples:
 
         s = question_answerer.build_search(index='dish')
         s.query(name='pad thai')
 
-        In the example above the query text "pad thai" will be used to match against document field "name" in KB
-        index "dish".
+        In the example above the query text "pad thai" will be used to match against document field
+        "name" in knowledge base index "dish".
 
         Args:
             a keyword argument to specify the query text and the knowledge base document field.
@@ -255,18 +271,20 @@ class Search:
         return new_search
 
     def filter(self, filter_type='text', **kwargs):
-        """Specify filter condition to be applied to specified knowledge base field. In Workbench two types of filters
-        are supported: text filter and range filters.
+        """Specify filter condition to be applied to specified knowledge base field. In Workbench
+        two types of filters are supported: text filter and range filters.
 
         Text filters are used to apply hard filters on specified knowledge base text fields.
-        The filter text value is normalized and matched using entire text span against the knowledge base field.
+        The filter text value is normalized and matched using entire text span against the
+        knowledge base field.
+
         It's common to have filter conditions based on other resolved canonical entities.
-        For example, in food ordering domain the resolved restaurant entity can be used as a filter to resolve
-        dish entities. The exact knowledge base field to apply these filters depends on
+        For example, in food ordering domain the resolved restaurant entity can be used as a filter
+        to resolve dish entities. The exact knowledge base field to apply these filters depends on
         the knowledge base data model of the application.
 
-        Range filters are used to filter with a value range on specified knowledge base number or date fields. Common
-        use cases include price range filters and release date range filters.
+        Range filters are used to filter with a value range on specified knowledge base number or
+        date fields. Example use cases include price range filters and date range filters.
 
 
         Examples:
@@ -295,10 +313,11 @@ class Search:
 
         Args:
             field (str): knowledge base field for sort.
-            sort_type (str): sorting type. valid values are 'asc', 'desc' and 'distance'. 'asc' and 'desc' can be used
-                        to sort numeric or date fields and 'distance' can be used to sort by distance on geo_point
-                        fields
-            location (str): location (lat, lon) in geo_point format to be used as origin when sorting by 'distance'
+            sort_type (str): sorting type. valid values are 'asc', 'desc' and 'distance'. 'asc' and
+                             'desc' can be used to sort numeric or date fields and 'distance' can
+                             be used to sort by distance on geo_point fields
+            location (str): location (lat, lon) in geo_point format to be used as origin when
+                            sorting by 'distance'
         """
         new_search = self._clone()
         new_search._build_clause("sort", field=field, sort_type=sort_type, location=location)
@@ -353,8 +372,8 @@ class Search:
 
         if self._clauses['filter']:
             for clause in self._clauses['filter']:
-                es_query['query']['function_score']['query']['bool']['filter']['bool']['must'].append(
-                    clause.build_query())
+                es_query['query']['function_score']['query']['bool']['filter']['bool']['must']\
+                    .append(clause.build_query())
 
         for clause in self._clauses['sort']:
             sort_function = clause.build_query()
@@ -435,7 +454,8 @@ class Search:
     class FilterClause(Clause):
         """This class models a knowledge base filter clause.
         """
-        def __init__(self, field, value=None, range_gt=None, range_gte=None, range_lt=None, range_lte=None):
+        def __init__(self, field, value=None, range_gt=None, range_gte=None, range_lt=None,
+                     range_lte=None):
             self.field = field
             self.value = value
             self.range_gt = range_gt
@@ -489,12 +509,15 @@ class Search:
 
         def _validate(self):
             if self.filter_type == 'range':
-                if not self.range_gt and not self.range_gte and not self.range_lt and not self.range_lte:
+                if not self.range_gt and not self.range_gte and not self.range_lt and \
+                   not self.range_lte:
                     raise ValueError('No range parameter is specified')
                 elif self.range_gte and self.range_gt:
-                    raise ValueError('Invalid range parameters. Cannot specify both \'gte\' and \'gt\'.')
+                    raise ValueError(
+                        'Invalid range parameters. Cannot specify both \'gte\' and \'gt\'.')
                 elif self.range_lte and self.range_lt:
-                    raise ValueError('Invalid range parameters. Cannot specify both \'lte\' and \'lt\'.')
+                    raise ValueError(
+                        'Invalid range parameters. Cannot specify both \'lte\' and \'lt\'.')
 
     class SortClause(Clause):
         """This class models a knowledge base sort clause.
