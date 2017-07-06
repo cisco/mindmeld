@@ -78,6 +78,7 @@ class EntityResolver(object):
                     new_list.append({"name": syn})
                 doc['whitelist'] = new_list
                 base.update(doc)
+
                 yield base
 
         load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE,
@@ -171,40 +172,16 @@ class EntityResolver(object):
 
         text_relevance_query = {
             "query": {
-                "bool": {
-                    "should": [
-                        {
-                            "bool": {
-                                "should": [
-                                    {
-                                        "match": {
-                                            "cname.normalized_keyword": {
-                                                "query": entity.text,
-                                                "boost": 10
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "match": {
-                                            "cname.raw": {
-                                                "query": entity.text,
-                                                "boost": 10
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "nested": {
-                                "path": "whitelist",
-                                "score_mode": "max",
-                                "query": {
+                "function_score": {
+                    "query": {
+                        "bool": {
+                            "should": [
+                                {
                                     "bool": {
                                         "should": [
                                             {
                                                 "match": {
-                                                    "whitelist.name.normalized_keyword": {
+                                                    "cname.normalized_keyword": {
                                                         "query": entity.text,
                                                         "boost": 10
                                                     }
@@ -212,25 +189,59 @@ class EntityResolver(object):
                                             },
                                             {
                                                 "match": {
-                                                    "whitelist.name": {
-                                                        "query": entity.text
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                "match": {
-                                                    "whitelist.name.char_ngram": {
-                                                        "query": entity.text
+                                                    "cname.raw": {
+                                                        "query": entity.text,
+                                                        "boost": 10
                                                     }
                                                 }
                                             }
                                         ]
                                     }
                                 },
-                                "inner_hits": {}
-                            }
+                                {
+                                    "nested": {
+                                        "path": "whitelist",
+                                        "score_mode": "max",
+                                        "query": {
+                                            "bool": {
+                                                "should": [
+                                                    {
+                                                        "match": {
+                                                            "whitelist.name.normalized_keyword": {
+                                                                "query": entity.text,
+                                                                "boost": 10
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "match": {
+                                                            "whitelist.name": {
+                                                                "query": entity.text
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "match": {
+                                                            "whitelist.name.char_ngram": {
+                                                                "query": entity.text
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "inner_hits": {}
+                                    }
+                                }
+                            ]
                         }
-                    ]
+                    },
+                    "field_value_factor": {
+                        "field": "sort_factor",
+                        "modifier": "log1p",
+                        "factor": 10
+                    },
+                    "boost_mode": "sum"
                 }
             }
         }
@@ -248,6 +259,9 @@ class EntityResolver(object):
 
             if hit['_source'].get('id'):
                 result['id'] = hit['_source'].get('id')
+
+            if hit['_source'].get('sort_factor'):
+                result['sort_factor'] = hit['_source'].get('sort_factor')
 
             results.append(result)
 
