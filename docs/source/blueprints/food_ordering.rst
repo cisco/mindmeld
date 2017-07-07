@@ -159,7 +159,7 @@ Here is a simplistic implementation of the ``build_order`` handler for illustrat
     @app.handle(intent='build_order')
     def build_order(context, slots, responder):
         """
-        When the user expresses an intent to make food selections, build up the order by 
+        When the user expresses an intent to make food selections, build up the order by
         adding the requested dishes to their "check-out" basket.
         """
         # Get the first recognized restaurant entity in the user query.
@@ -190,7 +190,7 @@ Here is a simplistic implementation of the ``build_order`` handler for illustrat
 
 The code above assumes that every user query contains a ``restaurant`` entity and at least one ``dish`` entity. It uses the Question Answerer (within the :func:`_get_restaurant_from_kb()` and :func:`_resolve_dish()` functions not shown above) to select the most likely restaurant and dishes requested by the user. That information is then saved in the dialogue frame for use in future conversational turns and also presented to the user via the responder object.
 
-For a more realistic implementation of ``build_order`` that deals with varied user flows and the full code behind all the dialogue state handlers, see the ``app.py`` file in the blueprint folder. 
+For a more realistic implementation of ``build_order`` that deals with varied user flows and the full code behind all the dialogue state handlers, see the ``app.py`` file in the blueprint folder.
 
 .. admonition:: Exercise
 
@@ -434,7 +434,7 @@ Change the classification model to random forest instead of the default logistic
 
 .. code:: python
 
-   >>> ic.fit(config_name='rforest')
+   >>> ic.fit(model_settings={'classifier_type': 'rforest'})
    Fitting intent classifier: domain='ordering'
    Selecting hyperparameters using k-fold cross validation with 10 splits
    Best accuracy: 97.31%, params: {'max_features': 'auto', 'n_estimators': 10, 'n_jobs': -1}
@@ -562,9 +562,9 @@ Look at the ``build_order`` implementation in ``app.py`` to better understand th
 
 .. admonition:: Exercise
 
-   - Use the Question Answerer within the ``build_order`` state handler to add support for searching for restaurants by ``cuisine`` and searching for dishes by ``category``. 
+   - Use the Question Answerer within the ``build_order`` state handler to add support for searching for restaurants by ``cuisine`` and searching for dishes by ``category``.
 
-   - When customizing the blueprint for your own app, consider adding location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. You could then use the Question Answerer to rank restaurant and dish results using those factors to provide a more relevant list of suggestions to the user. 
+   - When customizing the blueprint for your own app, consider adding location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. You could then use the Question Answerer to rank restaurant and dish results using those factors to provide a more relevant list of suggestions to the user.
 
    - Think of other important data that would be useful to have in the knowledge base for a food ordering use case and how it could be leveraged to provide a more intelligent user experience.
 

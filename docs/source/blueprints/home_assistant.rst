@@ -1,4 +1,5 @@
-Food Ordering
+
+Home Assistant
 =============
 
 This page documents the Workbench blueprint for a conversational application for a smart home that allows users to control different devices and appliances.
@@ -68,3 +69,173 @@ This application provides a conversational interface for users to check weather,
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+5. Knowledge Base
+^^^^^^^^^^^^^^^^^
+
+Since the home assistant application does not need a catalog of items or food products, it does not use a knowledge base as there are no catalog data associated with this application. However since the current version of Workbench still needs an Elasticsearch connection we still need a local instance of Elasticsearch running in the background.
+
+
+6. Training Data
+^^^^^^^^^^^^^^^^
+
+The labeled data for training our NLP pipeline was created using a combination of in-house data generation and crowdsourcing techniques. This is a highly important multi-step process that is described in more detail in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide. But briefly, it requires at least the following data generation tasks:
+
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Purpose                                                      | Question posed to data annotators                                                                                       |
++==============================================================+=========================================================================================================================+
+| Exploratory data generation for guiding the app design       | "How would you talk to a conversational app to control your smart home appliances?"                                     |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Divide your application use case into separate domains       | If your application has to control appliances in a smart home, check the weather and control a smart alarm, divide these|
+|                                                              | use cases into separate domains: smart_home, times_and_dates, weather. One way to break an application into smaller     |
+|                                                              | domains is by clustering the queries by similar use case and then naming each cluster as a domain                       |
++==============================================================+=========================================================================================================================+
+| Targeted query generation for training Domain and Intent     | For domain ``times_and_dates``, the following intents are constructed:                                                  |
+| Classifiers.                                                 | ``change_alarm``: "What would you say to the app to change your alarm time from a previous set time to a new set time?" |
+|                                                              | ``set_alarm``: "What would you say to the app to set a new alarm time?"                                                 |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Targeted query annotation for training the Entity Recognizer | ``set_alarm``: "Annotate all occurrences of sys_time and sys_interval system entities in the given query."              |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Targeted query annotation for training the Role Classifier   | ``set_alarm``: "Annotate all entities with their corresponding roles, when needed. For eg: old_time, new_time"          |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+| Targeted synonym generation for gazetteer generation to       | ``city`` entity: "Enumerate a list of names of cities"                                                                  |
+| improve entity recognition accuracies                        |                                                                                                                         |
+|                                                              | ``location`` entity: "What are some names of locations in your home"                                                    |
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
+
+The training data for intent classification and entity recognition can be found in the ``domains`` directory, whereas the data for entity resolution is in the ``entities`` directory, both located at the root level of the blueprint folder.
+
+.. admonition:: Exercise
+
+   - Read :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluatation and error analysis <../userguide/nlp>` in the user guide.
+
+   - To train NLP models for your own home-assistant app, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (city, sys_time) that your app needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your app.
+
+
+7. Training the NLP Classifiers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To put the training data to use and train a baseline NLP system for your app using Workbench's default machine learning settings, use the :meth:`build()` method of the :class:`NaturalLanguageProcessor` class:
+
+.. code:: python
+
+   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+   >>> import mmworkbench as wb
+   >>> wb.configure_logs()
+   >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
+   >>> nlp.build()
+   Fitting domain classifier
+   Loading queries from file greeting/exit/train.txt
+   Loading queries from file greeting/greet/train.txt
+   Loading queries from file unknown/unknown/training.txt
+   Loading queries from file smart_home/turn_appliance_off/train.txt
+   Loading queries from file smart_home/turn_on_thermostat/train.txt
+   Loading queries from file smart_home/set_thermostat/train.txt
+   Loading queries from file smart_home/specify_location/train.txt
+   Loading queries from file smart_home/turn_lights_on/train.txt
+   Loading queries from file smart_home/turn_off_thermostat/train.txt
+   Loading queries from file smart_home/close_door/train.txt
+   Loading queries from file smart_home/turn_lights_off/train.txt
+   Loading queries from file smart_home/turn_down_thermostat/train.txt
+   Unable to load query: Unable to resolve system entity of type 'sys_time' for '12pm'.
+   Loading queries from file smart_home/check_thermostat/train.txt
+   Loading queries from file smart_home/unlock_door/train.txt
+   Loading queries from file smart_home/open_door/train.txt
+   Loading queries from file smart_home/lock_door/train.txt
+   Loading queries from file smart_home/turn_appliance_on/train.txt
+   Loading queries from file smart_home/turn_up_thermostat/train.txt
+   Loading queries from file weather/check_weather/train.txt
+   Loading queries from file times_and_dates/remove_alarm/train.txt
+   Loading queries from file times_and_dates/start_timer/train.txt
+   Loading queries from file times_and_dates/change_alarm/train.txt   .
+   .
+   .
+   Fitting intent classifier: domain='greeting'
+   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Best accuracy: 99.31%, params: {'fit_intercept': False, 'C': 1, 'class_weight': {0: 1.5304182509505702, 1: 0.88306789606035196}}
+   Fitting entity recognizer: domain='greeting', intent='exit'
+   No entity model configuration set. Using default.
+   Fitting entity recognizer: domain='greeting', intent='greet'
+   No entity model configuration set. Using default.
+   Fitting entity recognizer: domain='unknown', intent='unknown'
+   No entity model configuration set. Using default.
+   Fitting intent classifier: domain='smart_home'
+   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Best accuracy: 98.43%, params: {'fit_intercept': True, 'C': 100, 'class_weight': {0: 0.99365079365079367, 1: 1.5915662650602409, 2: 1.3434782608695652, 3: 1.5222222222222221, 4: 0.91637426900584784, 5: 0.74743589743589745, 6: 1.9758620689655173, 7: 1.4254901960784312, 8: 1.0794871794871794, 9: 1.0645320197044335, 10: 1.1043715846994535, 11: 1.2563909774436088, 12: 1.3016260162601625, 13: 1.0775510204081633, 14: 1.8384615384615384}}
+   .
+   .
+.. tip::
+
+  During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+
+You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` for the domain ``smart_home`` and about 99% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>` for the domain ``smart_home`` and intent ``turn_on_thermostat``. To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
+
+.. code:: python
+
+   >>> nlp.process("please set my alarm to 8am for tomorrow")
+   {'domain': 'times_and_dates',
+    'entities': [{'confidence': -0.0,
+      'role': None,
+      'span': {'end': 38, 'start': 31},
+      'text': 'tomorrow',
+      'type': 'sys_time',
+      'value': [{'grain': 'day', 'value': '2017-07-08T00:00:00.000-07:00'}]}],
+    'intent': 'set_alarm',
+    'text': 'please set my alarm to 8am for tomorrow'
+    }
+
+For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom home assistant data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.
+
+Home assistant application consists of five domains and more than twenty intents so we need to do a fair bit of fine tuning of the classifiers.
+
+A good place to start is by inspecting the baseline configuration used by the different classifiers. The user guide lists and describes all of the available configuration options in detail. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.
+
+.. code:: python
+
+   >>> ic = nlp.domains['smart_home'].intent_classifier
+   >>> ic.config.model_settings['classifier_type']
+   'logreg'
+   >>> ic.config.features
+   {'bag-of-words': {'lengths': [1, 2]},
+    'edge-ngrams': {'lengths': [1, 2]},
+    'exact': {'scaling': 10},
+    'freq': {'bins': 5},
+    'gaz-freq': {},
+    'in-gaz': {}
+   }
+
+You can experiment with different learning algorithms (model types), features, hyperparameters and cross-validation settings by passing the appropriate parameters to the classifier's :meth:`fit()` method. Here are a couple of examples.
+
+Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
+
+.. code:: python
+
+   >>> features = {
+   ...             'bag-of-words': {'lengths': [1, 2]},
+   ...             'freq': {'bins': 5},
+   ...             'in-gaz': {},
+   ...             'length': {}
+   ...            }
+   >>> ic.fit(features=features)
+   Fitting intent classifier: domain='smart_home'
+   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Best accuracy: 98.46%, params: {'fit_intercept': False, 'C': 10, 'class_weight': {0: 0.98518518518518516, 1: 2.3803212851405622, 2: 1.801449275362319, 3: 2.2185185185185183, 4: 0.80487329434697852, 5: 0.41068376068376072, 6: 3.2770114942528741, 7: 1.9928104575163397, 8: 1.1854700854700853, 9: 1.1505747126436781, 10: 1.2435336976320581, 11: 1.5982456140350876, 12: 1.7037940379403793, 13: 1.180952380952381, 14: 2.9564102564102566}}
+
+.. code:: python
+
+   >>> ic.fit(model_settings={'classifier_type': 'rforest'}, params={'max_features': 'auto', 'n_estimators': 10, 'n_jobs': -1})
+   Fitting intent classifier: domain='smart_home'
+   >> ic.evaluate()
+   <StandardModelEvaluation score: 90.96%, 936 of 1029 examples correct>
+
+Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing and error analysis. Refer to the appropriate sections in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
+
+.. admonition:: Exercise
+
+   Experiment with different models, features and hyperparameter selection settings to see how they affect the classifier performance. It's helpful to have a held-out validation set to evaluate your trained NLP models and analyze the misclassified test instances. You could then use observations from the error analysis to inform your machine learning experimentation. For more examples and discussion on this topic, refer to the :doc:`user guide <../userguide/nlp>`.
+
+
+8. Parser Configuration
+
+Since the home assistant application does not use multiple entities, we do not have any parser configuration.
