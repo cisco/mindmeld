@@ -15,7 +15,7 @@ from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuff
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix)
 
-from .helpers import get_feature_extractor, get_label_encoder, register_label
+from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
 from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class ModelConfig(object):
 
 
 class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
-                                                       'probas'])):
+                                                       'probas', 'label_type'])):
     """Represents the evaluation of a single example
 
     Attributes:
@@ -98,11 +98,26 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
         expected: The expected label for the example
         predicted: The predicted label for the example
         proba (dict): Maps labels to their predicted probabilities
+        label_type (str): One of CLASS_LABEL_TYPE or ENTITIES_LABEL_TYPE
     """
 
     @property
     def is_correct(self):
-        return self.expected == self.predicted
+        # For entities compare just the type, span and text for each entity.
+        if self.label_type == ENTITIES_LABEL_TYPE:
+            if len(self.expected) != len(self.predicted):
+                return False
+            for i in range(len(self.expected)):
+                if self.expected[i].entity.type != self.predicted[i].entity.type:
+                    return False
+                if self.expected[i].span != self.predicted[i].span:
+                    return False
+                if self.expected[i].text != self.predicted[i].text:
+                    return False
+            return True
+        # For other label_types compare the full objects
+        else:
+            return self.expected == self.predicted
 
 
 class RawResults():
