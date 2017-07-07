@@ -1,4 +1,3 @@
-
 Home Assistant
 =============
 
@@ -69,6 +68,27 @@ This application provides a conversational interface for users to check weather,
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In order to figure out how many intents and domains we want, we should fully expand explore our use cases.
+
+   - Lights
+       - User will be able to turn on/off lights in specific locations at home (kitchen, living room etc.).
+       - User will be able to dim lights to a specific percentage.
+   - Thermostat
+       - Turn thermostat on/off, up/down. 
+       - Set thermostat to specific value.
+       - Thermostats in specific rooms.
+   - Control home security systems
+       - Lock/Unlock specific doors.
+       - Close/Open specific doors.
+   - Check weather
+       - Check weather in any major city in the world.
+       - Specify unit of temperature (C/F).
+   - Control timer and alarms
+       - Set, unset, change and show timer.
+       - Set, unset, change and show alarms
+
+This design exercise usually requires mapping each of the action into a precise number of intents.
 
 
 5. Knowledge Base
