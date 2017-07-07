@@ -115,7 +115,7 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
                 if self.expected[i].text != self.predicted[i].text:
                     return False
             return True
-        # For other label_types comapre the full objects
+        # For other label_types compare the full objects
         else:
             return self.expected == self.predicted
 
