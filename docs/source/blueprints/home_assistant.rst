@@ -52,7 +52,7 @@ Interact with the app in the python shell using the commands below. Try out the 
 Home Assistant uses Open Weather Map for retrieving weather forecast. You will need to register for a key online and set the environment variable:
 
 .. code:: bash
-  >>>> export OPEN_WEATHER_KEY=[YOUR-KEY]
+  export OPEN_WEATHER_KEY=[YOUR-KEY]
 
 
 Deep Dive
