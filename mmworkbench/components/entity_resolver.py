@@ -239,9 +239,11 @@ class EntityResolver(object):
                     "field_value_factor": {
                         "field": "sort_factor",
                         "modifier": "log1p",
-                        "factor": 10
+                        "factor": 10,
+                        "missing": 0
                     },
-                    "boost_mode": "sum"
+                    "boost_mode": "sum",
+                    "score_mode": "sum"
                 }
             }
         }
