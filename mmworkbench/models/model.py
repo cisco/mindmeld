@@ -103,20 +103,19 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
 
     @property
     def is_correct(self):
-        # For entities compare just the span and text.
-        # Todo: Update mallard to take a reference time so times are consistent and we can
-        # do a full object comparison for entities like we do for domain and intent
+        # For entities compare just the type, span and text for each entity.
         if self.label_type == ENTITIES_LABEL_TYPE:
             if len(self.expected) != len(self.predicted):
                 return False
             for i in range(len(self.expected)):
-                if self.expected[i].text != self.predicted[i].text:
+                if self.expected[i].entity.type != self.predicted[i].entity.type:
                     return False
                 if self.expected[i].span != self.predicted[i].span:
                     return False
-                if self.expected[i].entity.type != self.predicted[i].entity.type:
+                if self.expected[i].text != self.predicted[i].text:
                     return False
             return True
+        # For other label_types comapre the full objects
         else:
             return self.expected == self.predicted
 
