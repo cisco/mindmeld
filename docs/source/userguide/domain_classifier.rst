@@ -6,6 +6,10 @@ Domain Classifier
 
 The Domain Classifier is run as the first step in the natural language processing pipeline to determine the target domain for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the domains in an application. The name of each domain folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. A domain classifier is only needed for apps that support more than one domain.
 
+.. note::
+
+   For a quick introduction, refer to :ref:`Step 7 <domain_classification>` of the Step-By-Step Guide.
+
 
 Training a baseline domain classifier
 -------------------------------------
