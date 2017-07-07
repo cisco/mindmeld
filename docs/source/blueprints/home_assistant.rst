@@ -12,7 +12,7 @@ Quick Start
 1. Download
 ^^^^^^^^^^^
 
-Open a python shell and type the following commands to download and set up the food ordering blueprint application.
+Open a python shell and type the following commands to download and set up the home assistant blueprint application.
 
 .. code:: python
 
