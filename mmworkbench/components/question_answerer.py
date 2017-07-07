@@ -366,7 +366,9 @@ class Search:
                             }
                         }
                     },
-                    "functions": []
+                    "functions": [],
+                    "score_mode": "sum",
+                    "boost_mode": "sum"
                 }
             }
         }
