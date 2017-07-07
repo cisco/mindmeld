@@ -287,7 +287,6 @@ class Search:
         Range filters are used to filter with a value range on specified knowledge base number or
         date fields. Example use cases include price range filters and date range filters.
 
-
         Examples:
 
         add text filter:
@@ -296,11 +295,16 @@ class Search:
 
         add range filter:
         s = question_answerer.build_search(index='menu_items')
-        s.filter(filter_type='range', field='price', gte=1, lt=10)
+        s.filter(field='price', gte=1, lt=10)
 
         Args:
-            filter_type(str): type of filter. Valid values are 'text' and 'range'.
-            a keyword argument to specify the filter text and the knowledge base document field.
+            a keyword argument to specify the filter text and the knowledge base text field.
+            field (str): knowledge base field name for range filter.
+            gt (number or str): range filter operator for greater than.
+            gte (number or str): range filter operator for greater than or equal to.
+            lt (number or str): range filter operator for less than.
+            lte (number or str): range filter operator for less or equal to.
+
         Returns:
             Search: a new Search object with added search criteria.
         """
