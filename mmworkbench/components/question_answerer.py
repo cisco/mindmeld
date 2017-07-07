@@ -4,11 +4,11 @@ This module contains the question answerer component of Workbench.
 """
 from __future__ import absolute_import, unicode_literals
 from builtins import object
+from abc import ABCMeta, abstractmethod
 
 import json
 import logging
 import copy
-import six
 
 from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name
@@ -215,7 +215,7 @@ class Search:
             type (str): type of clause
         """
         if type == "query":
-            key, value = six.next(six.iteritems(kwargs))
+            key, value = next(iter(kwargs.items()))
             clause = Search.QueryClause(key, value)
         elif type == "filter":
             # set the filter type to be 'range' if any range operator is specified.
@@ -232,7 +232,7 @@ class Search:
                                              range_lt=lt,
                                              range_lte=lte)
             else:
-                key, value = six.next(six.iteritems(kwargs))
+                key, value = next(iter(kwargs.items()))
                 clause = Search.FilterClause(field=key, value=value)
 
         elif type == "sort":
@@ -404,16 +404,24 @@ class Search:
     class Clause:
         """This class models an abstract knowledge base clause."""
 
+        __metaclass__ = ABCMeta
+
         def __init__(self):
+            """Initialize a knowledge base clause"""
             self.clause_type = None
 
+        @abstractmethod
         def validate(self):
-            self._validate()
+            """Validate the clause."""
+            raise NotImplementedError("Must override validate()")
 
-        def _validate(self):
-            pass
+        @abstractmethod
+        def build_query(self):
+            """Build knowledge base query."""
+            raise NotImplementedError("Must override build_query()")
 
         def get_type(self):
+            """Returns clause type"""
             return self.clause_type
 
     class QueryClause(Clause):
@@ -427,6 +435,7 @@ class Search:
             self.clause_type = 'query'
 
         def build_query(self):
+            """build knowledge base query for query clause"""
 
             clause = {
                 "bool": {
@@ -459,6 +468,9 @@ class Search:
 
             return clause
 
+        def validate(self):
+            pass
+
     class FilterClause(Clause):
         """This class models a knowledge base filter clause."""
 
@@ -483,6 +495,7 @@ class Search:
             self.clause_type = 'filter'
 
         def build_query(self):
+            """build knowledge base query for filter clause"""
             clause = {}
             if self.filter_type == 'text':
                 clause = {
@@ -519,7 +532,7 @@ class Search:
 
             return clause
 
-        def _validate(self):
+        def validate(self):
             if self.filter_type == 'range':
                 if not self.range_gt and not self.range_gte and not self.range_lt and \
                    not self.range_lte:
@@ -545,6 +558,7 @@ class Search:
             self.clause_type = 'sort'
 
         def build_query(self):
+            """build knowledge base query for sort clause"""
 
             # sort by distance based on passed in origin
             if self.sort_type == 'distance':
@@ -574,3 +588,5 @@ class Search:
 
             return sort_clause
 
+        def validate(self):
+            pass
