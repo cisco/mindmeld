@@ -88,8 +88,44 @@ In order to figure out how many intents and domains we want, we should fully exp
        - Set, unset, change and show timer.
        - Set, unset, change and show alarms
 
+In addition to these actions, we also support simple responeses to greetings ("hi", "hello", "bye", ...) and queries that are not relevant ("who is tom hanks?").
+
 This design exercise usually requires mapping each of the action into a precise number of intents.
 
+3. Domain-Intent-Entity Hierarchy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In contrast with the food ordering application which only has one domain, the language differences between each of these activities are different enough that we need to organize them into five different domains: Greeting, Smart Home, Time & Dates, Weather and Unknown.
+   
+   - Greeting
+       - greet
+       - exit
+   - Smart Home
+       - check_thermostat
+       - close_door
+       - lock_door
+       - open_door
+       - set_thermostat
+       - specify_location
+       - turn_appliance_on
+       - turn_appliance_off
+       - turn_down_thermostat
+       - turn_lights_off
+       - turn_lights_on
+       - turn_off_thermostat
+       - turn_on_thermostat
+       - turn_up_thermostat
+       - unlock_door
+   - Time and dates
+       - change_alarm
+       - check_alarm
+       - set_alarm
+       - start_timer
+       - stop_timer
+   - Weather
+       - check_weather
+   - Unknown
+       - unknown
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
