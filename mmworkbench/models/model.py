@@ -114,6 +114,8 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
                     return False
                 if self.expected[i].span != self.predicted[i].span:
                     return False
+                if self.expected[i].entity.type != self.predicted[i].entity.type:
+                    return False
             return True
         else:
             return self.expected == self.predicted
