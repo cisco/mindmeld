@@ -15,7 +15,7 @@ from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuff
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix)
 
-from .helpers import get_feature_extractor, get_label_encoder, register_label
+from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
 from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
         expected: The expected label for the example
         predicted: The predicted label for the example
         proba (dict): Maps labels to their predicted probabilities
-        label_type (str): One of domain, intent, or entities
+        label_type (str): One of CLASS_LABEL_TYPE or ENTITIES_LABEL_TYPE
     """
 
     @property
@@ -106,7 +106,7 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
         # For entities compare just the span and text.
         # Todo: Update mallard to take a reference time so times are consistent and we can
         # do a full object comparison for entities like we do for domain and intent
-        if self.label_type == 'entities':
+        if self.label_type == ENTITIES_LABEL_TYPE:
             if len(self.expected) != len(self.predicted):
                 return False
             for i in range(len(self.expected)):
