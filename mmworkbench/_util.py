@@ -5,16 +5,19 @@ project structure.
 """
 from __future__ import unicode_literals, absolute_import
 from builtins import object
+from future.utils import iteritems
 
 import datetime
+from email.utils import parsedate
 import logging
 import os
+import shutil
 import tarfile
 
-import boto3
-import botocore
 from dateutil import tz
-
+import py
+import requests
+from requests.auth import HTTPBasicAuth
 
 from . import path
 from .exceptions import KnowledgeBaseConnectionError
@@ -23,8 +26,9 @@ from .components import QuestionAnswerer
 
 logger = logging.getLogger(__name__)
 
-BLUEPRINT_S3_BUCKET = 'mindmeld'
-BLUEPRINT_S3_KEY_BASE = 'workbench-data/blueprints'
+CONFIG_FILE_NAME = 'mmworkbench.cfg'
+BLUEPRINT_URL = '{mindmeld_url}/blueprints/{blueprint}/{filename}'
+
 BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
 BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
@@ -131,11 +135,9 @@ class Blueprint(object):
         cache_dir = path.get_cached_blueprint_path(name)
         try:
             local_archive = cls._fetch_archive(name, 'kb')
-        except botocore.exceptions.ClientError as ex:
-            if ex.response['Error']['Code'] == "404":
-                logger.warning('No knowledge base to set up.')
-                return
-            raise ex
+        except ValueError as ex:
+            logger.warning('No knowledge base to set up.')
+            return
 
         kb_dir = os.path.join(cache_dir, 'kb')
         tarball = tarfile.open(local_archive)
@@ -183,29 +185,50 @@ class Blueprint(object):
 
         local_archive = os.path.join(cache_dir, filename)
 
-        s3_service = boto3.resource('s3')
-        object_key = '/'.join((BLUEPRINT_S3_KEY_BASE, name, filename))
-
         try:
-            object_summary = s3_service.ObjectSummary(BLUEPRINT_S3_BUCKET, object_key)
-            remote_modified = object_summary.last_modified
-        except botocore.exceptions.NoCredentialsError:
+            config = load_global_configuration()
+            mindmeld_url = config.get('mindmeld_url', 'https://www.mindmeld.com')
+            username = config['username']
+            password = config['password']
+        except Exception:
             msg = 'Unable to locate AWS credentials. Cannot download blueprint.'
             logger.error(msg)
             raise EnvironmentError(msg)
 
+        remote_url = BLUEPRINT_URL.format(mindmeld_url=mindmeld_url, blueprint=name,
+                                          filename=filename)
+        auth = HTTPBasicAuth(username, password)
+
+        res = requests.head(remote_url, auth=auth)
+        if res.status_code == 401:
+            # authentication error
+            msg = ('Invalid MindMeld credentials. Cannot download blueprint. Please confirm '
+                   'they are correct and try again.')
+            logger.eror(msg)
+            raise EnvironmentError(msg)
+        if res.status_code != 200:
+            # Unknown error
+            msg = 'Unknown error fetching {} archive from {!r}'.format(archive_type, remote_url)
+            logger.warning(msg)
+            raise ValueError('Unknown error fetching archive')
+        remote_modified = datetime.datetime(*parsedate(res.headers.get('last-modified'))[:6],
+                                            tzinfo=tz.tzutc())
         try:
             local_modified = datetime.datetime.fromtimestamp(os.path.getmtime(local_archive),
                                                              tz.tzlocal())
         except (OSError, IOError):
-            # Minimum possible time
+            # File doesn't exist, use minimum possible time
             local_modified = datetime.datetime(datetime.MINYEAR, 1, 1, tzinfo=tz.tzutc())
 
         if remote_modified < local_modified:
             logger.info('Using cached %r %s archive', name, archive_type)
         else:
-            logger.info('Fetching %s archive from %r', archive_type, object_key)
-            s3_service.Bucket(BLUEPRINT_S3_BUCKET).download_file(object_key, local_archive)
+            logger.info('Fetching %s archive from %r', archive_type, remote_url)
+            res = requests.get(remote_url, stream=True, auth=auth)
+            if res.status_code == 200:
+                with open(local_archive, 'wb') as file_pointer:
+                    res.raw.decode_content = True
+                    shutil.copyfileobj(res.raw, file_pointer)
         return local_archive
 
 
@@ -223,3 +246,62 @@ def configure_logs(**kwargs):
     logging.basicConfig(stream=sys.stdout, format=log_format)
     package_logger = logging.getLogger(__package__)
     package_logger.setLevel(level)
+
+
+def load_global_configuration():
+    """Loads the global configuration file (~/.mmworkbench/config)
+
+    Returns:
+        dict: An object containing configuration values.
+    """
+    config_file = path.get_user_config_path()
+    iniconfig = py.iniconfig.IniConfig(config_file)
+    config = {}
+    config['mindmeld_url'] = iniconfig.get('mmworkbench', 'mindmeld_url')
+    config['username'] = iniconfig.get('mmworkbench', 'username')
+    config['password'] = iniconfig.get('mmworkbench', 'password')
+    for key, value in iteritems(config):
+        if value is None:
+            config.pop(key)
+    return config
+
+
+def load_configuration():
+    """Loads a configuration file (mmworkbench.cfg) for the current app. The
+    file is located by searching first in the current directory, and in parent
+    directories.
+    """
+    config_file = _find_config_file()
+    if config_file:
+        logger.debug("Using config file at '{}'".format(config_file))
+        # Do the thing
+        iniconfig = py.iniconfig.IniConfig(config_file)
+        config = {}
+        config['app_name'] = iniconfig.get('mmworkbench', 'app_name')
+        config['app_path'] = iniconfig.get('mmworkbench', 'app_path')
+        config['use_quarry'] = iniconfig.get('mmworkbench', 'use_quarry')
+        config['input_method'] = iniconfig.get('mmworkbench', 'input_method')
+        # resolve path if necessary
+        if config['app_path'] and not os.path.isabs(config['app_path']):
+            config_dir = os.path.dirname(config_file)
+            config['app_path'] = os.path.abspath(os.path.join(config_dir, config['app_path']))
+        return config
+    else:
+        logger.debug('No config file was found.')
+
+
+def _find_config_file():
+    prev_dir = None
+    current_dir = os.getcwd()
+
+    while prev_dir != current_dir:
+        config_file = os.path.join(current_dir, CONFIG_FILE_NAME)
+        if os.path.isfile(config_file):
+            # found a config file!
+            return config_file
+
+        # go up one directory
+        prev_dir = current_dir
+        current_dir = os.path.abspath(os.path.join(current_dir, '..'))
+
+    return None
