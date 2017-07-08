@@ -127,6 +127,22 @@ In contrast with the food ordering application which only has one domain, the la
    - Unknown
        - unknown
 
+These entities are supported and utilized:
+
+    - all
+    - appliance
+    - city
+    - color
+    - duration
+    - interval
+    - location
+    - unit
+
+4. Dialogue States
+^^^^^^^^^^^^^^^^^^
+
+In this application we map each intent into its own dialogue state.
+
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
