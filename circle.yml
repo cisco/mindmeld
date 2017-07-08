@@ -37,3 +37,4 @@ deployment:
     branch: /(develop)|(staging)|(master)/
     commands:
       - bash docs/scripts/upload_to_s3.sh
+      - MM_BRANCH=$CIRCLE_BRANCH bash scripts/upload_blueprint.sh -d `pwd`/tests/kwik_e_mart -b quickstart
