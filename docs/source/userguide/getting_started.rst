@@ -5,8 +5,8 @@ Getting Started
 ===============
 
 MindMeld Workbench is a commercial software product which leverages a number of technologies. This
-page serves as a guide to installing MindMeld Workbench set up on your personal machine and
-building your first application. The username and password used to access the MindMeld learning
+page serves as a guide to installing Workbench on your personal machine and
+setting up your first Workbench project. The username and password used to access the MindMeld Learning
 Center will be required in this process.
 
 Install Java 8
@@ -35,7 +35,7 @@ based components. Generally, the latest version of Elasticsearch is recommended,
 is required.
 
 Local Elasticsearch Cluster
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For the best developer experience with smaller applications, Elasticsearch should be installed locally. On
 macOS systems with `homebrew <https://brew.sh/>`_ installed, the simplest way to install
@@ -52,7 +52,7 @@ For other systems, or for more information on configuring Elasticsearch, go
 After Elasticsearch has been configured simply run ``elasticsearch`` to start the process.
 
 Remote Elasticsearch Cluster
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you have configured a remote Elasticsearch cluster to host Elasticsearch, you will need to set
 the ``MM_ES_HOST`` environment variable accordingly. Add this to your shell's profile
@@ -181,7 +181,7 @@ Configuring Workbench
 Certain MindMeld Workbench capabilities, such as accessing
 :doc:`blueprints <../blueprints/overview>` require authenticating using your MindMeld username and
 password. Workbench will read your credentials from its configuration file, located at
-``~/.mmworkbench/config``. Add the following lines to that the MindMeld configuration file,
+``~/.mmworkbench/config``. Add the following lines to the Workbench configuration file,
 substituting your username and password where appropriate.
 
 .. code-block:: text
@@ -273,12 +273,12 @@ populated with the directories and files of your application blueprint.
     :align: center
 
 Now create a new Python notebook by clicking on the “New” button and selecting the appropriate
-Python version. This will create new notebook file called Untitled.ipynb in your workspace.
+Python version. This will create a new notebook file called Untitled.ipynb in your workspace.
 Click on the notebook title to change the name to something like 'my_app'.
 
 A notebook contains a list of cells. Each cell can contain executable code or formatted text.
 Right now the notebook contains only one empty code cell, labeled “In [1]:”. Try typing
-``print("Hello world!")`` in the cell, and click on the play button or type Shift-Enter. This sends
+``print("Hello world!")`` in the cell, and click on the play button or press Shift-Enter. This sends
 the current cell to this notebook’s python kernel, which runs it and returns the output. The result
 is displayed below the cell, and since we reached the end of the notebook, a new cell is
 automatically created. Go through the User Interface Tour from Jupyter’s Help menu to learn
