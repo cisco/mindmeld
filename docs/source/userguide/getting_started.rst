@@ -62,7 +62,7 @@ the ``MM_ES_HOST`` environment variable accordingly. Add this to your shell's pr
 
     export MM_ES_HOST="my-es-host.com"
 
-Before attempting use workbench, make sure to re-source so the environment variable is set.
+Before attempting to use workbench, make sure to re-source so the environment variable is set.
 
 .. code-block:: console
 
@@ -74,7 +74,7 @@ Install Python
 
 Workbench is a Python-based machine learning library. To use Workbench, you will need to have
 Python installed. If Python is not already installed on your system, you can get it at
-`www.python.org <https://www.python.org/>`_ or use `pyenv <https://github.com/pyenv/pyenv>`_ to
+`python.org <https://www.python.org/>`_ or use `pyenv <https://github.com/pyenv/pyenv>`_ to
 manage multiple versions of Python. For workbench, Python 3.4 and newer are actively supported.
 The latest version of Python 3 is recommended. Python 2.7+ should work fine too, but it is
 deprecated.
@@ -280,8 +280,8 @@ A notebook contains a list of cells. Each cell can contain executable code or fo
 Right now the notebook contains only one empty code cell, labeled “In [1]:”. Try typing
 ``print("Hello world!")`` in the cell, and click on the play button or press Shift-Enter. This sends
 the current cell to this notebook’s python kernel, which runs it and returns the output. The result
-is displayed below the cell, and since we reached the end of the notebook, a new cell is
-automatically created. Go through the User Interface Tour from Jupyter’s Help menu to learn
+is displayed below the cell. Since we reached the end of the notebook, a new cell is
+automatically created after cell execution. Go through the User Interface Tour from Jupyter’s Help menu to learn
 the basics.
 
 You are now ready to begin training and evaluating machine learning models for your application.
