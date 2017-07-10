@@ -750,7 +750,7 @@ class SkLearnModel(Model):
             self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
-            # run cross validation to select params
+            # run cross-validation to select params
             best_clf, best_params = self._fit_cv(X, y, groups)
             self._clf = best_clf
             self._current_params = best_params
@@ -794,7 +794,7 @@ class SkLearnModel(Model):
 
         cv_type = selection_settings['type']
         num_splits = cv_iterator.get_n_splits(X, y, groups)
-        logger.info('Selecting hyperparameters using %s cross validation with %s split%s', cv_type,
+        logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
                     num_splits, '' if num_splits == 1 else 's')
 
         scoring = selection_settings.get('scoring', self.DEFAULT_CV_SCORING)

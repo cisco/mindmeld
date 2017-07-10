@@ -146,7 +146,7 @@ class MemmModel(SkLearnModel):
             self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
-            # run cross validation to select params
+            # run cross-validation to select params
             best_clf, best_params = self._fit_cv(X, y, groups)
             self._clf = best_clf
             self._current_params = best_params

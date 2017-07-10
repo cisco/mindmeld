@@ -118,7 +118,7 @@ class Classifier(object):
             params_selection (dict): The grid of hyper-parameters to search, for finding the optimal
                 hyper-parameter settings for the model. If omitted, the default hyper-parameter
                 search grid will be used.
-            param_selection (dict): Configuration for param selection (using cross validation)
+            param_selection (dict): Configuration for param selection (using cross-validation)
                 {'type': 'shuffle',
                  'n': 3,
                  'k': 10,
@@ -139,12 +139,12 @@ class Classifier(object):
 
                 >>> clf.fit(label_set='special')
 
-            Fit using given params, bypassing cross validation. This is useful for speeding up
+            Fit using given params, bypassing cross-validation. This is useful for speeding up
             train times if you are confident the params are optimized.
 
                 >>> clf.fit(params={'C': 10000000})
 
-            Fit using given parameter selection settings (also known as cross validation settings).
+            Fit using given parameter selection settings (also known as cross-validation settings).
 
                 >>> clf.fit(param_selection={
 
