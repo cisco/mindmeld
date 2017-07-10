@@ -10,17 +10,22 @@ The Natural Language Processor (NLP) understands the user's natural language inp
 
    For a quick introduction, refer to :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-By-Step Guide.
 
+
+.. _instantiate_nlp:
+
 Instantiate the NLP class
 -------------------------
 
-Before you can use the Natural Language Processor, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then get started by importing the :class:`NaturalLanguageProcessor` class from Workbench's :mod:`nlp` module and instantiating an object with the path to your Workbench project.
+Before you can use the natural language processor, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then get started by importing the :class:`NaturalLanguageProcessor` class from Workbench's :mod:`nlp` module and instantiating an object with the path to your Workbench project.
 
 .. code-block:: python
 
-  >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
-  >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
+   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+   >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
+   >>> nlp
+   <NaturalLanguageProcessor 'home_assistant' ready: False, dirty: False>
 
-The Natural Language Processor automatically infers the domain-intent-entity-role hierarchy for your app based on the project structure. Inspect the :attr:`domains` attribute of the :obj:`nlp` object to view the list of domains it identified.
+The NLP automatically infers the domain-intent-entity-role hierarchy for your app based on the project structure. Inspect the :attr:`domains` attribute of the :obj:`nlp` object to view the list of domains it identified.
 
 .. code-block:: python
 
@@ -45,8 +50,29 @@ You can similarly view the list of :attr:`intents` for each of the :attr:`domain
     'start_timer': <IntentProcessor 'start_timer' ready: False, dirty: False>,
     'stop_timer': <IntentProcessor 'stop_timer' ready: False, dirty: False>
    }
+   ...
    >>> nlp.domains['weather'].intents
-   {'check-weather': <IntentProcessor 'check-weather' ready: False, dirty: False>}
+   {'check_weather': <IntentProcessor 'check_weather' ready: False, dirty: False>}
+
+Upon initialization, the natural language processor merely scans the directory structure of your project, but does not read in the training data files. As a result, it has no knowledge of the entities associated with each intent at this time.
+
+.. code-block:: python
+
+   >>> nlp.domains['weather'].intents['check_weather'].entities
+   {}
+
+The NLP learns about the entities when labeled queries are loaded at model training time. Once training is finished, you can view the entity types identified for each intent using the :attr:`entities` attribute. The code snippet below introduces the :meth:`NaturalLanguageProcessor.build` method for model training which will be explained later in this chapter. This method can take several minutes to run.
+
+.. code-block:: python
+
+   >>> nlp.build()
+   >>> nlp.domains['weather'].intents['check_weather'].entities
+   {
+    'city': <EntityProcessor 'city' ready: True, dirty: True>,
+    'sys_interval': <EntityProcessor 'sys_interval' ready: True, dirty: True>,
+    'sys_time': <EntityProcessor 'sys_time' ready: True, dirty: True>,
+    'unit': <EntityProcessor 'unit' ready: True, dirty: True>
+   }
 
 There are two other useful attributes that indicate the current status of an NLP object. First, the :attr:`ready` flag indicates if the NLP instance is ready for processing user input. The value of this attribute is ``True`` only if all the NLP classification models have been trained and can be used for making predictions on new queries. 
 
@@ -62,8 +88,10 @@ The :attr:`dirty` flag indicates if the NLP object has changed since it was last
    >>> nlp.dirty
    False
 
-The values of both these attributes are currently ``False`` since we have merely initialized an NLP object so far. We are yet to do something interesting with it. 
+The values of both these attributes are currently ``False`` since we have merely initialized the NLP object and are yet to train it.
 
+
+.. _build_nlp:
 
 Build NLP models
 ----------------
@@ -151,6 +179,56 @@ Here's an example of a ``config.py`` file where the default configurations for t
    
 Refer to the chapters on the individual NLP components for details on the different configuration options.
 
+Calling the :meth:`build` method on the :obj:`nlp` object is the easiest way to build or rebuild all the classifiers in the NLP pipeline. However, it can be a time-consuming operation and there may be occasions when you only want to selectively rebuild a subset of your classifiers. This can be accomplished by calling the :meth:`build` method at the appropriate level in the domain-intent-entity-role hierarchy.
+
+For instance, the code below only rebuilds the NLP models for a specific domain, namely the ``times_and_dates`` domain of the ``home_assistant`` app.
+
+.. code-block:: python
+
+   >>> from mmworkbench import configure_logs; configure_logs()
+   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+   >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
+   >>> nlp.domains['times_and_dates'].build()
+   Fitting intent classifier: domain='times_and_dates'
+   Loading queries from file times_and_dates/change_alarm/train.txt
+   Loading queries from file times_and_dates/check_alarm/train.txt
+   Loading queries from file times_and_dates/remove_alarm/train.txt
+   Loading queries from file times_and_dates/set_alarm/train.txt
+   Loading queries from file times_and_dates/start_timer/train.txt
+   Loading queries from file times_and_dates/stop_timer/train.txt
+   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Best accuracy: 99.33%, params: {'C': 100, 'class_weight': {0: 1.0848387096774192, 1: 1.2278761061946901, 2: 0.8924193548387096, 3: 0.81719056974459714, 4: 1.3213541666666666, 5: 6.665}, 'fit_intercept': False}
+   Fitting entity recognizer: domain='times_and_dates', intent='set_alarm'
+   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Best accuracy: 98.08%, params: {'C': 1000000, 'penalty': 'l2'}
+   Fitting entity recognizer: domain='times_and_dates', intent='change_alarm'
+   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Best accuracy: 97.23%, params: {'C': 100, 'penalty': 'l2'}
+   Fitting entity recognizer: domain='times_and_dates', intent='start_timer'
+   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Best accuracy: 98.95%, params: {'C': 100, 'penalty': 'l1'}
+   Fitting entity recognizer: domain='times_and_dates', intent='check_alarm'
+   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Best accuracy: 97.18%, params: {'C': 1000000, 'penalty': 'l1'}
+
+Here are the different levels at which you can invoke the :meth:`build` method.
+
+:meth:`nlp.build`
+
+  | A **full** build that trains all the NLP classifiers for the app.
+
+:meth:`nlp.domains['d_name'].build`
+
+  | Trains the intent classifier for the ``d_name`` domain, the entity recognizers for all the intents under ``d_name``, and the role classifiers for all the entity types contained within those intents.
+
+:meth:`nlp.domains['d_name'].intents['i_name'].build`
+
+  | Trains the entity recognizer for the ``i_name`` intent, and the role classifiers for all the entity types in this intent.
+
+:meth:`nlp.domains['d_name'].intents['i_name'].entities['e_name'].build`
+
+  | Trains the role classifier for ``e_name`` entity type.
+
 
 Run NLP models
 --------------
@@ -233,6 +311,16 @@ The :meth:`process` method executes the following steps:
     - Returns the detailed output from each component
 
 The chapters on the individual NLP components provide more details on the above steps, along with documentation on their outputs and advanced features like batch testing and evaluation.
+
+
+Evaluate models
+---------------
+
+The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries that is prepared in :ref:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. The files containing the test queries have names starting with the ``test`` prefix, and are placed alongside the training data files within the different intent subfolders. While the training data is used for training and tuning the models, the test data is used solely for model evaluation. Ideally, the test data should have no queries in common with the training data and be representative of the real-world usage of the app.
+
+During evaluation, the ground truth annotations are stripped away from the test queries and the unlabeled queries are passed in to an NLP classifier. The classifier's output predictions are then compared against the ground truth labels to measure the model's prediction accuracy. A successful production-grade conversational app needs to have test accuracies in greater than 90% for all the classification models in its NLP pipeline.
+
+The `evaluation` section of the respective chapters will explain how evaluation works for each individual classifier in the NLP model hierarchy.
 
 
 Save models for future use
