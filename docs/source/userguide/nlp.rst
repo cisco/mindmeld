@@ -179,6 +179,8 @@ Here's an example of a ``config.py`` file where the default configurations for t
    
 Refer to the chapters on the individual NLP components for details on the different configuration options.
 
+.. _build_partial_nlp:
+
 Calling the :meth:`build` method on the :obj:`nlp` object is the easiest way to build or rebuild all the classifiers in the NLP pipeline. However, it can be a time-consuming operation and there may be occasions when you only want to selectively rebuild a subset of your classifiers. This can be accomplished by calling the :meth:`build` method at the appropriate level in the domain-intent-entity-role hierarchy.
 
 For instance, the code below only rebuilds the NLP models for a specific domain, namely the ``times_and_dates`` domain of the ``home_assistant`` app.
