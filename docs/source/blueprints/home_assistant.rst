@@ -138,6 +138,10 @@ These entities are supported and utilized:
     - location
     - unit
 
+For queries such as `change my alarm from 7 am to 6 am`, role entities are used to distinguish separate entities of the similar type in the same query. We can annotate the example as `change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}` with `old_time` and `new_time` as role.
+
+For more information on the usage of role, check WB3 documentation.
+
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
@@ -311,3 +315,30 @@ Similar options are available for inspecting and experimenting with the Entity R
 8. Parser Configuration
 
 Since the home assistant application does not use multiple entities, we do not have any parser configuration.
+
+9. Using the Question Answerer
+
+Since the home assistant does not use knowledge base, we do not have any question answerer.
+
+10. Testing and Deployment
+
+We can test the home assistant application like any other blue print.
+
+.. code:: python
+
+   >>> from mmworkbench.components.dialogue import Conversation
+   >>> conv = Conversation(nlp=nlp, app_path='home_asssitant')
+   >>> conv.say('Hi')
+   ['Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.']
+
+We can also enter the conversation mode directly from the commandline.
+
+.. code:: bash
+
+   >>> python app.py converse
+   
+   App: Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.
+   You: What's the weather today in San Francisco?
+   App: The weather forecast in San Francisco is clouds with a min of 62.6 F and a max of 89.6 F
+
+Exercise: test the app and play around with different language patterns to figure out the edge cases that our classifiers are not able to handle. The more language patterns we can collect in our training data, the better our classifiers can handle in live usage with real users. Good luck and have fun - now you have your very own Jarvis!
