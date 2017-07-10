@@ -4,11 +4,75 @@
 Role Classifier
 ===============
 
-The Role Classifier is run as the fourth step in the natural language processing pipeline to determine the target roles for entities in a given query. It is a machine-learned :doc:`classification <https://en.wikipedia.org/wiki/Statistical_classification>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the role types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Role classification models are trained per entity type. A Workbench app hence has one role classifier for every entity type with associated roles.
+The Role Classifier is run as the fourth step in the natural language processing pipeline to determine the target roles for entities in a given query. It is a machine-learned `classification <https://en.wikipedia.org/wiki/Statistical_classification>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the role types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Role classification models are trained per entity type. A Workbench app hence has one role classifier for every entity type with associated roles.
 
 .. note::
 
    For a quick introduction, refer to :ref:`Step 7 <role_classification>` of the Step-By-Step Guide.
+
+
+Access the role classifier
+--------------------------
+
+To work with any of the individual natural language processing components, start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
+
+.. code-block:: python
+
+  >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+  >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
+  >>> nlp
+  <NaturalLanguageProcessor 'home_assistant' ready: False, dirty: False>
+
+Next, verify that the NLP has correctly identified all the domains and intents for your app.
+
+.. code-block:: python
+
+   >>> nlp.domains
+   {
+    'smart_home': <DomainProcessor 'smart_home' ready: False, dirty: False>,
+    'times_and_dates': <DomainProcessor 'times_and_dates' ready: False, dirty: False>,
+    'unknown': <DomainProcessor 'unknown' ready: False, dirty: False>,
+    'weather': <DomainProcessor 'weather' ready: False, dirty: False>
+   }
+   ...
+   >>> nlp.domains['times_and_dates'].intents
+   {
+   	'change_alarm': <IntentProcessor 'change_alarm' ready: True, dirty: True>,
+ 	'check_alarm': <IntentProcessor 'check_alarm' ready: False, dirty: False>,
+ 	'remove_alarm': <IntentProcessor 'remove_alarm' ready: False, dirty: False>,
+ 	'set_alarm': <IntentProcessor 'set_alarm' ready: True, dirty: True>,
+ 	'start_timer': <IntentProcessor 'start_timer' ready: True, dirty: True>,
+ 	'stop_timer': <IntentProcessor 'stop_timer' ready: False, dirty: False>
+   }
+   ...
+   >>> nlp.domains['weather'].intents
+   {
+   	'check-weather': <IntentProcessor 'check-weather' ready: False, dirty: False>
+   }
+
+Call the :meth:`build` method at :ref:`the intent level <build_partial_nlp>` for the intent you are interested in and inspect the identified entity types. The :meth:`build` operation can take several minutes if the number of training queries for the chosen intent is large.
+
+.. code-block:: python
+
+   >>> nlp.domains['times_and_dates'].intents['change_alarm'].build()
+   >>> nlp.domains['times_and_dates'].intents['change_alarm'].entities
+   {
+   	'time': <EntityProcessor 'time' ready: True, dirty: True>
+   }
+
+The :class:`RoleClassifier` for each entity type can then be accessed using the :attr:`role_classifier` attribute of the corresponding entity.
+
+.. code-block:: python
+
+   >>> rc = nlp.domains['times_and_dates'].intents['change_alarm'].entities['time'].role_classifier
+   >>> rc
+   <RoleClassifier ready: True, dirty: True>
+
+
+Training a baseline role classifier
+-----------------------------------
+
+
 
 
 Introduce the general ML techniques and methodology common to all NLP classifiers:
@@ -20,22 +84,6 @@ Testing a Workbench classifier on a held-out validation set
 Doing error analysis on the validation set, retraining based on observations from error analysis by adding more training examples or feature tweaks
 Getting final evaluation numbers on an unseen “blind” test set
 Saving models for production use 
-
-Then, describe the above in more detail with specific code examples for each subcomponent:
-4.6.1 The Domain Classifier
-4.6.2 The Intent Classifier
-4.6.3 The Entity Recognizer
-Describe gazetteers.
-4.6.4 The Role Classifier
-
-Describe necessity of roles with examples.
-4.6.5 The Entity Resolver
-
-Describe collection of synonyms and the synonym mapping file.
-4.6.6 The Language Parser
-
-Describe our approach to language parsing, what a parser configuration looks like and how it can be used to improve parser accuracy.  Show code examples for parsing and how to inspect the parser output.
-
 
 ===
 
