@@ -138,7 +138,7 @@ These entities are supported and utilized:
     - location
     - unit
 
-For queries such as `change my alarm from 7 am to 6 am`, role entities are used to distinguish separate entities of the similar type in the same query. We can annotate the example as `change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}` with `old_time` and `new_time` as role.
+For queries such as ```change my alarm from 7 am to 6 am```, role entities are used to distinguish separate entities of the similar type in the same query. We can annotate the example as ```change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}``` with ```old_time``` and ```new_time``` as role.
 
 For more information on the usage of role, check WB3 documentation.
 
