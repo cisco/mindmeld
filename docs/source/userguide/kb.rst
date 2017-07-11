@@ -9,14 +9,13 @@ In its most basic form, a knowledge base is simply a repository of objects of sp
 
 Do we need a Knowledge Base?
 ----------------------------
-The first question to answer before we start to build the application is do we need a knowledge base or not? Knowledge base is critical and necessary component for application with large or medium vocabulary content and is usually the differentiating factor for the best conversational application. For example, video discovery
-application typically need to find the movie or TV shows from a huge catalog containing hundred of thousands or even millions of records and the knowledge base provides information about important entities to fulfill users' requests. On the other hand application with small vocabulary may not require a knowledge base. 
+The first question to answer before we start to build the application is do we need a knowledge base or not? Knowledge base is critical and necessary component for application with large or medium vocabulary content and is usually the differentiating factor for the best conversational application. For example, video discovery application typically need to find the movie or TV shows from a huge catalog containing hundred of thousands or even millions of records and the knowledge base provides information about important entities to fulfill users' requests. On the other hand application with small vocabulary may not require a knowledge base. 
 
 Question Answering in Conversational Applications
 -------------------------------------------------
 The foundations of Question Answering began back in the 60's and early 70's with knowledge bases targeted at narrow domains of knowledge. With computational linguistics emerging and evolving over the decades, modern day Question Answering systems have relied on statistical processing of broader domain, large vocabulary document collections. These systems especially started gaining popularity in mainstream media in the last 8-10 years. The IBM Watson Jeopardy! challenge revealed the beginnings of the true potential of broad vocabulary Question Answering systems that could be deployed in real world production applications.
 
-Several academic research initiatives continue to hallmark the field of Question Answering. The `OAQA_ <https://oaqa.github.io/>` initiative is a collaboration between `academia_ <http://www.cs.cmu.edu/~ehn/>`, `industry_ <https://www.research.ibm.com/deepqa/question_answering.shtml>` and the open source community. MIT CSAIL has a research thrust in Question Answering with the `START_ <http://start.csail.mit.edu/index.php>` project. A highly regarded conference specialized to the field of Question Answering is the `TREC_ <http://trec.nist.gov/>` - Text REtrieval Conference. Several academic datasets and related publications are available there for background reading.
+Several academic research initiatives continue to hallmark the field of Question Answering. The `OAQA <https://oaqa.github.io/>`_ initiative is a collaboration between `academia <http://www.cs.cmu.edu/~ehn/>`_, `industry <https://www.research.ibm.com/deepqa/question_answering.shtml>`_ and the open source community. MIT CSAIL has a research thrust in Question Answering with the `START <http://start.csail.mit.edu/index.php>`_ project. A highly regarded conference specialized to the field of Question Answering is the `TREC <http://trec.nist.gov/>`_ - Text REtrieval Conference. Several academic datasets and related publications are available there for background reading.
 
 Knowledge-based question answering is the idea of mapping natural language queries to a query over structured database. The MindMeld Workbench Question Answerer is specifically designed for custom knowledge bases involving large content catalogs, for production-grade applications. Catalogs containing even upto hundreds of millions of unique, domain-specific entity objects can easily be handled by MindMeld Workbench in production. Typically, Quick Service Restaurant menus range in the hundreds of thousands entities and specific product retail catalogs go into the millions, while media entertainment libraries scale into the tens or hundreds of millions of unique entities. MindMeld Workbench's Knowledge Base and Question Answering systems have been successfully been applied to all of the above use cases. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below.
 
@@ -126,9 +125,7 @@ It also supports knowledge base search using a list of text queries
 	
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> qa.get(index='menu_items',
-               name='pork and shrimp',
-               restaurant_id='B01CGKGQ40')
+	>>> qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40')
 
 When using the basic search API the text query strings are specified like keywords accompanied with the corresponding knowledge base field. In the example above we have a query string ``pork and shrimp`` to search against knowledge base field ``name``. Filter conditions can also be specified as queries in basic search API. In the example above the filter condition using ID on ``restaurant_id`` field are specified the same way as text queries. It automatically figures out the exact matches to be the important ranking factor for matching on filter criteria to find the best matching objects.
 
@@ -142,21 +139,13 @@ It's also possible to specify one optional custom sort criteria with the basic s
 	
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> qa.get(index='menu_items',
-               name='pork and shrimp',
-               restaurant_id='B01CGKGQ40',
-               _sort='price',
-               _sort_type='asc')
+	>>> qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40', _sort='price', _sort_type='asc')
 
 It's often desirable to sort by distance to find best matches with user's current location taken into account.
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> qa.get(index='menu_items',
-               name='pork and shrimp',
-               _sort='location',
-               _sort_type='distance',
-               _sort_location='33.14,123.15')
+	>>> qa.get(index='menu_items', name='pork and shrimp', _sort='location', _sort_type='distance', _sort_location='33.14,123.15')
 
 The basic search API is designed to have an intuitive interface that works for the most common use cases. It has certain limitations to keep the interface clean and simple including:
 	* filters based on number or date ranges are not supported.
