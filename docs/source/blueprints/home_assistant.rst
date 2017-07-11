@@ -127,8 +127,10 @@ In this blueprint, this application provides a conversational interface for user
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In contrast with the food ordering application which only has one domain, the language differences between each of these activities are different enough that we need to organize them into five different domains: Greeting, Smart Home, Time & Dates, Weather and Unknown.
-   
+The home assistant blue print is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the E-mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ... 
+
+Below is the full list of intents for every domain:
+
    - Greeting
        - greet
        - exit
@@ -159,16 +161,16 @@ In contrast with the food ordering application which only has one domain, the la
    - Unknown
        - unknown
 
-These entities are supported and utilized:
+The following entities are 
 
-    - all
-    - appliance
-    - city
-    - color
-    - duration
-    - interval
-    - location
-    - unit
+    - all: this entity is used to detect whether the user, for example: `turn on the lights in {all|all} room`
+    - appliance: this entity is used to detect household appliances
+    - city: this entity is used to detect cities
+    - color: this entity is used to detect color of the lights, for example: `turn the lights to {soft white|color}`
+    - duration: this entity is used to detect time duration, for example: `{15 minute|duration} alarm`
+    - interval: this entity is used to detect time interval, for example: `cancel {tomorrow night|interval} s alarms`
+    - location: this entity is used to detect household location, for example: `lock {back|location} door`
+    - unit: this entity is used to detect weather unit, for example: `what is the forecast for {london|city} in {celsius|unit}`
 
 For queries such as ``change my alarm from 7 am to 6 am``, role entities are used to distinguish separate entities of the similar type in the same query. We can annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as role.
 
