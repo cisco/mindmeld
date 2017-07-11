@@ -38,6 +38,11 @@ Build the Natural Language Processing models that power the app.
    >>> nlp = NaturalLanguageProcessor('home_assistant')
    >>> nlp.build()
 
+You can also build and save the model directly from commandline.
+
+.. code:: bash
+
+   python app.py build
 
 3. Run
 ^^^^^^
@@ -70,10 +75,12 @@ Deep Dive
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-This application provides a conversational interface for users to check weather, set alarms and timer, and control the lights, doors, thermostat and different appliances in the house.
+This application provides a conversational interface for home automation systems. It allows users to interact with various appliances and home-related functions using natural language. With this application, users will be able to check the weather, set alarms, timers, and control the lights, doors, thermostat and different appliances in the house.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This application provides a conversational interface for users to check weather, set alarms and timer, and control the lights, doors, thermostat and different appliances in the house.
 
 In order to figure out how many intents and domains we want, we should fully expand explore our use cases.
 
