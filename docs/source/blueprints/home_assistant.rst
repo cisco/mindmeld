@@ -183,7 +183,7 @@ For more information on the usage of role, check Workbench3 documentation.
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-In this application we map each intent into its own dialogue state.
+To capture the functionality we envision, our app defines a dialogue state per intent.
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
