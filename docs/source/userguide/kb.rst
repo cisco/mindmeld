@@ -79,7 +79,6 @@ For example, the knowledge base data could look like the following in a food ord
   }
   ...
 
-Workbench knowledge base 
 [TODO: add details about location field value format]
 
 It's critical to have clean data in knowledge base for question answerer to achieve the best possible performance. While Workbench knowledge base performs generic text processing and normalization it's common that some necessary normalizations are rather domain or application specific and it's often a good practice to inspect the data to identify noise and incosistency in the dataset and perform necessary clean-up and normalization as pre-processing. For example, in a food ordering application it's possible that the menus from different restaurant can have different formats and use different conventions. This pre-processing task is very important to avoid potential issues down the road.
@@ -140,7 +139,7 @@ It also supports knowledge base search using a list of text queries
 	
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40')
+	>>> results = qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40')
 
 When using the basic search API the text query strings are specified like keywords accompanied with the corresponding knowledge base field. In the example above we have a query string ``pork and shrimp`` to search against knowledge base field ``name``. Filter conditions can also be specified as queries in basic search API. In the example above the filter condition using ID on ``restaurant_id`` field are specified the same way as text queries. It automatically figures out the exact matches to be the important ranking factor for the filter criteria to find the best matching objects.
 
@@ -154,13 +153,13 @@ It's also possible to specify one custom sort criteria with the basic search API
 	
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40', _sort='price', _sort_type='asc')
+	>>> results = qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40', _sort='price', _sort_type='asc')
 
 To sort by distance to find best matches with user's current location taken into account.
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> qa.get(index='menu_items', name='pork and shrimp', _sort='location', _sort_type='distance', _sort_location='37.77,122.41')
+	>>> results = qa.get(index='menu_items', name='pork and shrimp', _sort='location', _sort_type='distance', _sort_location='37.77,122.41')
 
 The basic search API is designed to have an intuitive interface that works for the most common use cases. It has certain limitations to keep the interface simple and clean including.
 
@@ -190,20 +189,20 @@ Query
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
-	>>> s = s.query(dish_name='fish and chips')
+	>>> results = s.query(dish_name='fish and chips').execute()
 
 Filter
 ''''''
 
-``filter()`` API can be used to add filters to the knowledge base search. There are two types of filters supported: text filter and range filter. For text filter a knowledge base text field name and the filtering text string are specified. The text string is normalized and the entire text string is used to filter the documents like SQL predicates in RDBMS. For example, in food ordering applications we can filter dishes using selected restaurant ID. 
+``filter()`` API can be used to add filters to the knowledge base search. There are two types of filters supported: text filter and range filter. For text filter a knowledge base text field name and the filtering text string are specified. The text string is normalized and the entire text string is used to filter the documents like SQL predicates in relational databases. For example, in food ordering applications we can filter dishes using selected restaurant ID. 
 
 .. code:: python
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
-	>>> s = s.filter(restaurant_id='B01CGKGQ40')
+	>>> results = s.filter(restaurant_id='B01CGKGQ40').execute()
 
-Range filter is used to filter based on number or date ranges. It's created by specifying knowledge base field and one or more range operators. The supported range operators are described below.
+Range filter is used to filter based on number or date ranges. It can be created by specifying knowledge base field and one or more range operators. The supported range operators are described below.
 
 	* ``gt``: greater than
 	* ``gte``: greater than or equal to
@@ -214,30 +213,30 @@ Range filter is used to filter based on number or date ranges. It's created by s
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
-	>>> s = s.filter(field='price', lte=25)
+	>>> results = s.filter(field='price', lte=25).execute()
 
-Note that the range filters are only valid for number and date knowledge base fields. 
+.. note:: Note that the range filters are only valid for number and date knowledge base fields. 
 
 Sort
 ''''
 
-``sort()`` API can be used to add custom sort criteria for a knowledge base search. To define a custom sort criteria a knowledge base field, sorting types (``asc``, ``desc``, or ``distance``) and origin location for sorting by distance.
-
-Custom sort can only be used with number, date and location knowledge base fields. For number and date fields the sort type can simply be either ``asc`` or ``desc`` to determine sort order. Some example use cases are finding most popular items, cheapest items and most recently released items and etc.
+``sort()`` API can be used to add custom sort criteria for a knowledge base search. Custom sort can only be used with number, date and location knowledge base fields. For number and date fields the sort type can simply be either ``asc`` or ``desc`` to determine sort order. Some example use cases are finding most popular items, most recently released items and etc. 
 
 .. code:: python
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
-	>>> s = s.sort(field='popularity', type='desc')
+	>>> results = s.query(name='pork and shrimp').sort(field='popularity', type='desc').execute()
 
-As mentioned in previous section the requirement of sorting by distance is also very common in many applications. The sort by distance criteria can be applied to knowledge base location field by specifying the field name with the sort type ``distance`` and sort location parameter to indicate the origin location. 
+The sort score is combined with text relevance score when available. In the example above the score used for final ranking is a blend of text relevance score from text query and popularity sort score. 
+
+As mentioned in previous section the requirement of sorting by distance is fairly common in many applications. The sort by distance criteria can be applied to knowledge base location field by specifying the field name with the sort type ``distance`` and sort location parameter to indicate the origin location. 
 
 .. code:: python
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
-	>>> s = s.sort(field='location', type='distance', location='37.77,122.41')
+	>>> results = s.sort(field='location', type='distance', location='37.77,122.41').execute()
 
 When to use Basic Search vs Advanced Search?
 `````````````````````````````````````````````
