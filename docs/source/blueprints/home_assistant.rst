@@ -82,45 +82,44 @@ This application provides a conversational interface for home automation systems
 
 The conversational user flows for a home assistant app can get highly complex, depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
 
-```
-App: Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.
+.. code:: bash
+   App: Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.
 
-You: I want to turn on the lights in the kitchen
+   You: I want to turn on the lights in the kitchen
 
-App: Ok. The kitchen lights have been turned on.
+   App: Ok. The kitchen lights have been turned on.
 
-You: Turn the kitchen lights off
+   You: Turn the kitchen lights off
 
-App: Ok. The kitchen lights have been turned off.
+   App: Ok. The kitchen lights have been turned off.
 
-You: Turn on the thermostat
+   You: Turn on the thermostat
 
-App: Ok. The thermostat in the home has been turned on.
+   App: Ok. The thermostat in the home has been turned on.
 
-You: Turn up the thermostat
+   You: Turn up the thermostat
 
-App: The thermostat temperature in the home is now 73 degrees F.
+   App: The thermostat temperature in the home is now 73 degrees F.
 
-You: Set the thermostat to 70
+   You: Set the thermostat to 70
 
-App: The thermostat temperature in the home is now 70 degrees F.
+   App: The thermostat temperature in the home is now 70 degrees F.
 
-You: Lock all the doors
+   You: Lock all the doors
 
-App: Ok. All doors have been locked.
+   App: Ok. All doors have been locked.
 
-You: What's the weather today?
+   You: What's the weather today?
 
-App: The weather forecast in San Francisco is clouds with a min of 66.2 F and a max of 87.8 F.
+   App: The weather forecast in San Francisco is clouds with a min of 66.2 F and a max of 87.8 F.
 
-You: Set a timer for 30 minutes
+   You: Set a timer for 30 minutes
 
-App: Ok. A timer for 30 minutes has been set.
+   App: Ok. A timer for 30 minutes has been set.
 
-You: Set alarm for 9am
+   You: Set alarm for 9am
 
-App: Ok, I have set your alarm for 09:00:00.
-```
+   App: Ok, I have set your alarm for 09:00:00.
 
 In this blueprint, this application provides a conversational interface for users to check weather, set alarms and timer, and control the lights, doors, thermostat and different appliances in the house.
 
