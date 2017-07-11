@@ -183,6 +183,75 @@ For more information on the usage of role, check Workbench3 documentation.
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
+Defining the dialogue states might be the most difficult exercise of a sucessful conversational application as it requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic.
+
+From our example of E-mart, we can define a dialogue state for every intent. Let's take a closer look at these intents: `close_door`, `open_door`, `lock_door`, and `unlock_door`. We can propose the following implementation.
+
+.. code:: python
+
+  @app.handle(intent='close_door')
+  def close_door(context, slots, responder):
+
+      selected_all = _get_command_for_all(context)
+      selected_location = _get_location(context)
+
+      if selected_all or selected_location:
+          reply = _handle_door_open_close_reply(selected_all, selected_location, context,
+                                                desired_state="closed")
+          responder.reply(reply)
+      else:
+          context['frame']['desired_action'] = 'Close Door'
+          prompt = "Of course, which door?"
+          responder.prompt(prompt)
+
+
+  @app.handle(intent='open_door')
+  def open_door(context, slots, responder):
+
+      selected_all = _get_command_for_all(context)
+      selected_location = _get_location(context)
+
+      if selected_all or selected_location:
+          reply = _handle_door_open_close_reply(selected_all, selected_location, context,
+                                                desired_state="opened")
+          responder.reply(reply)
+      else:
+          context['frame']['desired_action'] = 'Open Door'
+          prompt = "Of course, which door?"
+          responder.prompt(prompt)
+
+
+  @app.handle(intent='lock_door')
+  def lock_door(context, slots, responder):
+
+      selected_all = _get_command_for_all(context)
+      selected_location = _get_location(context)
+
+      if selected_all or selected_location:
+          reply = _handle_door_lock_unlock_reply(selected_all, selected_location, context,
+                                                 desired_state="locked")
+          responder.reply(reply)
+      else:
+          context['frame']['desired_action'] = 'Lock Door'
+          prompt = "Of course, which door?"
+          responder.prompt(prompt)
+
+
+  @app.handle(intent='unlock_door')
+  def unlock_door(context, slots, responder):
+
+      selected_all = _get_command_for_all(context)
+      selected_location = _get_location(context)
+
+      if selected_all or selected_location:
+          reply = _handle_door_lock_unlock_reply(selected_all, selected_location, context,
+                                                 desired_state="unlocked")
+          responder.reply(reply)
+      else:
+          context['frame']['desired_action'] = 'Unlock Door'
+          prompt = "Of course, which door?"
+        responder.prompt(prompt)
+
 To capture the functionality we envision, our app defines a dialogue state per intent.
 
 5. Knowledge Base
