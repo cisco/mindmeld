@@ -191,68 +191,48 @@ From our example of E-mart, we can define a dialogue state for every intent. Let
 
   @app.handle(intent='close_door')
   def close_door(context, slots, responder):
-
-      selected_all = _get_command_for_all(context)
-      selected_location = _get_location(context)
-
-      if selected_all or selected_location:
-          reply = _handle_door_open_close_reply(selected_all, selected_location, context,
-                                                desired_state="closed")
-          responder.reply(reply)
-      else:
-          context['frame']['desired_action'] = 'Close Door'
-          prompt = "Of course, which door?"
-          responder.prompt(prompt)
-
+  
+      ...
 
   @app.handle(intent='open_door')
   def open_door(context, slots, responder):
 
-      selected_all = _get_command_for_all(context)
-      selected_location = _get_location(context)
-
-      if selected_all or selected_location:
-          reply = _handle_door_open_close_reply(selected_all, selected_location, context,
-                                                desired_state="opened")
-          responder.reply(reply)
-      else:
-          context['frame']['desired_action'] = 'Open Door'
-          prompt = "Of course, which door?"
-          responder.prompt(prompt)
-
+      ...
 
   @app.handle(intent='lock_door')
   def lock_door(context, slots, responder):
 
-      selected_all = _get_command_for_all(context)
-      selected_location = _get_location(context)
-
-      if selected_all or selected_location:
-          reply = _handle_door_lock_unlock_reply(selected_all, selected_location, context,
-                                                 desired_state="locked")
-          responder.reply(reply)
-      else:
-          context['frame']['desired_action'] = 'Lock Door'
-          prompt = "Of course, which door?"
-          responder.prompt(prompt)
-
+      ...
 
   @app.handle(intent='unlock_door')
   def unlock_door(context, slots, responder):
 
-      selected_all = _get_command_for_all(context)
-      selected_location = _get_location(context)
+      ...
+      
+However, since close/open/lock/unlock door are very similar to each other in the controller logic, we can also propose a different implementation which can take full advantage of this similarity:
 
-      if selected_all or selected_location:
-          reply = _handle_door_lock_unlock_reply(selected_all, selected_location, context,
-                                                 desired_state="unlocked")
-          responder.reply(reply)
-      else:
-          context['frame']['desired_action'] = 'Unlock Door'
-          prompt = "Of course, which door?"
-        responder.prompt(prompt)
+.. code:: python
 
-To capture the functionality we envision, our app defines a dialogue state per intent.
+  @app.handle(intent='close_door')
+  @app.handle(intent='open_door')
+  @app.handle(intent='lock_door')
+  @app.handle(intent='unlock_door')
+  def handle_door(context, slots, responder):
+  
+      ...
+
+Which approach to take depends on the exact application and it takes some trial and error to figure this out. The home assistant blueprint uses both patterns - check it out!
+
+Another pattern that would be useful to the reader is the follow-up request pattern. Take a look at the following interaction:
+
+.. code:: bash
+
+  User: Turn on the lights.
+  App: Sure. Which lights?
+  User: In the kitchen
+  
+In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent.
+
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
