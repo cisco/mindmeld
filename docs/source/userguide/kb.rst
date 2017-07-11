@@ -17,26 +17,26 @@ The foundations of Question Answering began back in the 60's and early 70's with
 
 Several academic research initiatives continue to hallmark the field of Question Answering. The `OAQA <https://oaqa.github.io/>`_ initiative is a collaboration between `academia <http://www.cs.cmu.edu/~ehn/>`_, `industry <https://www.research.ibm.com/deepqa/question_answering.shtml>`_ and the open source community. MIT CSAIL has a research thrust in Question Answering with the `START <http://start.csail.mit.edu/index.php>`_ project. A highly regarded conference specialized to the field of Question Answering is the `TREC <http://trec.nist.gov/>`_ - Text REtrieval Conference. Several academic datasets and related publications are available there for background reading.
 
-Knowledge-based question answering is the idea of mapping natural language queries to a query over structured database. The MindMeld Workbench Question Answerer is specifically designed for custom knowledge bases involving large content catalogs, for production-grade applications. Catalogs containing even upto hundreds of millions of unique, domain-specific entity objects can easily be handled by MindMeld Workbench in production. Typically, Quick Service Restaurant menus range in the hundreds of thousands entities and specific product retail catalogs go into the millions, while media entertainment libraries scale into the tens or hundreds of millions of unique entities. MindMeld Workbench's Knowledge Base and Question Answering systems have been successfully been applied to all of the above use cases. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below.
+The idea of knowledge-based question answering is mapping natural language queries to a query over structured database. The Workbench Question Answerer is specifically designed for custom knowledge bases involving large content catalogs, for production-grade applications. Catalogs containing even upto hundreds of millions of unique, domain-specific entity objects can easily be handled by Workbench in production. Typically, Quick Service Restaurant menus range in the hundreds of thousands entities and specific product retail catalogs go into the millions, while media entertainment libraries scale into the tens or hundreds of millions of unique entities. Workbench's Knowledge Base and Question Answering systems have been successfully been applied to all of the above use cases. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below.
 
-Answer Questions
+1. Answer Questions
 ````````````````
 
 One of the main use cases of question answerer in conversational applications is to provide one or more relevant documents as answer to users' requests. A knowledge base search can be constructed using the entities from NLP pipeline. The answers can be in various forms depending on the nature of the applications. For example, in a food ordering application the answer is usually the canonical dish with attributes necessary to complete the dialogue flow, while in video discovery application the answer is more often a list of best matching movies or TV shows.
 
-Validate Questions 
+2. Validate Questions 
 ``````````````````
 
 The knowledge base can also contain information to help inform user that the request is out of scope. For example, a knowledge base of food ordering application understands that the movie title ``Star Wars`` is not one of the entities supported by the application and can provide information to help steer the conversation to the right direction.
 
-Disambiguate Entities
+3. Disambiguate Entities
 `````````````````````
 
 It's common that we need to disambiguate entities based on application requirements. For example, in a food ordering application there could be hundreds of ``Pad Thai`` dishes offered from a number of restaurants. We would not be able to retrieve the canonical entities that users are referring to without having the contextual information taken into account. The contextual info may be the entity relationships and hierarchy, user preferences or business logic in the application. 
 
 This task can be formulated to a knowledge base search with constraints from contextual information. For the food ordering example the selected restaurant can be added as a filter to the knowledge base search to find the best matching dishes within that particular restaurant.
 
-Suggest Alternatives
+4. Suggest Alternatives
 ````````````````````
 
 Workbench Question Answerer uses a number of scoring factors for knowledge base search. It suggests closest matches when the correct matches could not be found. For example, if a user requests 'Star Wars Rogue One' and that movie is not available, the knowledge base could suggest other, available Star Wars titles.
@@ -79,9 +79,10 @@ For example, the knowledge base data could look like the following in a food ord
   }
   ...
 
+Workbench knowledge base 
 [TODO: add details about location field value format]
 
-It's critical to have clean data in knowledge base for question answerer to achieve the best possible performance. While Workbench knowledge base performs generic text processing and normalization it's common that some necessary normalizations are rather application specific and it's often a good practice to inspect the data to identify noise and incosistency in the dataset and perform necessary clean-up and normalization as pre-processing before knowledge base data import. For example, in a food ordering application it's possible that the menus from different restaurant can have in different formats and use different conventions. It is very important to have pre-processing for this to avoid potential issues down the road.
+It's critical to have clean data in knowledge base for question answerer to achieve the best possible performance. While Workbench knowledge base performs generic text processing and normalization it's common that some necessary normalizations are rather domain or application specific and it's often a good practice to inspect the data to identify noise and incosistency in the dataset and perform necessary clean-up and normalization as pre-processing. For example, in a food ordering application it's possible that the menus from different restaurant can have different formats and use different conventions. This pre-processing task is very important to avoid potential issues down the road.
 
 Import Data into Knowledge Base
 -------------------------------
@@ -93,23 +94,24 @@ Workbench Question Answerer provides APIs to load data into knowledge base. Curr
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> qa.load_kb('my_app', 'stores', 'my_app/data/stores.json')
 
-See API :doc:`documentation<link>` for more details.
+See API documentation for more details.
 
 The knowledge base data import can also be done via Workbench command-line tool ``mmworkbench``.
 
 .. code-block:: console
-	>>> mmworkbench load_kb
+
+	$ python app.py load-kb my_app stores my_app/data/stores.json
 
 
 Knowledge Base Search
 ---------------------
 
-Workbench Question Answerer module provides APIs to retrieve relevant information from knowledge base.
+Workbench Question Answerer provides APIs to retrieve relevant information from knowledge base.
 
 Basic Search
 ````````````
 
-Question Answerer provides basic search API - ``get()`` method for simple knowledge base searches. It has a simple and intuitive interface and can be used in a similar way as seen in common web search interfaces. It allows developers to specify a list of text query and knowledge base field pairs to find best matches. The knowledge base fields to be used depend on the mapping between NLP entity types and corresponding knowledge base objects, For example, in a food ordering domain application ``cuisine`` entity type can be mapped to a knowledge base object or an attribute of a knowledge base object. The mapping is often application specific and is dependent on the data model developers choose to use when building knowledge base. 
+Question Answerer provides basic search API - :meth:`get()` method for simple knowledge base searches. It has a simple and intuitive interface and can be used in a similar way as in common web search interfaces. It takes in a list of text query and knowledge base field pairs to find best matches. The knowledge base fields to be used depend on the mapping between NLP entity types and corresponding knowledge base objects. For example, in a food ordering application ``cuisine`` entity type can be mapped to a knowledge base object or an attribute of a knowledge base object. The mapping is often application specific and is dependent on the data model of the application. 
 
 The basic search API can retrieve a particular knowledge base object using ID
 
@@ -118,6 +120,19 @@ The basic search API can retrieve a particular knowledge base object using ID
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> qa.get(index='menu_items', id='B01CGKGQ40')
+		[{'category': 'Hawaiian Style Poke (HP)',
+		  'description': None,
+		  'id': 'B01CGKGQ40',
+		  'img_url': None,
+		  'menu_id': '78eb0100-029d-4efc-8b8c-77f97dc875b5',
+		  'name': 'Spicy Creamy Salmon Poke',
+		  'option_groups': [],
+		  'popular': False,
+		  'price': 6.5,
+		  'restaurant_id': 'B01N97KQNJ',
+		  'size_group': None,
+		  'size_prices': [],
+		  'syn_whitelist': [{'name': 'special fish'}]}]
 
 It also supports knowledge base search using a list of text queries
 
@@ -127,13 +142,13 @@ It also supports knowledge base search using a list of text queries
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40')
 
-When using the basic search API the text query strings are specified like keywords accompanied with the corresponding knowledge base field. In the example above we have a query string ``pork and shrimp`` to search against knowledge base field ``name``. Filter conditions can also be specified as queries in basic search API. In the example above the filter condition using ID on ``restaurant_id`` field are specified the same way as text queries. It automatically figures out the exact matches to be the important ranking factor for matching on filter criteria to find the best matching objects.
+When using the basic search API the text query strings are specified like keywords accompanied with the corresponding knowledge base field. In the example above we have a query string ``pork and shrimp`` to search against knowledge base field ``name``. Filter conditions can also be specified as queries in basic search API. In the example above the filter condition using ID on ``restaurant_id`` field are specified the same way as text queries. It automatically figures out the exact matches to be the important ranking factor for the filter criteria to find the best matching objects.
 
-It's also possible to specify one optional custom sort criteria with the basic search API. The following parameters are supported for controlling custom sort behavior.
+It's also possible to specify one custom sort criteria with the basic search API. The following parameters are supported for controlling custom sort behavior.
 
 	* **_sort_field**: the knowledge base field used for sorting. 
-	* **_sort_type**: specify the sort order (asc vs desc) or sort by distance. The sort order can be specified for number and date field, while the sort by distance can be specified for location field.
-	* **_sort_location**: optional parameter to specify origin for sorting by distance.
+	* **_sort_type**: valid values are ``asc``, ``desc`` and ``distance``. ``asc`` and ``desc`` specifies the sort order for sorting on number and date fields, while ``distance`` indicates sorting by distance and can be used on location field.
+	* **_sort_location**: specify origin location for sorting by distance.
 
 .. code:: python
 	
@@ -141,14 +156,15 @@ It's also possible to specify one optional custom sort criteria with the basic s
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40', _sort='price', _sort_type='asc')
 
-It's often desirable to sort by distance to find best matches with user's current location taken into account.
+To sort by distance to find best matches with user's current location taken into account.
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> qa.get(index='menu_items', name='pork and shrimp', _sort='location', _sort_type='distance', _sort_location='33.14,123.15')
+	>>> qa.get(index='menu_items', name='pork and shrimp', _sort='location', _sort_type='distance', _sort_location='37.77,122.41')
 
-The basic search API is designed to have an intuitive interface that works for the most common use cases. It has certain limitations to keep the interface clean and simple including:
-	* filters based on number or date ranges are not supported.
+The basic search API is designed to have an intuitive interface that works for the most common use cases. It has certain limitations to keep the interface simple and clean including.
+
+	* Filters on number or date ranges are not supported.
 	* Only one custom sort criteria is allowed.
 
 Question Answerer provides advanced search API for more advanced use case which require more fine-grained control of the knowledge base search behavior. The advanced search APIs are described in the next section.
@@ -221,7 +237,7 @@ As mentioned in previous section the requirement of sorting by distance is also 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
-	>>> s = s.sort(field='location', type='distance', location='33.14,-123.15')
+	>>> s = s.sort(field='location', type='distance', location='37.77,122.41')
 
 When to use Basic Search vs Advanced Search?
 `````````````````````````````````````````````
