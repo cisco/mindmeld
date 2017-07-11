@@ -48,7 +48,8 @@ following entities are currently automatically detected by Workbench:
 Annotating System Entities
 --------------------------
 
-Users have to annotate system entities. By annotating system entities,
+Users have to annotate system entities to let Workbench know which system
+entities are needed for the app. By annotating system entities,
 the user would train the entity recognition model on a much smaller
 training set since these system entities have already been pre-learned.
 Here are some examples of annotated system entities from the
@@ -105,7 +106,7 @@ Debugging System Entities
 To check which token spans in a query are detected as system entities,
 the following function can be invoked:
 
-::
+.. code-block:: python
 
     >>> from mmWorkbench.ser import parse_numerics
     >>> parse_numerics("tomorrow morning at 9am")
