@@ -186,6 +186,7 @@ Query
 ``query()`` API can be used to add text queries to the knowledge base search. For each query a knowledge base field and query string are specified for text relevance match. Several ranking factors including exact matches, phrase matches and partial matches are used to calculate text relevance scores and find best matching documents.
 
 .. code:: python
+
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
@@ -197,6 +198,7 @@ Filter
 ``filter()`` API can be used to add filters to the knowledge base search. There are two types of filters supported: text filter and range filter. For text filter a knowledge base text field name and the filtering text string are specified. The text string is normalized and the entire text string is used to filter the documents like SQL predicates in relational databases. For example, in food ordering applications we can filter dishes using selected restaurant ID. 
 
 .. code:: python
+
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
@@ -210,6 +212,7 @@ Range filter is used to filter based on number or date ranges. It can be created
 	* ``lte``: less than or equal to
 
 .. code:: python
+
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
@@ -223,6 +226,7 @@ Sort
 ``sort()`` API can be used to add custom sort criteria for a knowledge base search. Custom sort can only be used with number, date and location knowledge base fields. For number and date fields the sort type can simply be either ``asc`` or ``desc`` to determine sort order. Some example use cases are finding most popular items, most recently released items and etc. 
 
 .. code:: python
+
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
@@ -233,6 +237,7 @@ The sort score is combined with text relevance score when available. In the exam
 As mentioned in previous section the requirement of sorting by distance is fairly common in many applications. The sort by distance criteria can be applied to knowledge base location field by specifying the field name with the sort type ``distance`` and sort location parameter to indicate the origin location. 
 
 .. code:: python
+
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
