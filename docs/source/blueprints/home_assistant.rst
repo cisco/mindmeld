@@ -3,6 +3,12 @@ Home Assistant
 
 This page documents the Workbench blueprint for a conversational application for a smart home that allows users to control different devices and appliances.
 
+This blueprint is great for:
+
+   - Learning how to handle a large number of domains and intents.
+   - Learning how to use system entities such as dates and times.
+   - Learning how to use roles in the entity hierarchy.
+
 
 Quick Start
 -----------
@@ -313,14 +319,17 @@ Similar options are available for inspecting and experimenting with the Entity R
 
 
 8. Parser Configuration
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Since the home assistant application does not use multiple entities, we do not have any parser configuration.
 
 9. Using the Question Answerer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Since the home assistant does not use knowledge base, we do not have any question answerer.
 
 10. Testing and Deployment
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We can test the home assistant application like any other blue print.
 
