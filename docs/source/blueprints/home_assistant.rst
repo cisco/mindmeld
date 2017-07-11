@@ -80,30 +80,31 @@ This application provides a conversational interface for home automation systems
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This application provides a conversational interface for users to check weather, set alarms and timer, and control the lights, doors, thermostat and different appliances in the house.
+The conversational user flows for a home assistant app can get highly complex, depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
 
-In order to figure out how many intents and domains we want, we should fully expand explore our use cases.
+```
+App: Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.
+You: I want to turn on the lights in the kitchen
+App: Ok. The kitchen lights have been turned on.
+You: Turn the kitchen lights off
+App: Ok. The kitchen lights have been turned off.
+You: Turn on the thermostat
+App: Ok. The thermostat in the home has been turned on.
+You: Turn up the thermostat
+App: The thermostat temperature in the home is now 73 degrees F.
+You: Set the thermostat to 70
+App: The thermostat temperature in the home is now 70 degrees F.
+You: Lock all the doors
+App: Ok. All doors have been locked.
+You: What's the weather today?
+App: The weather forecast in San Francisco is clouds with a min of 66.2 F and a max of 87.8 F.
+You: Set a timer for 30 minutes
+App: Ok. A timer for 30 minutes has been set.
+You: Set alarm for 9am
+App: Ok, I have set your alarm for 09:00:00.
+```
 
-   - Lights
-       - User will be able to turn on/off lights in specific locations at home (kitchen, living room etc.).
-       - User will be able to dim lights to a specific percentage.
-   - Thermostat
-       - Turn thermostat on/off, up/down. 
-       - Set thermostat to specific value.
-       - Thermostats in specific rooms.
-   - Control home security systems
-       - Lock/Unlock specific doors.
-       - Close/Open specific doors.
-   - Check weather
-       - Check weather in any major city in the world.
-       - Specify unit of temperature (C/F).
-   - Control timer and alarms
-       - Set, unset, change and show timer.
-       - Set, unset, change and show alarms
-
-In addition to these actions, we also support simple responeses to greetings ("hi", "hello", "bye", ...) and queries that are not relevant ("who is tom hanks?").
-
-This design exercise usually requires mapping each of the action into a precise number of intents.
+In this blueprint, this application provides a conversational interface for users to check weather, set alarms and timer, and control the lights, doors, thermostat and different appliances in the house.
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
