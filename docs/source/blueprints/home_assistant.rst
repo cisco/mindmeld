@@ -161,20 +161,24 @@ Below is the full list of intents for every domain:
    - Unknown
        - unknown
 
-The following entities are 
+As documented in WB, there are two types of entities: named entities and system entities. Named entities are defined by the and used by application; the full list of values for each entity is defined in the file `gazetteer.txt` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Examples of system entities are temperature, time, unit, ...
 
-    - all: this entity is used to detect whether the user, for example: `turn on the lights in {all|all} room`
-    - appliance: this entity is used to detect household appliances
-    - city: this entity is used to detect cities
-    - color: this entity is used to detect color of the lights, for example: `turn the lights to {soft white|color}`
-    - duration: this entity is used to detect time duration, for example: `{15 minute|duration} alarm`
-    - interval: this entity is used to detect time interval, for example: `cancel {tomorrow night|interval} s alarms`
-    - location: this entity is used to detect household location, for example: `lock {back|location} door`
-    - unit: this entity is used to detect weather unit, for example: `what is the forecast for {london|city} in {celsius|unit}`
+Home assistant defines and uses the following named entities:
 
-For queries such as ``change my alarm from 7 am to 6 am``, role entities are used to distinguish separate entities of the similar type in the same query. We can annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as role.
+    - `all`: this entity is used to detect whether the user, for example: `turn on the lights in {all|all} room`.
+    - `appliance`: this entity is used to detect household appliances, for example: `can you turn on the {tv|appliance}?`
+    - `city`: this entity is used to detect cities, for example: `what is the weather in {shanghai|city}`
+    - `color`: this entity is used to detect color of the lights, for example: `turn the lights to {soft white|color}`
+    - `duration`: this entity is used to detect time duration, for example: `{15 minute|duration} alarm`
+    - `interval`: this entity is used to detect time interval, for example: `cancel {tomorrow night|interval} s alarms`
+    - `location`: this entity is used to detect household location, for example: `lock {back|location} door`
+    - `unit`: this entity is used to detect weather unit, for example: `what is the forecast for {london|city} in {celsius|unit}`
 
-For more information on the usage of role, check WB3 documentation.
+Home assistant uses two system entities: time (`sys_time`) and temperature (`sys_temperature`), for example: `set my thermostat to turn {on at 6 am|sys_time}` and `turn the heat off at {76 degrees|sys_temperature}`.
+
+In many queries, there might be more than one entity of the same type. For example, `change my alarm from 7 am to 6 am`, both` 7 am` and `6 am` are both system entity. Therefore, in order to distinguish between the two entities, we can use the concept of role to annotate `old_time` for `7 am` and `new_time` for `6 am`. We can annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as role.
+
+For more information on the usage of role, check Workbench3 documentation.
 
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
