@@ -84,23 +84,41 @@ The conversational user flows for a home assistant app can get highly complex, d
 
 ```
 App: Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.
+
 You: I want to turn on the lights in the kitchen
+
 App: Ok. The kitchen lights have been turned on.
+
 You: Turn the kitchen lights off
+
 App: Ok. The kitchen lights have been turned off.
+
 You: Turn on the thermostat
+
 App: Ok. The thermostat in the home has been turned on.
+
 You: Turn up the thermostat
+
 App: The thermostat temperature in the home is now 73 degrees F.
+
 You: Set the thermostat to 70
+
 App: The thermostat temperature in the home is now 70 degrees F.
+
 You: Lock all the doors
+
 App: Ok. All doors have been locked.
+
 You: What's the weather today?
+
 App: The weather forecast in San Francisco is clouds with a min of 66.2 F and a max of 87.8 F.
+
 You: Set a timer for 30 minutes
+
 App: Ok. A timer for 30 minutes has been set.
+
 You: Set alarm for 9am
+
 App: Ok, I have set your alarm for 09:00:00.
 ```
 
