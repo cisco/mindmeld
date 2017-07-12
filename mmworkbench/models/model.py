@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains base classes for models defined in the models subpackage."""
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
+from __future__ import unicode_literals
 from builtins import object, super
 
 from collections import namedtuple
@@ -14,8 +15,10 @@ from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuff
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix)
+from sklearn.metrics import make_scorer
+from sklearn_crfsuite.metrics import sequence_accuracy_score
 
-from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
+from .helpers import get_feature_extractor, get_label_encoder, register_label
 from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
@@ -24,6 +27,16 @@ ACCURACY_SCORING = 'accuracy'
 LIKELIHOOD_SCORING = 'log_loss'
 
 _NEG_INF = -1e10
+
+
+def evaluate_seq2seq(y, y_pred, **kwargs):
+    error = 0
+    for idx in range(len(y)):
+        if y[idx] != y_pred[idx]:
+            error += 1
+    accuracy = 1 - error / float(len(y))
+    print(accuracy)
+    return 1 - error / float(len(y))
 
 
 class ModelConfig(object):
@@ -90,7 +103,7 @@ class ModelConfig(object):
 
 
 class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
-                                                       'probas', 'label_type'])):
+                                                       'probas'])):
     """Represents the evaluation of a single example
 
     Attributes:
@@ -98,26 +111,11 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
         expected: The expected label for the example
         predicted: The predicted label for the example
         proba (dict): Maps labels to their predicted probabilities
-        label_type (str): One of CLASS_LABEL_TYPE or ENTITIES_LABEL_TYPE
     """
 
     @property
     def is_correct(self):
-        # For entities compare just the type, span and text for each entity.
-        if self.label_type == ENTITIES_LABEL_TYPE:
-            if len(self.expected) != len(self.predicted):
-                return False
-            for i in range(len(self.expected)):
-                if self.expected[i].entity.type != self.predicted[i].entity.type:
-                    return False
-                if self.expected[i].span != self.predicted[i].span:
-                    return False
-                if self.expected[i].text != self.predicted[i].text:
-                    return False
-            return True
-        # For other label_types compare the full objects
-        else:
-            return self.expected == self.predicted
+        return self.expected == self.predicted
 
 
 class RawResults():
@@ -495,7 +493,14 @@ class SequenceModelEvaluation(ModelEvaluation):
         """
         TODO: Generates statistics at the sequence level (vs token level)
         """
-        return None
+        num_error = 0.0
+        num_total = len(y_true)
+        for idx in range(num_total):
+            if y_true[idx] != y_pred[idx]:
+                num_error += 1
+        accuracy = 1.0 - num_error / num_total
+        print('ACCURACY::::{:.2%}'.format(accuracy))
+        return accuracy
 
     def print_stats(self):
         raw_results = self.raw_results()
@@ -509,9 +514,9 @@ class SequenceModelEvaluation(ModelEvaluation):
 
         # Note: can add any stats specific to the sequence model to any of the tables here
 
-        self._print_overall_stats_table(stats['stats_overall'])
-        self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
-        self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
+        # self._print_overall_stats_table(stats['stats_overall'])
+        # self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
+        # self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
         return stats
 
     def print_graphs(self):
@@ -803,6 +808,8 @@ class SkLearnModel(Model):
         param_grid = self._convert_params(selection_settings['grid'], y)
         model_class = self._get_model_constructor()
 
+        crf_scoring = make_scorer(score_func=sequence_accuracy_score)
+        scoring = crf_scoring
         grid_cv = GridSearchCV(estimator=model_class(), scoring=scoring, param_grid=param_grid,
                                cv=cv_iterator, n_jobs=n_jobs)
         model = grid_cv.fit(X, y, groups)
@@ -814,7 +821,9 @@ class SkLearnModel(Model):
                 msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
             elif scoring == LIKELIHOOD_SCORING:
                 msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
-            logger.debug(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
+            else:
+                msg = 'Candidate average seq2se2 accuracy: {:.2%} ± {:.2%}'
+            logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
 
         if scoring == ACCURACY_SCORING:
             msg = 'Best accuracy: {:.2%}, params: {}'
@@ -822,6 +831,9 @@ class SkLearnModel(Model):
         elif scoring == LIKELIHOOD_SCORING:
             msg = 'Best log likelihood: {:.4}, params: {}'
             self.cv_loss_ = - model.best_score_
+        else:
+            msg = 'Best seq2seq accuracy: {:.2%}, params: {}'
+            self.cv_loss_ = 1 - model.best_score_
         logger.info(msg.format(model.best_score_, model.best_params_))
 
         return model.best_estimator_, model.best_params_
@@ -975,6 +987,15 @@ class EntityLabelEncoder(LabelEncoder):
         all_tags = []
         for idx, label in enumerate(labels):
             all_tags.extend(get_tags_from_entities(examples[idx], label, scheme))
+        return all_tags
+
+    def encode_multiple(self, labels, **kwargs):
+        examples = kwargs['examples']
+        scheme = self._get_tag_scheme()
+        # Here each label is a list of entities for the corresponding example
+        all_tags = []
+        for idx, label in enumerate(labels):
+            all_tags.append(get_tags_from_entities(examples[idx], label, scheme))
         return all_tags
 
     def decode(self, tags_by_example, **kwargs):
