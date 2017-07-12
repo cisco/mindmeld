@@ -14,7 +14,6 @@ from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuff
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix)
-
 from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
 from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
@@ -396,6 +395,11 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns:
             None
         """
+        # Doesn't print if there isn't enough space to display the full matrix.
+        if len(text_labels) > 10:
+            print("Not printing confusion matrix since it is too large. The full matrix is still"
+                  " included in the returned object.")
+            return
         labels = range(len(text_labels)-1)
         title_format = "{:>15}" * (len(labels)+1)
         stat_row_format = "{:>15}" + "{:>15}" * (len(labels))
@@ -493,9 +497,18 @@ class SequenceModelEvaluation(ModelEvaluation):
 
     def _get_sequence_stats(self, y_true, y_pred, text_labels):
         """
-        TODO: Generates statistics at the sequence level (vs token level)
+        TODO: Generates additional sequence level stats
         """
-        return None
+        num_correct = 0
+        num_total = 0
+        for i in range(len(y_true)):
+            for j in range(len(y_true[i])):
+                if y_true[i][j] == y_pred[i][j]:
+                    num_correct += 1
+                num_total += 1
+
+        token_accuracy = float(num_correct)/num_total
+        return {'token_accuracy': token_accuracy}
 
     def print_stats(self):
         raw_results = self.raw_results()
