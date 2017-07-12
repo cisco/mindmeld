@@ -16,7 +16,7 @@ The Natural Language Processor (NLP) understands the user's natural language inp
 Instantiate the NLP class
 -------------------------
 
-Before you can use the natural language processor, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then get started by importing the :class:`NaturalLanguageProcessor` class from Workbench's :mod:`nlp` module and instantiating an object with the path to your Workbench project.
+Before using the natural language processor, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then get started by importing the :class:`NaturalLanguageProcessor` class from Workbench's :mod:`nlp` module and instantiating an object with the path to your Workbench project.
 
 .. code-block:: python
 
@@ -183,8 +183,8 @@ You will learn more about classifier configurations later in this chapter.
 
 .. _build_partial_nlp:
 
-Partial builds
-^^^^^^^^^^^^^^
+Training specific parts of the NLP hierarchy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Calling the :meth:`build` method on the :obj:`nlp` object is the easiest way to build or rebuild all the classifiers in the NLP pipeline. However, it can be a time-consuming operation and there may be occasions when you only want to selectively rebuild a subset of your classifiers. This can be accomplished by calling the :meth:`build` method at the appropriate level in the domain-intent-entity-role hierarchy.
 
@@ -220,32 +220,35 @@ For instance, the code below only rebuilds the NLP models for a specific domain,
 
 Here are the different levels at which you can invoke the :meth:`build` method.
 
-:meth:`nlp.build`
+1. :meth:`nlp.build`
 
-  | A **full** build that trains all the NLP classifiers for the app.
+  | Trains all the classifiers in the NLP pipeline.
 
-:meth:`nlp.domains['d_name'].build`
+2. :meth:`nlp.domains['d_name'].build`
 
   | Trains the intent classifier for the ``d_name`` domain, the entity recognizers for all the intents under ``d_name``, and the role classifiers for all the entity types contained within those intents.
 
-:meth:`nlp.domains['d_name'].intents['i_name'].build`
+3. :meth:`nlp.domains['d_name'].intents['i_name'].build`
 
   | Trains the entity recognizer for the ``i_name`` intent, and the role classifiers for all the entity types in this intent.
 
-:meth:`nlp.domains['d_name'].intents['i_name'].entities['e_name'].build`
+4. :meth:`nlp.domains['d_name'].intents['i_name'].entities['e_name'].build`
 
   | Trains the role classifier for ``e_name`` entity type.
 
+For details on fine-grained access to individual classifiers, read the upcoming chapters.
 
-Configure the NLP models
-------------------------
+
+Classifier configurations
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The previous section briefly introduced the concepts of default configurations and custom configurations for NLP classifiers. A classifier configuration defines the `machine learning algorithm <https://en.wikipedia.org/wiki/Supervised_learning#Approaches_and_algorithms>`_ to use, the `features <https://en.wikipedia.org/wiki/Feature_(machine_learning)>`_ to be extracted from the input data, and the methodology to use for `hyperparameter selection <https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)>`_. This configuration is used by the natural language processor's :meth:`build` method and the individual classifiers' :meth:`fit` method to train models according to the given settings.
 
 The domain, intent, entity, and role classifiers are all configured the same way. They use a configuration dictionary that defines the various machine learning settings to be used in model training. The structure and format of this dictionary is described below. Refer to the individual classifier chapters for detailed explanation on all the relevant configurable options.
 
+
 Anatomy of a classifier configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""
 
 A classifier configuration has three sections.
 
@@ -324,7 +327,7 @@ The configuration defines a grid with five potential values for the 'C' paramete
 
 
 Using custom configurations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""
 
 There are two ways to override Workbench's preset configurations for NLP classifiers.
 
@@ -339,7 +342,7 @@ Alternately, you could also pass the configuration settings (like model type, fe
 
 
 Configuring rest of the pipeline
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""
 
 The last two components in the NLP pipeline, namely, the entity resolver and the language parser, are not supervised classifiers, and are hence configured in a manner different than the first four. Their configuration options are covered in their respective chapters.
 
