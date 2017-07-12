@@ -1,5 +1,5 @@
 Home Assistant
-=============
+==============
 
 This page documents the Workbench blueprint for a conversational application for a smart home that allows users to control different devices and appliances.
 
@@ -75,12 +75,12 @@ Deep Dive
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-This application provides a conversational interface for home automation systems. It allows users to interact with various appliances and home-related functions using natural language. With this application, users will be able to check the weather, set alarms, timers, and control the lights, doors, thermostat and different appliances in the house.
+This application provides a conversational interface for home automation systems. It allows users to interact with various appliances and home-related functions using natural language. With this application, users will be able to check the weather, set alarms, set timers, and control the lights, doors, thermostat and different appliances in the house.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The conversational user flows for a home assistant app can get highly complex, depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
+The conversational user flows for a home assistant app can get complex depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
 
 .. code:: bash
 
@@ -122,7 +122,7 @@ The conversational user flows for a home assistant app can get highly complex, d
 
    App: Ok, I have set your alarm for 09:00:00.
 
-In this blueprint, this application provides a conversational interface for users to check weather, set alarms and timer, and control the lights, doors, thermostat and different appliances in the house.
+In this blueprint, this application provides a conversational interface for users to check weather, set alarms and timers, and control the lights, doors, thermostat and different appliances in the house.
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -161,7 +161,7 @@ Below is the full list of intents for every domain:
    - Unknown
        - unknown
 
-As documented in WB, there are two types of entities: named entities and system entities. Named entities are defined by the and used by application; the full list of values for each entity is defined in the file `gazetteer.txt` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Examples of system entities are temperature, time, unit, ...
+As documented in WB, there are two types of entities: named entities and system entities. Named entities are defined and used by application; the full list of values for each entity is defined in the file `gazetteer.txt` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Examples of system entities are sys-temperature, sys-time, sys-interval etc.
 
 Home assistant defines and uses the following named entities:
 
@@ -169,14 +169,13 @@ Home assistant defines and uses the following named entities:
     - `appliance`: this entity is used to detect household appliances, for example: `can you turn on the {tv|appliance}?`
     - `city`: this entity is used to detect cities, for example: `what is the weather in {shanghai|city}`
     - `color`: this entity is used to detect color of the lights, for example: `turn the lights to {soft white|color}`
-    - `duration`: this entity is used to detect time duration, for example: `{15 minute|duration} alarm`
     - `interval`: this entity is used to detect time interval, for example: `cancel {tomorrow night|interval} s alarms`
     - `location`: this entity is used to detect household location, for example: `lock {back|location} door`
     - `unit`: this entity is used to detect weather unit, for example: `what is the forecast for {london|city} in {celsius|unit}`
 
-Home assistant uses two system entities: time (`sys_time`) and temperature (`sys_temperature`), for example: `set my thermostat to turn {on at 6 am|sys_time}` and `turn the heat off at {76 degrees|sys_temperature}`.
+Home assistant uses three system entities: `sys_time` (time), `sys_interval` (interval) and `sys_temperature` (temperature), for example: `set my thermostat to turn on at {6 am|sys_time}` and `turn the heat off at {76 degrees|sys_temperature}`.
 
-In many queries, there might be more than one entity of the same type. For example, `change my alarm from 7 am to 6 am`, both` 7 am` and `6 am` are both system entity. Therefore, in order to distinguish between the two entities, we can use the concept of role to annotate `old_time` for `7 am` and `new_time` for `6 am`. We can annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as role.
+In many queries, there might be more than one entity of the same type. For example, `change my alarm from 7 am to 6 am`, both` 7 am` and `6 am` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate `old_time` for `7 am` and `new_time` for `6 am`. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can extract each entity based on their roles.
 
 For more information on the usage of role, check Workbench3 documentation.
 
@@ -185,7 +184,7 @@ For more information on the usage of role, check Workbench3 documentation.
 
 Defining the dialogue states might be the most difficult exercise of a sucessful conversational application as it requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic.
 
-From our example of E-mart, we can define a dialogue state for every intent. Let's take a closer look at these intents: `close_door`, `open_door`, `lock_door`, and `unlock_door`. We can propose the following implementation.
+From our example of E-mart, we can define a dialogue state for every intent. Let's take a closer look at these intents: `close_door`, `open_door`, `lock_door`, and `unlock_door`.
 
 .. code:: python
 
@@ -209,7 +208,7 @@ From our example of E-mart, we can define a dialogue state for every intent. Let
 
       ...
 
-However, since close/open/lock/unlock door are very similar to each other in the controller logic, we can also propose a different implementation which can take full advantage of this similarity:
+However, since close/open/lock/unlock door are very similar to each other in the controller logic, we use a different implementation which can take full advantage of this similarity:
 
 .. code:: python
 
@@ -237,7 +236,7 @@ In this pattern, the first request does not specify the required information, in
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-Since the home assistant application does not need a catalog of items or food products, it does not use a knowledge base as there are no catalog data associated with this application. However since the current version of Workbench still needs an Elasticsearch connection we still need a local instance of Elasticsearch running in the background.
+Since the home assistant application does not need a catalog of items, it does not use a knowledge base. However since Workbench needs an Elasticsearch connection, we need a local instance of Elasticsearch running in the background.
 
 
 6. Training Data
@@ -262,7 +261,7 @@ The labeled data for training our NLP pipeline was created using a combination o
 +--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
 | Targeted query annotation for training the Role Classifier   | ``set_alarm``: "Annotate all entities with their corresponding roles, when needed. For eg: old_time, new_time"          |
 +--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
-| Targeted synonym generation for gazetteer generation to       | ``city`` entity: "Enumerate a list of names of cities"                                                                  |
+| Targeted synonym generation for gazetteer generation to      | ``city`` entity: "Enumerate a list of names of cities"                                                                  |
 | improve entity recognition accuracies                        |                                                                                                                         |
 |                                                              | ``location`` entity: "What are some names of locations in your home"                                                    |
 +--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
@@ -289,25 +288,6 @@ To put the training data to use and train a baseline NLP system for your app usi
    >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
    >>> nlp.build()
    Fitting domain classifier
-   Loading queries from file greeting/exit/train.txt
-   Loading queries from file greeting/greet/train.txt
-   Loading queries from file unknown/unknown/training.txt
-   Loading queries from file smart_home/turn_appliance_off/train.txt
-   Loading queries from file smart_home/turn_on_thermostat/train.txt
-   Loading queries from file smart_home/set_thermostat/train.txt
-   Loading queries from file smart_home/specify_location/train.txt
-   Loading queries from file smart_home/turn_lights_on/train.txt
-   Loading queries from file smart_home/turn_off_thermostat/train.txt
-   Loading queries from file smart_home/close_door/train.txt
-   Loading queries from file smart_home/turn_lights_off/train.txt
-   Loading queries from file smart_home/turn_down_thermostat/train.txt
-   Unable to load query: Unable to resolve system entity of type 'sys_time' for '12pm'.
-   Loading queries from file smart_home/check_thermostat/train.txt
-   Loading queries from file smart_home/unlock_door/train.txt
-   Loading queries from file smart_home/open_door/train.txt
-   Loading queries from file smart_home/lock_door/train.txt
-   Loading queries from file smart_home/turn_appliance_on/train.txt
-   Loading queries from file smart_home/turn_up_thermostat/train.txt
    Loading queries from file weather/check_weather/train.txt
    Loading queries from file times_and_dates/remove_alarm/train.txt
    Loading queries from file times_and_dates/start_timer/train.txt
@@ -326,8 +306,6 @@ To put the training data to use and train a baseline NLP system for your app usi
    Fitting intent classifier: domain='smart_home'
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 98.43%, params: {'fit_intercept': True, 'C': 100, 'class_weight': {0: 0.99365079365079367, 1: 1.5915662650602409, 2: 1.3434782608695652, 3: 1.5222222222222221, 4: 0.91637426900584784, 5: 0.74743589743589745, 6: 1.9758620689655173, 7: 1.4254901960784312, 8: 1.0794871794871794, 9: 1.0645320197044335, 10: 1.1043715846994535, 11: 1.2563909774436088, 12: 1.3016260162601625, 13: 1.0775510204081633, 14: 1.8384615384615384}}
-   .
-   .
 .. tip::
 
   During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
