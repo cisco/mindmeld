@@ -127,7 +127,7 @@ In this blueprint, this application provides a conversational interface for user
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The home assistant blue print is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the E-mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ... 
+The home assistant blue print is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the E-mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...
 
 Below is the full list of intents for every domain:
 
@@ -191,7 +191,7 @@ From our example of E-mart, we can define a dialogue state for every intent. Let
 
   @app.handle(intent='close_door')
   def close_door(context, slots, responder):
-  
+
       ...
 
   @app.handle(intent='open_door')
@@ -208,7 +208,7 @@ From our example of E-mart, we can define a dialogue state for every intent. Let
   def unlock_door(context, slots, responder):
 
       ...
-      
+
 However, since close/open/lock/unlock door are very similar to each other in the controller logic, we can also propose a different implementation which can take full advantage of this similarity:
 
 .. code:: python
@@ -218,7 +218,7 @@ However, since close/open/lock/unlock door are very similar to each other in the
   @app.handle(intent='lock_door')
   @app.handle(intent='unlock_door')
   def handle_door(context, slots, responder):
-  
+
       ...
 
 Which approach to take depends on the exact application and it takes some trial and error to figure this out. The home assistant blueprint uses both patterns - check it out!
@@ -230,7 +230,7 @@ Another pattern that would be useful to the reader is the follow-up request patt
   User: Turn on the lights.
   App: Sure. Which lights?
   User: In the kitchen
-  
+
 In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent.
 
 
@@ -402,12 +402,14 @@ Similar options are available for inspecting and experimenting with the Entity R
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Since the home assistant application does not use multiple entities, we do not have any parser configuration.
+The home assistant application does not have relationships between entities in the application's queries, we therefore do not need a parser configuration. As the applications evolves, such entity relationships will form and referring to :doc:`Language Parser <../userguide/parser>` will be helpful on building out such a parser configuration.
+
 
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Since the home assistant does not use knowledge base, we do not have any question answerer.
+The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. Since the home assistant application does not use a knowledge base, a question answerer component is not needed.
+
 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -426,7 +428,7 @@ We can also enter the conversation mode directly from the commandline.
 .. code:: bash
 
    >>> python app.py converse
-   
+
    App: Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.
    You: What's the weather today in San Francisco?
    App: The weather forecast in San Francisco is clouds with a min of 62.6 F and a max of 89.6 F
