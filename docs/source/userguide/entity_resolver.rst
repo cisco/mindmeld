@@ -4,39 +4,37 @@
 Entity Resolver
 ===============
 
-The MindMeld Entity Resolver takes the entities recognized by the Entity Recognizer and transforms them into canonical forms that can be looked up in a Knowledge Base. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake" and "SF" may get resolved to "San Francisco".
+The MindMeld Entity Resolver takes the entities recognized by the Entity Recognizer and transforms them into canonical forms that can be looked up in a Knowledge Base. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake" and "SF" may get resolved to "San Francisco". In NLP literature, Entity Resolution or `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ is the problem of identifying all terms that refer to the same real world entity. In Workbench, these real world entities are identified by either a unique id or a canonical name in both the Entity Map and Knowledge Base.
 
-In NLP literature, Entity Resolution or `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ is the problem of identifying all terms that refer to the same real world entity. In Workbench, these real world entities are identified by either a unique id or a canonical name in both the Entity Map and Knowledge Base.
+For many entity types, an entity's canonical form corresponds with a document in the knowledge base. When this is the case, the goal of the Entity Resolver is to resolve to the specific document id so that as the developer, you can directly use that id to query the Knowledge Base or make an API call. For example, consider the *dish* entity type for the food ordering use case. The entity "stir-fried Thai noodles" would be resolved to {cname: "Pad Thai", id: 123}. Then the developer can use the dish id 123 to query the knowledge base, display results, or make an API call to place an order.
 
-In some cases an entity's canonical form corresponds with a document in the knowledge base. When this is the case, the goal of the Entity Resolver is to resolve to the specific document id so that as the developer, you can directly use that id to query the Knowledge Base or make an API call. For example, consider the food ordering use case. For the *dish* entity type, there are multiple restaurants which serve a dish called "Pad Thai". Each one of these "Pad Thai" dishes have a different id in the knowledge base and thus will be different entries in the mapping file. It is important to keep items with the same canonical name but different ids separate in the mapping file for two reasons:
+It is important to note that there are multiple restaurants which serve a dish called "Pad Thai". Each one of these "Pad Thai" dishes have a different id in the knowledge base. When canonical names are the same but ids are different, the Entity Resolver can rank one item above the other based on: 
 
-1. The resolved dish id can be used by the developer in the app.py to make an API call to preform an action like placing an order
+1. **Synonym lists.** Entities with the same canonical name may have different properties (e.g. "House Salad" may be a "spinach salad" at one restaurant but a "tropical fruit salad" at another restaurant). These differences can be captured in the synonym list of each entry which is used by the Entity Resolver to select the appropriate result.
 
-2. Entities with the same canonical name may have different ingredients (e.g. house salad). These differences can be captured in the synonym list of each entry.
+2. **A numeric value.** Textual similarity is the primary factor in entity resolution, but when there are many items with similar textual similarity, the numeric value is used to boost the items that the user is most likely referring to. A document with a higher numeric value will be preferred, but the meaning of the numeric value differs across applications. For example, in a food ordering application, the score may be the rating of a restaurant. In a music discovery application, the score may be number of listens for an album.
 
-In other cases, the entity's canonical form is simply a name that can be used to filter results or in natural language responses. For example, in the food ordering use case the *cuisine* entity type doesn't correspond to specific documents in the knowledge base. But resolving to the cuisine type "Thai" allows the developer to do a filter search against the knowledge base to select a list of relevent restaurants.
+For some entity types, the entity's canonical form does not correspond with a knowledge base document, but is simply a name that can be used to filter results or in natural language responses. For example, in the food ordering use case the *cuisine* entity type doesn't correspond to specific documents in the knowledge base. But resolving to the cuisine type "Thai" allows the developer to do a filter search against the knowledge base to select a list of relevant restaurants.
 
-Entity resolution is based on 1) textual similarity to a canonical name or one of its synonyms and 2) on a numeric value. Textual similarity is the primary factor in the ranking, but when there are many items with similar textual similarity, the numeric value is used to boost the items that the user is most likely referring to. A document with a higher numeric value will be preferred, but the meaning of the numeric value differs across applications. For example, in a music discovery application, the score may be number of listens for an album. In a food ordering application, the score may be the rating of a restaurant.
-
-To train the Entity Resolver, you must generate an Entity Map which includes a synonym set for each entity as well as the optional numeric value. The details of the entity map and guidelines on synonym data collection are described below.
+To train the Entity Resolver, you must generate Entity Mapping files which include a synonym set for each entity as well as the optional numeric value. The details of the Entity Mappings and guidelines on synonym data collection are described in the following sections.
 
 
 Entity Mapping
 --------------
 
-For each entity type, it is up to the developer to generate an Entity Map file which is used to train the Entity Resolver. The mapping file contains a list of documents, one for each real world entity that could be resolved to. For instance, in the food ordering blueprint where a dish is an entity type, the dish entity mapping file contains a list of all possible dishes that a user could order. Each document refers to a single real world entity and contains:
+For each entity type, it is up to the developer to generate an Entity Mapping file which is used to train the Entity Resolver. The Entity Mapping is a json file with a list of documents, one for each real world entity that could be resolved to. Each document refers to a single real world entity and contains:
 
 ==================== ===
-**canonical name**   The name used to refer to the real world entity. Note that in some use cases canonical names will be unique and some use cases they will not. Textual similarity with the canonical name is one of the primary factors of entity resolution.
+**canonical name**   The name used to refer to the real world entity. Note if canonical names are unique a separate unique id may not be needed. Textual similarity with the canonical name is one of the primary factors of entity resolution.
 
 **unique id**        A unique identifier (optional). If a corresponding entry exists in the knowledge base, this id should be the same as the KB document id. In cases where there are no corresponding documents in the knowledge base and there are no duplicate canonical names, an id is not needed.  
 
 **whitelist**        A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that it is often referred to by different terms. Textual similarity with synonyms in the whitelist is one of the primary factors of entity resolution.
 
-**numeric value**    An optional numeric value. Entities with a higher numeric value will be ranked above those with a lower value and similar textual similarity. E.g. in the music discovery use case, there are hundreds of songs with the title 'Let It Be', but the most popular and the one that the user is most likely referring to is by The Beatles. The numeric value for The Beatles' version of the song captures this non-textual information and indicates to the Entity Resolver that it should be ranked more highly than other textually similar, but less popular songs.
+**numeric value**    An optional numeric value. Entities with a higher numeric value will be ranked above those with a lower value and similar textual similarity.
 ==================== ===
 
-Below is an example of an entity map for the dish entity in the food ordering use case. In the real file, there would be many more entries, but for illustration purposes two are included below.
+In the food ordering blueprint where a dish is an entity type, the dish entity mapping file contains a list of all possible dishes that a user could order. Here is an example of what a couple of entries in the dish entity mapping file may look like.
 
 .. code-block:: json
 
@@ -66,9 +64,11 @@ Below is an example of an entity map for the dish entity in the food ordering us
         ...
     ]
 
-This file should be saved as *mapping.json* and exist in the corresponding entity folder. For example, the above file should exist in the following location:
+This file should be saved as *mapping.json* and exist in the corresponding entity folder. For example, the mapping.json file for the *store_name* entity should exist in the following location:
 
-[TODO - insert image of file structure]
+.. image:: /images/directory5.png
+    :width: 500px
+    :align: center
 
 
 Data Collection
@@ -90,18 +90,20 @@ Entity Resolution Configuration
 
 There are two options for entity resolution:
 
-1. Use a text similarity model which requires Elasticsearch (strongly recommended)
-2. Use a baseline exact match model
+1. Use an advanced text similarity model (strongly recommended, requires Elasticsearch)
+2. Use a baseline exact match model (no requirements)
 
-Elasticsearch is a full-text search and analytics engine that the Entity Resolver leverages for information retrieval. For more details on setting up Elasticsearch consult the getting started guide [TODO add link]. **If Elasticsearch is set up, the more powerful information retrieval based entity resolver is used by default, there is nothing you have to do.**
+Elasticsearch is a full-text search and analytics engine that the Entity Resolver leverages for information retrieval. For more details on setting up Elasticsearch consult the :doc:`Getting Started guide <getting_started>`. **If Elasticsearch is set up, Workbench's advanced information retrieval based entity resolver is used by default, there is nothing you have to do.**
 
-If you don't want to use Elasticsearch, we provide a simple baseline version of Entity Resolution which only resolves to a document if the text is an exact match on the canonical name or one of its synonyms. To use this version, specify the exact match model type in the entity resolver config. This would look like the following:
+If you don't want to use Elasticsearch, Workbench provides a simple baseline version of Entity Resolution which only resolves to a document if the text is an exact match on the canonical name or one of its synonyms. To use this version, add the following to your *config.py* located in the top level of your app folder:
 
+.. code-block:: python
 
-TODO: give specific location and syntax for the config
+    ENTITY_RESOLUTION_CONFIG = {
+        'model_type': 'exact_match'
+    }
 
-
-Again, the above exact match model is *not* recommended as Workbench will use the text relevance based Entity Resolver by default which significantly improves performance. However, if you have no way of getting Elasticsearch set up it is a possible alternative.
+Again, the above exact match model is *not* recommended as Workbench will use the more advanced text relevance based Entity Resolver by default which significantly improves performance. However, if you have no way of getting Elasticsearch set up it is a possible alternative.
 
 Trying it out
 -------------
