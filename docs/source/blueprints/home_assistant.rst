@@ -182,9 +182,9 @@ For more information on the usage of role, check Workbench3 documentation.
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-Defining the dialogue states might be the most difficult exercise of a sucessful conversational application as choosing the right programming pattern for dialogue states requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic.
+Defining the dialogue states might be the most difficult exercise of a sucessful conversational application. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining one dialogue state for multiple intents. Choosing the right programming pattern for dialogue states requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic. In this section we will explore both options in details.
 
-In E-mart example, we can define a dialogue state for every intent. For the home assisstant blueprint, let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents. 
+In the home assisstant blueprint, let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents. 
 
 .. code:: python
 
@@ -208,7 +208,7 @@ In E-mart example, we can define a dialogue state for every intent. For the home
 
       ...
 
-However, since close/open/lock/unlock door are very similar to each other in the controller logic, we use a different implementation which can take full advantage of this similarity:
+However, since close/open/lock/unlock door are very similar to each other in the controller logic (for example, setting the state variable for the door), we can handle all of these intents in the one state `handle_door`.
 
 .. code:: python
 
@@ -222,7 +222,7 @@ However, since close/open/lock/unlock door are very similar to each other in the
 
 Which approach to take depends on the exact application and it takes some trial and error to figure this out. The home assistant blueprint uses both patterns - check it out!
 
-Another pattern that would be useful to the reader is the follow-up request pattern. Take a look at the following interaction:
+Another conversational pattern that would be useful to the reader is the follow-up request pattern. Take a look at the following interaction:
 
 .. code:: bash
 
@@ -230,7 +230,7 @@ Another pattern that would be useful to the reader is the follow-up request patt
   App: Sure. Which lights?
   User: In the kitchen
 
-In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent.
+In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent and define the `handle_specify_location` state.
 
 
 5. Knowledge Base
