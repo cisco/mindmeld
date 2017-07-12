@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains base classes for models defined in the models subpackage."""
-from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 from builtins import object, super
 
 from collections import namedtuple
@@ -18,7 +17,7 @@ from sklearn.metrics import (f1_score, precision_recall_fscore_support as score,
 from sklearn.metrics import make_scorer
 from sklearn_crfsuite.metrics import sequence_accuracy_score
 
-from .helpers import get_feature_extractor, get_label_encoder, register_label
+from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
 from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
@@ -103,7 +102,7 @@ class ModelConfig(object):
 
 
 class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
-                                                       'probas'])):
+                                                       'probas', 'label_type'])):
     """Represents the evaluation of a single example
 
     Attributes:
@@ -111,11 +110,26 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
         expected: The expected label for the example
         predicted: The predicted label for the example
         proba (dict): Maps labels to their predicted probabilities
+        label_type (str): One of CLASS_LABEL_TYPE or ENTITIES_LABEL_TYPE
     """
 
     @property
     def is_correct(self):
-        return self.expected == self.predicted
+        # For entities compare just the type, span and text for each entity.
+        if self.label_type == ENTITIES_LABEL_TYPE:
+            if len(self.expected) != len(self.predicted):
+                return False
+            for i in range(len(self.expected)):
+                if self.expected[i].entity.type != self.predicted[i].entity.type:
+                    return False
+                if self.expected[i].span != self.predicted[i].span:
+                    return False
+                if self.expected[i].text != self.predicted[i].text:
+                    return False
+            return True
+        # For other label_types compare the full objects
+        else:
+            return self.expected == self.predicted
 
 
 class RawResults():
@@ -514,9 +528,9 @@ class SequenceModelEvaluation(ModelEvaluation):
 
         # Note: can add any stats specific to the sequence model to any of the tables here
 
-        # self._print_overall_stats_table(stats['stats_overall'])
-        # self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
-        # self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
+        self._print_overall_stats_table(stats['stats_overall'])
+        self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
+        self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
         return stats
 
     def print_graphs(self):
