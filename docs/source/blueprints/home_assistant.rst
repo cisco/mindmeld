@@ -127,7 +127,7 @@ In this blueprint, this application provides a conversational interface for user
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The home assistant blue print is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the E-mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...
+The home assistant blueprint is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the E-mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...
 
 Below is the full list of intents for every domain:
 
@@ -161,7 +161,7 @@ Below is the full list of intents for every domain:
    - Unknown
        - unknown
 
-As documented in WB, there are two types of entities: named entities and system entities. Named entities are defined and used by application; the full list of values for each entity is defined in the file `gazetteer.txt` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Examples of system entities are sys-temperature, sys-time, sys-interval etc.
+There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file `gazetteer.txt` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Examples of system entities are sys-temperature, sys-time, sys-interval etc.
 
 Home assistant defines and uses the following named entities:
 
@@ -182,9 +182,9 @@ For more information on the usage of role, check Workbench3 documentation.
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-Defining the dialogue states might be the most difficult exercise of a sucessful conversational application as it requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic.
+Defining the dialogue states might be the most difficult exercise of a sucessful conversational application as choosing the right programming pattern for dialogue states requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic.
 
-From our example of E-mart, we can define a dialogue state for every intent. Let's take a closer look at these intents: `close_door`, `open_door`, `lock_door`, and `unlock_door`.
+In E-mart example, we can define a dialogue state for every intent. For the home assisstant blueprint, let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents. 
 
 .. code:: python
 
