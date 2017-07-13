@@ -401,7 +401,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         # Doesn't print if there isn't enough space to display the full matrix.
         if len(text_labels) > 10:
             print("Not printing confusion matrix since it is too large. The full matrix is still"
-                  " included in the returned object.")
+                  " included in the dictionary returned from print_stats().")
             return
         labels = range(len(text_labels)-1)
         title_format = "{:>15}" * (len(labels)+1)
