@@ -11,7 +11,7 @@ import logging
 
 from sklearn_crfsuite import CRF
 
-from .helpers import get_feature_extractor
+from .helpers import extract_sequence_features
 from .tagging import get_tags_from_entities, get_entities_from_tags
 
 
@@ -113,26 +113,12 @@ class ConditionalRandomFields(Tagger):
         """Extracts feature dicts for each token in an example.
 
         Args:
-            examples (mmworkbench.core.Query): an query
+            example (mmworkbench.core.Query): an query
         Returns:
             (list dict): features
         """
-        feat_seq = []
-        example_type = self.config.example_type
-        for name, kwargs in self.config.features.items():
-            if callable(kwargs):
-                # a feature extractor function was passed in directly
-                feat_extractor = kwargs
-            else:
-                feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
-
-            update_feat_seq = feat_extractor(example, self._resources)
-            if not feat_seq:
-                feat_seq = update_feat_seq
-            else:
-                for idx, features in enumerate(update_feat_seq):
-                    feat_seq[idx].update(features)
-        return feat_seq
+        return extract_sequence_features(example, self.config.example_type,
+                                         self.config.features, self._resources)
 
     def _preprocess_data(self, X):
         """Converts data into formats of CRF suite.
