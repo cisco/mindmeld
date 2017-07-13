@@ -73,7 +73,6 @@ Contents
    userguide/getting_started
    userguide/key_concepts
    userguide/architecture
-   userguide/workbench_apps
    userguide/kb
    userguide/nlp
    userguide/domain_classifier
@@ -81,15 +80,12 @@ Contents
    userguide/entity_recognizer
    userguide/role_classifier
    userguide/entity_resolver
-   userguide/language_parser
+   userguide/parser
    userguide/dm
-   userguide/deployment
-   userguide/integration
 
 .. toctree::
    :maxdepth: 2
-   :caption: Internal Documentation
+   :caption: API
    :name: internal
 
    internal/api_reference
-   internal/history
