@@ -12,11 +12,13 @@ import random
 from .helpers import register_model
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers import ConditionalRandomFields
+from .memm import MemmModel
 
 logger = logging.getLogger(__name__)
 
 # classifier types
 CRF_TYPE = 'crf'
+MEMM_TYPE = 'memm'
 
 DEFAULT_FEATURES = {
     'bag-of-words-seq': {
@@ -158,9 +160,9 @@ class TaggerModel(Model):
         classifier_type = self.config.model_settings['classifier_type']
         try:
             return {
-                # MEMM_TYPE: MemmModel,
-                # LSTM_TYPE: LSTMModel,
+                MEMM_TYPE: MemmModel,
                 CRF_TYPE: ConditionalRandomFields,
+                # LSTM_TYPE: LSTMModel,
             }[classifier_type]
         except KeyError:
             msg = '{}: Classifier type {!r} not recognized'
