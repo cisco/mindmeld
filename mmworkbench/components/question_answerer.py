@@ -34,6 +34,7 @@ class QuestionAnswerer(object):
         self._es_host = es_host
         self.__es_client = None
         self._app_name = get_app_name(app_path)
+        self._es_field_info = {}
 
     @property
     def _es_client(self):
@@ -71,9 +72,6 @@ class QuestionAnswerer(object):
         Returns:
             a list of matching documents
         """
-
-        # get index name with app scope
-        index = get_scoped_index_name(self._app_name, index)
 
         doc_id = kwargs.get('id')
 
@@ -130,7 +128,35 @@ class QuestionAnswerer(object):
         Returns:
             Search: a Search object for filtered search.
         """
-        return Search(client=self._es_client, index=index, ranking_config=ranking_config)
+
+        # get index name with app scope
+        index = get_scoped_index_name(self._app_name, index)
+
+        # load knowledge base field information for the specified index.
+        self._load_field_info(index)
+
+        return Search(client=self._es_client,
+                      index=index,
+                      ranking_config=ranking_config,
+                      field_info=self._es_field_info[index])
+
+    def _load_field_info(self, index):
+        """load knowledge base field metadata information for the specified index.
+
+        Args:
+            index (str): index name.
+        """
+
+        # load field info from local cache
+        index_info = self._es_field_info.get(index, {})
+
+        if not index_info:
+            self._es_field_info[index] = {}
+            res = self._es_client.indices.get(index=index)
+            all_field_info = res[index]['mappings']['document']['properties']
+            for field_name in all_field_info:
+                field_type = all_field_info[field_name].get('type')
+                self._es_field_info[index][field_name] = FieldInfo(field_name, field_type)
 
     def config(self, config):
         """Summary
@@ -170,18 +196,70 @@ class QuestionAnswerer(object):
                    es_host, es_client, connect_timeout=connect_timeout)
 
 
+class FieldInfo:
+    """This class models an information source of a knowledge base field metadata"""
+
+    def __init__(self, name, type):
+        self.name = name
+        self.type = type
+
+    def get_name(self):
+        """Returns knowledge base field name"""
+
+        return self.name
+
+    def get_type(self):
+        """Returns knowledge base field type"""
+
+        return self.type
+
+    def is_number_field(self):
+        """Returns True if the knowledge base field is a number field, otherwise returns False"""
+
+        number_types = ['long', 'integer', 'short', 'byte', 'double', 'float', 'half_float',
+                        'scaled_float']
+        if self.type in number_types:
+            return True
+        else:
+            return False
+
+    def is_date_field(self):
+        """Returns True if the knowledge base field is a date field, otherwise returns False"""
+        if self.type == 'date':
+            return True
+        else:
+            return False
+
+    def is_location_field(self):
+        """Returns True if the knowledge base field is a location field, otherwise returns False"""
+        if self.type == 'geo_point':
+            return True
+        else:
+            return False
+
+    def is_text_field(self):
+        """Returns True if the knowledge base field is a text, otherwise returns False"""
+        text_field_types = ['text', 'keyword']
+
+        if self.type in text_field_types:
+            return True
+        else:
+            return False
+
+
 class Search:
     """This class models a generic filtered search in knowledge base. It allows developers to
     construct more complex knowledge base search criteria based on the application requirements.
 
     """
-    def __init__(self, client, index, ranking_config=None):
+    def __init__(self, client, index, ranking_config=None, field_info=None):
         """Initialize a Search object.
 
         Args:
             client (Elasticsearch): Elasticsearch client.
             index (str): index name of knowledge base object.
             ranking_config (dict): overriding ranking configuration parameters for current search.
+            field_info (dict): dictionary contains knowledge base matadata objects.
         """
         self.index = index
         self.client = client
@@ -196,6 +274,8 @@ class Search:
         if not ranking_config:
             self._ranking_config = copy.deepcopy(DEFAULT_RANKING_CONFIG)
 
+        self._kb_field_info = field_info
+
     def _clone(self):
         """Clone a Search object.
 
@@ -205,6 +285,7 @@ class Search:
         s = Search(client=self.client, index=self.index)
         s._clauses = copy.deepcopy(self._clauses)
         s._ranking_config = copy.deepcopy(self._ranking_config)
+        s._kb_field_info = copy.deepcopy(self._kb_field_info)
 
         return s
 
@@ -215,8 +296,11 @@ class Search:
             type (str): type of clause
         """
         if type == "query":
-            key, value = next(iter(kwargs.items()))
-            clause = Search.QueryClause(key, value)
+            field, value = next(iter(kwargs.items()))
+            field_info = self._kb_field_info.get(field)
+            if not field_info:
+                raise ValueError('Invalid knowledge base field \'{}\''.format(field))
+            clause = Search.QueryClause(field, field_info, value)
         elif type == "filter":
             # set the filter type to be 'range' if any range operator is specified.
             if kwargs.get('gt') or kwargs.get('gte') or kwargs.get('lt') or kwargs.get('lte'):
@@ -226,13 +310,19 @@ class Search:
                 lt = kwargs.get('lt')
                 lte = kwargs.get('lte')
 
+                if field not in self._kb_field_info:
+                    raise ValueError('Invalid knowledge base field \'{}\''.format(field))
+
                 clause = Search.FilterClause(field=field,
+                                             field_info=self._kb_field_info.get(field),
                                              range_gt=gt,
                                              range_gte=gte,
                                              range_lt=lt,
                                              range_lte=lte)
             else:
                 key, value = next(iter(kwargs.items()))
+                if key not in self._kb_field_info:
+                    raise ValueError('Invalid knowledge base field \'{}\''.format(key))
                 clause = Search.FilterClause(field=key, value=value)
 
         elif type == "sort":
@@ -240,9 +330,19 @@ class Search:
             sort_type = kwargs.get('sort_type')
             sort_location = kwargs.get('location')
 
+            field_info = self._kb_field_info.get(sort_field)
+            if not field_info:
+                raise ValueError('Invalid knowledge base field \'{}\''.format(sort_field))
+
+            # only compute field stats if sort field is number or date type.
+            field_stats = None
+            if field_info.is_number_field() or field_info.is_date_field():
+                field_stats = self._get_field_stats(sort_field)
+
             clause = Search.SortClause(sort_field,
+                                       field_info,
                                        sort_type,
-                                       self._get_field_stats(sort_field),
+                                       field_stats,
                                        sort_location)
 
         clause.validate()
@@ -400,6 +500,7 @@ class Search:
             es_query['query']['function_score']['functions'].append(sort_function)
 
         logger.debug("ES query syntax: {}.".format(es_query))
+        print(es_query)
         return es_query
 
     def execute(self):
@@ -439,9 +540,10 @@ class Search:
     class QueryClause(Clause):
         """This class models a knowledge base query clause."""
 
-        def __init__(self, field, value):
+        def __init__(self, field, field_info, value):
             """Initialize a knowledge base query clause."""
             self.field = field
+            self.field_info = field_info
             self.value = value
 
             self.clause_type = 'query'
@@ -481,18 +583,20 @@ class Search:
             return clause
 
         def validate(self):
-            pass
+            if not self.field_info.is_text_field():
+                raise ValueError('Query can only be defined on text field.')
 
     class FilterClause(Clause):
         """This class models a knowledge base filter clause."""
 
-        def __init__(self, field, value=None, range_gt=None, range_gte=None, range_lt=None,
-                     range_lte=None):
+        def __init__(self, field, field_info=None, value=None, range_gt=None, range_gte=None,
+                     range_lt=None, range_lte=None):
             """Initialize a knowledge base filter clause. The filter type is determined by whether
             the range operators or value is passed in.
             """
 
             self.field = field
+            self.field_info = field_info
             self.value = value
             self.range_gt = range_gt
             self.range_gte = range_gte
@@ -555,17 +659,22 @@ class Search:
                 elif self.range_lte and self.range_lt:
                     raise ValueError(
                         'Invalid range parameters. Cannot specify both \'lte\' and \'lt\'.')
+                elif not self.field_info.is_number_field() and self.field_info.is_date_field():
+                    raise ValueError(
+                        'Range filter can only be defined for number or date field.')
 
     class SortClause(Clause):
         """This class models a knowledge base sort clause."""
 
-        def __init__(self, field, sort_type='desc', field_stats=None, location=None):
+        def __init__(self, field, field_info=None, sort_type='desc', field_stats=None,
+                     location=None):
             """Initialize a knowledge base sort clause"""
             self.field = field
             self.type = type
             self.location = location
             self.sort_type = sort_type
             self.field_stats = field_stats
+            self.field_info = field_info
 
             self.clause_type = 'sort'
 
@@ -575,19 +684,26 @@ class Search:
             # sort by distance based on passed in origin
             if self.sort_type == 'distance':
                 origin = self.location
-                scale = "1km"
+                scale = "5km"
             else:
                 max_value = self.field_stats['max_value']
                 min_value = self.field_stats['min_value']
 
-                if self.sort_type == 'asc':
-                    origin = self.field_stats['min_value']
-                elif self.sort_type == 'desc':
-                    origin = self.field_stats['max_value']
-                else:
-                    raise ValueError('Invalid value for sort type {}'.format(self.sort_type))
+                if self.field_info.is_date_field():
+                    # ensure the timestamps for date fields are integer values
+                    max_value = int(max_value)
+                    min_value = int(min_value)
 
-                scale = 0.5 * (max_value - min_value) if max_value != min_value else 1
+                    # add time unit for date field
+                    scale = "{}ms".format(int(0.5 * (max_value - min_value))) \
+                        if max_value != min_value else 1
+                else:
+                    scale = 0.5 * (max_value - min_value) if max_value != min_value else 1
+
+                if self.sort_type == 'asc':
+                    origin = min_value
+                else:
+                    origin = max_value
 
             sort_clause = {
                 "linear": {
@@ -601,4 +717,12 @@ class Search:
             return sort_clause
 
         def validate(self):
-            pass
+            # validate the sort type to be valid.
+            if self.sort_type not in ['asc', 'desc', 'distance']:
+                raise ValueError('Invalid value for sort type \'{}\''.format(self.sort_type))
+
+            # validate the sort field is number, date or location field
+            if not self.field_info.is_number_field() and not self.field_info.is_date_field() and \
+                    not self.field_info.is_location_field():
+                raise ValueError('The custom sort criteria is only allowed to be defined for'
+                                 + ' \'number\', \'date\' or \'location\' field.')
