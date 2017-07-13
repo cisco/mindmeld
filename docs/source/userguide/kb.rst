@@ -3,7 +3,7 @@ Knowledge Base and Question Answerer
 
 What is Knowledge Base?
 -----------------------
-A knowledge base is a comprehensive repository that contains the universe of helpful information needed to understand requests and answer questions. It is the key component which understands domain and application specific concept and relationships. It allows us to optimize the NLP process and question answering to achieve human like accuracy.
+A knowledge base is a comprehensive repository that contains the universe of helpful information needed to understand requests and answer questions. It is the key component which understands domain and application specific concept and relationships. It allows us to optimize the natural language processing and question answering to achieve human-like accuracy.
 
 In its most basic form, a knowledge base is simply a repository of objects of specified types. For example, a knowledge base that contains a large entertainment content catalog could include ``movie`` and ``tv_show`` among the types of its objects. A knowledge base that contains a directory of local businesses could have object types like ``restaurant``, ``hardware_store``, and so on. Objects typically have attributes which capture salient aspects of the concepts they describe. For example, a ``restaurant`` object might have attributes for ``address`` and ``phone_number``; a ``movie`` object might have attributes like ``cast_list``, ``runtime``, and ``release_date``.
 
@@ -13,16 +13,12 @@ The first question to answer before we start to build the application is do we n
 
 Question Answering in Conversational Applications
 -------------------------------------------------
-The foundations of Question Answering began back in the 60's and early 70's with knowledge bases targeted at narrow domains of knowledge. With computational linguistics emerging and evolving over the decades, modern day Question Answering systems have relied on statistical processing of broader domain, large vocabulary document collections. These systems especially started gaining popularity in mainstream media in the last 8-10 years. The IBM Watson Jeopardy! challenge revealed the beginnings of the true potential of broad vocabulary Question Answering systems that could be deployed in real world production applications.
-
-Several academic research initiatives continue to hallmark the field of Question Answering. The `OAQA <https://oaqa.github.io/>`_ initiative is a collaboration between `academia <http://www.cs.cmu.edu/~ehn/>`_, `industry <https://www.research.ibm.com/deepqa/question_answering.shtml>`_ and the open source community. MIT CSAIL has a research thrust in Question Answering with the `START <http://start.csail.mit.edu/index.php>`_ project. A highly regarded conference specialized to the field of Question Answering is the `TREC <http://trec.nist.gov/>`_ - Text REtrieval Conference. Several academic datasets and related publications are available there for background reading.
-
 The idea of knowledge-based question answering is mapping natural language queries to a query over structured database. The Workbench Question Answerer is specifically designed for custom knowledge bases involving large content catalogs, for production-grade applications. Catalogs containing even upto hundreds of millions of unique, domain-specific entity objects can easily be handled by Workbench in production. Typically, Quick Service Restaurant menus range in the hundreds of thousands entities and specific product retail catalogs go into the millions, while media entertainment libraries scale into the tens or hundreds of millions of unique entities. Workbench's Knowledge Base and Question Answering systems have been successfully been applied to all of the above use cases. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below.
 
 1. Answer Questions
 ````````````````
 
-One of the main use cases of question answerer in conversational applications is to provide one or more relevant documents as answer to users' requests. A knowledge base search can be constructed using the entities from NLP pipeline. The answers can be in various forms depending on the nature of the applications. For example, in a food ordering application the answer is usually the canonical dish with attributes necessary to complete the dialogue flow, while in video discovery application the answer is more often a list of best matching movies or TV shows.
+One of the main use cases of question answerer in conversational applications is to provide one or more relevant results as answer to users' requests. A knowledge base search can be constructed using the entities from NLP pipeline. The answers can be in various forms depending on the nature of the applications. For example, in a food ordering application the answer is usually the canonical dish with attributes necessary to complete the dialogue flow, while in video discovery application the answer is more often a list of best matching movies or TV shows.
 
 2. Validate Questions 
 ``````````````````
@@ -43,7 +39,7 @@ Workbench Question Answerer uses a number of scoring factors for knowledge base 
 
 Prepare Data for Knowledge Base
 -------------------------------
-In knowledge base various objects of different types are stored in one or more indices. Each object can have a list of attributes which contain information about the object or about the relationship with another object type. 
+In knowledge base various objects of different types are stored in one or more indexes. Each object can have a list of attributes which contain information about the object or about the relationship with another object type. 
 
 For example, the knowledge base data could look like the following in a food ordering application.
 
@@ -81,7 +77,7 @@ For example, the knowledge base data could look like the following in a food ord
 
 [TODO: add details about location field value format]
 
-It's critical to have clean data in knowledge base for question answerer to achieve the best possible performance. While Workbench knowledge base performs generic text processing and normalization it's common that some necessary normalizations are rather domain or application specific and it's often a good practice to inspect the data to identify noise and incosistency in the dataset and perform necessary clean-up and normalization as pre-processing. For example, in a food ordering application it's possible that the menus from different restaurant can have different formats and use different conventions. This pre-processing task is very important to avoid potential issues down the road.
+It's critical to have clean data in knowledge base for question answerer to achieve the best possible performance. While Workbench knowledge base performs generic text processing and normalization it's common that some necessary normalizations are rather domain or application specific and it's often a good practice to inspect the data to identify noise and inconsistency in the dataset and perform necessary clean-up and normalization as pre-processing. For example, in a food ordering application it's possible that the menus from different restaurant can have different formats and use different conventions. This pre-processing task is very important to avoid potential issues down the road.
 
 Import Data into Knowledge Base
 -------------------------------
@@ -105,12 +101,12 @@ The knowledge base data import can also be done via Workbench command-line tool 
 Knowledge Base Search
 ---------------------
 
-Workbench Question Answerer provides APIs to retrieve relevant information from knowledge base.
+Workbench Question Answerer provides easy-to-use flexible APIs to retrieve relevant information from knowledge base.
 
 Basic Search
 ````````````
 
-Question Answerer provides basic search API - :meth:`get()` method for simple knowledge base searches. It has a simple and intuitive interface and can be used in a similar way as in common web search interfaces. It takes in a list of text query and knowledge base field pairs to find best matches. The knowledge base fields to be used depend on the mapping between NLP entity types and corresponding knowledge base objects. For example, in a food ordering application ``cuisine`` entity type can be mapped to a knowledge base object or an attribute of a knowledge base object. The mapping is often application specific and is dependent on the data model of the application. 
+Question Answerer provides basic search API - :meth:`get()` method for simple knowledge base searches. It has a simple and intuitive interface and can be used in a similar way as in common web search interfaces. It takes in a list of (knowledge base field, text query) pairs to find best matches. The knowledge base fields to be used depend on the mapping between NLP entity types and corresponding knowledge base objects. For example, in a food ordering application ``cuisine`` entity type can be mapped to a knowledge base object or an attribute of a knowledge base object. The mapping is often application specific and is dependent on the data model of the application. 
 
 The basic search API can retrieve a particular knowledge base object using ID
 
@@ -178,7 +174,7 @@ Workbench Question Answerer provides advanced search APIs to support more comple
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search()
 
-build_search() API creates a Search object which is an abstraction of a knowledge base search. It provides several APIs for specifying text query, text or range filters and custom sort criteria.
+:meth:`build_search()` API creates a Search object which is an abstraction of a knowledge base search. It provides several APIs for specifying text query, text or range filters and custom sort criteria.
 
 Query
 '''''
@@ -195,7 +191,7 @@ Query
 Filter
 ''''''
 
-``filter()`` API can be used to add filters to the knowledge base search. There are two types of filters supported: text filter and range filter. For text filter a knowledge base text field name and the filtering text string are specified. The text string is normalized and the entire text string is used to filter the documents like SQL predicates in relational databases. For example, in food ordering applications we can filter dishes using selected restaurant ID. 
+:meth:`filter()` API can be used to add filters to the knowledge base search. There are two types of filters supported: text filter and range filter. For text filter a knowledge base text field name and the filtering text string are specified. The text string is normalized and the entire text string is used to filter the documents like SQL predicates in relational databases. For example, in food ordering applications we can filter dishes using selected restaurant ID. 
 
 .. code:: python
 
@@ -223,7 +219,7 @@ Range filter is used to filter based on number or date ranges. It can be created
 Sort
 ''''
 
-``sort()`` API can be used to add custom sort criteria for a knowledge base search. Custom sort can only be used with number, date and location knowledge base fields. For number and date fields the sort type can simply be either ``asc`` or ``desc`` to determine sort order. Some example use cases are finding most popular items, most recently released items and etc. 
+:meth:`sort()` API can be used to add custom sort criteria for a knowledge base search. Custom sort can only be used with number, date and location knowledge base fields. For number and date fields the sort type can simply be either ``asc`` or ``desc`` to determine sort order. Some example use cases are finding most popular items, most recently released items and etc. 
 
 .. code:: python
 
