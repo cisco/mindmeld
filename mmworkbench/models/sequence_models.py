@@ -140,7 +140,7 @@ class TaggerModel(Model):
         """
         # TODO: also expose feature weights?
         predictions = self.predict(examples)
-        evaluations = [EvaluatedExample(e, labels[i], predictions[i], None)
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
                        for i, e in enumerate(examples)]
 
         config = self._get_effective_config()
