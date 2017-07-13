@@ -505,6 +505,24 @@ class SequenceModelEvaluation(ModelEvaluation):
         sequence_accuracy = self.get_accuracy()
         return {'sequence_accuracy': sequence_accuracy}
 
+    def _print_sequence_stats_table(self, sequence_stats):
+        """
+        Helper for printing a human readable table for sequence statistics
+
+        Returns:
+            None
+        """
+        title_format = "{:>18}" * (len(sequence_stats))
+        table_titles = ['sequence_accuracy']
+        stat_row_format = "{:>18.3f}" * (len(sequence_stats))
+        print("Sequence Statistics: \n")
+        print(title_format.format(*table_titles))
+        row = []
+        for stat in table_titles:
+            row.append(sequence_stats[stat])
+        print(stat_row_format.format(*row))
+        print("\n\n")
+
     def print_stats(self):
         raw_results = self.raw_results()
         stats = self._get_common_stats(raw_results.expected_flat,
@@ -520,6 +538,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         self._print_overall_stats_table(stats['stats_overall'])
         self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
         self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
+        self._print_sequence_stats_table(stats['sequence_stats'])
         return stats
 
     def print_graphs(self):
