@@ -141,15 +141,41 @@ When using the basic search API the text query strings are specified like keywor
 
 It's also possible to specify one custom sort criteria with the basic search API. The following parameters are supported for controlling custom sort behavior.
 
-	* **_sort_field**: the knowledge base field used for sorting. 
-	* **_sort_type**: valid values are ``asc``, ``desc`` and ``distance``. ``asc`` and ``desc`` specifies the sort order for sorting on number and date fields, while ``distance`` indicates sorting by distance and can be used on location field.
-	* **_sort_location**: specify origin location for sorting by distance.
+==================== ===
+**_sort_field**          the knowledge base field used for sorting.
+**_sort_type**           valid values are ``asc``, ``desc`` and ``distance``. ``asc`` and ``desc``   specifies the sort order for sorting on number and date fields, while ``distance`` indicates sorting by distance and can be used on location field.
+**_sort_location**       specify origin location for sorting by distance.
+==================== ===
 
 .. code:: python
 	
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> results = qa.get(index='menu_items', name='pork and shrimp', restaurant_id='B01CGKGQ40', _sort='price', _sort_type='asc')
+	[{'category': 'Appetizers and Side Orders',
+	  'description': None,
+	  'id': 'B01N3BB0PK',
+	  'img_url': None,
+	  'menu_id': '57572a43-f9fc-4a1c-96fe-788d544b1f2d',
+	  'name': 'Fish and Chips',
+	  'option_groups': [],
+	  'popular': False,
+	  'price': 9.99,
+	  'restaurant_id': 'B01DEEGQBK',
+	  'size_group': None,
+	  'size_prices': []},
+	 {'category': 'Appetizers and Side Orders',
+	  'description': None,
+	  'id': 'B01N9Z38XT',
+	  'img_url': None,
+	  'menu_id': '57572a43-f9fc-4a1c-96fe-788d544b1f2d',
+	  'name': 'Chicken Tenders and Chips',
+	  'option_groups': [],
+	  'popular': False,
+	  'price': 9.99,
+	  'restaurant_id': 'B01DEEGQBK',
+	  'size_group': None,
+	  'size_prices': []}]
 
 To sort by distance to find best matches with user's current location taken into account.
 
@@ -172,21 +198,46 @@ Workbench Question Answerer provides advanced search APIs to support more comple
 .. code:: python
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> s = qa.build_search()
+	>>> s = qa.build_search(index='menu_items')
 
 :meth:`build_search()` API creates a Search object which is an abstraction of a knowledge base search. It provides several APIs for specifying text query, text or range filters and custom sort criteria.
 
 Query
 '''''
 
-``query()`` API can be used to add text queries to the knowledge base search. For each query a knowledge base field and query string are specified for text relevance match. Several ranking factors including exact matches, phrase matches and partial matches are used to calculate text relevance scores and find best matching documents.
+:meth:`query()` API can be used to add text queries to the knowledge base search. For each query a knowledge base field and query string are specified for text relevance match. Several ranking factors including exact matches, phrase matches and partial matches are used to calculate text relevance scores and find best matching documents.
 
 .. code:: python
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> s = qa.build_search()
-	>>> results = s.query(dish_name='fish and chips').execute()
+	>>> s = qa.build_search(index='menu_items')
+	>>> s.query(dish_name='fish and chips').execute()
+	[{'category': 'Appetizers and Side Orders',
+	  'description': None,
+	  'id': 'B01N3BB0PK',
+	  'img_url': None,
+	  'menu_id': '57572a43-f9fc-4a1c-96fe-788d544b1f2d',
+	  'name': 'Fish and Chips',
+	  'option_groups': [],
+	  'popular': False,
+	  'price': 9.99,
+	  'restaurant_id': 'B01DEEGQBK',
+	  'size_group': None,
+	  'size_prices': []},
+	 {'category': 'Entrees',
+	  'description': None,
+	  'id': 'B01CH0SUMA',
+	  'img_url': 'http://g-ec2.images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/V_Cafe/VCafe_FishandChips_640x480._V286448998_.jpg',
+	  'menu_id': '17612bcf-307a-4098-828e-329dd0962182',
+	  'name': 'Fish and Chips',
+	  'option_groups': ['dressing'],
+	  'popular': True,
+	  'price': 13.0,
+	  'restaurant_id': 'B01CH0RZOE',
+	  'size_group': None,
+	  'size_prices': []},
+	  ...
 
 Filter
 ''''''
@@ -197,8 +248,21 @@ Filter
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> s = qa.build_search()
-	>>> results = s.filter(restaurant_id='B01CGKGQ40').execute()
+	>>> s = qa.build_search(index='menu_items')
+	>>> s.query(name='fish and chips').filter(restaurant_id='B01DEEGQBK').execute()
+	[{'category': 'Appetizers and Side Orders',
+	  'description': None,
+	  'id': 'B01N3BB0PK',
+	  'img_url': None,
+	  'menu_id': '57572a43-f9fc-4a1c-96fe-788d544b1f2d',
+	  'name': 'Fish and Chips',
+	  'option_groups': [],
+	  'popular': False,
+	  'price': 9.99,
+	  'restaurant_id': 'B01DEEGQBK',
+	  'size_group': None,
+	  'size_prices': []},
+	  ...
 
 Range filter is used to filter based on number or date ranges. It can be created by specifying knowledge base field and one or more range operators. The supported range operators are described below.
 
@@ -211,8 +275,35 @@ Range filter is used to filter based on number or date ranges. It can be created
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> s = qa.build_search()
-	>>> results = s.filter(field='price', lte=25).execute()
+	>>> s = qa.build_search(index='menu_items')
+	>>> s.filter(field='price', lte=25).execute()
+	[{'category': 'Makimono-Sushi Rolls (6 Pcs)',
+	  'description': 'Makimono-Sushi Rolls (6 Pcs)',
+	  'id': 'B01MXSBGG0',
+	  'img_url': None,
+	  'menu_id': '78eb0100-029d-4efc-8b8c-77f97dc875b5',
+	  'name': 'Sake Maki-Salmon',
+	  'option_groups': [],
+	  'popular': False,
+	  'price': 3.95,
+	  'restaurant_id': 'B01N97KQNJ',
+	  'size_group': None,
+	  'size_prices': []},
+	 {'category': 'Popular Dishes',
+	  'description': None,
+	  'id': 'B01CUUCX7K',
+	  'img_url': 'http://g-ec2.images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/TheSaladPlace/TheSaladPlace_Potatosalad_640x480._V295354393_.jpg',
+	  'menu_id': '1e6f9732-4d87-4e08-ac8c-c6198b2645cc',
+	  'name': 'Potato',
+	  'option_groups': [],
+	  'popular': True,
+	  'price': 3.95,
+	  'restaurant_id': 'B01CUUBQC8',
+	  'size_group': 'SaladSize',
+	  'size_prices': [{'id': 'B01CUUC10O', 'name': 'Small', 'price': 3.95},
+	   {'id': 'B01CUUBPYM', 'name': 'Medium', 'price': 4.95},
+	   {'id': 'B01CUUD9FA', 'name': 'Large', 'price': 5.95}]},
+	   ...
 
 .. note:: Note that the range filters are only valid for number and date knowledge base fields. 
 
@@ -225,8 +316,33 @@ Sort
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> s = qa.build_search()
-	>>> results = s.query(name='pork and shrimp').sort(field='popularity', type='desc').execute()
+	>>> s = qa.build_search(index='menu_items')
+	>>> s.query(name='fish and chips').sort(field='price', sort_type='asc').execute()
+	[{'category': 'Appetizers and Side Orders',
+	  'description': None,
+	  'id': 'B01N3BB0PK',
+	  'img_url': None,
+	  'menu_id': '57572a43-f9fc-4a1c-96fe-788d544b1f2d',
+	  'name': 'Fish and Chips',
+	  'option_groups': [],
+	  'popular': False,
+	  'price': 9.99,
+	  'restaurant_id': 'B01DEEGQBK',
+	  'size_group': None,
+	  'size_prices': []},
+	 {'category': 'Entrees',
+	  'description': None,
+	  'id': 'B01CH0SUMA',
+	  'img_url': 'http://g-ec2.images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/V_Cafe/VCafe_FishandChips_640x480._V286448998_.jpg',
+	  'menu_id': '17612bcf-307a-4098-828e-329dd0962182',
+	  'name': 'Fish and Chips',
+	  'option_groups': ['dressing'],
+	  'popular': True,
+	  'price': 13.0,
+	  'restaurant_id': 'B01CH0RZOE',
+	  'size_group': None,
+	  'size_prices': []},
+	  ...
 
 The sort score is combined with text relevance score when available. In the example above the score used for final ranking is a blend of text relevance score from text query and popularity sort score. 
 
@@ -236,8 +352,8 @@ As mentioned in previous section the requirement of sorting by distance is fairl
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
-	>>> s = qa.build_search()
-	>>> results = s.sort(field='location', type='distance', location='37.77,122.41').execute()
+	>>> s = qa.build_search(index='menu_items')
+	>>> s.query(name='fish and chips').sort(field='location', type='distance', location='37.77,122.41').execute()
 
 When to use Basic Search vs Advanced Search?
 `````````````````````````````````````````````
