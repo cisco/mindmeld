@@ -184,7 +184,7 @@ For more information on the usage of role, check Workbench3 documentation.
 
 Defining the dialogue states might be the most difficult exercise of a sucessful conversational application. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining one dialogue state for multiple intents. Choosing the right programming pattern for dialogue states requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic. In this section we will explore both options in details.
 
-In the home assisstant blueprint, let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents. 
+In the home assisstant blueprint, let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents.
 
 .. code:: python
 
@@ -392,14 +392,34 @@ The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We can test the home assistant application like any other blue print.
+Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational app using the :class:`Conversation` class in Workbench.
 
 .. code:: python
 
    >>> from mmworkbench.components.dialogue import Conversation
    >>> conv = Conversation(nlp=nlp, app_path='home_asssitant')
-   >>> conv.say('Hi')
-   ['Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.']
+   >>> conv.say('set alarm for 6am')
+   ['Ok, I have set your alarm for 06:00:00.']
+
+The :meth:`say()` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
+
+You can also try out multi-turn dialogues:
+
+.. code:: python
+
+   >>> conv.say('Hi there!')
+   ['Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.]
+   >>> conv.say("close the front door")
+   ['Ok. The front door has been closed.']
+   >>> conv.say("set the thermostat for 60 degrees")
+   ['The thermostat temperature in the home is now 60 degrees F.']
+   >>> conv.say("decrease the thermostat by 5 degrees")
+   ['The thermostat temperature in the home is now 55 degrees F.']
+   >>> conv.say("open the front door")
+   ['Ok. The front door has been opened.']
+   >>> conv.say("Thank you!")
+   ['Bye!']
+
 
 We can also enter the conversation mode directly from the commandline.
 
