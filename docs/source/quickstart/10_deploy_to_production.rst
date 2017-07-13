@@ -79,7 +79,7 @@ The web service responds with a JSON data structure containing the application r
 
 See the :ref:`User Guide <userguide>` for more about the Workbench request and response interface format.
 
-MindMeld Cloud Deployment
+Cloud Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Coming Soon
