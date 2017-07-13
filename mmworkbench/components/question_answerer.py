@@ -510,13 +510,20 @@ class Search:
             """build knowledge base query for filter clause"""
             clause = {}
             if self.filter_type == 'text':
-                clause = {
-                    "match": {
-                        self.field + ".normalized_keyword": {
-                            "query": self.value
+                if self.field == 'id':
+                    clause = {
+                        "term": {
+                            "id": self.value
+                            }
+                        }
+                else:
+                    clause = {
+                        "match": {
+                            self.field + ".normalized_keyword": {
+                                "query": self.value
+                            }
                         }
                     }
-                }
             elif self.filter_type == 'range':
                 lower_bound = None
                 upper_bound = None
