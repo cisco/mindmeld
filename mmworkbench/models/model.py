@@ -13,7 +13,8 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuffleSplit,
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
-from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix)
+from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
+                             accuracy_score)
 from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
 from .tagging import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
@@ -245,7 +246,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             dict: Structured dict containing evaluation statistics. Contains precision,
                   recall, f scores, support, etc.
         """
-        labels = range(len(text_labels)-1)
+        labels = range(len(text_labels))
 
         confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_expected,
                                                                 y_pred=raw_predicted)
@@ -280,6 +281,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         """
         precision, recall, f_beta, support = score(y_true=y_true, y_pred=y_pred,
                                                    labels=labels)
+
         stats = {
                     'precision': precision,
                     'recall': recall,
@@ -299,12 +301,13 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         f1_weighted = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='weighted')
         f1_macro = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='macro')
         f1_micro = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='micro')
+        accuracy = accuracy_score(y_true=y_true, y_pred=y_pred)
 
         stats_overall = {
             'f1_weighted': f1_weighted,
             'f1_macro': f1_macro,
             'f1_micro': f1_micro,
-            'accuracy': self.get_accuracy()
+            'accuracy': accuracy
         }
         return stats_overall
 
@@ -353,7 +356,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
                 # FN is the sum of Cij where i is class_index but j is not
                 mask = np.zeros((num_classes, num_classes))
-                mask[:, class_index] = 1
+                mask[class_index, :] = 1
                 mask[class_index, class_index] = 0
                 FN = np.sum(mask*confusion_mat)
                 FN_arr.append(FN)
@@ -380,7 +383,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
                                        if stat not in common_stats]
         print("Statistics by Class: \n")
         print(title_format.format("class", *table_titles))
-        for label in range(len(text_labels)-1):
+        for label in range(len(text_labels)):
             row = []
             for stat in table_titles:
                 row.append(stats[stat][label])
@@ -406,7 +409,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         table_titles = [self._truncate_label(text_labels[label], 10) for label in labels]
         print("Confusion Matrix: \n")
         print(title_format.format("", *table_titles))
-        for label in range(len(text_labels)-1):
+        for label in range(len(text_labels)):
             print(stat_row_format.format(self._truncate_label(text_labels[label], 10),
                                          *matrix[label]))
         print("\n\n")
@@ -497,18 +500,10 @@ class SequenceModelEvaluation(ModelEvaluation):
 
     def _get_sequence_stats(self, y_true, y_pred, text_labels):
         """
-        TODO: Generates additional sequence level stats
+        TODO: Generate additional sequence level stats
         """
-        num_correct = 0
-        num_total = 0
-        for i in range(len(y_true)):
-            for j in range(len(y_true[i])):
-                if y_true[i][j] == y_pred[i][j]:
-                    num_correct += 1
-                num_total += 1
-
-        token_accuracy = float(num_correct)/num_total
-        return {'token_accuracy': token_accuracy}
+        sequence_accuracy = self.get_accuracy()
+        return {'sequence_accuracy': sequence_accuracy}
 
     def print_stats(self):
         raw_results = self.raw_results()
