@@ -162,14 +162,25 @@ Architecting the dialogue manager correctly is often one of the most challenging
 
 Refer to Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide for a practical introduction to dialogue state tracking using Workbench. We will see more examples in the :doc:`Dialogue Manager User Guide <dm>`. 
 
-.. 
-  Application Manager
-  -------------------
 
-  Gateway
-  -------
+Gateway
+-------
+
+The Gateway is the component responsible for processing external requests via various endpoints, and for persisting user state. Supported endpoints include messaging platforms such as Cisco Spark or Facebook Messenger, intelligent assistants such as Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
+
+The gateway is able to identify users from various endpoints, load their context, and convert requests into a format the Workbench-trained components can consume. After a request has been processed, it converts responses to the appropriate client format, and sends the response back to the endpoint.
 
 
+Application Manager
+-------------------
+
+The Application Manager is the core orchestrator of the MindMeld platform. It performs the following functions:
+
+	- Receives the client request from the gateway
+	- Processes the request by passing it through all the Workbench-trained components of the MindMeld platform
+	- Returns the final response back to the gateway once the processing is complete
+
+The application manager is hidden from the Workbench developer, and accomplishes its tasks behind the scenes.
 
 
 That concludes our quick tour of the MindMeld Conversational AI platform. Now that we are familiar with all its components, the rest of this user guide will focus on hands-on tutorials using Workbench to build modern data-driven conversational apps that run on the MindMeld platform.
