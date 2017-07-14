@@ -172,6 +172,7 @@ Home assistant defines and uses the following named entities:
     - `interval`: this entity is used to detect time interval, for example: `cancel {tomorrow night|interval} s alarms`
     - `location`: this entity is used to detect household location, for example: `lock {back|location} door`
     - `unit`: this entity is used to detect weather unit, for example: `what is the forecast for {london|city} in {celsius|unit}`
+    - `duration`: this entity is used to detect time duration, for example: `{15 minute|duration} alarm`
 
 Home assistant uses three system entities: `sys_time` (time), `sys_interval` (interval) and `sys_temperature` (temperature), for example: `set my thermostat to turn on at {6 am|sys_time}` and `turn the heat off at {76 degrees|sys_temperature}`.
 
