@@ -200,7 +200,7 @@ class MemmModel(SkLearnModel):
 
         if self._no_entities:
             logger.warning("There are no labels in this label set, "
-                           "so we don't fit the model.")
+                           "so we don't run model evaluation.")
             return
 
         predictions = self.predict(examples)
