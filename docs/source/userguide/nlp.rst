@@ -238,6 +238,7 @@ Here are the different levels at which you can invoke the :meth:`build` method.
 
 For details on fine-grained access to individual classifiers, read the upcoming chapters.
 
+.. _config:
 
 Classifier configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -275,7 +276,7 @@ Here's another example from entity recognition. The configuration specifies '`ma
    },
    ...
 
-2. **Feature Extraction Settings** - The `features <https://en.wikipedia.org/wiki/Feature_(machine_learning)>`_ to extract from the input query, along with any configurable settings for each feature family.
+2. **Feature Extraction Settings** - The `features <https://en.wikipedia.org/wiki/Feature_(machine_learning)>`_ to extract from the input query, along with any configurable settings for each feature group.
 
 Here is an example of the feature extraction settings in a domain classifier configuration.
 
@@ -290,14 +291,14 @@ Here is an example of the feature extraction settings in a domain classifier con
    }
    ...
 
-The above configuration instructs Workbench to extract four different family of features for each input query:
+The above configuration instructs Workbench to extract four different groups of features for each input query:
 
   a. '`Bag of n-grams <http://scikit-learn.org/stable/modules/feature_extraction.html#the-bag-of-words-representation>`_' of length 1 (also called 'bag of words')
   b. `Gazetteer <https://gate.ac.uk/sale/tao/splitch13.html#x18-32600013.1>`_-derived features
   c. Token frequency-based features, quantized into 5 `bins <https://en.wikipedia.org/wiki/Data_binning>`_
   d. Features derived from the query length
 
-3. **Hyperparameter Selection Settings** - The `hyperparameters <https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)>`_ to use during model training, or the settings for choosing optimal hyperparameters.
+3. **Hyperparameter Settings** - The `hyperparameters <https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)>`_ to use during model training, or the settings for choosing optimal hyperparameters.
 
 Here is a role classifier configuration that defines the hyperparameters for its `maximum entropy classification model <https://en.wikipedia.org/wiki/Maximum_entropy_classifier>`_. It specifies a value of 100 for the '`C <http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_' parameter and '`L1 <http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_' as the norm to be used for `regularization <https://en.wikipedia.org/wiki/Regularization_%28mathematics%29#Use_of_regularization_in_classification>`_. 
 
@@ -461,7 +462,7 @@ In practice, several iterations of the above flow are necessary to optimize the 
 
 ..
 
-  2. **Optimizing the classifier configuration**: Accuracy can also be improved by selecting a classifier configuration that is better suited for your training data. The natural language processor's :meth:`build` method uses a default configuration for each classifier to train the NLP models. While these baseline models provide a reasonable starting point for your NLP pipeline, experimenting with different model types, features, etc. could help identify alternate configurations that produce more accurate models. However, this approach, unlike training data augmentation, is a lot more advanced. It requires expertise in applied machine learning for running meaningful experiments and identifying the optimal classifier settings.
+  2. **Optimizing the classifier configuration**: Accuracy can also be improved by selecting a classifier configuration that is better suited for your training data. The natural language processor's :meth:`build` method uses a default configuration for each classifier to train the NLP models. While these baseline models provide a reasonable starting point for your NLP pipeline, experimenting with different model types, features, etc. could help identify alternate configurations that produce more accurate models. However, this approach, unlike training data augmentation, is more advanced. It requires expertise in applied machine learning for running meaningful experiments and identifying the optimal classifier settings.
 
 Refer to the upcoming chapters for discussions on model optimization in the context of each NLP classifier.
 
