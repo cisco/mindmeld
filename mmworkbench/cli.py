@@ -64,7 +64,7 @@ def run_server(ctx, port, no_debug, reloader):
     """Starts the workbench service."""
     app = ctx.obj.get('app')
     if app is None:
-        raise ValueError('No app was given')
+        raise ValueError("No app was given. Run 'python app.py run' from your app folder.")
 
     ctx.invoke(num_parser, start=True)
     app.run(port=port, debug=not no_debug, host='0.0.0.0', threaded=True, use_reloader=reloader)
@@ -79,7 +79,7 @@ def converse(ctx, session):
     if isinstance(session, str):
         session = json.loads(session)
     if app is None:
-        raise ValueError('No app was given')
+        raise ValueError("No app was given. Run 'python app.py converse' from your app folder.")
 
     ctx.invoke(num_parser, start=True)
 
@@ -99,6 +99,9 @@ def converse(ctx, session):
 def build(ctx):
     """Builds the app with default config."""
     app = ctx.obj.get('app')
+    if app is None:
+        raise ValueError("No app was given. Run 'python app.py build' from your app folder.")
+
     app.lazy_init()
     nlp = app.app_manager.nlp
     nlp.build()
@@ -110,6 +113,9 @@ def build(ctx):
 def clean(ctx):
     """Deletes all built data, undoing `build`."""
     app = ctx.obj.get('app')
+    if app is None:
+        raise ValueError("No app was given. Run 'python app.py clean' from your app folder.")
+
     gen_path = path.get_generated_data_folder(app.app_path)
     try:
         shutil.rmtree(gen_path)
