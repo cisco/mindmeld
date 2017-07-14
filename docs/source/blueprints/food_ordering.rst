@@ -169,8 +169,7 @@ For a more realistic implementation of ``build_order`` that deals with varied us
 
    - After providing restaurant suggestions to a user based on a requested dish, do not ask the user to repeat the dish selection from scratch in the next turn. Instead, keep track of the dish the user was originally interested in. Then, when the user makes a restaurant selection, add the dish to the check-out basket.
 
-   - Update the natural language response templates to include resolved options for each dish that are stored in the dialogue frame (``context['frame']['dishes']``). Try to construct your NLR templates such that if someone orders the same dish with different options, instead of saying '*I have 3 orders of steak from ...*' your app could respond with something like '*I have 1 order of steak medium rare and 2 orders of steak well done from ...*'.
-
+   - Update the natural language response templates to include resolved options that are stored in the dialogue frame (``context['frame']['dishes']``) for each dish. Try to construct your responses such that if someone orders the same dish with different options, instead of saying '*I have 3 orders of steak from ...*' your app could respond with something like '*I have 1 order of steak medium rare and 2 orders of steak well done from ...*'.
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
