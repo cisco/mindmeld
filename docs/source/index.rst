@@ -73,7 +73,6 @@ Contents
    userguide/getting_started
    userguide/key_concepts
    userguide/architecture
-   userguide/kb
    userguide/nlp
    userguide/domain_classifier
    userguide/intent_classifier
@@ -81,6 +80,7 @@ Contents
    userguide/role_classifier
    userguide/entity_resolver
    userguide/parser
+   userguide/kb
    userguide/dm
 
 .. toctree::
