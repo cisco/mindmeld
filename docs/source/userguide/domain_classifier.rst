@@ -4,7 +4,32 @@
 Domain Classifier
 =================
 
-The Domain Classifier is run as the first step in the natural language processing pipeline to determine the target domain for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the domains in an application. The name of each domain folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. A domain classifier is only needed for apps that support more than one domain.
+The Domain Classifier is run as the first step in the natural language processing pipeline to determine the target domain for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the domains in an application. The name of each domain folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. A Workbench app has exactly one domain classifier which gets trained only when the labeled data contains more than one domain.
+
+.. note::
+
+   For a quick introduction, refer to :ref:`Step 7 <domain_classification>` of the Step-By-Step Guide.
+
+
+Access the domain classifier
+----------------------------
+
+To work with any of the individual natural language processing components, start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class. 
+
+.. code-block:: python
+
+   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+   >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
+   >>> nlp
+   <NaturalLanguageProcessor 'home_assistant' ready: False, dirty: False>
+
+The :class:`DomainClassifier` for the app can then be accessed using the :attr:`domain_classifier` attribute of the :class:`NaturalLanguageProcessor` class.
+
+.. code-block:: python
+
+  >>> dc = nlp.domain_classifier
+  >>> dc
+  <DomainClassifier ready: False, dirty: False>
 
 
 Training a baseline domain classifier
@@ -14,11 +39,11 @@ As described in :doc:`Step 7 <../quickstart/07_train_the_natural_language_proces
 
 .. code-block:: python
 
-  >>> from mmworkbench import configure_logs; configure_logs()
-  >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
-  >>> nlp = NaturalLanguageProcessor(app_path='my_app')
-  >>> nlp.build()
-  >>> nlp.dump()
+   >>> from mmworkbench import configure_logs; configure_logs()
+   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+   >>> nlp = NaturalLanguageProcessor(app_path='my_app')
+   >>> nlp.build()
+   >>> nlp.dump()
 
 The above code trains all the components of the NLP pipeline using Workbench's default settings. To test 
 
@@ -108,18 +133,3 @@ Testing a Workbench classifier on a held-out validation set
 Doing error analysis on the validation set, retraining based on observations from error analysis by adding more training examples or feature tweaks
 Getting final evaluation numbers on an unseen “blind” test set
 Saving models for production use 
-
-Then, describe the above in more detail with specific code examples for each subcomponent:
-4.6.1 The Domain Classifier
-4.6.2 The Intent Classifier
-4.6.3 The Entity Recognizer
-Describe gazetteers.
-4.6.4 The Role Classifier
-
-Describe necessity of roles with examples.
-4.6.5 The Entity Resolver
-
-Describe collection of synonyms and the synonym mapping file.
-4.6.6 The Language Parser
-
-Describe our approach to language parsing, what a parser configuration looks like and how it can be used to improve parser accuracy.  Show code examples for parsing and how to inspect the parser output.

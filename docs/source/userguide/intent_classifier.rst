@@ -4,7 +4,55 @@
 Intent Classifier
 =================
 
-The Intent Classifier is run as the second step in the natural language processing pipeline to determine the target intent for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the intents in a given domain. The name of each intent folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Intent classification models are trained per domain. A Workbench app hence has one intent classifier for every domain that has multiple intents.
+The Intent Classifier is run as the second step in the natural language processing pipeline to determine the target intent for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the intents in a given domain. The name of each intent folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Intent classification models are trained per domain. A Workbench app hence has one intent classifier for every domain with multiple intents.
+
+.. note::
+
+   For a quick introduction, refer to :ref:`Step 7 <intent_classification>` of the Step-By-Step Guide.
+
+
+Access the intent classifier
+----------------------------
+
+To work with any of the individual natural language processing components, start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
+
+.. code-block:: python
+
+   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+   >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
+   >>> nlp
+   <NaturalLanguageProcessor 'home_assistant' ready: False, dirty: False>
+
+Next, verify that the NLP has correctly identified all the domains for your app.
+
+.. code-block:: python
+
+   >>> nlp.domains
+   {
+    'smart_home': <DomainProcessor 'smart_home' ready: False, dirty: False>,
+    'times_and_dates': <DomainProcessor 'times_and_dates' ready: False, dirty: False>,
+    'unknown': <DomainProcessor 'unknown' ready: False, dirty: False>,
+    'weather': <DomainProcessor 'weather' ready: False, dirty: False>
+   }
+
+Each domain has its own :class:`IntentClassifier` which can be accessed using the :attr:`intent_classifier` attribute of the corresponding domain.
+
+.. code-block:: python
+
+   >>> # Intent classifier for the 'smart_home' domain:
+   >>> ic = nlp.domains['smart_home'].intent_classifier
+   >>> ic
+   <IntentClassifier ready: False, dirty: False>
+   ...
+   >>> # Intent classifier for the 'weather' domain:
+   >>> ic = nlp.domains['weather'].intent_classifier
+   >>> ic
+   <IntentClassifier ready: False, dirty: False>
+
+
+Training a baseline intent classifier
+-------------------------------------
+
 
 
 Introduce the general ML techniques and methodology common to all NLP classifiers:
@@ -17,17 +65,3 @@ Doing error analysis on the validation set, retraining based on observations fro
 Getting final evaluation numbers on an unseen “blind” test set
 Saving models for production use 
 
-Then, describe the above in more detail with specific code examples for each subcomponent:
-4.6.1 The Domain Classifier
-4.6.2 The Intent Classifier
-4.6.3 The Entity Recognizer
-Describe gazetteers.
-4.6.4 The Role Classifier
-
-Describe necessity of roles with examples.
-4.6.5 The Entity Resolver
-
-Describe collection of synonyms and the synonym mapping file.
-4.6.6 The Language Parser
-
-Describe our approach to language parsing, what a parser configuration looks like and how it can be used to improve parser accuracy.  Show code examples for parsing and how to inspect the parser output.

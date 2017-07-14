@@ -119,7 +119,7 @@ After the domain, intent, entities and roles have been determined by the 4-level
 Entity Resolver
 ~~~~~~~~~~~~~~~
 
-The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity-resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" might be resolved to "San Francisco, CA". 
+The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity_resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" might be resolved to "San Francisco, CA". 
 
 In conversational interactions, users generally refer to entities in informal terms, using abbreviations, nicknames, and other aliases, rather than their official standardized names. Robust entity resolution is hence key to a seamless conversational experience. The MindMeld Entity Resolver leverages advanced text relevance algorithms, similar to the ones used in state-of-the-art information retrieval systems to ensure high resolution accuracies.
 
