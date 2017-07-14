@@ -217,7 +217,7 @@ class RoleClassifier(Classifier):
         labels = []
         for query in queries:
             for idx, entity in enumerate(query.entities):
-                if entity.entity.type == self.entity_type:
+                if entity.entity.type == self.entity_type and entity.entity.role:
                     examples.append((query.query, query.entities, idx))
                     labels.append(entity.entity.role)
 
