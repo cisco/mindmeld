@@ -10,11 +10,13 @@ The Role Classifier is run as the fourth step in the natural language processing
 
    For a quick introduction, refer to :ref:`Step 7 <role_classification>` of the Step-By-Step Guide.
 
+   Recommended prior reading: :doc:`Natural Language Processor <nlp>` chapter of the User Guide.
+
 
 Access the role classifier
 --------------------------
 
-To work with any of the individual natural language processing components, start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
+Before using any of the NLP componenets, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
 
 .. code-block:: python
 
@@ -50,7 +52,7 @@ Next, verify that the NLP has correctly identified all the domains and intents f
    	'check-weather': <IntentProcessor 'check-weather' ready: False, dirty: False>
    }
 
-Call the :meth:`build` method at :ref:`the intent level <build_partial_nlp>` for the intent you are interested in and inspect the identified entity types. The :meth:`build` operation can take several minutes if the number of training queries for the chosen intent is large.
+Call the :meth:`build` method for the intent you are interested in and inspect the identified entity types. The :meth:`build` operation can take several minutes if the number of training queries for the chosen intent is large.
 
 .. code-block:: python
 

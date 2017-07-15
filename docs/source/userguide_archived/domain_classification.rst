@@ -1,37 +1,4 @@
-.. meta::
-    :scope: private
 
-Domain Classifier
-=================
-
-The domain classifier determines the target domain for a given query. It is trained using all of the labeled queries across all intents for all domains in an application. The labels for the training data are the domain names associated with each query. The classifier uses the "marked down" form of each query i.e all query annotations are removed and the raw text is sent to a text classifier.
-
-Training The Model
-------------------
-
-.. code-block:: python
-
-  from mindmeld.domain_classification import DomainClassifier
-
-  # Load training data to a numpy ndarray
-  training_data = mm.load_data('/path/to/app/training_data.txt')
-
-  # Load the gazetteer resources
-  gazetteers = mm.load_gaz('/path/to/app/gazetteers')
-
-  # Define the feature settings
-  features = {
-    "bag-of-words": { "lengths": [1, 2] },
-    "edge-ngrams": { "lengths": [1, 2] },
-    "in-gaz": { "scaling": 10 },
-    "length": {},
-    "gaz-freq": {},
-    "freq": { "bins": 5 }
-  }
-
-  # Train the classifier
-  domain_classifier = DomainClassifier(model_type='logreg', features=features, gaz=gazetteers)
-  domain_classifier.fit(data=training_data)
 
   # Evaluate the model
   eval_set = mm.load_data('/path/to/eval_set.txt')
@@ -83,27 +50,6 @@ Training Accuracy Statistics::
   Best accuracy: 99.60%, settings: {u'penalty': u'l2', u'C': 100, u'probability': True, 'class_weight': {0: 0.8454625164401579, 1: 1.404707233065442}}
 
 
-Feature Specification
----------------------
-
-The features to be used in the Machine Learning model can be specified in the **features** field of your model specification. The following feature-specifications are available to use.
-
-+--------------+----------------------------------------------------------------------------------------------------------------+
-|Feature Group | Description                                                                                                    |
-+==============+================================================================================================================+
-| bag-of-words | Takes a query and generates N-grams of the specified "lengths"                                                 |
-+--------------+----------------------------------------------------------------------------------------------------------------+
-| edge-ngrams  | N-grams of the specified lengths at the start and end of query                                                 |
-+--------------+----------------------------------------------------------------------------------------------------------------+
-| freq         | Counts of query tokens within each frequency bin (log-scaled)                                                  |
-+--------------+----------------------------------------------------------------------------------------------------------------+
-| in-gaz       | A set of features indicating presence of N-grams in Gazetteers                                                 |
-+--------------+----------------------------------------------------------------------------------------------------------------+
-| gaz-freq     | Extracts frequency bin features for each gazetteer (log-scaled)                                                |
-+--------------+----------------------------------------------------------------------------------------------------------------+
-| length       | Extracts length measures (linear & log scale) on whole query                                                   |
-+--------------+----------------------------------------------------------------------------------------------------------------+
-| exact        | Extracts whole query string as a feature - useful for high accuracy on command & control applications          |
 +--------------+----------------------------------------------------------------------------------------------------------------+
 
 Evaluation
