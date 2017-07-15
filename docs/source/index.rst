@@ -61,7 +61,6 @@ Contents
    blueprints/food_ordering
    blueprints/video_discovery
    blueprints/home_assistant
-   blueprints/meeting_assistant
 
 
 .. toctree::
