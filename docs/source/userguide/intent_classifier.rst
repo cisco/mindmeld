@@ -9,12 +9,14 @@ The Intent Classifier is run as the second step in the natural language processi
 .. note::
 
    For a quick introduction, refer to :ref:`Step 7 <intent_classification>` of the Step-By-Step Guide.
+   
+   Recommended prior reading: :doc:`Natural Language Processor <nlp>` chapter of the User Guide.
 
 
 Access the intent classifier
 ----------------------------
 
-To work with any of the individual natural language processing components, start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
+Before using any of the NLP componenets, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
 
 .. code-block:: python
 
