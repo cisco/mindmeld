@@ -4,11 +4,11 @@
 Entity Resolver
 ===============
 
-The MindMeld Entity Resolver takes the entities recognized by the Entity Recognizer and transforms them into canonical forms that can be looked up in a Knowledge Base. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake" and "SF" may get resolved to "San Francisco". In NLP literature, Entity Resolution or `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ is the problem of identifying all terms that refer to the same real world entity. In Workbench, these real world entities are identified by either a unique id or a canonical name in both the Entity Mapping and the Knowledge Base.
+The MindMeld Entity Resolver takes the entities recognized by the Entity Recognizer and transforms them into canonical forms that can be looked up in a Knowledge Base. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake" and "SF" may get resolved to "San Francisco". In NLP literature, Entity Resolution or `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ is the problem of identifying all terms that refer to the same real world entity. In Workbench, these real world entities are identified by a unique ID or a canonical name in the Entity Mapping and the Knowledge Base.
 
-For many entity types, an entity's canonical form corresponds with a document in the knowledge base. When this is the case, the goal of the Entity Resolver is to resolve to the specific document id so that as the developer, you can directly use that id to perform relevant actions. For example, consider the *dish* entity type for the food ordering use case. The entity "stir-fried Thai noodles" would be resolved to {cname: "Pad Thai", id: 123}. Then the developer can use the dish id 123 to query the Knowledge Base, display results, or make an API call to place an order.
+For many entity types, an entity's canonical form corresponds with a document in the knowledge base. When this is the case, the goal of the Entity Resolver is to resolve to the specific document ID so that as the developer, you can directly use that ID to perform relevant actions. For example, consider the ``dish`` entity type for the food ordering use case. The entity "stir-fried Thai noodles" would be resolved to {cname: "Pad Thai", id: 123}. Then the developer can use the dish ID 123 to query the Knowledge Base, display results, or make an API call to place an order.
 
-It is important to note that there are multiple restaurants which serve a dish called "Pad Thai". Each one of these "Pad Thai" dishes have a different id in the Knowledge Base. When canonical names are the same but ids are different, the Entity Resolver can rank one item above the other based on: 
+It is important to note that there are multiple restaurants which serve a dish called "Pad Thai". Each one of these "Pad Thai" dishes have a different ID in the Knowledge Base. When canonical names are the same but ids are different, the Entity Resolver can rank one item above the other based on: 
 
 1. **Synonym lists.** Entities with the same canonical name may have different properties (e.g. "House Salad" may be a "spinach salad" at one restaurant but a "tropical fruit salad" at another restaurant). These differences can be captured in the synonym list of each entry which is used by the Entity Resolver to select the appropriate result.
 
@@ -27,7 +27,7 @@ For each entity type, it is up to the developer to generate an Entity Mapping fi
 ==================== ===
 **canonical name**   The name used to refer to the real world entity. Textual similarity with the canonical name is one of the primary factors of entity resolution.
 
-**unique id**        A unique identifier (optional). If a corresponding entry exists in the Knowledge Base, this id should be the same as the KB document id. In cases where there are no corresponding documents in the Knowledge Base and there are no duplicate canonical names, an id is not needed.
+**unique ID**        A unique identifier (optional). If a corresponding entry exists in the Knowledge Base, this ID should be the same as the KB document ID. In cases where there are no corresponding documents in the Knowledge Base and there are no duplicate canonical names, an ID is not needed.
 
 **whitelist**        A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that it is often referred to by different terms. Textual similarity with synonyms in the whitelist is one of the primary factors of entity resolution.
 
@@ -161,7 +161,7 @@ The Entity Resolver always returns a ranked list of the top 10 canonical forms f
 ==================== ===
 **canonical name**   The name used to refer to the real world entity.
 
-**unique id**        The id as listed in the Entity Mapping file which should correspond with a Knowledge Base document.
+**unique ID**        The ID as listed in the Entity Mapping file which should correspond with a Knowledge Base document.
 
 **score**            A score which indicates the strength of the match. This score is a relative value (higher scores are better). It is not normalized accross all entity types or queries.
 
@@ -183,7 +183,7 @@ To test the Entity Resolver as a stand alone component you can create an EntityR
   >>> er = EntityResolver(app_path, r, 'dish')
   >>> er.fit()
 
-When using the fit method for the first time, the Elasticsearch index will be created and all of the documents will be uploaded, so this may take some time depending on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine. Subsequent calls to *er.fit()* will update the existing index rather than creating a new one from scratch to improve speed. This means that new documents will be added, and documents with the same id will but updated, but no documents will be deleted. If you would like to delete documents, you can fully recreate the index from scratch by running a clean fit as follows.
+When using the fit method for the first time, the Elasticsearch index will be created and all of the documents will be uploaded, so this may take some time depending on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine. Subsequent calls to *er.fit()* will update the existing index rather than creating a new one from scratch to improve speed. This means that new documents will be added, and documents with the same ID will but updated, but no documents will be deleted. If you would like to delete documents, you can fully recreate the index from scratch by running a clean fit as follows.
 
 .. code-block:: python
 
