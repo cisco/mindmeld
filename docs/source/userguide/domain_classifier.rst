@@ -211,14 +211,13 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
   |                       |                                                                                                                   |
-  |                       | ========================= ===                                                                                     |
-  |                       | ``'k-fold'``              :sk_api:`K-folds <sklearn.model_selection.KFold>`                                       |
-  |                       | ``'shuffle'``             :sk_api:`Randomized folds <sklearn.model_selection.ShuffleSplit>`                       |
-  |                       | ``'group-k-fold'``        :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`      |
-  |                       | ``'group-shuffle'``       :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`      |
-  |                       | ``'stratified-k-fold'``   :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                  |
-  |                       | ``'stratified-shuffle'``  :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`  |
-  |                       | ========================= ===                                                                                     |
+  |                       | - ``'k-fold'``: :sk_api:`K-folds <sklearn.model_selection.KFold>`                                                 |
+  |                       | - ``'shuffle'``: :sk_api:`Randomized folds <sklearn.model_selection.ShuffleSplit>`                                |
+  |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`          |
+  |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`         |
+  |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                 |
+  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`| 
+  |                       |                                                                                                                   |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'k'``               | Number of folds (splits)                                                                                          |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
