@@ -4,37 +4,37 @@
 Entity Resolver
 ===============
 
-The MindMeld Entity Resolver takes the entities recognized by the Entity Recognizer and transforms them into canonical forms that can be looked up in a Knowledge Base. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake" and "SF" may get resolved to "San Francisco". In NLP literature, Entity Resolution or `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ is the problem of identifying all terms that refer to the same real world entity. In Workbench, these real world entities are identified by a unique ID or a canonical name in the Entity Mapping and the Knowledge Base.
+The MindMeld Entity Resolver takes the entities recognized by the Entity Recognizer and transforms them into canonical forms that can be looked up in a Knowledge Base. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake" and "SF" may get resolved to "San Francisco". In NLP literature, Entity Resolution or `Entity Linking <https://en.wikipedia.org/wiki/Entity_linking>`_ is the problem of identifying all terms that refer to the same real world entity. In Workbench, these real world entities are identified by a unique ID or a canonical name in the Entity Mapping files and the Knowledge Base.
 
-For many entity types, an entity's canonical form corresponds with an object in the knowledge base. When this is the case, the goal of the Entity Resolver is to resolve to the specific object ID so that as the developer, you can directly use that ID to perform relevant actions. For example, consider the ``dish`` entity type for the food ordering use case. The entity "stir-fried Thai noodles" would be resolved to {cname: "Pad Thai", id: 123}. Then the developer can use the dish ID 123 to query the Knowledge Base, display results, or make an API call to place an order.
+For many entity types, an entity's canonical form corresponds with an object in the knowledge base. When this is the case, the goal of the entity resolver is to resolve to the specific object ID so that as the developer, you can directly use that ID to perform relevant actions. For example, consider the ``dish`` entity type for the food ordering use case. The entity "stir-fried Thai noodles" would be resolved to {cname: "Pad Thai", id: 123}. Then the developer can use the dish ID 123 to query the knowledge base, display results, or make an API call to place an order.
 
-In many cases, a knowledge base could have multiple unique entries having the same canonical name, each of them with their own different IDs. This may arise in the music discovery use case when there are two songs with the same song name that are sung by different artists. Similarly in the food ordering application, there are multiple restaurants which serve a dish called "Pad Thai". Each one of these "Pad Thai" dishes have a different ID in the Knowledge Base. When canonical names are the same but ids are different, the Entity Resolver can rank one item above the other based on: 
+In many cases, a knowledge base could have multiple unique entries having the same canonical name, each of them with their own different IDs. This may arise in the music discovery use case when there are two different songs sung by different artists with the same song name. Similarly in the food ordering application, there may be multiple restaurants which serve a dish called "Pad Thai". Each one of these "Pad Thai" dishes would have a different ID in the Knowledge Base. When canonical names are the same but IDs are different, the entity resolver can rank one item above the other based on: 
 
-1. **Synonym lists.** Entities with the same canonical name may have different properties (e.g. "House Salad" may be a "spinach salad" at one restaurant but a "tropical fruit salad" at another restaurant). These differences can be captured in the synonym list of each entry which is used by the Entity Resolver to select the appropriate result.
+1. **Synonym lists.** Entities with the same canonical name may have different properties (e.g. "House Salad" may be a "spinach salad" at one restaurant but a "tropical fruit salad" at another restaurant). These differences can be captured in the synonym list of each entry which is used by the entity resolver to select the appropriate result.
 
-2. **A numeric sort factor.** Textual similarity is the primary factor in entity resolution, but when there are many items with similar textual similarity, a provided numeric value which we refer to as the 'sort factor' is used to boost the items that the user is most likely referring to. An object with a higher sort factor will be preferred, but the meaning of the sort factor differs across applications. For example, in a food ordering application, the score may be the rating of a restaurant. In a music discovery application, the score may be number of listens for an album.
+2. **A numeric sort factor.** Textual similarity is the primary factor in entity resolution, but when there are many items with similar textual similarity, a provided numeric value called the 'sort factor' is used to boost items that the user is most likely referring to. An object with a higher sort factor will be preferred, but the meaning of the sort factor differs across applications. For example, in a food ordering application, the score may be the rating of a restaurant. In a music discovery application, the score may be number of listens for an album.
 
-For some entity types, the entity's canonical form does not correspond with a Knowledge Base object, but is simply a name that can be used to filter results or in natural language responses. In most cases, these entity types refer to attributes of objects in the KB. For example, in the food ordering use case the *cuisine* entity type doesn't correspond to specific objects in the knowledge base. But resolving to the cuisine type "Thai" allows the developer to do a filter search against the Knowledge Base to select a list of relevant restaurants.
+For some entity types, the entity's canonical form does not correspond with a knowledge base (KB) object, but is simply a name that can be used to filter results or in natural language responses. In most cases, the entity mapping files for these entity types do not include an ID field since there is no connection to the KB. When no ID is provided in the entity mapping files, the resolution value from the entity resolver does not include an ID. Often times, these entity types refer to attributes of objects in the KB. For example, in the food ordering use case the ``cuisine`` entity type doesn't correspond to specific objects in the knowledge base. But resolving to the cuisine type "Thai" allows the developer to do a filter search on the cuisine attribute of the ``restaurant`` objects in the KB to select a list of relevant restaurants. 
 
-To train the Entity Resolver, you must generate entity mapping files which include a synonym set for each entity as well as the optional sort factor. The details of the entity mappings and guidelines on synonym data collection are described in the following sections.
+To train the entity resolver, you must generate entity mapping files which include a synonym set for each entity as well as the optional sort factor. The details of the entity mappings and guidelines on synonym data collection are described in the following sections.
 
 
 Entity Mapping
 --------------
 
-For each entity type, it is up to the developer to generate an entity mapping file which is used to train the Entity Resolver. The entity mapping is a json file with a list of dictionaries, one for each real world entity that could be resolved to. Each dictionary refers to a single real world entity and contains:
+For each entity type, it is up to the developer to generate an entity mapping file which is used to train the entity resolver. The entity mapping is a json file with a list of dictionaries, one for each possible real world entity of the given entity type. Each dictionary refers to a single real world entity and contains:
 
 ==================== ===
 **canonical name**   The standardized or official name of the real world entity. Textual similarity with the canonical name is one of the primary factors used in entity resolution.
 
 **unique ID**        An optional unique identifier. If there are multiple entries in the mapping file with the same canonical name, the ID is necessary for uniquely identifying each entry. If an entity has a corresponding entry in the Knowledge Base, it is recommended that this ID be the same as the ID of the KB entry. You can then use the resolved ID to query the KB for the appropriate entry.
 
-**whitelist**        A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that it is often referred to by different terms. Textual similarity with synonyms in the whitelist is one of the primary factors of entity resolution.
+**whitelist**        A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that it is often referred to by different terms.
 
-**sort factor**    An optional numeric value. Entities with a higher sort factor will be ranked above those with a lower value and similar textual similarity.
+**sort factor**      An optional numeric value. Entities with a higher sort factor will be ranked above those with a lower value and similar textual similarity.
 ==================== ===
 
-In the food ordering blueprint where a *dish* is an entity type, the *dish* entity mapping file contains a list of all possible dishes that a user could order. Here is an example of what a couple of entries in the *dish* entity mapping file may look like.
+In the food ordering blueprint where a ``dish`` is an entity type, the ``dish`` entity mapping file contains a list of all possible dishes that a user could order. Here is an example of what a couple of entries in the ``dish`` entity mapping file may look like.
 
 .. code-block:: javascript
 
@@ -64,7 +64,7 @@ In the food ordering blueprint where a *dish* is an entity type, the *dish* enti
         ...
     ]
 
-This file should be saved as *mapping.json* in the corresponding entity folder. For example, the mapping.json file for the *store_name* entity should exist in the following location:
+This file should be saved as ``mapping.json`` in the corresponding entity folder. For example, the ``mapping.json`` file for the ``store_name`` entity should exist in the following location:
 
 .. image:: /images/directory5.png
     :width: 300px
@@ -74,7 +74,7 @@ This file should be saved as *mapping.json* in the corresponding entity folder. 
 Data Collection
 ---------------
 
-The most important component of developing a production quality entity resolver is collecting a high quality and comprehensive set of synonyms. These synonyms allow the resolver to consistently resolve to a given entity that it is often referred to by different terms. Synonyms can be generated in-house or by using a crowdsourcing tool such as Mechanical Turk. For some use cases you may also be able to find existing synonym data sets. An important question is - *what makes a synonym high quality?* Here are some general synonym generation guidelines:
+The most important component of developing a production quality entity resolver is collecting a high quality and comprehensive set of synonyms. These synonyms allow the resolver to consistently resolve to a given entity that it is often referred to by different terms. Synonyms can be generated in-house or by using a crowdsourcing tool such as Mechanical Turk. For some use cases you may also be able to find existing synonym data sets. An important question is - what makes a synonym high quality? Here are some general synonym generation guidelines:
 
 1. The best synonyms are textually different but semantically similar. For example, *Beef rice bowl* as a synonym for *Gyudon*. 
 
@@ -82,9 +82,9 @@ The most important component of developing a production quality entity resolver 
 
 3. Add synonyms that include any useful information that is not reflected in more generic canonical names. For example, for a particular restaurant *Spinach Tomato Salad* would be a good synonym for *House Salad*.
 
-4. Don’t worry about generating exhaustive lists of possible misspellings or pluralization, since the resolver will handle those cases.
+4. Synonyms should be commonplace enough to be used in a conversational setting, rather than those which are highly contrived. For example, *cinnamon bun* may be a good synonym for *cinnamon roll*, but *cinnamon sugar sprinkled yeast-leavened dough in spiral form* would not be.
 
-5. Synonyms should be commonplace enough to be used in a conversational setting, rather than those which are highly contrived. For example, *cinnamon bun* may be a good synonym for *cinnamon roll*, but *cinnamon sugar sprinkled yeast-leavened dough in spiral form* would not be.
+5. Don’t worry about generating exhaustive lists of possible misspellings or pluralization, since the resolver will handle those cases.
 
 
 Entity Resolution Configuration
@@ -110,17 +110,29 @@ It is highly recommended that you install Elasticsearch to leverage Workbench's 
 Trying it out
 -------------
 
-Once all of the Entity Mapping files are generated, **nlp.build()** will build all of the NLP components including the Entity Resolver.
+Once all of the Entity Mapping files are generated, :meth:`nlp.build()` will build all of the NLP components including the Entity Resolver.
 
 .. code-block:: python
 
+  >>> from mmworkbench import configure_logs; configure_logs()
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('food_ordering')
   >>> nlp.build()
 
+  ...
+  Importing synonym data to ES index 'synonym_restaurant'
+  Creating index 'synonym_restaurant'
+  Loaded 25 documents
+  Fitting role classifier: domain='ordering', intent='build_order', entity_type='dish'
+  No role model configuration set. Using default.
+  Importing synonym data to ES index 'synonym_dish'
+  Creating index 'synonym_dish'
+  Loaded 1480 documents
+  ...
+
 Note that the first time you build the Entity Resolver, it may take some time if your data set is large and your Elasticsearch server is not on the same machine as your code.
 
-Then *nlp.process()* will include the list of resolved entities. 
+Then :meth:`nlp.process()` will include the list of resolved entities. 
 
 .. code-block:: python
 
@@ -158,7 +170,7 @@ Then *nlp.process()* will include the list of resolved entities.
  'intent': 'build_order',
  'text': 'I would like to order a gluten free pepperoni pizza and a chocolate milkshake'}
 
-The Entity Resolver always returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top 1 is sufficient, but in some cases it may be beneficial to look at other options if there are other constraints that the top few do not satisfy. The resolver returns:
+The Entity Resolver returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top 1 is sufficient, but in some cases it may be beneficial to look at other options if there are other constraints that the top few do not satisfy. The resolver returns:
 
 ==================== ===
 **canonical name**   The name used to refer to the real world entity.
