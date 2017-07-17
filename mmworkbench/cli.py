@@ -61,10 +61,10 @@ def cli(ctx):
 @click.option('-r', '--reloader', is_flag=True,
               help='starts the service with the reloader enabled')
 def run_server(ctx, port, no_debug, reloader):
-    """Starts the workbench service"""
+    """Starts the workbench service."""
     app = ctx.obj.get('app')
     if app is None:
-        raise ValueError('No app was given')
+        raise ValueError("No app was given. Run 'python app.py run' from your app folder.")
 
     ctx.invoke(num_parser, start=True)
     app.run(port=port, debug=not no_debug, host='0.0.0.0', threaded=True, use_reloader=reloader)
@@ -74,12 +74,12 @@ def run_server(ctx, port, no_debug, reloader):
 @click.pass_context
 @click.option('--session', help='JSON object to be used as the session')
 def converse(ctx, session):
-    """Starts a conversation with the app"""
+    """Starts a conversation with the app."""
     app = ctx.obj.get('app')
     if isinstance(session, str):
         session = json.loads(session)
     if app is None:
-        raise ValueError('No app was given')
+        raise ValueError("No app was given. Run 'python app.py converse' from your app folder.")
 
     ctx.invoke(num_parser, start=True)
 
@@ -97,8 +97,11 @@ def converse(ctx, session):
 @cli.command('build', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def build(ctx):
-    """Builds the app with default config"""
+    """Builds the app with default config."""
     app = ctx.obj.get('app')
+    if app is None:
+        raise ValueError("No app was given. Run 'python app.py build' from your app folder.")
+
     app.lazy_init()
     nlp = app.app_manager.nlp
     nlp.build()
@@ -108,8 +111,11 @@ def build(ctx):
 @cli.command('clean', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def clean(ctx):
-    """Delete all built data, undoing `build`"""
+    """Deletes all built data, undoing `build`."""
     app = ctx.obj.get('app')
+    if app is None:
+        raise ValueError("No app was given. Run 'python app.py clean' from your app folder.")
+
     gen_path = path.get_generated_data_folder(app.app_path)
     try:
         shutil.rmtree(gen_path)
@@ -124,7 +130,7 @@ def clean(ctx):
 @click.argument('index_name', required=True)
 @click.argument('data_file', required=True)
 def load_index(es_host, app_name, index_name, data_file):
-    """Load data into a question answerer index"""
+    """Loads data into a question answerer index."""
     QuestionAnswerer.load_kb(app_name, index_name, data_file, es_host)
 
 
@@ -132,7 +138,7 @@ def load_index(es_host, app_name, index_name, data_file):
 @click.pass_context
 @click.option('--start/--stop', default=True, help='Start or stop numerical parser')
 def num_parser(ctx, start):
-    """Starts or stops the numerical parser service"""
+    """Starts or stops the numerical parser service."""
     if start:
         pid = _get_mallard_pid()
 
@@ -173,7 +179,7 @@ def _get_mallard_pid():
 @click.argument('blueprint_name', required=True)
 @click.argument('app_path', required=False)
 def setup_blueprint(es_host, skip_kb, blueprint_name, app_path):
-    """Sets up a blueprint application"""
+    """Sets up a blueprint application."""
     blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
 
 
