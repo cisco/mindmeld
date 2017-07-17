@@ -88,7 +88,7 @@ The :attr:`dirty` flag indicates if the NLP object has changed since it was last
    >>> nlp.dirty
    False
 
-The values of both these attributes are currently ``False`` since we have merely initialized the NLP object and are yet to train it.
+The values of both these attributes are currently ``False`` since the NLP object has merely been initialized. It hasn't been trained yet.
 
 
 .. _build_nlp:
@@ -130,9 +130,9 @@ The :meth:`build` method thus accomplishes the following:
 
     - Configures the Language Parser using the provided parser configuration file.
 
-You will learn more about each of these steps in the upcoming chapters which will also describe the default settings for each component and methods to override them with your own custom configurations. For experimentation, it is recommended that you train, tune and test each classifier individually to identify the ideal configuration for each. The best machine learning settings should then be stored in your application configuration file, ``config.py``, so the :meth:`build` method can use them instead of the Workbench defaults.
-
 .. _build_nlp_with_config:
+
+You will learn more about each of these steps in the upcoming chapters which will also describe the default settings for each component and methods to override them with your own custom configurations. For experimentation, it is recommended that you train, tune and test each classifier individually to identify the ideal configuration for each. The best machine learning settings should then be stored in your application configuration file, ``config.py``, so the :meth:`build` method can use them instead of the Workbench defaults.
 
 Here's an example of a ``config.py`` file where the default configurations for the domain and intent classifiers are being overridden by custom settings that have been optimized for the app.
 
@@ -265,7 +265,7 @@ For instance, here is a snippet from a domain classifier configuration specifyin
    },
    ...
 
-Here's another example from entity recognition. The configuration specifies '`maximum entropy markov model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_' as the machine learning algorithm and the '`Inside-Outside-Beginning <https://en.wikipedia.org/wiki/Inside_Outside_Beginning>`_' format as the tagging scheme. It additionally also specifies a feature transformation operation, namely '`maximum absolute scaling <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MaxAbsScaler.html>`_' as a preprocessing step.
+Here's another example from entity recognition. The configuration specifies '`maximum entropy markov model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_' as the machine learning algorithm and the '`Inside-Outside-Beginning <https://en.wikipedia.org/wiki/Inside_Outside_Beginning>`_' format as the tagging scheme. It additionally also specifies a feature transformation operation, namely ':sk_api:`maximum absolute scaling <sklearn.preprocessing.MaxAbsScaler>`' as a preprocessing step.
 
 .. code:: python
 
@@ -293,14 +293,14 @@ Here is an example of the feature extraction settings in a domain classifier con
 
 The above configuration instructs Workbench to extract four different groups of features for each input query:
 
-  a. '`Bag of n-grams <http://scikit-learn.org/stable/modules/feature_extraction.html#the-bag-of-words-representation>`_' of length 1 (also called 'bag of words')
+  a. ':sk_guide:`Bag of n-grams <feature_extraction#the-bag-of-words-representation>`' of length 1 (also called 'bag of words')
   b. `Gazetteer <https://gate.ac.uk/sale/tao/splitch13.html#x18-32600013.1>`_-derived features
   c. Token frequency-based features, quantized into 5 `bins <https://en.wikipedia.org/wiki/Data_binning>`_
   d. Features derived from the query length
 
 3. **Hyperparameter Settings** - The `hyperparameters <https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)>`_ to use during model training, or the settings for choosing optimal hyperparameters.
 
-Here is a role classifier configuration that defines the hyperparameters for its `maximum entropy classification model <https://en.wikipedia.org/wiki/Maximum_entropy_classifier>`_. It specifies a value of 100 for the '`C <http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_' parameter and '`L1 <http://scikit-learn.org/stable/modules/linear_model.html#logistic-regression>`_' as the norm to be used for `regularization <https://en.wikipedia.org/wiki/Regularization_%28mathematics%29#Use_of_regularization_in_classification>`_. 
+Here is a role classifier configuration that defines the hyperparameters for its `maximum entropy classification model <https://en.wikipedia.org/wiki/Maximum_entropy_classifier>`_. It specifies a value of 100 for the ':sk_guide:`C <linear_model#logistic-regression>`' parameter and ':sk_guide:`L1 <linear_model#logistic-regression>`' as the norm to be used for `regularization <https://en.wikipedia.org/wiki/Regularization_%28mathematics%29#Use_of_regularization_in_classification>`_. 
 
 .. code:: python
 
@@ -430,13 +430,18 @@ The :meth:`process` method executes the following steps:
 
 The chapters on the individual NLP components provide more details on the above steps, along with documentation on their outputs and methods for batch testing and evaluation.
 
+.. _evaluate_nlp:
 
 Evaluate NLP performance
 ------------------------
 
-The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries that is prepared in :ref:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. The files containing the test queries have names starting with the ``test`` prefix, and are placed alongside the training data files within the different intent subfolders. While the training data is used for training and tuning the models, the test data is used solely for model evaluation. Ideally, the test data should have no queries in common with the training data and be representative of the real-world usage of the app.
+The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries that is prepared in :ref:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. The files containing the test queries have names starting with the ``test`` prefix, and are placed alongside the training data files within the different intent subfolders. 
 
-During evaluation, the ground truth annotations are stripped away from the test queries and the unlabeled queries are passed in to a trained classifier. The classifier's output predictions are then compared against the ground truth labels to measure the model's prediction accuracy. A successful production-grade conversational app needs to have test accuracies greater than 90% for all the classification models in its NLP pipeline.
+.. image:: /images/food_ordering_directory2.png
+    :width: 350px
+    :align: center
+
+While the training data is used for training and tuning the models, the test data is used solely for model evaluation. Ideally, the test data should have no queries in common with the training data and be representative of the real-world usage of the app. During evaluation, the ground truth annotations are stripped away from the test queries and the unlabeled queries are passed in to a trained classifier. The classifier's output predictions are then compared against the ground truth labels to measure the model's prediction accuracy. A successful production-grade conversational app needs to have test accuracies greater than 90% for all the classification models in its NLP pipeline.
 
 The `evaluation` section of the respective chapters will explain how evaluation works for each individual classifier in the NLP model hierarchy.
 
@@ -462,9 +467,7 @@ In practice, several iterations of the above flow are necessary to optimize the 
 
 ..
 
-  2. **Optimizing the classifier configuration**: Accuracy can also be improved by selecting a classifier configuration that is better suited for your training data. The natural language processor's :meth:`build` method uses a default configuration for each classifier to train the NLP models. While these baseline models provide a reasonable starting point for your NLP pipeline, experimenting with different model types, features, etc. could help identify alternate configurations that produce more accurate models. However, this approach, unlike training data augmentation, is more advanced. It requires expertise in applied machine learning for running meaningful experiments and identifying the optimal classifier settings.
-
-Refer to the upcoming chapters for discussions on model optimization in the context of each NLP classifier.
+  2. **Optimizing the classifier configuration**: Accuracy can also be improved by selecting a classifier configuration that is better suited for your training data. The natural language processor's :meth:`build` method uses a default configuration for each classifier to train the NLP models. While these baseline models provide a reasonable starting point for your NLP pipeline, experimenting with different model types, features, etc. could help identify alternate configurations that produce more accurate models. However, this approach, unlike training data augmentation, is more advanced. It requires expertise in applied machine learning to run meaningful experiments and identify the optimal classifier settings. Refer to the upcoming chapters for details on the configuration options available for each NLP classifier.
 
 
 Save models for future use
