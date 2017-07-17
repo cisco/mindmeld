@@ -90,26 +90,26 @@ To view the current :ref:`configuration <config>` being used by a trained classi
 
    >>> ic.config.to_dict()
    {
-   	'features': {
-   		'bag-of-words': {'lengths': [1]},
-     	'freq': {'bins': 5},
-     	'in-gaz': {},
-     	'length': {}
- 	},
+    'features': {
+      'bag-of-words': {'lengths': [1]},
+      'freq': {'bins': 5},
+      'in-gaz': {},
+      'length': {}
+    },
     'model_settings': {'classifier_type': 'logreg'},
     'model_type': 'text',
     'param_selection': {
-        'grid': {
-          'C': [0.01, 1, 100, 10000, 1000000],
-          'class_weight': [
-          	...
-          ],
-          'fit_intercept': [True, False]
-    	},
-    	'k': 10,
-    	'type': 'k-fold'
-	},
-	'params': None
+      'grid': {
+        'C': [0.01, 1, 100, 10000, 1000000],
+        'class_weight': [
+          ...
+        ],
+        'fit_intercept': [True, False]
+      },
+      'k': 10,
+      'type': 'k-fold'
+    },
+    'params': None
    }
 
 Let's take a look at the allowed values for each setting in an intent classifier configuration.
@@ -451,12 +451,12 @@ When experimenting with different classifier settings or debugging classifier pe
 
    >>> ic.predict_proba('cancel my alarm')
    [
-	('remove_alarm', 0.80000000000000004),
- 	('set_alarm', 0.20000000000000001),
- 	('change_alarm', 0.0),
- 	('check_alarm', 0.0),
- 	('start_timer', 0.0),
- 	('stop_timer', 0.0)]
+    ('remove_alarm', 0.80000000000000004),
+    ('set_alarm', 0.20000000000000001),
+    ('change_alarm', 0.0),
+    ('check_alarm', 0.0),
+    ('start_timer', 0.0),
+    ('stop_timer', 0.0)]
    ]
 
 The result of :meth:`predict_proba` is a list of tuples ranked from the most likely intent to the least. The first element of each tuple is the intent label and the second element is the associated classification probability. Ideally, you want a classifier that assigns a high probability to the expected (correct) class label for a test query, while having very low prediction probabilities for the incorrect labels.
@@ -582,8 +582,8 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
    ]
    >>> list(eval.incorrect_results())
    [
-	EvaluatedExample(example=<Query 'reschedule my 6 am alarm to tomorrow morning at 10'>, expected='change_alarm', predicted='set_alarm', probas={'change_alarm': 0.26666666666666666, 'check_alarm': 0.0, 'remove_alarm': 0.26666666666666666, 'set_alarm': 0.46666666666666667, 'start_timer': 0.0, 'stop_timer': 0.0}, label_type='class'),
- 	EvaluatedExample(example=<Query 'move my 6 am alarm to 3pm in the afternoon'>, expected='change_alarm', predicted='remove_alarm', probas={'change_alarm': 0.20000000000000001, 'check_alarm': 0.20000000000000001, 'remove_alarm': 0.33333333333333331, 'set_alarm': 0.066666666666666666, 'start_timer': 0.20000000000000001, 'stop_timer': 0.0}, label_type='class'),
+    EvaluatedExample(example=<Query 'reschedule my 6 am alarm to tomorrow morning at 10'>, expected='change_alarm', predicted='set_alarm', probas={'change_alarm': 0.26666666666666666, 'check_alarm': 0.0, 'remove_alarm': 0.26666666666666666, 'set_alarm': 0.46666666666666667, 'start_timer': 0.0, 'stop_timer': 0.0}, label_type='class'),
+    EvaluatedExample(example=<Query 'move my 6 am alarm to 3pm in the afternoon'>, expected='change_alarm', predicted='remove_alarm', probas={'change_alarm': 0.20000000000000001, 'check_alarm': 0.20000000000000001, 'remove_alarm': 0.33333333333333331, 'set_alarm': 0.066666666666666666, 'start_timer': 0.20000000000000001, 'stop_timer': 0.0}, label_type='class'),
     ...
    ]
 
@@ -595,12 +595,12 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
    [
     (<Query 'remind me in 1 hour'>,
      {
-     	'change_alarm': 0.0,
-   		'check_alarm': 0.066666666666666666,
-   		'remove_alarm': 0.066666666666666666,
-	    'set_alarm': 0.53333333333333333,
-   		'start_timer': 0.33333333333333331,
-   		'stop_timer': 0.0
+      'change_alarm': 0.0,
+      'check_alarm': 0.066666666666666666,
+      'remove_alarm': 0.066666666666666666,
+      'set_alarm': 0.53333333333333333,
+      'start_timer': 0.33333333333333331,
+      'stop_timer': 0.0
      }
     )
    ]
@@ -616,15 +616,15 @@ Here's an example listing all the misclassified queries from the ``check_alarm``
    [
     ...
     (<Query 'did you set an alarm for 6 am'>,
-  	 {
-  	  'change_alarm': 0.0,
-   	  'check_alarm': 0.066666666666666666,
+     {
+      'change_alarm': 0.0,
+      'check_alarm': 0.066666666666666666,
       'remove_alarm': 0.0,
       'set_alarm': 0.80000000000000004,
       'start_timer': 0.13333333333333333,
       'stop_timer': 0.0
-  	 }
- 	),
+     }
+  ),
     (<Query 'did you set an alarm to wake me up at 6 am'>,
      {
       'change_alarm': 0.0,
