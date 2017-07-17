@@ -69,7 +69,7 @@ To train a domain classification model, use the :meth:`DomainClassifier.fit` met
    Loading queries from file times_and_dates/start_timer/train.txt
    Loading queries from file times_and_dates/stop_timer/train.txt
    Loading queries from file unknown/unknown/training.txt
-   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 99.50%, params: {'C': 10, 'fit_intercept': True}
 
 The :meth:`fit` method loads all the necessary training queries and trains a domain classification model using the provided machine learning settings. When the method is called without any parameters (as in the example above), it uses the settings from the :ref:`app's configuration file <build_nlp_with_config>` (``config.py``), if defined, or Workbench's preset :ref:`classifier configuration <config>`.
@@ -86,21 +86,21 @@ To view the current :ref:`configuration <config>` being used by a trained classi
 
    >>> dc.config.to_dict()
    {
-    'features': 
-      {
+    'features': {
         'bag-of-words': {'lengths': [1]},
         'freq': {'bins': 5},
         'in-gaz': {}
-      },
+    },
     'model_settings': {'classifier_type': 'logreg'},
     'model_type': 'text',
-    'param_selection': 
-      {
-        'grid': {'C': [10, 100, 1000, 10000, 100000],
-        'fit_intercept': [True, False]},
+    'param_selection': {
+        'grid': {
+          'C': [10, 100, 1000, 10000, 100000],
+          'fit_intercept': [True, False]
+        },
         'k': 10,
         'type': 'k-fold'
-      },
+    },
     'params': None
   }
 
@@ -311,7 +311,7 @@ To retrain the classifier with the updated feature set, pass in the :data:`my_fe
    >>> dc.fit(features=my_features)
    Fitting domain classifier
    No app configuration file found. Using default domain model configuration
-   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 99.60%, params: {'C': 100, 'fit_intercept': False}
 
 
@@ -332,7 +332,7 @@ Next, let's experiment with the model's hyperparameters. To get the hyperparamet
     'type': 'k-fold'
    }
 
-Let's reduce the range of values to search for the ``'C'`` parameter (inverse of regularization strength). Also, instead of always choosing an ``'l2'`` penalty, let's allow the hyperparameter estimation process to choose the ideal norm (``'l1'`` or ``'l2'``) for penalization. The updated settings can then be passed to :meth:`fit` as an argument to the :data:`param_selection` parameter.
+Let's reduce the range of values to search for the ``'C'`` parameter (inverse of regularization strength). Also, instead of always choosing an ``'l2'`` penalty by default, let's allow the hyperparameter estimation process to choose the ideal norm (``'l1'`` or ``'l2'``) for penalization. The updated settings can then be passed to :meth:`fit` as an argument to the :data:`param_selection` parameter.
 
 .. code-block:: python
 
@@ -351,7 +351,7 @@ Let's reduce the range of values to search for the ``'C'`` parameter (inverse of
    >>> dc.fit(param_selection=my_param_settings)
    Fitting domain classifier
    No app configuration file found. Using default domain model configuration
-   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 99.56%, params: {'C': 10, 'fit_intercept': False, 'penalty': 'l2'}
 
 The :meth:`fit` method now searches over the updated parameter grid and prints the hyperparameter values for the model with the highest cross-validation accuracy. By default, the domain classifier uses k-fold cross-validation with 10 folds. To use a different cross-validation strategy, you can modify the value for the ``'type'`` key in the :data:`my_param_settings`. For instance, to use five randomized folds:
@@ -373,7 +373,7 @@ The :meth:`fit` method now searches over the updated parameter grid and prints t
    >>> dc.fit(param_selection=my_param_settings)
    Fitting domain classifier
    No app configuration file found. Using default domain model configuration
-   Selecting hyperparameters using shuffle cross validation with 5 splits
+   Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 99.50%, params: {'C': 100, 'fit_intercept': False, 'penalty': 'l2'}
 
 For a full list of configurable hyperparameters for each model and available cross-validation methods, refer to the above section on defining :ref:`hyperparameter settings <tuning>`.
@@ -401,7 +401,7 @@ Lastly, let's try other :ref:`machine learning models <sklearn_models>` in place
    >>> dc.fit(model_settings={'classifier_type': 'svm'}, param_selection=my_param_settings)
    Fitting domain classifier
    No app configuration file found. Using default domain model configuration
-   Selecting hyperparameters using shuffle cross validation with 5 splits
+   Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 99.56%, params: {'C': 1000, 'kernel': 'rbf'}
 
 Here's another example that trains a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :sk_guide:`ensemble <ensemble>` classifier:
@@ -416,7 +416,7 @@ Here's another example that trains a :sk_api:`random forest <sklearn.ensemble.Ra
    >>> dc.fit(model_settings={'classifier_type': 'rforest'}, param_selection=my_param_settings)
   Fitting domain classifier
   No app configuration file found. Using default domain model configuration
-  Selecting hyperparameters using shuffle cross validation with 5 splits
+  Selecting hyperparameters using shuffle cross-validation with 5 splits
   Best accuracy: 98.37%, params: {'criterion': 'gini', 'n_estimators': 15, 'warm_start': False}
 
 
@@ -481,7 +481,7 @@ To evaluate the accuracy of your trained domain classifier, you first need to cr
    Loading queries from file weather/check-weather/test.txt
    <StandardModelEvaluation score: 98.05%, 1811 of 1847 examples correct>
 
-The :meth:`evaluate` method strips away all ground truth annotations from the test queries and passes in the resulting unlabeled queries to the trained domain classifier for prediction. The classifier's output predictions are then compared against the ground truth labels to compute the model's prediction accuracy. In the above example, the model got 1,811 out of 1,847 test queries correct, resulting in an accuracy of 98.05%
+The :meth:`evaluate` method strips away all ground truth annotations from the test queries and passes in the resulting unlabeled queries to the trained domain classifier for prediction. The classifier's output predictions are then compared against the ground truth labels to compute the model's prediction accuracy. In the above example, the model got 1,811 out of 1,847 test queries correct, resulting in an accuracy of 98%
 
 The :meth:`evaluate` method returns a rich object that contains a lot more information over and above the aggregate accuracy score. The code below prints all the model performance statistics reported by the :meth:`evaluate` method.
 
@@ -561,7 +561,7 @@ To view the classifier predictions for the entire test set, you can use the :att
 
 .. code-block:: python
 
-   >>> dc.results
+   >>> eval.results
    [
     EvaluatedExample(example=<Query 'change my 6 am alarm'>, expected='times_and_dates', predicted='times_and_dates', probas={'smart_home': 0.050000000000000003, 'times_and_dates': 0.94999999999999996, 'unknown': 0.0, 'weather': 0.0}, label_type='class'),
     EvaluatedExample(example=<Query 'change my 6 am alarm to 7 am'>, expected='times_and_dates', predicted='times_and_dates', probas={'smart_home': 0.050000000000000003, 'times_and_dates': 0.94999999999999996, 'unknown': 0.0, 'weather': 0.0}, label_type='class')],
@@ -629,7 +629,7 @@ Here's an example listing all the misclassified queries from the ``weather`` dom
     ...
    ]
 
-In both of the cases above, the domain was misclassified as ``smart_home``. On inspecting the :doc:`training data <../blueprints/home_assistant>`, you will find that the ``weather`` domain indeed lacks labeled training queries like the ones above. On the other hand, these queries are very similar in language patterns ("check temperature ...", "check current temperature ...") to the training data for the ``check_thermostat`` intent in the ``smart_home`` domain. The model hence chose ``smart_home`` over ``weather`` while classifying them. This issue could be solved by adding more relevant training queries to the ``weather`` domain, so the classification model can better learn to distinguish between these two confusable domains.
+In both of the cases above, the domain was misclassified as ``smart_home``. On inspecting the :doc:`training data <../blueprints/home_assistant>`, you will find that the ``weather`` domain indeed lacks labeled training queries like the ones above. On the other hand, these queries are very similar in language patterns ("check temperature ...", "check current temperature ...") to the training data for the ``check_thermostat`` intent in the ``smart_home`` domain. The model hence chose ``smart_home`` over ``weather`` when classifying them. This issue could potentially be solved by adding more relevant training queries to the ``weather`` domain, so the classification model can better learn to distinguish between these two confusable domains.
 
 Error analysis on the results of the :meth:`evaluate` method can thus inform your experimentation and help in building better models. In the example  above, adding more training data was proposed as a solution for improving accuracy. While training data augmentation should be your first step, you could also explore other techniques such as experimenting with different model types, features and hyperparameters, as described :ref:`earlier <build_domain_with_config>` in this chapter.
 
