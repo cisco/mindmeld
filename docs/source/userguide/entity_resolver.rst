@@ -186,15 +186,11 @@ To test the Entity Resolver as a stand alone component you can create an EntityR
 
 .. code-block:: python
 
-  >>> from mmworkbench.components.entity_resolver import EntityResolver
-  >>> from mmworkbench.tokenizer import Tokenizer
-  >>> from mmworkbench.query_factory import QueryFactory
-  >>> from mmworkbench.resource_loader import ResourceLoader
-  >>> app_path = 'food_ordering'
-  >>> t = Tokenizer()
-  >>> q = QueryFactory(t)
-  >>> r = ResourceLoader(app_path, q)
-  >>> er = EntityResolver(app_path, r, 'dish')
+  >>> from mmworkbench import configure_logs; configure_logs() 
+  >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+  >>> nlp = NaturalLanguageProcessor(app_path='food_ordering')
+  >>> nlp.domains['ordering'].intents['build_order'].build()
+  >>> er = nlp.domains['ordering'].intents['build_order'].entities['dish'].entity_resolver
   >>> er.fit()
 
 When using the fit method for the first time, the Elasticsearch index will be created and all of the objects will be uploaded, so this may take some time depending on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine. Subsequent calls to *er.fit()* will update the existing index rather than creating a new one from scratch to improve speed. This means that new objects will be added, and objects with the same ID will but updated, but no objects will be deleted. If you would like to delete objects, you can fully recreate the index from scratch by running a clean fit as follows.
