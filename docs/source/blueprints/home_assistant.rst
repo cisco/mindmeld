@@ -231,7 +231,7 @@ Another conversational pattern that would be useful to the reader is the follow-
   App: Sure. Which lights?
   User: In the kitchen
 
-In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent and define the `handle_specify_location` state. Since a number of states (`close/open door`, `lock/unlock door`, `turn on/off lights`, `turn on/off appliance`, `check door/light`) can lead to the `specify location` state, we need to pass in the previous state/action information in the request context. 
+In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent and define the `handle_specify_location` state. Since a number of states (`close/open door`, `lock/unlock door`, `turn on/off lights`, `turn on/off appliance`, `check door/light`) can lead to the `specify location` state, we need to pass in the previous state/action information in the request context.
 
 .. code:: python
 
@@ -312,12 +312,16 @@ Here is the full list of states:
    - start_timer
    - stop_timer
    - unknown
-   
+
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we still need a local instance of Elasticsearch running in the background.
+The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we still need a local instance of Elasticsearch running in the background. If you have brew, you can set one up quickly:
+
+.. code:: bash
+   >>> brew install elasticsearch
+   >>> elasticsearch
 
 
 6. Training Data
@@ -372,7 +376,8 @@ To put the training data to use and train a baseline NLP system for your app usi
    Loading queries from file weather/check_weather/train.txt
    Loading queries from file times_and_dates/remove_alarm/train.txt
    Loading queries from file times_and_dates/start_timer/train.txt
-   Loading queries from file times_and_dates/change_alarm/train.txt   .
+   Loading queries from file times_and_dates/change_alarm/train.txt
+   .
    .
    .
    Fitting intent classifier: domain='greeting'
@@ -387,6 +392,7 @@ To put the training data to use and train a baseline NLP system for your app usi
    Fitting intent classifier: domain='smart_home'
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 98.43%, params: {'fit_intercept': True, 'C': 100, 'class_weight': {0: 0.99365079365079367, 1: 1.5915662650602409, 2: 1.3434782608695652, 3: 1.5222222222222221, 4: 0.91637426900584784, 5: 0.74743589743589745, 6: 1.9758620689655173, 7: 1.4254901960784312, 8: 1.0794871794871794, 9: 1.0645320197044335, 10: 1.1043715846994535, 11: 1.2563909774436088, 12: 1.3016260162601625, 13: 1.0775510204081633, 14: 1.8384615384615384}}
+
 .. tip::
 
   During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
@@ -444,12 +450,42 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 98.46%, params: {'fit_intercept': False, 'C': 10, 'class_weight': {0: 0.98518518518518516, 1: 2.3803212851405622, 2: 1.801449275362319, 3: 2.2185185185185183, 4: 0.80487329434697852, 5: 0.41068376068376072, 6: 3.2770114942528741, 7: 1.9928104575163397, 8: 1.1854700854700853, 9: 1.1505747126436781, 10: 1.2435336976320581, 11: 1.5982456140350876, 12: 1.7037940379403793, 13: 1.180952380952381, 14: 2.9564102564102566}}
 
-.. code:: python
+Change the model for the intent classifier to svm:
 
-   >>> ic.fit(model_settings={'classifier_type': 'rforest'}, params={'max_features': 'auto', 'n_estimators': 10, 'n_jobs': -1})
+.. code:: python
+   >>> search_grid = {
+   ...    'C': [0.1, 0.5, 1, 5, 10, 50, 100, 1000, 5000],
+   ...    'kernel': ['linear', 'rbf', 'poly'],
+   ... }
+   ...
+   >>> param_selection_settings = {
+   ...      'grid': search_grid,
+   ...      'type': 'k-fold',
+   ...      'k': 10
+   ... }
+   ...
+   >>> ic = nlp.domains['smart_home'].intent_classifier
+   >>> ic.fit(model_settings={'classifier_type': 'svm'}, param_selection=param_selection_settings)
    Fitting intent classifier: domain='smart_home'
-   >> ic.evaluate()
-   <StandardModelEvaluation score: 90.96%, 936 of 1029 examples correct>
+   Loading queries from file smart_home/check_lights/train.txt
+   Loading queries from file smart_home/specify_location/train.txt
+   Loading queries from file smart_home/turn_appliance_off/train.txt
+   Loading queries from file smart_home/check_thermostat/train.txt
+   Loading queries from file smart_home/set_thermostat/train.txt
+   Loading queries from file smart_home/turn_up_thermostat/train.txt
+   Loading queries from file smart_home/turn_lights_on/train.txt
+   Loading queries from file smart_home/unlock_door/train.txt
+   Loading queries from file smart_home/turn_on_thermostat/train.txt
+   Loading queries from file smart_home/lock_door/train.txt
+   Loading queries from file smart_home/turn_down_thermostat/train.txt
+   Unable to load query: Unable to resolve system entity of type 'sys_time' for '12pm'.
+   Loading queries from file smart_home/close_door/train.txt
+   Loading queries from file smart_home/turn_lights_off/train.txt
+   Loading queries from file smart_home/open_door/train.txt
+   Loading queries from file smart_home/turn_off_thermostat/train.txt
+   Loading queries from file smart_home/turn_appliance_on/train.txt
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
+   Best accuracy: 98.27%, params: {'C': 5000, 'kernel': 'rbf'}
 
 Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing and error analysis. Refer to the appropriate sections in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
 
