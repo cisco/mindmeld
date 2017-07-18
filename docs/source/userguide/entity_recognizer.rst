@@ -6,6 +6,71 @@ Entity Recognizer
 
 The Entity Recognizer is run as the third step in the natural language processing pipeline to detect all the relevant entities in a given query. It is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the entity types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Entity recognition models are trained per intent. A Workbench app hence has one entity recognizer for every intent that requires entity detection.
 
+.. note::
+
+   For a quick introduction, refer to :ref:`Step 7 <entity_recognition>` of the Step-By-Step Guide.
+
+   Recommended prior reading: :doc:`Natural Language Processor <nlp>` chapter of the User Guide.
+
+
+Access the entity recognizer
+----------------------------
+
+Before using any of the NLP componenets, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
+
+.. code-block:: python
+
+  >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+  >>> nlp = NaturalLanguageProcessor(app_path='home_assistant')
+  >>> nlp
+  <NaturalLanguageProcessor 'home_assistant' ready: False, dirty: False>
+
+Next, verify that the NLP has correctly identified all the domains and intents for your app.
+
+.. code-block:: python
+
+   >>> nlp.domains
+   {
+    'smart_home': <DomainProcessor 'smart_home' ready: False, dirty: False>,
+    'times_and_dates': <DomainProcessor 'times_and_dates' ready: False, dirty: False>,
+    'unknown': <DomainProcessor 'unknown' ready: False, dirty: False>,
+    'weather': <DomainProcessor 'weather' ready: False, dirty: False>
+   }
+   ...
+   >>> nlp.domains['times_and_dates'].intents
+   {
+   	'change_alarm': <IntentProcessor 'change_alarm' ready: True, dirty: True>,
+ 	'check_alarm': <IntentProcessor 'check_alarm' ready: False, dirty: False>,
+ 	'remove_alarm': <IntentProcessor 'remove_alarm' ready: False, dirty: False>,
+ 	'set_alarm': <IntentProcessor 'set_alarm' ready: True, dirty: True>,
+ 	'start_timer': <IntentProcessor 'start_timer' ready: True, dirty: True>,
+ 	'stop_timer': <IntentProcessor 'stop_timer' ready: False, dirty: False>
+   }
+   ...
+   >>> nlp.domains['weather'].intents
+   {
+   	'check-weather': <IntentProcessor 'check-weather' ready: False, dirty: False>
+   }
+
+Each intent has its own :class:`EntityRecognizer` which can be accessed using the :attr:`entity_recognizer` attribute of the corresponding intent.
+
+.. code-block:: python
+
+   >>> # Entity recognizer for the 'change_alarm' intent in the 'times_and_dates' domain:
+   >>> er = nlp.domains['times_and_dates'].intents['change_alarm'].entity_recognizer
+   >>> er
+   <EntityRecognizer ready: False, dirty: False>
+   ...
+   >>> # Entity recognizer for the 'check_weather' intent in the 'weather' domain:
+   >>> er = nlp.domains['weather'].intents['check-weather'].entity_recognizer
+   >>> er
+   <EntityRecognizer ready: False, dirty: False>
+
+
+Training a baseline entity recognizer
+-------------------------------------
+
+
 
 Introduce the general ML techniques and methodology common to all NLP classifiers:
 Getting the right kind of training data using in-house data generation and crowdsourcing, QAing and analyzing the data
@@ -16,21 +81,6 @@ Testing a Workbench classifier on a held-out validation set
 Doing error analysis on the validation set, retraining based on observations from error analysis by adding more training examples or feature tweaks
 Getting final evaluation numbers on an unseen “blind” test set
 Saving models for production use 
-
-Then, describe the above in more detail with specific code examples for each subcomponent:
-4.6.1 The Domain Classifier
-4.6.2 The Intent Classifier
-4.6.3 The Entity Recognizer
-Describe gazetteers.
-4.6.4 The Role Classifier
-
-Describe necessity of roles with examples.
-4.6.5 The Entity Resolver
-
-Describe collection of synonyms and the synonym mapping file.
-4.6.6 The Language Parser
-
-Describe our approach to language parsing, what a parser configuration looks like and how it can be used to improve parser accuracy.  Show code examples for parsing and how to inspect the parser output.
 
 ====
 

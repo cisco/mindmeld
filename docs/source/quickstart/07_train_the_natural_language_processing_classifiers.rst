@@ -54,6 +54,7 @@ The :meth:`nlp.process()` command returns detailed information about the output 
 
 By default, the :meth:`build()` method shown above uses the baseline machine learning settings for all classifiers, which should train reasonable models in most cases. To further improve model performance, Workbench provides extensive capabilities for optimizing individual model parameters and measuring results. We'll next explore how to experiment with different settings for each NLP component individually.
 
+.. _domain_classification:
 
 Domain Classification
 ~~~~~~~~~~~~~~~~~~~~~
@@ -89,6 +90,8 @@ To view the classification probabilities associated with all available domains, 
   ]
 
 In addition to the `model` parameter we used above, the :meth:`fit()` method also takes parameters we can use to improve upon the baseline SVM model trained by default. These include parameters for features, cross-validation settings, and other model-specific configuration. See the :ref:`User Guide <userguide>` for details.
+
+.. _intent_classification:
 
 Intent Classification
 ~~~~~~~~~~~~~~~~~~~~~
@@ -162,6 +165,8 @@ Once we have experimented with different settings and have an optimized intent m
 
 See the :ref:`User Guide <userguide>` for a comprehensive list of the different model, feature extraction and hyperparameter settings for training the domain and intent models. The :ref:`User Guide <userguide>` also describes how to evaluate trained models using labeled test data.
 
+.. _entity_recognition:
+
 Entity Recognition
 ~~~~~~~~~~~~~~~~~~
 
@@ -234,6 +239,8 @@ We have now trained and saved the ``get_name`` entity recognizer for the ``get_s
 
 See the :ref:`User Guide <userguide>` for more about entity recognizer training and evaluation options.
 
+.. _role_classification:
+
 Role Classification
 ~~~~~~~~~~~~~~~~~~~
 
@@ -261,7 +268,7 @@ Once the classifier is trained, we test it on a new query using the familiar :me
 
 We can further optimize our baseline role classifier using the training and evaluation options detailed in the :ref:`User Guide <userguide>`.
 
-.. _entity-resolution:
+.. _entity_resolution:
 
 Entity Resolution
 ~~~~~~~~~~~~~~~~~

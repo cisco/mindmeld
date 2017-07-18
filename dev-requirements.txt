@@ -16,6 +16,6 @@ jupyter_client>=4.4.0
 Sphinx==1.6.3
 nbsphinx==0.2.11
 sphinx-autobuild==0.6.0
-git+ssh://git@github.com/expectlabs/sphinx_rtd_theme.git@0.1.10-mm2#egg=sphinx_rtd_theme-0.1.10-mm2
+git+ssh://git@github.com/expectlabs/sphinx_rtd_theme.git@0.1.10-mm3#egg=sphinx_rtd_theme-0.1.10-mm3
 pandoc==1.0.0b2
 mock==2.0.0
