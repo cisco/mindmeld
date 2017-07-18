@@ -35,7 +35,38 @@ DEFAULT_FEATURES = {
 
 
 class TaggerModel(Model):
-    """A machine learning classifier for tags."""
+    """A machine learning classifier for tags.
+
+    This class manages feature extraction, training, cross-validation, and
+    prediction. The design goal is that after providing initial settings like
+    hyperparameters, grid-searchable hyperparameters, feature extractors, and
+    cross-validation settings, TaggerModel manages all of the details
+    involved in training and prediction
+
+    TODO: define the inputs and outputs
+    such that the input to training or
+    prediction is Query objects, and the output is class names, and no data
+    manipulation is needed from the client.
+
+    Attributes:
+        classifier_type (str): The name of the classifier type. Currently
+            recognized values are "memm", "crf", and "lstm".
+        hyperparams (dict): A kwargs dict of parameters that will be used to
+            initialize the classifier object.
+        grid_search_hyperparams (dict): Like 'hyperparams', but the values are
+            lists of parameters. The training process will grid search over the
+            Cartesian product of these parameter lists and select the best via
+            cross-validation.
+        feat_specs (dict): A mapping from feature extractor names, as given in
+            FEATURE_NAME_MAP, to a kwargs dict, which will be passed into the
+            associated feature extractor function.
+        cross_validation_settings (dict): A dict that contains "type", which
+            specifies the name of the cross-validation strategy, such as
+            "k-folds" or "shuffle". The remaining keys are parameters
+            specific to the cross-validation type, such as "k" when the type is
+            "k-folds".
+
+    """
 
     def __init__(self, config):
         if not config.features:

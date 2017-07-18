@@ -28,16 +28,6 @@ LIKELIHOOD_SCORING = 'log_loss'
 _NEG_INF = -1e10
 
 
-def evaluate_seq2seq(y, y_pred, **kwargs):
-    error = 0
-    for idx in range(len(y)):
-        if y[idx] != y_pred[idx]:
-            error += 1
-    accuracy = 1 - error / float(len(y))
-    print(accuracy)
-    return 1 - error / float(len(y))
-
-
 class ModelConfig(object):
     """A value object representing a model configuration
 
