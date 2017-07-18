@@ -13,6 +13,7 @@ from sklearn_crfsuite import CRF
 
 from .helpers import extract_sequence_features
 from .tagging import get_tags_from_entities, get_entities_from_tags
+from .feature_binner import FeatureBinner
 
 
 logger = logging.getLogger(__name__)
@@ -71,6 +72,9 @@ class Tagger(object):
 
 class ConditionalRandomFields(Tagger):
     """A Conditional Random Fields model."""
+    def __init__(self, config):
+        super().__init__(config)
+        self._feat_binner = self._get_feature_binner()
 
     def fit(self, examples, labels, resources=None):
         self._resources = resources
@@ -79,7 +83,7 @@ class ConditionalRandomFields(Tagger):
         for idx, label in enumerate(labels):
             all_tags.append(get_tags_from_entities(examples[idx], label, self._tag_scheme))
 
-        X = self._get_features(examples)
+        X = self._get_features(examples, fit=True)
         self._clf = self._fit(X, all_tags, self.config.params)
         self._current_params = self.config.params
         return self
@@ -95,7 +99,7 @@ class ConditionalRandomFields(Tagger):
         """Returns the python class of the actual underlying model"""
         return CRF
 
-    def _get_features(self, examples):
+    def _get_features(self, examples, fit=False):
         """Transforms a list of examples into a feature matrix.
 
         Args:
@@ -106,7 +110,7 @@ class ConditionalRandomFields(Tagger):
         feats = []
         for idx, example in enumerate(examples):
             feats.append(self._extract_features(example))
-        X = self._preprocess_data(feats)
+        X = self._preprocess_data(feats, fit)
         return X
 
     def _extract_features(self, example):
@@ -120,7 +124,7 @@ class ConditionalRandomFields(Tagger):
         return extract_sequence_features(example, self.config.example_type,
                                          self.config.features, self._resources)
 
-    def _preprocess_data(self, X):
+    def _preprocess_data(self, X, fit=False):
         """Converts data into formats of CRF suite.
 
         Args:
@@ -128,8 +132,11 @@ class ConditionalRandomFields(Tagger):
         Returns:
             (list of list of str): features in CRF suite format
         """
+        if fit:
+            self._feat_binner.fit(X)
+
         new_X = []
-        for feat_seq in X:
+        for feat_seq in self._feat_binner.transform(X):
             feat_list = []
             for feature in feat_seq:
                 temp_list = []
@@ -149,3 +156,6 @@ class ConditionalRandomFields(Tagger):
         """
         model_class = self._get_model_constructor()
         return model_class(**params).fit(X, y)
+
+    def _get_feature_binner(self):
+        return FeatureBinner()
