@@ -391,9 +391,9 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             print("Not printing confusion matrix since it is too large. The full matrix is still"
                   " included in the dictionary returned from print_stats().")
             return
-        labels = range(len(text_labels)-1)
+        labels = range(len(text_labels))
         title_format = "{:>15}" * (len(labels)+1)
-        stat_row_format = "{:>15}" + "{:>15}" * (len(labels))
+        stat_row_format = "{:>15}" * (len(labels)+1)
         table_titles = [self._truncate_label(text_labels[label], 10) for label in labels]
         print("Confusion Matrix: \n")
         print(title_format.format("", *table_titles))
