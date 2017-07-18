@@ -178,7 +178,7 @@ class QuestionAnswerer(object):
                         doc = json.loads(line)
                         yield transform(doc)
 
-        load_index(app_name, index_name, data_file, _doc_generator, DEFAULT_ES_QA_MAPPING, DOC_TYPE,
+        load_index(app_name, index_name, _doc_generator(data_file), DEFAULT_ES_QA_MAPPING, DOC_TYPE,
                    es_host, es_client, connect_timeout=connect_timeout)
 
 

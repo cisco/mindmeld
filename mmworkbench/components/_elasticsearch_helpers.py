@@ -89,7 +89,7 @@ def delete_index(app_name, index_name, es_host=None, es_client=None, connect_tim
         raise KnowledgeBaseConnectionError()
 
 
-def load_index(app_name, index_name, data_file, doc_generator, mapping, doc_type, es_host=None,
+def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
                es_client=None, connect_timeout=2):
     """Loads documents from data into the specified index. If an index with the specified name
     doesn't exist, a new index with that name will be created.
@@ -97,9 +97,8 @@ def load_index(app_name, index_name, data_file, doc_generator, mapping, doc_type
     Args:
         app_name (str): The name of the app
         index_name (str): The name of the new index to be created
-        data_file (str): The path to the data file containing the documents to be imported
-        doc_generator (func): A generator which processes the loaded documents and yields them in
-                              the correct format to insert into Elasticsearch
+        docs (generator): A generator which iterates documents loaded from disk to be
+                          imported into the index in the correct format
         mapping (str): The Elasticsearch index mapping to use
         doc_type (str): The document type
         es_host (str): The Elasticsearch host server
@@ -109,7 +108,6 @@ def load_index(app_name, index_name, data_file, doc_generator, mapping, doc_type
     """
     scoped_index_name = get_scoped_index_name(app_name, index_name)
     es_client = es_client or create_es_client(es_host)
-
     try:
         # Confirm ES connection with a shorter timeout
         es_client.cluster.health(request_timeout=connect_timeout)
@@ -121,7 +119,7 @@ def load_index(app_name, index_name, data_file, doc_generator, mapping, doc_type
             create_index(app_name, index_name, mapping, es_host=es_host, es_client=es_client)
 
         count = 0
-        for okay, result in streaming_bulk(es_client, doc_generator(data_file),
+        for okay, result in streaming_bulk(es_client, docs,
                                            index=scoped_index_name, doc_type=doc_type,
                                            chunk_size=50):
 

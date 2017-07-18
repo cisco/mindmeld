@@ -81,7 +81,7 @@ class EntityResolver(object):
 
                 yield base
 
-        load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE,
+        load_index(app_name, index_name, _doc_generator(data), DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE,
                    es_host, es_client)
 
     def fit(self, clean=False):
