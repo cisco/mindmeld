@@ -9,11 +9,11 @@ In its most basic form, a knowledge base is simply a repository of objects of sp
 
 Do we need a Knowledge Base?
 ----------------------------
-The first question to answer before we start to build the application is do we need a knowledge base or not? Knowledge base is critical and necessary component for application with large or medium vocabulary content and is usually the differentiating factor for the best conversational application. For example, video discovery application typically need to find the movie or TV shows from a huge catalog containing hundred of thousands or even millions of records and the knowledge base provides information about important entities to fulfill users' requests. On the other hand, the applications with small vocabulary such as home assistant for smart home automation genearally don't require ranking and disambiguating entities and may not need a knowledge base. 
+The first question to answer before we start to build the application is - do we need a knowledge base or not? Knowledge base is critical and necessary component for application with large or medium vocabulary content and is usually the differentiating factor for the best conversational application. For example, video discovery application typically need to find the movie or TV shows from a huge catalog containing hundred of thousands or even millions of records and the knowledge base provides information about important entities to fulfill users' requests. On the other hand, the applications with small vocabulary such as home assistant for smart home automation genearally don't require ranking and disambiguating entities and may not need a knowledge base. 
 
 Question Answering in Conversational Applications
 -------------------------------------------------
-The idea of knowledge-based question answering is mapping natural language queries to a query over structured database. The Workbench Question Answerer is specifically designed for custom knowledge bases involving large content catalogs, for production-grade applications. Catalogs containing even upto hundreds of millions of unique, domain-specific entity objects can easily be handled by Workbench in production. Typically, Food delivery service processes restaurant menus range in the tens of thousands entities and specific product retail catalogs go into the millions, while media entertainment libraries scale into the tens or hundreds of millions of unique entities. Workbench's Knowledge Base and Question Answering systems have been successfully applied to all of the above use cases. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below.
+The idea of knowledge-based question answering is mapping natural language queries to a query over structured database. The Workbench Question Answerer is specifically designed for custom knowledge bases involving large content catalogs, for production-grade applications. Catalogs containing even up to hundreds of millions of unique, domain-specific entity objects can easily be handled by Workbench in production. Typically, Food delivery service processes restaurant menus range in the tens of thousands entities and specific product retail catalogs go into the millions, while media entertainment libraries scale into the tens or hundreds of millions of unique entities. Workbench's Knowledge Base and Question Answering systems have been successfully applied to all of the above use cases. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below.
 
 1. Answer Questions
 ````````````````
@@ -48,7 +48,7 @@ Prepare Data for Knowledge Base
 -------------------------------
 The Workbench Question Answerer makes it starightforward to build custom knowledge base using application content data. The content data can be restaurant menus, retailing product catalogs or any custom data that users would like to interact with through conversational interfaces. They are often stored in large scale databases with application specific data models. The Question Answerer can build knowledge base using data dumps from databases or output of data pipelines which handles more complex data transformations if necessary.  
 
-The Question Answerer takes in data files containing knowledge base objects which is the basic unit of knowledge base index. Each data file contains objects of a specified type. Each object has an ``id`` field as the unique identifier, an optional ``location`` field for location information if available and a list of arbitrary data fields of different types that contain information about the object or about the relationship with other object types. The Question Answerer creates optimized indexes for objects to efficiently and accurately retrieve most relevant information. It processes all data fields to determine the data field types and index them accordingly.  
+The Question Answerer takes in data files containing knowledge base objects which is the basic unit of information in knowledge base index. Each data file contains objects of a specified type. Each object has an ``id`` field as the unique identifier, an optional ``location`` field for location information if available and a list of arbitrary data fields of different types that contain information about the object or about the relationship with other object types. The Question Answerer creates optimized indexes for objects to efficiently and accurately retrieve most relevant information. It processes all data fields to determine the data field types and index them accordingly.  
 
 The Question Answerer supports the following data types.
 
@@ -60,7 +60,7 @@ The Question Answerer supports the following data types.
 **location**         location value in one of the supported formats described in the table below.
 ==================== ===
 
-.. note:: Note that the location information of an knowledge base object needs to be specified using ``location`` field and it is currently not supported to specify additional location fields or use custom field name for location.
+.. note:: Note that the location information of a knowledge base object needs to be specified using ``location`` field and it is currently not supported to specify additional location fields or use custom field name for location.
 
 For date and location data types the following value formats are supported.
 
@@ -81,9 +81,9 @@ For date and location data types the following value formats are supported.
                      * geo-point as an array, e.g. [37.77, 122.41]  
 ==================== ===
 
-The Question Answerer supports any data model that applications choose to use. Applications may prefer using certain data models over the other for their own reasons. For example, in certain food ordering applications the cuisine types can have richer information and be modeled as an object with a list of attributes or it can simply be a string for cuisine type name and be modeled as an attribute of dish objects. The mapping between NLP entity type and knowledge base objects is often application specific and the knowledge base searches will need to be formulated accordingly.
+The Question Answerer supports any data model that applications choose to use. Applications may prefer using certain data models over the other for various reasons. For example, in certain food ordering applications the ``cuisine`` types can have richer information and be modeled as an object with a list of attributes or it can simply be a string for cuisine type name and be modeled as an attribute of dish objects. The mapping between NLP entity type and knowledge base objects is often application specific and the knowledge base searches will need to be formulated accordingly.
 
-For example, a food ordering application may have ``restaurant`` and ``menu_item`` objects, while a video discovery application may have ``cast`` and ``title`` objects. The ``menu_item`` object in food ordering application may have the following fields.
+For example, a food ordering application may have ``restaurant`` and ``menu_item`` objects, while a video discovery application may have ``cast`` and ``title`` objects. The ``menu_item`` object in food ordering application may have the following fields:
 
 +---------------+---------------+------------------------------------+
 | Field         | Type          | Description                        |
@@ -103,7 +103,7 @@ For example, a food ordering application may have ``restaurant`` and ``menu_item
 | restaurant_id | text          | ID of the restaurant.              |
 +---------------+---------------+------------------------------------+
 
-And the JSON data file for the ``menu_item`` object may look like the following.
+And the JSON data file for the ``menu_item`` object may look like the following:
 
 .. code-block:: javascript
 
@@ -111,19 +111,19 @@ And the JSON data file for the ``menu_item`` object may look like the following.
     "category": "Makimono-Sushi Rolls (6 Pcs)",
     "description": "Makimono-Sushi Rolls (6 Pcs)\nDeep-fried shrimp, avocado, cucumber",
     "price": 6.5,
-	"restaurant_id": "B01N97KQNJ",
-	"img_url": null,
-	"id": "B01N0KXELH",
-	"name": "Shrimp Tempura Roll"
+    "restaurant_id": "B01N97KQNJ",
+    "img_url": null,
+    "id": "B01N0KXELH",
+    "name": "Shrimp Tempura Roll"
   },
   {
     "category": "Special Rolls",
-	"description": "California roll topped w/ cooked salmon, mayo and masago",
-	"price": 9.95,
-	"restaurant_id": "B01N97KQNJ",
-	"img_url": null,
-	"id": "B01MYTS7W4",
-	"name": "Pink Salmon Roll"
+    "description": "California roll topped w/ cooked salmon, mayo and masago",
+    "price": 9.95,
+    "restaurant_id": "B01N97KQNJ",
+    "img_url": null,
+    "id": "B01MYTS7W4",
+    "name": "Pink Salmon Roll"
   }
   ...
 
@@ -133,7 +133,7 @@ Import Data into Knowledge Base
 -------------------------------
 The Question Answerer provides APIs to load data into knowledge base. The :meth:`load_kb()` API loads data from JSON-formatted data file to create an index for the specified objects in the knowledge base. The index will be created if it does not exist, otherwise the objects will be imported into existing index.
 
-In the following example :meth:`load_kb()` is used to load data file from path ``my_app/data/restaurants.json`` and create an index called ``restaurants`` for all restaurant objects specified in the data file. 
+In the following example :meth:`load_kb()` is used to load data file from path ``my_app/data/restaurants.json`` and create an index called ``restaurants`` for all restaurant objects specified in the data file: 
 
 .. code:: python
 
@@ -155,36 +155,51 @@ To check that your knowledge base was created successfully, use the Question Ans
   >>> restaurants[0]
   [
     {
-	  'categories': ['Beverages', 'Pizzas', 'Sides', 'Popular Dishes'],
-	  'cuisine_types': ['Pizza'],
-	  'id': 'B01CT54GYE',
-	  'image_url': 'https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png',
-	  'menus': [{'id': '127c097e-2d9d-4880-99ac-f1688909af07',
-	    'option_groups': [{'id': 'ToppingsGF',
-		  'max_selected': 9,
-		  'min_selected': 0,
-		  'name': 'Add Some Extra Toppings',
-		  'options': [{'description': None,
-		    'id': 'B01D8TDFV0',
-		    'name': 'Goat Cheese',
-		    'price': 2.0},
-		   {'description': None,
-		    'id': 'B01D8TCH3M',
-		    'name': 'Olives',
-		    'price': 1.0},
-		   ...
-	  'name': 'Firetrail Pizza',
-	  'num_reviews': 13,
-	  'price_range': 2.0,
-	  'rating': 4.1
-	},
-  	...
+      'categories': ['Beverages', 'Pizzas', 'Sides', 'Popular Dishes'],
+      'cuisine_types': ['Pizza'],
+      'id': 'B01CT54GYE',
+      'image_url': 'https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png',
+      'menus': [
+        {
+          'id': '127c097e-2d9d-4880-99ac-f1688909af07',
+          'option_groups': [
+            {
+              'id': 'ToppingsGF',
+              'max_selected': 9,
+              'min_selected': 0,
+              'name': 'Add Some Extra Toppings',
+              'options': [
+                {
+                  'description': None,
+                  'id': 'B01D8TDFV0',
+                  'name': 'Goat Cheese',
+                  'price': 2.0
+                },
+                {
+                  'description': None,
+                  'id': 'B01D8TCH3M',
+                  'name': 'Olives',
+                  'price': 1.0
+                },
+                ...
+              ]
+            }
+            ...
+          ]
+        }
+      ],
+      'name': 'Firetrail Pizza',
+      'num_reviews': 13,
+      'price_range': 2.0,
+      'rating': 4.1
+    },
+    ...
   ]
 
 Knowledge Base Search
 ---------------------
 
-Workbench Question Answerer provides easy-to-use flexible APIs to retrieve relevant information from knowledge base.
+The Question Answerer provides easy-to-use flexible APIs to retrieve relevant information from knowledge base.
 
 Basic Search
 ````````````
@@ -247,7 +262,7 @@ It also supports knowledge base searches with a list of text queries. The text q
 
 In the example above we have a query string ``fish and chips`` to search against knowledge base field ``name`` and restaurant ID string ``B01DEEGQBK`` against ``restaurant_id`` field. Basic search API finds the best results matching all queries specified.
 
-It's also possible to specify one custom sort criteria with the basic search API. The following parameters are supported to specify custom sort criteria.
+It's also possible to specify custom sort criteria in basic search API. The following parameters are supported to specify custom sort criteria.
 
 ==================== ===
 **_sort**            the knowledge base field used for sorting.
@@ -255,7 +270,7 @@ It's also possible to specify one custom sort criteria with the basic search API
 **_sort_location**   specify origin location for sorting by distance.
 ==================== ===
 
-In the following example Question Answerer finds ``menu_items`` objects that best match ``fish and chips`` on ``name``, ``B01CGKGQ40`` on ``restaurant_id`` and have cheaper price. Note that the score for ranking is a optimized blend of sort score and text relevance scores.
+In the following example Question Answerer finds ``menu_items`` objects that best match ``fish and chips`` on ``name``, ``B01CGKGQ40`` on ``restaurant_id`` and have cheaper price. Note that the score for ranking is a optimized blend of sort score and text relevance scores:
 
 .. code:: python
 	
@@ -288,7 +303,7 @@ In the following example Question Answerer finds ``menu_items`` objects that bes
 	  'size_prices': []}]
 	  ...
 
-To define sorting by distance for finding best matches with user's current location taken into account we specify the ``_sort_type`` parameter to be ``distance`` and specify origin location via ``_sort_location`` parameter. In the following example we try to find the closest restaurant from the center of San Francisco.
+To define sorting by distance based on certain origin location we can specify the ``_sort_type`` parameter to be ``distance`` and specify origin location in ``_sort_location`` parameter. In the following example we try to find the closest restaurant from the center of San Francisco:
 
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
@@ -342,7 +357,7 @@ Query
 
 :meth:`query()` API can be used to add text queries to the knowledge base search. For each query a knowledge base field and query string are specified for text relevance match. Workbench Question Answerer ranks results using several ranking factors on textual information including exact matches, phrase matches and partial matches to find best matching results. Note that Question Answerer expects the queries to be specified on knowledge base text fields.
 
-In the following example Question Answerer returns best matching dishes with the name ``fish and chips``. We specify the query string ``fish and chips`` on the knowledge base field ``name`` in ``menu_items`` index which contains all available dishes. The top two results have the name exactly as ``fish and chips`` from different restaurants.
+In the following example Question Answerer returns best matching dishes with the name ``fish and chips``. We specify the query string ``fish and chips`` on the knowledge base field ``name`` in ``menu_items`` index which contains all available dishes. The top two results have the name exactly as ``fish and chips`` from different restaurants:
 
 .. code:: python
 
@@ -380,7 +395,7 @@ In the following example Question Answerer returns best matching dishes with the
 Filter
 ''''''
 
-:meth:`filter()` API can be used to add filters to the knowledge base search. There are two types of filters supported: **text filter** and **range filter**. For text filter a knowledge base text field name and the filtering text string are specified. The text string is normalized and the entire text string is used to filter the results like SQL predicates in relational databases. For example, in food ordering applications it's common that users would want to find dishes of a particular cuisine type or from a specific restaurant they had in mind. In the following example we try to find the best matching ``fish and chips`` dishes within restaurant with ID ``B01DEEGQBK``.
+:meth:`filter()` API can be used to add filters to the knowledge base search. There are two types of filters supported: **text filter** and **range filter**. For text filter a knowledge base text field name and the filtering text string are specified. The text string is normalized and the entire text string is used to filter the results like SQL predicates in relational databases. For example, in food ordering applications it's common that users would want to find dishes of a particular cuisine type or from a specific restaurant they had in mind. In the following example we try to find the best matching ``fish and chips`` dishes within restaurant with ID ``B01DEEGQBK``:
 
 .. code:: python
 
@@ -413,7 +428,7 @@ To define a filter on ranges we specify a knowledge base field and one or more r
 **lte**  less than or equal to
 ======== ===
 
-In the example below we filter on price range to find the dishes priced below 5 dollars.
+In the example below we filter on price range to find the dishes priced below 5 dollars:
 
 .. code:: python
 
@@ -456,7 +471,7 @@ Sort
 
 :meth:`sort()` API can be used to add one or more custom sort criteria to a knowledge base search. Custom sort can be used with number, date or location knowledge base fields. It takes in three parameters: ``field``, ``sort_type`` and ``location``. The ``field`` parameter specifies the knowledge base field for sort, the ``sort_type`` parameter can be either ``asc`` or ``desc`` to indicate sort order for number or date fields and ``distance`` to indicate sorting by distance using location field, and the ``location`` field parameter specifies the origin location when sorting by distance. 
 
-The custom sort can be applied to any number or date fields desirable and the score for ranking will be a optimized blend of sort score with other scoring factors including text relevance scores when available. In the following example Question Answerer finds the best ``menu_item`` objects matching text query ``fish and chips`` with cheaper price by combining the text relevance score and sort score on ``price`` field. 
+The custom sort can be applied to any number or date fields desirable and the score for ranking will be a optimized blend of sort score with other scoring factors including text relevance scores when available. In the following example Question Answerer finds the best ``menu_item`` objects matching text query ``fish and chips`` with cheaper price by combining the text relevance score and sort score on ``price`` field:
 
 .. code:: python
 
@@ -490,7 +505,7 @@ The custom sort can be applied to any number or date fields desirable and the sc
 	  'size_prices': []},
 	  ...
 
-It's also fairly common to use proximity as sorting factor when using conversational applications on the go. To define sorting by distance ``location`` needs to be specified as sort field with ``distance`` for sort_type parameter and the origin location latitude and longitude for location parameter. In the example below Question Answerer provides a list of best restaurant options that match ``firetrail`` on restaurant name and close to center of San Francisco.  
+It's also fairly common to use proximity as sorting factor when using conversational applications on the go. To define sorting by distance ``location`` needs to be specified as sort field with ``distance`` for sort_type parameter and the origin location latitude and longitude for location parameter. In the example below Question Answerer provides a list of best restaurant options that match ``firetrail`` on restaurant name and close to center of San Francisco:
 
 .. code:: python
 
