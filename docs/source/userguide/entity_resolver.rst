@@ -95,7 +95,11 @@ There are two options for entity resolution:
 1. Use an advanced text similarity model (strongly recommended, requires Elasticsearch)
 2. Use a simple exact match model (no requirements)
 
-Elasticsearch is a full-text search and analytics engine that the Entity Resolver leverages for information retrieval. For more details on setting up Elasticsearch consult the :doc:`Getting Started guide <getting_started>`. **If Elasticsearch is set up, Workbench's advanced information retrieval based entity resolver is used by default, there is nothing you have to do.**
+Elasticsearch is a full-text search and analytics engine that the Entity Resolver leverages for information retrieval. For more details on setting up Elasticsearch consult the :doc:`Getting Started guide <getting_started>`.
+
+.. note::
+
+   If Elasticsearch is set up, Workbench's advanced information retrieval based entity resolver is used by default, there is nothing you have to do.
 
 If you don't want to use Elasticsearch, Workbench provides a simple baseline version of Entity Resolution which only resolves to an object if the text is an exact match on the canonical name or one of its synonyms. To use this version, add the following to your app config (``config.py``) located in the top level of your app folder:
 
