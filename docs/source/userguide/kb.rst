@@ -204,7 +204,7 @@ The Question Answerer provides easy-to-use flexible APIs to retrieve relevant in
 Basic Search
 ````````````
 
-The Question Answerer provides basic search API - :meth:`get()` method for simple knowledge base searches. It has a simple and intuitive interface and can be used in a similar way as in common web search interfaces. It takes in a list of (knowledge base field, text query) pairs to find best matches. The knowledge base fields to be used depend on the mapping between NLP entity types and corresponding knowledge base objects. For example, in a food ordering application ``cuisine`` entity type can be mapped to a knowledge base object or an attribute of a knowledge base object. The mapping is often application specific and is dependent on the data model of the application. 
+The Question Answerer provides basic search API - :meth:`get()` method for simple knowledge base searches. It has a simple and intuitive interface and can be used in a similar way as in common Web search interfaces. It takes in a list of (knowledge base field, text query) pairs to find best matches. The knowledge base fields to be used depend on the mapping between NLP entity types and corresponding knowledge base objects. For example, in a food ordering application ``cuisine`` entity type can be mapped to a knowledge base object or an attribute of a knowledge base object. The mapping is often application specific and is dependent on the data model of the application. 
 
 The basic search API can be used to retrieve a particular knowledge base object using ID when the exact ID of the object is already identified.   
 
@@ -227,7 +227,7 @@ The basic search API can be used to retrieve a particular knowledge base object 
 		  'size_prices': [],
 		  'syn_whitelist': [{'name': 'special fish'}]}]
 
-It also supports knowledge base searches with a list of text queries. The text query strings are specified like keywords accompanied with corresponding knowledge base field. 
+It also supports knowledge base searches with a list of text queries. The text query strings are specified like keywords accompanied with corresponding knowledge base field and the best results matching all queries specified are returned. In the following example we try to find the dishes that have name matching ``fish and chips`` and the restaurant ID matching ``B01DEEGQBK``:
 
 .. code:: python
 	
@@ -258,9 +258,7 @@ It also supports knowledge base searches with a list of text queries. The text q
 	  'restaurant_id': 'B01DEEGQBK',
 	  'size_group': None,
 	  'size_prices': []}]
-	  ...
-
-In the example above we have a query string ``fish and chips`` to search against knowledge base field ``name`` and restaurant ID string ``B01DEEGQBK`` against ``restaurant_id`` field. Basic search API finds the best results matching all queries specified.
+	  ... 
 
 It's also possible to specify custom sort criteria in basic search API. The following parameters are supported to specify custom sort criteria.
 
@@ -310,31 +308,46 @@ To define sorting by distance based on certain origin location we can specify th
 	>>> qa.get(index='restaurants', _sort='location', _sort_type='distance', _sort_location='37.77,122.41')
 	  [
 	    {
-		  'categories': ['Beverages', 'Pizzas', 'Sides', 'Popular Dishes'],
-		  'cuisine_types': ['Pizza'],
-		  'id': 'B01CT54GYE',
-		  'image_url': 'https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png',
-		  'menus': [{'id': '127c097e-2d9d-4880-99ac-f1688909af07',
-		    'option_groups': [{'id': 'ToppingsGF',
-			  'max_selected': 9,
-			  'min_selected': 0,
-			  'name': 'Add Some Extra Toppings',
-			  'options': [{'description': None,
-			    'id': 'B01D8TDFV0',
-			    'name': 'Goat Cheese',
-			    'price': 2.0},
-			   {'description': None,
-			    'id': 'B01D8TCH3M',
-			    'name': 'Olives',
-			    'price': 1.0},
-			   ...
-		  'name': 'Firetrail Pizza',
-		  'num_reviews': 13,
-		  'price_range': 2.0,
-		  'rating': 4.1,
-		  'location': [37.77, 122.39]
-		},
-	  	...
+	      'categories': ['Beverages', 'Pizzas', 'Sides', 'Popular Dishes'],
+	      'cuisine_types': ['Pizza'],
+	      'id': 'B01CT54GYE',
+	      'image_url': 'https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png',
+	      'menus': [
+	        {
+	          'id': '127c097e-2d9d-4880-99ac-f1688909af07',
+	          'option_groups': [
+	            {
+	              'id': 'ToppingsGF',
+	              'max_selected': 9,
+	              'min_selected': 0,
+	              'name': 'Add Some Extra Toppings',
+	              'options': [
+	                {
+	                  'description': None,
+	                  'id': 'B01D8TDFV0',
+	                  'name': 'Goat Cheese',
+	                  'price': 2.0
+	                },
+	                {
+	                  'description': None,
+	                  'id': 'B01D8TCH3M',
+	                  'name': 'Olives',
+	                  'price': 1.0
+	                },
+	                ...
+	              ]
+	            }
+	            ...
+	          ]
+	        }
+	      ],
+	      'name': 'Firetrail Pizza',
+	      'num_reviews': 13,
+	      'price_range': 2.0,
+	      'rating': 4.1,
+	      'location': [37.77, 122.39]
+	    },
+	    ...
 	  ]
 
 
