@@ -430,10 +430,45 @@ Our video discovery application does not use entity groups. This means we do not
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<< TODO >>
+The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top ten entries in our ``videos`` index and present them as suggestions to the user. For that, we sort the videos by popularity when using the :doc:`Question Answerer <../userguide/kb>`:
+
+.. code:: python
+	results = app.question_answerer.get(index=KB_INDEX_NAME,
+                                            _sort='popularity', _sort_type='desc')
+
+In general the ``browse`` handler retrieves documents from the knowledge base in different ways, depending on the entities found in the user's queries.
+
+Look at the ``browse`` implementation in ``app.py`` to better understand the different ways you can leverage the knowledge base and Question Answerer to provide intelligent responses to the user. See the :doc:`User Guide <../userguide/kb>` for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.
 
 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<< TODO >>
+Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the :class:`Conversation` class in Workbench to perform an end-to-end test of your conversational app.
+
+For instance:
+
+.. code:: python
+
+   >>> from mmworkbench.components.dialogue import Conversation
+   >>> conv = Conversation(nlp=nlp, app_path='video_discovery')
+   >>> conv.say("Show me movies with Tom Hanks")
+   ['Done. Here are some movies with Tom Hanks:', "Unsupported response: {'videos': [{'release_year': 1994, 'type': 'movie', 'title': 'Forrest Gump'}, {'release_year': 1995, 'type': 'movie', 'title': 'Toy Story'}, {'release_year': 2016, 'type': 'movie', 'title': 'Inferno'}, {'release_year': 2006, 'type': 'movie', 'title': 'Cars'}, {'release_year': 2010, 'type': 'movie', 'title': 'Toy Story 3'}, {'release_year': 1999, 'type': 'movie', 'title': 'Toy Story 2'}, {'release_year': 2016, 'type': 'movie', 'title': 'Sully'}, {'release_year': 1998, 'type': 'movie', 'title': 'Saving Private Ryan'}, {'release_year': 2002, 'type': 'movie', 'title': 'Catch Me If You Can'}, {'release_year': 1999, 'type': 'movie', 'title': 'The Green Mile'}]}"]
+
+The :meth:`say()` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested movies from a particular actor, in a single query. The app responded, as expected, with an initial response acknowledging the filters used and a list of videos.
+
+You can also try out multi-turn dialogues:
+
+.. code:: python
+
+	>>> conv.say('Hi there!')
+	['Hey.', 'Tell me what you would like to watch today.', "Unsupported response: {'videos': [{'release_year': 2017, 'type': 'movie', 'title': 'Wonder Woman'}, {'release_year': 2017, 'type': 'movie', 'title': 'Beauty and the Beast'}, {'release_year': 2017, 'type': 'movie', 'title': 'Transformers: The Last Knight'}, {'release_year': 2017, 'type': 'movie', 'title': 'Logan'}, {'release_year': 2017, 'type': 'movie', 'title': 'The Mummy'}, {'release_year': 2017, 'type': 'movie', 'title': 'Kong: Skull Island'}, {'release_year': 2005, 'type': 'tv-show', 'title': 'Doctor Who'}, {'release_year': 2011, 'type': 'tv-show', 'title': 'Game of Thrones'}, {'release_year': 2010, 'type': 'tv-show', 'title': 'The Walking Dead'}, {'release_year': 2017, 'type': 'movie', 'title': 'Pirates of the Caribbean: Dead Men Tell No Tales'}]}", "Suggestions: 'Most popular', 'Most recent', 'Movies', 'TV Shows', 'Action', 'Dramas', 'Sci-Fi'"]
+	>>> conv.say('Show me Tom Hanks movies')
+	['Done. Here are some movies starring Tom Hanks:', "Unsupported response: {'videos': [{'release_year': 1994, 'type': 'movie', 'title': 'Forrest Gump'}, {'release_year': 1995, 'type': 'movie', 'title': 'Toy Story'}, {'release_year': 2016, 'type': 'movie', 'title': 'Inferno'}, {'release_year': 2006, 'type': 'movie', 'title': 'Cars'}, {'release_year': 2010, 'type': 'movie', 'title': 'Toy Story 3'}, {'release_year': 1999, 'type': 'movie', 'title': 'Toy Story 2'}, {'release_year': 2016, 'type': 'movie', 'title': 'Sully'}, {'release_year': 1998, 'type': 'movie', 'title': 'Saving Private Ryan'}, {'release_year': 2002, 'type': 'movie', 'title': 'Catch Me If You Can'}, {'release_year': 1999, 'type': 'movie', 'title': 'The Green Mile'}]}"]
+	>>> conv.say('romantic')
+	['Done. Here are some romance movies with Tom Hanks:', "Unsupported response: {'videos': [{'release_year': 1994, 'type': 'movie', 'title': 'Forrest Gump'}, {'release_year': 1988, 'type': 'movie', 'title': 'Big'}, {'release_year': 2011, 'type': 'movie', 'title': 'Larry Crowne'}, {'release_year': 1990, 'type': 'movie', 'title': 'Joe Versus the Volcano'}, {'release_year': 1984, 'type': 'movie', 'title': 'Splash'}, {'release_year': 1993, 'type': 'movie', 'title': 'Sleepless in Seattle'}, {'release_year': 1986, 'type': 'movie', 'title': 'The Money Pit'}, {'release_year': 2019, 'type': 'movie', 'title': 'Toy Story 4'}, {'release_year': 1998, 'type': 'movie', 'title': "You've Got Mail"}, {'release_year': 1986, 'type': 'movie', 'title': 'Nothing in Common'}]}"
+	>>> conv.say('from 2011')
+	['Perfect. Here are some romance movies with Tom Hanks from 2011:', "Unsupported response: {'videos': [{'release_year': 2011, 'type': 'movie', 'title': 'Larry Crowne'}]}"]]
+
+
+Refer to the User Guide for tips and best practices on testing your app before launch. Once you're satisfied with the performance of your app, you can deploy it to production as described in the :doc:`deployment <../userguide/deployment>` section of the User Guide.
