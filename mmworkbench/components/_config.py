@@ -292,10 +292,7 @@ DEFAULT_ROLE_MODEL_CONFIG = {
                 2: [0, 1]
             }
         },
-        'in-gaz': {},
-        'other-entities': {},
-        'operator-entities': {},
-        'age-entities': {}
+        'other-entities': {}
     }
 }
 

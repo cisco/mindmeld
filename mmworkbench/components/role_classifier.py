@@ -11,6 +11,7 @@ import os
 from sklearn.externals import joblib
 
 from ..models import create_model, ENTITY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
+from ..core import Query
 
 from .classifier import Classifier, ClassifierConfig
 from ._config import get_classifier_config
@@ -154,6 +155,8 @@ class RoleClassifier(Classifier):
         if not self._model:
             logger.error('You must fit or load the model before running predict')
             return
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
         self._model.register_resources(gazetteers=gazetteers)
         return self._model.predict([(query, entities, entity_index)])[0]
