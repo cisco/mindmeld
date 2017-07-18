@@ -189,7 +189,7 @@ For example, here's the knowledge base entry in the ``videos`` index for "Minion
         'popularity': 2.295467321653707
     }
 
-Here's a knowledge base entry also in the ``videos`` index for "The Big Bang Theory," a comedy tv show from 2007:
+Here's a knowledge base entry also in the ``videos`` index for "The Big Bang Theory," a comedy TV show from 2007:
 
 .. code:: javascript
 
@@ -291,12 +291,141 @@ To see how the trained NLP pipeline performs on a test query, use the :meth:`pro
 
 .. code:: python
 
-   >>> nlp.process("Show me movies with Brad Pitt")
+   	>>> nlp.process("Show me movies with Brad Pitt")
+	{
+	  "text": "Show me movies with Brad Pitt",
+	  "intent": "browse",
+	  "entities": [
+	    {
+	      "text": "movies",
+	      "value": [
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        },
+	        {
+	          "score": 39.775864,
+	          "top_synonym": "movies",
+	          "cname": "movie"
+	        }
+	      ],
+	      "type": "type",
+	      "span": {
+	        "start": 8,
+	        "end": 13
+	      },
+	      "role": null
+	    },
+	    {
+	      "text": "Brad Pitt",
+	      "value": [],
+	      "type": "cast",
+	      "span": {
+	        "start": 20,
+	        "end": 28
+	      },
+	      "role": null
+	    }
+	  ],
+	  "domain": "video_content"
+	}
+
+
+For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom video discovery data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.
+
+Start by inspecting the baseline configurations that the different classifiers use. The User Guide lists and describes the available configuration options. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.
+
+.. code:: python
+
+	>>> ic = nlp.domains['video_content'].intent_classifier
+	>>> ic.config.model_settings['classifier_type']
+	'logreg'
+	>>> ic.config.features
+	{
+	  "edge-ngrams": {
+	    "lengths": [
+	      1,
+	      2
+	    ]
+	  },
+	  "bag-of-words": {
+	    "lengths": [
+	      1,
+	      2
+	    ]
+	  },
+	  "in-gaz": {},
+	  "gaz-freq": {},
+	  "freq": {
+	    "bins": 5
+	  },
+	  "exact": {
+	    "scaling": 10
+	  }
+	}
+
+You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings by passing the appropriate parameters to the classifier's :meth:`fit()` method. Here are a few examples.
+
+Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
+
+.. code:: python
+
+   >>> features = {
+   ...             'bag-of-words': {'lengths': [1, 2]},
+   ...             'freq': {'bins': 5},
+   ...             'in-gaz': {},
+   ...             'length': {}
+   ...            }
+   >>> ic.fit(features=features)
+   Fitting intent classifier: domain='ordering'
+
+You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various Workbench classifiers.
 
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-<< TODO >>
+Our video discovery application does not use entity groups. This means we do not need to train the Workbench :doc:`Language Parser <../userguide/parser>` for this purpose.
 
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
