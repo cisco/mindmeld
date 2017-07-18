@@ -97,8 +97,8 @@ def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
     Args:
         app_name (str): The name of the app
         index_name (str): The name of the new index to be created
-        docs (generator): A generator which iterates documents loaded from disk to be
-                          imported into the index in the correct format
+        docs (iterable): An iterable which contains a collection of documents in the correct format
+                         which should be imported into the index
         mapping (str): The Elasticsearch index mapping to use
         doc_type (str): The document type
         es_host (str): The Elasticsearch host server
