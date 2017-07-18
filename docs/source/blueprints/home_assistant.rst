@@ -450,7 +450,7 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 98.46%, params: {'fit_intercept': False, 'C': 10, 'class_weight': {0: 0.98518518518518516, 1: 2.3803212851405622, 2: 1.801449275362319, 3: 2.2185185185185183, 4: 0.80487329434697852, 5: 0.41068376068376072, 6: 3.2770114942528741, 7: 1.9928104575163397, 8: 1.1854700854700853, 9: 1.1505747126436781, 10: 1.2435336976320581, 11: 1.5982456140350876, 12: 1.7037940379403793, 13: 1.180952380952381, 14: 2.9564102564102566}}
 
-Change the model for the intent classifier to svm:
+Change the model for the intent classifier to Support Vector Machine (SVM) classifier. SVM classifiers produce good results based on scientific literature:
 
 .. code:: python
    >>> search_grid = {
