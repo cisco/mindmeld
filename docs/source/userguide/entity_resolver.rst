@@ -66,7 +66,7 @@ In the food ordering blueprint where a ``dish`` is an entity type, the ``dish`` 
 
 This file should be saved as ``mapping.json`` in the corresponding entity folder. For example, the ``mapping.json`` file for the ``category`` entity should exist in the following location:
 
-.. image:: /images/food_ordering_directory2.png
+.. image:: /images/food_ordering_directory3.png
     :width: 300px
     :align: center
 
