@@ -19,6 +19,10 @@ Here are some examples of scripted dialogue interactions for conversational flow
     :width: 700px
     :align: center
 
+.. admonition:: Exercise
+
+   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking for something unrelated to movies and TV shows, asking for something with to many filters so there are no results, asking for something that is not in the knowledge base, etc.
+
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -58,6 +62,10 @@ For this app, only the ``browse`` intent requires entity recognition. This inten
    - ``sort`` — How the users want to sort the results: by most recent, most popular, etc...
    - ``title`` — The title of a video in the catalog
    - ``type`` — The type of video the user is looking for: `movie` or `TV show`
+
+.. admonition:: Exercise
+
+   While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., ``get_cast_in_video``, ``get_releaseyear_for_video``, and so on) and entities (e.g., ``writers``, ``budget``, and so on) that make sense for a video discovery use case.
 
 To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice.
 
@@ -158,6 +166,12 @@ This code follows a series of steps to build the final answer to the user: it up
 
 For more information on the ``show_content`` method and the functinos it calls, see the ``app.py`` file in the blueprint folder.
 
+.. admonition:: Exercise
+
+   Extend the ``show_content`` dialogue state handler in ``app.py`` to handle more user flows or handle the existing ones in a smarter way. Here are a few suggestions for improvements:
+
+   << TODO: Add sugestions here >>
+
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
@@ -253,6 +267,12 @@ The labeled data for training our NLP pipeline was created using both in-house d
 << Add table of training data steps? >>
 
 The ``domains`` directory contains the training data for intent classification and entity recognition. The ``entities`` directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.
+
+.. admonition:: Exercise
+
+   - Study the best practices around training data generation and annotation for conversational apps in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide. Following those principles, create additional labeled data for all the intents in this blueprint. Read more about :doc:`NLP model evaluation and error analysis <../userguide/nlp>` in the User Guide. Then apply what you have learned in evaluating your app, using your newly-created labeled data as held-out validation data.
+
+   - Complete the following exercise if you are extending the blueprint to build your own video discovery app. For app-agnostic, generic intents like ``greet``, ``exit``, and ``help``, start by simply reusing the blueprint data to train NLP models for your video discovery app. For ``show_content`` and any other app-specific intents, gather new training data tailored to the relevant entities (title, cast, genre, etc.). Apply the approach you learned in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -422,6 +442,10 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
 
 You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various Workbench classifiers.
 
+.. admonition:: Exercise
+
+   Experiment with different models, features, and hyperparameter selection settings to see how they affect classifier performance. Maintain a held-out validation set to evaluate your trained NLP models and analyze misclassified test instances. Then, use observations from the error analysis to inform your machine learning experimentation. See the :doc:`User Guide <../userguide/nlp>` for examples and discussion.
+
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -440,6 +464,9 @@ In general the ``browse`` handler retrieves documents from the knowledge base in
 
 Look at the ``browse`` implementation in ``app.py`` to better understand the different ways you can leverage the knowledge base and Question Answerer to provide intelligent responses to the user. See the :doc:`User Guide <../userguide/kb>` for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.
 
+.. admonition:: Exercise
+
+   << TODO: Fill this exercise >>
 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -470,5 +497,8 @@ You can also try out multi-turn dialogues:
 	>>> conv.say('from 2011')
 	['Perfect. Here are some romance movies with Tom Hanks from 2011:', "Unsupported response: {'videos': [{'release_year': 2011, 'type': 'movie', 'title': 'Larry Crowne'}]}"]]
 
+.. admonition:: Exercise
+
+   Test the app multiple times with different conversational flows. Keep track of all cases where the response does not make good sense. Then, analyze those cases in detail. You should be able to attribute each error to a specific step in our end-to-end processing (e.g., incorrect intent classification, missed entity recognition, unideal natural language response, and so on). Categorizing your errors in this manner helps you understand the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.
 
 Refer to the User Guide for tips and best practices on testing your app before launch. Once you're satisfied with the performance of your app, you can deploy it to production as described in the :doc:`deployment <../userguide/deployment>` section of the User Guide.
