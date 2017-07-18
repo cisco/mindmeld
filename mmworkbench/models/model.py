@@ -322,44 +322,32 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         confusion_mat = confusion_matrix(y_true=y_true, y_pred=y_pred)
         TP_arr, TN_arr, FP_arr, FN_arr = [], [], [], []
 
-        # binary class case
-        if len(confusion_mat) == 2:
-            TP = confusion_mat[1][1]
+        num_classes = len(confusion_mat)
+        for class_index in range(num_classes):
+            # TP is C_classindex, classindex
+            TP = confusion_mat[class_index][class_index]
             TP_arr.append(TP)
-            TN = confusion_mat[0][0]
+
+            # TN is the sum of Cij where i or j are not class_index
+            mask = np.ones((num_classes, num_classes))
+            mask[:, class_index] = 0
+            mask[class_index, :] = 0
+            TN = np.sum(mask*confusion_mat)
             TN_arr.append(TN)
-            FP = confusion_mat[0][1]
+
+            # FP is the sum of Cij where j is class_index but i is not
+            mask = np.zeros((num_classes, num_classes))
+            mask[:, class_index] = 1
+            mask[class_index, class_index] = 0
+            FP = np.sum(mask*confusion_mat)
             FP_arr.append(FP)
-            FN = confusion_mat[1][0]
+
+            # FN is the sum of Cij where i is class_index but j is not
+            mask = np.zeros((num_classes, num_classes))
+            mask[class_index, :] = 1
+            mask[class_index, class_index] = 0
+            FN = np.sum(mask*confusion_mat)
             FN_arr.append(FN)
-        # multi class case
-        else:
-            num_classes = len(confusion_mat)
-            for class_index in range(num_classes):
-                # TP is C_classindex, classindex
-                TP = confusion_mat[class_index][class_index]
-                TP_arr.append(TP)
-
-                # TN is the sum of Cij where i or j are not class_index
-                mask = np.ones((num_classes, num_classes))
-                mask[:, class_index] = 0
-                mask[class_index, :] = 0
-                TN = np.sum(mask*confusion_mat)
-                TN_arr.append(TN)
-
-                # FP is the sum of Cij where j is class_index but i is not
-                mask = np.zeros((num_classes, num_classes))
-                mask[:, class_index] = 1
-                mask[class_index, class_index] = 0
-                FP = np.sum(mask*confusion_mat)
-                FP_arr.append(FP)
-
-                # FN is the sum of Cij where i is class_index but j is not
-                mask = np.zeros((num_classes, num_classes))
-                mask[class_index, :] = 1
-                mask[class_index, class_index] = 0
-                FN = np.sum(mask*confusion_mat)
-                FN_arr.append(FN)
 
         Counts = namedtuple('Counts', ['TP', 'TN', 'FP', 'FN'])
         return {'confusion_matrix': confusion_mat,
