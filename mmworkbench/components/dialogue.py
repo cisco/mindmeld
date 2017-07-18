@@ -339,6 +339,8 @@ class Conversation(object):
         app = app or _get_app_module(app_path)
         app.lazy_init(nlp)
         self._app_manager = app.app_manager
+        if not self._app_manager.ready:
+            self._app_manager.load()
         self.session = session or {}
         self.history = []
         self.frame = {}
@@ -353,8 +355,6 @@ class Conversation(object):
         Returns:
             list of str: A text representation of the dialogue responses
         """
-        if not self._app_manager.ready:
-            self._app_manager.load()
         response = self._app_manager.parse(text, session=self.session, frame=self.frame,
                                            history=self.history)
         response.pop('history')

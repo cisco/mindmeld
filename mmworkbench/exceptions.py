@@ -62,4 +62,15 @@ class SystemEntityResolutionError(Exception):
 
 class KnowledgeBaseConnectionError(WorkbenchError):
     """An exception representing an issue connecting to a knowledge base"""
-    pass
+    def __init__(self, es_host):
+        self.es_host = es_host
+        self.message = 'Unable to connect to elasticsearch for knowledgebase - please verify your' \
+                       ' connection to hosts {hosts}.'.format(hosts=self.es_host)
+
+
+class EntityResolverConnectionError(WorkbenchError):
+    """An exception representing an issue connecting to elasticsearch for entity resolver"""
+    def __init__(self, es_host):
+        self.es_host = es_host
+        self.message = 'Unable to connect to elasticsearch for entity resolution - verify your' \
+                       ' connection to hosts {hosts}.'.format(hosts=self.es_host)
