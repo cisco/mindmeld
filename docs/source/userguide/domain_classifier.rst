@@ -118,7 +118,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 
   Is always a dictionary with a single key called ``'classifier_type'``. The value of the key specifies the machine learning model to use. Allowed values are 
 
-.. _sklearn_models:
+.. _sklearn_domain_models:
 
   =============== =======================================================
   Classifier Type Description (with list of configurable hyperparameters)
@@ -172,14 +172,14 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   | ``'exact'``           | Returns the entire query text as a feature.                                                                |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
 
-.. _tuning:
+.. _domain_tuning:
 
 3. **Hyperparameter Settings**
 
 ``'params'`` (:class:`dict`)
   |
 
-  Is a dictionary containing the values to be used for different model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, the ``'penalty'`` parameter for logistic regression, the ``'max_depth'`` parameter for decision tree, and so on. The list of allowable hyperparameters depends on the selected model. Refer to the parameter list in :ref:`the model table <sklearn_models>` above.
+  Is a dictionary containing the values to be used for different model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, the ``'penalty'`` parameter for logistic regression, the ``'max_depth'`` parameter for decision tree, and so on. The list of allowable hyperparameters depends on the selected model. Refer to the parameter list in :ref:`the model table <sklearn_domain_models>` above.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -207,7 +207,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   |                       |       'fit_intercept': [True, False]                                                                              |
   |                       |    }                                                                                                              |
   |                       |                                                                                                                   | 
-  |                       | :ref:`The model table <sklearn_models>` above lists the hyperparameters available for each supported model.       |
+  |                       | :ref:`The model table <sklearn_domain_models>` above lists the hyperparameters available for each supported model.|
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
   |                       |                                                                                                                   |
@@ -375,12 +375,12 @@ The :meth:`fit` method now searches over the updated parameter grid and prints t
    Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 99.50%, params: {'C': 100, 'fit_intercept': False, 'penalty': 'l2'}
 
-For a full list of configurable hyperparameters for each model and available cross-validation methods, refer to the above section on defining :ref:`hyperparameter settings <tuning>`.
+For a full list of configurable hyperparameters for each model and available cross-validation methods, refer to the above section on defining :ref:`hyperparameter settings <domain_tuning>`.
 
 
 **Model selection**
 
-Lastly, let's try other :ref:`machine learning models <sklearn_models>` in place of the default logistic regression. The hyperparameter grid needs to updated accordingly to be compatible with the selected model. Here's an example using a :sk_guide:`support vector machine (SVM) <svm>` with the same features as before, and the parameter selection settings updated to search over the :sk_api:`SVM hyperparameters <sklearn.svm.SVC.html#sklearn.svm.SVC>`.
+Lastly, let's try other :ref:`machine learning models <sklearn_domain_models>` in place of the default logistic regression. The hyperparameter grid needs to updated accordingly to be compatible with the selected model. Here's an example using a :sk_guide:`support vector machine (SVM) <svm>` with the same features as before, and the parameter selection settings updated to search over the :sk_api:`SVM hyperparameters <sklearn.svm.SVC.html#sklearn.svm.SVC>`.
 
 .. code-block:: python
 
@@ -429,7 +429,7 @@ A trained domain classifier can be run on a test query using the :meth:`DomainCl
    >>> dc.predict('weather in san francisco?')
    'weather'
 
-The :meth:`predict` method returns the label for the domain with highest predicted probability. This method gets called by the natural language processor's :meth:`process` method at runtime to classify the domain for an incoming query.
+The :meth:`predict` method returns the label for the domain with highest predicted probability. It gets called by the natural language processor's :meth:`process` method at runtime to classify the domain for an incoming query.
 
 When experimenting with different classifier settings or debugging classifier performance, it is often useful to inspect how confident a trained model is at predicting the right label. To view the predicted probability distribution over all the possible domain labels, use the :meth:`DomainClassifier.predict_proba` method.
 
@@ -445,7 +445,7 @@ When experimenting with different classifier settings or debugging classifier pe
 
 The result of :meth:`predict_proba` is a list of tuples ranked from the most likely domain to the least. The first element of each tuple is the domain label and the second element is the associated classification probability. Ideally, you want a classifier that assigns a high probability to the expected (correct) class label for a test query, while having very low prediction probabilities for the incorrect labels.
 
-The :meth:`predict` and :meth:`predict_proba` methods run on one query at a time. See the next section for details on evaluating classifier performance by testing a trained model on a batch of labeled test queries.
+The :meth:`predict` and :meth:`predict_proba` methods run on one query at a time. To instead test a trained model on a batch of labeled test queries and evaluate classifier performance, see the next section.
 
 
 Evaluate classifier performance

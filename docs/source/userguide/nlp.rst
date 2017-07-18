@@ -435,7 +435,7 @@ The chapters on the individual NLP components provide more details on the above 
 Evaluate NLP performance
 ------------------------
 
-The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries that is prepared in :ref:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. The files containing the test queries have names starting with the ``test`` prefix, and are placed alongside the training data files within the different intent subfolders. 
+The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries that is prepared in :doc:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. The files containing the test queries have names starting with the ``test`` prefix, and are placed alongside the training data files within the different intent subfolders. 
 
 .. image:: /images/food_ordering_directory2.png
     :width: 350px
