@@ -199,6 +199,12 @@ class QuestionAnswerer(object):
 class FieldInfo:
     """This class models an information source of a knowledge base field metadata"""
 
+    NUMBER_TYPES = {'long', 'integer', 'short', 'byte', 'double', 'float', 'half_float',
+                    'scaled_float'}
+    TEXT_TYPES = {'text', 'keyword'}
+    DATE_TYPES = {'date'}
+    GEO_TYPES = {'geo_point'}
+
     def __init__(self, name, type):
         self.name = name
         self.type = type
@@ -216,35 +222,22 @@ class FieldInfo:
     def is_number_field(self):
         """Returns True if the knowledge base field is a number field, otherwise returns False"""
 
-        number_types = ['long', 'integer', 'short', 'byte', 'double', 'float', 'half_float',
-                        'scaled_float']
-        if self.type in number_types:
-            return True
-        else:
-            return False
+        return self.type in self.NUMBER_TYPES
 
     def is_date_field(self):
         """Returns True if the knowledge base field is a date field, otherwise returns False"""
-        if self.type == 'date':
-            return True
-        else:
-            return False
+
+        return self.type in self.DATE_TYPES
 
     def is_location_field(self):
         """Returns True if the knowledge base field is a location field, otherwise returns False"""
-        if self.type == 'geo_point':
-            return True
-        else:
-            return False
+
+        return self.type in self.GEO_TYPES
 
     def is_text_field(self):
         """Returns True if the knowledge base field is a text, otherwise returns False"""
-        text_field_types = ['text', 'keyword']
 
-        if self.type in text_field_types:
-            return True
-        else:
-            return False
+        return self.type in self.TEXT_TYPES
 
 
 class Search:
@@ -500,7 +493,6 @@ class Search:
             es_query['query']['function_score']['functions'].append(sort_function)
 
         logger.debug("ES query syntax: {}.".format(es_query))
-        print(es_query)
         return es_query
 
     def execute(self):
@@ -665,6 +657,7 @@ class Search:
 
     class SortClause(Clause):
         """This class models a knowledge base sort clause."""
+        SORT_TYPES = {'asc', 'desc', 'distance'}
 
         def __init__(self, field, field_info=None, sort_type='desc', field_stats=None,
                      location=None):
@@ -718,11 +711,11 @@ class Search:
 
         def validate(self):
             # validate the sort type to be valid.
-            if self.sort_type not in ['asc', 'desc', 'distance']:
+            if self.sort_type not in self.SORT_TYPES:
                 raise ValueError('Invalid value for sort type \'{}\''.format(self.sort_type))
 
             # validate the sort field is number, date or location field
             if not self.field_info.is_number_field() and not self.field_info.is_date_field() and \
                     not self.field_info.is_location_field():
-                raise ValueError('The custom sort criteria is only allowed to be defined for'
-                                 + ' \'number\', \'date\' or \'location\' field.')
+                raise ValueError('Custom sort criteria can only be defined for'
+                                 + ' \'number\', \'date\' or \'location\' fields.')
