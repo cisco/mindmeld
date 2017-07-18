@@ -151,7 +151,7 @@ class QuestionAnswerer(object):
             app_name (str): The name of the app
             index_name (str): The name of the new index to be created
             data_file (str): The path to the data file containing the documents to be imported
-                into the knowledge base index
+                             into the knowledge base index. It could be either json or jsonl file.
             es_host (str): The Elasticsearch host server
             es_client (Elasticsearch): The Elasticsearch client
             connect_timeout (int, optional): The amount of time for a connection to the
@@ -159,12 +159,24 @@ class QuestionAnswerer(object):
         """
 
         def _doc_generator(data_file):
+            def transform(doc):
+                base = {'_id': doc['id']}
+                base.update(doc)
+                return base
+
             with open(data_file) as data_fp:
-                for line in data_fp:
-                    doc = json.loads(line)
-                    base = {'_id': doc['id']}
-                    base.update(doc)
-                    yield base
+                line = data_fp.readline()
+                data_fp.seek(0)
+                if line.strip() == '[':
+                    logging.debug('Loading data from a json file.')
+                    docs = json.load(data_fp)
+                    for doc in docs:
+                        yield transform(doc)
+                else:
+                    logging.debug('Loading data from a jsonl file.')
+                    for line in data_fp:
+                        doc = json.loads(line)
+                        yield transform(doc)
 
         load_index(app_name, index_name, data_file, _doc_generator, DEFAULT_ES_QA_MAPPING, DOC_TYPE,
                    es_host, es_client, connect_timeout=connect_timeout)
