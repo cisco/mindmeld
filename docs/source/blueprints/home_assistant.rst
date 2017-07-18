@@ -183,7 +183,7 @@ For more information on the usage of role, check :doc:`Role <../userguide/role_c
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining one dialogue state for multiple intents. Choosing the right programming pattern for dialogue states requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic. In this section we will explore both options in details.
+Dialogue state logic can get arbitrarily complex. Simple handlers could just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining one dialogue state for multiple intents. In this section we will explore both options in details.
 
 In the home assisstant blueprint, let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents.
 
@@ -231,7 +231,9 @@ Another conversational pattern that would be useful to the reader is the follow-
   App: Sure. Which lights?
   User: In the kitchen
 
-In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent and define the `handle_specify_location` state. Since a number of states (`close/open door`, `lock/unlock door`, `turn on/off lights`, `turn on/off appliance`, `check door/light`) can lead to the `specify location` state, we need to pass in the previous state/action information in the request context.
+In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent and define the `specify_location` state. Since a number of states (`close/open door`, `lock/unlock door`, `turn on/off lights`, `turn on/off appliance`, `check door/light`) can lead to the `specify location` state, we need to pass in the previous state/action information in the request context as `context['frame']['desired_action']`.
+
+We include a code snippet for `specify_location` for your reference.
 
 .. code:: python
 
@@ -392,7 +394,6 @@ To put the training data to use and train a baseline NLP system for your app usi
    Fitting intent classifier: domain='smart_home'
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 98.43%, params: {'fit_intercept': True, 'C': 100, 'class_weight': {0: 0.99365079365079367, 1: 1.5915662650602409, 2: 1.3434782608695652, 3: 1.5222222222222221, 4: 0.91637426900584784, 5: 0.74743589743589745, 6: 1.9758620689655173, 7: 1.4254901960784312, 8: 1.0794871794871794, 9: 1.0645320197044335, 10: 1.1043715846994535, 11: 1.2563909774436088, 12: 1.3016260162601625, 13: 1.0775510204081633, 14: 1.8384615384615384}}
-
 .. tip::
 
   During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
