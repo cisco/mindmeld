@@ -160,3 +160,64 @@ For more information on the ``show_content`` method and the functinos it calls, 
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
+
+<< Ray fills this section >>
+
+6. Training Data
+^^^^^^^^^^^^^^^^
+
+The labeled data for training our NLP pipeline was created using both in-house data generation and crowdsourcing techniques. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for a full description of this highly important, multi-step process.
+
+<< Add table of training data steps? >>
+
+The ``domains`` directory contains the training data for intent classification and entity recognition. The ``entities`` directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.
+
+7. Training the NLP Classifiers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, will train the NLP system using the annotated data.
+
+.. code:: python
+
+   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
+   >>> nlp = NaturalLanguageProcessor(app_path='food_ordering')
+   >>> nlp.build()
+   Fitting intent classifier: domain='ordering'
+   Loading queries from file ordering/build_order/train.txt
+   Loading queries from file ordering/exit/train.txt
+   Loading queries from file ordering/greet/train.txt
+   Loading queries from file ordering/help/train.txt
+   Loading queries from file ordering/place_order/train.txt
+   Loading queries from file ordering/start_over/train.txt
+   Loading queries from file ordering/unsupported/train.txt
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
+   Best accuracy: 98.11%, params: {'C': 100, 'class_weight': {0: 1.7987394957983194, 1: 3.0125475285171097, 2: 0.89798826487845773, 3: 4.4964705882352938, 4: 2.5018518518518515, 5: 1.7559183673469387, 6: 0.46913229018492181}, 'fit_intercept': True}
+   Fitting entity recognizer: domain='ordering', intent='place_order'
+   Fitting entity recognizer: domain='ordering', intent='unsupported'
+   Fitting entity recognizer: domain='ordering', intent='greet'
+   Fitting entity recognizer: domain='ordering', intent='exit'
+   Fitting entity recognizer: domain='ordering', intent='build_order'
+   Selecting hyperparameters using k-fold cross-validation with 5 splits
+   Best accuracy: 92.46%, params: {'C': 1000000, 'penalty': 'l2'}
+   Fitting entity recognizer: domain='ordering', intent='start_over'
+   Fitting entity recognizer: domain='ordering', intent='help'
+
+.. tip::
+
+  During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+
+8. Parser Configuration
+^^^^^^^^^^^^^^^^^^^^^^^
+
+<< TODO >>
+
+9. Using the Question Answerer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+<< TODO >>
+
+
+10. Testing and Deployment
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+<< TODO >>
