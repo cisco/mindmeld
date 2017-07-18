@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 LABEL_SETS = {
     'train': 'train*.txt',
-    'heldout': 'heldout*.txt'
+    'test': 'test*.txt'
 }
 DEFAULT_LABEL_SET = 'train'
 

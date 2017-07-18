@@ -177,7 +177,7 @@ class RoleClassifier(Classifier):
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as test data. If none
-                are provided, the heldout label set will be used.
+                are provided, the test label set will be used.
 
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
@@ -188,7 +188,7 @@ class RoleClassifier(Classifier):
 
         gazetteers = self._resource_loader.get_gazetteers()
         self._model.register_resources(gazetteers=gazetteers)
-        queries, labels = self._get_queries_and_labels(queries, label_set='heldout')
+        queries, labels = self._get_queries_and_labels(queries, label_set='test')
 
         if not queries:
             logger.info('Could not evaluate model. No relevant examples in evaluation set.')
