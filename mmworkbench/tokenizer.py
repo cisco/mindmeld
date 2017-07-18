@@ -307,9 +307,12 @@ class Tokenizer(object):
             elif directions[n_idx][m_idx] == '↓':
                 n_idx -= 1
 
-        # this is naive and probably not robust
-        raw_to_norm_mapping = {v: k for k, v in mapping.items()}
+        # initialize the forward mapping (raw to normalized text)
+        raw_to_norm_mapping = {0: 0}
 
+        # naive approach for generating forward mapping. this is naive and probably not robust.
+        # all leading special characters will get mapped to index position 0 in normalized text.
+        raw_to_norm_mapping.update({v: k for k, v in mapping.items()})
         for i in range(0, m):
             if i not in raw_to_norm_mapping:
                 raw_to_norm_mapping[i] = raw_to_norm_mapping[i-1]
