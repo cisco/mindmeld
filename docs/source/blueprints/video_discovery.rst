@@ -262,31 +262,36 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 .. code:: python
 
    >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
-   >>> nlp = NaturalLanguageProcessor(app_path='food_ordering')
+   >>> nlp = NaturalLanguageProcessor(app_path='video_discovery')
    >>> nlp.build()
-   Fitting intent classifier: domain='ordering'
-   Loading queries from file ordering/build_order/train.txt
-   Loading queries from file ordering/exit/train.txt
-   Loading queries from file ordering/greet/train.txt
-   Loading queries from file ordering/help/train.txt
-   Loading queries from file ordering/place_order/train.txt
-   Loading queries from file ordering/start_over/train.txt
-   Loading queries from file ordering/unsupported/train.txt
-   Selecting hyperparameters using k-fold cross-validation with 10 splits
-   Best accuracy: 98.11%, params: {'C': 100, 'class_weight': {0: 1.7987394957983194, 1: 3.0125475285171097, 2: 0.89798826487845773, 3: 4.4964705882352938, 4: 2.5018518518518515, 5: 1.7559183673469387, 6: 0.46913229018492181}, 'fit_intercept': True}
-   Fitting entity recognizer: domain='ordering', intent='place_order'
-   Fitting entity recognizer: domain='ordering', intent='unsupported'
-   Fitting entity recognizer: domain='ordering', intent='greet'
-   Fitting entity recognizer: domain='ordering', intent='exit'
-   Fitting entity recognizer: domain='ordering', intent='build_order'
-   Selecting hyperparameters using k-fold cross-validation with 5 splits
-   Best accuracy: 92.46%, params: {'C': 1000000, 'penalty': 'l2'}
-   Fitting entity recognizer: domain='ordering', intent='start_over'
-   Fitting entity recognizer: domain='ordering', intent='help'
+	Fitting domain classifier
+	Loading queries from file video_content/start_over/train.txt
+	Loading queries from file video_content/exit/train.txt
+	Loading queries from file video_content/unsupported/train_get_channel_00.txt
+	Loading queries from file video_content/unsupported/train_get_channel_01.txt
+	Loading queries from file video_content/unsupported/train_get_channel_02.txt
+	Loading queries from file video_content/unsupported/train_get_time_00.txt
+	Loading queries from file video_content/unsupported/train_get_time_01.txt
+	Loading queries from file video_content/unsupported/train_get_time_02.txt
+	Loading queries from file video_content/greet/train.txt
+	Loading queries from file video_content/help/train.txt
+	Loading queries from file video_content/browse/train_00.txt
+	Loading queries from file video_content/browse/train_01.txt
+	Loading queries from file video_content/browse/train_02.txt
+	Loading queries from file video_content/browse/train_03.txt
+	Loading queries from file video_content/browse/train_04.txt
+	Loading queries from file video_content/browse/train_05.txt
+	Loading queries from file video_content/browse/train_mturk_00.txt
 
 .. tip::
 
   During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+
+To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
+
+.. code:: python
+
+   >>> nlp.process("Show me movies with Brad Pitt")
 
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
