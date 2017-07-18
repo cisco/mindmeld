@@ -75,12 +75,12 @@ Deep Dive
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-This application provides a conversational interface for home automation systems. It allows users to interact with various appliances and home-related functions using natural language. With this application, users will be able to check the weather, set alarms, set timers, and control the lights, doors, thermostat and different appliances in the house.
+This application provides a conversational interface for home automation systems. It allows users to interact with various appliances and home-related functions using natural language. With this application, users will be able to check the weather, set alarms, set timers, and control the lights, the doors, the thermostat and different appliances in the house.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The conversational user flows for a home assistant app can get complex depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
+The conversational user flows for a home assistant application can get complex depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
 
 .. code:: bash
 
@@ -122,7 +122,7 @@ The conversational user flows for a home assistant app can get complex depending
 
    App: Ok, I have set your alarm for 09:00:00.
 
-In this blueprint, this application provides a conversational interface for users to check weather, set alarms and timers, and control the lights, doors, thermostat and different appliances in the house.
+In this blueprint, the application provides a conversational interface for users to check weather, set alarms and timers, and control the lights, doors, thermostat and different appliances in the house.
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -176,9 +176,9 @@ Home assistant defines and uses the following named entities:
 
 Home assistant uses three system entities: `sys_time` (time), `sys_interval` (interval) and `sys_temperature` (temperature), for example: `set my thermostat to turn on at {6 am|sys_time}` and `turn the heat off at {76 degrees|sys_temperature}`.
 
-In many queries, there might be more than one entity of the same type. For example, `change my alarm from 7 am to 6 am`, both` 7 am` and `6 am` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate `old_time` for `7 am` and `new_time` for `6 am`. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can extract each entity based on their roles.
+In many queries, there might be more than one entity of the same type. For example, `change my alarm from 7 am to 6 am`, both` 7 am` and `6 am` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate `old_time` for `7 am` and `new_time` for `6 am`. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguishh each entity based on their roles.
 
-For more information on the usage of role, check Workbench3 documentation.
+For more information on the usage of role, check :doc:`Role <../userguide/role_classifier>`.
 
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
@@ -296,7 +296,7 @@ Here is the full list of states:
    - open_door
    - lock_door
    - unlock_door
-   _ turn_appliance_on
+   - turn_appliance_on
    - turn_appliance_off
    - check_lights
    - turn_lights_on
@@ -317,7 +317,7 @@ Here is the full list of states:
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we need a local instance of Elasticsearch running in the background.
+The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we still need a local instance of Elasticsearch running in the background.
 
 
 6. Training Data
