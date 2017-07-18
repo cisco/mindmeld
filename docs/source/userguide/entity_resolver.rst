@@ -27,7 +27,7 @@ For each entity type, it is up to the developer to generate an entity mapping fi
 ==================== ===
 **canonical name**   The standardized or official name of the real world entity. Textual similarity with the canonical name is one of the primary factors used in entity resolution.
 
-**unique ID**        An optional unique identifier. If there are multiple entries in the mapping file with the same canonical name, the ID is necessary for uniquely identifying each entry. If an entity has a corresponding entry in the Knowledge Base, it is recommended that this ID be the same as the ID of the KB entry. You can then use the resolved ID to query the KB for the appropriate entry.
+**unique ID**        An optional unique identifier. If there are multiple entries in the mapping file with the same canonical name, the ID is necessary for uniquely identifying each entry. If an entity has a corresponding entry in the Knowledge Base, this ID should be the same as the ID of the KB entry. You can then use the resolved ID to query the KB for the appropriate entry.
 
 **whitelist**        A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that it is often referred to by different terms.
 
@@ -64,9 +64,9 @@ In the food ordering blueprint where a ``dish`` is an entity type, the ``dish`` 
         ...
     ]
 
-This file should be saved as ``mapping.json`` in the corresponding entity folder. For example, the ``mapping.json`` file for the ``store_name`` entity should exist in the following location:
+This file should be saved as ``mapping.json`` in the corresponding entity folder. For example, the ``mapping.json`` file for the ``category`` entity should exist in the following location:
 
-.. image:: /images/directory5.png
+.. image:: /images/food_ordering_directory2.png
     :width: 300px
     :align: center
 
@@ -140,35 +140,35 @@ Then :meth:`nlp.process()` will include the list of resolved entities.
 
   {'domain': 'ordering',
    'entities': [{'role': None,
-   'span': {'end': 50, 'start': 24},
-   'text': 'gluten free pepperoni pizza',
-   'type': 'dish',
-   'value': [{'cname': 'Pepperoni Pizza (Gluten Free)',
-     'id': 'B01D8TCLJ2',
-     'score': 119.62746,
-     'top_synonym': 'gluten free pepperoni pizza'},
-    {'cname': 'Margherita Pizza (Gluten Free)',
-     'id': 'B01D8TCRWI',
-     'score': 38.989628,
-     'top_synonym': 'gluten-free margherita pizza'},
-    ...
-    ]},
-  {'role': None,
-   'span': {'end': 76, 'start': 58},
-   'text': 'chocolate milkshake',
-   'type': 'dish',
-   'value': [{'cname': 'Chocolate',
-     'id': 'B01MFFKGA2',
-     'score': 99.32763,
-     'top_synonym': 'chocolate milkshake'},
-    {'cname': 'BTW',
-     'id': 'B01GXT4XYK',
-     'score': 19.519268,
-     'top_synonym': 'chocolate hazelnut spread pancake'},
-    ...
-    ]}],
- 'intent': 'build_order',
- 'text': 'I would like to order a gluten free pepperoni pizza and a chocolate milkshake'}
+     'span': {'end': 50, 'start': 24},
+     'text': 'gluten free pepperoni pizza',
+     'type': 'dish',
+     'value': [{'cname': 'Pepperoni Pizza (Gluten Free)',
+       'id': 'B01D8TCLJ2',
+       'score': 119.62746,
+       'top_synonym': 'gluten free pepperoni pizza'},
+      {'cname': 'Margherita Pizza (Gluten Free)',
+       'id': 'B01D8TCRWI',
+       'score': 38.989628,
+       'top_synonym': 'gluten-free margherita pizza'},
+      ...
+      ]},
+    {'role': None,
+     'span': {'end': 76, 'start': 58},
+     'text': 'chocolate milkshake',
+     'type': 'dish',
+     'value': [{'cname': 'Chocolate',
+       'id': 'B01MFFKGA2',
+       'score': 99.32763,
+       'top_synonym': 'chocolate milkshake'},
+      {'cname': 'BTW',
+       'id': 'B01GXT4XYK',
+       'score': 19.519268,
+       'top_synonym': 'chocolate hazelnut spread pancake'},
+      ...
+      ]}],
+   'intent': 'build_order',
+   'text': 'I would like to order a gluten free pepperoni pizza and a chocolate milkshake'}
 
 The Entity Resolver returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top 1 is sufficient, but in some cases it may be beneficial to look at other options if there are other constraints that the top few do not satisfy. The resolver returns:
 
@@ -199,7 +199,7 @@ When using the fit method for the first time, the Elasticsearch index will be cr
 
   >>> er.fit(clean=True)
 
-Unlike the other nlp components, *er.dump()* and *er.load()* do not do anything since there are no model weights to be saved to disk. Everything needed exists in the Elasticsearch index and the entity mapping files.
+Unlike the other NLP components, *er.dump()* and *er.load()* do not do anything since there are no model weights to be saved to disk. Everything needed exists in the Elasticsearch index and the entity mapping files.
 
 Once the resolver is fit, you can pass Entity objects to test the Entity Resolver as follows.
 
