@@ -183,7 +183,7 @@ For more information on the usage of role, check Workbench3 documentation.
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-Defining the dialogue states might be the most difficult exercise of a sucessful conversational application. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining one dialogue state for multiple intents. Choosing the right programming pattern for dialogue states requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic. In this section we will explore both options in details.
+In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining one dialogue state for multiple intents. Choosing the right programming pattern for dialogue states requires a familiar and nuanced understanding of Workbench paradigm as well as the underlying application logic. In this section we will explore both options in details.
 
 In the home assisstant blueprint, let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents.
 
@@ -231,13 +231,93 @@ Another conversational pattern that would be useful to the reader is the follow-
   App: Sure. Which lights?
   User: In the kitchen
 
-In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent and define the `handle_specify_location` state.
+In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent and define the `handle_specify_location` state. Since a number of states (`close/open door`, `lock/unlock door`, `turn on/off lights`, `turn on/off appliance`, `check door/light`) can lead to the `specify location` state, we need to pass in the previous state/action information in the request context. 
 
+.. code:: python
+
+  @app.handle(intent='specify_location')
+  def specify_location(context, slots, responder):
+  selected_all = False
+  selected_location = _get_location(context)
+
+  if selected_location:
+      try:
+          if context['frame']['desired_action'] == 'Close Door':
+              reply = self._handle_door_open_close_reply(
+                  selected_all, selected_location, context, desired_state="closed")
+          elif context['frame']['desired_action'] == 'Open Door':
+              reply = self._handle_door_open_close_reply(
+                  selected_all, selected_location, context, desired_state="opened")
+          elif context['frame']['desired_action'] == 'Lock Door':
+              reply = self._handle_door_lock_unlock_reply(
+                  selected_all, selected_location, context, desired_state="locked")
+          elif context['frame']['desired_action'] == 'Unlock Door':
+              reply = self._handle_door_lock_unlock_reply(
+                  selected_all, selected_location, context, desired_state="unlocked")
+          elif context['frame']['desired_action'] == 'Check Door':
+              reply = self._handle_check_door_reply(selected_location, context)
+          elif context['frame']['desired_action'] == 'Turn On Lights':
+              reply = self._handle_lights_reply(
+                  selected_all, selected_location, context, desired_state="on")
+          elif context['frame']['desired_action'] == 'Turn Off Lights':
+              reply = self._handle_lights_reply(
+                  selected_all, selected_location, context, desired_state="off")
+          elif context['frame']['desired_action'] == 'Check Lights':
+              reply = self._handle_check_lights_reply(selected_location, context)
+          elif context['frame']['desired_action'] == 'Turn On Appliance':
+              selected_appliance = context['frame']['appliance']
+              reply = self._handle_appliance_reply(
+                  selected_location, selected_appliance, desired_state="on")
+          elif context['frame']['desired_action'] == 'Turn Off Appliance':
+              selected_appliance = context['frame']['appliance']
+              reply = self._handle_appliance_reply(
+                  selected_location, selected_appliance, desired_state="off")
+
+          del context['frame']['desired_action']
+
+      except KeyError:
+          reply = "Please specify an action to go along with that location."
+
+      responder.reply(reply)
+  else:
+      prompt = "I'm sorry, I wasn't able to recognize that location, could you try again?"
+      responder.prompt(prompt)
+
+
+Here is the full list of states:
+
+   - greet
+   - exit
+   - check_weather
+   - specify_location
+   - specify_time
+   - check_door
+   - close_door
+   - open_door
+   - lock_door
+   - unlock_door
+   _ turn_appliance_on
+   - turn_appliance_off
+   - check_lights
+   - turn_lights_on
+   - turn_lights_off
+   - check_thermostat
+   - set_thermostat
+   - change_thermostat
+   - turn_thermostat
+   - change_alarm
+   - check_alarm
+   - remove_alarm
+   - set_alarm
+   - start_timer
+   - stop_timer
+   - unknown
+   
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-Since the home assistant application does not need a catalog of items, it does not use a knowledge base. However since Workbench needs an Elasticsearch connection, we need a local instance of Elasticsearch running in the background.
+The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we need a local instance of Elasticsearch running in the background.
 
 
 6. Training Data
