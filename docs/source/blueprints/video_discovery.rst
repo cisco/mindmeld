@@ -161,7 +161,89 @@ For more information on the ``show_content`` method and the functinos it calls, 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-<< Ray fills this section >>
+The knowledge base for our video discovery app leverages publicly available information about movies and tv shows from the `The Movie DB <https://www.themoviedb.org/>`_ website. The knowledge base comprises one index in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
+
+   - ``videos`` — information about movies and tv shows
+
+For example, here's the knowledge base entry in the ``videos`` index for "Minions," a comedy movie in 2015:
+
+.. code:: javascript
+
+    {
+        'genres': ['Family', 'Animation', 'Adventure', 'Comedy'],
+        'id': 'movie_211672',
+        'countries': ['US'],
+        'vote_count': 3660,
+        'runtime': 91,
+        'title': 'Minions',
+        'overview': 'Minions Stuart, Kevin and Bob are recruited by Scarlet Overkill, a super-villain who, alongside her inventor husband Herb, hatches a plot to take over the world.',
+        'doc_type': 'movie',
+        'release_date': '2015-06-17',
+        'img_url': 'http://image.tmdb.org/t/p/w185//q0R4crx2SehcEEQEkYObktdeFy.jpg',
+        'vote_average': 6.4,
+        'release_year': 2015,
+        'cast': ['Sandra Bullock', 'Jon Hamm', 'Michael Keaton', 'Allison Janney', 'Steve Coogan', 'Jennifer Saunders', 'Geoffrey Rush', 'Steve Carell', 'Pierre Coffin',
+                 'Katy Mixon', 'Michael Beattie', 'Hiroyuki Sanada', 'Dave Rosenbaum', 'Alex Dowding', 'Paul Thornley', 'Kyle Balda', 'Ava Acres'],
+        'directors': ['Kyle Balda', 'Pierre Coffin'],
+        'imdb_id': 'tt2293640',
+        'popularity': 2.295467321653707
+    }
+
+Here's a knowledge base entry also in the ``videos`` index for "The Big Bang Theory," a comedy tv show from 2007:
+
+.. code:: javascript
+
+    {
+        'genres': ['Comedy'],
+        'id': 'tv-show_1418',
+        'countries': ['US'],
+        'vote_count': 1698,
+        'runtime': null,
+        'title': 'The Big Bang Theory',
+        'number_of_seasons': 10,
+        'overview': 'The Big Bang Theory is centered on five characters living in Pasadena, California: roommates Leonard Hofstadter and Sheldon Cooper; Penny, a waitress and aspiring actress who lives across the hall; and Leonard and Sheldon's equally geeky and socially awkward friends and co-workers, mechanical engineer Howard Wolowitz and astrophysicist Raj Koothrappali. The geekiness and intellect of the four guys is contrasted for comic effect with Penny's social skills and common sense.',
+        'doc_type': 'tv-show',
+        'release_date': '2007-09-24',
+        'img_url': 'http://image.tmdb.org/t/p/w185//wQoosZYg9FqPrmI4zeCLRdEbqAB.jpg',
+        'vote_average': 7,
+        'release_year': 2007,
+        'cast': ['Johnny Galecki', 'Jim Parsons', 'Kaley Cuoco', 'Simon Helberg', 'Kunal Nayyar', 'Mayim Bialik', 'Melissa Rauch'],
+        'directors': [],
+        'number_of_episodes': 231,
+        'popularity': 3.2740931003620037
+    }
+
+Assuming that you have Elasticsearch installed, running the :func:`blueprint()` command described above should build the knowledge base for the video discovery app by creating the one index and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the :doc:`Question Answerer <../userguide/kb>` to query the indexes.
+
+For example:
+
+.. code:: python
+
+   >>> from mmworkbench.components.question_answerer import QuestionAnswerer
+   >>> qa = QuestionAnswerer(app_path='video_discovery')
+   >>> qa.get(index='videos', _sort='popularity', _sort_type='desc')[0]
+   {
+     'cast': ['Gal Gadot', 'Chris Pine', 'Connie Nielsen', ...],
+     'countries': ['US'],
+     'directors': ['Patty Jenkins'],
+     'doc_type': 'movie',
+     'genres': ['Action', 'Adventure', 'Fantasy', 'Science Fiction'],
+     'id': 'movie_297762',
+     'imdb_id': 'tt0451279',
+     'img_url': 'http://image.tmdb.org/t/p/w185//gfJGlDaHuWimErCr5Ql0I8x9QSy.jpg',
+     'overview': 'An Amazon princess comes to the world of Man to become the greatest of the female superheroes.',
+     'popularity': 4.904354681204688,
+     'release_date': '2017-05-30',
+     'release_year': 2017,
+     'runtime': 141,
+     'title': 'Wonder Woman',
+     'vote_average': 7.1,
+     'vote_count': 1979
+   }
+
+.. admonition:: Exercise
+
+   The blueprint comes with a pre-configured, pre-populated knowledge base to help you get up and running quickly. Read the User Guide section on :doc:`Question Answerer <../userguide/kb>` to learn how to create knowledge base indexes from scratch. Then, try creating one or more knowledge base indexes for your own data.
 
 6. Training Data
 ^^^^^^^^^^^^^^^^
