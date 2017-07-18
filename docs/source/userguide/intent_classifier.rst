@@ -126,7 +126,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
 
   Is always a dictionary with a single key called ``'classifier_type'``. The value of the key specifies the machine learning model to use. Allowed values are 
 
-.. _sklearn_models:
+.. _sklearn_intent_models:
 
   =============== =======================================================
   Classifier Type Description (with list of configurable hyperparameters)
@@ -175,19 +175,19 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       | along with popularity information (as defined in the gazetteer).                                           |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'length'``          | Generates a set of features that capture query length information. Computes the number of tokens and       |
-  |                       | characters in the query, on both linear and log scales.                                                    | 
+  |                       | characters in the query, on both linear and log scales.                                                    |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'exact'``           | Returns the entire query text as a feature.                                                                |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
 
-.. _tuning:
+.. _intent_tuning:
 
 3. **Hyperparameter Settings**
 
 ``'params'`` (:class:`dict`)
   |
 
-  Is a dictionary containing the values to be used for different model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, the ``'penalty'`` parameter for logistic regression, the ``'max_depth'`` parameter for decision tree, and so on. The list of allowable hyperparameters depends on the selected model. Refer to the parameter list in :ref:`the model table <sklearn_models>` above.
+  Is a dictionary containing the values to be used for different model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, the ``'penalty'`` parameter for logistic regression, the ``'max_depth'`` parameter for decision tree, and so on. The list of allowable hyperparameters depends on the selected model. Refer to the parameter list in :ref:`the model table <sklearn_intent_models>` above.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -209,13 +209,13 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       |                                                                                                                   |
   |                       | .. code-block:: python                                                                                            |
   |                       |                                                                                                                   |
-  |                       |    {                                                                                                              | 
+  |                       |    {                                                                                                              |
   |                       |      'penalty': ['l1', 'l2'],                                                                                     |
   |                       |      'C': [10, 100, 1000, 10000, 100000],                                                                         |
   |                       |       'fit_intercept': [True, False]                                                                              |
   |                       |    }                                                                                                              |
-  |                       |                                                                                                                   | 
-  |                       | :ref:`The model table <sklearn_models>` above lists the hyperparameters available for each supported model.       |
+  |                       |                                                                                                                   |
+  |                       | :ref:`The model table <sklearn_intent_models>` above lists the hyperparameters available for each supported model.|
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
   |                       |                                                                                                                   |
@@ -224,7 +224,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`          |
   |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`         |
   |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                 |
-  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`| 
+  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`|
   |                       |                                                                                                                   |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'k'``               | Number of folds (splits)                                                                                          |
@@ -389,12 +389,12 @@ The :meth:`fit` method now searches over the updated parameter grid and prints t
    Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 97.70%, params: {'C': 100, 'class_weight': {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4: 0.98433048433048431, 5: 3.3872549019607843}, 'fit_intercept': False, 'penalty': 'l2'}
 
-For a full list of configurable hyperparameters for each model and available cross-validation methods, refer to the above section on defining :ref:`hyperparameter settings <tuning>`.
+For a full list of configurable hyperparameters for each model and available cross-validation methods, refer to the above section on defining :ref:`hyperparameter settings <intent_tuning>`.
 
 
 **Model selection**
 
-Lastly, let's try other :ref:`machine learning models <sklearn_models>` in place of the default logistic regression. The hyperparameter grid needs to updated accordingly to be compatible with the selected model. Here's an example using a :sk_guide:`support vector machine (SVM) <svm>` with the same features as before, and the parameter selection settings updated to search over the :sk_api:`SVM hyperparameters <sklearn.svm.SVC.html#sklearn.svm.SVC>`.
+Lastly, let's try other :ref:`machine learning models <sklearn_intent_models>` in place of the default logistic regression. The hyperparameter grid needs to updated accordingly to be compatible with the selected model. Here's an example using a :sk_guide:`support vector machine (SVM) <svm>` with the same features as before, and the parameter selection settings updated to search over the :sk_api:`SVM hyperparameters <sklearn.svm.SVC.html#sklearn.svm.SVC>`.
 
 .. code-block:: python
 
@@ -443,7 +443,7 @@ A trained intent classifier can be run on a test query using the :meth:`IntentCl
    >>> ic.predict('cancel my morning alarm')
    'remove_alarm'   
 
-The :meth:`predict` method returns the label for the intent with highest predicted probability. This method gets called by the natural language processor's :meth:`process` method at runtime to classify the intent for an incoming query.
+The :meth:`predict` method returns the label for the intent with highest predicted probability. It gets called by the natural language processor's :meth:`process` method at runtime to classify the intent for an incoming query.
 
 When experimenting with different classifier settings or debugging classifier performance, it is often useful to inspect how confident a trained model is at predicting the right label. To view the predicted probability distribution over all the possible intent labels, use the :meth:`IntentClassifier.predict_proba` method.
 
@@ -461,7 +461,7 @@ When experimenting with different classifier settings or debugging classifier pe
 
 The result of :meth:`predict_proba` is a list of tuples ranked from the most likely intent to the least. The first element of each tuple is the intent label and the second element is the associated classification probability. Ideally, you want a classifier that assigns a high probability to the expected (correct) class label for a test query, while having very low prediction probabilities for the incorrect labels.
 
-The :meth:`predict` and :meth:`predict_proba` methods run on one query at a time. See the next section for details on evaluating classifier performance by testing a trained model on a batch of labeled test queries.
+The :meth:`predict` and :meth:`predict_proba` methods run on one query at a time. To instead test a trained model on a batch of labeled test queries and evaluate classifier performance, see the next section.
 
 
 Evaluate classifier performance

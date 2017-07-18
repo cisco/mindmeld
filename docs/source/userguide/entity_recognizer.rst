@@ -39,17 +39,17 @@ Next, verify that the NLP has correctly identified all the domains and intents f
    ...
    >>> nlp.domains['times_and_dates'].intents
    {
-   	'change_alarm': <IntentProcessor 'change_alarm' ready: True, dirty: True>,
- 	'check_alarm': <IntentProcessor 'check_alarm' ready: False, dirty: False>,
- 	'remove_alarm': <IntentProcessor 'remove_alarm' ready: False, dirty: False>,
- 	'set_alarm': <IntentProcessor 'set_alarm' ready: True, dirty: True>,
- 	'start_timer': <IntentProcessor 'start_timer' ready: True, dirty: True>,
- 	'stop_timer': <IntentProcessor 'stop_timer' ready: False, dirty: False>
+    'change_alarm': <IntentProcessor 'change_alarm' ready: True, dirty: True>,
+  'check_alarm': <IntentProcessor 'check_alarm' ready: False, dirty: False>,
+  'remove_alarm': <IntentProcessor 'remove_alarm' ready: False, dirty: False>,
+  'set_alarm': <IntentProcessor 'set_alarm' ready: True, dirty: True>,
+  'start_timer': <IntentProcessor 'start_timer' ready: True, dirty: True>,
+  'stop_timer': <IntentProcessor 'stop_timer' ready: False, dirty: False>
    }
    ...
    >>> nlp.domains['weather'].intents
    {
-   	'check-weather': <IntentProcessor 'check-weather' ready: False, dirty: False>
+    'check-weather': <IntentProcessor 'check-weather' ready: False, dirty: False>
    }
 
 Each intent has its own :class:`EntityRecognizer` which can be accessed using the :attr:`entity_recognizer` attribute of the corresponding intent.
@@ -66,6 +66,8 @@ Each intent has its own :class:`EntityRecognizer` which can be accessed using th
    >>> er
    <EntityRecognizer ready: False, dirty: False>
 
+
+.. _train_entity_model:
 
 Training a baseline entity recognizer
 -------------------------------------
@@ -99,7 +101,7 @@ The problem consists of two parts:
 1. Detect which spans of words within the input text correspond to entities of interest
 2. Classify those detected text spans into a pre-determined set of entity types
 
-The Entity Recognizer uses a Machine-Learned Sequence Labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in :doc:`Entity Recognizer </entity_recognition>`.
+The Entity Recognizer uses a Machine-Learned Sequence Labeling model to look at each word in the input query sequentially and assign a label to it. It is trained using labeled training data where queries are annotated to mark entity spans along with their corresponding entity types. We train a separate entity recognition model for each user intent since the types of entities required to satisfy the end goal vary from intent to intent. We will get into the details of build entity recognition models in :doc:`Entity Recognizer`.
 
 
 
