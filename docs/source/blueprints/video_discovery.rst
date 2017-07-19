@@ -166,12 +166,6 @@ This code follows a series of steps to build the final answer to the user: it up
 
 For more information on the ``show_content`` method and the functinos it calls, see the ``app.py`` file in the blueprint folder.
 
-.. admonition:: Exercise
-
-   Extend the ``show_content`` dialogue state handler in ``app.py`` to handle more user flows or handle the existing ones in a smarter way. Here are a few suggestions for improvements:
-
-   << TODO: Add sugestions here >>
-
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
@@ -466,7 +460,7 @@ Look at the ``browse`` implementation in ``app.py`` to better understand the dif
 
 .. admonition:: Exercise
 
-   << TODO: Fill this exercise >>
+   - Think of other important data that would be useful to have in the knowledge base for a food ordering use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.
 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
