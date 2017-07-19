@@ -34,6 +34,39 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
     return es_client
 
 
+def does_index_exist(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
+    """Return boolean flag to indicate whether the specified index exists."""
+
+    es_client = es_client or create_es_client(es_host)
+    scoped_index_name = get_scoped_index_name(app_name, index_name)
+
+    try:
+        # Confirm ES connection with a shorter timeout
+        es_client.cluster.health(request_timeout=connect_timeout)
+        return es_client.indices.exists(index=scoped_index_name)
+    except ESConnectionError:
+        logger.error('Unable to connect to Elasticsearch cluster at %r', es_host)
+        raise KnowledgeBaseConnectionError()
+
+
+def get_field_names(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
+    """Return a list of field names available in the specified index."""
+
+    es_client = es_client or create_es_client(es_host)
+    scoped_index_name = get_scoped_index_name(app_name, index_name)
+
+    try:
+        # Confirm ES connection with a shorter timeout
+        es_client.cluster.health(request_timeout=connect_timeout)
+
+        res = es_client.indices.get(index=scoped_index_name)
+        all_field_info = res[scoped_index_name]['mappings']['document']['properties']
+        return all_field_info.keys()
+    except ESConnectionError:
+        logger.error('Unable to connect to Elasticsearch cluster at %r', es_host)
+        raise KnowledgeBaseConnectionError()
+
+
 def create_index(app_name, index_name, mapping, es_host=None, es_client=None, connect_timeout=2):
     """Creates a new index.
 

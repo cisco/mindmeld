@@ -297,6 +297,9 @@ DEFAULT_ROLE_MODEL_CONFIG = {
 }
 
 # ElasticSearch mapping to define text analysis settings for text fields
+# The default knowledge base ES mapping contains two dynamic templates for any text fields and
+# nested object fields for synonym whitelists. The synonym whitelist fields are assumed to have
+# field name with "$whitelist" suffix.
 DEFAULT_ES_QA_MAPPING = {
     "mappings": {
         DOC_TYPE: {
@@ -320,6 +323,35 @@ DEFAULT_ES_QA_MAPPING = {
                                 "char_ngram": {
                                     "type": "text",
                                     "analyzer": "char_ngram_analyzer"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "synonym_whitelist_text": {
+                        "match": "*$whitelist",
+                        "match_mapping_type": "object",
+                        "mapping": {
+                            "type": "nested",
+                            "properties": {
+                                "name": {
+                                    "type": "text",
+                                    "fields": {
+                                        "raw": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        },
+                                        "normalized_keyword": {
+                                            "type": "text",
+                                            "analyzer": "keyword_match_analyzer"
+                                        },
+                                        "char_ngram": {
+                                            "type": "text",
+                                            "analyzer": "char_ngram_analyzer"
+                                        }
+                                    },
+                                    "analyzer": "default_analyzer"
                                 }
                             }
                         }

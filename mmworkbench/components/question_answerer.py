@@ -549,12 +549,21 @@ class Search:
             self.field = field
             self.field_info = field_info
             self.value = value
+            self.syn_field = field + "$whitelist"
 
             self.clause_type = 'query'
 
         def build_query(self):
             """build knowledge base query for query clause"""
 
+            # ES syntax is generated based on specified knowledge base field
+            # the following ranking factors are considered:
+            # 1. exact matches (with boosted weight)
+            # 2. word N-gram matches
+            # 3. character N-gram matches
+            # 4. matches on synonym if available (exact, word N-gram and character N-gram):
+            # for a knowledge base text field the synonym are indexed in a separate field
+            # "<field name>$whitelist" if available.
             clause = {
                 "bool": {
                     "should": [
@@ -578,6 +587,41 @@ class Search:
                                 self.field + ".name.char_ngram": {
                                     "query": self.value
                                 }
+                            }
+                        },
+                        {
+                            "nested": {
+                                "path": self.syn_field,
+                                "score_mode": "max",
+                                "query": {
+                                    "bool": {
+                                        "should": [
+                                            {
+                                                "match": {
+                                                    self.syn_field + ".name.normalized_keyword": {
+                                                        "query": self.value,
+                                                        "boost": 10
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    self.syn_field + ".name": {
+                                                        "query": self.value
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    self.syn_field + ".name.char_ngram": {
+                                                        "query": self.value
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                "inner_hits": {}
                             }
                         }
                     ]
