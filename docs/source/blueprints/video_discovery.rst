@@ -75,7 +75,9 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 This should create a Workbench project folder called ``video_discovery`` in your current directory with the following structure:
 
-<< ADD IMAGE HERE >>
+.. image:: /images/food_ordering_directory.png
+    :width: 250px
+    :align: center
 
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
@@ -256,9 +258,34 @@ For example:
 6. Training Data
 ^^^^^^^^^^^^^^^^
 
-The labeled data for training our NLP pipeline was created using both in-house data generation and crowdsourcing techniques. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for a full description of this highly important, multi-step process.
+The labeled data for training our NLP pipeline was created using both in-house data generation and crowdsourcing techniques. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for a full description of this highly important, multi-step process. Be aware that at minimum, the following data generation tasks are required:
 
-<< Add table of training data steps? >>
++--------------------------------------+-----------------------------------------------------------------------------+
+| | Purpose                            | | Question (for crowdsourced data generators)                               |
+| |                                    | | or instruction (for annotators)                                           |
++======================================+=============================================================================+
+| | Exploratory data generation        | | "How would you talk to a conversational app                               |
+| | for guiding the app design         | | to search for movies and TV shows?"                                       |
++--------------------------------------+-----------------------------------------------------------------------------+
+| | Targeted query generation          | | ``browse``: "What would you say to the app                                |
+| | for training the Intent Classifier | | to find movies and TV shows you want to watch?                            |
++--------------------------------------+-----------------------------------------------------------------------------+
+| | Targeted query annotation          | | ``browse``: "Annotate all occurrences of cast,                            |
+| | for training the Entity Recognizer | | country, director, genre, sort, title, and type                           |
+| |                                    | | names in the given query."                                                |
++--------------------------------------+-----------------------------------------------------------------------------+
+| | Targeted synonym generation        | | ``country``: "What names would you use to refer                           |
+| | for training the Entity Resolver   | | to this country?"                                                         |
+| |                                    | |                                                                           |
+| |                                    | | ``genre``: "What are the different ways in which                          |      
+| |                                    | | you would refer to this genre?"                                           |
+| |                                    | |                                                                           |
+| |                                    | | ``sort``: "What are the different ways in which                           |      
+| |                                    | | you would speficy to sort movies or TV shows?"                            |
+| |                                    | |                                                                           |
+| |                                    | | ``type``: "What are the different ways in which                           |      
+| |                                    | | you would refer to this type?"                                            |
++--------------------------------------+-----------------------------------------------------------------------------+
 
 The ``domains`` directory contains the training data for intent classification and entity recognition. The ``entities`` directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.
 
