@@ -286,7 +286,7 @@ The labeled data for training our NLP pipeline was created using both in-house d
 | |                                    | | you would refer to this type?"                                            |
 +--------------------------------------+-----------------------------------------------------------------------------+
 
-The ``domains`` directory contains the training data for intent classification and entity recognition. The ``entities`` directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.
+The ``domains`` directory contains the training data for domain and intent classification and entity recognition. The ``entities`` directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.
 
 .. admonition:: Exercise
 
@@ -322,6 +322,7 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 	Loading queries from file video_content/browse/train_04.txt
 	Loading queries from file video_content/browse/train_05.txt
 	Loading queries from file video_content/browse/train_mturk_00.txt
+	...
 
 .. tip::
 
@@ -480,9 +481,9 @@ The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly 
 	results = app.question_answerer.get(index=KB_INDEX_NAME,
                                             _sort='popularity', _sort_type='desc')
 
-In general the ``browse`` handler retrieves documents from the knowledge base in different ways, depending on the entities found in the user's queries.
+In general the ``show_content`` handler retrieves documents from the knowledge base in different ways, depending on the entities found in the user's queries.
 
-Look at the ``browse`` implementation in ``app.py`` to better understand the different ways you can leverage the knowledge base and Question Answerer to provide intelligent responses to the user. See the :doc:`User Guide <../userguide/kb>` for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.
+Look at the ``show_content`` implementation in ``app.py`` to better understand the different ways you can leverage the knowledge base and Question Answerer to provide intelligent responses to the user. See the :doc:`User Guide <../userguide/kb>` for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.
 
 .. admonition:: Exercise
 
