@@ -16,24 +16,24 @@ Question Answering in Conversational Applications
 The idea of knowledge-based question answering is mapping natural language queries to a query over structured database. The Workbench Question Answerer is specifically designed for custom knowledge bases involving large content catalogs, for production-grade applications. Catalogs containing even up to hundreds of millions of unique, domain-specific entity objects can easily be handled by Workbench in production. Typically, Food delivery service processes restaurant menus range in the tens of thousands entities and specific product retail catalogs go into the millions, while media entertainment libraries scale into the tens or hundreds of millions of unique entities. Workbench's Knowledge Base and Question Answering systems have been successfully applied to all of the above use cases. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below.
 
 1. Answer Questions
-````````````````
+```````````````````
 
 One of the main use cases of question answerer in conversational applications is to provide one or more relevant results as answers to users' requests. Knowledge base searches can be constructed using the entities extracted from NLP pipeline. The answers can be in various forms depending on the nature of the applications. For instance, in a food ordering application the answer is usually a dish with attributes matching the criteria provided by users, while in video discovery application the answer is more often a list of best matching movies or TV shows.
 
 2. Validate Questions 
-``````````````````
+`````````````````````
 
 The knowledge base can also contain information to help inform user that the request is out of scope. For example, if a user orders pizza from a coffee shop in a food ordering application the Question Answerer would not be able to find the entity matching user's request and can provide information to help steer the conversation to the right direction. There are other examples that fall into this category such as asking a dish that is not available in the specified restaurant or asking for a customization option that is not available for the specified dish.
 
 3. Disambiguate Entities
-`````````````````````
+````````````````````````
 
 It's common that we need to disambiguate entities based on application requirements and context. For example, in a food ordering application there could be hundreds of ``Pad Thai`` dishes offered from a number of restaurants. In a travel booking application it is impossible to book the right flight without knowing exactly which destination city ``Springfield`` user is asking for. (In Massachusetts or Illinois?) In a music discovery application when user asks for ``thriller`` they could be referring to a song or an album. In these cases we would not be able to retrieve the exact entities that users are referring to without having the contextual information taken into account. The contextual info may be the entity relationships and hierarchy, user preferences or application business logic. 
 
 This disambiguation task can be formulated as a knowledge base search with constraints from contextual information. For the food ordering example the selected restaurant can be added as a filter to the knowledge base search to find the best matching dishes within that particular restaurant.
 
 4. Suggest Alternatives
-````````````````````
+```````````````````````
 
 Workbench Question Answerer can be used to suggest closest matches when the correct matches could not be found. For example, if a user requests 'Star Wars Rogue One' and that movie is not available, the knowledge base could suggest other available Star Wars titles. The Question Answerer uses a number of scoring factors including text relevance, location proximity among others to retrieve most relevant information from knowledge base as suggestions. 
 
@@ -303,6 +303,8 @@ In the following example Question Answerer finds ``menu_items`` objects that bes
 
 To define sorting by distance based on certain origin location we can specify the ``_sort_type`` parameter to be ``distance`` and specify origin location in ``_sort_location`` parameter. In the following example we try to find the closest restaurant from the center of San Francisco:
 
+.. code:: python
+
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> qa.get(index='restaurants', _sort='location', _sort_type='distance', _sort_location='37.77,122.41')
@@ -359,6 +361,7 @@ Advanced Search
 Workbench Question Answerer provides advanced search APIs to support more complex knowledge base searches. It allows a list of text queries, filters and custom sort criteria to be specified for having fine-grained control on knowledge base search behavior.
 
 .. code:: python
+
 	>>> from mmworkbench.components import QuestionAnswerer
 	>>> qa = QuestionAnswerer(app_path='my_app')
 	>>> s = qa.build_search(index='menu_items')
