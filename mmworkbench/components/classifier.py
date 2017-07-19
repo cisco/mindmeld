@@ -216,7 +216,7 @@ class Classifier(object):
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
     def evaluate(self, queries=None, use_blind=False):
-        """Evaluates the trained entity recognition model on the given test data
+        """Evaluates the trained classifier model on the given test data
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as test data. If none
