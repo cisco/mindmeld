@@ -43,7 +43,7 @@ As it turns out, quick-and-dirty prototypes and limited-scale user testing are n
 
 Users are unforgiving when evaluating a conversational interface. They expect to verbalize requests just as if speaking with another person. They then expect the system to respond with human-like accuracy. This typically means that conversational applications must be near-perfect. In practice, when a conversational interface cannot achieve accuracy of at least 95%, users are likely conclude that the app is dimwitted and never use it again.
 
-To ensure that your conversational interface meets a minimum threshold of acceptability before going live, it is important to remember the following guidelines which account for the unique characteristics of conversational applications.
+Observe the following guidelines to ensure that your conversational interface accounts for the unique characteristics of conversational applications and meets a minimum threshold of acceptability before going live.
 
 === ===
 1   Select a use case that mimics a familiar, real-world interaction so that users intuitively know the types of questions to ask. Selecting an unrealistic or incorrect use case will render even the smartest app dead on arrival.
