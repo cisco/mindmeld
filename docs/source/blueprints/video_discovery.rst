@@ -1,12 +1,12 @@
 Video Discovery
 ===============
 
-In this step-by-step walkthrough, you'll build a conversational application that allows users to browse and find movies and TV shows from a huge content catalog, using the Workbench blueprint for this purpose.
+In this step-by-step walkthrough, you'll build a conversational application that allows users to browse and find movies and TV shows from a big content catalog, using the Workbench blueprint for this purpose.
 
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-Through a conversational interface, users should be able to browse through a content catalog containing movies and TV shows. They should be able to search using common filters for video content, such as: genre, cast, release year, etc... They should also be able to continue refining their search until they find the right content, and restart the search at any moment. The app should also support general actions such as greeting the user and handling basic humor.
+Through a conversational interface, users should be able to browse through a content catalog containing movies and TV shows. They should be able to search using common filters for video content, such as: genre, cast, release year, etc... They should also be able to continue refining their search until they find the right content, and restart the search at any moment. The app will also support general actions such as greeting the user, providing help and responding to insults and compliments.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -32,7 +32,6 @@ Here is the NLP model hierarchy for our video discovery application.
     :width: 700px
     :align: center
 
-
 The 2 domains supported by this application are ``video_content`` and ``unrelated``:
 
   - ``video_content`` - Supports the functionality for browsing through the video catalog.
@@ -40,28 +39,28 @@ The 2 domains supported by this application are ``video_content`` and ``unrelate
 
 The ``video_content`` domain supports the following intents:
 
-  - ``greet`` - User greets the app
-  - ``help`` - User is confused or needs instructions on how to proceed
-  - ``start_over`` — User wants to abandon current selections and restart the ordering process
-  - ``exit`` - User wants to end the current conversation
-  - ``browse`` - User is searching for content, either for a specific movie or TV show or for a set of results
-  - ``unsupported`` - User is asking for information related to movies or TV shows, but the app does not support thoese questions. For example, asking when a movie was released, or when it will be on given channel
+  - ``greet`` - User greets the app.
+  - ``help`` - User is confused or needs instructions on how to proceed.
+  - ``start_over`` — User wants to abandon current selections and restart the ordering process.
+  - ``exit`` - User wants to end the current conversation.
+  - ``browse`` - User is searching for content, either for a specific movie or TV show or for a set of results.
+  - ``unsupported`` - User is asking for information related to movies or TV shows, but the app does not support thoese questions. For example, asking when a movie was released, or when it will be on given channel.
 
 Similarly the ``unrelated`` domain supports the intents:
 
   - ``general`` - User asks general questions unrelated to video content. For example questions about weather, food, sports, etc...
-  - ``compliment`` - User gives a compliment to the app
-  - ``insult`` - User gives an insult to the app
+  - ``compliment`` - User gives a compliment to the app.
+  - ``insult`` - User gives an insult to the app.
 
 For this app, only the ``browse`` intent requires entity recognition. This intent supports the following entity types:
 
-   - ``cast`` — The name of an actor
-   - ``country`` — The name of the country of origing of a movie or TV show
-   - ``director`` — The name of a director
-   - ``genre`` — The name of a video genre
+   - ``cast`` — The name of an actor.
+   - ``country`` — The name of the country of origing of a movie or TV show.
+   - ``director`` — The name of a director.
+   - ``genre`` — The name of a video genre.
    - ``sort`` — How the users want to sort the results: by most recent, most popular, etc...
-   - ``title`` — The title of a video in the catalog
-   - ``type`` — The type of video the user is looking for: `movie` or `TV show`
+   - ``title`` — The title of a video in the catalog.
+   - ``type`` — The type of video the user is looking for: `movie` or `TV show`.
 
 .. admonition:: Exercise
 
@@ -105,13 +104,13 @@ To support the functionality we envision, our app needs one dialogue state for e
 | |                | |                        | | information and get them back to video search |
 +------------------+--------------------------+-------------------------------------------------+
 | | ``compliment`` | | ``say_something_nice`` | | Compliment the user back and promt the user   |
-| |                | |                        | | to get back to food ordering                  | 
+| |                | |                        | | to get back to video search                   | 
 +------------------+--------------------------+-------------------------------------------------+
 | | ``insult``     | | ``handle_insult``      | | Handle the insult and promt the user          | 
-| |                | |                        | | to get back to food ordering                  |
+| |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
 | | others         | | ``default``            | | Prompt a user who has gone off-topic          | 
-| |                | |                        | | to get back to food ordering                  |
+| |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
 
 All dialogue states and their associated handlers are defined in the ``app.py`` application container file at the top level of the blueprint folder.
@@ -134,7 +133,7 @@ For example, here's the ``say_goodbye`` state handler, where we clear the :doc:`
 
 	    responder.reply(goodbyes)
 
-By contrast, the handler logic for the ``show_content`` dialogue state is more substantial, because it contains the core business logic for our application. In this dialogue state handler, we use the :doc:`Question Answerer <../userguide/kb>` and external API calls to process the transaction.
+By contrast, the handler logic for the ``show_content`` dialogue state is more substantial, because it contains the core business logic for our application. In this dialogue state handler, we use the :doc:`Question Answerer <../userguide/kb>` to process the transaction.
 
 We can illustrate this with the general implementation of the ``show_content`` handler:
 
@@ -166,7 +165,7 @@ We can illustrate this with the general implementation of the ``show_content`` h
 
 This code follows a series of steps to build the final answer to the user: it updates the :doc:`dialogue frame <../userguide/dm>` with the new found entities, fetches results from the knowledge base (in the ``get_video_content`` method), builds a response with the new entities (done in ``fill_browse_slots`` and ``build_browse_response``) and sends a response to the user.
 
-For more information on the ``show_content`` method and the functinos it calls, see the ``app.py`` file in the blueprint folder.
+For more information on the ``show_content`` method and the functinos it uses, see the ``app.py`` file in the blueprint folder.
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
@@ -487,7 +486,7 @@ Look at the ``browse`` implementation in ``app.py`` to better understand the dif
 
 .. admonition:: Exercise
 
-   - Think of other important data that would be useful to have in the knowledge base for a food ordering use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.
+   - Think of other important data that would be useful to have in the knowledge base for a video discovery use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.
 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
