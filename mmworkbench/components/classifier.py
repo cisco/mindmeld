@@ -215,16 +215,31 @@ class Classifier(object):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
-    def evaluate(self, use_blind=False):
-        """Evaluates the trained classification model on the given test data
+    def evaluate(self, queries=None, use_blind=False):
+        """Evaluates the trained entity recognition model on the given test data
 
         Args:
+            queries (list of ProcessedQuery): The labeled queries to use as test data. If none
+                are provided, the test label set will be used.
             use_blind (bool): Description
 
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        if not self._model:
+            logger.error('You must fit or load the model before running evaluate.')
+            return
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
+        queries, labels = self._get_queries_and_labels(queries, label_set='test')
+
+        if not queries:
+            logger.info('Could not evaluate model. No relevant examples in evaluation set defined'
+                        ' in your test.txt files.')
+            return
+
+        evaluation = self._model.evaluate(queries, labels)
+        return evaluation
 
     def _get_model_config(self, default_config=None, **kwargs):
         """Gets a machine learning model configuration
