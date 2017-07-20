@@ -176,7 +176,7 @@ Home assistant defines and uses the following named entities:
 
 Home assistant uses three system entities: `sys_time` (time), `sys_interval` (interval) and `sys_temperature` (temperature), for example: `set my thermostat to turn on at {6 am|sys_time}` and `turn the heat off at {76 degrees|sys_temperature}`.
 
-In many queries, there might be more than one entity of the same type. For example, `change my alarm from 7 am to 6 am`, both` 7 am` and `6 am` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate `old_time` for `7 am` and `new_time` for `6 am`. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguishh each entity based on their roles.
+In many queries, there might be more than one entity of the same type. For example, `change my alarm from 7 am to 6 am`, both `7 am` and `6 am` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate `old_time` for `7 am` and `new_time` for `6 am`. We annotate the example as `change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}` with `old_time` and `new_time` as roles. This way, we can distinguishh each entity based on their roles.
 
 For more information on the usage of role, check :doc:`Role <../userguide/role_classifier>`.
 
