@@ -410,7 +410,7 @@ Change the classification model to random forest instead of the default logistic
 
 .. code:: python
 
-   >>> ic.fit(config_name='rforest')
+   >>> ic.fit(model_settings={'classifier_type': 'rforest'})
    Fitting intent classifier: domain='ordering'
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 97.31%, params: {'max_features': 'auto', 'n_estimators': 10, 'n_jobs': -1}
@@ -540,8 +540,7 @@ Look at the ``build_order`` implementation in ``app.py`` to better understand th
 
    - Use the Question Answerer within the ``build_order`` state handler to add support for searching for restaurants by ``cuisine`` and searching for dishes by ``category``.
 
-   - When customizing the blueprint for your own app, add location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. Then use the Question Answerer to rank restaurant and dish results using those factors, and evaluate whether this provides a more relevant list of suggestions to the user.
-
+   - When customizing the blueprint for your own app, consider adding location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. You could then use the Question Answerer to rank restaurant and dish results using those factors, and evaluate whether this provides a more relevant list of suggestions to the user.
    - Think of other important data that would be useful to have in the knowledge base for a food ordering use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.
 
 
