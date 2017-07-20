@@ -34,6 +34,7 @@ BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
     'quickstart': {},
     'food_ordering': {},
+    'home_assistant': {},
     'template': {}
 }
 
