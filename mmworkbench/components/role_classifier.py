@@ -56,10 +56,10 @@ class RoleClassifier(Classifier):
         """
         kwargs['example_type'] = ENTITY_EXAMPLE_TYPE
         kwargs['label_type'] = CLASS_LABEL_TYPE
-        default_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
-                                               domain=self.domain, intent=self.intent,
-                                               entity=self.entity_type)
-        return super()._get_model_config(default_config, **kwargs)
+        loaded_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
+                                              domain=self.domain, intent=self.intent,
+                                              entity=self.entity_type)
+        return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, queries=None, label_set='train', **kwargs):
         """Trains a statistical model for role classification using the provided training examples

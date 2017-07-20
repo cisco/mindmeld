@@ -52,9 +52,9 @@ class EntityRecognizer(Classifier):
         """
         kwargs['example_type'] = QUERY_EXAMPLE_TYPE
         kwargs['label_type'] = ENTITIES_LABEL_TYPE
-        default_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
-                                               domain=self.domain, intent=self.intent)
-        return super()._get_model_config(default_config, **kwargs)
+        loaded_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
+                                              domain=self.domain, intent=self.intent)
+        return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, queries=None, label_set='train', **kwargs):
         """Trains the entity recognition model using the provided training queries

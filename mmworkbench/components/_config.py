@@ -489,6 +489,7 @@ def get_app_name(app_path):
 
 
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):
+    """Returns the application config if it exists, otherwise returns the default config."""
     try:
         module_conf = _get_config_module(app_path)
         attribute = {
