@@ -9,7 +9,9 @@ Tests for config module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 
-from mmworkbench.components._config import _expand_parser_config
+from mmworkbench.components._config import _expand_parser_config, get_classifier_config
+
+APP_PATH = '../kwik_e_mart'
 
 BASIC_PARSER_CONFIG = {
     'product': ['quantity', 'size', 'option'],
@@ -75,6 +77,39 @@ def test_dict_parser_config_2():
                 'precedence': 'left',
                 'linking_words': frozenset()
             }
+        }
+    }
+
+    assert actual == expected
+
+
+def test_get_classifier_config():
+    """Tests that the default config is returned when an app specified config doesn't exist."""
+    actual = get_classifier_config('domain', APP_PATH)['param_selection']
+
+    expected = {
+        'type': 'k-fold',
+        'k': 10,
+        'grid': {
+            'fit_intercept': [True, False],
+            'C': [10, 100, 1000, 10000, 100000]
+        }
+    }
+
+    assert actual == expected
+
+
+def test_get_classifier_config2():
+    """Tests that the app specified config is returned over the default config."""
+    actual = get_classifier_config('intent', APP_PATH, domain='store_info')['param_selection']
+
+    expected = {
+        'type': 'k-fold',
+        'k': 5,
+        'grid': {
+            'fit_intercept': [True, False],
+            'C': [1, 20, 300],
+            'class_bias': [1, 0]
         }
     }
 

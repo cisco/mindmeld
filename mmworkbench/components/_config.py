@@ -492,6 +492,11 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
     """Returns the application config if it exists, otherwise returns the default config."""
     try:
         module_conf = _get_config_module(app_path)
+
+        from pprint import pprint
+        pprint(module_conf)
+        pprint(app_path)
+
         attribute = {
             'domain': 'DOMAIN_MODEL_CONFIG',
             'intent': 'INTENT_MODEL_CONFIG',
