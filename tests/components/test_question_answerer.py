@@ -20,6 +20,7 @@ ENTITY_TYPE = 'store_name'
 APP_PATH = '../kwik_e_mart'
 DATA_FILE_PATH = os.path.dirname(__file__) + "/../kwik_e_mart/data/stores.json"
 
+
 @pytest.fixture
 def es_client():
     """An Elasticsearch client"""
