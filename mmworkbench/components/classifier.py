@@ -234,8 +234,9 @@ class Classifier(object):
         queries, labels = self._get_queries_and_labels(queries, label_set='test')
 
         if not queries:
-            logger.info('Could not evaluate model. No relevant examples in evaluation set defined'
-                        ' in your test.txt files.')
+            logger.info('Could not evaluate model since no relevant examples were found. Make sure '
+                        'the labeled queries for evaluation are placed in "test*" files alongside '
+                        'the training data in your Workbench project.')
             return
 
         evaluation = self._model.evaluate(queries, labels)
