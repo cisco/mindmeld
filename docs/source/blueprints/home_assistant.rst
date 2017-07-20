@@ -455,6 +455,7 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
 Change the model for the intent classifier to Support Vector Machine (SVM) classifier. SVM classifiers produce good results based on scientific literature:
 
 .. code:: python
+
    >>> search_grid = {
    ...    'C': [0.1, 0.5, 1, 5, 10, 50, 100, 1000, 5000],
    ...    'kernel': ['linear', 'rbf', 'poly'],
@@ -489,7 +490,48 @@ Change the model for the intent classifier to Support Vector Machine (SVM) class
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 98.27%, params: {'C': 5000, 'kernel': 'rbf'}
 
-Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing and error analysis. Refer to the appropriate sections in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
+Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing and error analysis. Refer to the :doc:`Intent Classifier <../userguide/intent_classifier>` in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
+
+The home assistant application also has role classifiers to distinguish between different role labels. For example, the annotated data in the "times_and_dates" domain and "check_alarm" intent have two types of roles: "old_time" and "new_time". We use the role classifier to correctly classify these roles for the "sys_time" entity:
+
+.. code:: python
+
+   >>> nlp.domains["times_and_dates"].intents["change_alarm"].load()
+   >>> nlp.domains["times_and_dates"].intents["change_alarm"].entities["sys_time"].role_classifier.fit()
+   >>> nlp.domains["times_and_dates"].intents["change_alarm"].entities["sys_time"].role_classifier.evaluate()
+   <StandardModelEvaluation score: 100.00%, 15 of 15 examples correct>
+
+In the above case, the role classifier was able to correctly distinguish between "new_time" and "old_time" for all test cases.
+
+The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configs that are namespaced by ``DOMAIN_MODEL_CONFIG and INTENT_MODEL_CONFIG`` respectively, that can also be tuned from there (other namespaces include ``ENTITY_MODEL_CONFIG and ROLE_MODEL_CONFIG``). If no custom model configurations are added to config.py file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
+
+.. code:: python
+
+   INTENT_MODEL_CONFIG = {
+       'model_type': 'text',
+       'model_settings': {
+           'classifier_type': 'logreg'
+       },
+       'param_selection': {
+           'type': 'k-fold',
+           'k': 5,
+           'grid': {
+               'fit_intercept': [True, False],
+               'C': [0.01, 1, 10, 100],
+               'class_bias': [0.7, 0.3, 0]
+           }
+       },
+       'features': {
+           "bag-of-words": {
+               "lengths": [1, 2]
+           },
+           "edge-ngrams": {"lengths": [1, 2]},
+           "in-gaz": {},
+           "exact": {"scaling": 10},
+           "gaz-freq": {},
+           "freq": {"bins": 5}
+       }
+   }
 
 .. admonition:: Exercise
 
@@ -499,7 +541,8 @@ Similar options are available for inspecting and experimenting with the Entity R
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The home assistant application does not have relationships between entities in the application's queries, we therefore do not need a parser configuration. As the applications evolves, such entity relationships will form and referring to :doc:`Language Parser <../userguide/parser>` will be helpful on building out such a parser configuration.
+The queries in the home assistant do not have complex relationships between entities. For example, for the annotated query "is the {back|location} door closed or open", there are no entities that describe the "location" entity. As queries become more complex, for example, "is the {green|color} {back|location} door closed or open", we would need to relate the "color" entity with the "location" entity. When this happens, we call these two related entities "entity groups".
+Since we do not have entity groups in the home assistant application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships will form. Please refer to :doc:`Entity Groups <../userguide/language_parsing.html?highlight=entity%20groups>` and :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
 
 
 9. Using the Question Answerer
