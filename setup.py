@@ -25,6 +25,7 @@ requirements = [
     'requests>=2.13.0',
     'scipy>=0.9',
     'scikit-learn>=0.18.1',
+    'urllib3<1.22,>=1.21.1',
 ]
 
 setup_requirements = [
