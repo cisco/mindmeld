@@ -185,7 +185,7 @@ For more information on the usage of role, check :doc:`Role <../userguide/role_c
 
 Dialogue state logic can get arbitrarily complex. Simple handlers can just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining a single dialogue state for multiple intents. In this section we will explore both options in detail.
 
-Let's take a closer look at these intents for controlling doors: ``close_door``, ``open_door``, ``lock_door``, and ``unlock_door``. Let's define a dialogue state for each of these intents.
+Let's take a closer look at these intents for controlling doors: ``close_door``, ``open_door``, ``lock_door``, and ``unlock_door``. Now we can define a dialogue state for each of these intents.
 
 .. code:: python
 
@@ -286,7 +286,7 @@ We include a code snippet for ``specify_location`` for your reference.
       responder.prompt(prompt)
 
 
-Here is the full list of states:
+Here is the full list of states in the home assistant blueprint:
 
    - greet
    - exit
