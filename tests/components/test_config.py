@@ -11,7 +11,8 @@ Tests for config module.
 
 from mmworkbench.components._config import _expand_parser_config, get_classifier_config
 
-APP_PATH = './'
+import os
+APP_PATH = os.path.dirname(os.path.abspath(__file__))
 
 BASIC_PARSER_CONFIG = {
     'product': ['quantity', 'size', 'option'],
@@ -101,7 +102,7 @@ def test_get_classifier_config():
 
 def test_get_classifier_config2():
     """Tests that the app specified config is returned over the default config."""
-    actual = get_classifier_config('intent', APP_PATH, domain='store_info')['param_selection']
+    actual = get_classifier_config('intent', APP_PATH)['param_selection']
 
     expected = {
         'type': 'k-fold',
