@@ -7,6 +7,7 @@ from builtins import object
 
 import copy
 import logging
+import hashlib
 
 from ..core import Entity
 from ._config import get_app_name, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
@@ -71,6 +72,9 @@ class EntityResolver(object):
                 base = {}
                 if doc.get('id'):
                     base['_id'] = doc['id']
+                else:
+                    # generate hash from canonical name as ID
+                    base['_id'] = hashlib.sha256(doc.get('cname').encode('utf-8')).hexdigest()
                 whitelist = doc['whitelist']
                 new_list = []
                 new_list.append({"name": doc['cname']})
