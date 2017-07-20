@@ -16,7 +16,7 @@ The Domain Classifier is run as the first step in the natural language processin
 Access the domain classifier
 ----------------------------
 
-Before using any of the NLP componenets, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class. 
+Before using any of the NLP components, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class. 
 
 .. code-block:: python
 
@@ -588,7 +588,7 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
 
 .. code-block:: python
 
-   >>>  [(r.example, r.probas) for r in eval.incorrect_results() if r.expected == 'times_and_dates'] 
+   >>> [(r.example, r.probas) for r in eval.incorrect_results() if r.expected == 'times_and_dates']
    [
     (<Query 'stop my timers'>,
      {
