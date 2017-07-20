@@ -11,15 +11,14 @@ Tests for `question_answerer` module.
 from __future__ import unicode_literals
 
 import pytest
-
-from mmworkbench.core import Entity
+import os
 
 from mmworkbench.components.question_answerer import QuestionAnswerer
 from mmworkbench.components._elasticsearch_helpers import create_es_client
 
 ENTITY_TYPE = 'store_name'
 APP_PATH = '../kwik_e_mart'
-
+DATA_FILE_PATH = os.path.dirname(__file__) + "/../kwik_e_mart/data/stores.json"
 
 @pytest.fixture
 def es_client():
@@ -30,7 +29,7 @@ def es_client():
 @pytest.fixture
 def answerer(resource_loader, es_client):
     QuestionAnswerer.load_kb(app_name='kwik_e_mart', index_name='store_name',
-                             data_file="../kwik_e_mart/data/stores.json")
+                             data_file=DATA_FILE_PATH)
     qa = QuestionAnswerer(APP_PATH)
     es_client.indices.flush(index='_all')
     return qa
