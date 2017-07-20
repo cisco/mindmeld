@@ -255,6 +255,9 @@ class Classifier(object):
             # Use specified or default config, customizing with provided kwargs
             model_config = default_config
             model_config.update(kwargs)
+            # If a parameter selection grid was passed in, set config params to None
+            if kwargs.get('param_selection'):
+                model_config.pop('params', None)
         return ModelConfig(**model_config)
 
     def dump(self, model_path):
