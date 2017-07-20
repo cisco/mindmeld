@@ -161,11 +161,11 @@ Below is the full list of intents for every domain:
    - Unknown
        - unknown
 
-There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Examples of system entities are sys-temperature, sys-time, sys-interval etc.
+There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are `sys_temperature`, `sys_time`, `sys_interval`, etc.
 
 Home assistant defines and uses the following named entities:
 
-    - ``all``: this entity is used to detect whether the user, for example: ``turn on the lights in {all|all} room``.
+    - ``all``: this entity is used to detect whether the user has asked for all entities, for example: ``turn on the lights in {all|all} room``.
     - ``appliance``: this entity is used to detect household appliances, for example: ``can you turn on the {tv|appliance}?``
     - ``city``: this entity is used to detect cities, for example: ``what is the weather in {shanghai|city}``
     - ``color``: this entity is used to detect color of the lights, for example: ``turn the lights to {soft white|color}``
@@ -174,9 +174,9 @@ Home assistant defines and uses the following named entities:
     - ``unit``: this entity is used to detect weather unit, for example: ``what is the forecast for {london|city} in {celsius|unit}``
     - ``duration``: this entity is used to detect time duration, for example: ``{15 minute|duration} alarm``
 
-Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature), for example: ``set my thermostat to turn on at {6 am|sys_time}`` and ``turn the heat off at {76 degrees|sys_temperature}``.
+Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature). Some examples for annotation with system entities: ``set my thermostat to turn on at {6 am|sys_time}`` and ``turn the heat off at {76 degrees|sys_temperature}``.
 
-In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate ``old_time`` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles.
+In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we can use roles to annotate ``old_time`` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles.
 
 For more information on the usage of role, check :doc:`Role <../userguide/role_classifier>`.
 
