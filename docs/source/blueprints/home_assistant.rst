@@ -176,16 +176,16 @@ Home assistant defines and uses the following named entities:
 
 Home assistant uses three system entities: `sys_time` (time), `sys_interval` (interval) and `sys_temperature` (temperature), for example: `set my thermostat to turn on at {6 am|sys_time}` and `turn the heat off at {76 degrees|sys_temperature}`.
 
-In many queries, there might be more than one entity of the same type. For example, `change my alarm from 7 am to 6 am`, both `7 am` and `6 am` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate `old_time` for `7 am` and `new_time` for `6 am`. We annotate the example as `change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}` with `old_time` and `new_time` as roles. This way, we can distinguishh each entity based on their roles.
+In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate `old_time` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles.
 
 For more information on the usage of role, check :doc:`Role <../userguide/role_classifier>`.
 
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-Dialogue state logic can get arbitrarily complex. Simple handlers could just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining one dialogue state for multiple intents. In this section we will explore both options in details.
+Dialogue state logic can get arbitrarily complex. Simple handlers can just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining a single dialogue state for multiple intents. In this section we will explore both options in detail.
 
-In the home assisstant blueprint, let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents.
+Let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents.
 
 .. code:: python
 
@@ -319,8 +319,7 @@ Here is the full list of states:
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we still need a local instance of Elasticsearch running in the background. If you have 
-, you can set one up quickly:
+The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we still need a local instance of Elasticsearch running in the background. If you have homebrew, you can set one up quickly:
 
 .. code:: bash
 
