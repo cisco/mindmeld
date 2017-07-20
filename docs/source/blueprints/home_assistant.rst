@@ -360,13 +360,13 @@ The training data for intent classification and entity recognition can be found 
 
    - Read :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluation and error analysis <../userguide/nlp>` in the user guide.
 
-   - To train NLP models for your own home-assistant app, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (city, sys_time) that your app needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your app.
+   - To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (``city``, ``sys_time``) that your application needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your application.
 
 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To put the training data to use and train a baseline NLP system for your app using Workbench's default machine learning settings, use the :meth:``build()`` method of the :class:``NaturalLanguageProcessor`` class:
+To put the training data to use and train a baseline NLP system for your applicatio using Workbench's default machine learning settings, use the :meth:``build()`` method of the :class:``NaturalLanguageProcessor`` class:
 
 .. code:: python
 
@@ -397,7 +397,7 @@ To put the training data to use and train a baseline NLP system for your app usi
    Best accuracy: 98.43%, params: {'fit_intercept': True, 'C': 100, 'class_weight': {0: 0.99365079365079367, 1: 1.5915662650602409, 2: 1.3434782608695652, 3: 1.5222222222222221, 4: 0.91637426900584784, 5: 0.74743589743589745, 6: 1.9758620689655173, 7: 1.4254901960784312, 8: 1.0794871794871794, 9: 1.0645320197044335, 10: 1.1043715846994535, 11: 1.2563909774436088, 12: 1.3016260162601625, 13: 1.0775510204081633, 14: 1.8384615384615384}}
 .. tip::
 
-  During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+  During active development, it is helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what is happening behind the scenes. All code snippets here assume that logging level has been set to verbose (``wb.configure_logs()``).
 
 You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` for the domain ``smart_home`` and about 99% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>` for the domain ``smart_home`` and intent ``turn_on_thermostat``. To see how the trained NLP pipeline performs on a test query, use the :meth:``process()`` method.
 
@@ -415,7 +415,7 @@ You should see a cross validation accuracy of around 98% for the :doc:`Intent Cl
     'text': 'please set my alarm to 8am for tomorrow'
     }
 
-For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom home assistant data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.
+For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom home assistant data, you may find that the default settings may not be optimal and you can get better accuracy by individually optimizing each of the NLP components.
 
 Home assistant application consists of five domains and more than twenty intents so we need to do a fair bit of fine tuning of the classifiers.
 
@@ -435,9 +435,9 @@ A good place to start is by inspecting the baseline configuration used by the di
     'in-gaz': {}
    }
 
-You can experiment with different learning algorithms (model types), features, hyperparameters and cross-validation settings by passing the appropriate parameters to the classifier's :meth:``fit()`` method. Here are a couple of examples.
+You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier's :meth:``fit()`` method. Here are a couple of examples.
 
-Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
+For example, we can hange the feature extraction settings to use bag of bigrams in addition to the default bag of words:
 
 .. code:: python
 
@@ -452,7 +452,7 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 98.46%, params: {'fit_intercept': False, 'C': 10, 'class_weight': {0: 0.98518518518518516, 1: 2.3803212851405622, 2: 1.801449275362319, 3: 2.2185185185185183, 4: 0.80487329434697852, 5: 0.41068376068376072, 6: 3.2770114942528741, 7: 1.9928104575163397, 8: 1.1854700854700853, 9: 1.1505747126436781, 10: 1.2435336976320581, 11: 1.5982456140350876, 12: 1.7037940379403793, 13: 1.180952380952381, 14: 2.9564102564102566}}
 
-Change the model for the intent classifier to Support Vector Machine (SVM) classifier. SVM classifiers produce good results based on scientific literature:
+In another example, we can change the model for the intent classifier to Support Vector Machine (SVM) classifier, which can work well in some dataset:
 
 .. code:: python
 
@@ -490,9 +490,9 @@ Change the model for the intent classifier to Support Vector Machine (SVM) class
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 98.27%, params: {'C': 5000, 'kernel': 'rbf'}
 
-Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing and error analysis. Refer to the :doc:`Intent Classifier <../userguide/intent_classifier>` in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
+Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the :doc:`Intent Classifier <../userguide/intent_classifier>` in the user guide for a detailed discussion on training, tuning, and evaluating the various Workbench classifiers.
 
-The home assistant application also has role classifiers to distinguish between different role labels. For example, the annotated data in the "times_and_dates" domain and "check_alarm" intent have two types of roles: "old_time" and "new_time". We use the role classifier to correctly classify these roles for the "sys_time" entity:
+The home assistant application also has role classifiers to distinguish between different role labels. For example, the annotated data in the ``times_and_dates`` domain and ``check_alarm`` intent have two types of roles: ``old_time`` and ``new_time``. We use the role classifier to correctly classify these roles for the ``sys_time`` entity:
 
 .. code:: python
 
@@ -501,9 +501,9 @@ The home assistant application also has role classifiers to distinguish between 
    >>> nlp.domains["times_and_dates"].intents["change_alarm"].entities["sys_time"].role_classifier.evaluate()
    <StandardModelEvaluation score: 100.00%, 15 of 15 examples correct>
 
-In the above case, the role classifier was able to correctly distinguish between "new_time" and "old_time" for all test cases.
+In the above case, the role classifier was able to correctly distinguish between ``new_time`` and ``old_time`` for all test cases.
 
-The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configs that are namespaced by ``DOMAIN_MODEL_CONFIG and INTENT_MODEL_CONFIG`` respectively, that can also be tuned from there (other namespaces include ``ENTITY_MODEL_CONFIG and ROLE_MODEL_CONFIG``). If no custom model configurations are added to config.py file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
+The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configurations that are namespaced by ``DOMAIN_MODEL_CONFIG and INTENT_MODEL_CONFIG`` respectively; other namespaces include ``ENTITY_MODEL_CONFIG and ROLE_MODEL_CONFIG``. If no custom model configuration is added to ``config.py`` file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
 
 .. code:: python
 
@@ -535,13 +535,13 @@ The application configuration file, ``config.py``, at the top level of home assi
 
 .. admonition:: Exercise
 
-   Experiment with different models, features and hyperparameter selection settings to see how they affect the classifier performance. It's helpful to have a held-out validation set to evaluate your trained NLP models and analyze the misclassified test instances. You could then use observations from the error analysis to inform your machine learning experimentation. For more examples and discussion on this topic, refer to the :doc:`user guide <../userguide/nlp>`.
+   Experiment with different models, features, and hyperparameter selection settings to see how they affect the classifier performance. It is helpful to have a held-out validation set to evaluate your trained NLP models and analyze the misclassified test instances. You could then use observations from the error analysis to inform your machine learning experimentation. For more examples and discussion on this topic, refer to the :doc:`user guide <../userguide/nlp>`.
 
 
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The queries in the home assistant do not have complex relationships between entities. For example, for the annotated query "is the {back|location} door closed or open", there are no entities that describe the "location" entity. As queries become more complex, for example, "is the {green|color} {back|location} door closed or open", we would need to relate the "color" entity with the "location" entity. When this happens, we call these two related entities "entity groups".
+The queries in the home assistant do not have complex relationships between entities. For example, for the annotated query ``is the {back|location} door closed or open``, there is no entity that describes the ``location`` entity. As queries become more complex, for example, ``is the {green|color} {back|location} door closed or open``, we would need to relate the ``color`` entity with the ``location`` entity. When this happens, we call these two related entities ``entity groups``.
 Since we do not have entity groups in the home assistant application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships will form. Please refer to :doc:`Entity Groups <../userguide/language_parsing.html?highlight=entity%20groups>` and :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
 
 
@@ -554,7 +554,7 @@ The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational app using the :class:``Conversation`` class in Workbench.
+Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational application using the :class:``Conversation`` class in Workbench.
 
 .. code:: python
 
@@ -563,7 +563,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
    >>> conv.say('set alarm for 6am')
    ['Ok, I have set your alarm for 06:00:00.']
 
-The :meth:``say()`` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
+The :meth:``say()`` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
 
 You can also try out multi-turn dialogues:
 
