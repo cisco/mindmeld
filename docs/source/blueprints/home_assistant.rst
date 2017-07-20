@@ -161,7 +161,7 @@ Below is the full list of intents for every domain:
    - Unknown
        - unknown
 
-There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are `sys_temperature`, `sys_time`, `sys_interval`, etc.
+There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are ``sys_temperature``, ``sys_time``, ``sys_interval``, etc.
 
 Home assistant defines and uses the following named entities:
 
