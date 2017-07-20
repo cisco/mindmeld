@@ -500,6 +500,8 @@ The home assistant application also has role classifiers to distinguish between 
 
 In the above case, the role classifier was able to correctly distinguish between "new_time" and "old_time" for all test cases.
 
+The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configs that are namespaced by DOMAIN_MODEL_CONFIG and INTENT_MODEL_CONFIG respectively, that can also be tuned from there (other namespaces include ENTITY_MODEL_CONFIG and ROLE_MODEL_CONFIG). If no custom model configurations are added to config.py file, Workbench will use it's default classifier configurations for training and evaluation.
+
 
 .. admonition:: Exercise
 
