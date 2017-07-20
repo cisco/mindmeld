@@ -16,7 +16,7 @@ The Role Classifier is run as the fourth step in the natural language processing
 Access a role classifier
 ------------------------
 
-Before using any of the NLP componenets, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
+Before using any of the NLP components, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
 
 .. code-block:: python
 
@@ -49,7 +49,7 @@ Next, verify that the NLP has correctly identified all the domains and intents f
    ...
    >>> nlp.domains['weather'].intents
    {
-    'check-weather': <IntentProcessor 'check-weather' ready: False, dirty: False>
+    'check_weather': <IntentProcessor 'check_weather' ready: False, dirty: False>
    }
 
 Workbench isn't aware of the different entity types for your app till it has loaded the labeled training queries. Load the relevant queries by calling the :meth:`build` method for the intent you are interested in. The :meth:`build` operation can take several minutes if the number of training queries for the chosen intent is large. Once the build is complete, you can inspect the identified entity types.
@@ -402,7 +402,7 @@ Once the entities have been detected, you can call the role classifier's :meth:`
    >>> rc.predict(query, entities, 1)
    'newtime'
 
-The :meth:`predict` method returns the label for the role with highest predicted probability. It gets called by the natural language processor's :meth:`process` method at runtime to classify the roles for all detected entities. 
+The :meth:`predict` method returns the label for the role with highest predicted probability. It gets called by the natural language processor's :meth:`process` method at runtime to classify the roles for all the detected entities in the incoming query.
 
 The :meth:`predict` method runs on one entity at a time. To instead test a trained model on a batch of labeled test queries and evaluate classifier performance, see the next section.
 
@@ -520,7 +520,7 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
 
 .. code-block:: python
 
-   >>>  [(r.example, r.probas) for r in eval.incorrect_results() if r.expected == 'newtime']
+   >>> [(r.example, r.probas) for r in eval.incorrect_results() if r.expected == 'newtime']
    [
      (
        (
