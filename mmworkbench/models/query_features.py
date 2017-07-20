@@ -9,8 +9,8 @@ import math
 import re
 
 from ..core import resolve_entity_conflicts
-from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC, register_features,
-                      mask_numerics, get_ngram)
+from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
+                      register_features, mask_numerics, get_ngram)
 
 # TODO: clean this up a LOT
 
@@ -157,6 +157,8 @@ def extract_in_gaz_span_features():
 
             return feat_seq
 
+        # TODO: clean up this method -- currently the parts involving sys_types are
+        # completely broken
         def get_gaz_spans(query, gazetteers, sys_types):
             """Collect tuples of (start index, end index, ngram, entity type)
             tracking ngrams that match with the entity gazetteer data
@@ -370,7 +372,7 @@ def extract_sys_candidate_features(start_positions=(0,)):
     """
     def _extractor(query, resources):
         feat_seq = [{} for _ in query.normalized_tokens]
-        system_entities = query.get_system_entity_candidates(resources['sys_types'])
+        system_entities = query.get_system_entity_candidates(resources[SYS_TYPES_RSC])
         resolve_entity_conflicts([system_entities])
         for entity in system_entities:
             for i in range(entity['start'], entity['end']+1):

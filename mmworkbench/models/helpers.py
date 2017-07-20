@@ -18,10 +18,10 @@ ENTITIES_LABEL_TYPE = 'entities'
 
 
 # resource/requirements names
-GAZETTEER_RSC = "gazetteers"
-WORD_FREQ_RSC = "w_freq"
-QUERY_FREQ_RSC = "q_freq"
-
+GAZETTEER_RSC = 'gazetteers'
+QUERY_FREQ_RSC = 'q_freq'
+SYS_TYPES_RSC = 'sys_types'
+WORD_FREQ_RSC = 'w_freq'
 
 OUT_OF_BOUNDS_TOKEN = '<$>'
 
