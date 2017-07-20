@@ -10,7 +10,7 @@ from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 
 from . import tagging
-from .helpers import GAZETTEER_RSC, get_feature_extractor, register_model
+from .helpers import get_feature_extractor, register_model
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, SkLearnModel
 
 logger = logging.getLogger(__name__)

@@ -375,15 +375,15 @@ def extract_sys_candidate_features(start_positions=(0,)):
         system_entities = query.get_system_entity_candidates(resources[SYS_TYPES_RSC])
         resolve_entity_conflicts([system_entities])
         for entity in system_entities:
-            for i in range(entity['start'], entity['end']+1):
+            for i in entity.token_span:
                 for j in start_positions:
                     if 0 < i-j < len(feat_seq):
                         feat_name = 'sys-candidate|type:{}:{}|pos:{}'.format(
-                            entity['type'], entity.get('grain'), j)
+                            entity.entity.type, entity.entity.value.get('grain'), j)
                         feat_seq[i-j][feat_name] = 1
                         feat_name = 'sys-candidate|type:{}:{}|pos:{}|log-len'.format(
-                            entity['type'], entity.get('grain'), j)
-                        feat_seq[i-j][feat_name] = math.log(len(entity['entity']))
+                            entity.entity.type, entity.entity.value.get('grain'), j)
+                        feat_seq[i-j][feat_name] = math.log(len(entity.normalized_text))
         return feat_seq
 
     return _extractor
