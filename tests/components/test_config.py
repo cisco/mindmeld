@@ -11,7 +11,7 @@ Tests for config module.
 
 from mmworkbench.components._config import _expand_parser_config, get_classifier_config
 
-APP_PATH = '../kwik_e_mart'
+APP_PATH = './'
 
 BASIC_PARSER_CONFIG = {
     'product': ['quantity', 'size', 'option'],
