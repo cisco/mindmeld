@@ -322,6 +322,7 @@ Here is the full list of states:
 The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we still need a local instance of Elasticsearch running in the background. If you have brew, you can set one up quickly:
 
 .. code:: bash
+
    >>> brew install elasticsearch
    >>> elasticsearch
 
@@ -454,6 +455,7 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
 Change the model for the intent classifier to Support Vector Machine (SVM) classifier. SVM classifiers produce good results based on scientific literature:
 
 .. code:: python
+
    >>> search_grid = {
    ...    'C': [0.1, 0.5, 1, 5, 10, 50, 100, 1000, 5000],
    ...    'kernel': ['linear', 'rbf', 'poly'],
@@ -493,6 +495,7 @@ Similar options are available for inspecting and experimenting with the Entity R
 The home assistant application also has role classifiers to distinguish between different role labels. For example, the annotated data in the "times_and_dates" domain and "check_alarm" intent have two types of roles: "old_time" and "new_time". We use the role classifier to correctly classify these roles for the "sys_time" entity:
 
 .. code:: python
+
    >>> nlp.domains["times_and_dates"].intents["change_alarm"].load()
    >>> nlp.domains["times_and_dates"].intents["change_alarm"].entities["sys_time"].role_classifier.fit()
    >>> nlp.domains["times_and_dates"].intents["change_alarm"].entities["sys_time"].role_classifier.evaluate()
@@ -500,9 +503,10 @@ The home assistant application also has role classifiers to distinguish between 
 
 In the above case, the role classifier was able to correctly distinguish between "new_time" and "old_time" for all test cases.
 
-The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configs that are namespaced by DOMAIN_MODEL_CONFIG and INTENT_MODEL_CONFIG respectively, that can also be tuned from there (other namespaces include ENTITY_MODEL_CONFIG and ROLE_MODEL_CONFIG). If no custom model configurations are added to config.py file, Workbench will use it's default classifier configurations for training and evaluation. Here is an example of an intent configuration:
+The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configs that are namespaced by ``DOMAIN_MODEL_CONFIG and INTENT_MODEL_CONFIG`` respectively, that can also be tuned from there (other namespaces include ``ENTITY_MODEL_CONFIG and ROLE_MODEL_CONFIG``). If no custom model configurations are added to config.py file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
 
 .. code:: python
+
    INTENT_MODEL_CONFIG = {
        'model_type': 'text',
        'model_settings': {
