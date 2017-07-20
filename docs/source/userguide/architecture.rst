@@ -119,7 +119,7 @@ After the domain, intent, entities and roles have been determined by the 4-level
 Entity Resolver
 ~~~~~~~~~~~~~~~
 
-The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity-resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" might be resolved to "San Francisco, CA". 
+The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity_resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" might be resolved to "San Francisco, CA". 
 
 In conversational interactions, users generally refer to entities in informal terms, using abbreviations, nicknames, and other aliases, rather than their official standardized names. Robust entity resolution is hence key to a seamless conversational experience. The MindMeld Entity Resolver leverages advanced text relevance algorithms, similar to the ones used in state-of-the-art information retrieval systems to ensure high resolution accuracies.
 
@@ -138,7 +138,7 @@ In the :ref:`example <nlp_output>` above, the resolved entities have been arrang
 
 The first two groups represent the products to be ordered, whereas the last group contains the store information. The main entity at the top in each group is called the parent or the `head <https://en.wikipedia.org/wiki/Head_(linguistics)>`_, whereas the other entities are called its children or `dependents <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_. This structured representation of the user's natural language input can then be interpreted by the app to decide on the next action and/or response. E.g. submitting the order to a point-of-sale system to complete the user's order.
 
-Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The MindMeld Language Parser, on the other hand, is a config-driven rule-based parser which works out-of-the-box without the need for training. Refer to the :doc:`User Guide <language_parser>` for details on how Workbench can be used to configure the parser for optimum performance for a specific app.
+Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The MindMeld Language Parser, on the other hand, is a config-driven rule-based parser which works out-of-the-box without the need for training. Refer to the :doc:`User Guide <parser>` for details on how Workbench can be used to configure the parser for optimum performance for a specific app.
 
 The Natural Language Processor gets half of the job done, namely, understanding what the user wants. The next two components in the MindMeld pipeline address the other half by responding appropriately to the user and advancing the conversation.
 
@@ -162,14 +162,25 @@ Architecting the dialogue manager correctly is often one of the most challenging
 
 Refer to Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide for a practical introduction to dialogue state tracking using Workbench. We will see more examples in the :doc:`Dialogue Manager User Guide <dm>`. 
 
-.. 
-  Application Manager
-  -------------------
 
-  Gateway
-  -------
+Gateway
+-------
+
+The Gateway is the component responsible for processing external requests via various endpoints, and for persisting user state. Supported endpoints include messaging platforms such as Cisco Spark or Facebook Messenger, intelligent assistants such as Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
+
+The gateway is able to identify users from various endpoints, load their context, and convert requests into a format the Workbench-trained components can consume. After a request has been processed, it converts responses to the appropriate client format, and sends the response back to the endpoint.
 
 
+Application Manager
+-------------------
+
+The Application Manager is the core orchestrator of the MindMeld platform. It performs the following functions:
+
+	- Receives the client request from the gateway
+	- Processes the request by passing it through all the Workbench-trained components of the MindMeld platform
+	- Returns the final response back to the gateway once the processing is complete
+
+The application manager is hidden from the Workbench developer, and accomplishes its tasks behind the scenes.
 
 
 That concludes our quick tour of the MindMeld Conversational AI platform. Now that we are familiar with all its components, the rest of this user guide will focus on hands-on tutorials using Workbench to build modern data-driven conversational apps that run on the MindMeld platform.

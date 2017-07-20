@@ -4,21 +4,16 @@
 Getting Started
 ===============
 
-Obtain a token
-----------------
-
-**TODO: Revisit this section -- talk more about user name and password**
-
-MindMeld Workbench is a commercial software product which requires a license to use. For more
-information or to inquire about obtaining access to MindMeld Workbench, please
-`contact MindMeld <mailto:info@mindmeld.com>`_. Once approved, you will receive credentials which
-can be used to install MindMeld Workbench and retrieve related files.
+MindMeld Workbench is a commercial software product which leverages a number of technologies. This
+page serves as a guide to installing Workbench on your personal machine and
+setting up your first Workbench project. The username and password used to access the MindMeld Learning
+Center will be required in this process.
 
 Install Java 8
 --------------
 
-Workbench has a numerical parsing component that runs in Java. Java 8 or newer is required. You can
-use the following command to confirm that Java 8 is installed on your system.
+MindMeld Workbench has a numerical parsing component that runs in Java. Java 8 or newer is
+required. To check whether Java 8 is already installed on your system, use the following command:
 
 .. code-block:: console
 
@@ -40,10 +35,10 @@ based components. Generally, the latest version of Elasticsearch is recommended,
 is required.
 
 Local Elasticsearch Cluster
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For the best performance with smaller applications, Elasticsearch should be installed locally. On
-Mac OS X systems with `homebrew <https://brew.sh/>`_ installed, the simplest way to install
+For the best developer experience with smaller applications, Elasticsearch should be installed locally. On
+macOS systems with `homebrew <https://brew.sh/>`_ installed, the simplest way to install
 Elasticsearch is with the following set of commands.
 
 .. code-block:: console
@@ -57,7 +52,7 @@ For other systems, or for more information on configuring Elasticsearch, go
 After Elasticsearch has been configured simply run ``elasticsearch`` to start the process.
 
 Remote Elasticsearch Cluster
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you have configured a remote Elasticsearch cluster to host Elasticsearch, you will need to set
 the ``MM_ES_HOST`` environment variable accordingly. Add this to your shell's profile
@@ -67,7 +62,7 @@ the ``MM_ES_HOST`` environment variable accordingly. Add this to your shell's pr
 
     export MM_ES_HOST="my-es-host.com"
 
-Before attempting use workbench, make sure to re-source so the environment variable is set.
+Before attempting to use workbench, make sure to re-source so the environment variable is set.
 
 .. code-block:: console
 
@@ -79,7 +74,7 @@ Install Python
 
 Workbench is a Python-based machine learning library. To use Workbench, you will need to have
 Python installed. If Python is not already installed on your system, you can get it at
-`www.python.org <https://www.python.org/>`_ or use `pyenv <https://github.com/pyenv/pyenv>`_ to
+`python.org <https://www.python.org/>`_ or use `pyenv <https://github.com/pyenv/pyenv>`_ to
 manage multiple versions of Python. For workbench, Python 3.4 and newer are actively supported.
 The latest version of Python 3 is recommended. Python 2.7+ should work fine too, but it is
 deprecated.
@@ -164,20 +159,37 @@ binary module installation (a.k.a. wheels). To upgrade the pip module, type:
     [...]
     Successfully installed pip-9.0.1
 
-MindMeld Workbench is not publicly available, and can only be installed from MindMeld's private Python
-Package Index (PyPI). Once you have confirmed pip is installed, you need to configure it so that it
-will work with the MindMeld PyPI. On Mac OS X the pip config file is located at ``~/.pip/pip.conf``.
-You can read more about configuring pip on your platform, including where config files are located
-in the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
+MindMeld Workbench is not publicly available, and can only be installed from MindMeld's private
+Python Package Index (PyPI). Once you have confirmed pip is installed, you need to configure it
+so that it will work with the MindMeld PyPI. On macOS the pip config file is located at
+``~/.pip/pip.conf``. You can read more about configuring pip on your platform, including where
+config files are located in the
+`pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
 
 The MindMeld PyPI is hosted at https://pypi.mindmeld.com/simple/. In order to access it you will
 need to authenticate using your username and password. Add the following lines to your pip
-config file.
+config file, substituting your username and password where appropriate.
 
 .. code-block:: text
 
   [global]
-  extra-index-url = https://username:password@pypi.mindmeld.com/simple/
+  extra-index-url = https://{YOUR_USERNAME}:{YOUR_PASSWORD}@pypi.mindmeld.com/simple/
+
+Configuring Workbench
+---------------------
+
+Certain MindMeld Workbench capabilities, such as accessing
+:doc:`blueprints <../blueprints/overview>` require authenticating using your MindMeld username and
+password. Workbench will read your credentials from its configuration file, located at
+``~/.mmworkbench/config``. Add the following lines to the Workbench configuration file,
+substituting your username and password where appropriate.
+
+.. code-block:: text
+
+  [mmworkbench]
+  username = {YOUR_USERNAME}
+  password = {YOUR_PASSWORD}
+
 
 Install Workbench
 -----------------
@@ -260,8 +272,19 @@ populated with the directories and files of your application blueprint.
     :width: 700px
     :align: center
 
-Now create a new Python notebook by clicking on the “New” button and selecting the appropriate Python version. This will create new notebook file called Untitled.ipynb in your workspace. Click on the notebook title to change the name to something like 'my_app'.
+Now create a new Python notebook by clicking on the “New” button and selecting the appropriate
+Python version. This will create a new notebook file called Untitled.ipynb in your workspace.
+Click on the notebook title to change the name to something like 'my_app'.
 
-A notebook contains a list of cells. Each cell can contain executable code or formatted text. Right now the notebook contains only one empty code cell, labeled “In [1]:”. Try typing print("Hello world!") in the cell, and click on the play button or type Shift-Enter. This sends the current cell to this notebook’s python kernel, which runs it and returns the output. The result is displayed below the cell, and since we reached the end of the notebook, a new cell is automatically created. Go through the User Interface Tour from Jupyter’s Help menu to learn the basics.
+A notebook contains a list of cells. Each cell can contain executable code or formatted text.
+Right now the notebook contains only one empty code cell, labeled “In [1]:”. Try typing
+``print("Hello world!")`` in the cell, and click on the play button or press Shift-Enter. This sends
+the current cell to this notebook’s python kernel, which runs it and returns the output. The result
+is displayed below the cell. Since we reached the end of the notebook, a new cell is
+automatically created after cell execution. Go through the User Interface Tour from Jupyter’s Help menu to learn
+the basics.
 
-You are now ready to begin training and evaluating machine learning models for your application. The following sections describe the modules and functionality available in Workbench to build and evaluate state-of-the-art models to understand language, answer questions and power an advanced conversational interface.
+You are now ready to begin training and evaluating machine learning models for your application.
+The following sections describe the modules and functionality available in Workbench to build and
+evaluate state-of-the-art models to understand language, answer questions and power an advanced
+conversational interface.

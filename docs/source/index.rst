@@ -11,12 +11,20 @@ For nearly three decades, application design has centered around the Graphical U
 Today, faced with these unfamiliar challenges, developers and companies struggle to create reliable and useful conversational applications. In fact, the vast majority of attempts have failed. This woeful track record can no doubt be traced to the dearth of tools and best practices companies could use to find the path to success. A new playbook and a new generation of tools is desperately needed to help organizations chart a fruitful course in the new frontier of conversational application design.
 
 
-About This Guide
-----------------
+About This Playbook
+-------------------
 
-This guide represents a first step toward defining the governing principles and best practices which will enable developers to build great conversational applications. It is the result of several years of practical experience building and deploying dozens of the most advanced conversational applications achievable. This guide does not survey cutting-edge research and state-of-the-art algorithms; there are many other helpful resources already available for that purpose. Instead, it serves as a comprehensive playbook to help developers and data scientists build real production applications. The detailed instructions, practical advice, and real-world examples provided here should empower developers to improve the quality and variety of conversational experiences of the coming months and years.
+This playbook represents a first step toward defining the governing principles and best practices which will enable developers to build great conversational applications. It is the result of several years of practical experience building and deploying dozens of the most advanced conversational applications achievable. Cutting-edge research and state-of-the-art algorithms are not surveyed here; there are many other resources available for that purpose. Instead, this playbook focuses on helping developers and data scientists build real production applications. The detailed instructions, practical advice, and real-world examples provided here should empower developers to improve the quality and variety of conversational experiences of the coming months and years.
 
-This guide assumes familiarity with `Machine Learning <https://www.coursera.org/learn/machine-learning>`_ and the `Python <https://www.python.org/>`_ programming language, including functional knowledge of the `scikit-learn <http://scikit-learn.org/>`_ python package. The :ref:`intro` provides an overview of the state-of-the-art in building conversational applications and discusses tradeoffs associated with different implementation approaches. The :ref:`quickstart` illustrates how to build a simple end-to-end conversational application using Workbench, the MindMeld Conversational AI toolkit. The :ref:`userguide` covers conversational applications and MindMeld Workbench in depth. In the process, it highlights many of the common techniques and best practices that are used to build production-quality conversational experiences today.
+The :ref:`intro` provides an overview of the state of the art in building conversational applications and discusses tradeoffs associated with different implementation approaches. 
+
+The :ref:`quickstart` illustrates how to build an end-to-end conversational application using Workbench, the MindMeld Conversational AI toolkit. You can apply it directly while building a conversational application, or just read it to learn the essentials of Workbench.
+
+The :ref:`blueprints` section explains how to use Workbench to quickly build and test a fully working conversational application without writing code or collecting training data. You can bootstrap a Blueprint app into a more specialized and powerful conversational application, or just use the Blueprint app as a demo or research tool. 
+
+The :ref:`userguide` covers each component of the MindMeld platform in depth and explains how to use Workbench to build and configure each component for optimal performance. It functions as a technical supplement that details how to improve an application built following either the :ref:`quickstart` or the :ref:`blueprints`. The :ref:`userguide` highlights many common techniques and best practices that contribute to successful conversational experiences today. 
+
+Readers should be familiar with `Machine Learning <https://www.coursera.org/learn/machine-learning>`_ and the `Python <https://www.python.org/>`_ programming language, including functional knowledge of the `scikit-learn <http://scikit-learn.org/>`_ python package.
 
 
 
@@ -32,6 +40,7 @@ Contents
    intro/approaches_for_building_conversational_applications
    intro/anatomy_of_a_conversational_ai_interaction
    intro/introducing_mindmeld_workbench
+   intro/key_concepts
 
 
 .. toctree::
@@ -61,7 +70,6 @@ Contents
    blueprints/food_ordering
    blueprints/video_discovery
    blueprints/home_assistant
-   blueprints/meeting_assistant
 
 
 .. toctree::
@@ -71,25 +79,20 @@ Contents
 
    userguide/introduction
    userguide/getting_started
-   userguide/key_concepts
    userguide/architecture
-   userguide/workbench_apps
-   userguide/kb
    userguide/nlp
    userguide/domain_classifier
    userguide/intent_classifier
    userguide/entity_recognizer
    userguide/role_classifier
    userguide/entity_resolver
-   userguide/language_parser
+   userguide/parser
+   userguide/kb
    userguide/dm
-   userguide/deployment
-   userguide/integration
 
 .. toctree::
    :maxdepth: 2
-   :caption: Internal Documentation
+   :caption: API
    :name: internal
 
    internal/api_reference
-   internal/history

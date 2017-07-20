@@ -1,70 +1,19 @@
 Food Ordering
 =============
 
-This page documents the Workbench blueprint for a conversational application that allows users to order food for delivery from nearby restaurants.
-
-
-Quick Start
------------
-
-|
-
-1. Download
-^^^^^^^^^^^
-
-Open a python shell and type the following commands to download and set up the food ordering blueprint application.
-
-.. code:: python
-
-   >>> import mmworkbench as wb
-   >>> wb.configure_logs()
-   >>> wb.blueprint('food_ordering')
-
-
-2. Build
-^^^^^^^^
-
-Build the Natural Language Processing models that power the app.
-
-.. code:: python
-
-   >>> from mmworkbench.components import NaturalLanguageProcessor
-   >>> nlp = NaturalLanguageProcessor('food_ordering')
-   >>> nlp.build()
-
-
-3. Run
-^^^^^^
-
-Interact with the app in the python shell using the commands below. Try out the examples shown here as well as some queries of your own.
-
-.. code:: python
-
-   >>> from mmworkbench.components.dialogue import Conversation
-   >>> conv = Conversation(nlp=nlp, app_path='food_ordering')
-   >>> conv.say('Hello!')
-   ['Hello. Some nearby popular restaurants you can order delivery from are Curry Up Now, Ganim's Deli, Firetrail Pizza.]
-   >>> conv.say("Get me a saag paneer and garlic naan from urban curry")
-   ['Sure, I got Saag Paneer, Garlic Naan from Urban Curry for a total price of $14.70. Would you like to place the order?']
-   >>> conv.say("Bye")
-   ['Goodbye!']
-
-
-Deep Dive
----------
-
-|
+In this step-by-step walkthrough, you'll build a conversational application that allows users to order food for delivery from nearby restaurants, using the Workbench blueprint for this purpose.
 
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-This application provides a conversational interface for users to order food delivery from a service like Amazon Restaurants, Grubhub or DoorDash. It allows users to place these orders in a hands-free manner from the convenience of their homes, while still providing the same experience they would get when conversing with a restaurant waiter or a drive-through attendant.
-
+In a hands-free manner, from the convenience of their homes, users should have the same food-ordering experience as when conversing with a restaurant waiter or a drive-through attendant. The food is ordered for delivery from a service similar to Amazon Restaurants, Grubhub or DoorDash.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The conversational user flows for a food ordering app can get highly complex, depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
+The conversational flows for food ordering can be highly complex, depending on the desired app functionality and the amount of user guidance required at each step. Enumerating and finalizing all anticipated user interactions requires multiple iterations.
+
+Here are some examples of scripted dialogue interactions for conversational flows.
 
 .. image:: /images/food_ordering_interactions.png
     :width: 700px
@@ -72,13 +21,13 @@ The conversational user flows for a food ordering app can get highly complex, d
 
 .. admonition:: Exercise
 
-   Pick a representation (textual or graphical) that's convenient to you and try to design as many user flows as you can, in each case, capturing the entire dialogue from start to finish. Think of scenarios other than the examples above, such as a user asking to order from a specific restaurant without choosing a dish, requesting a dish that is not available at the selected restaurant, asking for a restaurant location that doesn't exist, choosing a customization option that is not applicable for the chosen dish, etc.
+   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking to order from a specific restaurant without choosing a dish; requesting a dish that is not available at the selected restaurant; asking for a restaurant location that doesn't exist; choosing a customization option that is not applicable for the chosen dish, and so on.
 
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The NLP model hierarchy for our food ordering application is illustrated below.
+Here is the NLP model hierarchy for our food ordering application.
 
 .. image:: /images/food_ordering_hierarchy.png
     :width: 700px
@@ -105,9 +54,9 @@ For this app, only the ``build_order`` intent requires entity recognition. This 
 
 .. admonition:: Exercise
 
-   While the intents and entities in the blueprint provide a good starting point, you may need additional ones to cover the desired scope of your app. Enumerate some other intents (e.g. ``check_order_status``, ``get_calories``, etc.) and entities (e.g. ``location``, ``price_level``, etc.) you may need in a food ordering use case.
+   While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., ``check_order_status``, ``get_calories``, and so on) and entities (e.g., ``location``, ``price_level``, and so on) that make sense for a food ordering use case.
 
-Our application requires labeled training data covering all of the above intents and entities in order to train the different machine learning models in the NLP pipeline. To download the required data and accompanying code for running this blueprint, run this command in a directory of your choice.
+To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
 
 .. code-block:: console
 
@@ -123,17 +72,37 @@ This should create a Workbench project folder called ``food_ordering`` in your c
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-To capture the functionality we envision, our app needs seven dialogue states, one for each intent:
+To support the functionality we envision, our app needs one dialogue state for each intent, as shown in the table below.
 
-   - ``welcome`` — Begins an interaction and welcomes the user
-   - ``build_order`` — Guides the user to make selections and build up the delivery order
-   - ``place_order`` — Places the order to complete the transaction
-   - ``start_over`` — Cancels the ongoing transaction and prompts the user for a new request
-   - ``say_goodbye`` — Ends the current interaction
-   - ``provide_help`` — Provides help information in case the user gets stuck
-   - ``default`` — Prompts the user to get back to food ordering in case he goes off topic
++------------------+---------------------+-----------------------------------------------+
+| | Intent         | |  Dialogue State   | | Dialogue State                              |
+| |                | |  name             | | function                                    |
++==================+=====================+===============================================+
+| | ``greet``      | | ``welcome``       | | Begin an interaction and welcome the user   |
++------------------+---------------------+-----------------------------------------------+
+| | ``build_order``| | ``build_order``   | | Guide the user through making selections    |
+| |                | |                   | | and build up the delivery order             |
++------------------+---------------------+-----------------------------------------------+
+| | ``place_order``| | ``place_order``   | | Place the order to complete the transaction | 
++------------------+---------------------+-----------------------------------------------+
+| | ``start_over`` | | ``start_over``    | | Cancel the ongoing transaction              | 
+| |                | |                   | | and prompt the user for a new request       |
++------------------+---------------------+-----------------------------------------------+
+| | ``exit``       | | ``say_goodbye``   | | End the current interaction                 | 
++------------------+---------------------+-----------------------------------------------+
+| | ``help``       | | ``provide_help``  | | Provide help information                    | 
+| |                | |                   | | in case the user gets stuck                 |
++------------------+---------------------+-----------------------------------------------+
+| | ``unsupported``| | ``default``       | | Prompt a user who has gone off-topic        | 
+| |                | |                   | | to get back to food ordering                |
++------------------+---------------------+-----------------------------------------------+
 
-All of the dialogue states and their associated handlers are defined in the ``app.py`` application container file at the top level of the blueprint folder. For many of our dialogue states, namely, ``welcome``, ``start_over``, ``say_goodbye``, ``provide_help`` and ``default``, the handler logic is fairly straightforward. It mostly involves choosing from a set of pre-scripted natural language responses and replying to the user.
+
+All dialogue states and their associated handlers are defined in the ``app.py`` application container file at the top level of the blueprint folder.
+
+Handler logic can be simple, complex, or in between. At one end of this spectrum, the handler simply returns a canned response, sometimes choosing randomly from a set of responses. A more sophisticated handler could execute knowledge base queries to fill in the slots of a partially-templatized response. And a handler that applies more complex business logic could call an external API, process what the API returns, and incorporate the result into the response template.
+
+The handler logic is fairly straightforward for most of our dialogue states. The main actions are choosing from a set of pre-scripted natural language responses, and replying to the user. These simple states include ``welcome``, ``start_over``, ``say_goodbye``, ``provide_help`` and ``default``.
 
 For example, here's the ``say_goodbye`` state handler, where we clear the :doc:`dialogue frame <../userguide/dm>` and use the :doc:`responder <../userguide/dm>` object to reply with one of our scripted "goodbye" responses:
 
@@ -150,9 +119,9 @@ For example, here's the ``say_goodbye`` state handler, where we clear the :doc:`
         # Respond with a random selection from one of the canned "goodbye" responses.
         responder.reply(['Bye!', 'Goodbye!', 'Have a nice day.', 'See you later.'])
 
-The core business logic for our application mainly resides in the ``build_order`` and ``place_order`` dialogue state handlers, where we use the :doc:`Question Answerer <../userguide/kb>` and external API calls to process the transaction.
+By contrast, the handler logic for the ``build_order`` and ``place_order`` dialogue states is more substantial, because they contain the core business logic for our application. In these dialogue state handlers, we use the :doc:`Question Answerer <../userguide/kb>` and external API calls to process the transaction.
 
-Here is a simplistic implementation of the ``build_order`` handler for illustrative purposes:
+We can illustrate this with a simplistic implementation of the ``build_order`` handler:
 
 .. code:: python
 
@@ -188,28 +157,29 @@ Here is a simplistic implementation of the ``build_order`` handler for illustrat
         responder.prompt('Sure, I got {dish_names} from {restaurant_name} for a total '
                          'price of ${price:.2f}. Would you like to place the order?')
 
-The code above assumes that every user query contains a ``restaurant`` entity and at least one ``dish`` entity. It uses the Question Answerer (within the :func:`_get_restaurant_from_kb()` and :func:`_resolve_dish()` functions not shown above) to select the most likely restaurant and dishes requested by the user. That information is then saved in the dialogue frame for use in future conversational turns and also presented to the user via the responder object.
+This code assumes that every user query contains a ``restaurant`` entity and at least one ``dish`` entity. Using the Question Answerer (within the :func:`_get_restaurant_from_kb()` and :func:`_resolve_dish()` functions not shown above), it selects the most likely restaurant and dishes requested by the user. Next, it saves this information in the dialogue frame for use in future conversational turns, and presents it to the user via the responder object.
 
 For a more realistic implementation of ``build_order`` that deals with varied user flows and the full code behind all the dialogue state handlers, see the ``app.py`` file in the blueprint folder.
 
 .. admonition:: Exercise
 
-   Extend the ``build_order`` dialogue state handler in ``app.py`` to handle more user flows or handle the existing ones in a smarter way. There are many suggestions for improvements in the comments accompanying the code in the ``app.py`` file. Here are a few more:
+   Extend the ``build_order`` dialogue state handler in ``app.py`` to handle more user flows or handle the existing ones in a smarter way. See the suggestions for improvements in the comments in the ``app.py`` code. Here are a few more:
 
-   - Add support to select restaurants by ``cuisine`` or to search for dishes by ``category``. These are already modeled as entities in the blueprint and are also available as part of the restaurant and dish metadata stored in the knowledge base. But ``build_order`` needs some additional code to handle queries containing these entities.
+   - Make it possible to select restaurants by ``cuisine`` or to search for dishes by ``category``. These are already modeled as entities in the blueprint and available as part of the restaurant and dish metadata stored in the knowledge base. But ``build_order`` needs some additional code to handle queries containing these entities.
 
-   - After providing restaurant suggestions to a user based on a dish they requested, do not ask them to repeat their dish selection from scratch in the next turn. Instead, keep track of the dish they were originally interested in and directly add that to the check-out basket when the user makes a restaurant selection.
+   - After providing restaurant suggestions to a user based on a requested dish, do not ask the user to repeat the dish selection from scratch in the next turn. Instead, keep track of the dish the user was originally interested in. Then, when the user makes a restaurant selection, add the dish to the check-out basket.
 
+   - Update the natural language response templates to include resolved options that are stored in the dialogue frame (``context['frame']['dishes']``) for each dish. Try to construct your responses such that if someone orders the same dish with different options, instead of saying '*I have 3 orders of steak from ...*' your app could respond with something like '*I have 1 order of steak medium rare and 2 orders of steak well done from ...*'.
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-Our food ordering app leverages publicly available information about San Francisco restaurants, scraped from the `Amazon Restaurants <https://primenow.amazon.com/restaurants>`_ website. Specifically, our knowledge base comprises of two indexes in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
+The knowledge base for our food ordering app leverages publicly available information about San Francisco restaurants, scraped from the `Amazon Restaurants <https://primenow.amazon.com/restaurants>`_ website. The knowledge base comprises two indexes in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
 
-   - ``restaurants`` — Stores information about restaurant locations
-   - ``menu_items`` — Stores information about dishes on different restaurants' menus
+   - ``restaurants`` — information about restaurant locations
+   - ``menu_items`` — information about dishes on different restaurants' menus
 
-For example, here's the knowledge base entry in the ``restaurants`` index for a Thai restaurant in San Francisco named "Thoughts Style Cuisine Showroom":
+For example, here's the knowledge base entry in the ``restaurants`` index for "Thoughts Style Cuisine Showroom," a Thai restaurant in San Francisco:
 
 .. code:: javascript
 
@@ -242,7 +212,7 @@ For example, here's the knowledge base entry in the ``restaurants`` index for a 
         'rating': None
     }
 
-Similarly, here's an example of a knowledge base entry in the ``menu_items`` index for a specific dish at the above restaurant.
+Here's a knowledge base entry in the ``menu_items`` index for a dish from the above restaurant.
 
 .. code:: javascript
 
@@ -261,7 +231,7 @@ Similarly, here's an example of a knowledge base entry in the ``menu_items`` ind
         'size_prices': []}
     }
 
-Assuming you have Elasticsearch installed on your machine, running the :func:`blueprint()` command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, you can use the :doc:`Question Answerer <../userguide/kb>` to query the indexes.
+Assuming that you have Elasticsearch installed, running the :func:`blueprint()` command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the :doc:`Question Answerer <../userguide/kb>` to query the indexes.
 
 For example:
 
@@ -291,43 +261,49 @@ For example:
 
 .. admonition:: Exercise
 
-   The blueprint comes with a pre-configured, pre-populated knowledge base to help you get up and running with an end-to-end working application quickly. To learn how you can set up knowledge base indexes from scratch for your own data, read the user guide section on :doc:`Question Answerer <../userguide/kb>`.
+   The blueprint comes with a pre-configured, pre-populated knowledge base to help you get up and running quickly. Read the User Guide section on :doc:`Question Answerer <../userguide/kb>` to learn how to create knowledge base indexes from scratch. Then, try creating one or more knowledge base indexes for your own data.
 
 
 6. Training Data
 ^^^^^^^^^^^^^^^^
 
-The labeled data for training our NLP pipeline was created using a combination of in-house data generation and crowdsourcing techniques. This is a highly important multi-step process that is described in more detail in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide. But briefly, it requires at least the following data generation tasks:
+The labeled data for training our NLP pipeline was created using both in-house data generation and crowdsourcing techniques. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for a full description of this highly important, multi-step process. Be aware that at minimum, the following data generation tasks are required:
 
-+--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
-| Purpose                                                      | Question posed to data annotators                                                                                       |
-+==============================================================+=========================================================================================================================+
-| Exploratory data generation for guiding the app design       | "How would you talk to a conversational app to place orders for food delivery?"                                         |
-+--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
-| Targeted query generation for training the Intent Classifier | ``build_order``: "What would you say to the app to make food or restaurant selections and create your delivery order?"  |
-|                                                              |                                                                                                                         |
-|                                                              | ``start_over``: "How would you ask the app to cancel your current selections and start over?"                           |
-+--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
-| Targeted query annotation for training the Entity Recognizer | ``build_order``: "Annotate all occurrences of restaurant, cuisine, category, dish and option names in the given query." |
-+--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
-| Targeted synonym generation for training the Entity Resolver | ``restaurant``: "What are the different ways in which you would refer to this restaurant location?"                     |
-|                                                              |                                                                                                                         |
-|                                                              | ``dish``: "What names would you use to refer to this item on the restaurant menu?"                                      |
-+--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
++--------------------------------------+-----------------------------------------------------------------------------+
+| | Purpose                            | | Question (for crowdsourced data generators)                               |
+| |                                    | | or instruction (for annotators)                                           |
++======================================+=============================================================================+
+| | Exploratory data generation        | | "How would you talk to a conversational app                               |
+| | for guiding the app design         | | to place orders for food?"                                                |
++--------------------------------------+-----------------------------------------------------------------------------+
+| | Targeted query generation          | | ``build_order``: "What would you say to the app                           |
+| | for training the Intent Classifier | | to make food or restaurant selections and create                          |
+| |                                    | | your delivery order?"                                                     |
++--------------------------------------+-----------------------------------------------------------------------------+
+| | Targeted query annotation          | | ``build_order``: "Annotate all occurrences of restaurant,                 |
+| | for training the Entity Recognizer | | cuisine, category, dish and option names                                  |
+| |                                    | | in the given query."                                                      |
++--------------------------------------+-----------------------------------------------------------------------------+
+| | Targeted synonym generation        | | ``restaurant``: "What are the different ways in which                     |
+| | for training the Entity Resolver   | | you would refer to this restaurant location?"                             |
+| |                                    | |                                                                           |
+| |                                    | | ``dish``: "What names would you use to refer                              |      
+| |                                    | | to this item on the restaurant menu?"                                     |
++--------------------------------------+-----------------------------------------------------------------------------+
 
-The training data for intent classification and entity recognition can be found in the ``domains`` directory, whereas the data for entity resolution is in the ``entities`` directory, both located at the root level of the blueprint folder.
 
-.. admonition:: Exercise
+The ``domains`` directory contains the training data for intent classification and entity recognition. The ``entities`` directory contains the data for entity resolution. Both directories are at root level in the blueprint folder.
 
-   - Read :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluatation and error analysis <../userguide/nlp>` in the user guide.
+.. admonition:: Exercise 1
 
-   - To train NLP models for your own food ordering app, you can start by reusing the blueprint data for generic intents like ``greet``, ``exit`` and ``help``. However, for core intents like ``build_order``, it's recommended that you collect new training data that is tailored towards the entities (restaurants, dishes, etc.) that your app needs to support. Follow the same approach to gather new training data for the ``build_order`` intent or any additional intents and entities needed for your app.
+   - Study the best practices around training data generation and annotation for conversational apps in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide. Following those principles, create additional labeled data for all the intents in this blueprint. Read more about :doc:`NLP model evaluation and error analysis <../userguide/nlp>` in the User Guide. Then apply what you have learned in evaluating your app, using your newly-created labeled data as held-out validation data.
 
+   - Complete the following exercise if you are extending the blueprint to build your own food ordering app.For app-agnostic, generic intents like ``greet``, ``exit``, and ``help``, start by simply reusing the blueprint data to train NLP models for your food ordering app. For ``build_order`` and any other app-specific intents, gather new training data tailored to the relevant entities (restaurants, dishes, etc.). Apply the approach you learned in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To put the training data to use and train a baseline NLP system for your app using Workbench's default machine learning settings, use the :meth:`build()` method of the :class:`NaturalLanguageProcessor` class:
+Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, applies Workbench's default machine learning settings.
 
 .. code:: python
 
@@ -342,14 +318,14 @@ To put the training data to use and train a baseline NLP system for your app usi
    Loading queries from file ordering/place_order/train.txt
    Loading queries from file ordering/start_over/train.txt
    Loading queries from file ordering/unsupported/train.txt
-   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 98.11%, params: {'C': 100, 'class_weight': {0: 1.7987394957983194, 1: 3.0125475285171097, 2: 0.89798826487845773, 3: 4.4964705882352938, 4: 2.5018518518518515, 5: 1.7559183673469387, 6: 0.46913229018492181}, 'fit_intercept': True}
    Fitting entity recognizer: domain='ordering', intent='place_order'
    Fitting entity recognizer: domain='ordering', intent='unsupported'
    Fitting entity recognizer: domain='ordering', intent='greet'
    Fitting entity recognizer: domain='ordering', intent='exit'
    Fitting entity recognizer: domain='ordering', intent='build_order'
-   Selecting hyperparameters using k-fold cross validation with 5 splits
+   Selecting hyperparameters using k-fold cross-validation with 5 splits
    Best accuracy: 92.46%, params: {'C': 1000000, 'penalty': 'l2'}
    Fitting entity recognizer: domain='ordering', intent='start_over'
    Fitting entity recognizer: domain='ordering', intent='help'
@@ -358,7 +334,7 @@ To put the training data to use and train a baseline NLP system for your app usi
 
   During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
 
-You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` and about 92% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>`. To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
+You should see a cross-validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` and about 92% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>`. To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
 
 .. code:: python
 
@@ -398,7 +374,7 @@ You should see a cross validation accuracy of around 98% for the :doc:`Intent Cl
 
 For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom food ordering data, you may find that the default settings may not be optimal and you could get better accuracy by individually optimizing each of the NLP components.
 
-A good place to start is by inspecting the baseline configuration used by the different classifiers. The user guide lists and describes all of the available configuration options in detail. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.
+Start by inspecting the baseline configurations that the different classifiers use. The User Guide lists and describes the available configuration options. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.
 
 .. code:: python
 
@@ -413,7 +389,7 @@ A good place to start is by inspecting the baseline configuration used by the di
     'length': {}
    }
 
-You can experiment with different learning algorithms (model types), features, hyperparameters and cross-validation settings by passing the appropriate parameters to the classifier's :meth:`fit()` method. Here are a couple of examples.
+You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings by passing the appropriate parameters to the classifier's :meth:`fit()` method. Here are a few examples.
 
 Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
 
@@ -427,7 +403,7 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
    ...            }
    >>> ic.fit(features=features)
    Fitting intent classifier: domain='ordering'
-   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 98.36%, params: {'C': 10000, 'class_weight': {0: 1.0, 1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0}, 'fit_intercept': False}
 
 Change the classification model to random forest instead of the default logistic regression:
@@ -436,20 +412,20 @@ Change the classification model to random forest instead of the default logistic
 
    >>> ic.fit(model_settings={'classifier_type': 'rforest'})
    Fitting intent classifier: domain='ordering'
-   Selecting hyperparameters using k-fold cross validation with 10 splits
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 97.31%, params: {'max_features': 'auto', 'n_estimators': 10, 'n_jobs': -1}
 
-Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing and error analysis. Refer to the appropriate sections in the user guide for a detailed discussion on training, tuning and evaluating the various Workbench classifiers.
+You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various Workbench classifiers.
 
 .. admonition:: Exercise
 
-   Experiment with different models, features and hyperparameter selection settings to see how they affect the classifier performance. It's helpful to have a held-out validation set to evaluate your trained NLP models and analyze the misclassified test instances. You could then use observations from the error analysis to inform your machine learning experimentation. For more examples and discussion on this topic, refer to the :doc:`user guide <../userguide/nlp>`.
+   Experiment with different models, features, and hyperparameter selection settings to see how they affect classifier performance. Maintain a held-out validation set to evaluate your trained NLP models and analyze misclassified test instances. Then, use observations from the error analysis to inform your machine learning experimentation. See the :doc:`User Guide <../userguide/nlp>` for examples and discussion.
 
 
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Once the NLP classification models are trained, you can configure and run the Workbench :doc:`Language Parser <../userguide/parser>` to link related entities into meaningful entity groups. The application configuration file, ``config.py``, at the top level of blueprint folder contains the following parser configuration:
+Once the NLP classification models are trained, you can configure and run the Workbench :doc:`Language Parser <../userguide/parser>` to link related entities into meaningful entity groups. The application configuration file, ``config.py``, at the top level of the blueprint folder, contains the following parser configuration:
 
 .. code:: javascript
 
@@ -463,9 +439,9 @@ Once the NLP classification models are trained, you can configure and run the Wo
        }
    }
 
-In simple terms, the configuration for our food ordering app specifies that a dish entity can have a numeric quantity entity and an option entity as its attributes, and an option can in turn have another quantity entity associated with it. In addition to defining the head - dependent relations between the entities, the config also defines constraints such as the number of allowed dependents of a certain kind, the allowed attachment directions, etc. These constraints improve parsing accuracy by helping to eliminate potentially incorrect parse hypotheses. A full list of configurable constraints can be found in the :doc:`user guide <../userguide/parser>`.
+This configuration specifies that a dish entity can have a numeric quantity entity and an option entity as its attributes. An option entity, in turn, can have its own associated quantity entity. These are the *head-dependent relations* between the entities. The configuration also defines constraints which improve parsing accuracy by helping to eliminate potentially incorrect parse hypotheses. These constraints may include the number of allowed dependents of a certain kind, the allowed attachment directions, and so on. See the :doc:`User Guide <../userguide/parser>` for a full list of configurable constraints.
 
-Since the parser runs as the last step in the NLP pipeline, the easiest way to test it is using the Natural Language Processor's :meth:`process()` method.
+The parser runs as the last step in the NLP pipeline. The easiest way to test it is to use the Natural Language Processor's :meth:`process()` method.
 
 .. code:: python
 
@@ -526,13 +502,13 @@ Lastly, the restaurant "Palmyra" is a standalone entity without any dependents a
     'value': [{'cname': 'Palmyra', 'id': 'B01DEFLJIO'}]
    }
 
-When extending the blueprint to your custom application data, the parser should work fine out-of-the-box for most queries as long as the head - dependent relations are properly set in the configuration file. Generally speaking, you should be able to improve its accuracy even further by experimenting with the parser constraints and optimizing them for what makes the best sense for your data. Read the :doc:`Language Parser user guide <../userguide/parser>` for a more detailed discussion.
+When extending the blueprint to your custom application data, the parser should work fine out-of-the-box for most queries, provided that head-dependent relations are properly set in the configuration file. To improve its accuracy further, experiment with the parser constraints, optimizing them for what makes the best sense for your data. See the :doc:`Language Parser <../userguide/parser>` section of the User Guide for details.
 
 .. admonition:: Exercise
 
-   - Experiment with the different constraints in the parser configuration and observe how it affects the parsing accuracy.
+   - Experiment with the different constraints in the parser configuration and observe how it affects parsing accuracy.
 
-   - Think of any additional entity relationships you might want to capture when extending the blueprint with new entity types for your own use case. For instance, ``restaurant`` is a standalone entity in the blueprint. However, when you introduce related entities like ``location`` (to search for restaurants by geographical area or address) or ``price_level`` (the number of "dollar signs" or average price per person at a restaurant), you would have to update the parser configuration to extract these new relations.
+   - Think of any additional entity relationships you might want to capture when extending the blueprint with new entity types for your own use case. For instance, the blueprint treats ``restaurant`` as a standalone entity. However, you might want to introduce related entities like ``location`` (to search for restaurants by geographical area or address) or ``price_level`` (the number of "dollar signs" or average price per person at a restaurant). In that case, you would need to update the parser configuration to extract these new relations.
 
 
 9. Using the Question Answerer
@@ -550,29 +526,28 @@ The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly 
     'Firetrail Pizza'
    ]
 
-The ``build_order`` handler retrieves details about the user's restaurant and dish selections from the knowledge base, and uses the information to:
+The ``build_order`` handler retrieves details about the user's restaurant and dish selections from the knowledge base, and uses the information to
 
-  #. Suggest restaurants to the user that offer their requested dishes.
-  #. Resolve the requested dish name to the most likely entry on a restaurant's menu.
-  #. Verify that a requested dish is offered at the selected restaurant.
-  #. Verify that a requested option is applicable for the selected dish.
-  #. Get pricing for the requested dish and options.
+  #. Suggest restaurants to the user that offer their requested dishes
+  #. Resolve the requested dish name to the most likely entry on a restaurant's menu
+  #. Verify that a requested dish is offered at the selected restaurant
+  #. Verify that a requested option is applicable for the selected dish
+  #. Get pricing for the requested dish and options
 
-Look at the ``build_order`` implementation in ``app.py`` to better understand the different ways in which the knowledge base and Question Answerer can be leveraged to provide intelligent responses to the user. Also refer to the :doc:`user guide <../userguide/kb>` for an in-depth explanation of the retrieval and ranking mechanisms offered by the Question Answerer.
+Look at the ``build_order`` implementation in ``app.py`` to better understand the different ways you can leverage the knowledge base and Question Answerer to provide intelligent responses to the user. See the :doc:`User Guide <../userguide/kb>` for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.
 
 .. admonition:: Exercise
 
    - Use the Question Answerer within the ``build_order`` state handler to add support for searching for restaurants by ``cuisine`` and searching for dishes by ``category``.
 
-   - When customizing the blueprint for your own app, consider adding location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. You could then use the Question Answerer to rank restaurant and dish results using those factors to provide a more relevant list of suggestions to the user.
-
-   - Think of other important data that would be useful to have in the knowledge base for a food ordering use case and how it could be leveraged to provide a more intelligent user experience.
+   - When customizing the blueprint for your own app, consider adding location information (for restaurants) and popularity (for both restaurants and dishes) in the knowledge base. You could then use the Question Answerer to rank restaurant and dish results using those factors, and evaluate whether this provides a more relevant list of suggestions to the user.
+   - Think of other important data that would be useful to have in the knowledge base for a food ordering use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.
 
 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational app using the :class:`Conversation` class in Workbench.
+Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the :class:`Conversation` class in Workbench to perform an end-to-end test of your conversational app.
 
 For instance:
 
@@ -583,7 +558,7 @@ For instance:
    >>> conv.say("Get me a saag paneer and garlic naan from urban curry")
    ['Sure, I got Saag Paneer, Garlic Naan from Urban Curry for a total price of $14.70. Would you like to place the order?']
 
-The :meth:`say()` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested a couple of dishes from a restaurant and the app responded, as expected, with a preview of the order details and a confirmation prompt.
+The :meth:`say()` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested dishes from a restaurant, in a single query. The app responded, as expected, with a preview of the order details and a confirmation prompt.
 
 You can also try out multi-turn dialogues:
 
@@ -604,7 +579,7 @@ You can also try out multi-turn dialogues:
 
 .. admonition:: Exercise
 
-   Test the app multiple times with different conversational flows and keep track of all the cases where the response doesn't make sense. Then, analyze those cases in detail to attribute each error to a specific step in our end-to-end processing (e.g. incorrect intent classification, missed entity recognition, unideal natural language response, etc.). Categorizing your errors in this manner helps in understanding the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.
+   Test the app multiple times with different conversational flows. Keep track of all cases where the response does not make good sense. Then, analyze those cases in detail. You should be able to attribute each error to a specific step in our end-to-end processing (e.g., incorrect intent classification, missed entity recognition, unideal natural language response, and so on). Categorizing your errors in this manner helps you understand the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.
 
 
-Refer to the user guide for tips and best practices on testing your app before launch. Once you're satisfied with the performance of your app, you can deploy it to production using MindMeld's cloud deployment offerings. Read more about the different available options in :doc:`deployment <../userguide/deployment>` section of the user guide.
+Refer to the User Guide for tips and best practices on testing your app before launch. Once you're satisfied with the performance of your app, you can deploy it to production as described in the :doc:`deployment <../userguide/deployment>` section of the User Guide.

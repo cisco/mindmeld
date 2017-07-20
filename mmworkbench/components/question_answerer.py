@@ -357,15 +357,7 @@ class Search:
         es_query = {
             "query": {
                 "function_score": {
-                    "query": {
-                        "bool": {
-                            "filter": {
-                                "bool": {
-                                    "must": []
-                                }
-                            }
-                        }
-                    },
+                    "query": {},
                     "functions": [],
                     "score_mode": "sum",
                     "boost_mode": "sum"
@@ -373,22 +365,36 @@ class Search:
             }
         }
 
-        if self._clauses['query']:
-            query_clauses = []
+        if not self._clauses['query'] and not self._clauses['filter']:
+            # no query/filter clauses - use match_all
+            es_query['query']['function_score']['query'] = {"match_all": {}}
+        else:
+            es_query['query']['function_score']['query']['bool'] = {}
 
-            for clause in self._clauses['query']:
-                query_clauses.append(clause.build_query())
+            if self._clauses['query']:
+                es_query_clauses = []
 
-            if self._ranking_config['query_clauses_operator'] == 'and':
-                es_query['query']['function_score']['query']['bool']['must'] = query_clauses
-            else:
-                es_query['query']['function_score']['query']['bool']['should'] = query_clauses
+                for clause in self._clauses['query']:
+                    es_query_clauses.append(clause.build_query())
 
-        if self._clauses['filter']:
-            for clause in self._clauses['filter']:
-                es_query['query']['function_score']['query']['bool']['filter']['bool']['must']\
-                    .append(clause.build_query())
+                if self._ranking_config['query_clauses_operator'] == 'and':
+                    es_query['query']['function_score']['query']['bool']['must'] = es_query_clauses
+                else:
+                    es_query['query']['function_score']['query']['bool']['should'] = \
+                        es_query_clauses
 
+            if self._clauses['filter']:
+                es_filter_clauses = {
+                    "bool": {
+                        "must": []
+                    }
+                }
+                for clause in self._clauses['filter']:
+                    es_filter_clauses['bool']['must'].append(clause.build_query())
+
+                es_query['query']['function_score']['query']['bool']['filter'] = es_filter_clauses
+
+        # add scoring function for custom sort criteria
         for clause in self._clauses['sort']:
             sort_function = clause.build_query()
             es_query['query']['function_score']['functions'].append(sort_function)

@@ -26,7 +26,7 @@ While training data is always stored in text files, there are two different type
 ==================== ====
 **Labeled Queries**  Labeled query files are text files containing example user queries. Workbench uses them to train the domain and intent classification models. Labeled query files also support an inline markup syntax for annotating entities and entity roles within each query. These annotations are used to train both the entity and role classification models. All labeled query files belong in the ``domains`` folder. Each domain and intent subfolder should contain labeled query files that apply only to that intent. The hierarchical structure of the ``domains`` folder provides the classification labels used to train the domain and intent classification models.
 
-**Entity Mappings**  Entity mappings are JSON files which associate whitelisted and blacklisted alternate names, or synonyms, with individual entities. Workbench uses entity mappings to train the models required for entity resolution. These files belong in the ``entities`` folder.
+**Entity Mappings**  Entity mappings are JSON files which associate whitelisted alternate names, or synonyms, with individual entities. Workbench uses entity mappings to train the models required for entity resolution. These files belong in the ``entities`` folder.
 ==================== ====
 
 We will now illustrate the typical structure for these two types of training data files.

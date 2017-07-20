@@ -191,11 +191,13 @@ class TextModel(SkLearnModel):
         """
         # TODO: also expose feature weights?
         predictions = self.predict_proba(examples)
-        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1])
-                       for i, e in enumerate(examples)]
 
         # Create a model config object for the current effective config (after param selection)
         config = self._get_effective_config()
+
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1],
+                       config.label_type) for i, e in enumerate(examples)]
+
         model_eval = StandardModelEvaluation(config, evaluations)
         return model_eval
 
@@ -255,11 +257,13 @@ class MaxentModel(SkLearnModel):
         """
         # TODO: also expose feature weights?
         predictions = self.predict_proba(examples)
-        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1])
-                       for i, e in enumerate(examples)]
 
         # Create a model config object for the current effective config (after param selection)
         config = self._get_effective_config()
+
+        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1],
+                       config.label_type) for i, e in enumerate(examples)]
+
         model_eval = StandardModelEvaluation(config, evaluations)
         return model_eval
 

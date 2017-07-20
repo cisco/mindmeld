@@ -58,6 +58,7 @@ MALLARD_JAR_PATH = os.path.join(RESOURCES_FOLDER, 'mindmeld-mallard.jar')
 
 # User specific directories
 USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mmworkbench')
+USER_CONFIG_PATH = os.path.join(USER_CONFIG_DIR, 'config')
 BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, 'blueprints')
 BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, '{name}')
 
@@ -378,4 +379,20 @@ def get_config_module_path(app_path):
 
 
 def get_cached_blueprint_path(name):
+    """
+    Args:
+        name (str): The name of the blueprint
+
+    Returns:
+        str: The path to the blueprint archives.
+    """
     return BLUEPRINT_PATH.format(name=name)
+
+
+def get_user_config_path():
+    """
+
+    Returns:
+        str: The path to the current user's workbench configuration file.
+    """
+    return USER_CONFIG_PATH
