@@ -161,22 +161,22 @@ Below is the full list of intents for every domain:
    - Unknown
        - unknown
 
-There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file `gazetteer.txt` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Examples of system entities are sys-temperature, sys-time, sys-interval etc.
+There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Examples of system entities are sys-temperature, sys-time, sys-interval etc.
 
 Home assistant defines and uses the following named entities:
 
-    - `all`: this entity is used to detect whether the user, for example: `turn on the lights in {all|all} room`.
-    - `appliance`: this entity is used to detect household appliances, for example: `can you turn on the {tv|appliance}?`
-    - `city`: this entity is used to detect cities, for example: `what is the weather in {shanghai|city}`
-    - `color`: this entity is used to detect color of the lights, for example: `turn the lights to {soft white|color}`
-    - `interval`: this entity is used to detect time interval, for example: `cancel {tomorrow night|interval} s alarms`
-    - `location`: this entity is used to detect household location, for example: `lock {back|location} door`
-    - `unit`: this entity is used to detect weather unit, for example: `what is the forecast for {london|city} in {celsius|unit}`
-    - `duration`: this entity is used to detect time duration, for example: `{15 minute|duration} alarm`
+    - ``all``: this entity is used to detect whether the user, for example: ``turn on the lights in {all|all} room``.
+    - ``appliance``: this entity is used to detect household appliances, for example: ``can you turn on the {tv|appliance}?``
+    - ``city``: this entity is used to detect cities, for example: ``what is the weather in {shanghai|city}``
+    - ``color``: this entity is used to detect color of the lights, for example: ``turn the lights to {soft white|color}``
+    - ``interval``: this entity is used to detect time interval, for example: ``cancel {tomorrow night|interval} s alarms``
+    - ``location``: this entity is used to detect household location, for example: ``lock {back|location} door``
+    - ``unit``: this entity is used to detect weather unit, for example: ``what is the forecast for {london|city} in {celsius|unit}``
+    - ``duration``: this entity is used to detect time duration, for example: ``{15 minute|duration} alarm``
 
-Home assistant uses three system entities: `sys_time` (time), `sys_interval` (interval) and `sys_temperature` (temperature), for example: `set my thermostat to turn on at {6 am|sys_time}` and `turn the heat off at {76 degrees|sys_temperature}`.
+Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature), for example: ``set my thermostat to turn on at {6 am|sys_time}`` and ``turn the heat off at {76 degrees|sys_temperature}``.
 
-In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate `old_time` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles.
+In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we use roles to annotate ``old_time`` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles.
 
 For more information on the usage of role, check :doc:`Role <../userguide/role_classifier>`.
 
@@ -185,7 +185,7 @@ For more information on the usage of role, check :doc:`Role <../userguide/role_c
 
 Dialogue state logic can get arbitrarily complex. Simple handlers can just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining a single dialogue state for multiple intents. In this section we will explore both options in detail.
 
-Let's take a closer look at these intents for controlling doors: `close_door`, `open_door`, `lock_door`, and `unlock_door`. Let's define a dialogue state for each of these intents.
+Let's take a closer look at these intents for controlling doors: ``close_door``, ``open_door``, ``lock_door``, and ``unlock_door``. Let's define a dialogue state for each of these intents.
 
 .. code:: python
 
@@ -209,7 +209,7 @@ Let's take a closer look at these intents for controlling doors: `close_door`, `
 
       ...
 
-However, since close/open/lock/unlock door are very similar to each other in the controller logic (for example, setting the state variable for the door), we can handle all of these intents in the one state `handle_door`.
+However, since close/open/lock/unlock door are very similar to each other in the controller logic (for example, setting the state variable for the door), we can handle all of these intents in the one state ``handle_door``.
 
 .. code:: python
 
@@ -231,9 +231,9 @@ Another conversational pattern that would be useful to the reader is the follow-
   App: Sure. Which lights?
   User: In the kitchen
 
-In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the `specify_location` intent and define the `specify_location` state. Since a number of states (`close/open door`, `lock/unlock door`, `turn on/off lights`, `turn on/off appliance`, `check door/light`) can lead to the `specify location` state, we need to pass in the previous state/action information in the request context as `context['frame']['desired_action']`.
+In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the ``specify_location`` intent and define the ``specify_location`` state. Since a number of states (``close/open door``, ``lock/unlock door``, ``turn on/off lights``, ``turn on/off appliance``, ``check door/light``) can lead to the ``specify location`` state, we need to pass in the previous state/action information in the request context as ``context['frame']['desired_action']``.
 
-We include a code snippet for `specify_location` for your reference.
+We include a code snippet for ``specify_location`` for your reference.
 
 .. code:: python
 
@@ -358,7 +358,7 @@ The training data for intent classification and entity recognition can be found 
 
 .. admonition:: Exercise
 
-   - Read :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluatation and error analysis <../userguide/nlp>` in the user guide.
+   - Read :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluation and error analysis <../userguide/nlp>` in the user guide.
 
    - To train NLP models for your own home-assistant app, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (city, sys_time) that your app needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your app.
 
@@ -366,7 +366,7 @@ The training data for intent classification and entity recognition can be found 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To put the training data to use and train a baseline NLP system for your app using Workbench's default machine learning settings, use the :meth:`build()` method of the :class:`NaturalLanguageProcessor` class:
+To put the training data to use and train a baseline NLP system for your app using Workbench's default machine learning settings, use the :meth:``build()`` method of the :class:``NaturalLanguageProcessor`` class:
 
 .. code:: python
 
@@ -399,7 +399,7 @@ To put the training data to use and train a baseline NLP system for your app usi
 
   During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
 
-You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` for the domain ``smart_home`` and about 99% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>` for the domain ``smart_home`` and intent ``turn_on_thermostat``. To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
+You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` for the domain ``smart_home`` and about 99% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>` for the domain ``smart_home`` and intent ``turn_on_thermostat``. To see how the trained NLP pipeline performs on a test query, use the :meth:``process()`` method.
 
 .. code:: python
 
@@ -435,7 +435,7 @@ A good place to start is by inspecting the baseline configuration used by the di
     'in-gaz': {}
    }
 
-You can experiment with different learning algorithms (model types), features, hyperparameters and cross-validation settings by passing the appropriate parameters to the classifier's :meth:`fit()` method. Here are a couple of examples.
+You can experiment with different learning algorithms (model types), features, hyperparameters and cross-validation settings by passing the appropriate parameters to the classifier's :meth:``fit()`` method. Here are a couple of examples.
 
 Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
 
@@ -511,7 +511,7 @@ The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational app using the :class:`Conversation` class in Workbench.
+Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational app using the :class:``Conversation`` class in Workbench.
 
 .. code:: python
 
@@ -520,7 +520,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
    >>> conv.say('set alarm for 6am')
    ['Ok, I have set your alarm for 06:00:00.']
 
-The :meth:`say()` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
+The :meth:``say()`` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
 
 You can also try out multi-turn dialogues:
 
