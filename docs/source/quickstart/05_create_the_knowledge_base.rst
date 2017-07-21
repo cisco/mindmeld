@@ -66,6 +66,6 @@ This code loads the Question Answerer module from Workbench, then loads the ``da
     "phone_number": (+1) 100-100-1100
   }
 
-Now that your knowledge base is created, the Question Answerer can leverage it in your dialogue state handling logic. See the :ref:`User Guide <userguide>` for more about how to use the Question Answerer to find answers to questions, validate user requests, disambiguate entities, and offer alternative suggestions.
+Now that your knowledge base is created, the Question Answerer can leverage it in your dialogue state handling logic. See the :doc:`User Guide <../userguide/kb>` for more about how to use the Question Answerer to find answers to questions, validate user requests, disambiguate entities, and offer alternative suggestions.
 
 
