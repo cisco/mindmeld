@@ -19,7 +19,7 @@ System entities and custom entities
 Entities in Workbench are categorized into two types:
 
 **System Entities**
-  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. Read more in the :doc:`System Entities <ser>` chapter. 
+  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. Read more in the :doc:`System Entities <system_entities>` chapter. 
 
 **Custom Entities**
   Application-specific entities that need to be detected using a trained entity recognizer. These are generally `named entities <https://en.wikipedia.org/wiki/Named_entity>`_ which can only be recognized using statistical models that have been trained with deep domain knowledge.
