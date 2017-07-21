@@ -19,7 +19,7 @@ System entities and custom entities
 Entities in Workbench are categorized into two types:
 
 **System Entities**
-  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. Read more in the :doc:`System Entities <ser>` chapter. 
+  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. Read more in the :doc:`System Entities <system_entities>` chapter. 
 
 **Custom Entities**
   Application-specific entities that need to be detected using a trained entity recognizer. These are generally `named entities <https://en.wikipedia.org/wiki/Named_entity>`_ which can only be recognized using statistical models that have been trained with deep domain knowledge.
@@ -122,7 +122,10 @@ To view the current :ref:`configuration <config>` being used by a trained classi
             2: [-2, -1, 0, 1]
          }
        },
-       'in-gaz-span-seq': {}
+       'in-gaz-span-seq': {},
+       'sys-candidates-seq': {
+         'start_positions': [-1, 0, 1]
+       }
      },
      'model_settings': {'feature_scaler': 'max-abs', 'tag_scheme': 'IOB'},
      'model_type': 'memm',
@@ -210,6 +213,17 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | ``'in-gaz-span-seq'``     | Generates a set of features indicating the presence of the current token in different entity gazetteers,   |
   |                           | along with popularity information (as defined in the gazetteer).                                           |
+  +---------------------------+------------------------------------------------------------------------------------------------------------+
+  | ``'sys-candidates-seq'``  | Generates a set of features indicating the presence of system entities in the query text surrounding the   |
+  |                           | current token.                                                                                             |
+  |                           |                                                                                                            |
+  |                           | Supported settings:                                                                                        |
+  |                           | A dictionary with a single key named ``'start_positions'`` and a list of different starting positions      |
+  |                           | as its value. As in the ``'bag-of-words-seq'`` feature, each starting position is a token index, relative  |
+  |                           | to the the current token.                                                                                  |
+  |                           |                                                                                                            |
+  |                           | E.g.,``'start_positions': [-1, 0, 1]`` will extract features indicating whether the current token or its   |
+  |                           | immediate neigbors are system entities.                                                                    |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
 
 .. _entity_tuning:
@@ -308,7 +322,10 @@ Here's an example of a ``config.py`` file where the preset configuration for the
                    2: [-1, 0, 1]
                }
            },
-           'in-gaz-span-seq': {}
+           'in-gaz-span-seq': {},
+           'sys-candidates-seq': {
+             'start_positions': [-1, 0, 1]
+           }
        }
    }
 
@@ -336,7 +353,10 @@ Let's start with the baseline classifier that was trained :ref:`above <baseline_
          2: [-2, -1, 0, 1]
        }
      },
-     'in-gaz-span-seq': {}
+     'in-gaz-span-seq': {},
+     'sys-candidates-seq': {
+       'start_positions': [-1, 0, 1]
+     }
    }
 
 By default, the classifier only extracts n-grams within a context window of two tokens or less around the token of interest. It may be useful to have the classifier look at a larger context window since that could potentially provide more information than just the words in the immediate vicinity. To accomplish this, you need to change the ``'ngram_lengths_to_start_positions'`` settings to extract n-grams starting from tokens that are further away. Suppose you want to extract all the unigrams and bigrams in a window of three tokens around the current token, the :data:`my_features` dictionary should be updated as shown below.
@@ -355,7 +375,10 @@ By default, the classifier only extracts n-grams within a context window of two 
          2: [-3, -2, -1, 0, 1, 2]
        }
      },
-     'in-gaz-span-seq': {}
+     'in-gaz-span-seq': {},
+     'sys-candidates-seq': {
+       'start_positions': [-1, 0, 1]
+     }
    }
 
 Suppose w\ :sub:`i` represents the word at the *ith* index in the query, where the index is calculated relative to the current token. Then, the above feature configuration should extract the following n-grams (w\ :sub:`0` being the current token).
