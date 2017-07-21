@@ -35,6 +35,7 @@ BLUEPRINTS = {
     'quickstart': {},
     'food_ordering': {},
     'home_assistant': {},
+    'video_discovery': {},
     'template': {}
 }
 
