@@ -477,7 +477,7 @@ Our video discovery application does not use entity groups. This means we do not
 
 The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top ten entries in our ``videos`` index and present them as suggestions to the user. For that, we sort the videos by popularity when using the :doc:`Question Answerer <../userguide/kb>`:
 
-.. code:: python
+.. code::python
 	results = app.question_answerer.get(index=KB_INDEX_NAME,
                                             _sort='popularity', _sort_type='desc')
 
