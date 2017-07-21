@@ -1,73 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-This module contains all code required to perform tagging.
+This module contains the Memm entity recognizer.
 """
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import division
+from __future__ import print_function, absolute_import, unicode_literals, division
+from sklearn_crfsuite import CRF
+
+from ..helpers import extract_sequence_features
+from ..feature_binner import FeatureBinner
+from .taggers import Tagger, get_tags_from_entities, get_entities_from_tags
 
 import logging
 
-from sklearn_crfsuite import CRF
-
-from .helpers import extract_sequence_features
-from .tagging import get_tags_from_entities, get_entities_from_tags
-from .feature_binner import FeatureBinner
-
-
 logger = logging.getLogger(__name__)
-
-
-class Tagger(object):
-    def __init__(self, config):
-        """
-        Args:
-            config (ModelConfig): model configuration
-        """
-        self.config = config
-        # Default tag scheme to IOB
-        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
-        # Placeholders
-        self._resources = {}
-        self._clf = None
-        self._current_params = {}
-
-    def __getstate__(self):
-        """Returns the information needed pickle an instance of this class.
-
-        By default, pickling removes attributes with names starting with
-        underscores. This overrides that behavior. For the _resources field,
-        we save the resources that are memory intensive
-        """
-        attributes = self.__dict__.copy()
-        resources_to_persist = set(['sys_types'])
-        for key in list(attributes['_resources'].keys()):
-            if key not in resources_to_persist:
-                del attributes['_resources'][key]
-        return attributes
-
-    def fit(self, examples, labels, resources=None):
-        """Trains the model
-
-        Args:
-            labeled_queries (list of mmworkbench.core.Query): a list of queries to train on
-            labels (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
-        """
-        raise NotImplementedError
-
-    def predict(self, examples):
-        """Predicts for a list of examples
-        Args:
-            examples (list of mmworkbench.core.Query): a list of queries to be predicted
-        Returns:
-            (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
-        """
-        raise NotImplementedError
-
-    def _get_model_constructor(self):
-        """Returns the python class of the actual underlying model"""
-        raise NotImplementedError
 
 
 class ConditionalRandomFields(Tagger):

@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
-"""This module contains the Memm entity recognizer."""
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import division
+"""
+This module contains the Memm entity recognizer.
+"""
+from __future__ import print_function, absolute_import, unicode_literals, division
 from builtins import super
-
-import logging
 
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 
+from .taggers import Tagger, START_TAG
+from ..helpers import extract_sequence_features, get_label_encoder
 
-from . import tagging
-from .taggers import Tagger
-from .helpers import extract_sequence_features, get_label_encoder
+import logging
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +46,7 @@ class MemmModel(Tagger):
             return self._label_encoder.decode([], examples=[example])[0]
 
         predicted_tags = []
-        prev_tag = tagging.START_TAG
+        prev_tag = START_TAG
         for features in features_by_segment:
             features['prev_tag'] = prev_tag
             X, _ = self._preprocess_data([features])
@@ -90,7 +87,7 @@ class MemmModel(Tagger):
             groups.extend([i for _ in features_by_segment])
             for j, segment in enumerate(features_by_segment):
                 if j == 0:
-                    segment['prev_tag'] = tagging.START_TAG
+                    segment['prev_tag'] = START_TAG
                 elif fit:
                     segment['prev_tag'] = y[y_offset + j - 1]
 

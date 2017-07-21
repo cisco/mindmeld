@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
-"""This module contains constants and functions for sequence tagging."""
-from __future__ import absolute_import, unicode_literals
+"""
+This module contains all code required to perform sequence tagging.
+"""
+from __future__ import print_function, absolute_import, unicode_literals, division
 from builtins import zip
+
+from ...core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
+from ...ser import resolve_system_entity, SystemEntityResolutionError
 
 import logging
 
-from ..core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
-from ..ser import resolve_system_entity, SystemEntityResolutionError
-
 logger = logging.getLogger(__name__)
+
 
 START_TAG = 'START'
 B_TAG = 'B'
@@ -16,6 +19,62 @@ I_TAG = 'I'
 O_TAG = 'O'
 E_TAG = 'E'
 S_TAG = 'S'
+
+
+class Tagger(object):
+    def __init__(self, config):
+        """
+        Args:
+            config (ModelConfig): model configuration
+        """
+        self.config = config
+        # Default tag scheme to IOB
+        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
+        # Placeholders
+        self._resources = {}
+        self._clf = None
+        self._current_params = {}
+
+    def __getstate__(self):
+        """Returns the information needed pickle an instance of this class.
+
+        By default, pickling removes attributes with names starting with
+        underscores. This overrides that behavior. For the _resources field,
+        we save the resources that are memory intensive
+        """
+        attributes = self.__dict__.copy()
+        resources_to_persist = set(['sys_types'])
+        for key in list(attributes['_resources'].keys()):
+            if key not in resources_to_persist:
+                del attributes['_resources'][key]
+        return attributes
+
+    def fit(self, examples, labels, resources=None):
+        """Trains the model
+
+        Args:
+            labeled_queries (list of mmworkbench.core.Query): a list of queries to train on
+            labels (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
+        """
+        raise NotImplementedError
+
+    def predict(self, examples):
+        """Predicts for a list of examples
+        Args:
+            examples (list of mmworkbench.core.Query): a list of queries to be predicted
+        Returns:
+            (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
+        """
+        raise NotImplementedError
+
+    def _get_model_constructor(self):
+        """Returns the python class of the actual underlying model"""
+        raise NotImplementedError
+
+
+"""
+Helpers for taggers
+"""
 
 
 def get_tags_from_entities(query, entities, scheme='IOB'):

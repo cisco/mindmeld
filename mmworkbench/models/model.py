@@ -18,7 +18,7 @@ from sklearn.metrics import make_scorer
 from sklearn_crfsuite.metrics import sequence_accuracy_score
 
 from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
-from .tagging import get_tags_from_entities, get_entities_from_tags
+from .taggers.taggers import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
 # model scoring types

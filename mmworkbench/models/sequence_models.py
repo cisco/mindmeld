@@ -11,8 +11,8 @@ import random
 
 from .helpers import register_model
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
-from .taggers import ConditionalRandomFields
-from .memm import MemmModel
+from .taggers.crf import ConditionalRandomFields
+from .taggers.memm import MemmModel
 
 logger = logging.getLogger(__name__)
 
