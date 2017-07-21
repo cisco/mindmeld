@@ -118,7 +118,7 @@ class Classifier(object):
             params_selection (dict): The grid of hyper-parameters to search, for finding the optimal
                 hyper-parameter settings for the model. If omitted, the default hyper-parameter
                 search grid will be used.
-            param_selection (dict): Configuration for param selection (using cross validation)
+            param_selection (dict): Configuration for param selection (using cross-validation)
                 {'type': 'shuffle',
                  'n': 3,
                  'k': 10,
@@ -139,12 +139,12 @@ class Classifier(object):
 
                 >>> clf.fit(label_set='special')
 
-            Fit using given params, bypassing cross validation. This is useful for speeding up
+            Fit using given params, bypassing cross-validation. This is useful for speeding up
             train times if you are confident the params are optimized.
 
                 >>> clf.fit(params={'C': 10000000})
 
-            Fit using given parameter selection settings (also known as cross validation settings).
+            Fit using given parameter selection settings (also known as cross-validation settings).
 
                 >>> clf.fit(param_selection={
 
@@ -215,16 +215,32 @@ class Classifier(object):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
-    def evaluate(self, use_blind=False):
+    def evaluate(self, queries=None, use_blind=False):
         """Evaluates the trained classification model on the given test data
 
         Args:
+            queries (list of ProcessedQuery): The labeled queries to use as test data. If none
+                are provided, the test label set will be used.
             use_blind (bool): Description
 
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        if not self._model:
+            logger.error('You must fit or load the model before running evaluate.')
+            return
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
+        queries, labels = self._get_queries_and_labels(queries, label_set='test')
+
+        if not queries:
+            logger.info('Could not evaluate model since no relevant examples were found. Make sure '
+                        'the labeled queries for evaluation are placed in "test*" files alongside '
+                        'the training data in your Workbench project.')
+            return
+
+        evaluation = self._model.evaluate(queries, labels)
+        return evaluation
 
     def _get_model_config(self, default_config=None, **kwargs):
         """Gets a machine learning model configuration

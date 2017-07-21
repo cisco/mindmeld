@@ -7,12 +7,15 @@ from builtins import object
 
 import copy
 import logging
+import hashlib
 
 from ..core import Entity
 from ._config import get_app_name, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
 
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      delete_index)
+from elasticsearch.exceptions import ConnectionError
+from ..exceptions import EntityResolverConnectionError
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +74,9 @@ class EntityResolver(object):
                 base = {}
                 if doc.get('id'):
                     base['_id'] = doc['id']
+                else:
+                    # generate hash from canonical name as ID
+                    base['_id'] = hashlib.sha256(doc.get('cname').encode('utf-8')).hexdigest()
                 whitelist = doc['whitelist']
                 new_list = []
                 new_list.append({"name": doc['cname']})
@@ -81,7 +87,7 @@ class EntityResolver(object):
 
                 yield base
 
-        load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE,
+        load_index(app_name, index_name, _doc_generator(data), DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE,
                    es_host, es_client)
 
     def fit(self, clean=False):
@@ -330,9 +336,12 @@ class EntityResolver(object):
         Args:
             model_path (str): The location on disk where the model is stored
         """
-        if self._use_text_rel:
-            scoped_index_name = get_scoped_index_name(self._app_name, self._es_index_name)
-            if not self._es_client.indices.exists(index=scoped_index_name):
+        try:
+            if self._use_text_rel:
+                scoped_index_name = get_scoped_index_name(self._app_name, self._es_index_name)
+                if not self._es_client.indices.exists(index=scoped_index_name):
+                    self.fit()
+            else:
                 self.fit()
-        else:
-            self.fit()
+        except ConnectionError:
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
