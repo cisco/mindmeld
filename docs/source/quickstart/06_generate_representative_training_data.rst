@@ -26,7 +26,7 @@ While training data is always stored in text files, there are two different type
 ==================== ====
 **Labeled Queries**  Labeled query files are text files containing example user queries. Workbench uses them to train the domain and intent classification models. Labeled query files also support an inline markup syntax for annotating entities and entity roles within each query. These annotations are used to train both the entity and role classification models. All labeled query files belong in the ``domains`` folder. Each domain and intent subfolder should contain labeled query files that apply only to that intent. The hierarchical structure of the ``domains`` folder provides the classification labels used to train the domain and intent classification models.
 
-**Entity Mappings**  Entity mappings are JSON files which associate whitelisted and blacklisted alternate names, or synonyms, with individual entities. Workbench uses entity mappings to train the models required for entity resolution. These files belong in the ``entities`` folder.
+**Entity Mappings**  Entity mappings are JSON files which associate whitelisted alternate names, or synonyms, with individual entities. Workbench uses entity mappings to train the models required for entity resolution. These files belong in the ``entities`` folder.
 ==================== ====
 
 We will now illustrate the typical structure for these two types of training data files.
@@ -41,11 +41,11 @@ Labeled query files are the primary source of training data for the Workbench na
     :width: 400px
     :align: center
 
-Since this application contains only a single domain, ``store_info``, a domain classifier is not necessary. If additional domains were present, we would need separate sets of training queries for each domain. By default, training data for a given domain consists of the union of all labeled queries for all intents belonging to that domain. For example, training queries for the ``store_information`` domain would consist of the union of all queries in the ``greet``, ``get_store_hours``, ``find_nearest_store``, ``exit`` and ``help`` intents.
+Since this application contains only a single domain, ``store_info``, a domain classifier is not necessary. If additional domains were present, we would need separate sets of training queries for each domain. By default, training data for a given domain consists of the union of all labeled queries for all intents belonging to that domain. For example, training queries for the ``store_info`` domain would consist of the union of all queries in the ``greet``, ``get_store_hours``, ``find_nearest_store``, ``exit`` and ``help`` intents.
 
 Since the ``store_info`` domain contains multiple intents, we will use the labeled query text files to train the intent classifier for this domain. The example queries in each individual file should illustrate the typical language patterns associated with each intent.
 
-For example, the ``greet_queries.txt`` file captures many of the different ways you might expect your users to express a greeting:
+For example, the ``train.txt`` file under the ``greet`` intent folder captures many of the different ways you might expect your users to express a greeting:
 
 .. code-block:: text
 
@@ -57,7 +57,7 @@ For example, the ``greet_queries.txt`` file captures many of the different ways 
   What's up?
   ...
 
-The ``exit_queries.txt`` file captures many of the different ways a user might exit your application:
+The ``train.txt`` file in the ``exit`` intent folder captures many of the different ways a user might exit your application:
 
 .. code-block:: text
 
@@ -68,7 +68,7 @@ The ``exit_queries.txt`` file captures many of the different ways a user might e
   sayonara
   ...
 
-The ``get_store_hours_queries.txt`` file captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``sys_time``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
+The ``train.txt`` file for the ``get_store_hours`` intent captures ways that a user might ask about store hours. In this file, we see the annotation scheme for inline entities, because the ``get_store_hours`` intent supports the two entity types: ``store_name`` and ``sys_time``, as you might recall from :doc:`Step 3 <03_define_the_hierarchy>`.
 
 .. code-block:: text
 
@@ -109,7 +109,7 @@ Production conversational applications today rely on training data sets and supe
     :width: 350px
     :align: center
 
-In this example, ``store_name_mapping.json`` is the mapping file for the ``store_name`` entity. Here is what ``store_name_mapping.json`` looks like:
+In this example, the ``mapping.json`` file under the ``store_name`` entity folder is the mapping file for the ``store_name`` entity. Here is what ``mapping.json`` looks like:
 
 .. code-block:: javascript
 
@@ -134,4 +134,4 @@ In this example, ``store_name_mapping.json`` is the mapping file for the ``store
   ]
   ...
 
-The entity mapping file specifies a canonical name, or ``cname``, and a unique object ``id`` for the entity. Alternate names or synonyms by which users might refer to the entity are specified as items in the ``whitelist`` array. Workbench relies on the data specified in this file in order to associate each natural language entity with a unique and unambiguous concept. See the :ref:`User Guide <userguide>` for details.
+The entity mapping file specifies a canonical name, or ``cname``, and a unique object ``id`` for the entity. Alternate names or synonyms by which users might refer to the entity are specified as items in the ``whitelist`` array. Workbench relies on the data specified in this file in order to associate each natural language entity with a unique and unambiguous concept. See the :doc:`User Guide <../userguide/entity_resolver>` for details.

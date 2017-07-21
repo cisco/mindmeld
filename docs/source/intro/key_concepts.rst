@@ -4,7 +4,7 @@
 Key Concepts
 ============
 
-This section introduces terminology that every Workbench developer should know.
+Every Workbench developer should know the terms defined in this section. It's best to read the entire section through, since later definitions build on earlier ones.
 
 
 app

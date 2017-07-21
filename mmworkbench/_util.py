@@ -34,6 +34,7 @@ BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
     'quickstart': {},
     'food_ordering': {},
+    'home_assistant': {},
     'template': {}
 }
 
@@ -204,7 +205,7 @@ class Blueprint(object):
             # authentication error
             msg = ('Invalid MindMeld credentials. Cannot download blueprint. Please confirm '
                    'they are correct and try again.')
-            logger.eror(msg)
+            logger.error(msg)
             raise EnvironmentError(msg)
         if res.status_code != 200:
             # Unknown error

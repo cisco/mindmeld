@@ -1,3 +1,5 @@
+:orphan:
+
 System Entities
 ===============
 
@@ -55,7 +57,7 @@ training set since these system entities have already been pre-learned.
 Here are some examples of annotated system entities from the
 home-assistant blueprint application:
 
-::
+.. code-block:: text
 
     - adjust the temperature to {65|sys_temperature}
     - {in the morning|sys_interval} set the temperature to {72|sys_temperature}
@@ -68,7 +70,7 @@ Common issues with system entities
 
 -  **Misclassifying system entities**:
 
-::
+.. code-block:: text
 
     change my {6:45|sys_interval|old_time} alarm to {7 am|sys_time|new_time}
 
@@ -76,7 +78,7 @@ In the above query, “6:45” is misclassified as a ``sys_interval``
 entity since it is a ``sys_time`` entity. During training, the following
 warning will be printed to stdout:
 
-::
+.. code-block:: text
 
     Unable to load query: Unable to resolve system entity of type 'sys_interval' for '6:45'. Entities found for the following types ['sys_time']
 
@@ -85,14 +87,14 @@ warning will be printed to stdout:
 
 -  **Unsupported system entities**:
 
-::
+.. code-block:: text
 
     set my alarm {daily|sys_time}
 
 Since the token “daily” is not supported by Workbench as a system entity
 at the moment, the following warning will be printed:
 
-::
+.. code-block:: text
 
     Unable to load query: Unable to resolve system entity of type 'sys_time' for 'daily'.
 

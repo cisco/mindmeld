@@ -40,6 +40,7 @@ your models use the ``build`` command:
 To launch the web service use the ``run`` command:
 
 .. code-block:: console
+
     $ python app.py run
     Numerical parser running, PID 20248
     Loading intent classifier: domain='store_info'
@@ -77,9 +78,9 @@ To test using any REST client (such as Postman or Advanced Rest Client), send `P
 
 The web service responds with a JSON data structure containing the application response along with the detailed output for all of the machine learning components of the Workbench platform.
 
-See the :ref:`User Guide <userguide>` for more about the Workbench request and response interface format.
+.. See the :ref:`User Guide <userguide>` for more about the Workbench request and response interface format.
 
-MindMeld Cloud Deployment
-~~~~~~~~~~~~~~~~~~~~~~~~~
+.. Cloud Deployment
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Coming Soon
+.. Coming Soon

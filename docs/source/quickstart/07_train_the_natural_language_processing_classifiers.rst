@@ -50,10 +50,11 @@ To run all of the trained models in the NLP pipeline, use the :meth:`nlp.process
     'text': 'When does Elm Street close?'
   }
 
-The :meth:`nlp.process()` command returns detailed information about the output of each of the trained NLP models. See the :ref:`User Guide <userguide>` for details.
+The :meth:`nlp.process()` command returns detailed information about the output of each of the trained NLP models. See the :doc:`User Guide <../userguide/nlp>` for details.
 
 By default, the :meth:`build()` method shown above uses the baseline machine learning settings for all classifiers, which should train reasonable models in most cases. To further improve model performance, Workbench provides extensive capabilities for optimizing individual model parameters and measuring results. We'll next explore how to experiment with different settings for each NLP component individually.
 
+.. _domain_classification:
 
 Domain Classification
 ~~~~~~~~~~~~~~~~~~~~~
@@ -88,7 +89,9 @@ To view the classification probabilities associated with all available domains, 
     ('finance', 0.026346)
   ]
 
-In addition to the `model` parameter we used above, the :meth:`fit()` method also takes parameters we can use to improve upon the baseline SVM model trained by default. These include parameters for features, cross-validation settings, and other model-specific configuration. See the :ref:`User Guide <userguide>` for details.
+In addition to the `model` parameter we used above, the :meth:`fit()` method also takes parameters we can use to improve upon the baseline SVM model trained by default. These include parameters for features, cross-validation settings, and other model-specific configuration. See the :doc:`User Guide <../userguide/domain_classifier>` for details.
+
+.. _intent_classification:
 
 Intent Classification
 ~~~~~~~~~~~~~~~~~~~~~
@@ -160,7 +163,9 @@ Once we have experimented with different settings and have an optimized intent m
 
   >>> clf.dump('my_app/experimentation/intent_model_logreg.pkl')
 
-See the :ref:`User Guide <userguide>` for a comprehensive list of the different model, feature extraction and hyperparameter settings for training the domain and intent models. The :ref:`User Guide <userguide>` also describes how to evaluate trained models using labeled test data.
+See the :doc:`User Guide <../userguide/intent_classifier>` for a comprehensive list of the different model, feature extraction and hyperparameter settings for training the domain and intent models. The :doc:`User Guide <../userguide/intent_classifier>` also describes how to evaluate trained models using labeled test data.
+
+.. _entity_recognition:
 
 Entity Recognition
 ~~~~~~~~~~~~~~~~~~
@@ -232,7 +237,9 @@ We have now trained and saved the ``get_name`` entity recognizer for the ``get_s
   >>> recognizer.predict('When does the store on Elm Street close?')
   (<QueryEntity 'Elm Street' ('store_name') char: [23-32], tok: [5-6]>,)
 
-See the :ref:`User Guide <userguide>` for more about entity recognizer training and evaluation options.
+See the :doc:`User Guide <../userguide/entity_recognizer>` for more about entity recognizer training and evaluation options.
+
+.. _role_classification:
 
 Role Classification
 ~~~~~~~~~~~~~~~~~~~
@@ -259,9 +266,9 @@ Once the classifier is trained, we test it on a new query using the familiar :me
   >>> clf.predict(query, predicted_entities)
   {'8 AM': 'open_time', '6 PM': 'close_time'}
 
-We can further optimize our baseline role classifier using the training and evaluation options detailed in the :ref:`User Guide <userguide>`.
+We can further optimize our baseline role classifier using the training and evaluation options detailed in the :doc:`User Guide <../userguide/role_classifier>`.
 
-.. _entity-resolution:
+.. _entity_resolution:
 
 Entity Resolution
 ~~~~~~~~~~~~~~~~~
@@ -331,4 +338,4 @@ The code below illustrates how to train and evaluate the entity resolver model f
   >>> resolver.predict(entities[0])
   [{'cname': '23 Elm Street', 'id': '1'}]
 
-See the :ref:`User Guide <userguide>` for more about how to evaluate and optimize entity resolution models.
+See the :doc:`User Guide <../userguide/entity_resolver>` for more about how to evaluate and optimize entity resolution models.
