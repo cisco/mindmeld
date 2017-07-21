@@ -51,7 +51,7 @@ All blueprints require you to install Workbench and its required dependencies be
 
 See the :doc:`Getting Started <../userguide/getting_started>` page for instructions on acquiring and installing the Workbench toolkit on your system.
 
-The Home Assistant blueprint requires you to register for an `Open Weather Map <https://openweathermap.org/appid>`_ API key, and then set an environment variable with the command ``export OPEN_WEATHER_KEY=[YOUR-KEY]``. If you skip this step, the app can run but cannot retrieve weather forecasts. 
+The Home Assistant blueprint requires you to register for an `Open Weather Map <https://openweathermap.org/appid>`_ API key, and then set an environment variable with the command ``export OPEN_WEATHER_KEY=[YOUR-KEY]``. If you skip this step, the app can run but cannot retrieve weather forecasts.
 
 Quick Start
 -----------
@@ -107,7 +107,7 @@ Interact with the app in the Python shell using the commands below. Try the quer
 .. code:: python
 
     >>> from mmworkbench.components.dialogue import Conversation
-    >>> conv = Conversation(nlp=nlp, app_path='bp_name')
+    >>> conv = Conversation(nlp=nlp, app_path=bp_name)
     >>> conv.say('Hi')
     ['Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.']
     >>> conv.say('What is the weather today?')
