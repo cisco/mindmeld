@@ -13,7 +13,8 @@ from ..core import Entity
 from ._config import get_app_name, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
 
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
-                                     delete_index, does_index_exist, get_field_names)
+                                     delete_index, does_index_exist, get_field_names,
+                                     INDEX_TYPE_KB, INDEX_TYPE_SYNONYM)
 
 from elasticsearch.exceptions import ConnectionError
 from ..exceptions import EntityResolverConnectionError
@@ -59,8 +60,8 @@ class EntityResolver(object):
         return self.__es_client
 
     @classmethod
-    def ingest_synonym(cls, app_name, index_name, index_type='syn', field_name=None, data=[],
-                       es_host=None, es_client=None):
+    def ingest_synonym(cls, app_name, index_name, index_type=INDEX_TYPE_SYNONYM,
+                       field_name=None, data=[], es_host=None, es_client=None):
         """Loads synonym documents from the mapping.json data into the specified index. If an index
         with the specified name doesn't exist, a new index with that name will be created.
 
@@ -99,7 +100,7 @@ class EntityResolver(object):
                 # If index type is 'kb' we import the synonym into knowledge base object index
                 # by updating the knowledge base object with additional synonym whitelist field.
                 # Otherwise, by default we import to synonym index in ES.
-                if index_type == 'kb' and field_name:
+                if index_type == INDEX_TYPE_KB and field_name:
                     syn_field = field_name + "$whitelist"
                     action['_op_type'] = 'update'
                     action['doc'] = {syn_field: syn_list}

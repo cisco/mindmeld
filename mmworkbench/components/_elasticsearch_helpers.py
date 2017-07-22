@@ -14,6 +14,9 @@ from ..exceptions import KnowledgeBaseConnectionError
 
 logger = logging.getLogger(__name__)
 
+INDEX_TYPE_SYNONYM = 'syn'
+INDEX_TYPE_KB = 'kb'
+
 
 def get_scoped_index_name(app_name, index_name):
     return '{}${}'.format(app_name, index_name)
