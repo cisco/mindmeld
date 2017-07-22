@@ -18,7 +18,9 @@ import click_log
 
 from . import path
 from .components import Conversation, QuestionAnswerer
-from .exceptions import FileNotFoundError
+from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
+                         EntityResolverConnectionError)
+
 from ._util import blueprint
 from ._version import current as __version__
 
@@ -74,38 +76,45 @@ def run_server(ctx, port, no_debug, reloader):
 @click.pass_context
 @click.option('--session', help='JSON object to be used as the session')
 def converse(ctx, session):
-    """Starts a conversation with the app."""
-    app = ctx.obj.get('app')
-    if isinstance(session, str):
-        session = json.loads(session)
-    if app is None:
-        raise ValueError("No app was given. Run 'python app.py converse' from your app folder.")
+    try:
+        """Starts a conversation with the app."""
+        app = ctx.obj.get('app')
+        if isinstance(session, str):
+            session = json.loads(session)
+        if app is None:
+            raise ValueError("No app was given. Run 'python app.py converse' from your app"
+                             " folder.")
 
-    ctx.invoke(num_parser, start=True)
+        ctx.invoke(num_parser, start=True)
 
-    convo = Conversation(app=app, session=session)
+        convo = Conversation(app=app, session=session)
 
-    while True:
-        message = click.prompt('You')
-        responses = convo.say(message)
+        while True:
+            message = click.prompt('You')
+            responses = convo.say(message)
 
-        for index, response in enumerate(responses):
-            prefix = 'App: ' if index == 0 else '...  '
-            click.secho(prefix + response, fg='blue', bg='white')
+            for index, response in enumerate(responses):
+                prefix = 'App: ' if index == 0 else '...  '
+                click.secho(prefix + response, fg='blue', bg='white')
+    except EntityResolverConnectionError as ex:
+        logger.error(ex.message)
 
 
 @cli.command('build', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def build(ctx):
-    """Builds the app with default config."""
-    app = ctx.obj.get('app')
-    if app is None:
-        raise ValueError("No app was given. Run 'python app.py build' from your app folder.")
+    try:
+        """Builds the app with default config."""
+        app = ctx.obj.get('app')
+        if app is None:
+            raise ValueError("No app was given. Run 'python app.py build' from your app folder.")
 
-    app.lazy_init()
-    nlp = app.app_manager.nlp
-    nlp.build()
-    nlp.dump()
+        app.lazy_init()
+        nlp = app.app_manager.nlp
+        nlp.build()
+        nlp.dump()
+    except KnowledgeBaseConnectionError as ex:
+        logger.error(ex.message)
 
 
 @cli.command('clean', context_settings=CONTEXT_SETTINGS)

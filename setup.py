@@ -25,6 +25,7 @@ requirements = [
     'requests>=2.13.0',
     'scipy>=0.9',
     'scikit-learn>=0.18.1',
+    'urllib3<1.22,>=1.21.1',
 ]
 
 setup_requirements = [
@@ -40,7 +41,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='3.0.0rc1',
+    version='3.0.0rc2',
     description="A Python module for building natural language processing models.",
     long_description=readme + '\n\n' + history,
     author="MindMeld, Inc.",

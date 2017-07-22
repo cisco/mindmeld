@@ -584,7 +584,7 @@ class Search:
                         },
                         {
                             "match": {
-                                self.field + ".name.char_ngram": {
+                                self.field + ".char_ngram": {
                                     "query": self.value
                                 }
                             }

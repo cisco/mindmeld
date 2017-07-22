@@ -175,31 +175,6 @@ class RoleClassifier(Classifier):
         """
         raise NotImplementedError
 
-    def evaluate(self, queries=None):
-        """Evaluates the trained entity recognition model on the given test data
-
-        Args:
-            queries (list of ProcessedQuery): The labeled queries to use as test data. If none
-                are provided, the test label set will be used.
-
-        Returns:
-            ModelEvaluation: A ModelEvaluation object that contains evaluation results
-        """
-        if not self._model:
-            logger.error('You must fit or load the model before running evaluate.')
-            return
-
-        gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
-        queries, labels = self._get_queries_and_labels(queries, label_set='test')
-
-        if not queries:
-            logger.info('Could not evaluate model. No relevant examples in evaluation set.')
-            return
-
-        evaluation = self._model.evaluate(queries, labels)
-        return evaluation
-
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
@@ -213,7 +188,7 @@ class RoleClassifier(Classifier):
             query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
                                                                    intent=self.intent,
                                                                    label_set=label_set)
-            queries = query_tree[self.domain][self.intent]
+            queries = query_tree.get(self.domain, {}).get(self.intent, {})
 
         # build list of examples -- entities of this role classifier's type
         examples = []

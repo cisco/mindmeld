@@ -99,7 +99,7 @@ def create_index(app_name, index_name, mapping, es_host=None, es_client=None, co
             logger.error('Index %r already exists.', index_name)
     except ESConnectionError:
         logger.error('Unable to connect to Elasticsearch cluster at %r', es_host)
-        raise KnowledgeBaseConnectionError()
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
 
 
 def delete_index(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
@@ -125,7 +125,7 @@ def delete_index(app_name, index_name, es_host=None, es_client=None, connect_tim
             es_client.indices.delete(scoped_index_name)
     except ESConnectionError:
         logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
-        raise KnowledgeBaseConnectionError()
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
 
 
 def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
@@ -174,4 +174,4 @@ def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
         logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
     except ESConnectionError:
         logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
-        raise KnowledgeBaseConnectionError()
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
