@@ -257,6 +257,8 @@ class Search:
     construct more complex knowledge base search criteria based on the application requirements.
 
     """
+    SYN_FIELD_SUFFIX = "$whitelist"
+
     def __init__(self, client, index, ranking_config=None, field_info=None):
         """Initialize a Search object.
 
@@ -305,7 +307,12 @@ class Search:
             field_info = self._kb_field_info.get(field)
             if not field_info:
                 raise ValueError('Invalid knowledge base field \'{}\''.format(field))
-            clause = Search.QueryClause(field, field_info, value)
+
+            # check whether the synonym field is available. By default the synonyms are
+            # imported to "<field_name>$whitelist" field.
+            synonym_field = field + self.SYN_FIELD_SUFFIX \
+                if self._kb_field_info.get(field + self.SYN_FIELD_SUFFIX) else None
+            clause = Search.QueryClause(field, field_info, value, synonym_field)
         elif type == "filter":
             # set the filter type to be 'range' if any range operator is specified.
             if kwargs.get('gt') or kwargs.get('gte') or kwargs.get('lt') or kwargs.get('lte'):
@@ -544,12 +551,12 @@ class Search:
     class QueryClause(Clause):
         """This class models a knowledge base query clause."""
 
-        def __init__(self, field, field_info, value):
+        def __init__(self, field, field_info, value, synonym_field=None):
             """Initialize a knowledge base query clause."""
             self.field = field
             self.field_info = field_info
             self.value = value
-            self.syn_field = field + "$whitelist"
+            self.syn_field = synonym_field
 
             self.clause_type = 'query'
 
@@ -564,6 +571,7 @@ class Search:
             # 4. matches on synonym if available (exact, word N-gram and character N-gram):
             # for a knowledge base text field the synonym are indexed in a separate field
             # "<field name>$whitelist" if available.
+
             clause = {
                 "bool": {
                     "should": [
@@ -588,45 +596,50 @@ class Search:
                                     "query": self.value
                                 }
                             }
-                        },
-                        {
-                            "nested": {
-                                "path": self.syn_field,
-                                "score_mode": "max",
-                                "query": {
-                                    "bool": {
-                                        "should": [
-                                            {
-                                                "match": {
-                                                    self.syn_field + ".name.normalized_keyword": {
-                                                        "query": self.value,
-                                                        "boost": 10
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                "match": {
-                                                    self.syn_field + ".name": {
-                                                        "query": self.value
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                "match": {
-                                                    self.syn_field + ".name.char_ngram": {
-                                                        "query": self.value
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                "inner_hits": {}
-                            }
                         }
                     ]
                 }
             }
+
+            # generate ES syntax for matching on synonym whitelist if available.
+            if self.syn_field:
+                clause['bool']['should'].append(
+                    {
+                        "nested": {
+                            "path": self.syn_field,
+                            "score_mode": "max",
+                            "query": {
+                                "bool": {
+                                    "should": [
+                                        {
+                                            "match": {
+                                                self.syn_field + ".name.normalized_keyword": {
+                                                    "query": self.value,
+                                                    "boost": 10
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                self.syn_field + ".name": {
+                                                    "query": self.value
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                self.syn_field + ".name.char_ngram": {
+                                                    "query": self.value
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "inner_hits": {}
+                        }
+                    }
+                )
 
             return clause
 
