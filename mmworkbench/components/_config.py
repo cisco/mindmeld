@@ -94,37 +94,94 @@ DEFAULT_ENTITY_RESOLUTION_CONFIG = {
 
 DOC_TYPE = 'document'
 
-# ElasticSearch mapping to define text analysis settings for text fields
+# ElasticSearch mapping to define text analysis settings for text fields.
+# It defines specific index configuration for synonym indices. The common index configuration
+# is in default index template.
 DEFAULT_ES_SYNONYM_MAPPING = {
     "mappings": {
         DOC_TYPE: {
-            "properties": {
-                "cname": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword",
-                            "ignore_above": 256
-                        },
-                        "normalized_keyword": {
-                            "type": "text",
-                            "analyzer": "keyword_match_analyzer"
-                        },
-                        "char_ngram": {
-                            "type": "text",
-                            "analyzer": "char_ngram_analyzer"
+            "dynamic_templates": [
+                {
+                    "synonym_whitelist_text": {
+                        "match": "whitelist",
+                        "match_mapping_type": "object",
+                        "mapping": {
+                            "type": "nested",
+                            "properties": {
+                                "name": {
+                                    "type": "text",
+                                    "fields": {
+                                        "raw": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        },
+                                        "normalized_keyword": {
+                                            "type": "text",
+                                            "analyzer": "keyword_match_analyzer"
+                                        },
+                                        "char_ngram": {
+                                            "type": "text",
+                                            "analyzer": "char_ngram_analyzer"
+                                        }
+                                    },
+                                    "analyzer": "default_analyzer"
+                                }
+                            }
                         }
-                    },
-                    "analyzer": "default_analyzer"
-                },
-                "id": {
-                    "type": "keyword"
-                },
-                "whitelist": {
-                    "type": "nested",
-                    "properties": {
-                        "name": {
+                    }
+                }
+            ],
+            "properties": {
+                "sort_factor": {
+                    "type": "double"
+                }
+            }
+        }
+    }
+}
+
+DEFAULT_ROLE_MODEL_CONFIG = {
+    'model_type': 'maxent',
+    'params': {
+        'C': 100,
+        'penalty': 'l1'
+    },
+    'features': {
+        'bag-of-words-before': {
+            'ngram_lengths_to_start_positions': {
+                1: [-2, -1],
+                2: [-2, -1]
+            }
+        },
+        'bag-of-words-after': {
+            'ngram_lengths_to_start_positions': {
+                1: [0, 1],
+                2: [0, 1]
+            }
+        },
+        'other-entities': {}
+    }
+}
+
+DEFAULT_ES_INDEX_TEMPLATE_NAME = "default"
+
+# Default ES index template that contains the base index configuration shared across different
+# types of indices. Currently all ES indices will be created using this template.
+# - custom text analysis settings such as custom analyzers, token filters and character filters.
+# - dynamic field mapping template for text fields
+# - common fields, e.g. id.
+DEFAULT_ES_INDEX_TEMPLATE = {
+    "template": "*",
+    "mappings": {
+        DOC_TYPE: {
+            "dynamic_templates": [
+                {
+                    "default_text": {
+                        "match": "*",
+                        "match_mapping_type": "string",
+                        "mapping": {
                             "type": "text",
+                            "analyzer": "default_analyzer",
                             "fields": {
                                 "raw": {
                                     "type": "keyword",
@@ -138,16 +195,67 @@ DEFAULT_ES_SYNONYM_MAPPING = {
                                     "type": "text",
                                     "analyzer": "char_ngram_analyzer"
                                 }
-                            },
-                            "analyzer": "default_analyzer"
+                            }
                         }
                     }
+                }
+            ],
+            "properties": {
+                "id": {
+                    "type": "keyword"
                 }
             }
         }
     },
     "settings": {
         "analysis": {
+            "char_filter": {
+                "remove_loose_apostrophes": {
+                    "pattern": " '|' ",
+                    "type": "pattern_replace",
+                    "replacement": ""
+                },
+                "space_possessive_apostrophes": {
+                    "pattern": "([^\\p{N}\\s]+)'s ",
+                    "type": "pattern_replace",
+                    "replacement": "$1 's "
+                },
+                "remove_special_beginning": {
+                    "pattern": "^[^\\p{L}\\p{N}\\p{Sc}&']+",
+                    "type": "pattern_replace",
+                    "replacement": ""
+                },
+                "remove_special_end": {
+                    "pattern": "[^\\p{L}\\p{N}&']+$",
+                    "type": "pattern_replace",
+                    "replacement": ""
+                },
+                "remove_special1": {
+                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{N}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 "
+                },
+                "remove_special2": {
+                    "pattern": "([\\p{N}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 "
+                },
+                "remove_special3": {
+                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 "
+                },
+                "remove_comma": {
+                    "pattern": ",",
+                    "type": "pattern_replace",
+                    "replacement": ""
+                },
+                "remove_tm_and_r": {
+                    "pattern": "™|®",
+                    "type": "pattern_replace",
+                    "replacement": ""
+                }
+            },
             "filter": {
                 "token_shingle": {
                     "max_shingle_size": "4",
@@ -221,113 +329,21 @@ DEFAULT_ES_SYNONYM_MAPPING = {
                     "type": "custom",
                     "tokenizer": "whitespace"
                 }
-            },
-            "char_filter": {
-                "remove_comma": {
-                    "pattern": ",",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "remove_loose_apostrophes": {
-                    "pattern": " '|' ",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "remove_special2": {
-                    "pattern": "([\\p{N}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}\\s]+)",
-                    "type": "pattern_replace",
-                    "replacement": "$1 "
-                },
-                "remove_tm_and_r": {
-                    "pattern": "™|®",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "remove_special3": {
-                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
-                    "type": "pattern_replace",
-                    "replacement": "$1 "
-                },
-                "remove_special1": {
-                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{N}\\s]+)",
-                    "type": "pattern_replace",
-                    "replacement": "$1 "
-                },
-                "remove_special_end": {
-                    "pattern": "[^\\p{L}\\p{N}&']+$",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "space_possessive_apostrophes": {
-                    "pattern": "([^\\p{N}\\s]+)'s ",
-                    "type": "pattern_replace",
-                    "replacement": "$1 's "
-                },
-                "remove_special_beginning": {
-                    "pattern": "^[^\\p{L}\\p{N}\\p{Sc}&']+",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                }
             }
         }
     }
 }
 
-DEFAULT_ROLE_MODEL_CONFIG = {
-    'model_type': 'maxent',
-    'params': {
-        'C': 100,
-        'penalty': 'l1'
-    },
-    'features': {
-        'bag-of-words-before': {
-            'ngram_lengths_to_start_positions': {
-                1: [-2, -1],
-                2: [-2, -1]
-            }
-        },
-        'bag-of-words-after': {
-            'ngram_lengths_to_start_positions': {
-                1: [0, 1],
-                2: [0, 1]
-            }
-        },
-        'other-entities': {}
-    }
-}
 
-# ElasticSearch mapping to define text analysis settings for text fields
-# The default knowledge base ES mapping contains two dynamic templates for any text fields and
-# nested object fields for synonym whitelists. The synonym whitelist fields are assumed to have
-# field name with "$whitelist" suffix.
+# Elasticsearch mapping to define knowledge base index specific configuration:
+# - dynamic field mapping to index all synonym whitelist in fields with "$whitelist" suffix.
+# - location field
+#
+# The common configuration is defined in default index template
 DEFAULT_ES_QA_MAPPING = {
     "mappings": {
         DOC_TYPE: {
             "dynamic_templates": [
-                {
-                    "default_text": {
-                        "match": "*",
-                        "match_mapping_type": "string",
-                        "mapping": {
-                            "type": "text",
-                            "analyzer": "default_analyzer",
-                            "fields": {
-                                "raw": {
-                                    "type": "keyword",
-                                    "ignore_above": 256
-                                },
-                                "normalized_keyword": {
-                                    "type": "text",
-                                    "analyzer": "keyword_match_analyzer"
-                                },
-                                "char_ngram": {
-                                    "type": "text",
-                                    "analyzer": "char_ngram_analyzer"
-                                }
-                            }
-                        }
-                    }
-                },
                 {
                     "synonym_whitelist_text": {
                         "match": "*$whitelist",
@@ -361,134 +377,6 @@ DEFAULT_ES_QA_MAPPING = {
             "properties": {
                 "location": {
                     "type": "geo_point"
-                },
-                "id": {
-                    "type": "keyword"
-                }
-            }
-        }
-    },
-    "settings": {
-        "analysis": {
-            "char_filter": {
-                "remove_loose_apostrophes": {
-                    "pattern": " '|' ",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "space_possessive_apostrophes": {
-                    "pattern": "([^\\p{N}\\s]+)'s ",
-                    "type": "pattern_replace",
-                    "replacement": "$1 's "
-                },
-                "remove_special_beginning": {
-                    "pattern": "^[^\\p{L}\\p{N}\\p{Sc}&']+",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "remove_special_end": {
-                    "pattern": "[^\\p{L}\\p{N}&']+$",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "remove_special1": {
-                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{N}\\s]+)",
-                    "type": "pattern_replace",
-                    "replacement": "$1 "
-                },
-                "remove_special2": {
-                    "pattern": "([\\p{N}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}\\s]+)",
-                    "type": "pattern_replace",
-                    "replacement": "$1 "
-                },
-                "remove_special3": {
-                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
-                    "type": "pattern_replace",
-                    "replacement": "$1 "
-                },
-                "remove_comma": {
-                    "pattern": ",",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "remove_tm_and_r": {
-                    "pattern": "™|®",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                }
-            },
-            "filter": {
-                "token_shingle": {
-                    "max_shingle_size": "4",
-                    "min_shingle_size": "2",
-                    "output_unigrams": "true",
-                    "type": "shingle"
-                },
-                "ngram_filter": {
-                    "type": "ngram",
-                    "min_gram": "3",
-                    "max_gram": "3"
-                }
-            },
-            "analyzer": {
-                "default_analyzer": {
-                    "filter": [
-                        "lowercase",
-                        "asciifolding",
-                        "token_shingle"
-                    ],
-                    "char_filter": [
-                        "remove_comma",
-                        "remove_tm_and_r",
-                        "remove_loose_apostrophes",
-                        "space_possessive_apostrophes",
-                        "remove_special_beginning",
-                        "remove_special_end",
-                        "remove_special1",
-                        "remove_special2",
-                        "remove_special3"
-                    ],
-                    "type": "custom",
-                    "tokenizer": "whitespace"
-                },
-                "keyword_match_analyzer": {
-                    "filter": [
-                        "lowercase",
-                        "asciifolding"
-                    ],
-                    "char_filter": [
-                        "remove_comma",
-                        "remove_tm_and_r",
-                        "remove_loose_apostrophes",
-                        "space_possessive_apostrophes",
-                        "remove_special_beginning",
-                        "remove_special_end",
-                        "remove_special1",
-                        "remove_special2",
-                        "remove_special3"
-                    ],
-                    "type": "custom",
-                    "tokenizer": "keyword"
-                },
-                "char_ngram_analyzer": {
-                    "filter": [
-                        "lowercase",
-                        "asciifolding",
-                        "ngram_filter"
-                    ],
-                    "char_filter": [
-                        "remove_comma",
-                        "remove_tm_and_r",
-                        "remove_loose_apostrophes",
-                        "space_possessive_apostrophes",
-                        "remove_special_beginning",
-                        "remove_special_end",
-                        "remove_special1",
-                        "remove_special2",
-                        "remove_special3"
-                    ],
-                    "type": "custom",
-                    "tokenizer": "whitespace"
                 }
             }
         }

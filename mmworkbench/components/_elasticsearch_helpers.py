@@ -8,6 +8,8 @@ import logging
 from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
 from elasticsearch.helpers import streaming_bulk
 
+from ._config import DEFAULT_ES_INDEX_TEMPLATE, DEFAULT_ES_INDEX_TEMPLATE_NAME
+
 from ..exceptions import KnowledgeBaseConnectionError
 
 logger = logging.getLogger(__name__)
@@ -87,6 +89,10 @@ def create_index(app_name, index_name, mapping, es_host=None, es_client=None, co
         es_client.cluster.health(request_timeout=connect_timeout)
 
         if not es_client.indices.exists(index=scoped_index_name):
+            # checks the existence of default index template, if not then creates it.
+            if not es_client.indices.exists_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME):
+                es_client.indices.put_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME,
+                                               body=DEFAULT_ES_INDEX_TEMPLATE)
             logger.info('Creating index %r', index_name)
             es_client.indices.create(scoped_index_name, body=mapping)
         else:
