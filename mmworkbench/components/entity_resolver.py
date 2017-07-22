@@ -69,11 +69,11 @@ class EntityResolver(object):
             app_name (str): The name of the app
             index_name (str): The name of the new index to be created
             index_type (str): specify whether to import to synonym index or knowledge base object
-                              index. 'syn' is the default which indicates the synonyms to be
-                              imported to synonym index, while 'kb' indicates that the synonyms
-                              should be imported into existing knowledge base index.
+                              index. INDEX_TYPE_SYNONYM is the default which indicates the synonyms
+                              to be imported to synonym index, while INDEX_TYPE_KB indicates that
+                              the synonyms should be imported into existing knowledge base index.
             field_name (str): specify name of the knowledge base field that the synonym list
-                              corresponds to when index_type is 'kb'.
+                              corresponds to when index_type is INDEX_TYPE_SYNONYM.
             data (list): A list of documents to be loaded into the index
             es_host (str): The Elasticsearch host server
             es_client (Elasticsearch): The Elasticsearch client
@@ -97,9 +97,9 @@ class EntityResolver(object):
                 for syn in whitelist:
                     syn_list.append({"name": syn})
 
-                # If index type is 'kb' we import the synonym into knowledge base object index
-                # by updating the knowledge base object with additional synonym whitelist field.
-                # Otherwise, by default we import to synonym index in ES.
+                # If index type is INDEX_TYPE_KB  we import the synonym into knowledge base object
+                # index by updating the knowledge base object with additional synonym whitelist
+                # field. Otherwise, by default we import to synonym index in ES.
                 if index_type == INDEX_TYPE_KB and field_name:
                     syn_field = field_name + "$whitelist"
                     action['_op_type'] = 'update'

@@ -163,7 +163,7 @@ def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
         count = 0
         for okay, result in streaming_bulk(es_client, docs,
                                            index=scoped_index_name, doc_type=doc_type,
-                                           chunk_size=50):
+                                           chunk_size=50, raise_on_error=False):
 
             action, result = result.popitem()
             doc_id = '/%s/%s/%s' % (index_name, doc_type, result['_id'])

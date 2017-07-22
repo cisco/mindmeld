@@ -474,6 +474,9 @@ class Search:
                     "score_mode": "sum",
                     "boost_mode": "sum"
                 }
+            },
+            "_source": {
+                "excludes": ["*" + self.SYN_FIELD_SUFFIX]
             }
         }
 
