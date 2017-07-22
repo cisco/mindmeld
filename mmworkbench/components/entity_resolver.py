@@ -140,7 +140,7 @@ class EntityResolver(object):
         entities = entity_map.get('entities')
 
         # create synonym index and import synonyms
-        logger.info("Importing synonym data to ES index '{}'".format(self._es_index_name))
+        logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
         EntityResolver.ingest_synonym(app_name=self._app_name, index_name=self._es_index_name,
                                       data=entities, es_host=self._es_host,
                                       es_client=self._es_client)
@@ -157,13 +157,16 @@ class EntityResolver(object):
             # validate the KB index and field are valid.
             # TODO: this validation can probably be in some other places like resource loader.
             if not does_index_exist(self._app_name, kb_index, self._es_host, self._es_client):
-                raise ValueError("Knowledge base index \'{}\' is not valid.".format(kb_index))
+                raise ValueError("Cannot import synonym data to knowledge base. The knowledge base "
+                                 "index name \'{}\' is not valid.".format(kb_index))
             if kb_field not in get_field_names(self._app_name, kb_index, self._es_host,
                                                self._es_client):
-                raise ValueError("Knowledge base field \'{}\' is not valid.".format(kb_field))
+                raise ValueError("Cannot import synonym data to knowledge base. The knowledge base "
+                                 "field name \'{}\' is not valid.".format(kb_field))
             if entities and not entities[0].get('id'):
                 raise ValueError("Knowledge base index and field cannot be specified for entities "
                                  "without ID.")
+            logger.info("Importing synonym data to knowledge base index '{}'".format(kb_index))
             EntityResolver.ingest_synonym(app_name=self._app_name, index_name=kb_index,
                                           index_type='kb', field_name=kb_field, data=entities,
                                           es_host=self._es_host, es_client=self._es_client)

@@ -61,8 +61,8 @@ def get_field_names(app_name, index_name, es_host=None, es_client=None, connect_
     scoped_index_name = get_scoped_index_name(app_name, index_name)
 
     try:
-        # Confirm ES connection with a shorter timeout
-        es_client.cluster.health(request_timeout=connect_timeout)
+        if not does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
+            raise ValueError('Elasticsearch index \'{}\' does not exist.'.format(index_name))
 
         res = es_client.indices.get(index=scoped_index_name)
         all_field_info = res[scoped_index_name]['mappings']['document']['properties']
@@ -88,10 +88,7 @@ def create_index(app_name, index_name, mapping, es_host=None, es_client=None, co
     scoped_index_name = get_scoped_index_name(app_name, index_name)
 
     try:
-        # Confirm ES connection with a shorter timeout
-        es_client.cluster.health(request_timeout=connect_timeout)
-
-        if not es_client.indices.exists(index=scoped_index_name):
+        if not does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
             # checks the existence of default index template, if not then creates it.
             if not es_client.indices.exists_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME):
                 es_client.indices.put_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME,
@@ -120,10 +117,7 @@ def delete_index(app_name, index_name, es_host=None, es_client=None, connect_tim
     scoped_index_name = get_scoped_index_name(app_name, index_name)
 
     try:
-        # Confirm ES connection with a shorter timeout
-        es_client.cluster.health(request_timeout=connect_timeout)
-
-        if es_client.indices.exists(index=scoped_index_name):
+        if does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
             logger.info('Deleting index %r', index_name)
             es_client.indices.delete(scoped_index_name)
     except ESConnectionError:
@@ -151,11 +145,8 @@ def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
     scoped_index_name = get_scoped_index_name(app_name, index_name)
     es_client = es_client or create_es_client(es_host)
     try:
-        # Confirm ES connection with a shorter timeout
-        es_client.cluster.health(request_timeout=connect_timeout)
-
         # create index if specified index does not exist
-        if es_client.indices.exists(index=scoped_index_name):
+        if does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
             logger.info('Loading index %r', index_name)
         else:
             create_index(app_name, index_name, mapping, es_host=es_host, es_client=es_client)
