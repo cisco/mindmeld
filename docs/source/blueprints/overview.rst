@@ -12,22 +12,22 @@ Blueprints are also ideal when you want to:
 
 Workbench provides four blueprints:
 
-+------------------------------------------------+-----------------------------------------+------------------------------+
-| | Blueprint                                    | |  Use Case                             | | Blueprint Name             |
-| |                                              | |                                       | | in Python                  |
-+================================================+=========================================+==============================+
-| |  :doc:`Food Ordering <food_ordering>`        | | Users order food for delivery         | | ``food_ordering``          |
-| |                                              | | from nearby restaurants               | |                            |
-+------------------------------------------------+-----------------------------------------+------------------------------+
-| |  :doc:`Home Assistant <home_assistant>`      | | Users control devices                 | | ``home_assistant``         |
-| |                                              | | and appliances in a smart home        | |                            |
-+------------------------------------------------+-----------------------------------------+------------------------------+
-| |  :doc:`Video Discovery <video_discovery>`    | | Users search for, ask questions about,| | ``video_assistant``        |
-| |                                              | | and ask to view movies and TV shows   | |                            |
-+------------------------------------------------+-----------------------------------------+------------------------------+
-| |  :doc:`Quickstart <quickstart>`              | | The Kwik-E-Mart app described         | | ``quickstart``             |
-| |                                              | | in the Step-by-Step Guide             | |                            |
-+------------------------------------------------+-----------------------------------------+------------------------------+
++-------------------------------------------------+-----------------------------------------+------------------------------+
+| | Blueprint                                     | |  Use Case                             | | Blueprint Name             |
+| |                                               | |                                       | | in Python                  |
++=================================================+=========================================+==============================+
+| |  :doc:`Food Ordering <food_ordering>`         | | Users order food for delivery         | | ``food_ordering``          |
+| |                                               | | from nearby restaurants               | |                            |
++-------------------------------------------------+-----------------------------------------+------------------------------+
+| |  :doc:`Home Assistant <home_assistant>`       | | Users control devices                 | | ``home_assistant``         |
+| |                                               | | and appliances in a smart home        | |                            |
++-------------------------------------------------+-----------------------------------------+------------------------------+
+| |  :doc:`Video Discovery <video_discovery>`     | | Users search for, ask questions about,| | ``video_assistant``        |
+| |                                               | | and ask to view movies and TV shows   | |                            |
++-------------------------------------------------+-----------------------------------------+------------------------------+
+| |  :doc:`Quickstart <../quickstart/00_overview>`| | The Kwik-E-Mart app described         | | ``quickstart``             |
+| |                                               | | in the Step-by-Step Guide             | |                            |
++-------------------------------------------------+-----------------------------------------+------------------------------+
 
 You can use the Quick Start below to get any blueprint up and running.
 
