@@ -479,7 +479,7 @@ The application configuration file, ``config.py``, at the top level of home assi
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The queries in the home assistant do not have complex relationships between entities. For example, for the annotated query ``is the {back|location} door closed or open``, there is no entity that describes the ``location`` entity. As queries become more complex, for example, ``is the {green|color} {back|location} door closed or open``, we would need to relate the ``color`` entity with the ``location`` entity. When this happens, we call these two related entities ``entity groups``.
-Since we do not have entity groups in the home assistant application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships will form. Please refer to :doc:`Entity Groups <../userguide/language_parsing.html?highlight=entity%20groups>` and :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
+Since we do not have entity groups in the home assistant application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships will form. Please refer to :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
 
 
 9. Using the Question Answerer
@@ -500,7 +500,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
    >>> conv.say('set alarm for 6am')
    ['Ok, I have set your alarm for 06:00:00.']
 
-The :meth:``say()`` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
+The :meth:``say()`` method packages the input text in a user request object and passes it to the Workbench Application Manager to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
 
 You can also try out multi-turn dialogues:
 

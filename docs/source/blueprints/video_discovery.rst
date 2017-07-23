@@ -503,7 +503,7 @@ For instance:
    >>> conv.say("Show me movies with Tom Hanks")
    ['Done. Here are some movies with Tom Hanks:', "Unsupported response: {'videos': [{'release_year': 1994, 'type': 'movie', 'title': 'Forrest Gump'}, {'release_year': 1995, 'type': 'movie', 'title': 'Toy Story'}, {'release_year': 2016, 'type': 'movie', 'title': 'Inferno'}, {'release_year': 2006, 'type': 'movie', 'title': 'Cars'}, {'release_year': 2010, 'type': 'movie', 'title': 'Toy Story 3'}, {'release_year': 1999, 'type': 'movie', 'title': 'Toy Story 2'}, {'release_year': 2016, 'type': 'movie', 'title': 'Sully'}, {'release_year': 1998, 'type': 'movie', 'title': 'Saving Private Ryan'}, {'release_year': 2002, 'type': 'movie', 'title': 'Catch Me If You Can'}, {'release_year': 1999, 'type': 'movie', 'title': 'The Green Mile'}]}"]
 
-The :meth:`say()` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested movies from a particular actor, in a single query. The app responded, as expected, with an initial response acknowledging the filters used and a list of videos.
+The :meth:`say()` method packages the input text in a user request object and passes it to the Workbench Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested movies from a particular actor, in a single query. The app responded, as expected, with an initial response acknowledging the filters used and a list of videos.
 
 You can also try out multi-turn dialogues:
 
@@ -522,4 +522,6 @@ You can also try out multi-turn dialogues:
 
    Test the app multiple times with different conversational flows. Keep track of all cases where the response does not make good sense. Then, analyze those cases in detail. You should be able to attribute each error to a specific step in our end-to-end processing (e.g., incorrect intent classification, missed entity recognition, unideal natural language response, and so on). Categorizing your errors in this manner helps you understand the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.
 
-Refer to the User Guide for tips and best practices on testing your app before launch. Once you're satisfied with the performance of your app, you can deploy it to production as described in the :doc:`deployment <../userguide/deployment>` section of the User Guide.
+Refer to the User Guide for tips and best practices on testing your app before launch. 
+
+.. Once you're satisfied with the performance of your app, you can deploy it to production as described in the :doc:`deployment <../userguide/deployment>` section of the User Guide.
