@@ -18,7 +18,7 @@ project
 |
 
 blueprint
-  A pre-configured project for a specific conversational use case, distributed with Workbench as an example app. Available blueprints include :doc:`Meeting Assistant <../blueprints/meeting_assistant>`, :doc:`Food Ordering <../blueprints/food_ordering>`, :doc:`Video Discovery <../blueprints/video_discovery>` and :doc:`Home Assistant <../blueprints/home_assistant>`.
+  A pre-configured project for a specific conversational use case, distributed with Workbench as an example app. Available blueprints include :doc:`Food Ordering <../blueprints/food_ordering>`, :doc:`Video Discovery <../blueprints/video_discovery>` and :doc:`Home Assistant <../blueprints/home_assistant>`.
 
 |
 
