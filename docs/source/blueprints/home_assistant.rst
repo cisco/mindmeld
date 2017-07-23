@@ -19,7 +19,7 @@ This application provides a conversational interface for home automation systems
 
 The conversational user flows for a home assistant application can get complex depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
 
-.. code:: bash
+.. code:: console
 
    App: Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.
 
@@ -522,7 +522,7 @@ You can also try out multi-turn dialogues:
 
 We can also enter the conversation mode directly from the commandline.
 
-.. code:: bash
+.. code:: console
 
    >>> python app.py converse
 
