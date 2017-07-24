@@ -1,6 +1,3 @@
-.. meta::
-    :scope: private
-
 Domain Classifier
 =================
 
