@@ -6,7 +6,7 @@ In this step-by-step walkthrough, you'll build a conversational application that
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-Through a conversational interface, users should be able to browse through a content catalog containing movies and TV shows. They should be able to search using common filters for video content, such as: genre, cast, release year, etc... They should also be able to continue refining their search until they find the right content, and restart the search at any moment. The app will also support general actions such as greeting the user, providing help and responding to insults and compliments.
+Through a conversational interface, users should be able to browse through a content catalog containing movies and TV shows. The content found could then be played within a service similar to Netflix, Hulu, Amazon Video, etc.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -21,12 +21,14 @@ Here are some examples of scripted dialogue interactions for conversational flow
 
 .. admonition:: Exercise
 
-   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking for something unrelated to movies and TV shows, asking for something with to many filters so there are no results, asking for something that is not in the knowledge base, etc.
+   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking for something unrelated to movies and TV shows, asking for something with too many filters so there are no results, asking for something that is not in the app's catalog, etc.
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here is the NLP model hierarchy for our video discovery application.
+In this app users should be able to search using common filters for video content, such as: genre, cast, release year, etc... They should also be able to continue refining their search until they find the right content, and restart the search at any moment. The app will also support general actions such as greeting the user, providing help and responding to insults and compliments.
+
+Here is the NLP model hierarchy for supporting the mentioned functionality.
 
 .. image:: /images/video_discovery_hierarchy.png
     :width: 700px
@@ -44,7 +46,7 @@ The ``video_content`` domain supports the following intents:
   - ``start_over`` — User wants to abandon current selections and restart the ordering process.
   - ``exit`` - User wants to end the current conversation.
   - ``browse`` - User is searching for content, either for a specific movie or TV show or for a set of results.
-  - ``unsupported`` - User is asking for information related to movies or TV shows, but the app does not support thoese questions. For example, asking when a movie was released, or when it will be on given channel.
+  - ``unsupported`` - User is asking for information related to movies or TV shows, but the app does not support those questions. For example, asking when a movie was released, or when it will be on given channel.
 
 Similarly the ``unrelated`` domain supports the intents:
 
@@ -55,7 +57,7 @@ Similarly the ``unrelated`` domain supports the intents:
 For this app, only the ``browse`` intent requires entity recognition. This intent supports the following entity types:
 
    - ``cast`` — The name of an actor.
-   - ``country`` — The name of the country of origing of a movie or TV show.
+   - ``country`` — The name of the country of origin of a movie or TV show.
    - ``director`` — The name of a director.
    - ``genre`` — The name of a video genre.
    - ``sort`` — How the users want to sort the results: by most recent, most popular, etc...
@@ -64,7 +66,7 @@ For this app, only the ``browse`` intent requires entity recognition. This inten
 
 .. admonition:: Exercise
 
-   While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., ``get_cast_in_video``, ``get_releaseyear_for_video``, and so on) and entities (e.g., ``writers``, ``budget``, and so on) that make sense for a video discovery use case.
+   While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., ``get_cast_in_video``, ``get_release_year_for_video``, and so on) and entities (e.g., ``writers``, ``budget``, and so on) that make sense for a video discovery use case.
 
 To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice.
 
@@ -103,10 +105,10 @@ To support the functionality we envision, our app needs one dialogue state for e
 | | ``unsupported``| | ``handle_unsupported`` | | Inform user the app does not provide that     | 
 | |                | |                        | | information and get them back to video search |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``compliment`` | | ``say_something_nice`` | | Compliment the user back and promt the user   |
+| | ``compliment`` | | ``say_something_nice`` | | Compliment the user back and prompt the user  |
 | |                | |                        | | to get back to video search                   | 
 +------------------+--------------------------+-------------------------------------------------+
-| | ``insult``     | | ``handle_insult``      | | Handle the insult and promt the user          | 
+| | ``insult``     | | ``handle_insult``      | | Handle the insult and prompt the user         | 
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
 | | others         | | ``default``            | | Prompt a user who has gone off-topic          | 
@@ -165,7 +167,7 @@ We can illustrate this with the general implementation of the ``show_content`` h
 
 This code follows a series of steps to build the final answer to the user: it updates the :doc:`dialogue frame <../userguide/dm>` with the new found entities, fetches results from the knowledge base (in the ``get_video_content`` method), builds a response with the new entities (done in ``fill_browse_slots`` and ``build_browse_response``) and sends a response to the user.
 
-For more information on the ``show_content`` method and the functinos it uses, see the ``app.py`` file in the blueprint folder.
+For more information on the ``show_content`` method and the functions it uses, see the ``app.py`` file in the blueprint folder.
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
