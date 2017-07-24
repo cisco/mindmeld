@@ -51,7 +51,7 @@ All blueprints require you to install Workbench and its required dependencies be
 
 See the :doc:`Getting Started <../userguide/getting_started>` page for instructions on acquiring and installing the Workbench toolkit on your system.
 
-The Home Assistant blueprint requires you to register for an `Open Weather Map <https://openweathermap.org/appid>`_ API key, and then set an environment variable with the command ``export OPEN_WEATHER_KEY=[YOUR-KEY]``. If you skip this step, the app can run but cannot retrieve weather forecasts. 
+The Home Assistant blueprint requires you to register for an `Open Weather Map <https://openweathermap.org/appid>`_ API key, and then set an environment variable with the command ``export OPEN_WEATHER_KEY=[YOUR-KEY]``. If you skip this step, the app can run but cannot retrieve weather forecasts.
 
 Quick Start
 -----------
@@ -107,10 +107,23 @@ Interact with the app in the Python shell using the commands below. Try the quer
 .. code:: python
 
     >>> from mmworkbench.components.dialogue import Conversation
-    >>> conv = Conversation(nlp=nlp, app_path='bp_name')
+    >>> conv = Conversation(nlp=nlp, app_path=bp_name)
     >>> conv.say('Hi')
     ['Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.']
     >>> conv.say('What is the weather today?')
     ['The weather forecast in San Francisco is haze with a min of 66.2 F and a max of 89.6 F']
     >>> conv.say('Set the temperature to 72')
     ['The thermostat temperature in the home is now 72 degrees F.']
+
+*Video Discovery example*
+
+.. code:: python
+
+    >>> from mmworkbench.components.dialogue import Conversation
+    >>> conv = Conversation(nlp=nlp, app_path='video_discovery')
+    >>> conv.say('Hi')
+    ['Hello.', 'I can help you find movies and TV shows. What do you feel like watching today?', "Unsupported response: {'videos': [{'type': 'movie', 'title': 'Wonder Woman', 'release_year': 2017}, {'type': 'movie', 'title': 'Beauty and the Beast', 'release_year': 2017}, {'type': 'movie', 'title': 'Transformers: The Last Knight', 'release_year': 2017}, {'type': 'movie', 'title': 'Logan', 'release_year': 2017}, {'type': 'movie', 'title': 'The Mummy', 'release_year': 2017}, {'type': 'movie', 'title': 'Kong: Skull Island', 'release_year': 2017}, {'type': 'tv-show', 'title': 'Doctor Who', 'release_year': 2005}, {'type': 'tv-show', 'title': 'Game of Thrones', 'release_year': 2011}, {'type': 'tv-show', 'title': 'The Walking Dead', 'release_year': 2010}, {'type': 'movie', 'title': 'Pirates of the Caribbean: Dead Men Tell No Tales', 'release_year': 2017}]}", "Suggestions: 'Most popular', 'Most recent', 'Movies', 'TV Shows', 'Action', 'Dramas', 'Sci-Fi'"]
+    >>> conv.say('Show me movies with Tom Hanks')
+    ['Perfect. Here are some movies with Tom Hanks:', "Unsupported response: {'videos': [{'type': 'movie', 'title': 'Forrest Gump', 'release_year': 1994}, {'type': 'movie', 'title': 'Toy Story', 'release_year': 1995}, {'type': 'movie', 'title': 'Inferno', 'release_year': 2016}, {'type': 'movie', 'title': 'Cars', 'release_year': 2006}, {'type': 'movie', 'title': 'Toy Story 3', 'release_year': 2010}, {'type': 'movie', 'title': 'Toy Story 2', 'release_year': 1999}, {'type': 'movie', 'title': 'Sully', 'release_year': 2016}, {'type': 'movie', 'title': 'Saving Private Ryan', 'release_year': 1998}, {'type': 'movie', 'title': 'Catch Me If You Can', 'release_year': 2002}, {'type': 'movie', 'title': 'The Green Mile', 'release_year': 1999}]}"]
+    >>> conv.say('romantic')
+    ['Perfect. Here are some romance movies with Tom Hanks:', "Unsupported response: {'videos': [{'type': 'movie', 'title': 'Forrest Gump', 'release_year': 1994}, {'type': 'movie', 'title': 'Big', 'release_year': 1988}, {'type': 'movie', 'title': 'Larry Crowne', 'release_year': 2011}, {'type': 'movie', 'title': 'Joe Versus the Volcano', 'release_year': 1990}, {'type': 'movie', 'title': 'Splash', 'release_year': 1984}, {'type': 'movie', 'title': 'Sleepless in Seattle', 'release_year': 1993}, {'type': 'movie', 'title': 'The Money Pit', 'release_year': 1986}, {'type': 'movie', 'title': 'Toy Story 4', 'release_year': 2019}, {'type': 'movie', 'title': "You've Got Mail", 'release_year': 1998}, {'type': 'movie', 'title': 'Nothing in Common', 'release_year': 1986}]}"]

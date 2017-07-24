@@ -1,16 +1,4 @@
 
-The Conversational AI Playbook
-==============================
-
-Conversational applications have been the subject of AI research for many decades. Only in the past few years, however, have they have gone mainstream. Today, billions of people around the world rely on products like Siri, Alexa, Google Assistant, and Cortana every week. Experts agree that this is just the beginning. Conversational interfaces represent the new frontier of application development, and over the next decade, we will see a wide variety of conversational assistants emerge to help us with many daily tasks.
-
-This is not the first tectonic shift in application development. In the mid 1990s, the arrival of the Web saw traditional packaged software replaced by a new generation of browser-based, web applications. Similarly, with the arrival of the iPhone app store in 2008, native mobile applications supplanted web applications as the predominant application paradigm. Conversational applications are now ushering in a third major transformation in development practices, but this one looks to be even more disruptive than its predecessors.
-
-For nearly three decades, application design has centered around the Graphical User Interface, or GUI. During this time, a generation of developers became well-versed in a set of tools, design patterns, and best practices which streamline the building of professional, GUI-based applications. With conversational experiences, all of this changes, and the GUI becomes de-emphasized or absent altogether. As a result, the previous generation of tools and best practices no longer applies. Furthermore, unlike their predecessors, conversational applications rely heavily on AI technology to understand and respond to human language. Prior to now, mastering AI was a never a prerequisite for good application design.
-
-Today, faced with these unfamiliar challenges, developers and companies struggle to create reliable and useful conversational applications. In fact, the vast majority of attempts have failed. This woeful track record can no doubt be traced to the dearth of tools and best practices companies could use to find the path to success. A new playbook and a new generation of tools is desperately needed to help organizations chart a fruitful course in the new frontier of conversational application design.
-
-
 About This Playbook
 -------------------
 
@@ -26,6 +14,40 @@ The :ref:`userguide` covers each component of the MindMeld platform in depth and
 
 Readers should be familiar with `Machine Learning <https://www.coursera.org/learn/machine-learning>`_ and the `Python <https://www.python.org/>`_ programming language, including functional knowledge of the `scikit-learn <http://scikit-learn.org/>`_ python package.
 
+How to Use these Docs
+---------------------
+
+The questions and answers below explain how to use this Conversational AI Playbook to support your individual needs as a developer and learner. 
+
+----
+
+..
+
+        **Q:** What is Conversational AI? Why does MindMeld Workbench exist and what does it do?
+
+        **A:** Read the :ref:`intro`. This explains what Workbench does differently from other platforms and toolkits.
+
+----
+
+**Q:** What is the methodology for building Conversational AI applications with Workbench?
+
+**A:** Read the :ref:`quickstart`. This and the :ref:`userguide` together form the main body of knowledge for MindMeld Workbench developers.
+
+----
+
+**Q:** How do I quickly get a pre-built Workbench app running, either as a learning exercise or as a baseline for my own application?
+
+**A:** Follow the instructions in :ref:`blueprints`.
+
+----
+
+**Q:** How do I apply the Step-by-Step methodology to my own Workbench app, either building from scratch or extending a Blueprint app?
+
+**A:** Work through either the :ref:`quickstart` or the section of :ref:`blueprints` that’s appropriate for your use case. Where those docs refer you to the :ref:`userguide`, apply the in-depth material in the :ref:`userguide` to improve your application’s performance or increase its sophistication, as needed.
+
+The :ref:`userguide` and the :ref:`quickstart` together form the main body of knowledge for MindMeld Workbench developers.
+
+----
 
 
 Contents
@@ -74,7 +96,7 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Workbench User Guide
+   :caption: User Guide
    :name: userguide
 
    userguide/introduction

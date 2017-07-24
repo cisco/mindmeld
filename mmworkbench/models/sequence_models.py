@@ -138,6 +138,8 @@ class MemmModel(SkLearnModel):
 
         if len(set(y)) == 1:
             self._no_entities = True
+            logger.warning("There are no labels in this label set, "
+                           "so we don't fit the model.")
             return self
 
         X, y, groups = self.get_feature_matrix(examples, y, fit=True)
@@ -146,7 +148,7 @@ class MemmModel(SkLearnModel):
             self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
-            # run cross validation to select params
+            # run cross-validation to select params
             best_clf, best_params = self._fit_cv(X, y, groups)
             self._clf = best_clf
             self._current_params = best_params
@@ -195,6 +197,12 @@ class MemmModel(SkLearnModel):
                 evaluation
         """
         # TODO: also expose feature weights?
+
+        if self._no_entities:
+            logger.warning("There are no labels in this label set, "
+                           "so we don't run model evaluation.")
+            return
+
         predictions = self.predict(examples)
         config = self._get_effective_config()
 

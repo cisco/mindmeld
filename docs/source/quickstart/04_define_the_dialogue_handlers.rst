@@ -72,7 +72,7 @@ Implement the Dialogue State Handlers
 
 We have already defined the dialogue handlers that the interaction in :doc:`Step 2 <02_script_interactions>` requires.
 
-Now, to finish implementing the dialogue handlers, we need to add the desired response for each dialogue state. As we do so, we will learn about capabilities of Workbench which are explained further in the :ref:`User Guide <userguide>`.
+Now, to finish implementing the dialogue handlers, we need to add the desired response for each dialogue state. As we do so, we will learn about capabilities of Workbench which are explained further in the :doc:`User Guide <../userguide/dm>`.
 
 First, consider the handler for the ``welcome`` dialogue state.
 
@@ -94,7 +94,7 @@ The ``@app.handle()`` decorator specifies the pattern which must be matched to i
 
 Every dialogue handler returns a ``response`` object that specifies the natural language text and any other data to be returned in the response. Text strings contained in this response can use templated expressions in standard Python string formatting syntax, like ``'Hello, {name}.'`` in our example. Templated expressions are populated with real values before the response is returned to the client. Workbench uses the :data:`slots` object to store the named string values which populate the templates.
 
-The code snippet also introduces the :data:`context` object, which Workbench uses to keep track of all of the state information associated with the conversational interaction as it progresses. This state information can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information. The contents of the :data:`context` can be very useful for implementing custom dialogue state handling logic. See the :ref:`User Guide <userguide>` for details.
+The code snippet also introduces the :data:`context` object, which Workbench uses to keep track of all of the state information associated with the conversational interaction as it progresses. This state information can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information. The contents of the :data:`context` can be very useful for implementing custom dialogue state handling logic. See the :doc:`User Guide <../userguide/dm>` for details.
 
 Let's follow this same approach to define handlers for the dialogue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting `app.py` file looks like the following.
 
