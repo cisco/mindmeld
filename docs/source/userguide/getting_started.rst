@@ -11,8 +11,7 @@ Pre-requisites
 --------------
 
 This release of MindMeld Workbench is targeted towards seasoned Python developers with machine 
-learning knowhow and experience with one or more popular frameworks and libraries. If you don't fit
-that profile, we suggest you wait or look elsewhere.
+learning knowhow and experience with one or more popular machine learning frameworks and libraries.
 
 The username and password used to access the MindMeld Learning Center will be required in this process.
 
@@ -74,13 +73,8 @@ Using a Virtual Environment
 """""""""""""""""""""""""""
 
 If you would like to work in an isolated environment (which is strongly recommended so you can work
-on different projects without having conflicting library versions), you can use pyenv.
-
-Check out the `pyenv command reference <https://github.com/pyenv/pyenv/blob/master/COMMANDS.md>`_
-for more details on how to use pyenv in general and the
-`pyenv-virtualenv usage <https://github.com/pyenv/pyenv-virtualenv#usage>`_ for usage with
-virtualenv specifically.
-
+on different projects without having conflicting library versions), you can use `virtualenv with pyenv
+<https://github.com/pyenv/pyenv-virtualenv>`.
 
 Java 8
 ^^^^^^
@@ -148,8 +142,8 @@ substituting your username and password where appropriate.
 Configure your Virtual Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You may want to install Workbench in an isolate environment so you can keep it separate from your other work.
-Here is one way of doing this using pyenv and virtual-env:
+You may want to install Workbench in an isolated environment so you can keep it separate from your other work.
+Here is one way of doing this using pyenv and virtualenv:
 
 .. code-block:: console
 
@@ -192,20 +186,39 @@ To upgrade to the latest version of Workbench, you can run:
 
   $ pip install mmworkbench --upgrade
 
+Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
 
-Begin a New Project
-^^^^^^^^^^^^^^^^^^^
 
-To begin a new project, you can use workbench's built-in ``blueprint`` command, which uses one of the 
-already built example apps for you to use as a baseline.
+Start the Numerical Parser
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run these commands:
+Start the numerical parser with this command:
+
+.. code-block:: console
+  $ mmworkbench num-parse --start
+
+
+Begin Your Journey
+------------------
+
+With the setup out of the way, you are now ready to get your feet wet. MindMeld Workbench is designed so you can 
+keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in 
+your command-line shell using the ``mmworkbench`` command. But to really take advantage of the power of Workbench, 
+the Python shell is where all the action is at.
+
+
+Create a New Project - Command Line
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can use ``blueprint`` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
+already built example apps as a baseline for your project.
+
+To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run these commands on the command line:
 
 .. code-block:: console
 
   $ mmworkbench blueprint food_ordering
   $ cd $_
-  $ mmworkbench num-parse --start     # starts the numerical parser
   $ python app.py build   # this will take a few minutes
   $ python app.py converse
  Loading intent classifier: domain='ordering'
@@ -216,14 +229,26 @@ The *converse* command loads the machine learnings models and starts an interact
 Here you can enter your own input and get an immediate response back. Try "hi", for example, and see what you get.
 
 
+Create a New Project - Python Shell
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To try out the :doc:`Home Assistant blueprint<../blueprints/home_assistant>`, run these commands in your Python shell:
+
+.. code-block:: python
+ 
+    import mmworkbench as wb
+    wb.configure_logs()    
+    blueprint = 'home_assistant'
+    wb.blueprint(blueprint)
+
+    from mmworkbench.components import NaturalLanguageProcessor
+    nlp = NaturalLanguageProcessor(blueprint)
+    nlp.build()
+
+    from mmworkbench.components.dialogue import Conversation
+    conv = Conversation(nlp=nlp, app_path=blueprint)
+    conv.say('Hello!')
+
+
 Workbench provides several different blueprint applications to support many common use cases for
-conversational applications.
-
-
-Begin Your Journey
-------------------
-
-You are now ready to begin training and evaluating machine learning models for your application.
-The following sections describe the modules and functionality available in Workbench to build and
-evaluate state-of-the-art models to understand language, answer questions and power an advanced
-conversational interface.
+conversational applications. See :doc:`Workbench Blueprints<../blueprints/overview>` for more details.
