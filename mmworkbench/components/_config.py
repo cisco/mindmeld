@@ -100,40 +100,32 @@ DOC_TYPE = 'document'
 DEFAULT_ES_SYNONYM_MAPPING = {
     "mappings": {
         DOC_TYPE: {
-            "dynamic_templates": [
-                {
-                    "synonym_whitelist_text": {
-                        "match": "whitelist",
-                        "match_mapping_type": "object",
-                        "mapping": {
-                            "type": "nested",
-                            "properties": {
-                                "name": {
-                                    "type": "text",
-                                    "fields": {
-                                        "raw": {
-                                            "type": "keyword",
-                                            "ignore_above": 256
-                                        },
-                                        "normalized_keyword": {
-                                            "type": "text",
-                                            "analyzer": "keyword_match_analyzer"
-                                        },
-                                        "char_ngram": {
-                                            "type": "text",
-                                            "analyzer": "char_ngram_analyzer"
-                                        }
-                                    },
-                                    "analyzer": "default_analyzer"
-                                }
-                            }
-                        }
-                    }
-                }
-            ],
             "properties": {
                 "sort_factor": {
                     "type": "double"
+                },
+                "whitelist": {
+                    "type": "nested",
+                    "properties": {
+                        "name": {
+                            "type": "text",
+                            "fields": {
+                                "raw": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                },
+                                "normalized_keyword": {
+                                    "type": "text",
+                                    "analyzer": "keyword_match_analyzer"
+                                },
+                                "char_ngram": {
+                                    "type": "text",
+                                    "analyzer": "char_ngram_analyzer"
+                                }
+                            },
+                            "analyzer": "default_analyzer"
+                        }
+                    }
                 }
             }
         }
