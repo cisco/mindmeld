@@ -307,23 +307,42 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
    >>> nlp = NaturalLanguageProcessor(app_path='video_discovery')
    >>> nlp.build()
 	Fitting domain classifier
-	Loading queries from file video_content/start_over/train.txt
-	Loading queries from file video_content/exit/train.txt
-	Loading queries from file video_content/unsupported/train_get_channel_00.txt
-	Loading queries from file video_content/unsupported/train_get_channel_01.txt
-	Loading queries from file video_content/unsupported/train_get_channel_02.txt
-	Loading queries from file video_content/unsupported/train_get_time_00.txt
-	Loading queries from file video_content/unsupported/train_get_time_01.txt
-	Loading queries from file video_content/unsupported/train_get_time_02.txt
+	No domain model configuration set. Using default.
+	Loading queries from file unrelated/insult/train.txt
+	Loading queries from file unrelated/general/train.txt
+	Loading queries from file unrelated/compliment/train.txt
 	Loading queries from file video_content/greet/train.txt
-	Loading queries from file video_content/help/train.txt
 	Loading queries from file video_content/browse/train_00.txt
-	Loading queries from file video_content/browse/train_01.txt
-	Loading queries from file video_content/browse/train_02.txt
-	Loading queries from file video_content/browse/train_03.txt
-	Loading queries from file video_content/browse/train_04.txt
-	Loading queries from file video_content/browse/train_05.txt
-	Loading queries from file video_content/browse/train_mturk_00.txt
+	...
+	Selecting hyperparameters using k-fold cross-validation with 10 splits
+	Best accuracy: 96.89%, params: {'fit_intercept': True, 'C': 10}
+	Fitting intent classifier: domain='unrelated'
+	No intent model configuration set. Using default.
+	Selecting hyperparameters using k-fold cross-validation with 10 splits
+	Best accuracy: 79.29%, params: {'class_weight': {0: 0.9618644067796609, 1: 1.0089999999999999, 2: 1.0395604395604394}, 'fit_intercept': False, 'C': 1000000}
+	Fitting entity recognizer: domain='unrelated', intent='insult'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting entity recognizer: domain='unrelated', intent='general'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting entity recognizer: domain='unrelated', intent='compliment'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting intent classifier: domain='video_content'
+	No intent model configuration set. Using default.
+	Selecting hyperparameters using k-fold cross-validation with 10 splits
+	Best accuracy: 96.50%, params: {'class_weight': {0: 0.58072419281491583, 1: 3.4295944233206592, 2: 0.98992735400949983, 3: 5.1416666666666666, 4: 2.904694092827004, 5: 0.67738804829588872}, 'fit_intercept': False, 'C': 1000000}
+	Fitting entity recognizer: domain='video_content', intent='greet'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting entity recognizer: domain='video_content', intent='help'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting entity recognizer: domain='video_content', intent='browse'
+	No entity model configuration set. Using default.
+	Selecting hyperparameters using k-fold cross-validation with 5 splits
+	Best accuracy: 97.43%, params: {'penalty': 'l2', 'C': 100000000}
 	...
 
 .. tip::
