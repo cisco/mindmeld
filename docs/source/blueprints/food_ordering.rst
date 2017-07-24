@@ -422,6 +422,8 @@ You can use similar options to inspect and experiment with the Entity Recognizer
    Experiment with different models, features, and hyperparameter selection settings to see how they affect classifier performance. Maintain a held-out validation set to evaluate your trained NLP models and analyze misclassified test instances. Then, use observations from the error analysis to inform your machine learning experimentation. See the :doc:`User Guide <../userguide/nlp>` for examples and discussion.
 
 
+.. _food_ordering_parser:
+
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 

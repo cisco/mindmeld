@@ -4,7 +4,7 @@
 Natural Language Processor
 ==========================
 
-The Natural Language Processor (NLP) understands the user's natural language input and outputs a representation that captures all the salient information in the user query. It uses a pipeline of six components that sequentially analyze the query, with each one building upon the output of the previous ones. These individual components are covered in depth in the following chapters. This chapter focuses on the :class:`NaturalLanguageProcessor` class in Workbench, which is a higher level abstraction encapsulating the full natural language processing pipeline. 
+The :ref:`Natural Language Processor (NLP) <arch_nlp>` understands the user's natural language input and outputs a representation that captures all the salient information in the user query. It uses a pipeline of six components that sequentially analyze the query, with each one building upon the output of the previous ones. These individual components are covered in depth in the following chapters. This chapter focuses on the :class:`NaturalLanguageProcessor` class in Workbench, which is a higher level abstraction encapsulating the full natural language processing pipeline. 
 
 .. note::
 

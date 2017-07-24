@@ -4,13 +4,14 @@
 Entity Recognizer
 =================
 
-The Entity Recognizer is run as the third step in the natural language processing pipeline to detect all the relevant entities in a given query. It is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the entity types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Entity recognition models are trained per intent. A Workbench app hence has one entity recognizer for every intent that requires entity detection.
+The :ref:`Entity Recognizer <arch_entity_model>` is run as the third step in the natural language processing pipeline to detect all the relevant :term:`entities <entity>` in a given query. It is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the entity types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Entity recognition models are trained per intent. A Workbench app hence has one entity recognizer for every intent that requires entity detection.
 
 .. note::
 
-   For a quick introduction, refer to :ref:`Step 7 <entity_recognition>` of the Step-By-Step Guide.
+   **Recommended prior reading:**
 
-   Recommended prior reading: :doc:`Natural Language Processor <nlp>` chapter of the User Guide.
+   - :ref:`Step 7: Train the Natural Language Processing Classifiers <entity_recognition>` (Step-By-Step Guide)
+   - :doc:`Natural Language Processor <nlp>` (User Guide)
 
 
 System entities and custom entities

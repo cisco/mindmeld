@@ -61,6 +61,8 @@ The conversational user flows for a home assistant application can get complex d
 
 In this blueprint, the application provides a conversational interface for users to check weather, set alarms and timers, and control the lights, doors, thermostat and different appliances in the house.
 
+.. _home_model_hierarchy:
+
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -4,13 +4,15 @@
 Role Classifier
 ===============
 
-The Role Classifier is run as the fourth step in the natural language processing pipeline to determine the target roles for entities in a given query. It is a machine-learned `classification <https://en.wikipedia.org/wiki/Statistical_classification>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the role types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Role classification models are trained per entity type. A Workbench app hence has one role classifier for every entity type with associated roles.
+The :ref:`Role Classifier <arch_role_model>` is run as the fourth step in the natural language processing pipeline to determine the target roles for entities in a given query. It is a machine-learned `classification <https://en.wikipedia.org/wiki/Statistical_classification>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the role types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Role classification models are trained per entity type. A Workbench app hence has one role classifier for every entity type with associated roles.
 
 .. note::
 
-   For a quick introduction, refer to :ref:`Step 7 <role_classification>` of the Step-By-Step Guide.
+   **Recommended prior reading:**
 
-   Recommended prior reading: :doc:`Natural Language Processor <nlp>` chapter of the User Guide.
+   - :ref:`Step 7: Train the Natural Language Processing Classifiers <role_classification>` (Step-By-Step Guide)
+   - :doc:`Natural Language Processor <nlp>` (User Guide)
+   - :doc:`Entity Recognizer <entity_recognizer>` (User Guide)
 
 
 Access a role classifier
