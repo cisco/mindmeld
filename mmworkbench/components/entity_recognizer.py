@@ -151,7 +151,7 @@ class EntityRecognizer(Classifier):
 
         Args:
             query (Query): The input query
-            
+
         Returns:
             list: a list of tuples of the form (Entity list, float) grouping potential entity
                 tagging hypotheses and their probabilities

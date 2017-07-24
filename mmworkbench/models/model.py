@@ -219,8 +219,8 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             NamedTuple: RawResults named tuple containing
                 expected: vector of predicted classes (numeric value)
                 predicted: vector of gold classes (numeric value)
-                text_labels: a list of all the text label values, the index of the text label in this array 
-                is the numeric label
+                text_labels: a list of all the text label values, the index of the text label in
+                this array is the numeric label
         """
         raise NotImplementedError
 
@@ -239,7 +239,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     def _get_common_stats(self, raw_expected, raw_predicted, text_labels):
         """
-         Prints a useful stats table and returns a structured stats object for evaluation.
+        Prints a useful stats table and returns a structured stats object for evaluation.
 
         Returns:
             dict: Structured dict containing evaluation statistics. Contains precision,
