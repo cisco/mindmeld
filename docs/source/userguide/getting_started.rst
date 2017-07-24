@@ -176,29 +176,17 @@ If the following command returns no error, the installation was successful:
 
     $ mmworkbench
 
-
-Upgrade Workbench
-^^^^^^^^^^^^^^^^^
-
-To upgrade to the latest version of Workbench, you can run:
-
-.. code-block:: console
-
-  $ pip install mmworkbench --upgrade
-
-Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
-
-
 Start the Numerical Parser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Start the numerical parser with this command:
 
 .. code-block:: console
+
   $ mmworkbench num-parse --start
 
 
-Begin Your Journey
+Your First Project
 ------------------
 
 With the setup out of the way, you are now ready to get your feet wet. MindMeld Workbench is designed so you can 
@@ -207,8 +195,8 @@ your command-line shell using the ``mmworkbench`` command. But to really take ad
 the Python shell is where all the action is at.
 
 
-Create a New Project - Command Line
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Command Line
+^^^^^^^^^^^^
 
 You can use ``blueprint`` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
 already built example apps as a baseline for your project.
@@ -229,8 +217,8 @@ The *converse* command loads the machine learnings models and starts an interact
 Here you can enter your own input and get an immediate response back. Try "hi", for example, and see what you get.
 
 
-Create a New Project - Python Shell
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Python Shell
+^^^^^^^^^^^^
 
 To try out the :doc:`Home Assistant blueprint<../blueprints/home_assistant>`, run these commands in your Python shell:
 
@@ -251,4 +239,31 @@ To try out the :doc:`Home Assistant blueprint<../blueprints/home_assistant>`, ru
 
 
 Workbench provides several different blueprint applications to support many common use cases for
-conversational applications. See :doc:`Workbench Blueprints<../blueprints/overview>` for more details.
+conversational applications. See :doc:`Workbench Blueprints<../blueprints/overview>` for more usage examples.
+
+
+`mmworkbench` Command Line Interface
+------------------------------------
+
+The command-line interface (CLI) for MindMeld Workbench can be accessed with the `mmworkbench` command.
+Builtin help is available.
+
+
+Commands
+^^^^^^^^
+
+#. `blueprint`: Downloads all the training data for an existing blueprint and sets it up for use in your own project.
+#. `num-parse`: Starts or stops the numerical parser service.
+
+
+Upgrade Workbench
+-----------------
+
+To upgrade to the latest version of Workbench, you can run:
+
+.. code-block:: console
+
+  $ pip install mmworkbench --upgrade
+
+Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
+
