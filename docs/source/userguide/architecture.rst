@@ -28,6 +28,8 @@ The figure below shows the NLP output on a sample user input.
 The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in Steps :doc:`3 <../quickstart/03_define_the_hierarchy>`, :doc:`6 <../quickstart/06_generate_representative_training_data>` and :doc:`7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-by-Step Guide. In addition to the four layers of classifiers, the NLP also has modules for entity resolution and language parsing. The user query is processed sequentially by each of these six subcomponents in the left-to-right order shown in the :ref:`architecture diagram <architecture_diagram>` above. The role of each step in the NLP pipeline is described below.
 
 
+.. _arch_domain_model:
+
 Domain Classifier
 ~~~~~~~~~~~~~~~~~
 
@@ -47,6 +49,8 @@ On the opposite end of the spectrum are apps with just one de facto domain. This
 
 The number of domains thus depends on the scope of the application. For apps with multiple domains, the :doc:`Domain Classifier User Guide <domain_classifier>` describes how Workbench can be used to train a machine-learned domain classification model.
 
+
+.. _arch_intent_model:
 
 Intent Classifier
 ~~~~~~~~~~~~~~~~~
@@ -70,6 +74,8 @@ Each domain in a conversational app usually has multiple intents. By convention,
 Every domain has its own separate intent classifier for categorizing the query into one of the intent defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query. Refer to the :doc:`Intent Classifier User Guide <intent_classifier>` for details on training intent classification models using Workbench.
 
 
+.. _arch_entity_model:
+
 Entity Recognizer
 ~~~~~~~~~~~~~~~~~
 
@@ -91,6 +97,8 @@ Each intent within a domain usually has multiple entities. By convention, entity
 
 Since the set of relevant entity types might differ for each intent (even within the same domain), every intent has its own separate entity recognizer. Once the domain and intent have been established at runtime, the app uses the appropriate entity model to detect entities in the query that are specific to the predicted intent. We will get into the details of building machine-learned entity recognition models using Workbench in the :doc:`Entity Recognizer User Guide <entity_recognizer>`.
 
+
+.. _arch_role_model:
 
 Role Classifier
 ~~~~~~~~~~~~~~~
@@ -116,6 +124,8 @@ Role classifiers are trained separately for each entity that requires the additi
 After the domain, intent, entities and roles have been determined by the 4-level classifier hierarchy discussed above, the processed query is sent to the Entity Resolver and the Language Parser modules to complete the natural language understanding of the user input.
 
 
+.. _arch_resolver:
+
 Entity Resolver
 ~~~~~~~~~~~~~~~
 
@@ -125,6 +135,8 @@ In conversational interactions, users generally refer to entities in informal te
 
 Each entity has its own resolver that is trained to capture all the name variations specific to that entity. We will learn more about how to build about entity resolvers using Workbench in the :doc:`Entity Resolver User Guide <entity_resolver>`.
 
+
+.. _arch_parser:
 
 Language Parser
 ~~~~~~~~~~~~~~~
@@ -143,6 +155,8 @@ Most natural language parsers used in NLP academic research need to be trained u
 The Natural Language Processor gets half of the job done, namely, understanding what the user wants. The next two components in the MindMeld pipeline address the other half by responding appropriately to the user and advancing the conversation.
 
 
+.. _arch_qa:
+
 Question Answerer
 -----------------
 
@@ -152,6 +166,8 @@ The question answerer uses information retrieval techniques to identify the best
 
 The MindMeld Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches. Refer to the :doc:`Question Answerer User Guide <kb>` for detailed documentation along with examples.
 
+
+.. _arch_dm:
 
 Dialogue Manager
 ----------------
@@ -163,6 +179,9 @@ Architecting the dialogue manager correctly is often one of the most challenging
 Refer to Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide for a practical introduction to dialogue state tracking using Workbench. We will see more examples in the :doc:`Dialogue Manager User Guide <dm>`. 
 
 
+
+.. _arch_gateway:
+
 Gateway
 -------
 
@@ -171,14 +190,16 @@ The Gateway is the component responsible for processing external requests via va
 The gateway is able to identify users from various endpoints, load their context, and convert requests into a format the Workbench-trained components can consume. After a request has been processed, it converts responses to the appropriate client format, and sends the response back to the endpoint.
 
 
+.. _arch_app_manager:
+
 Application Manager
 -------------------
 
 The Application Manager is the core orchestrator of the MindMeld platform. It performs the following functions:
 
-	- Receives the client request from the gateway
-	- Processes the request by passing it through all the Workbench-trained components of the MindMeld platform
-	- Returns the final response back to the gateway once the processing is complete
+    - Receives the client request from the gateway
+    - Processes the request by passing it through all the Workbench-trained components of the MindMeld platform
+    - Returns the final response back to the gateway once the processing is complete
 
 The application manager is hidden from the Workbench developer, and accomplishes its tasks behind the scenes.
 
