@@ -97,12 +97,13 @@ class ResourceLoader(object):
 
     def build_gazetteer(self, gaz_name, exclude_ngrams=False, force_reload=False):
         """Builds the specified gazetteer using the entity data and mapping files
+
         Args:
             gaz_name (str): The name of the gazetteer
             exclude_ngrams (bool, optional): Whether partial matches of
-                entities should be included in the gazetteer
+                 entities should be included in the gazetteer
             force_reload (bool, optional): Whether file should be forcefully
-                reloaded from disk
+                 reloaded from disk
         """
         popularity_cutoff = 0.0
 
