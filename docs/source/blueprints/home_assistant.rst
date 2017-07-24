@@ -30,7 +30,7 @@ In this blueprint, the application provides a conversational interface for users
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The home assistant blueprint is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the E-mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...
+The home assistant blueprint is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the Kwik-E-Mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...
 
 Below is the full list of intents for every domain:
 
@@ -64,29 +64,45 @@ Below is the full list of intents for every domain:
    - Unknown
        - unknown
 
-There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are ``sys_temperature``, ``sys_time``, ``sys_interval``, etc.
+There are two types of entities: :doc:`Custom Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Custom entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are ``sys_temperature``, ``sys_time``, ``sys_interval``, etc.
 
-Home assistant defines and uses the following named entities:
+Home assistant defines and uses the following custom entities, which are grouped by intents below:
 
-    - ``all``: this entity is used to detect whether the user has asked for all entities, for example: ``turn on the lights in {all|all} room``.
-    - ``appliance``: this entity is used to detect household appliances, for example: ``can you turn on the {tv|appliance}?``
-    - ``city``: this entity is used to detect cities, for example: ``what is the weather in {shanghai|city}``
-    - ``color``: this entity is used to detect color of the lights, for example: ``turn the lights to {soft white|color}``
-    - ``interval``: this entity is used to detect time interval, for example: ``cancel {tomorrow night|interval} s alarms``
-    - ``location``: this entity is used to detect household location, for example: ``lock {back|location} door``
-    - ``unit``: this entity is used to detect weather unit, for example: ``what is the forecast for {london|city} in {celsius|unit}``
-    - ``duration``: this entity is used to detect time duration, for example: ``{15 minute|duration} alarm``
+   - Smart Home
+       - ``location``: detects household location, for example: "lock {back|location} door"
+       - ``appliance``: detects household appliances, for example: "can you turn on the {tv|appliance}?"
+       - ``all``: detects whether the user is referring to all household locations, instead of a specific location, for example: "turn on the lights in {all|all} room" and "lock the doors {everywhere|all}".
+       - ``color``: detects color of the lights, for example: "turn the lights to {soft white|color}"
+
+   - Time and dates
+       - ``duration``: detects time duration, for example: "{15 minute|duration} alarm"
+       - ``interval``: detects time interval, for example: "cancel {tomorrow night|interval} s alarms"
+
+   - Weather
+       - ``city``: detects cities, for example: "what is the weather in {shanghai|city}"
+       - ``unit``: detects weather unit, for example: "what is the forecast for {london|city} in {celsius|unit}"
 
 Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature). Some examples for annotation with system entities: ``set my thermostat to turn on at {6 am|sys_time}`` and ``turn the heat off at {76 degrees|sys_temperature}``.
 
-In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we can use roles to annotate ``old_time`` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles.
+In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we can use roles to annotate ``old_time`` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles. For more information on the usage of role, check :doc:`Role Classifier <../userguide/role_classifier>`.
 
-For more information on the usage of role, check :doc:`Role <../userguide/role_classifier>`.
+To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
+
+.. code-block:: console
+
+    $ python -c "import mmworkbench as wb; wb.blueprint('home_assistant');"
+
+This should create a Workbench project folder called ``home_assistant`` in your current directory with the following structure:
+
+.. image:: /images/home_assistant_directory.png
+    :width: 250px
+    :align: center
+
 
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-Dialogue state logic can get arbitrarily complex. Simple handlers can just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining a single dialogue state for multiple intents. In this section we will explore both options in detail.
+Dialogue state logic can get arbitrarily complex. Simple handlers can just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In Kwik-E-Mart example, we can define a dialogue state for every intent. Workbench3 also supports defining a single dialogue state for multiple intents. In this section we will explore both options in detail.
 
 Let's take a closer look at these intents for controlling doors: ``close_door``, ``open_door``, ``lock_door``, and ``unlock_door``. Now we can define a dialogue state for each of these intents.
 
@@ -222,13 +238,7 @@ Here is the full list of states in the home assistant blueprint:
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we still need a local instance of Elasticsearch running in the background. If you have homebrew, you can set one up quickly:
-
-.. code:: bash
-
-   >>> brew install elasticsearch
-   >>> elasticsearch
-
+The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base.
 
 6. Training Data
 ^^^^^^^^^^^^^^^^
@@ -243,7 +253,7 @@ The labeled data for training our NLP pipeline was created using a combination o
 | Divide your application use case into separate domains       | If your application has to control appliances in a smart home, check the weather and control a smart alarm, divide these|
 |                                                              | use cases into separate domains: smart_home, times_and_dates, weather. One way to break an application into smaller     |
 |                                                              | domains is by clustering the queries by similar use case and then naming each cluster as a domain                       |
-+==============================================================+=========================================================================================================================+
++--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
 | Targeted query generation for training Domain and Intent     | For domain ``times_and_dates``, the following intents are constructed:                                                  |
 | Classifiers.                                                 | ``change_alarm``: "What would you say to the app to change your alarm time from a previous set time to a new set time?" |
 |                                                              | ``set_alarm``: "What would you say to the app to set a new alarm time?"                                                 |
@@ -263,13 +273,13 @@ The training data for intent classification and entity recognition can be found 
 
    - Read :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluation and error analysis <../userguide/nlp>` in the user guide.
 
-   - To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (``city``, ``sys_time``) that your application needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your application.
+   - To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (``city``, ``duration``) that your application needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your application.
 
 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To put the training data to use and train a baseline NLP system for your applicatio using Workbench's default machine learning settings, use the :meth:``build()`` method of the :class:``NaturalLanguageProcessor`` class:
+To put the training data to use and train a baseline NLP system for your applicatio using Workbench's default machine learning settings, use the :meth:`build` method of the :class:`NaturalLanguageProcessor` class:
 
 .. code:: python
 
@@ -300,9 +310,9 @@ To put the training data to use and train a baseline NLP system for your applica
    Best accuracy: 98.43%, params: {'fit_intercept': True, 'C': 100, 'class_weight': {0: 0.99365079365079367, 1: 1.5915662650602409, 2: 1.3434782608695652, 3: 1.5222222222222221, 4: 0.91637426900584784, 5: 0.74743589743589745, 6: 1.9758620689655173, 7: 1.4254901960784312, 8: 1.0794871794871794, 9: 1.0645320197044335, 10: 1.1043715846994535, 11: 1.2563909774436088, 12: 1.3016260162601625, 13: 1.0775510204081633, 14: 1.8384615384615384}}
 .. tip::
 
-  During active development, it is helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what is happening behind the scenes. All code snippets here assume that logging level has been set to verbose (``wb.configure_logs()``).
+  During active development, it is helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what is happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
 
-You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` for the domain ``smart_home`` and about 99% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>` for the domain ``smart_home`` and intent ``turn_on_thermostat``. To see how the trained NLP pipeline performs on a test query, use the :meth:``process()`` method.
+You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` for the domain ``smart_home`` and about 99% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>` for the domain ``smart_home`` and intent ``turn_on_thermostat``. To see how the trained NLP pipeline performs on a test query, use the :meth:`process` method.
 
 .. code:: python
 
@@ -338,9 +348,9 @@ A good place to start is by inspecting the baseline configuration used by the di
     'in-gaz': {}
    }
 
-You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier's :meth:``fit()`` method. Here are a couple of examples.
+You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier's :meth:`fit` method. Here are a couple of examples.
 
-For example, we can hange the feature extraction settings to use bag of bigrams in addition to the default bag of words:
+For example, we can change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
 
 .. code:: python
 
@@ -393,7 +403,7 @@ In another example, we can change the model for the intent classifier to Support
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 98.27%, params: {'C': 5000, 'kernel': 'rbf'}
 
-Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the :doc:`Intent Classifier <../userguide/intent_classifier>` in the user guide for a detailed discussion on training, tuning, and evaluating the various Workbench classifiers.
+Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the :doc:`NaturalLanguageProcessor <../userguide/nlp>` in the user guide for a detailed discussion on training, tuning, and evaluating the various Workbench classifiers.
 
 The home assistant application also has role classifiers to distinguish between different role labels. For example, the annotated data in the ``times_and_dates`` domain and ``check_alarm`` intent have two types of roles: ``old_time`` and ``new_time``. We use the role classifier to correctly classify these roles for the ``sys_time`` entity:
 
@@ -406,7 +416,7 @@ The home assistant application also has role classifiers to distinguish between 
 
 In the above case, the role classifier was able to correctly distinguish between ``new_time`` and ``old_time`` for all test cases.
 
-The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configurations that are namespaced by ``DOMAIN_MODEL_CONFIG and INTENT_MODEL_CONFIG`` respectively; other namespaces include ``ENTITY_MODEL_CONFIG and ROLE_MODEL_CONFIG``. If no custom model configuration is added to ``config.py`` file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
+The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configurations, defined as dictionaries named ``DOMAIN_MODEL_CONFIG`` and ``INTENT_MODEL_CONFIG`` respectively; other dictionaries include ``ENTITY_MODEL_CONFIG`` and ``ROLE_MODEL_CONFIG``. If no custom model configuration is added to ``config.py`` file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
 
 .. code:: python
 
@@ -457,7 +467,7 @@ The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational application using the :class:``Conversation`` class in Workbench.
+Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational application using the :class:`Conversation` class in Workbench.
 
 .. code:: python
 
@@ -466,7 +476,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
    >>> conv.say('set alarm for 6am')
    ['Ok, I have set your alarm for 06:00:00.']
 
-The :meth:``say()`` method packages the input text in a user request object and passes it to the Workbench Application Manager to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
+The :meth:`say` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
 
 You can also try out multi-turn dialogues:
 
@@ -486,7 +496,7 @@ You can also try out multi-turn dialogues:
    ['Bye!']
 
 
-We can also enter the conversation mode directly from the commandline.
+We can also enter the conversation mode directly from the command-line.
 
 .. code:: console
 
@@ -496,4 +506,6 @@ We can also enter the conversation mode directly from the commandline.
    You: What's the weather today in San Francisco?
    App: The weather forecast in San Francisco is clouds with a min of 62.6 F and a max of 89.6 F
 
-Exercise: test the app and play around with different language patterns to figure out the edge cases that our classifiers are not able to handle. The more language patterns we can collect in our training data, the better our classifiers can handle in live usage with real users. Good luck and have fun - now you have your very own Jarvis!
+.. admonition:: Exercise
+
+   - Test the app and play around with different language patterns to figure out the edge cases that our classifiers are not able to handle. The more language patterns we can collect in our training data, the better our classifiers can handle in live usage with real users. Good luck and have fun - now you have your very own Jarvis!
