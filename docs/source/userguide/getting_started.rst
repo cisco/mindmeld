@@ -186,8 +186,8 @@ Start the numerical parser with this command:
   $ mmworkbench num-parse --start
 
 
-Your First Project
-------------------
+Begin New Project
+-----------------
 
 With the setup out of the way, you are now ready to get your feet wet. MindMeld Workbench is designed so you can 
 keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in 
