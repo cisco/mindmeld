@@ -355,81 +355,41 @@ To see how the trained NLP pipeline performs on a test query, use the :meth:`pro
 
    	>>> nlp.process("Show me movies with Brad Pitt")
 	{
-	  "text": "Show me movies with Brad Pitt",
 	  "intent": "browse",
 	  "entities": [
 	    {
-	      "text": "movies",
-	      "value": [
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        }
-	      ],
+	      "role": null,
 	      "type": "type",
 	      "span": {
 	        "start": 8,
 	        "end": 13
 	      },
-	      "role": null
+	      "text": "movies",
+	      "value": [
+	        {
+	          "cname": "movie",
+	          "top_synonym": "movies",
+	          "score": 18.921387
+	        },
+	        {
+	          "cname": "tv-show",
+	          "top_synonym": "tv miniseries",
+	          "score": 1.684855
+	        }
+	      ]
 	    },
 	    {
-	      "text": "Brad Pitt",
-	      "value": [],
+	      "role": null,
 	      "type": "cast",
 	      "span": {
 	        "start": 20,
 	        "end": 28
 	      },
-	      "role": null
+	      "text": "Brad Pitt",
+	      "value": []
 	    }
 	  ],
+	  "text": "Show me movies with Brad Pitt",
 	  "domain": "video_content"
 	}
 
