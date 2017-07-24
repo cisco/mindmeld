@@ -82,9 +82,9 @@ Home assistant defines and uses the following custom entities, which are grouped
        - ``city``: detects cities, for example: "what is the weather in {shanghai|city}"
        - ``unit``: detects weather unit, for example: "what is the forecast for {london|city} in {celsius|unit}"
 
-Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature). Some examples for annotation with system entities: ``set my thermostat to turn on at {6 am|sys_time}`` and ``turn the heat off at {76 degrees|sys_temperature}``.
+Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature). Some examples for annotation with system entities: "set my thermostat to turn on at {6 am|sys_time}" and "turn the heat off at {76 degrees|sys_temperature}".
 
-In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we can use roles to annotate ``old_time`` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles. For more information on the usage of role, check :doc:`Role Classifier <../userguide/role_classifier>`.
+In many queries, there might be more than one entity of the same type. For example, "change my alarm from 7 am to 6 am", both "7 am" and "6 am" are both system entities. Therefore, in order to distinguish between the two entities, we can use roles to annotate ``old_time`` for "7 am" and ``new_time`` for "6 am". We annotate the example as "change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}" with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles. For more information on the usage of role, check :doc:`Role Classifier <../userguide/role_classifier>`.
 
 To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
 
@@ -250,10 +250,6 @@ The labeled data for training our NLP pipeline was created using a combination o
 +==============================================================+=========================================================================================================================+
 | Exploratory data generation for guiding the app design       | "How would you talk to a conversational app to control your smart home appliances?"                                     |
 +--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
-| Divide your application use case into separate domains       | If your application has to control appliances in a smart home, check the weather and control a smart alarm, divide these|
-|                                                              | use cases into separate domains: smart_home, times_and_dates, weather. One way to break an application into smaller     |
-|                                                              | domains is by clustering the queries by similar use case and then naming each cluster as a domain                       |
-+--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
 | Targeted query generation for training Domain and Intent     | For domain ``times_and_dates``, the following intents are constructed:                                                  |
 | Classifiers.                                                 | ``change_alarm``: "What would you say to the app to change your alarm time from a previous set time to a new set time?" |
 |                                                              | ``set_alarm``: "What would you say to the app to set a new alarm time?"                                                 |
@@ -267,6 +263,8 @@ The labeled data for training our NLP pipeline was created using a combination o
 |                                                              | ``location`` entity: "What are some names of locations in your home"                                                    |
 +--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
 
+In summary, we start out with an exploratory data generation process to collect varied examples of how the end user would interact with the app. We then cluster that data into different domains based on functionality. For example, the home assistant application has to control appliances in a smart home, check the weather and control a smart alarm, so we divide these functions into the following domains: greeting, smart_home, times_and_dates and weather. Once we establish a clear domain-intent-entity-role hierarchy for the application, the next steps are to do targeted labeled data generation for each component in the hierarchy.
+
 The training data for intent classification and entity recognition can be found in the ``domains`` directory, whereas the data for entity resolution is in the ``entities`` directory, both located at the root level of the blueprint folder.
 
 .. admonition:: Exercise
@@ -279,7 +277,7 @@ The training data for intent classification and entity recognition can be found 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To put the training data to use and train a baseline NLP system for your applicatio using Workbench's default machine learning settings, use the :meth:`build` method of the :class:`NaturalLanguageProcessor` class:
+To put the training data to use and train a baseline NLP system for your application using Workbench's default machine learning settings, use the :meth:`build` method of the :class:`NaturalLanguageProcessor` class:
 
 .. code:: python
 
@@ -476,7 +474,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
    >>> conv.say('set alarm for 6am')
    ['Ok, I have set your alarm for 06:00:00.']
 
-The :meth:`say` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
+The :meth:`say` method packages the input text in a user request object and passes it to the Workbench Application Manager to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
 
 You can also try out multi-turn dialogues:
 
