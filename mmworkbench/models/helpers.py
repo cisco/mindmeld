@@ -75,7 +75,7 @@ def register_model(model_type, model_class):
 
     Args:
         model_type (str): The model type as specified in model configs
-        model_class (type): The model to register
+        model_class (class): The model to register
     """
     if model_type in MODEL_MAP:
         raise ValueError('Model {!r} is already registered.'.format(model_type))

@@ -29,18 +29,18 @@ class ClassifierConfig(object):
         param_selection (dict): Configuration for param selection (using cross
             validation)
             {'type': 'shuffle',
-             'n': 3,
-             'k': 10,
-             'n_jobs': 2,
-             'scoring': '',
-             'grid': {}
+            'n': 3,
+            'k': 10,
+            'n_jobs': 2,
+            'scoring': '',
+            'grid': {}
             }
         features (dict): The keys are the names of feature extractors and the
             values are either a kwargs dict which will be passed into the
             feature extractor function, or a callable which will be used as to
-            extract features
-
+            extract features.
     """
+
     __slots__ = ['model_type', 'features', 'model_settings', 'params', 'param_selection']
 
     def __init__(self, model_type=None, features=None, model_settings=None, params=None,
@@ -107,28 +107,28 @@ class Classifier(object):
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
-                training set will be loaded.
+                 training set will be loaded.
             model_type (str, optional): The type of machine learning model to use. If omitted, the
-                default model type will be used.
+                 default model type will be used.
             model_settings (dict): Settings specific to the model type specified
             features (dict): Features to extract from each example instance to form the feature
-                vector used for model training. If omitted, the default feature set for the model
-                type will be used.
+                 vector used for model training. If omitted, the default feature set for the model
+                 type will be used.
             params (dict): Params to pass to the underlying classifier
             params_selection (dict): The grid of hyper-parameters to search, for finding the optimal
-                hyper-parameter settings for the model. If omitted, the default hyper-parameter
-                search grid will be used.
+                 hyper-parameter settings for the model. If omitted, the default hyper-parameter
+                 search grid will be used.
             param_selection (dict): Configuration for param selection (using cross-validation)
                 {'type': 'shuffle',
-                 'n': 3,
-                 'k': 10,
-                 'n_jobs': 2,
-                 'scoring': '',
-                 'grid': { 'C': [100, 10000, 1000000]}}
+                'n': 3,
+                'k': 10,
+                'n_jobs': 2,
+                'scoring': '',
+                'grid': { 'C': [100, 10000, 1000000]}}
             features (dict): The keys are the names of feature extractors and the
                 values are either a kwargs dict which will be passed into the
                 feature extractor function, or a callable which will be used as to
-                extract features
+                extract features.
 
         Examples:
             Fit using default the configuration.
@@ -146,9 +146,7 @@ class Classifier(object):
 
             Fit using given parameter selection settings (also known as cross-validation settings).
 
-                >>> clf.fit(param_selection={
-
-                    })
+                >>> clf.fit(param_selection={})
 
             Fit using a custom set of features, including a custom feature extractor.
             This is only for advanced users.
@@ -158,6 +156,7 @@ class Classifier(object):
                         'contrived': lambda exa, res: {'contrived': len(exa.text) == 26}
                     })
         """
+
         # create model with given params
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
