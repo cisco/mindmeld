@@ -242,18 +242,39 @@ Workbench provides several different blueprint applications to support many comm
 conversational applications. See :doc:`Workbench Blueprints<../blueprints/overview>` for more usage examples.
 
 
-`mmworkbench` Command Line Interface
-------------------------------------
+Command Line Interfaces
+-----------------------
 
-The command-line interface (CLI) for MindMeld Workbench can be accessed with the `mmworkbench` command.
-Builtin help is available.
+MindMeld Workbench has two command-line interfaces for some of the common workflow tasks you'll be doing often:
 
+#. mmworkbench
+#. python app.py
 
-Commands
-^^^^^^^^
+Builtin help is available with the standard `-h` flag.
 
-#. `blueprint`: Downloads all the training data for an existing blueprint and sets it up for use in your own project.
-#. `num-parse`: Starts or stops the numerical parser service.
+mmworkbench
+^^^^^^^^^^^
+
+The command-line interface (CLI) for MindMeld Workbench can be accessed with the `mmworkbench` command. 
+This is most suitable for use in an app-agnostic context.
+
+The commands available are:
+
+#. `blueprint` : Downloads all the training data for an existing blueprint and sets it up for use in your own project.
+#. `num-parse` : Starts or stops the numerical parser service.
+
+python app.py
+^^^^^^^^^^^^^
+
+When you're in the context of a specific app, `python app.py` is more appropriate to use.
+
+The commands available are:
+
+#. `build` : Builds the artifacts and machine learning models and persists them.
+#. `clean` : Deletes the generated artifacts and takes the system back to a pristine state.
+#. `converse` : Begins an interactive conversational session with the user at the command line.
+#. `load-kb` : Populates the knowledge base.
+#. `run` : Starts the workbench service as a REST API.
 
 
 Upgrade Workbench
