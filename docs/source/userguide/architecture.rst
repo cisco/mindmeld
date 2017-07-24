@@ -12,6 +12,7 @@ The MindMeld Deep-Domain Conversational AI Platform provides a robust end-to-end
 
 We will now take a look at each of the components in the MindMeld platform.
 
+.. _arch_nlp:
 
 Natural Language Processor
 --------------------------
