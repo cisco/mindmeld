@@ -86,9 +86,15 @@ Java 8 is already installed on your system, use the following command:
     Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
     Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
 
-If the command fails, or your java version begins with 1.7, you need to install Java 8. Visit
-`java.com <https://www.java.com/inc/BrowserRedirect1.jsp?locale=en>`_ for detailed instructions.
+If the command fails, or your java version begins with 1.7, you need to install Java 8. On
+macOS systems with `homebrew <https://brew.sh/>`_ installed, you can run:
 
+.. code-block:: console
+
+   $ brew cask install java
+
+
+Visit `java.com <https://www.java.com/inc/BrowserRedirect1.jsp?locale=en>`_ for detailed instructions.
 
 Elasticsearch
 ^^^^^^^^^^^^^
