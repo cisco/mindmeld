@@ -9,7 +9,7 @@ dependencies:
   cache_directories:
     - ~/mindmeld-workbench3/.tox
   override:
-    - pip install -r dev-requirements.txt
+    - pip install -r dev-requirements.txt --extra-index-url=https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi
     - tox --notest
   post:
     - sudo apt-get install libzmq-dev
