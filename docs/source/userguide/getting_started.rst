@@ -51,8 +51,8 @@ binary module installation (a.k.a. wheels). To upgrade the pip module, type:
 MindMeld Workbench is not publicly available, and can only be installed from MindMeld's private
 Python Package Index (PyPI). Once you have confirmed pip is installed, you need to configure it
 so that it will work with the MindMeld PyPI. On macOS the pip config file is located at
-``~/.pip/pip.conf``. You can read more about configuring pip on your platform, including where
-config files are located in the
+``~/.pip/pip.conf``. Create the folder and the file if it does not already exist. You can read 
+more about configuring pip on your platform, including where config files are located in the
 `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
 
 The MindMeld PyPI is hosted at https://mindmeld.com/pypi/. In order to access it you will
