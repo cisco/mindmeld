@@ -131,8 +131,9 @@ Configure Workbench
 Certain MindMeld Workbench capabilities, such as accessing
 :doc:`blueprints <../blueprints/overview>` require authenticating using your MindMeld username and
 password. Workbench will read your credentials from its configuration file, located at
-``~/.mmworkbench/config``. Add the following lines to the Workbench configuration file,
-substituting your username and password where appropriate.
+``~/.mmworkbench/config``. Go ahead and create the folder and file if they don't already exist. 
+Add the following lines to the Workbench configuration file, substituting your username and password 
+where appropriate.
 
 .. code-block:: text
 
