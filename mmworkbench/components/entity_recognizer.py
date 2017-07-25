@@ -10,6 +10,7 @@ import logging
 
 from sklearn.externals import joblib
 
+from ..core import Entity
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
@@ -52,9 +53,9 @@ class EntityRecognizer(Classifier):
         """
         kwargs['example_type'] = QUERY_EXAMPLE_TYPE
         kwargs['label_type'] = ENTITIES_LABEL_TYPE
-        default_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
-                                               domain=self.domain, intent=self.intent)
-        return super()._get_model_config(default_config, **kwargs)
+        loaded_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
+                                              domain=self.domain, intent=self.intent)
+        return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, queries=None, label_set='train', **kwargs):
         """Trains the entity recognition model using the provided training queries
@@ -79,10 +80,12 @@ class EntityRecognizer(Classifier):
             for entity in label:
                 self.entity_types.add(entity.entity.type)
 
+        sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
+
         # Get gazetteers (they will be built if necessary)
         gazetteers = self._resource_loader.get_gazetteers()
 
-        model.register_resources(gazetteers=gazetteers)
+        model.register_resources(gazetteers=gazetteers, sys_types=sys_types)
         model.fit(queries, labels)
         self._model = model
         self.config = ClassifierConfig.from_model_config(self._model.config)
@@ -125,7 +128,8 @@ class EntityRecognizer(Classifier):
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()
-            self._model.register_resources(gazetteers=gazetteers)
+            sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
+            self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.ready = True

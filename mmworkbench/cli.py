@@ -76,8 +76,8 @@ def run_server(ctx, port, no_debug, reloader):
 @click.pass_context
 @click.option('--session', help='JSON object to be used as the session')
 def converse(ctx, session):
+    """Starts a conversation with the app."""
     try:
-        """Starts a conversation with the app."""
         app = ctx.obj.get('app')
         if isinstance(session, str):
             session = json.loads(session)
@@ -103,8 +103,8 @@ def converse(ctx, session):
 @cli.command('build', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def build(ctx):
+    """Builds the app with default config."""
     try:
-        """Builds the app with default config."""
         app = ctx.obj.get('app')
         if app is None:
             raise ValueError("No app was given. Run 'python app.py build' from your app folder.")

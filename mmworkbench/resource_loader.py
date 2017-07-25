@@ -118,7 +118,7 @@ class ResourceLoader(object):
         self._entity_files[gaz_name]['entity_data']['loaded'] = time.time()
 
         mapping = self.get_entity_map(gaz_name, force_reload=force_reload)
-        gaz.update_with_entity_map(mapping, self.query_factory.normalize)
+        gaz.update_with_entity_map(mapping.get('entities', []), self.query_factory.normalize)
 
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.dump(gaz_path)

@@ -10,7 +10,7 @@ from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 
 from . import tagging
-from .helpers import GAZETTEER_RSC, get_feature_extractor, register_model
+from .helpers import get_feature_extractor, register_model
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, SkLearnModel
 
 logger = logging.getLogger(__name__)
@@ -116,9 +116,6 @@ class MemmModel(SkLearnModel):
             verbose (boolean): show more debug/diagnostic output
 
         """
-        system_types = self._get_system_types()
-        self.register_resources(sys_types=system_types)
-
         params = params or self.config.params
         skip_param_selection = params is not None or self.config.param_selection is None
 
@@ -214,12 +211,6 @@ class MemmModel(SkLearnModel):
 
     def _convert_params(self, param_grid, y, is_grid=True):
         return param_grid
-
-    def _get_system_types(self):
-        sys_types = set()
-        for gaz in self._resources[GAZETTEER_RSC].values():
-            sys_types.update(gaz['sys_types'])
-        return sys_types
 
     def _get_feature_selector(self):
         """Get a feature selector instnace based on the feature_selector model

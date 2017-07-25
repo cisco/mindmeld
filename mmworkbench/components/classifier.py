@@ -241,19 +241,25 @@ class Classifier(object):
         evaluation = self._model.evaluate(queries, labels)
         return evaluation
 
-    def _get_model_config(self, default_config=None, **kwargs):
-        """Gets a machine learning model configuration
+    def _get_model_config(self, loaded_config, **kwargs):
+        """Updates the loaded configuration with runtime specified options, and creates a model
+        configuration object with the final configuration dictionary. If an application config
+        exists it should be passed in, if not the default config should be passed in.
 
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
         try:
-            # If all params requred for model config were passed in, use kwargs
+            # If all params required for model config were passed in, use kwargs
             return ModelConfig(**kwargs)
         except (TypeError, ValueError):
-            # Use specified or default config, customizing with provided kwargs
-            model_config = default_config
+            # Use application specified or default config, customizing with provided kwargs
+            model_config = loaded_config
             model_config.update(kwargs)
+            # If a parameter selection grid was passed in at runtime, override params set in the
+            # application specified or default config
+            if kwargs.get('param_selection') and not kwargs.get('params'):
+                model_config.pop('params', None)
         return ModelConfig(**model_config)
 
     def dump(self, model_path):
