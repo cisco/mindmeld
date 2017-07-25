@@ -1,6 +1,3 @@
-.. meta::
-    :scope: private
-
 Key Concepts
 ============
 
