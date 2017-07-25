@@ -139,7 +139,9 @@ class EntityRecognizer(Classifier):
 
         Returns:
             str: The predicted class label
+
         """
+
         prediction = super().predict(query) or ()
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
@@ -149,7 +151,7 @@ class EntityRecognizer(Classifier):
 
         Args:
             query (Query): The input query
-`
+
         Returns:
             list: a list of tuples of the form (Entity list, float) grouping potential entity
                 tagging hypotheses and their probabilities

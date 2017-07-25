@@ -27,7 +27,7 @@ _NEG_INF = -1e10
 
 
 class ModelConfig(object):
-    """A value object representing a model configuration
+    """A value object representing a model configuration.
 
     Attributes:
         model_type (str): The name of the model type. Will be used to find the
@@ -35,25 +35,24 @@ class ModelConfig(object):
         example_type (str): The type of the examples which will be passed into
             `fit()` and `predict()`. Used to select feature extractors
         label_type (str): The type of the labels which will be passed into
-            `fit()` and returned by `predict()`. Used to select the label
-            encoder
+            `fit()` and returned by `predict()`. Used to select the label encoder
         model_settings (dict): Settings specific to the model type specified
         params (dict): Params to pass to the underlying classifier
         param_selection (dict): Configuration for param selection (using cross
             validation)
             {'type': 'shuffle',
-             'n': 3,
-             'k': 10,
-             'n_jobs': 2,
-             'scoring': '',
-             'grid': {}
+            'n': 3,
+            'k': 10,
+            'n_jobs': 2,
+            'scoring': '',
+            'grid': {}
             }
         features (dict): The keys are the names of feature extractors and the
             values are either a kwargs dict which will be passed into the
             feature extractor function, or a callable which will be used as to
             extract features
-
     """
+
     __slots__ = ['model_type', 'example_type', 'label_type', 'features', 'model_settings', 'params',
                  'param_selection']
 
@@ -214,14 +213,14 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
     def raw_results(self):
         """
         Exposes raw vectors of expected and predicted for data scientists to use for any additional
-        evaluation metrics or to generate graphs of their choice
+        evaluation metrics or to generate graphs of their choice.
 
         Returns:
             NamedTuple: RawResults named tuple containing
                 expected: vector of predicted classes (numeric value)
                 predicted: vector of gold classes (numeric value)
                 text_labels: a list of all the text label values, the index of the text label in
-                             this array is the numeric label
+                this array is the numeric label
         """
         raise NotImplementedError
 
@@ -240,7 +239,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     def _get_common_stats(self, raw_expected, raw_predicted, text_labels):
         """
-         Prints a useful stats table and returns a structured stats object for evaluation.
+        Prints a useful stats table and returns a structured stats object for evaluation.
 
         Returns:
             dict: Structured dict containing evaluation statistics. Contains precision,
