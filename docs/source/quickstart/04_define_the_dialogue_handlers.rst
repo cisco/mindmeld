@@ -1,3 +1,5 @@
+.. _define_dialogue_state_handlers:
+
 Step 4: Define the Dialogue State Handlers
 ==========================================
 
