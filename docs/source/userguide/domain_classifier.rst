@@ -520,15 +520,36 @@ The statistics are split into three sections.
   Aggregate stats measured across the entire test set:
 
   ===========  ===
-  accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`
-  f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`
+  accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`.
+  f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`. By weighting the F1 scores by class support this takes class imbalance into account.
   TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
-  f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
+  f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`, which is the mean of F1 scores calculated by class.
+  f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`, which is the F1 calculated with the global precision and recall metrics.
   ===========  ===
+
+  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some helpful tips on how to interpret these values for your app:
+ 
+  - **All F1 and accuracy scores are low**: Domain classification is performing poorly across all domains. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your domain structure and make sure queries in different domains have distinct vocabularies. You may need to combine domains or seperate them in different ways.
+ 
+  - **Classes are balanced**: When the number of training examples in your domains are comparable and each domain is equally important, focusing on the accuracy metric is usually good enough. An example of equally important domains is somthing like the v
+ 
+  - **Classes are imbalanced but equally important**:
+ 
+  - **Classes are imbalanced and some are more important**:
+ 
+  - **F1 weighted is higher than F1 macro**: Your domains with fewer evaluation examples are performing poorly. Is your training data balanced? You may need to add more data to domains that have fewer examples. You could also try adding class weights to your hyperparameters.
+ 
+  - **F1 macro is higher than F1 weighted**: Your domains with more evaluation examples are performing poorly. Does the number of evaluation examples reflect the class distribution of your training examples? 
+ 
+  - **F1 micro is higher than F1 macro**:
+ 
+  - **F1 macro is higher than F1 micro**:
+
+  - **All F1 and accuracy scores are high**: Congrats! Your app is on it's way to being production ready
+
 
 **Class-wise Statistics**
   |
