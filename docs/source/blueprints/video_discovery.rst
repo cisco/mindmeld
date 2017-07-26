@@ -454,7 +454,9 @@ You can use similar options to inspect and experiment with the Entity Recognizer
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Our video discovery application does not use entity groups. This means we do not need to train the Workbench :doc:`Language Parser <../userguide/parser>` for this purpose.
+Our video discovery application does not have complex relationships between entities. For example, for the annotated query ``content with {Tom Hanks|cast}``, there is no entity that describes the ``cast`` entity.  As queries become more complex, for example, ``show me a {Tom Hanks|cast} {movie|type} and a {Jim Parsons|cast} {TV show|type}``, we would need to relate each ``cast`` entity to its corresponding ``type`` entity.
+
+Since we do not have entity groups in the video discovery application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships might form. Please refer to :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
 
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
