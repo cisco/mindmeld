@@ -76,7 +76,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 This should create a Workbench project folder called ``video_discovery`` in your current directory with the following structure:
 
-.. image:: /images/food_ordering_directory.png
+.. image:: /images/directory_video_discovery.png
     :width: 250px
     :align: center
 
@@ -111,7 +111,7 @@ To support the functionality we envision, our app needs one dialogue state for e
 | | ``insult``     | | ``handle_insult``      | | Handle the insult and prompt the user         | 
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
-| | others         | | ``default``            | | Prompt a user who has gone off-topic          | 
+| | other intents  | | ``default``            | | Prompt a user who has gone off-topic          | 
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
 
@@ -303,6 +303,7 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. code:: python
 
+   >>> from mmworkbench import configure_logs; configure_logs()
    >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
    >>> nlp = NaturalLanguageProcessor(app_path='video_discovery')
    >>> nlp.build()
@@ -400,6 +401,7 @@ Start by inspecting the baseline configurations that the different classifiers u
 
 .. code:: python
 
+  wb.configure_logs()
 	>>> ic = nlp.domains['video_content'].intent_classifier
 	>>> ic.config.model_settings['classifier_type']
 	'logreg'
@@ -458,8 +460,9 @@ Our video discovery application does not use entity groups. This means we do not
 
 The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top ten entries in our ``videos`` index and present them as suggestions to the user. For that, we sort the videos by popularity when using the :doc:`Question Answerer <../userguide/kb>`:
 
-.. code::python
-	results = app.question_answerer.get(index=KB_INDEX_NAME,
+.. code:: python
+
+	 results = app.question_answerer.get(index=KB_INDEX_NAME,
                                             _sort='popularity', _sort_type='desc')
 
 In general the ``show_content`` handler retrieves documents from the knowledge base in different ways, depending on the entities found in the user's queries.
