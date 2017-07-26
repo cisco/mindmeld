@@ -584,6 +584,22 @@ The statistics are split into four sections.
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
 
+  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+ 
+  - **Classes are balanced**: When the number of annotated entities for each entity type are comparable and each entity type is equally important, focusing on the accuracy metric is usually good enough.
+ 
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  
+  - **All F1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
+
+  - **F1 weighted is higher than F1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples. You could also try adding class weights to your hyperparameters.
+ 
+  - **F1 macro is higher than F1 weighted**: Your entity types with more evaluation examples are performing poorly. Does the number of evaluation examples reflect the class distribution of your training examples? 
+ 
+  - **F1 micro is higher than F1 macro**: Certain entity types are being misclassified more often than others. Check the class-wise statistics to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
+ 
+  - **Some classes are more important than others**: If some intents are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
+
 **Class-wise Statistics**
   |
 
