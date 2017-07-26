@@ -269,19 +269,42 @@ For example:
    >>> from mmworkbench.components.question_answerer import QuestionAnswerer
    >>> qa = QuestionAnswerer(app_path='food_ordering')
    >>> qa.get(index='menu_items')[0]
-   {
-     'category': 'Hawaiian Style Poke (HP)',
-     'description': None,
-     'id': 'B01MYTS235',
-     'img_url': None,
-     'menu_id': '78eb0100-029d-4efc-8b8c-77f97dc875b5',
-     'name': 'Spicy Creamy Salmon Poke',
-     'option_groups': [],
-     'popular': False,
-     'price': 6.5,
-     'restaurant_id': 'B01N97KQNJ',
-     'size_group': None,
-     'size_prices': []
+    {
+       "size_group": "pizzasize",
+       "menu_id": "57572a43-f9fc-4a1c-96fe-788d544b1f2d",
+       "restaurant_id": "B01DEEGQBK",
+       "size_prices": [
+          {
+             "name": "12\" Small",
+             "price": 13.99,
+             "id": "B01N9YUFMX"
+          },
+          {
+             "name": "14\" Medium",
+             "price": 16.99,
+             "id": "B01MRDF6V1"
+          },
+          {
+             "name": "16\" Large",
+             "price": 17.99,
+             "id": "B01MUI0ZGE"
+          },
+          {
+             "name": "18\" X-Large",
+             "price": 19.99,
+             "id": "B01N7ZK0ZR"
+          }
+       ],
+       "option_groups": [
+          "pizzawhole"
+       ],
+       "img_url": null,
+       "description": null,
+       "id": "B01NB08SGM",
+       "popular": false,
+       "name": "Cheese Pizza",
+       "category": "Pizzas",
+       "price": 13.99
     }
 
 .. admonition:: Exercise
