@@ -100,28 +100,28 @@ def test_basic_search_validation(food_ordering_answerer):
 
     # index not exist
     with pytest.raises(ValueError):
-        res = food_ordering_answerer.get(index='nosuchindex', nosuchfield='novalue')
+        food_ordering_answerer.get(index='nosuchindex', nosuchfield='novalue')
 
     # field not exist
     with pytest.raises(ValueError):
-        res = food_ordering_answerer.get(index='menu_items', nosuchfield='novalue')
+        food_ordering_answerer.get(index='menu_items', nosuchfield='novalue')
 
     # invalid field type
     with pytest.raises(ValueError):
-        res = food_ordering_answerer.get(index='menu_items', price='novalue')
+        food_ordering_answerer.get(index='menu_items', price='novalue')
 
     # invalid sort type
     with pytest.raises(ValueError):
-        res = food_ordering_answerer.get(index='menu_items', _sort='price', _sort_type='distance')
+        food_ordering_answerer.get(index='menu_items', _sort='price', _sort_type='distance')
 
     # invalid sort type
     with pytest.raises(ValueError):
-        res = food_ordering_answerer.get(index='menu_items', _sort='location', _sort_type='asc')
+        food_ordering_answerer.get(index='menu_items', _sort='location', _sort_type='asc')
 
     # missing origin
     with pytest.raises(ValueError):
-        res = food_ordering_answerer.get(index='menu_items', _sort='location',
-                                         _sort_type='distance')
+        food_ordering_answerer.get(index='menu_items', _sort='location',
+                                   _sort_type='distance')
 
 
 def test_advanced_search_validation(answerer):
@@ -156,5 +156,3 @@ def test_advanced_search_validation(answerer):
     with pytest.raises(ValueError):
         s = answerer.build_search(index='store_name')
         s.sort(field='location', sort_type='distance')
-
-
