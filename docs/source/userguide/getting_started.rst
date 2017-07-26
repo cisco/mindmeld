@@ -70,8 +70,8 @@ Using a Virtual Environment
 """""""""""""""""""""""""""
 
 If you would like to work in an isolated environment (which is strongly recommended so you can work
-on different projects without having conflicting library versions), you can use `virtualenv with pyenv
-<https://github.com/pyenv/pyenv-virtualenv>`.
+on different projects without having conflicting library versions), you can use `virtualenv with pyenv 
+<https://github.com/pyenv/pyenv-virtualenv>`_.
 
 Java 8
 ^^^^^^
@@ -203,7 +203,14 @@ Command Line
 ^^^^^^^^^^^^
 
 You can use ``blueprint`` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
-already built example apps as a baseline for your project.
+already built example apps as a baseline for your project. 
+
+You can use the `template` blueprint to setup a blank project:
+
+.. code-block:: console
+
+  $ mmworkbench blueprint template myapp
+
 
 To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run these commands on the command line:
 
@@ -223,6 +230,15 @@ Here you can enter your own input and get an immediate response back. Try "hi", 
 
 Python Shell
 ^^^^^^^^^^^^
+
+You can use the `template` blueprint to setup a blank project:
+
+.. code-block:: python
+
+    import mmworkbench as wb
+    wb.configure_logs()    
+    wb.blueprint('template', 'my_app')
+
 
 To try out the :doc:`Home Assistant blueprint<../blueprints/home_assistant>`, run these commands in your Python shell:
 
