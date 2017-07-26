@@ -31,11 +31,11 @@ class TestDialogueManager:
         cls.dm.add_dialogue_rule('domain_intent', lambda x, y, z: None,
                                  domain='domain', intent='intent')
         cls.dm.add_dialogue_rule('intent_entity_1', lambda x, y, z: None,
-                                 intent='intent', entity='entity_1')
+                                 intent='intent', has_entity='entity_1')
         cls.dm.add_dialogue_rule('intent_entity_2', lambda x, y, z: None,
-                                 intent='intent', entity='entity_2')
+                                 intent='intent', has_entity='entity_2')
         cls.dm.add_dialogue_rule('intent_entities', lambda x, y, z: None,
-                                 intent='intent', entities=('entity_1', 'entity_2', 'entity_3'))
+                                 intent='intent', has_entities=('entity_1', 'entity_2', 'entity_3'))
 
         cls.dm.add_dialogue_rule('default', lambda x, y, z: None)
 
