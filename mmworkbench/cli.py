@@ -157,7 +157,12 @@ def num_parser(ctx, start):
             return
 
         try:
-            mallard_service = subprocess.Popen(['java', '-jar', path.MALLARD_JAR_PATH])
+            # We redirect all the output of starting the process to /dev/null and all errors
+            # to stdout.
+            with open(os.devnull, 'w') as dev_null:
+                mallard_service = subprocess.Popen(['java', '-jar', path.MALLARD_JAR_PATH],
+                                                   stdout=dev_null, stderr=subprocess.STDOUT)
+
             # mallard takes some time to start so sleep for a bit
             time.sleep(5)
             logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
