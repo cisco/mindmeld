@@ -194,7 +194,10 @@ def _get_mallard_pid():
 @click.argument('app_path', required=False)
 def setup_blueprint(es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application."""
-    blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
+    try:
+        blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
+    except ValueError as e:
+        logger.error(e)
 
 
 if __name__ == '__main__':
