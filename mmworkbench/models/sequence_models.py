@@ -13,7 +13,7 @@ from .helpers import get_feature_extractor, register_model
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model, SkLearnModel
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
-from .tagers import taggers
+from .taggers import taggers
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 
