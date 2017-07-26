@@ -1,19 +1,18 @@
 Natural Language Processor
 ==========================
 
-The :ref:`Natural Language Processor (NLP) <arch_nlp>` understands the user's natural language input and outputs a representation that captures all the salient information in the user query. It uses a pipeline of six components that sequentially analyze the query, with each one building upon the output of the previous ones. These individual components are covered in depth in the following chapters. This chapter focuses on the :class:`NaturalLanguageProcessor` class in Workbench, which is a higher level abstraction encapsulating the full natural language processing pipeline. 
+We have seen how the :ref:`Natural Language Processor (NLP) <arch_nlp>` uses a pipeline of components to analyze the query. Workbench encapsulates this pipeline in a higher-level abstraction, in the form of the :class:`NaturalLanguageProcessor` Python class, or NLP class. This chapter focuses on the NLP class,  while subsequent chapters examine each individual component of the pipeline.
 
 .. note::
 
-   For a quick introduction, refer to :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-By-Step Guide.
-
+   For a quick introduction, see :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-By-Step Guide.
 
 .. _instantiate_nlp:
 
 Instantiate the NLP class
 -------------------------
 
-Before using the natural language processor, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then get started by importing the :class:`NaturalLanguageProcessor` class from Workbench's :mod:`nlp` module and instantiating an object with the path to your Workbench project.
+To use the natural language processor, you must first generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. Once you have training data, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
 
 .. code-block:: python
 
@@ -22,7 +21,7 @@ Before using the natural language processor, you need to generate the necessary 
    >>> nlp
    <NaturalLanguageProcessor 'home_assistant' ready: False, dirty: False>
 
-The NLP automatically infers the domain-intent-entity-role hierarchy for your app based on the project structure. Inspect the :attr:`domains` attribute of the :obj:`nlp` object to view the list of domains it identified.
+The natural language processor automatically infers the domain-intent-entity-role hierarchy for your app based on the project structure. Inspect the :attr:`domains` attribute of the :obj:`nlp` object to view the list of domains it identified.
 
 .. code-block:: python
 
@@ -34,11 +33,11 @@ The NLP automatically infers the domain-intent-entity-role hierarchy for your ap
     'weather': <DomainProcessor 'weather' ready: False, dirty: False>
    }
 
-You can similarly view the list of :attr:`intents` for each of the :attr:`domains`.
+View the list of :attr:`intents` for each of the :attr:`domains`.
 
 .. code-block:: python
 
-   >>> nlp.domains['times_and_dates'].intents 
+   >>> nlp.domains['times_and_dates'].intents
    {
     'change_alarm': <IntentProcessor 'change_alarm' ready: False, dirty: False>,
     'check_alarm': <IntentProcessor 'check_alarm' ready: False, dirty: False>,
@@ -51,14 +50,14 @@ You can similarly view the list of :attr:`intents` for each of the :attr:`domain
    >>> nlp.domains['weather'].intents
    {'check_weather': <IntentProcessor 'check_weather' ready: False, dirty: False>}
 
-Upon initialization, the natural language processor merely scans the directory structure of your project, but does not read in the training data files. As a result, it has no knowledge of the entities associated with each intent at this time.
+Upon initialization, the natural language processor merely scans the directory structure of your project, but does not read in the training data files. At this point in our tutorial, it has no knowledge of the entities associated with each intent.
 
 .. code-block:: python
 
    >>> nlp.domains['weather'].intents['check_weather'].entities
    {}
 
-The NLP learns about the entities when labeled queries are loaded at model training time. Once training is finished, you can view the entity types identified for each intent using the :attr:`entities` attribute. The code snippet below introduces the :meth:`NaturalLanguageProcessor.build` method for model training which will be explained later in this chapter. This method can take several minutes to run.
+The NLP learns about the entities when labeled queries are loaded at model training time. Once training is finished, you can use the :attr:`entities` attribute to view the entity types identified for each intent. The code snippet below introduces the :meth:`NaturalLanguageProcessor.build` method for model training. This method can take several minutes to run.
 
 .. code-block:: python
 
@@ -71,21 +70,23 @@ The NLP learns about the entities when labeled queries are loaded at model train
     'unit': <EntityProcessor 'unit' ready: True, dirty: True>
    }
 
-There are two other useful attributes that indicate the current status of an NLP object. First, the :attr:`ready` flag indicates if the NLP instance is ready for processing user input. The value of this attribute is ``True`` only if all the NLP classification models have been trained and can be used for making predictions on new queries. 
+The :attr:`ready` and :attr:`dirty` attributes further describe the status of an NLP object.
+
+The :attr:`ready` flag indicates whether the NLP instance is ready to process user input. Its value is ``True`` only if all the NLP classification models have been trained and can be used for making predictions on new queries.
 
 .. code-block:: python
 
    >>> nlp.ready
    False
 
-The :attr:`dirty` flag indicates if the NLP object has changed since it was last loaded from, or written to disk. The value of this attribute is ``True`` if the models have been retrained since the last disk I/O operation.
+The :attr:`dirty` flag indicates whether the NLP object has changed since last loaded from or written to disk. Its value is ``True`` if the models have been retrained since the last disk I/O operation.
 
 .. code-block:: python
 
    >>> nlp.dirty
    False
 
-The values of both these attributes are currently ``False`` since the NLP object has merely been initialized. It hasn't been trained yet.
+So far in our tutorial, the NLP object has been initialized but has not yet been trained, so :attr:`ready` and :attr:`dirty` are both false.
 
 
 .. _build_nlp:
@@ -93,7 +94,7 @@ The values of both these attributes are currently ``False`` since the NLP object
 Train the NLP pipeline
 ----------------------
 
-As described in :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`, the fastest way to train a baseline natural language processor is by using the :meth:`NaturalLanguageProcessor.build` method. Depending on the complexity of your Workbench project and the size of the training data, this can take anywhere from a few seconds to several minutes to finish. If the logging level is set to ``INFO`` or below, you should see the build progress in the console along with the cross-validation accuracies for each of the classifiers.
+As described in :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`, the :meth:`NaturalLanguageProcessor.build` method is the fastest way to train a baseline natural language processor. Depending on the complexity of your Workbench project and the size of its training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracies for the classifiers.
 
 .. code-block:: python
 
@@ -117,21 +118,23 @@ As described in :doc:`Step 7 <../quickstart/07_train_the_natural_language_proces
    Best accuracy: 92.82%, params: {'C': 100, 'penalty': 'l1'}
    ...
 
-The :meth:`build` method loads all the training queries, checks them for annotation errors, and then proceeds to build all the necessary NLP components using the machine learning settings defined in the app's configuration file (``config.py``). If settings have not been specified for a particular component, it uses Workbench's preset configuration for that component.
+The :meth:`build` method loads all the training queries, checks them for annotation errors, then proceeds to build all the necessary NLP components using the machine learning settings defined in ``config.py``, the app's configuration file. The method applies Workbench's preset configuration for any component whose settings have not been specified.
 
-The :meth:`build` method thus accomplishes the following:
+In so doing, the :meth:`build` method:
 
-    - Calls the :meth:`fit` method on each of the classifiers in the domain-intent-entity-role hierarchy to train them using the provided model, feature and hyperparameter settings.
+    - Calls the :meth:`fit` method on the classifiers in the domain-intent-entity-role hierarchy to train them using the provided model, feature, and hyperparameter settings
 
-    - Builds the Entity Resolver using the provided entity mapping file.
+    - Builds the Entity Resolver using the provided entity mapping file
 
-    - Configures the Language Parser using the provided parser configuration file.
+    - Configures the Language Parser using the provided parser configuration file
 
 .. _build_nlp_with_config:
 
-You will learn more about each of these steps in the upcoming chapters which will also describe the default settings for each component and methods to override them with your own custom configurations. For experimentation, it is recommended that you train, tune and test each classifier individually to identify the ideal configuration for each. The best machine learning settings should then be stored in your application configuration file, ``config.py``, so the :meth:`build` method can use them instead of the Workbench defaults.
+These steps are described further in upcoming chapters, along with default settings for each component, and methods to override them with your own custom configurations.
 
-Here's an example of a ``config.py`` file where the default configurations for the domain and intent classifiers are being overridden by custom settings that have been optimized for the app.
+To identify the optimal configuration for each classifier, you should experiment by training, tuning and testing. Then, store the best machine learning settings in ``config.py``, for the :meth:`build` method to use instead of the Workbench defaults.
+
+Here's an example of a ``config.py`` file where the default configurations for the domain and intent classifiers are overridden by custom settings optimized for the app.
 
 .. code-block:: python
 
@@ -175,17 +178,17 @@ Here's an example of a ``config.py`` file where the default configurations for t
            "freq": {"bins": 5}
        }
    }
-   
-You will learn more about classifier configurations later in this chapter.
+
+You will learn more about classifier configuration later in this chapter.
 
 .. _build_partial_nlp:
 
-Training specific parts of the NLP hierarchy
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Training at different levels of the NLP hierarchy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Calling the :meth:`build` method on the :obj:`nlp` object is the easiest way to build or rebuild all the classifiers in the NLP pipeline. However, it can be a time-consuming operation and there may be occasions when you only want to selectively rebuild a subset of your classifiers. This can be accomplished by calling the :meth:`build` method at the appropriate level in the domain-intent-entity-role hierarchy.
+While calling the :meth:`build` method on the :obj:`nlp` object is the easiest way to build or rebuild all the classifiers, it can be time-consuming. Sometimes it is more efficient to only rebuild a subset of your classifiers. To do this, call the :meth:`build` method at the appropriate level in the domain-intent-entity-role hierarchy.
 
-For instance, the code below only rebuilds the NLP models for a specific domain, namely the ``times_and_dates`` domain of the ``home_assistant`` app.
+For instance, the code below rebuilds the NLP models for one selected domain only, namely the ``times_and_dates`` domain of the ``home_assistant`` app.
 
 .. code-block:: python
 
@@ -215,7 +218,7 @@ For instance, the code below only rebuilds the NLP models for a specific domain,
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 97.18%, params: {'C': 1000000, 'penalty': 'l1'}
 
-Here are the different levels at which you can invoke the :meth:`build` method.
+To specify a level in the domain-intent-entity-role when invoking the :meth:`build` method, choose one of the following patterns:
 
 1. :meth:`nlp.build`
 
@@ -233,36 +236,39 @@ Here are the different levels at which you can invoke the :meth:`build` method.
 
   | Trains the role classifier for ``e_name`` entity type.
 
-For details on fine-grained access to individual classifiers, read the upcoming chapters.
+More about fine-grained access to individual classifiers appears in the subsequent chapters.
 
 .. _config:
 
 Classifier configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The previous section briefly introduced the concepts of default configurations and custom configurations for NLP classifiers. A classifier configuration defines the `machine learning algorithm <https://en.wikipedia.org/wiki/Supervised_learning#Approaches_and_algorithms>`_ to use, the `features <https://en.wikipedia.org/wiki/Feature_(machine_learning)>`_ to be extracted from the input data, and the methodology to use for `hyperparameter selection <https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)>`_. This configuration is used by the natural language processor's :meth:`build` method and the individual classifiers' :meth:`fit` method to train models according to the given settings.
+We have seen how the natural language processor's :meth:`build` method and the individual classifiers' :meth:`fit` methods use configurations to train models.
 
-The domain, intent, entity, and role classifiers are all configured the same way. They use a configuration dictionary that defines the various machine learning settings to be used in model training. The structure and format of this dictionary is described below. Refer to the individual classifier chapters for detailed explanation on all the relevant configurable options.
+To be more precise, a classifier configuration defines the `machine learning algorithm <https://en.wikipedia.org/wiki/Supervised_learning#Approaches_and_algorithms>`_ to use, the `features <https://en.wikipedia.org/wiki/Feature_(machine_learning)>`_ to be extracted from the input data, and the methodology to use for `hyperparameter selection <https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)>`_.
 
+Workbench domain, intent, entity, and role classifiers all use a *configuration dictionary* to define the machine learning settings for model training.
+
+This section describes the structure and format of the configuration dictionary. Detailed explanation of configurable options for each type of classifier appears in subsequent chapters.
 
 Anatomy of a classifier configuration
 """""""""""""""""""""""""""""""""""""
 
-A classifier configuration has three sections.
+A classifier configuration has three sections: **Model Settings**, **Feature Extraction Settings**, and **Hyperparameter Settings**.
 
 1. **Model Settings** - The `machine learning algorithm <https://en.wikipedia.org/wiki/Supervised_learning#Approaches_and_algorithms>`_  or modeling approach to use, along with any algorithm-specific settings.
 
-For instance, here is a snippet from a domain classifier configuration specifying a '`text classifier <https://en.wikipedia.org/wiki/Text_classification>`_' to be trained using a '`logistic regression <https://en.wikipedia.org/wiki/Logistic_regression>`_' model.
+This snippet from a domain classifier configuration specifies a '`text classifier <https://en.wikipedia.org/wiki/Text_classification>`_' to be trained using a '`logistic regression <https://en.wikipedia.org/wiki/Logistic_regression>`_' model.
 
 .. code:: python
-   
+
    'model_type': 'text',
    'model_settings': {
       'classifier_type': 'logreg',
    },
    ...
 
-Here's another example from entity recognition. The configuration specifies '`maximum entropy markov model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_' as the machine learning algorithm and the '`Inside-Outside-Beginning <https://en.wikipedia.org/wiki/Inside_Outside_Beginning>`_' format as the tagging scheme. It additionally also specifies a feature transformation operation, namely ':sk_api:`maximum absolute scaling <sklearn.preprocessing.MaxAbsScaler>`' as a preprocessing step.
+This example, also from entity recognition, specifies '`maximum entropy markov model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_' as the machine learning algorithm and the '`Inside-Outside-Beginning <https://en.wikipedia.org/wiki/Inside_Outside_Beginning>`_' format as the tagging scheme. It further specifies the ':sk_api:`maximum absolute scaling <sklearn.preprocessing.MaxAbsScaler>`' feature transformation operation as a preprocessing step.
 
 .. code:: python
 
@@ -275,7 +281,7 @@ Here's another example from entity recognition. The configuration specifies '`ma
 
 2. **Feature Extraction Settings** - The `features <https://en.wikipedia.org/wiki/Feature_(machine_learning)>`_ to extract from the input query, along with any configurable settings for each feature group.
 
-Here is an example of the feature extraction settings in a domain classifier configuration.
+These feature extraction settings are from a domain classifier configuration.
 
 .. code:: python
 
@@ -297,7 +303,7 @@ The above configuration instructs Workbench to extract four different groups of 
 
 3. **Hyperparameter Settings** - The `hyperparameters <https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)>`_ to use during model training, or the settings for choosing optimal hyperparameters.
 
-Here is a role classifier configuration that defines the hyperparameters for its `maximum entropy classification model <https://en.wikipedia.org/wiki/Maximum_entropy_classifier>`_. It specifies a value of 100 for the ':sk_guide:`C <linear_model#logistic-regression>`' parameter and ':sk_guide:`L1 <linear_model#logistic-regression>`' as the norm to be used for `regularization <https://en.wikipedia.org/wiki/Regularization_%28mathematics%29#Use_of_regularization_in_classification>`_. 
+This role classifier configuration defines hyperparameters for its `maximum entropy classification model <https://en.wikipedia.org/wiki/Maximum_entropy_classifier>`_. It specifies a value of 100 for the ':sk_guide:`C <linear_model#logistic-regression>`' parameter and ':sk_guide:`L1 <linear_model#logistic-regression>`' as the norm to be used for `regularization <https://en.wikipedia.org/wiki/Regularization_%28mathematics%29#Use_of_regularization_in_classification>`_.
 
 .. code:: python
 
@@ -307,7 +313,7 @@ Here is a role classifier configuration that defines the hyperparameters for its
       'penalty': 'l1'
    }
 
-It is also possible to give Workbench a hyperparameter grid instead of the exact values and let it search for the optimal settings. In such cases, the configuration needs to specify both the hyperparameter search grid and the settings for the selection methodology, as shown below.
+You can also provide a hyperparameter grid instead of exact values and let Workbench search for optimal settings. This type of configuration must specify both the hyperparameter search grid and settings for the selection methodology, as shown below.
 
 .. code:: python
 
@@ -321,8 +327,7 @@ It is also possible to give Workbench a hyperparameter grid instead of the exact
       },
     }
 
-The configuration defines a grid with five potential values for the 'C' parameter and two possible values for the 'penalty' parameter. It also specifies that the optimal values need to be found using a 10-fold cross-validated grid search over the provided parameter grid.
-
+The above configuration defines a grid with five potential values for the 'C' parameter and two possible values for the 'penalty' parameter. It also specifies that optimal values need to be found using a 10-fold cross-validated grid search over the provided parameter grid.
 
 Using custom configurations
 """""""""""""""""""""""""""
@@ -336,19 +341,19 @@ The first method, as described :ref:`earlier <build_nlp_with_config>`, is to def
   - :data:`ENTITY_MODEL_CONFIG`
   - :data:`ROLE_MODEL_CONFIG`
 
-Alternately, you could also pass the configuration settings (like model type, features, etc.) as arguments to the :meth:`fit` method of the appropriate classifier. Arguments passed to :meth:`fit` take precedence over the Workbench defaults as well as the settings defined in the app's configuration file. Refer to the individual classifier chapters for more details on the :meth:`fit` method.
+Alternatively, you could pass configuration settings (like model type, features, and so on) as arguments to the :meth:`fit` method of the appropriate classifier. Arguments passed to :meth:`fit` take precedence over both Workbench defaults and settings defined in ``config.py``. See individual classifier chapters for more about the :meth:`fit` method.
 
 
 Configuring rest of the pipeline
 """"""""""""""""""""""""""""""""
 
-The last two components in the NLP pipeline, namely, the entity resolver and the language parser, are not supervised classifiers, and are hence configured in a manner different than the first four. Their configuration options are covered in their respective chapters.
+Since neither the entity resolver nor the language parser are supervised classifiers, they are configured differently from the rest of the NLP pipeline. See `Working with the Entity Resolver <entity_resolver>`_ and `Working with the Language Parser <parser>`_, respectively, to learn how to configure these components.
 
 
 Run the NLP pipeline
 --------------------
 
-A trained NLP pipeline can be run on a test query using the :meth:`NaturalLanguageProcessor.process` method. The :meth:`process` method sends the query for sequential processing by each component in the NLP pipeline and returns the aggregated output from all of them.
+Run the trained NLP pipeline on a test query using the :meth:`NaturalLanguageProcessor.process` method. The :meth:`process` method sends the query for sequential processing by each component in the NLP pipeline and returns the aggregated output from all of them.
 
 .. code:: python
 
@@ -365,7 +370,7 @@ A trained NLP pipeline can be run on a test query using the :meth:`NaturalLangua
       },
       {
         'role': None,
-        'span': {'end': 32, 'start': 30},  
+        'span': {'end': 32, 'start': 30},
         'text': 'two',
         'type': 'sys_number',
         'value': {'value': 2}
@@ -375,7 +380,7 @@ A trained NLP pipeline can be run on a test query using the :meth:`NaturalLangua
           {
             'role': None,
             'span': {'end': 32, 'start': 30},
-            'text': 'two',    
+            'text': 'two',
             'type': 'sys_number',
             'value': {'value': 2}
           }
@@ -398,7 +403,7 @@ A trained NLP pipeline can be run on a test query using the :meth:`NaturalLangua
     'text': "I'd like a mujaddara wrap and two chicken kebab from palmyra"
    }
 
-The return value is a dictionary with the following fields:
+The return value is the dictionary described in the table below.
 
 +----------+--------------------------------------------------------------------------+-----------------------------------------------+
 | Key      | Value                                                                    | Component(s) Responsible                      |
@@ -417,54 +422,54 @@ The return value is a dictionary with the following fields:
 
 The :meth:`process` method executes the following steps:
 
-    - Calls the :meth:`predict` (or equivalent) method for each of the classifiers in the domain-intent-entity-role hierarchy to detect the domain, intent, entities and roles in the query
+    - Call the :meth:`predict` (or equivalent) method for each classifier in the domain-intent-entity-role hierarchy to detect the domain, intent, entities and roles in the query
 
-    - Calls the Entity Resolver's :meth:`predict` method to resolve all detected entities to their canonical forms
+    - Call the Entity Resolver's :meth:`predict` method to resolve all detected entities to their canonical forms
 
-    - Calls the Language Parser's :meth:`parse_entities` method to cluster all the resolved entities
+    - Call the Language Parser's :meth:`parse_entities` method to cluster the resolved entities
 
-    - Returns the detailed output from each component
+    - Return the detailed output from each component
 
-The chapters on the individual NLP components provide more details on the above steps, along with documentation on their outputs and methods for batch testing and evaluation.
+For more about the above steps, including outputs and methods for batch testing and evaluation, see the chapters on individual NLP components.
 
 .. _evaluate_nlp:
 
 Evaluate NLP performance
 ------------------------
 
-The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries that is prepared in :doc:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. The files containing the test queries have names starting with the ``test`` prefix, and are placed alongside the training data files within the different intent subfolders. 
+The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries prepared in :doc:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. Names of files containing test queries have the prefix ``test``. These files placed within the intent subfolders, alongside the training data files.
 
 .. image:: /images/food_ordering_directory2.png
     :width: 350px
     :align: center
 
-While the training data is used for training and tuning the models, the test data is used solely for model evaluation. Ideally, the test data should have no queries in common with the training data and be representative of the real-world usage of the app. During evaluation, the ground truth annotations are stripped away from the test queries and the unlabeled queries are passed in to a trained classifier. The classifier's output predictions are then compared against the ground truth labels to measure the model's prediction accuracy. A successful production-grade conversational app needs to have test accuracies greater than 90% for all the classification models in its NLP pipeline.
+While training data is used for training and tuning the models, test data is used solely for model evaluation. Ideally, the test data should have no queries in common with the training data and be representative of the real-world usage of the app. During evaluation, the ground truth annotations are stripped away from the test queries and the unlabeled queries are passed in to a trained classifier. The classifier's output predictions are then compared against the ground truth labels to measure the model's prediction accuracy. A successful production-grade conversational app must achieve test accuracies greater than 90% for all the classification models in its NLP pipeline.
 
-The `evaluation` section of the respective chapters will explain how evaluation works for each individual classifier in the NLP model hierarchy.
+For more about how evaluation works for each individual classifier, see the `evaluation` sections of the respective chapters.
 
 
 Optimize the NLP models
 -----------------------
 
-For any machine learning based system, the typical experimentation flow involves:
+The typical experimentation flow for ML-based systems looks like this:
 
-  - Gathering representative labeled data
+  - Gather representative labeled data
 
-  - Training a baseline model
+  - Train a baseline model
 
-  - Measuring the model performance using `cross-validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_ or `heldout dataset <https://en.wikipedia.org/wiki/Test_set#Validation_set>`_
+  - Measure model performance using `cross-validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_ or `heldout dataset <https://en.wikipedia.org/wiki/Test_set#Validation_set>`_
 
-  - Performing error analysis on incorrect model predictions
+  - Perform error analysis on incorrect model predictions
 
-  - Using insights from the analysis to improve model performance by appropriately updating the machine learning setup 
+  - Apply insights from the analysis to improve model performance by appropriately updating the machine learning setup
 
-In practice, several iterations of the above flow are necessary to optimize the NLP models to production-level accuracies. During each round of experimentation, there are two primary ways to improve the model performance.
+In practice, optimizing the NLP models to production-level accuracies demands several iterations of this flow. During each round of experimentation, there are two primary ways to improve the model performance.
 
-  1. **Adding more training data**: In most cases, model accuracy can be improved simply by adding more representative training data. Error analysis can help in identifying a relevant set of training queries that can be added to help the model generalize better and make more accurate predictions on the misclassified examples. Filling in the gaps in the training data and improving the overall quality of the labeled queries should always be the first step when debugging classifier performance.
+  1. **Adding more training data**: In most cases, model accuracy can be improved simply by adding more representative training data. Error analysis can help identify a relevant set of training queries to add. This helps the model generalize better and make more accurate predictions on the misclassified examples. Filling in gaps in the training data and improving the overall quality of labeled queries should always be the first step when debugging classifier performance.
 
 ..
 
-  2. **Optimizing the classifier configuration**: Accuracy can also be improved by selecting a classifier configuration that is better suited for your training data. The natural language processor's :meth:`build` method uses a default configuration for each classifier to train the NLP models. While these baseline models provide a reasonable starting point for your NLP pipeline, experimenting with different model types, features, etc. could help identify alternate configurations that produce more accurate models. However, this approach, unlike training data augmentation, is more advanced. It requires expertise in applied machine learning to run meaningful experiments and identify the optimal classifier settings. Refer to the upcoming chapters for details on the configuration options available for each NLP classifier.
+  2. **Optimizing the classifier configuration**: Accuracy can also be improved by selecting a classifier configuration that is better suited for your training data. The natural language processor's :meth:`build` method uses a default configuration for each classifier to train the NLP models. While these baseline models provide a reasonable starting point for your NLP pipeline, experimenting with different model types, features, etc., could help identify alternate configurations that produce more accurate models. However, unlike training data augmentation, this more advanced approach requires expertise in applied machine learning to run meaningful experiments and identify optimal classifier settings. For details about configuration options available for each NLP classifier, see the respective chapters.
 
 
 Save models for future use
@@ -487,4 +492,4 @@ The saved models can then be loaded anytime using the :meth:`NaturalLanguageProc
    Loading intent classifier: domain='ordering'
    ...
 
-In addition to saving the models all at once, you can also choose to save just one specific NLP model. This is useful when you are actively experimenting with the classifiers individually and want to checkpoint your work or save multiple model versions for comparison. This can be accomplished using the :meth:`dump` and :meth:`load` methods exposed by each classifier. Refer to the chapter for the appropriate classifier to learn more.
+Another option is to save just one specific NLP model, which is useful when you are actively experimenting with individual classifiers and want to checkpoint your work or save multiple model versions for comparison. This is done using the :meth:`dump` and :meth:`load` methods exposed by each classifier. Refer to the chapter for the appropriate classifier to learn more.
