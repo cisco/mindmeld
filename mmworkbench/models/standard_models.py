@@ -19,8 +19,8 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
-from sklearn.preprocessing import MaxAbsScaler, StandardScaler
+from sklearn.feature_selection import SelectFromModel, SelectPercentile
+from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
@@ -66,6 +66,22 @@ class StandardModel(Model):
         self._feat_selector = self._get_feature_selector()
         self._feat_scaler = self._get_feature_scaler()
 
+    def __getstate__(self):
+        """Returns the information needed pickle an instance of this class.
+
+        By default, pickling removes attributes with names starting with
+        underscores. This overrides that behavior.
+        """
+        attributes = self.__dict__.copy()
+        attributes['_resources'] = {WORD_FREQ_RSC: self._resources.get(WORD_FREQ_RSC, {}),
+                                    QUERY_FREQ_RSC: self._resources.get(QUERY_FREQ_RSC, {})}
+        return attributes
+
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        # TODO: use general sklearn model
+        return LogisticRegression
+
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
 
@@ -88,59 +104,6 @@ class StandardModel(Model):
 
         model_eval = StandardModelEvaluation(config, evaluations)
         return model_eval
-
-    def __getstate__(self):
-        """Returns the information needed pickle an instance of this class.
-
-        By default, pickling removes attributes with names starting with
-        underscores. This overrides that behavior.
-        """
-        attributes = self.__dict__.copy()
-        attributes['_resources'] = {WORD_FREQ_RSC: self._resources.get(WORD_FREQ_RSC, {}),
-                                    QUERY_FREQ_RSC: self._resources.get(QUERY_FREQ_RSC, {})}
-        return attributes
-
-    def _convert_params(self, param_grid, y, is_grid=True):
-        """
-        Convert the params from the style given by the config to the style
-        passed in to the actual classifier.
-
-        Args:
-            param_grid (dict): lists of classifier parameter values, keyed by parameter name
-
-        Returns:
-            (dict): revised param_grid
-        """
-        if 'class_weight' in param_grid:
-            raw_weights = param_grid['class_weight'] if is_grid else [param_grid['class_weight']]
-            weights = [{k if isinstance(k, int) else self._class_encoder.transform((k,))[0]: v
-                        for k, v in cw_dict.items()} for cw_dict in raw_weights]
-            param_grid['class_weight'] = weights if is_grid else weights[0]
-        elif 'class_bias' in param_grid:
-            # interpolate between class_bias=0 => class_weight=None
-            # and class_bias=1 => class_weight='balanced'
-            class_count = bincount(y)
-            classes = self._class_encoder.classes_
-            weights = []
-            raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]
-            for class_bias in raw_bias:
-                # these weights are same as sklearn's class_weight='balanced'
-                balanced_w = [old_div(len(y), (float(len(classes)) * c)) for c in class_count]
-                balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
-
-                weights.append({c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples})
-            param_grid['class_weight'] = weights if is_grid else weights[0]
-            del param_grid['class_bias']
-
-        return param_grid
-
-    def _get_feature_selector(self):
-        return None
-
-    def _get_model_constructor(self):
-        """Returns the class of the actual underlying model"""
-        # TODO: use general sklearn model
-        return LogisticRegression
 
     def fit(self, examples, labels, params=None):
         """Trains this model.
@@ -305,16 +268,6 @@ class StandardModel(Model):
 
         return predictions
 
-    def _get_feature_scaler(self):
-        """Get a feature value scaler based on the model settings"""
-        if self.config.model_settings is None:
-            scale_type = None
-        else:
-            scale_type = self.config.model_settings.get('feature_scaler')
-        scaler = {'std-dev': StandardScaler(with_mean=False),
-                  'max-abs': MaxAbsScaler()}.get(scale_type)
-        return scaler
-
     def get_feature_matrix(self, examples, y=None, fit=False):
         """Transforms a list of examples into a feature matrix.
 
@@ -351,6 +304,66 @@ class StandardModel(Model):
                 X = self._feat_selector.transform(X)
 
         return X, y
+
+    def _convert_params(self, param_grid, y, is_grid=True):
+        """
+        Convert the params from the style given by the config to the style
+        passed in to the actual classifier.
+
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by parameter name
+
+        Returns:
+            (dict): revised param_grid
+        """
+        if 'class_weight' in param_grid:
+            raw_weights = param_grid['class_weight'] if is_grid else [param_grid['class_weight']]
+            weights = [{k if isinstance(k, int) else self._class_encoder.transform((k,))[0]: v
+                        for k, v in cw_dict.items()} for cw_dict in raw_weights]
+            param_grid['class_weight'] = weights if is_grid else weights[0]
+        elif 'class_bias' in param_grid:
+            # interpolate between class_bias=0 => class_weight=None
+            # and class_bias=1 => class_weight='balanced'
+            class_count = bincount(y)
+            classes = self._class_encoder.classes_
+            weights = []
+            raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]
+            for class_bias in raw_bias:
+                # these weights are same as sklearn's class_weight='balanced'
+                balanced_w = [old_div(len(y), (float(len(classes)) * c)) for c in class_count]
+                balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
+
+                weights.append({c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples})
+            param_grid['class_weight'] = weights if is_grid else weights[0]
+            del param_grid['class_bias']
+
+        return param_grid
+
+    def _get_feature_selector(self):
+        """Get a feature selector instance based on the feature_selector model
+        parameter
+
+        Returns:
+            (Object): a feature selector which returns a reduced feature matrix,
+                given the full feature matrix, X and the class labels, y
+        """
+        if self.config.model_settings is None:
+            selector_type = None
+        else:
+            selector_type = self.config.model_settings.get('feature_selector')
+        selector = {'l1': SelectFromModel(LogisticRegression(penalty='l1', C=1)),
+                    'f': SelectPercentile()}.get(selector_type)
+        return selector
+
+    def _get_feature_scaler(self):
+        """Get a feature value scaler based on the model settings"""
+        if self.config.model_settings is None:
+            scale_type = None
+        else:
+            scale_type = self.config.model_settings.get('feature_scaler')
+        scaler = {'std-dev': StandardScaler(with_mean=False),
+                  'max-abs': MaxAbsScaler()}.get(scale_type)
+        return scaler
 
 
 class TextModel(StandardModel):
