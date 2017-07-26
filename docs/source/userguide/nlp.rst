@@ -348,6 +348,8 @@ Configuring rest of the pipeline
 The last two components in the NLP pipeline, namely, the entity resolver and the language parser, are not supervised classifiers, and are hence configured in a manner different than the first four. Their configuration options are covered in their respective chapters.
 
 
+.. _run_nlp:
+
 Run the NLP pipeline
 --------------------
 
