@@ -56,7 +56,7 @@ This utility will update the version in all the places it should, create a new c
 
 Our versioning format is `{major}.{minor}.{patch}{release}{revision}`. So version part should be any of `major`, `minor`, `patch` `release` or `revision`.
 
-Let's say the current version is `3.0.1dev2`. `bumpversion revision` would bump the version to `3.0.1dev3`. 
+Let's say the current version is `3.0.1dev2`. `bumpversion revision` would bump the version to `3.0.1dev3`.
 
 If this is your first release, it is recommended that you do a dry run first to confirm you are using the correct version part:
 
@@ -86,17 +86,8 @@ python setup.py bdist_wheel --universal
 
 ### Publishing to PyPI
 
-The process for publishing to PyPI is still quite rough. For now it involves manually copying the package archive to our PyPI server. This process will need to be repeated for each environment. The PyPI servers in each environment are: `dev-pypi-000.dev`, `staging-pypi-000.staging`, and `prod-pypi-000.prod`
-
-#### TLDR; Do The Thing
+You can publish to pypi.<dev||staging||prod> by pushing the .whl to s3://mindmeld-pypi/<dev||staging||prod>
 
 ```
-# Confirm you are connected to MindMeld VPN
-scp dist/mmworkbench-{new-version}-py2.py3-none-any.whl dev-pypi-000.dev:~/
-ssh dev-pypi-000.dev
-
-# Wait for ssh connection to complete
-sudo su -
-mv /home/{your-username}/mmworkbench-{new-version}-py2.py3-none-any.whl /opt/pypi
-chown root:root /opt/pypi/mmworkbench-{new-version}-py2.py3-none-any.whl
+aws s3 cp dist/mmworkbench-{new-version}-py2.py3-none-any.whl s3://mindmeld-pypi/<develop||staging||prod>/
 ```
