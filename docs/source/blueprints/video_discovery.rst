@@ -401,7 +401,6 @@ Start by inspecting the baseline configurations that the different classifiers u
 
 .. code:: python
 
-  wb.configure_logs()
 	>>> ic = nlp.domains['video_content'].intent_classifier
 	>>> ic.config.model_settings['classifier_type']
 	'logreg'
@@ -443,6 +442,8 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
    ...            }
    >>> ic.fit(features=features)
    Fitting intent classifier: domain='ordering'
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
+   Best accuracy: 97.34%, params: {'fit_intercept': False, 'class_weight': {0: 0.40103456116416553, 1: 4.4708491761723703, 2: 0.98561050572785691, 3: 6.916666666666667, 4: 3.7209915611814348, 5: 0.53912578327984106}, 'C': 10000}
 
 You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various Workbench classifiers.
 
