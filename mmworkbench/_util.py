@@ -34,17 +34,18 @@ BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
     'quickstart': {},
     'food_ordering': {},
-    'home_assistant': {},
-    'template': {}
+    'home_assistant': {'kb': False},
+    'template': {'kb': False},
+    'video_discovery': {}
 }
 
 
 class Blueprint(object):
     """This is a callable class used to set up a blueprint app.
 
-    In S3 the directory structure looks like this:
+    The MindMeld website hosts the blueprints in a directory structure like this:
 
-       - s3://mindmeld/workbench-data/blueprints/
+       - https://mindmeld.com/blueprints/
        |-food_ordering
        |  |-app.tar.gz
        |  |-kb.tar.gz
@@ -53,14 +54,15 @@ class Blueprint(object):
           |-kb.tar.gz
 
 
-    Within each blueprint dir `app.tar.gz` contains the workbench application
-    data (`app.py`, `domains`, `entities`, etc.) and `kb.tar.gz`
+    Within each blueprint directory `app.tar.gz` contains the workbench
+    application data (`app.py`, `domains`, `entities`, etc.) and `kb.tar.gz`
+    contains the a JSON file for each index in the knowledge base.
 
-    The blueprint method will check S3 for when the blueprint files were last
-    updated and compare that with any files in a local blueprint cache at
-    ~/.mmworkbench/blueprints. If the cache is out of date, the updated archive
-    is downloaded. The archive is then extracted into a directory named for the
-    blueprint.
+    The blueprint method will check the MindMeld website for when the blueprint
+    files were last updated and compare that with any files in a local
+    blueprint cache at ~/.mmworkbench/blueprints. If the cache is out of date,
+    the updated archive is downloaded. The archive is then extracted into a
+    directory named for the blueprint.
     """
     def __call__(self, name, app_path=None, es_host=None, skip_kb=False):
         """
@@ -81,8 +83,10 @@ class Blueprint(object):
         """
         if name not in BLUEPRINTS:
             raise ValueError('Unknown blueprint name: {!r}'.format(name))
+        bp_config = BLUEPRINTS[name]
+
         app_path = self.setup_app(name, app_path)
-        if not skip_kb:
+        if bp_config.get('kb', True) and not skip_kb:
             self.setup_kb(name, app_path, es_host=es_host)
         return app_path
 

@@ -32,6 +32,37 @@ def test_query(query_factory):
     assert query.normalized_text == 'test 1 2 3'
 
 
+def test_query_with_leading_special_chars(query_factory):
+    """Tests creation of a query"""
+    text = ' Test: 1. 2. 3.'
+    query = query_factory.create_query(text)
+
+    assert query.text == text
+    assert query.processed_text == text
+    assert query.normalized_text == 'test 1 2 3'
+
+    text = '"Test": 1. 2. 3.'
+    query = query_factory.create_query(text)
+
+    assert query.text == text
+    assert query.processed_text == text
+    assert query.normalized_text == 'test 1 2 3'
+
+    text = '(Test": 1. 2. 3.)'
+    query = query_factory.create_query(text)
+
+    assert query.text == text
+    assert query.processed_text == text
+    assert query.normalized_text == 'test 1 2 3'
+
+    text = '((()))'
+    query = query_factory.create_query(text)
+
+    assert query.text == text
+    assert query.processed_text == text
+    assert query.normalized_text == ''
+
+
 def test_transform_index_forward(query):
     """Tests transforming a char index from raw to processed or normalized"""
     raw_index = 6

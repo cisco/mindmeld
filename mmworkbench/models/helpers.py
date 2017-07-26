@@ -18,10 +18,10 @@ ENTITIES_LABEL_TYPE = 'entities'
 
 
 # resource/requirements names
-GAZETTEER_RSC = "gazetteers"
-WORD_FREQ_RSC = "w_freq"
-QUERY_FREQ_RSC = "q_freq"
-
+GAZETTEER_RSC = 'gazetteers'
+QUERY_FREQ_RSC = 'q_freq'
+SYS_TYPES_RSC = 'sys_types'
+WORD_FREQ_RSC = 'w_freq'
 
 OUT_OF_BOUNDS_TOKEN = '<$>'
 
@@ -104,7 +104,7 @@ def register_model(model_type, model_class):
 
     Args:
         model_type (str): The model type as specified in model configs
-        model_class (type): The model to register
+        model_class (class): The model to register
     """
     if model_type in MODEL_MAP:
         raise ValueError('Model {!r} is already registered.'.format(model_type))

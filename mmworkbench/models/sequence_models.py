@@ -9,10 +9,13 @@ from builtins import range, super
 import logging
 import random
 
-from .helpers import register_model
-from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
+from .helpers import get_feature_extractor, register_model
+from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model, SkLearnModel
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
+from .tagers import taggers
+from sklearn.feature_selection import SelectFromModel, SelectPercentile
+from sklearn.linear_model import LogisticRegression
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +105,6 @@ class TaggerModel(Model):
         """
         system_types = self._get_system_types()
         self.register_resources(sys_types=system_types)
-
         skip_param_selection = params is not None or self.config.param_selection is None
         params = params or self.config.params
 
@@ -120,6 +122,8 @@ class TaggerModel(Model):
 
         if len(set(y)) == 1:
             self._no_entities = True
+            logger.warning("There are no labels in this label set, "
+                           "so we don't fit the model.")
             return self
         """
         if skip_param_selection:
@@ -172,6 +176,12 @@ class TaggerModel(Model):
                 evaluation
         """
         # TODO: also expose feature weights?
+
+        if self._no_entities:
+            logger.warning("There are no labels in this label set, "
+                           "so we don't run model evaluation.")
+            return
+
         predictions = self.predict(examples)
         evaluations = [EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
                        for i, e in enumerate(examples)]

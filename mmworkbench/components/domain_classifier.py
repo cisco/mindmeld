@@ -33,8 +33,8 @@ class DomainClassifier(Classifier):
         """
         kwargs['example_type'] = QUERY_EXAMPLE_TYPE
         kwargs['label_type'] = CLASS_LABEL_TYPE
-        default_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path)
-        return super()._get_model_config(default_config, **kwargs)
+        loaded_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path)
+        return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, *args, **kwargs):
         """Trains the domain classification model using the provided training queries
@@ -73,25 +73,6 @@ class DomainClassifier(Classifier):
         logger.info('Loading domain classifier')
         super().load(*args, **kwargs)
 
-    def evaluate(self, queries=None):
-        """Evaluates the trained domain classification model on the given test data
-
-        Args:
-            queries (list of ProcessedQuery): The labeled queries to use as training data. If none
-                are provided, the heldout label set will be used.
-
-        Returns:
-            ModelEvaluation: A ModelEvaluation object that contains evaluation results
-        """
-        if not self._model:
-            logger.error('You must fit or load the model before running evaluate.')
-            return
-        gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
-        queries, classes = self._get_queries_and_labels(queries, label_set='heldout')
-        evaluation = self._model.evaluate(queries, classes)
-        return evaluation
-
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
@@ -104,4 +85,6 @@ class DomainClassifier(Classifier):
         if not queries:
             query_tree = self._resource_loader.get_labeled_queries(label_set=label_set)
             queries = self._resource_loader.flatten_query_tree(query_tree)
+        if len(queries) < 1:
+            return [None, None]
         return list(zip(*[(q.query, q.domain) for q in queries]))

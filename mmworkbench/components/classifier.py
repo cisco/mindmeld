@@ -29,18 +29,18 @@ class ClassifierConfig(object):
         param_selection (dict): Configuration for param selection (using cross
             validation)
             {'type': 'shuffle',
-             'n': 3,
-             'k': 10,
-             'n_jobs': 2,
-             'scoring': '',
-             'grid': {}
+            'n': 3,
+            'k': 10,
+            'n_jobs': 2,
+            'scoring': '',
+            'grid': {}
             }
         features (dict): The keys are the names of feature extractors and the
             values are either a kwargs dict which will be passed into the
             feature extractor function, or a callable which will be used as to
-            extract features
-
+            extract features.
     """
+
     __slots__ = ['model_type', 'features', 'model_settings', 'params', 'param_selection']
 
     def __init__(self, model_type=None, features=None, model_settings=None, params=None,
@@ -107,28 +107,28 @@ class Classifier(object):
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
-                training set will be loaded.
+                 training set will be loaded.
             model_type (str, optional): The type of machine learning model to use. If omitted, the
-                default model type will be used.
+                 default model type will be used.
             model_settings (dict): Settings specific to the model type specified
             features (dict): Features to extract from each example instance to form the feature
-                vector used for model training. If omitted, the default feature set for the model
-                type will be used.
+                 vector used for model training. If omitted, the default feature set for the model
+                 type will be used.
             params (dict): Params to pass to the underlying classifier
             params_selection (dict): The grid of hyper-parameters to search, for finding the optimal
-                hyper-parameter settings for the model. If omitted, the default hyper-parameter
-                search grid will be used.
-            param_selection (dict): Configuration for param selection (using cross validation)
+                 hyper-parameter settings for the model. If omitted, the default hyper-parameter
+                 search grid will be used.
+            param_selection (dict): Configuration for param selection (using cross-validation)
                 {'type': 'shuffle',
-                 'n': 3,
-                 'k': 10,
-                 'n_jobs': 2,
-                 'scoring': '',
-                 'grid': { 'C': [100, 10000, 1000000]}}
+                'n': 3,
+                'k': 10,
+                'n_jobs': 2,
+                'scoring': '',
+                'grid': { 'C': [100, 10000, 1000000]}}
             features (dict): The keys are the names of feature extractors and the
                 values are either a kwargs dict which will be passed into the
                 feature extractor function, or a callable which will be used as to
-                extract features
+                extract features.
 
         Examples:
             Fit using default the configuration.
@@ -139,16 +139,14 @@ class Classifier(object):
 
                 >>> clf.fit(label_set='special')
 
-            Fit using given params, bypassing cross validation. This is useful for speeding up
+            Fit using given params, bypassing cross-validation. This is useful for speeding up
             train times if you are confident the params are optimized.
 
                 >>> clf.fit(params={'C': 10000000})
 
-            Fit using given parameter selection settings (also known as cross validation settings).
+            Fit using given parameter selection settings (also known as cross-validation settings).
 
-                >>> clf.fit(param_selection={
-
-                    })
+                >>> clf.fit(param_selection={})
 
             Fit using a custom set of features, including a custom feature extractor.
             This is only for advanced users.
@@ -158,6 +156,7 @@ class Classifier(object):
                         'contrived': lambda exa, res: {'contrived': len(exa.text) == 26}
                     })
         """
+
         # create model with given params
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
@@ -215,30 +214,52 @@ class Classifier(object):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
-    def evaluate(self, use_blind=False):
+    def evaluate(self, queries=None, use_blind=False):
         """Evaluates the trained classification model on the given test data
 
         Args:
+            queries (list of ProcessedQuery): The labeled queries to use as test data. If none
+                are provided, the test label set will be used.
             use_blind (bool): Description
 
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        if not self._model:
+            logger.error('You must fit or load the model before running evaluate.')
+            return
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
+        queries, labels = self._get_queries_and_labels(queries, label_set='test')
 
-    def _get_model_config(self, default_config=None, **kwargs):
-        """Gets a machine learning model configuration
+        if not queries:
+            logger.info('Could not evaluate model since no relevant examples were found. Make sure '
+                        'the labeled queries for evaluation are placed in "test*" files alongside '
+                        'the training data in your Workbench project.')
+            return
+
+        evaluation = self._model.evaluate(queries, labels)
+        return evaluation
+
+    def _get_model_config(self, loaded_config, **kwargs):
+        """Updates the loaded configuration with runtime specified options, and creates a model
+        configuration object with the final configuration dictionary. If an application config
+        exists it should be passed in, if not the default config should be passed in.
 
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
         try:
-            # If all params requred for model config were passed in, use kwargs
+            # If all params required for model config were passed in, use kwargs
             return ModelConfig(**kwargs)
         except (TypeError, ValueError):
-            # Use specified or default config, customizing with provided kwargs
-            model_config = default_config
+            # Use application specified or default config, customizing with provided kwargs
+            model_config = loaded_config
             model_config.update(kwargs)
+            # If a parameter selection grid was passed in at runtime, override params set in the
+            # application specified or default config
+            if kwargs.get('param_selection') and not kwargs.get('params'):
+                model_config.pop('params', None)
         return ModelConfig(**model_config)
 
     def dump(self, model_path):

@@ -8,9 +8,14 @@ import logging
 from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
 from elasticsearch.helpers import streaming_bulk
 
+from ._config import DEFAULT_ES_INDEX_TEMPLATE, DEFAULT_ES_INDEX_TEMPLATE_NAME
+
 from ..exceptions import KnowledgeBaseConnectionError
 
 logger = logging.getLogger(__name__)
+
+INDEX_TYPE_SYNONYM = 'syn'
+INDEX_TYPE_KB = 'kb'
 
 
 def get_scoped_index_name(app_name, index_name):
@@ -34,6 +39,39 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
     return es_client
 
 
+def does_index_exist(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
+    """Return boolean flag to indicate whether the specified index exists."""
+
+    es_client = es_client or create_es_client(es_host)
+    scoped_index_name = get_scoped_index_name(app_name, index_name)
+
+    try:
+        # Confirm ES connection with a shorter timeout
+        es_client.cluster.health(request_timeout=connect_timeout)
+        return es_client.indices.exists(index=scoped_index_name)
+    except ESConnectionError:
+        logger.error('Unable to connect to Elasticsearch cluster at %r', es_host)
+        raise KnowledgeBaseConnectionError()
+
+
+def get_field_names(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
+    """Return a list of field names available in the specified index."""
+
+    es_client = es_client or create_es_client(es_host)
+    scoped_index_name = get_scoped_index_name(app_name, index_name)
+
+    try:
+        if not does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
+            raise ValueError('Elasticsearch index \'{}\' does not exist.'.format(index_name))
+
+        res = es_client.indices.get(index=scoped_index_name)
+        all_field_info = res[scoped_index_name]['mappings']['document']['properties']
+        return all_field_info.keys()
+    except ESConnectionError:
+        logger.error('Unable to connect to Elasticsearch cluster at %r', es_host)
+        raise KnowledgeBaseConnectionError()
+
+
 def create_index(app_name, index_name, mapping, es_host=None, es_client=None, connect_timeout=2):
     """Creates a new index.
 
@@ -50,17 +88,18 @@ def create_index(app_name, index_name, mapping, es_host=None, es_client=None, co
     scoped_index_name = get_scoped_index_name(app_name, index_name)
 
     try:
-        # Confirm ES connection with a shorter timeout
-        es_client.cluster.health(request_timeout=connect_timeout)
-
-        if not es_client.indices.exists(index=scoped_index_name):
+        if not does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
+            # checks the existence of default index template, if not then creates it.
+            if not es_client.indices.exists_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME):
+                es_client.indices.put_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME,
+                                               body=DEFAULT_ES_INDEX_TEMPLATE)
             logger.info('Creating index %r', index_name)
             es_client.indices.create(scoped_index_name, body=mapping)
         else:
             logger.error('Index %r already exists.', index_name)
     except ESConnectionError:
         logger.error('Unable to connect to Elasticsearch cluster at %r', es_host)
-        raise KnowledgeBaseConnectionError()
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
 
 
 def delete_index(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
@@ -78,18 +117,15 @@ def delete_index(app_name, index_name, es_host=None, es_client=None, connect_tim
     scoped_index_name = get_scoped_index_name(app_name, index_name)
 
     try:
-        # Confirm ES connection with a shorter timeout
-        es_client.cluster.health(request_timeout=connect_timeout)
-
-        if es_client.indices.exists(index=scoped_index_name):
+        if does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
             logger.info('Deleting index %r', index_name)
             es_client.indices.delete(scoped_index_name)
     except ESConnectionError:
         logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
-        raise KnowledgeBaseConnectionError()
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
 
 
-def load_index(app_name, index_name, data, doc_generator, mapping, doc_type, es_host=None,
+def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
                es_client=None, connect_timeout=2):
     """Loads documents from data into the specified index. If an index with the specified name
     doesn't exist, a new index with that name will be created.
@@ -97,9 +133,8 @@ def load_index(app_name, index_name, data, doc_generator, mapping, doc_type, es_
     Args:
         app_name (str): The name of the app
         index_name (str): The name of the new index to be created
-        data (list): A list of the documents loaded from disk to be imported into the index
-        doc_generator (func): A generator which processes the loaded documents and yeilds them in
-                              the correct format to insert into Elasticsearch
+        docs (iterable): An iterable which contains a collection of documents in the correct format
+                         which should be imported into the index
         mapping (str): The Elasticsearch index mapping to use
         doc_type (str): The document type
         es_host (str): The Elasticsearch host server
@@ -109,21 +144,17 @@ def load_index(app_name, index_name, data, doc_generator, mapping, doc_type, es_
     """
     scoped_index_name = get_scoped_index_name(app_name, index_name)
     es_client = es_client or create_es_client(es_host)
-
     try:
-        # Confirm ES connection with a shorter timeout
-        es_client.cluster.health(request_timeout=connect_timeout)
-
         # create index if specified index does not exist
-        if es_client.indices.exists(index=scoped_index_name):
+        if does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
             logger.info('Loading index %r', index_name)
         else:
             create_index(app_name, index_name, mapping, es_host=es_host, es_client=es_client)
 
         count = 0
-        for okay, result in streaming_bulk(es_client, doc_generator(data),
+        for okay, result in streaming_bulk(es_client, docs,
                                            index=scoped_index_name, doc_type=doc_type,
-                                           chunk_size=50):
+                                           chunk_size=50, raise_on_error=False):
 
             action, result = result.popitem()
             doc_id = '/%s/%s/%s' % (index_name, doc_type, result['_id'])
@@ -137,4 +168,4 @@ def load_index(app_name, index_name, data, doc_generator, mapping, doc_type, es_
         logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
     except ESConnectionError:
         logger.error('Unable to connect to Elasticsearch cluster at {!r}'.format(es_host))
-        raise KnowledgeBaseConnectionError()
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
