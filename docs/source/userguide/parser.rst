@@ -1,7 +1,7 @@
 Language Parser
 ===============
 
-The :ref:`Language Parser <arch_parser>` (often referred to simply as the Parser) is run as the sixth and final step in the :ref:`natural language processing <arch_nlp>` pipeline to extract the relationships between :term:`entities <entity>` in a given :term:`query <query / request>`. It is a heuristic-driven `chart parser <https://en.wikipedia.org/wiki/Chart_parser>`_ that is configured to model the `dependencies <https://en.wikipedia.org/wiki/Dependency_grammar>`_ between different entity types in an application. The parser uses a developer-provided configuration to cluster the :doc:`recognized entities <entity_recognizer>` in a query together and group them into a meaningful hierarchy (:term:`entity group`) that captures how different entities relate to each other.
+The :ref:`Language Parser <arch_parser>` (often referred to simply as the Parser) is run as the sixth and final step in the :ref:`natural language processing <arch_nlp>` pipeline to extract the relationships between :term:`entities <entity>` in a given :term:`query <query / request>`. It is a heuristic-driven `chart parser <https://en.wikipedia.org/wiki/Chart_parser>`_ that is configured to model the `dependencies <https://en.wikipedia.org/wiki/Dependency_grammar>`_ between different entity types in an application. The parser uses a developer-provided configuration to cluster the :doc:`recognized entities <entity_recognizer>` in a query together and group them into a meaningful hierarchy (called :term:`entity group`) that captures how different entities relate to each other.
 
 .. note::
 
@@ -17,7 +17,7 @@ Do you need a parser?
 
 Not all Workbench apps need a language parser. The following two conditions need to be met to necessitate the use of a parser:
 
-  1. The app has one or more :term:`dependent (child) <dependent / child>` entity types that further describe a :term:`head (parent) <head / parent>` entity type.
+  1. The app has one or more :term:`dependent (child) <dependent / child>` entity types that describe a :term:`head (parent) <head / parent>` entity type.
 
   2. The app supports queries with multiple head entities of the same type.
 
@@ -42,7 +42,7 @@ Condition #2 ✗
 
 The ``turn_appliance_on`` and ``turn_appliance_off`` intents in the :ref:`home assistant blueprint <home_model_hierarchy>` have a pair of related entity types named ``location`` and ``appliance``. The ``location`` entity identifies the specific ``appliance`` of interest by describing where it is located. The ``location`` entity is thus a dependent of the ``appliance`` head entity. 
 
-However, the home assistant blueprint app is only designed to support the operation of one appliance per query. In other words, the user cannot reference two different appliances in the same query such as "Switch off the {living room|location} {tv|appliance} and turn on the {bedroom|location} {tv|appliance}." A parser is therefore not required since the app already knows the one and only head entity that all the dependent entities must refer to.
+However, the home assistant blueprint app is only designed to support the operation of one appliance per query. In other words, the user cannot reference two different appliances in the same query such as "Switch off the {living room|location} {tv|appliance} and turn on the {bedroom|location} {tv|appliance}." A parser is therefore not required since the app already knows that all dependents must refer to the only head entity present in the query.
 
 **c. Food ordering**
 
@@ -56,7 +56,7 @@ In the :ref:`food ordering blueprint <food_ordering_parser>`, the ``option`` and
 
 .. note::
 
-   The main entity in an entity group can be interchangbly referred to as the **parent** or the **head** entity. The other entities in the group that are attributes of the main entity are correspondingly called **child** or **dependent** entities.
+   The main entity in an entity group can be interchangbly referred to as the **parent** or **head** entity. The other entities in the group that are attributes of the main entity are correspondingly called **child** or **dependent** entities.
 
    The terms **head** and **dependent** reflect the `linguistic (syntactic) function <https://en.wikipedia.org/wiki/Dependency_grammar>`_ of the different entities within the group.
 
@@ -84,14 +84,14 @@ Simple parser configuration
 
 As described in :doc:`Step 8 <../quickstart/08_configure_the_language_parser>`, the fastest way to configure the language parser is by defining a simple dictionary that maps each head entity type to a list of related dependent entity types.
 
-.. _food_parser_simple_config:
+.. _food_simple_parser_config:
 
 Here is an example from the :doc:`food ordering blueprint <../blueprints/food_ordering>`:
 
 .. code-block:: python
 
    PARSER_CONFIG = {
-       'dish': ['option', 'sys_number']
+       'dish': ['option', 'sys_number'],
        'option': ['sys_number']
    }
 
@@ -107,22 +107,17 @@ Here's a slightly more complicated example where the configuration also specifi
        'option': ['sys_number']
    }
 
-In this example, ``option`` entities with a ``beverage`` or ``baked_good`` role type can only be grouped with ``dish`` entities having the same ``beverage`` or ``baked_good`` role, respectively. This ensures that the parser doesn't group incompatible options and dishes together, such as "extra cheese" for a "mocha" or "whipped cream" for a "lasagna".
+In this example, ``option`` entities with a ``beverage`` or ``baked_good`` role type can only be grouped with ``dish`` entities having the same ``beverage`` or ``baked_good`` role, respectively. This ensures that the parser doesn't group incompatible options and dishes together, such as "extra cheese" with a "mocha" or "whipped cream" with a "lasagna".
 
 Each key-value pair in the configuration instructs the parser to look for a specific head entity in the query and cluster it with one or more of the specified dependent entities to form an entity group.
 
-  - The key is a string describing the entity type and optionally, the role type of the head entity. E.g., ``'dish'`` matches all entities of the type ``dish``, whereas 'dish|beverage' only matches ``dish`` entities with a ``beverage`` role.
+  - The key is a string describing the entity type and optionally, the role type of the head entity. E.g., ``'dish'`` matches all entities of the type ``dish``, whereas ``'dish|beverage'`` only matches ``dish`` entities with a ``beverage`` role.
 
-  - The value is a list of strings, with each string describing the entity type and optionally, the role type of a dependent entity. E.g., ``['size', 'option|beverage']`` instructs the parser to consider all ``size`` entities, and ``option`` entities with a ``beverage`` role type as potential dependents for the head entity.
+  - The value is a list of strings, with each string describing the entity type and optionally, the role type of a dependent entity. E.g., ``['size', 'option|beverage']`` instructs the parser to consider all ``size`` entities, and ``option`` entities with a ``beverage`` role as potential dependents for the head entity.
 
-Using the head-dependent relationships defined in the configuration, the parser analyzes the detected entities in a query and hypothesizes different potential ways of grouping the entities together. Each such grouping is called a candidate parse. Queries containing multiple head entities of the same type with many potential dependents are inherently ambiguous, i.e. there is always more than one way to generate a candidate parse for such queries that satisfies the configuration constraints. 
+Using the head-dependent relationships defined in the configuration, the parser analyzes the detected entities in a query and hypothesizes different potential ways of grouping the entities together. Each such grouping is called a candidate **parse**. After generating these parse hypotheses, the parser uses a set of linguistically-motivated heuristics to pick the most likely candidate.
 
-For example, here are two (out of the many) candidate parses for a sample query using the parser configuration above.
-
-.. image:: /images/candidate_parses.png
-    :align: center
-
-After generating these hypotheses, the parser uses a set of linguistically-motivated heuristics to pick the most likely candidate. Workbench's default settings for the parser should give you a decent baseline parsing accuracy out-of-the-box. To improve its accuracy further, you can experiment with the parser settings, optimizing them for what makes the best sense for your data. See the next section for more details.
+Workbench's default settings for the parser should give you a decent baseline parsing accuracy out-of-the-box. To improve its accuracy further, you can experiment with the parser settings, optimizing them for what makes the best sense for your data. See the next section for more details.
 
 
 Advanced parser configuration
@@ -130,9 +125,9 @@ Advanced parser configuration
 
 Workbench's advanced parser configuration format gives you a finer-grained control over the parser's behavior. In addition to defining the head-dependent relationships, it allows you to to specify constraints that must be satisfied for a dependent entity to be attached to a compatible head entity. If chosen correctly, these additional constraints can significantly improve the parsing accuracy by helping to eliminate potentially incorrect parse hypotheses.
 
-Similar to the :ref:`simple format <simple_parser_config>`, each key-value pair in the advanced configuration instructs the parser to look for a specific head entity and group it with one or more of the specified dependent entities. The key, just as in the simple format, is a string describing the entity type and optionally, the role type of the head entity. The value, however, is a much richer object, mapping each potential dependent to a per-dependent configuration dictionary.
+Similar to the :ref:`simple format <simple_parser_config>`, each key-value pair in the advanced configuration instructs the parser to look for a specific head entity and group it with one or more of the specified dependent entities. Just as in the simple format, the key is a string describing the entity type and optionally, the role type of the head entity. The value, however, is a much richer object, mapping each potential dependent to a per-dependent configuration dictionary.
 
-The table below enumerates the different settings that can be defined in the per-dependent configuration to specify constraints that each dependent must adhere to.
+The table below enumerates the different settings that can be defined in the per-dependent configuration.
 
 +---------------------+-----------------+------------------------------------------------------------------------------------------------------+
 | Key                 | Value type      | Value                                                                                                |
@@ -191,7 +186,7 @@ Here's an example of an advanced parser configuration from the :ref:`food orderi
        }
    }
 
-It sets up the same head-dependent relationships as the :ref:`simple configuration` in the previous section, but additionally defines some settings for each dependent:
+It sets up the same head-dependent relationships as the :ref:`simple configuration <food_simple_parser_config>` in the previous section, but defines some additional settings for each dependent:
 
   - 'with' should be treated as a linking word between ``option`` and ``dish`` entities.
 
@@ -199,9 +194,16 @@ It sets up the same head-dependent relationships as the :ref:`simple configurati
 
   - An ``option`` can have only one quantity (``sys_number``) associated with it, and the quantity entity must be to its left.
 
-The first setting is motivated by examples like "a burger `with` a side of fries" or "chicken biriyani `with` cucumber raita" where the intervening word "with" indicates a ``dish``-``option`` relationship. The last two settings are due to real-world constraints (a thing can only have one quantifying adjective describing it) and English grammar rules (an adjective generally appears before the noun it describes). These settings provide useful syntactic and semantic cues to help the parser weed out non-sensical parses.
+The first setting is motivated by natural language constructs like "a burger `with` a side of fries" or "chicken biriyani `with` cucumber raita" where the intervening word "with" implies a ``dish``-``option`` relationship. The last two settings are due to real-world constraints (a thing can only have one quantifying adjective describing it) and English grammar rules (an adjective generally appears before the noun it describes). These settings provide useful syntactic and semantic cues to help the parser weed out non-sensical parses.
 
-It is recommended that you fine-tune your parser configuration to best reflect the usage of your app.
+For example, here are three possible candidate parses for a sample food ordering query:
+
+.. image:: /images/candidate_parses.png
+    :align: center
+
+A baseline parser using the :ref:`simple configuration <food_simple_parser_config>` will reject the incorrect third candidate and choose the second hypothesis, which is better, but still not fully correct. A parser configured using the :ref:`per-dependent settings <food_parser_advanced_config>`, on the other hand, will correctly choose the first parse by leveraging its knowledge of the linking word, "with".
+
+Queries like the one above which contain multiple head entities of the same type with many potential dependents are inherently ambiguous. In other words, there is more than one way to generate an entity grouping for such queries that satisfies the specified head-dependent relationships. If you expect your app to deal with queries like this, it's highly recommended that you fine-tune the settings available in the advanced configuration format to optimize your parser's performance.
 
 
 Run the parser
@@ -259,9 +261,9 @@ Here's an example from the :ref:`food ordering <food_ordering_parser>` blueprint
     'text': "I'd like a mujaddara wrap and two chicken kebab from palmyra"
    }
 
-To interpret all the items in the returned dictionary, refer to the chapter on :ref:`Natural Language Processor <run_nlp>`. The entry relevant to the parser is the ``'entities'`` key. Each recognized entity is represented as a dictionary with entity-specific properties like the entity text, the entity type, the role type, and so on. Additionally, for any entity that is detected as a head (parent), the parser adds a 'children' key, whose value is a list of all the dependent (child) entities related to this entity.
+To interpret all the items in the returned dictionary, refer to the chapter on :ref:`Natural Language Processor <run_nlp>`. The entry relevant to the parser is the ``'entities'`` field. Each recognized entity is represented as a dictionary with entity-specific properties like the entity text, the entity type, the role type, and so on. Additionally, for any entity that is detected as a head (parent), the parser adds a 'children' key, whose value is a list of all the dependent (child) entities related to this entity.
 
-E.g., the ``dish`` entity, "chicken kebab", has the quantity (``sys_number``) entity, "two", as its dependent:
+For instance, the entity, "chicken kebab" (``dish``), has the entity "two" (``sys_number``), as its dependent:
 
 .. code:: python
    :emphasize-lines: 4-13
@@ -286,12 +288,16 @@ E.g., the ``dish`` entity, "chicken kebab", has the quantity (``sys_number``) en
      'value': [ ... ]
    }
 
-An entity is not assigned a 'children' property if any of the following scenarios is true:
+The remaining entities in the query, "mujaddara wrap" (``dish``) and "palymra" (``restaurant``), are childless since the parser did not find any dependent entities that are related to them.
 
-  #. The entity type is absent from the parser configuration. The parser simply leaves such entities alone.
+More generally, an entity is not assigned a 'children' property by the parser if any of the following is true:
 
-  #. The entity type is not specified as a potential head in the parser configuration. By definition, the parser doesn't try to find dependents for such entities.
+  #. The entity type is a potential head, according to the configuration, but the parser did not find any compatible dependents in the query that could attach to it.
 
-  #. The entity can be a potential head, but the parser couldn't find any compatible dependents in the query that could attach to this entity.
+  #. The entity type is not specified as a potential head in the configuration. By definition, the parser does not attach any dependents to such entities.
 
+  #. The entity type is absent from the configuration altogether. The parser leaves such entities alone.
 
+An entity, together with its children forms an entity group. The entity groups in the above example are {"mujaddara wrap"}, {"two", "chicken kebab"} and {"palmyra"}. Childless entities are considered to be in a singleton group of their own. 
+
+To better familiarize yourself with the language parser, use the :doc:`food ordering blueprint <../blueprints/food_ordering>` as a sandbox to test out the preconfigured parser and experiment with different configuration settings. Also, refer to the dialogue manager section of the blueprint for examples on how to use the parser output within your :term:`dialogue state handlers <dialogue state handler>`.
