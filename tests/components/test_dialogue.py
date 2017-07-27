@@ -26,18 +26,18 @@ class TestDialogueManager:
     def setup_class(cls):
         """Sets up test by creating a dialogue manager with some simple rules"""
         cls.dm = DialogueManager()
-        cls.dm.add_dialogue_rule('domain', lambda x, y, z: None, domain='domain')
-        cls.dm.add_dialogue_rule('intent', lambda x, y, z: None, intent='intent')
-        cls.dm.add_dialogue_rule('domain_intent', lambda x, y, z: None,
+        cls.dm.add_dialogue_rule('domain', lambda x, y: None, domain='domain')
+        cls.dm.add_dialogue_rule('intent', lambda x, y: None, intent='intent')
+        cls.dm.add_dialogue_rule('domain_intent', lambda x, y: None,
                                  domain='domain', intent='intent')
-        cls.dm.add_dialogue_rule('intent_entity_1', lambda x, y, z: None,
+        cls.dm.add_dialogue_rule('intent_entity_1', lambda x, y: None,
                                  intent='intent', has_entity='entity_1')
-        cls.dm.add_dialogue_rule('intent_entity_2', lambda x, y, z: None,
+        cls.dm.add_dialogue_rule('intent_entity_2', lambda x, y: None,
                                  intent='intent', has_entity='entity_2')
-        cls.dm.add_dialogue_rule('intent_entities', lambda x, y, z: None,
+        cls.dm.add_dialogue_rule('intent_entities', lambda x, y: None,
                                  intent='intent', has_entities=('entity_1', 'entity_2', 'entity_3'))
 
-        cls.dm.add_dialogue_rule('default', lambda x, y, z: None)
+        cls.dm.add_dialogue_rule('default', lambda x, y: None)
 
     def test_default(self):
         """Default dialogue state when no rules match"""

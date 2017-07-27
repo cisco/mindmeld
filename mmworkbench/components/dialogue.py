@@ -217,13 +217,14 @@ class DialogueManager(object):
             handler = self._default_handler
         else:
             handler = self.handler_map[dialogue_state]
-        slots = {}  # TODO: where should slots come from??
+        # TODO: prepopulate slots
+        slots = {}
         responder = DialogueResponder(slots)
-        handler(context, slots, responder)
+        handler(context, responder)
         return {'dialogue_state': dialogue_state, 'client_actions': responder.client_actions}
 
     @staticmethod
-    def _default_handler(context, slots, responder):
+    def _default_handler(context, responder):
         # TODO: implement default handler
         pass
 
