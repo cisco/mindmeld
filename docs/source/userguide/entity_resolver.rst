@@ -83,7 +83,7 @@ The most important component of developing a production quality entity resolver 
 
 5. Don’t worry about generating exhaustive lists of possible misspellings or pluralization, since the resolver will handle those cases.
 
-Collecting or generating sort factors is largely app specific. Use what makes the most sense for your use case. In most cases, these values are part of an existing dataset. For example, for the food ordering use case it could be something like the rating of a restaurant, the numer of reviews for a restaurant, or the proximity of the restaurant to some location. All of these values can be scraped from a publically available dataset such as Yelp, Amazon Restaurants, or Grub Hub.
+Collecting or generating sort factors is largely app specific. Use what makes the most sense for your use case. In most cases, these values are part of an existing dataset. For example, for the food ordering use case it could be something like the rating of a restaurant, the number of reviews for a restaurant, or the proximity of the restaurant to some location. Often times the sort factor is a value that can be scraped from a publically available dataset.
 
 The metric you decide to use as a sort factor will be scaled differently for different apps. For example, a restaurant rating will be between 1 and 5, but the number of song listens may be between 1 and over a hundred million. If you notice that the sort value is outweighting good text relevance matches for your use case, you may want to scale the sort factor to a lower max value. On the other hand, you can slightly boost the weight of the sort factor in ranking by scaling to a higher max value.
 
@@ -114,7 +114,7 @@ It is highly recommended that you install Elasticsearch to leverage Workbench's 
 Run the Entity Resolver
 -----------------------
 
-Once all of the Entity Mapping files are generated, you can train the resolver as follows.
+Once all of the Entity Mapping files are generated, it will be trained and used as part of the NLP pipeline. Using :meth:`nlp.build()` will fit the resolver and :meth:`nlp.process()` will include the resolved entities in the result. To try out the resolver as a stand alone component, you can train it as shown below.
 
 .. code-block:: python
 
