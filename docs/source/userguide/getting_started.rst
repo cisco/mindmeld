@@ -21,12 +21,12 @@ If you are on a Mac OS machine, it is recommended that you install `homebrew <ht
 
 Run ``brew --version`` to verify that homebrew is installed.
 
-This is not a requirement, strictly speaking, but if your system cannot run homebrew you will need to find alternatives to some instructions in this document.
+This is not a requirement, but if your system cannot run homebrew you will need to find alternatives to some instructions in this document.
 
 Pyenv and Virtualenv
 ^^^^^^^^^^^^^^^^^^^^
 
-Is strongly recommended that you install Workbench in an isolated environment. This way, you can work
+It is strongly recommended that you install Workbench in an isolated environment. This way, you can work
 on different projects without having conflicting library versions, and keep Workbench separate from your other work.
 
 One solution is to use `virtualenv with pyenv <https://github.com/pyenv/pyenv-virtualenv>`_.
@@ -35,7 +35,7 @@ Run ``pyenv --version`` to verify that Pyenv is installed.
 
 Run ``virtualenv --version`` to verify that Virtualenv is installed.
 
-This is not a requirement, strictly speaking, but if your system cannot run pyenv you will need to find alternatives to some instructions in this document.
+Again, this is not a requirement, but if your system cannot run pyenv you will need to find alternatives to some instructions in this document.
 
 Python
 ^^^^^^
@@ -87,20 +87,15 @@ full-text search and analytics engine. store that handles large volumes of data 
 
 For the best developer experience with smaller applications, Elasticsearch should be installed locally.
 
-  - On Mac OS systems with `homebrew <https://brew.sh/>`_, run the following commands:
-
-.. code-block:: console
-
-    $ brew update
-    $ brew install elasticsearch
+  - On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew install elasticsearch``
 
 For other systems, or for more information on configuring Elasticsearch, go
 `here <https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html>`_.
 
 After Elasticsearch has been configured simply run ``elasticsearch`` to start the process.
 
-Prepare your system for Workbench
----------------------------------
+Prepare your system
+---------------------
 
 The configuration steps described in this section are all either required or strongly recommended.
 
@@ -111,6 +106,7 @@ To prepare to install Workbench in an isolated environment using pyenv and virtu
 
 .. code-block:: console
 
+  # this is the parent of your Workbench project folder. It can be anywhere you want.
   mkdir workbench-development
   cd $_
 
@@ -158,7 +154,7 @@ Configure Workbench
 ^^^^^^^^^^^^^^^^^^^
 
 Workbench reads your credentials from its configuration file, located at
-``~/.mmworkbench/config``, when performing actions that require authentication, such as such as accessing
+``~/.mmworkbench/config``, when performing actions that require authentication, such as accessing
 :doc:`blueprints <../blueprints/overview>`.
 
 Create the ``~/.mmworkbench`` folder.
@@ -212,10 +208,10 @@ the Python shell is where all the action is at.
 Command Line
 ^^^^^^^^^^^^
 
-You can use ``blueprint` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
+You can use the ``blueprint`` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
 already built example apps as a baseline for your project. 
 
-You can use the `template` blueprint to setup a blank project:
+The `template` blueprint sets up the scaffolding for a blank project:
 
 .. code-block:: console
 
@@ -234,14 +230,14 @@ To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run 
  ...
  You:
 
-The *converse* command loads the machine learnings models and starts an interactive session with the "You:" prompt.
+The ``converse`` command loads the machine learnings models and starts an interactive session with the "You:" prompt.
 Here you can enter your own input and get an immediate response back. Try "hi", for example, and see what you get.
 
 
 Python Shell
 ^^^^^^^^^^^^
 
-You can use the `template` blueprint to setup a blank project:
+The `template` blueprint sets up the scaffolding for a blank project:
 
 .. code-block:: python
 
@@ -310,11 +306,6 @@ The commands available are:
 Upgrade Workbench
 -----------------
 
-To upgrade to the latest version of Workbench, you can run:
-
-.. code-block:: console
-
-  $ pip install mmworkbench --upgrade
+To upgrade to the latest version of Workbench, run ``pip install mmworkbench --upgrade``
 
 Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
-
