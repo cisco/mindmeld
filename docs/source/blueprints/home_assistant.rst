@@ -32,37 +32,9 @@ In this blueprint, the application provides a conversational interface for users
 
 The home assistant blueprint is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the Kwik-E-Mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...
 
-Below is the full list of intents for every domain:
+The full list of intents for all domains is illustrated below.
 
-   - Greeting
-       - greet
-       - exit
-   - Smart Home
-       - check_thermostat
-       - close_door
-       - lock_door
-       - open_door
-       - set_thermostat
-       - specify_location
-       - turn_appliance_on
-       - turn_appliance_off
-       - turn_down_thermostat
-       - turn_lights_off
-       - turn_lights_on
-       - turn_off_thermostat
-       - turn_on_thermostat
-       - turn_up_thermostat
-       - unlock_door
-   - Time and dates
-       - change_alarm
-       - check_alarm
-       - set_alarm
-       - start_timer
-       - stop_timer
-   - Weather
-       - check_weather
-   - Unknown
-       - unknown
+.. image:: /images/hierarchy_home_assistant.png
 
 There are two types of entities: :doc:`Custom Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Custom entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are ``sys_temperature``, ``sys_time``, ``sys_interval``, etc.
 
