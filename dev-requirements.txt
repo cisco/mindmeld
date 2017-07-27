@@ -16,6 +16,6 @@ jupyter_client>=4.4.0
 Sphinx==1.6.3
 nbsphinx==0.2.11
 sphinx-autobuild==0.6.0
-sphinx_rtd_theme==0.1.10mm4
+sphinx_rtd_theme==0.1.10mm5
 pandoc==1.0.0b2
 mock==2.0.0
