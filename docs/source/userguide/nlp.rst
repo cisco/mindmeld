@@ -350,6 +350,8 @@ Configuring rest of the pipeline
 Since neither the entity resolver nor the language parser are supervised classifiers, they are configured differently from the rest of the NLP pipeline. See `Working with the Entity Resolver <entity_resolver>`_ and `Working with the Language Parser <parser>`_, respectively, to learn how to configure these components.
 
 
+.. _run_nlp:
+
 Run the NLP pipeline
 --------------------
 

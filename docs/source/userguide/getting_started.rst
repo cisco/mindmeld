@@ -1,63 +1,154 @@
 Getting Started
 ===============
 
-This will get you started with installing MindMeld Workbench on your personal machine
-and setting up your first Workbench project.
+These instructions install MindMeld Workbench on your personal machine and set up your first Workbench project.
 
 Pre-requisites
 --------------
 
-This release of MindMeld Workbench is targeted towards seasoned Python developers with machine 
-learning knowhow and experience with one or more popular machine learning frameworks and libraries.
+For this release of MindMeld Workbench, you should
 
-The username and password used to access the MindMeld Learning Center will be required in this process.
+ - be a seasoned Python developer with machine learning (ML) knowhow and experience with one or more popular ML frameworks or libraries
 
-Install Software
-----------------
+ - have a username and password for the MindMeld Learning Center
+
+The rest of this section describes how to install software pre-requisites.
+
+Homebrew on Mac OS
+^^^^^^^^^^^^^^^^^^
+
+If you are on a Mac OS machine, it is recommended that you install `homebrew <https://brew.sh/>`_, a package manager that some of these instructions use.
+
+Run ``brew --version`` to verify that homebrew is installed.
+
+This is not a requirement, but if your system cannot run homebrew you will need to find alternatives to some instructions in this document.
+
+Pyenv and Virtualenv
+^^^^^^^^^^^^^^^^^^^^
+
+It is strongly recommended that you install Workbench in an isolated environment. This way, you can work
+on different projects without having conflicting library versions, and keep Workbench separate from your other work.
+
+One solution is to use `virtualenv with pyenv <https://github.com/pyenv/pyenv-virtualenv>`_.
+
+Run ``pyenv --version`` to verify that Pyenv is installed.
+
+Run ``virtualenv --version`` to verify that Virtualenv is installed.
+
+Again, this is not a requirement, but if your system cannot run pyenv you will need to find alternatives to some instructions in this document.
 
 Python
 ^^^^^^
 
-Workbench is a Python-based machine learning library. To use Workbench, you will need to have
-Python installed. If Python is not already installed on your system, you can get it at
-`python.org <https://www.python.org/>`_ or use `pyenv <https://github.com/pyenv/pyenv>`_ to
-manage multiple versions of Python. For workbench, Python 3.4 and newer are actively supported.
-The latest version of Python 3 is recommended. Python 2.7+ should work fine too, but it is
-deprecated.
+Since Workbench is a Python-based machine learning library, you need Python on your system.
 
+Run ``python --version`` to verify that Python is installed.
 
-Configure Pip
-"""""""""""""
+In Workbench,
 
-The simplest way to install workbench is using pip, Python’s packaging system which is included by
-default with the Python binary installers (since Python 2.7.9). You can check to see if pip is
-installed by typing the following command:
+ - Python 3.4 and newer are actively supported
+ - The latest version of Python 3 is recommended
+ - Python 2.7+ should work, but is deprecated
+
+You can
+
+ - use `pyenv <https://github.com/pyenv/pyenv>`_ to manage multiple versions of Python
+ - obtain Python at `python.org <https://www.python.org/>`_  if it is not already installed
+
+Java 8
+^^^^^^^
+
+Workbench requires Java 8 or newer.
+
+Run ``java -version`` to verify that Java 8 or newer is installed. 
+
+If the command fails, or your Java version begins with 1.7, install Java 8.
+
+ - On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew cask install java``
+
+Visit `java.com <https://www.java.com/inc/BrowserRedirect1.jsp?locale=en>`_ for detailed instructions.
+
+Elasticsearch
+^^^^^^^^^^^^^
+
+Workbench requires Elasticsearch 5.0 or newer. Version 5.5.x is recommended.
+
+`Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ is a highly scalable open-source
+full-text search and analytics engine. It can be installed locally or you can use a remote instance if you have access to one.
+
+  - On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew install elasticsearch``
+
+For other systems, or for more information on configuring Elasticsearch, go
+`here <https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html>`_.
+
+After Elasticsearch has been configured simply run ``elasticsearch`` to start the process.
+
+Prepare your system
+---------------------
+
+The configuration steps described in this section are all either required or strongly recommended.
+
+Configure a Virtual Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To prepare to install Workbench in an isolated environment using pyenv and virtualenv, run these or similar commands:
 
 .. code-block:: console
 
-    $ pip --version
-    pip 8.1.2 from [...]/lib/python3.5/site-packages (python 3.5)
+  # this is the parent of your Workbench project folder. It can be anywhere you want.
+  mkdir workbench-development
+  cd $_
 
-You should make sure you have a recent version of pip installed, at the very least >1.4 to support
-binary module installation (a.k.a. wheels). To upgrade the pip module, type:
+  # install Python 3.6.1
+  pyenv install 3.6.1
 
-.. code-block:: console
+  # create a new virtual environment using Python 3.6.1
+  pyenv virtualenv 3.6.1 workbench
 
-    $ pip install --upgrade pip
-    Collecting pip
-    [...]
-    Successfully installed pip-9.0.1
+  # automatically activate the environment upon entering this directory
+  pyenv local workbench
 
-MindMeld Workbench is not publicly available, and can only be installed from MindMeld's private
-Python Package Index (PyPI). Once you have confirmed pip is installed, you need to configure it
-so that it will work with the MindMeld PyPI. On macOS the pip config file is located at
-``~/.pip/pip.conf``. Create the folder and the file if it does not already exist. You can read 
-more about configuring pip on your platform, including where config files are located in the
-`pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
+Configure Pip and Workbench
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The MindMeld PyPI is hosted at https://mindmeld.com/pypi/. In order to access it you will
-need to authenticate using your username and password. Add the following lines to your pip
-config file, substituting your username and password where appropriate.
+Workbench installation relies on ``pip``, a Python packaging system included by default with the Python binary installers.
+
+Run ``pip --version`` to verify that pip is installed.
+
+ - You should have pip version 8 or 9
+
+ - If you need upgrade pip module, run ``pip install --upgrade pip``
+
+
+Automatic Configuration
+"""""""""""""""""""""""
+
+You can configure pip and workbench easily by following these steps.
+
+#. Modify the USERNAME to your actual CEC username and run in a command shell ``export USERNAME=<Your CEC Username>``
+#. Download the setup script - you will be prompted for your MindMeld Learning Center password: ``curl -s -u $USERNAME https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh``
+#. Run the setup script - you will be prompted for your password again: ``bash mmworkbench_init.sh``
+
+Proceed to :ref:`installing Workbench <getting_started_install_workbench>`.
+
+
+Manual Configuration
+""""""""""""""""""""
+
+Pip
+'''
+
+The next two steps are for Mac OS. If you need information about configuring pip on a different OS, see the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
+
+Run ``ls -l ~/.pip`` to verify that there is a ``~/.pip`` folder on your system.
+
+ - Create the folder if it does not exist
+
+Run ``ls -l ~/.pip/pip.conf`` to verify that there is a ``~/.pip/pip.conf`` file on your system.
+
+ - Create the file if it does not exist
+
+Add the following lines to your ``pip.conf`` file, substituting your username and password.
 
 .. code-block:: text
 
@@ -65,75 +156,18 @@ config file, substituting your username and password where appropriate.
   extra-index-url = https://{YOUR_USERNAME}:{YOUR_PASSWORD}@mindmeld.com/pypi/
   trusted-host = mindmeld.com
 
+These configuration changes enable pip to work with the MindMeld private Python Package Index (PyPI). MindMeld Workbench is not publicly available, and can only be installed from the MindMeld PyPI, which is hosted at https://mindmeld.com/pypi/.
 
-Using a Virtual Environment
-"""""""""""""""""""""""""""
+Workbench
+''''''''''
 
-If you would like to work in an isolated environment (which is strongly recommended so you can work
-on different projects without having conflicting library versions), you can use `virtualenv with pyenv
-<https://github.com/pyenv/pyenv-virtualenv>`.
+Workbench reads your credentials from its configuration file, located at
+``~/.mmworkbench/config``, when performing actions that require authentication, such as accessing
+:doc:`blueprints <../blueprints/overview>`.
 
-Java 8
-^^^^^^
+Create the ``~/.mmworkbench`` folder.
 
-MindMeld Workbench has a numerical parsing component that requires Java 8 or newer. To check whether
-Java 8 is already installed on your system, use the following command:
-
-.. code-block:: console
-
-    $ java -version
-    java version "1.8.0_131"
-    Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
-    Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
-
-If the command fails, or your java version begins with 1.7, you need to install Java 8. On
-macOS systems with `homebrew <https://brew.sh/>`_ installed, you can run:
-
-.. code-block:: console
-
-   $ brew cask install java
-
-
-Visit `java.com <https://www.java.com/inc/BrowserRedirect1.jsp?locale=en>`_ for detailed instructions.
-
-Elasticsearch
-^^^^^^^^^^^^^
-
-`Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ is a highly scalable open-source
-full-text search and analytics engine. It allows you to store, search, and analyze big volumes of
-data quickly and in near real time. Workbench leverages Elasticsearch for information retrieval. 
-Generally, the latest version of Elasticsearch is recommended, but 5.0 or newer is required.
-
-For the best developer experience with smaller applications, Elasticsearch should be installed locally. On
-macOS systems with `homebrew <https://brew.sh/>`_ installed, the simplest way to install
-Elasticsearch is with the following set of commands.
-
-.. code-block:: console
-
-    $ brew update
-    $ brew install elasticsearch
-
-For other systems, or for more information on configuring Elasticsearch, go
-`here <https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html>`_.
-
-After Elasticsearch has been configured simply run ``elasticsearch`` to start the process.
-
-
-Setup Workbench
----------------
-
-Now, we are ready to install Workbench.
-
-
-Configure Workbench
-^^^^^^^^^^^^^^^^^^^
-
-Certain MindMeld Workbench capabilities, such as accessing
-:doc:`blueprints <../blueprints/overview>` require authenticating using your MindMeld username and
-password. Workbench will read your credentials from its configuration file, located at
-``~/.mmworkbench/config``. Go ahead and create the folder and file if they don't already exist. 
-Add the following lines to the Workbench configuration file, substituting your username and password 
-where appropriate.
+Create the ``~/.mmworkbench/config`` file and add the following lines, substituting your username and password:
 
 .. code-block:: text
 
@@ -143,29 +177,10 @@ where appropriate.
   password = {YOUR_PASSWORD}
 
 
-Configure your Virtual Environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You may want to install Workbench in an isolated environment so you can keep it separate from your other work.
-Here is one way of doing this using pyenv and virtualenv:
-
-.. code-block:: console
-
-  mkdir workbench-development
-  cd $_
-
-  # install Python 3.6.1
-  pyenv install 3.6.1
-
-  # create a new virtual environment using Python 3.6.1 
-  pyenv virtualenv 3.6.1 workbench
-
-  # automatically activate the environment upon entering this directory
-  pyenv local workbench
-
+.. _getting_started_install_workbench:
 
 Install Workbench
-^^^^^^^^^^^^^^^^^
+-----------------
 
 Now that your environment is set up, you can install MindMeld Workbench just as you would any other
 Python package. This may take a few minutes.
@@ -189,21 +204,29 @@ Start the numerical parser with this command:
 
   $ mmworkbench num-parse --start
 
+The numerical parser is the component that relies on Java 8.
 
 Begin New Project
 -----------------
 
-With the setup out of the way, you are now ready to get your feet wet. MindMeld Workbench is designed so you can 
-keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in 
-your command-line shell using the ``mmworkbench`` command. But to really take advantage of the power of Workbench, 
+With the setup out of the way, you are now ready to get your feet wet. MindMeld Workbench is designed so you can
+keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in
+your command-line shell using the ``mmworkbench`` command. But to really take advantage of the power of Workbench,
 the Python shell is where all the action is at.
 
 
 Command Line
 ^^^^^^^^^^^^
 
-You can use ``blueprint`` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
-already built example apps as a baseline for your project.
+You can use the ``blueprint`` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
+already built example apps as a baseline for your project. 
+
+The `template` blueprint sets up the scaffolding for a blank project:
+
+.. code-block:: console
+
+  $ mmworkbench blueprint template myapp
+
 
 To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run these commands on the command line:
 
@@ -215,21 +238,30 @@ To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run 
   $ python app.py converse
  Loading intent classifier: domain='ordering'
  ...
- You:    
+ You:
 
-The *converse* command loads the machine learnings models and starts an interactive session with the "You:" prompt. 
+The ``converse`` command loads the machine learnings models and starts an interactive session with the "You:" prompt.
 Here you can enter your own input and get an immediate response back. Try "hi", for example, and see what you get.
 
 
 Python Shell
 ^^^^^^^^^^^^
 
+The `template` blueprint sets up the scaffolding for a blank project:
+
+.. code-block:: python
+
+    import mmworkbench as wb
+    wb.configure_logs()    
+    wb.blueprint('template', 'my_app')
+
+
 To try out the :doc:`Home Assistant blueprint<../blueprints/home_assistant>`, run these commands in your Python shell:
 
 .. code-block:: python
- 
+
     import mmworkbench as wb
-    wb.configure_logs()    
+    wb.configure_logs()
     blueprint = 'home_assistant'
     wb.blueprint(blueprint)
 
@@ -259,7 +291,7 @@ Builtin help is available with the standard `-h` flag.
 mmworkbench
 ^^^^^^^^^^^
 
-The command-line interface (CLI) for MindMeld Workbench can be accessed with the `mmworkbench` command. 
+The command-line interface (CLI) for MindMeld Workbench can be accessed with the `mmworkbench` command.
 This is most suitable for use in an app-agnostic context.
 
 The commands available are:
@@ -284,11 +316,6 @@ The commands available are:
 Upgrade Workbench
 -----------------
 
-To upgrade to the latest version of Workbench, you can run:
-
-.. code-block:: console
-
-  $ pip install mmworkbench --upgrade
+To upgrade to the latest version of Workbench, run ``pip install mmworkbench --upgrade``
 
 Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
-

@@ -174,42 +174,71 @@ For a more realistic implementation of ``build_order`` that deals with varied us
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The knowledge base for our food ordering app leverages publicly available information about San Francisco restaurants, scraped from the `Amazon Restaurants <https://primenow.amazon.com/restaurants>`_ website. The knowledge base comprises two indexes in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
+The knowledge base for our food ordering app leverages publicly available information about San Francisco restaurants from `Amazon Restaurants <https://primenow.amazon.com/restaurants>`_. The knowledge base comprises two indexes in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
 
    - ``restaurants`` — information about restaurant locations
    - ``menu_items`` — information about dishes on different restaurants' menus
 
-For example, here's the knowledge base entry in the ``restaurants`` index for "Thoughts Style Cuisine Showroom," a Thai restaurant in San Francisco:
+For example, here's the knowledge base entry in the ``restaurants`` index for "Basa Seafood Express," a seafood restaurant in San Francisco:
 
 .. code:: javascript
 
     {
-        'categories': ['Drinks', 'Watery', 'Beginnings', 'Salads', 'Fried Rice', 'Significant', 'Noodles', 'Supper Sizzles', 'Sugary'],
-        'cuisine_types': ['Thai'],
-        'id': 'B01DUUMTLY',
-        'image_url': 'https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/ThoughtsStyleCuisineShowroom/logo_232x174._CB295406843_SX600_QL70_.png',
-        'menus': [{'id': '4b999943-a3d6-4af1-b7ab-fbd56094c40d',
-                   'option_groups': [{'id': 'Alacarte2',
-                     'max_selected': 1,
-                     'min_selected': 0,
-                     'name': 'Make It A La Carte',
-                     'options': [{'description': None,
-                       'id': 'B01ERURPOM',
-                       'name': 'Make It A La Carte',
-                       'price': 4.0}]},
-                    {'id': 'Alacarte',
-                     'max_selected': 1,
-                     'min_selected': 0,
-                     'name': 'Make It A La Carte',
-                     'options': [{'description': None,
-                       'id': 'B01DWWSZN6',
-                       'name': 'Make It A La Carte',
-                       'price': 2.0}]}],
-                   'size_groups': []}],
-        'name': 'Thoughts Style Cuisine Showroom',
-        'num_reviews': None,
-        'price_range': 2.0,
-        'rating': None
+        "cuisine_types": ["Seafood", "Sushi"], 
+        "rating": 3.2, 
+        "name": "Basa Seafood Express", 
+        "num_reviews": 8, 
+        "menus": [
+            {
+                "option_groups": [
+                    {
+                        "max_selected": 1, 
+                        "options": [
+                            {
+                                "price": 0.0, 
+                                "description": null, 
+                                "name": "Coke", 
+                                "id": "B01N1ME52H"
+                            }, 
+                            {
+                                "price": 0.0, 
+                                "description": null, 
+                                "name": "Water", 
+                                "id": "B01MTUONJU"
+                            }
+                        ], 
+                        "min_selected": 1, 
+                        "id": "Coke or Water", 
+                        "name": "Choose One"
+                    }
+                ], 
+                "id": "78eb0100-029d-4efc-8b8c-77f97dc875b5", 
+                "size_groups": [
+                    {
+                        "sizes": [
+                            {
+                                "alt_name": "Small", 
+                                "name": "Small"
+                            }, 
+                            {
+                                "alt_name": "Medium", 
+                                "name": "Medium"
+                            }
+                        ], 
+                        "description": null, 
+                        "name": "Choose Size", 
+                        "id": "Size"
+                    }
+                ]
+            }
+        ], 
+        "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/BasaSeafoodExpress/logo_232x174._CB523176793_SX600_QL70_.png", 
+        "price_range": 1.0, 
+        "id": "B01N97KQNJ", 
+        "categories": ["Hawaiian Style Poke (HP)", "Ceviche (C)", "Nigiri Sushi (2 Pcs)", "Popular Dishes", 
+            "Makimono-Sushi Rolls (6 Pcs)", "Clam Chowder (CC)", "Side Order (SO)", "Sashimi (5 Pcs)", 
+            "Fish & Chips (FC)", "Salads (SL)", "Rice Bowl (RB)", "Sandwiches (SW)", "Special Rolls", 
+            "Special Combo (PC)"]
     }
 
 Here's a knowledge base entry in the ``menu_items`` index for a dish from the above restaurant.
@@ -217,18 +246,18 @@ Here's a knowledge base entry in the ``menu_items`` index for a dish from the ab
 .. code:: javascript
 
     {
-        'category': 'Fried Rice',
-        'description': None,
-        'id': 'B01DWWTMGK',
-        'img_url': None,
-        'menu_id': '4b999943-a3d6-4af1-b7ab-fbd56094c40d',
-        'name': 'Basil Fried Rice with Crispy Pork Shoulder',
-        'option_groups': [],
-        'popular': False,
-        'price': 13.0,
-        'restaurant_id': 'B01DUUMTLY',
-        'size_group': None,
-        'size_prices': []}
+        "category": "Nigiri Sushi (2 Pcs)", 
+        "menu_id": "78eb0100-029d-4efc-8b8c-77f97dc875b5", 
+        "description": "Nigiri Sushi", 
+        "price": 4.5, 
+        "option_groups": [], 
+        "restaurant_id": "B01N97KQNJ", 
+        "size_prices": [], 
+        "size_group": null, 
+        "popular": false, 
+        "img_url": null, 
+        "id": "B01MTUOW2R", 
+        "name": "Masago (Capelin Roe)"
     }
 
 Assuming that you have Elasticsearch installed, running the :func:`blueprint()` command described above should build the knowledge base for the food ordering app by creating the two indexes and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the :doc:`Question Answerer <../userguide/kb>` to query the indexes.
@@ -240,24 +269,43 @@ For example:
    >>> from mmworkbench.components.question_answerer import QuestionAnswerer
    >>> qa = QuestionAnswerer(app_path='food_ordering')
    >>> qa.get(index='menu_items')[0]
-   {
-     'category': 'Signature Pizza',
-     'description': 'Fresh mushroom, red onion, artichoke heart, green pepper, vine tomato, broccoli, fresh basil, tomato sauce, mozzarella & sprinkle of cheddar',
-     'id': 'B06XB2DFDV',
-     'img_url': None,
-     'menu_id': 'f5f5e585-d56b-45de-b592-c453eaf1f082',
-     'name': 'Drag It Thru The Garden',
-     'option_groups': ['crust', 'signature toppings2'],
-     'popular': False,
-     'price': 10.95,
-     'restaurant_id': 'B06WRPJ21G',
-     'size_group': 'Size',
-     'size_prices': [{'id': 'B06X9XWPTV', 'name': 'Indee-8', 'price': 10.95},
-      {'id': 'B06XB3FXNZ', 'name': 'Medium-12', 'price': 21.95},
-      {'id': 'B06X9ZX74N', 'name': 'Large-14', 'price': 25.95},
-      {'id': 'B06XB12GH5', 'name': 'Xlarge-16', 'price': 29.95},
-      {'id': 'B06X9XZPJ1', 'name': 'Huge-18', 'price': 33.95}]
-   }
+    {
+       "size_group": "pizzasize",
+       "menu_id": "57572a43-f9fc-4a1c-96fe-788d544b1f2d",
+       "restaurant_id": "B01DEEGQBK",
+       "size_prices": [
+          {
+             "name": "12\" Small",
+             "price": 13.99,
+             "id": "B01N9YUFMX"
+          },
+          {
+             "name": "14\" Medium",
+             "price": 16.99,
+             "id": "B01MRDF6V1"
+          },
+          {
+             "name": "16\" Large",
+             "price": 17.99,
+             "id": "B01MUI0ZGE"
+          },
+          {
+             "name": "18\" X-Large",
+             "price": 19.99,
+             "id": "B01N7ZK0ZR"
+          }
+       ],
+       "option_groups": [
+          "pizzawhole"
+       ],
+       "img_url": null,
+       "description": null,
+       "id": "B01NB08SGM",
+       "popular": false,
+       "name": "Cheese Pizza",
+       "category": "Pizzas",
+       "price": 13.99
+    }
 
 .. admonition:: Exercise
 
@@ -520,12 +568,15 @@ The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly 
 
 .. code:: python
 
-   >>> restaurants = app.question_answerer.get(index='restaurants')[0:3]
+   >>> from mmworkbench.components.question_answerer import QuestionAnswerer
+   >>> qa = QuestionAnswerer(app_path=app_path)
+   >>> restaurants = qa.get(index='restaurants')[0:3]
    >>> [restaurant['name'] for restaurant in restaurants]
+
    [
-    'Curry Up Now',
-    "Ganim's Deli",
-    'Firetrail Pizza'
+    "Firetrail Pizza",
+    "Grandma's Deli & Cafe",
+    "The Salad Place"
    ]
 
 The ``build_order`` handler retrieves details about the user's restaurant and dish selections from the knowledge base, and uses the information to
@@ -558,8 +609,8 @@ For instance:
 
    >>> from mmworkbench.components.dialogue import Conversation
    >>> conv = Conversation(nlp=nlp, app_path='food_ordering')
-   >>> conv.say("Get me a saag paneer and garlic naan from urban curry")
-   ['Sure, I got Saag Paneer, Garlic Naan from Urban Curry for a total price of $14.70. Would you like to place the order?']
+   >>> conv.say("Get me a pad thai and pinapple fried rice from thep phanom thai")
+   ['Sure, I have 1 order of 62. Pad Thai and 1 order of 66. Pineapple Fried Rice from Thep Phanom Thai Restaurant for a total price of $34.00. Would you like to place the order?']
 
 The :meth:`say()` method packages the input text in a user request object and passes it to the Workbench Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested dishes from a restaurant, in a single query. The app responded, as expected, with a preview of the order details and a confirmation prompt.
 

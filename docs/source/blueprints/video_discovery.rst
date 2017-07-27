@@ -76,7 +76,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 This should create a Workbench project folder called ``video_discovery`` in your current directory with the following structure:
 
-.. image:: /images/food_ordering_directory.png
+.. image:: /images/directory_video_discovery.png
     :width: 250px
     :align: center
 
@@ -111,7 +111,7 @@ To support the functionality we envision, our app needs one dialogue state for e
 | | ``insult``     | | ``handle_insult``      | | Handle the insult and prompt the user         | 
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
-| | others         | | ``default``            | | Prompt a user who has gone off-topic          | 
+| | other intents  | | ``default``            | | Prompt a user who has gone off-topic          | 
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
 
@@ -303,6 +303,7 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. code:: python
 
+   >>> from mmworkbench import configure_logs; configure_logs()
    >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
    >>> nlp = NaturalLanguageProcessor(app_path='video_discovery')
    >>> nlp.build()
@@ -441,6 +442,8 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
    ...            }
    >>> ic.fit(features=features)
    Fitting intent classifier: domain='ordering'
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
+   Best accuracy: 97.34%, params: {'fit_intercept': False, 'class_weight': {0: 0.40103456116416553, 1: 4.4708491761723703, 2: 0.98561050572785691, 3: 6.916666666666667, 4: 3.7209915611814348, 5: 0.53912578327984106}, 'C': 10000}
 
 You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various Workbench classifiers.
 
@@ -451,15 +454,18 @@ You can use similar options to inspect and experiment with the Entity Recognizer
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Our video discovery application does not use entity groups. This means we do not need to train the Workbench :doc:`Language Parser <../userguide/parser>` for this purpose.
+Our video discovery application does not have complex relationships between entities. For example, for the annotated query ``content with {Tom Hanks|cast}``, there is no entity that describes the ``cast`` entity.  As queries become more complex, for example, ``show me a {Tom Hanks|cast} {movie|type} and a {Jim Parsons|cast} {TV show|type}``, we would need to relate each ``cast`` entity to its corresponding ``type`` entity.
+
+Since we do not have entity groups in the video discovery application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships might form. Please refer to :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
 
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top ten entries in our ``videos`` index and present them as suggestions to the user. For that, we sort the videos by popularity when using the :doc:`Question Answerer <../userguide/kb>`:
 
-.. code::python
-	results = app.question_answerer.get(index=KB_INDEX_NAME,
+.. code:: python
+
+	 results = app.question_answerer.get(index=KB_INDEX_NAME,
                                             _sort='popularity', _sort_type='desc')
 
 In general the ``show_content`` handler retrieves documents from the knowledge base in different ways, depending on the entities found in the user's queries.
