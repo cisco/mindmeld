@@ -300,4 +300,4 @@ More generally, an entity is not assigned a 'children' property by the parser if
 
 An entity, together with its children forms an entity group. The entity groups in the above example are {"mujaddara wrap"}, {"two", "chicken kebab"} and {"palmyra"}. Childless entities are considered to be in a singleton group of their own. 
 
-To better familiarize yourself with the language parser, use the :doc:`food ordering blueprint <../blueprints/food_ordering>` as a sandbox to test out the preconfigured parser and experiment with different configuration settings. Also, refer to the dialogue manager section of the blueprint for examples on how to use the parser output within your :term:`dialogue state handlers <dialogue state handler>`.
+To better familiarize yourself with the language parser, use the :doc:`food ordering blueprint <../blueprints/food_ordering>` as a sandbox to test out the preconfigured parser and experiment with different configuration settings. Also, refer to the blueprint's application file (``app.py``) for examples on how to use the parser output within your :term:`dialogue state handlers <dialogue state handler>`.
