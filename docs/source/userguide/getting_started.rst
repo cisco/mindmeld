@@ -23,20 +23,6 @@ Run ``brew --version`` to verify that homebrew is installed.
 
 This is not a requirement, but if your system cannot run homebrew you will need to find alternatives to some instructions in this document.
 
-Pyenv and Virtualenv
-^^^^^^^^^^^^^^^^^^^^
-
-It is strongly recommended that you install Workbench in an isolated environment. This way, you can work
-on different projects without having conflicting library versions, and keep Workbench separate from your other work.
-
-One solution is to use `virtualenv with pyenv <https://github.com/pyenv/pyenv-virtualenv>`_.
-
-Run ``pyenv --version`` to verify that Pyenv is installed.
-
-Run ``virtualenv --version`` to verify that Virtualenv is installed.
-
-Again, this is not a requirement, but if your system cannot run pyenv you will need to find alternatives to some instructions in this document.
-
 Python
 ^^^^^^
 
@@ -54,6 +40,20 @@ You can
 
  - use `pyenv <https://github.com/pyenv/pyenv>`_ to manage multiple versions of Python
  - obtain Python at `python.org <https://www.python.org/>`_  if it is not already installed
+
+Pyenv and Virtualenv
+^^^^^^^^^^^^^^^^^^^^
+
+It is strongly recommended that you install Workbench in an isolated environment. This way, you can work
+on different projects without having conflicting library versions, and keep Workbench separate from your other work.
+
+One solution is to use `virtualenv with pyenv <https://github.com/pyenv/pyenv-virtualenv>`_.
+
+Run ``pyenv --version`` to verify that Pyenv is installed.
+
+Run ``virtualenv --version`` to verify that Virtualenv is installed.
+
+Again, this is not a requirement, but if your system cannot run pyenv you will need to find alternatives to some instructions in this document.
 
 Java 8
 ^^^^^^^
