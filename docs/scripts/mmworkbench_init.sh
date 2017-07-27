@@ -2,7 +2,7 @@
 
 set -e
 
-read -p "Enter mindmeld.com username: " USERNAME
+[ -z "$USERNAME" ] && read -p "Enter mindmeld.com username: " USERNAME
 echo -n "Enter mindmeld.com password: " 
 read -s PASSWORD
 echo
@@ -39,4 +39,3 @@ trusted-host = mindmeld.com
 EOL
 
 echo ~/.pip/pip.conf created.
-
