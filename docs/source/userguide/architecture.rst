@@ -69,7 +69,7 @@ Each domain in a conversational app usually has multiple intents. By convention,
 | place_order         | Place an order for pick up or delivery                                                    |
 +---------------------+-------------------------------------------------------------------------------------------+
 
-Every domain has its own separate intent classifier for categorizing the query into one of the intent defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query. Refer to the :doc:`Intent Classifier User Guide <intent_classifier>` for details on training intent classification models using Workbench.
+Every domain has its own separate intent classifier for categorizing the query into one of the intents defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query. Refer to the :doc:`Intent Classifier User Guide <intent_classifier>` for details on training intent classification models using Workbench.
 
 
 .. _arch_entity_model:
