@@ -94,24 +94,24 @@ To support the functionality we envision, our app needs one dialogue state for e
 | | ``browse``     | | ``show_content``       | | Show the user a set of results and            |
 | |                | |                        | | refine them as the user provides more details |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``start_over`` | | ``start_over``         | | Cancel the ongoing search                     | 
+| | ``start_over`` | | ``start_over``         | | Cancel the ongoing search                     |
 | |                | |                        | | and prompt the user for a new request         |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``exit``       | | ``say_goodbye``        | | End the current interaction                   | 
+| | ``exit``       | | ``say_goodbye``        | | End the current interaction                   |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``help``       | | ``provide_help``       | | Provide help information                      | 
+| | ``help``       | | ``provide_help``       | | Provide help information                      |
 | |                | |                        | | in case the user gets stuck                   |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``unsupported``| | ``handle_unsupported`` | | Inform user the app does not provide that     | 
+| | ``unsupported``| | ``handle_unsupported`` | | Inform user the app does not provide that     |
 | |                | |                        | | information and get them back to video search |
 +------------------+--------------------------+-------------------------------------------------+
 | | ``compliment`` | | ``say_something_nice`` | | Compliment the user back and prompt the user  |
-| |                | |                        | | to get back to video search                   | 
-+------------------+--------------------------+-------------------------------------------------+
-| | ``insult``     | | ``handle_insult``      | | Handle the insult and prompt the user         | 
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
-| | other intents  | | ``default``            | | Prompt a user who has gone off-topic          | 
+| | ``insult``     | | ``handle_insult``      | | Handle the insult and prompt the user         |
+| |                | |                        | | to get back to video search                   |
++------------------+--------------------------+-------------------------------------------------+
+| | other intents  | | ``default``            | | Prompt a user who has gone off-topic          |
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
 
@@ -126,7 +126,7 @@ For example, here's the ``say_goodbye`` state handler, where we clear the :doc:`
 .. code:: python
 
 	@app.handle(intent='exit')
-	def say_goodbye(context, slots, responder):
+	def say_goodbye(context, responder):
 	    """
 	    When the user ends a conversation, clear the dialogue frame and say goodbye.
 	    """
@@ -142,7 +142,7 @@ We can illustrate this with the general implementation of the ``show_content`` h
 .. code:: python
 
 	@app.handle(intent='browse')
-	def show_content(context, slots, responder):
+	def show_content(context, responder):
 	    """
 	    When the user looks for a movie or TV show, fetch the documents from the knowledge base
 	    with all entities we have so far.
@@ -154,10 +154,10 @@ We can illustrate this with the general implementation of the ``show_content`` h
 	    results = get_video_content(context['frame'])
 
 	    # Fill the slots with the frame.
-	    slots = fill_browse_slots(context['frame'], slots)
+	    responder.slots.update(browse_slots_for_frame(context['frame']))
 
 	    # Build response based on available slots and results.
-	    reply, videos_client_action, prompt = build_browse_response(context, slots, results)
+	    reply, videos_client_action, prompt = build_browse_response(context, responder.slots, results)
 
 	    responder.reply(reply)
 
@@ -165,7 +165,7 @@ We can illustrate this with the general implementation of the ``show_content`` h
 	    videos_client_action = video_results_to_action(results)
 	    responder.respond(videos_client_action)
 
-This code follows a series of steps to build the final answer to the user: it updates the :doc:`dialogue frame <../userguide/dm>` with the new found entities, fetches results from the knowledge base (in the ``get_video_content`` method), builds a response with the new entities (done in ``fill_browse_slots`` and ``build_browse_response``) and sends a response to the user.
+This code follows a series of steps to build the final answer to the user: it updates the :doc:`dialogue frame <../userguide/dm>` with the new found entities, fetches results from the knowledge base (in the ``get_video_content`` method), builds a response with the new entities (done in ``browse_slots_for_frame`` and ``build_browse_response``) and sends a response to the user.
 
 For more information on the ``show_content`` method and the functions it uses, see the ``app.py`` file in the blueprint folder.
 
@@ -278,13 +278,13 @@ The labeled data for training our NLP pipeline was created using both in-house d
 | | Targeted synonym generation        | | ``country``: "What names would you use to refer                           |
 | | for training the Entity Resolver   | | to this country?"                                                         |
 | |                                    | |                                                                           |
-| |                                    | | ``genre``: "What are the different ways in which                          |      
+| |                                    | | ``genre``: "What are the different ways in which                          |
 | |                                    | | you would refer to this genre?"                                           |
 | |                                    | |                                                                           |
-| |                                    | | ``sort``: "What are the different ways in which                           |      
+| |                                    | | ``sort``: "What are the different ways in which                           |
 | |                                    | | you would speficy to sort movies or TV shows?"                            |
 | |                                    | |                                                                           |
-| |                                    | | ``type``: "What are the different ways in which                           |      
+| |                                    | | ``type``: "What are the different ways in which                           |
 | |                                    | | you would refer to this type?"                                            |
 +--------------------------------------+-----------------------------------------------------------------------------+
 
@@ -509,6 +509,6 @@ You can also try out multi-turn dialogues:
 
    Test the app multiple times with different conversational flows. Keep track of all cases where the response does not make good sense. Then, analyze those cases in detail. You should be able to attribute each error to a specific step in our end-to-end processing (e.g., incorrect intent classification, missed entity recognition, unideal natural language response, and so on). Categorizing your errors in this manner helps you understand the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.
 
-Refer to the User Guide for tips and best practices on testing your app before launch. 
+Refer to the User Guide for tips and best practices on testing your app before launch.
 
 .. Once you're satisfied with the performance of your app, you can deploy it to production as described in the :doc:`deployment <../userguide/deployment>` section of the User Guide.

@@ -109,22 +109,22 @@ Let's take a closer look at these intents for controlling doors: ``close_door``,
 .. code:: python
 
   @app.handle(intent='close_door')
-  def close_door(context, slots, responder):
+  def close_door(context, responder):
 
       ...
 
   @app.handle(intent='open_door')
-  def open_door(context, slots, responder):
+  def open_door(context, responder):
 
       ...
 
   @app.handle(intent='lock_door')
-  def lock_door(context, slots, responder):
+  def lock_door(context, responder):
 
       ...
 
   @app.handle(intent='unlock_door')
-  def unlock_door(context, slots, responder):
+  def unlock_door(context, responder):
 
       ...
 
@@ -136,7 +136,7 @@ However, since close/open/lock/unlock door are very similar to each other in the
   @app.handle(intent='open_door')
   @app.handle(intent='lock_door')
   @app.handle(intent='unlock_door')
-  def handle_door(context, slots, responder):
+  def handle_door(context, responder):
 
       ...
 
@@ -157,59 +157,58 @@ We include a code snippet for ``specify_location`` for your reference.
 .. code:: python
 
   @app.handle(intent='specify_location')
-  def specify_location(context, slots, responder):
-  selected_all = False
-  selected_location = _get_location(context)
+  def specify_location(context, responder):
+      selected_all = False
+      selected_location = _get_location(context)
 
-  if selected_location:
-      try:
-          if context['frame']['desired_action'] == 'Close Door':
-              reply = self._handle_door_open_close_reply(
-                  selected_all, selected_location, context, desired_state="closed")
-          elif context['frame']['desired_action'] == 'Open Door':
-              reply = self._handle_door_open_close_reply(
-                  selected_all, selected_location, context, desired_state="opened")
-          elif context['frame']['desired_action'] == 'Lock Door':
-              reply = self._handle_door_lock_unlock_reply(
-                  selected_all, selected_location, context, desired_state="locked")
-          elif context['frame']['desired_action'] == 'Unlock Door':
-              reply = self._handle_door_lock_unlock_reply(
-                  selected_all, selected_location, context, desired_state="unlocked")
-          elif context['frame']['desired_action'] == 'Check Door':
-              reply = self._handle_check_door_reply(selected_location, context)
-          elif context['frame']['desired_action'] == 'Turn On Lights':
-              reply = self._handle_lights_reply(
-                  selected_all, selected_location, context, desired_state="on")
-          elif context['frame']['desired_action'] == 'Turn Off Lights':
-              reply = self._handle_lights_reply(
-                  selected_all, selected_location, context, desired_state="off")
-          elif context['frame']['desired_action'] == 'Check Lights':
-              reply = self._handle_check_lights_reply(selected_location, context)
-          elif context['frame']['desired_action'] == 'Turn On Appliance':
-              selected_appliance = context['frame']['appliance']
-              reply = self._handle_appliance_reply(
-                  selected_location, selected_appliance, desired_state="on")
-          elif context['frame']['desired_action'] == 'Turn Off Appliance':
-              selected_appliance = context['frame']['appliance']
-              reply = self._handle_appliance_reply(
-                  selected_location, selected_appliance, desired_state="off")
+      if selected_location:
+          try:
+              if context['frame']['desired_action'] == 'Close Door':
+                  reply = self._handle_door_open_close_reply(
+                      selected_all, selected_location, context, desired_state="closed")
+              elif context['frame']['desired_action'] == 'Open Door':
+                  reply = self._handle_door_open_close_reply(
+                      selected_all, selected_location, context, desired_state="opened")
+              elif context['frame']['desired_action'] == 'Lock Door':
+                  reply = self._handle_door_lock_unlock_reply(
+                      selected_all, selected_location, context, desired_state="locked")
+              elif context['frame']['desired_action'] == 'Unlock Door':
+                  reply = self._handle_door_lock_unlock_reply(
+                      selected_all, selected_location, context, desired_state="unlocked")
+              elif context['frame']['desired_action'] == 'Check Door':
+                  reply = self._handle_check_door_reply(selected_location, context)
+              elif context['frame']['desired_action'] == 'Turn On Lights':
+                  reply = self._handle_lights_reply(
+                      selected_all, selected_location, context, desired_state="on")
+              elif context['frame']['desired_action'] == 'Turn Off Lights':
+                  reply = self._handle_lights_reply(
+                      selected_all, selected_location, context, desired_state="off")
+              elif context['frame']['desired_action'] == 'Check Lights':
+                  reply = self._handle_check_lights_reply(selected_location, context)
+              elif context['frame']['desired_action'] == 'Turn On Appliance':
+                  selected_appliance = context['frame']['appliance']
+                  reply = self._handle_appliance_reply(
+                      selected_location, selected_appliance, desired_state="on")
+              elif context['frame']['desired_action'] == 'Turn Off Appliance':
+                  selected_appliance = context['frame']['appliance']
+                  reply = self._handle_appliance_reply(
+                      selected_location, selected_appliance, desired_state="off")
 
-          del context['frame']['desired_action']
+              del context['frame']['desired_action']
 
-      except KeyError:
-          reply = "Please specify an action to go along with that location."
+          except KeyError:
+              reply = "Please specify an action to go along with that location."
 
-      responder.reply(reply)
-  else:
-      prompt = "I'm sorry, I wasn't able to recognize that location, could you try again?"
-      responder.prompt(prompt)
+          responder.reply(reply)
+      else:
+          prompt = "I'm sorry, I wasn't able to recognize that location, could you try again?"
+          responder.prompt(prompt)
 
 
 Here is the full list of intents and states in the home assistant blueprint.
 
 +---------------------------------------------------+--------------------------------+---------------------------------------------------+
-|  Intent                                           |  Dialogue State                | Dialogue State                                    |
-|                                                   |  name                          | function                                          |
+|  Intent                                           |  Dialogue State Name           | Dialogue State Function                           |
 +===================================================+================================+===================================================+
 | ``greet``                                         | ``greet``                      | Begin an interaction and welcome the user         |
 +---------------------------------------------------+--------------------------------+---------------------------------------------------+
