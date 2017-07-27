@@ -174,7 +174,7 @@ For a more realistic implementation of ``build_order`` that deals with varied us
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The knowledge base for our food ordering app leverages publicly available information about San Francisco restaurants, scraped from the `Amazon Restaurants <https://primenow.amazon.com/restaurants>`_ website. The knowledge base comprises two indexes in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
+The knowledge base for our food ordering app leverages publicly available information about San Francisco restaurants from `Amazon Restaurants <https://primenow.amazon.com/restaurants>`_. The knowledge base comprises two indexes in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
 
    - ``restaurants`` — information about restaurant locations
    - ``menu_items`` — information about dishes on different restaurants' menus
