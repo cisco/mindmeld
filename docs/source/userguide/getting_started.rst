@@ -56,20 +56,11 @@ You can
  - obtain Python at `python.org <https://www.python.org/>`_  if it is not already installed
 
 Java 8
-^^^^^^
+^^^^^^^
 
 Workbench requires Java 8 or newer.
 
-Run ``java -version`` to verify that Java 8 or newer is installed.
-
-The result should resemble:
-
-.. code-block:: console
-
-    $ java -version
-    java version "1.8.0_131"
-    Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
-    Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
+Run ``java -version`` to verify that Java 8 or newer is installed. 
 
 If the command fails, or your Java version begins with 1.7, install Java 8.
 
@@ -83,9 +74,7 @@ Elasticsearch
 Workbench requires Elasticsearch 5.0 or newer. Version 5.5.x is recommended.
 
 `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ is a highly scalable open-source
-full-text search and analytics engine. store that handles large volumes of data quickly and in near-real time.
-
-For the best developer experience with smaller applications, Elasticsearch should be installed locally.
+full-text search and analytics engine. It can be installed locally or you can use a remote instance if you have access to one.
 
   - On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew install elasticsearch``
 
