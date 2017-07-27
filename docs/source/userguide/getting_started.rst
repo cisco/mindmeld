@@ -21,12 +21,12 @@ If you are on a Mac OS machine, it is recommended that you install `homebrew <ht
 
 Run ``brew --version`` to verify that homebrew is installed.
 
-This is not a requirement, strictly speaking, but if your system cannot run homebrew you will need to find alternatives to some instructions in this document.
+This is not a requirement, but if your system cannot run homebrew you will need to find alternatives to some instructions in this document.
 
 Pyenv and Virtualenv
 ^^^^^^^^^^^^^^^^^^^^
 
-Is strongly recommended that you install Workbench in an isolated environment. This way, you can work
+It is strongly recommended that you install Workbench in an isolated environment. This way, you can work
 on different projects without having conflicting library versions, and keep Workbench separate from your other work.
 
 One solution is to use `virtualenv with pyenv <https://github.com/pyenv/pyenv-virtualenv>`_.
@@ -35,7 +35,7 @@ Run ``pyenv --version`` to verify that Pyenv is installed.
 
 Run ``virtualenv --version`` to verify that Virtualenv is installed.
 
-This is not a requirement, strictly speaking, but if your system cannot run pyenv you will need to find alternatives to some instructions in this document.
+Again, this is not a requirement, but if your system cannot run pyenv you will need to find alternatives to some instructions in this document.
 
 Python
 ^^^^^^
@@ -56,20 +56,11 @@ You can
  - obtain Python at `python.org <https://www.python.org/>`_  if it is not already installed
 
 Java 8
-^^^^^^
+^^^^^^^
 
 Workbench requires Java 8 or newer.
 
-Run ``java -version`` to verify that Java 8 or newer is installed.
-
-The result should resemble:
-
-.. code-block:: console
-
-    $ java -version
-    java version "1.8.0_131"
-    Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
-    Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
+Run ``java -version`` to verify that Java 8 or newer is installed. 
 
 If the command fails, or your Java version begins with 1.7, install Java 8.
 
@@ -83,24 +74,17 @@ Elasticsearch
 Workbench requires Elasticsearch 5.0 or newer. Version 5.5.x is recommended.
 
 `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ is a highly scalable open-source
-full-text search and analytics engine. store that handles large volumes of data quickly and in near-real time.
+full-text search and analytics engine. It can be installed locally or you can use a remote instance if you have access to one.
 
-For the best developer experience with smaller applications, Elasticsearch should be installed locally.
-
-  - On Mac OS systems with `homebrew <https://brew.sh/>`_, run the following commands:
-
-.. code-block:: console
-
-    $ brew update
-    $ brew install elasticsearch
+  - On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew install elasticsearch``
 
 For other systems, or for more information on configuring Elasticsearch, go
 `here <https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html>`_.
 
 After Elasticsearch has been configured simply run ``elasticsearch`` to start the process.
 
-Prepare your system for Workbench
----------------------------------
+Prepare your system
+---------------------
 
 The configuration steps described in this section are all either required or strongly recommended.
 
@@ -111,6 +95,7 @@ To prepare to install Workbench in an isolated environment using pyenv and virtu
 
 .. code-block:: console
 
+  # this is the parent of your Workbench project folder. It can be anywhere you want.
   mkdir workbench-development
   cd $_
 
@@ -123,10 +108,10 @@ To prepare to install Workbench in an isolated environment using pyenv and virtu
   # automatically activate the environment upon entering this directory
   pyenv local workbench
 
-Configure Pip
-^^^^^^^^^^^^^
+Configure Pip and Workbench
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Workbench installation relies on pip, a Python packaging system included by default with the Python binary installers.
+Workbench installation relies on ``pip``, a Python packaging system included by default with the Python binary installers.
 
 Run ``pip --version`` to verify that pip is installed.
 
@@ -134,7 +119,26 @@ Run ``pip --version`` to verify that pip is installed.
 
  - If you need upgrade pip module, run ``pip install --upgrade pip``
 
-The next two steps are written in terms of Mac OS. If you need information about configuring pip on a different OS, see the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
+
+Automatic Configuration
+"""""""""""""""""""""""
+
+You can configure pip and workbench easily by following these steps.
+
+#. Modify the USERNAME to your actual CEC username and run in a command shell ``export USERNAME=<Your CEC Username>``
+#. Download the setup script - you will be prompted for your MindMeld Learning Center password: ``curl -s -u $USERNAME https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh``
+#. Run the setup script - you will be prompted for your password again: ``bash mmworkbench_init.sh``
+
+Proceed to :ref:`installing Workbench <getting_started_install_workbench>`.
+
+
+Manual Configuration
+""""""""""""""""""""
+
+Pip
+'''
+
+The next two steps are for Mac OS. If you need information about configuring pip on a different OS, see the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
 
 Run ``ls -l ~/.pip`` to verify that there is a ``~/.pip`` folder on your system.
 
@@ -154,11 +158,11 @@ Add the following lines to your ``pip.conf`` file, substituting your username an
 
 These configuration changes enable pip to work with the MindMeld private Python Package Index (PyPI). MindMeld Workbench is not publicly available, and can only be installed from the MindMeld PyPI, which is hosted at https://mindmeld.com/pypi/.
 
-Configure Workbench
-^^^^^^^^^^^^^^^^^^^
+Workbench
+''''''''''
 
 Workbench reads your credentials from its configuration file, located at
-``~/.mmworkbench/config``, when performing actions that require authentication, such as such as accessing
+``~/.mmworkbench/config``, when performing actions that require authentication, such as accessing
 :doc:`blueprints <../blueprints/overview>`.
 
 Create the ``~/.mmworkbench`` folder.
@@ -172,6 +176,8 @@ Create the ``~/.mmworkbench/config`` file and add the following lines, substitut
   username = {YOUR_USERNAME}
   password = {YOUR_PASSWORD}
 
+
+.. _getting_started_install_workbench:
 
 Install Workbench
 -----------------
@@ -212,10 +218,10 @@ the Python shell is where all the action is at.
 Command Line
 ^^^^^^^^^^^^
 
-You can use ``blueprint` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
+You can use the ``blueprint`` command in ``mmworkbench`` to begin a new project. This enables you to use one of the 
 already built example apps as a baseline for your project. 
 
-You can use the `template` blueprint to setup a blank project:
+The `template` blueprint sets up the scaffolding for a blank project:
 
 .. code-block:: console
 
@@ -234,14 +240,14 @@ To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run 
  ...
  You:
 
-The *converse* command loads the machine learnings models and starts an interactive session with the "You:" prompt.
+The ``converse`` command loads the machine learnings models and starts an interactive session with the "You:" prompt.
 Here you can enter your own input and get an immediate response back. Try "hi", for example, and see what you get.
 
 
 Python Shell
 ^^^^^^^^^^^^
 
-You can use the `template` blueprint to setup a blank project:
+The `template` blueprint sets up the scaffolding for a blank project:
 
 .. code-block:: python
 
@@ -310,11 +316,6 @@ The commands available are:
 Upgrade Workbench
 -----------------
 
-To upgrade to the latest version of Workbench, you can run:
-
-.. code-block:: console
-
-  $ pip install mmworkbench --upgrade
+To upgrade to the latest version of Workbench, run ``pip install mmworkbench --upgrade``
 
 Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
-
