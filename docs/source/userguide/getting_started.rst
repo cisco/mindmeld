@@ -108,10 +108,10 @@ To prepare to install Workbench in an isolated environment using pyenv and virtu
   # automatically activate the environment upon entering this directory
   pyenv local workbench
 
-Configure Pip
-^^^^^^^^^^^^^
+Configure Pip and Workbench
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Workbench installation relies on pip, a Python packaging system included by default with the Python binary installers.
+Workbench installation relies on ``pip``, a Python packaging system included by default with the Python binary installers.
 
 Run ``pip --version`` to verify that pip is installed.
 
@@ -119,7 +119,26 @@ Run ``pip --version`` to verify that pip is installed.
 
  - If you need upgrade pip module, run ``pip install --upgrade pip``
 
-The next two steps are written in terms of Mac OS. If you need information about configuring pip on a different OS, see the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
+
+Automatic Configuration
+"""""""""""""""""""""""
+
+You can configure pip and workbench easily by following these steps.
+
+#. Modify the USERNAME to your actual CEC username and run in a command shell ``export USERNAME=<Your CEC Username>``
+#. Download the setup script - you will be prompted for your MindMeld Learning Center password: ``curl -s -u $USERNAME https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh``
+#. Run the setup script - you will be prompted for your password again: ``bash mmworkbench_init.sh``
+
+Proceed to :ref:`installing Workbench <getting_started_install_workbench>`.
+
+
+Manual Configuration
+""""""""""""""""""""
+
+Pip
+'''
+
+The next two steps are for Mac OS. If you need information about configuring pip on a different OS, see the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
 
 Run ``ls -l ~/.pip`` to verify that there is a ``~/.pip`` folder on your system.
 
@@ -139,8 +158,8 @@ Add the following lines to your ``pip.conf`` file, substituting your username an
 
 These configuration changes enable pip to work with the MindMeld private Python Package Index (PyPI). MindMeld Workbench is not publicly available, and can only be installed from the MindMeld PyPI, which is hosted at https://mindmeld.com/pypi/.
 
-Configure Workbench
-^^^^^^^^^^^^^^^^^^^
+Workbench
+''''''''''
 
 Workbench reads your credentials from its configuration file, located at
 ``~/.mmworkbench/config``, when performing actions that require authentication, such as accessing
@@ -157,6 +176,8 @@ Create the ``~/.mmworkbench/config`` file and add the following lines, substitut
   username = {YOUR_USERNAME}
   password = {YOUR_PASSWORD}
 
+
+.. _getting_started_install_workbench:
 
 Install Workbench
 -----------------
