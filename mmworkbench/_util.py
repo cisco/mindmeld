@@ -19,8 +19,9 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from . import path
-from .exceptions import KnowledgeBaseConnectionError
 from .components import QuestionAnswerer
+from .exceptions import KnowledgeBaseConnectionError
+from .components._config import get_app_name
 
 
 logger = logging.getLogger(__name__)
@@ -133,8 +134,7 @@ class Blueprint(object):
 
         app_path = app_path or os.path.join(os.getcwd(), name)
         app_path = os.path.abspath(app_path)
-        _, app_name = os.path.split(app_path)
-
+        app_name = get_app_name(app_path)
         es_host = es_host or os.environ.get('MM_ES_HOST', 'localhost')
         cache_dir = path.get_cached_blueprint_path(name)
         try:
