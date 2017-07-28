@@ -32,7 +32,7 @@ BLUEPRINT_URL = '{mindmeld_url}/blueprints/{blueprint}/{filename}'
 BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
 BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
-    'quickstart': {},
+    'kwik_e_mart': {},
     'food_ordering': {},
     'home_assistant': {'kb': False},
     'template': {'kb': False},
