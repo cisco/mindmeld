@@ -109,7 +109,7 @@ For example, here's the ``say_goodbye`` state handler, where we clear the :doc:`
 .. code:: python
 
     @app.handle(intent='exit')
-    def say_goodbye(context, slots, responder):
+    def say_goodbye(context, responder):
         """
         When the user ends a conversation, clear the dialogue frame and say goodbye.
         """
@@ -126,7 +126,7 @@ We can illustrate this with a simplistic implementation of the ``build_order`` h
 .. code:: python
 
     @app.handle(intent='build_order')
-    def build_order(context, slots, responder):
+    def build_order(context, responder):
         """
         When the user expresses an intent to make food selections, build up the order by
         adding the requested dishes to their "check-out" basket.
@@ -151,9 +151,9 @@ We can illustrate this with a simplistic implementation of the ``build_order`` h
         context['frame']['dishes'] = selected_dishes
 
         # Respond with a preview of the current basket and prompt for order confirmation.
-        slots['restaurant_name'] = selected_restaurant['name']
-        slots['dish_names'] = ', '.join([dish['name'] for dish in selected_dishes])
-        slots['price'] = sum([dish['price'] for dish in selected_dishes])
+        responder.slots['restaurant_name'] = selected_restaurant['name']
+        responder.slots['dish_names'] = ', '.join([dish['name'] for dish in selected_dishes])
+        responder.slots['price'] = sum([dish['price'] for dish in selected_dishes])
         responder.prompt('Sure, I got {dish_names} from {restaurant_name} for a total '
                          'price of ${price:.2f}. Would you like to place the order?')
 

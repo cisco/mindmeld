@@ -5,7 +5,6 @@ project structure.
 """
 from __future__ import unicode_literals, absolute_import
 from builtins import object
-from future.utils import iteritems
 
 import datetime
 from email.utils import parsedate
@@ -196,7 +195,7 @@ class Blueprint(object):
             username = config['username']
             password = config['password']
         except Exception:
-            msg = 'Unable to locate AWS credentials. Cannot download blueprint.'
+            msg = 'Unable to locate MindMeld credentials. Cannot download blueprint.'
             logger.error(msg)
             raise EnvironmentError(msg)
 
@@ -265,9 +264,14 @@ def load_global_configuration():
     config['mindmeld_url'] = iniconfig.get('mmworkbench', 'mindmeld_url')
     config['username'] = iniconfig.get('mmworkbench', 'username')
     config['password'] = iniconfig.get('mmworkbench', 'password')
-    for key, value in iteritems(config):
-        if value is None:
-            config.pop(key)
+    bad_keys = set()
+    for key in config.keys():
+        if config[key] is None:
+            bad_keys.add(key)
+
+    for key in bad_keys:
+        config.pop(key)
+
     return config
 
 

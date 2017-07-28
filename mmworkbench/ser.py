@@ -84,7 +84,8 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
         return response.json()
     except requests.ConnectionError:
         logger.error('Unable to connect to Mallard.')
-        raise RuntimeError('Unable to connect to Mallard. Is it running?')
+        raise RuntimeError("Unable to connect to Mallard. Make sure it's running by typing "
+                           "'mmworkbench num-parse' at the command line.")
     except Exception as ex:
         logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
                      json.dumps(data))
