@@ -11,8 +11,8 @@ import logging
 import copy
 
 from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
-from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name, \
-                                    does_index_exist
+from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
+                                     does_index_exist)
 
 from ..resource_loader import ResourceLoader
 
@@ -799,7 +799,7 @@ class Search:
             if self.sort_type not in self.SORT_TYPES:
                 raise ValueError('Invalid value for sort type \'{}\''.format(self.sort_type))
 
-            if self.field == 'location' and self.sort_type != 'distance':
+            if self.field == 'location' and self.sort_type != self.SORT_DISTANCE:
                 raise ValueError('Invalid value for sort type \'{}\''.format(self.sort_type))
 
             if self.field == 'location' and not self.location:
