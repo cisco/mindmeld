@@ -123,11 +123,24 @@ Run ``pip --version`` to verify that pip is installed.
 Automatic Configuration
 """""""""""""""""""""""
 
-You can configure pip and workbench easily by following these steps.
+You can configure pip and workbench easily by running these commands in a command-line terminal:
 
-#. Modify the USERNAME to your actual CEC username and run in a command shell ``export USERNAME=<Your CEC Username>``
-#. Download the setup script - you will be prompted for your MindMeld Learning Center password: ``curl -s -u $USERNAME https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh``
-#. Run the setup script - you will be prompted for your password again: ``bash mmworkbench_init.sh``
+.. highlight:: python
+   :linenothreshold: 2
+
+.. code-block:: shell
+
+  export USERNAME=<Your CEC Username>
+  curl -s -u $USERNAME https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh
+  if [[ `file -b mmworkbench_init.sh` =~ Bourne* ]]; then source mmworkbench_init.sh; else echo Your password is incorrect; fi
+
+
+Notes on each line:
+
+#. Remember to modify the USERNAME to your actual CEC username.
+#. Downloads the setup script - you will be prompted for your MindMeld Learning Center password.
+#. Runs the setup script - you will be prompted for your password again.
+
 
 Proceed to :ref:`installing Workbench <getting_started_install_workbench>`.
 
