@@ -23,7 +23,6 @@ class DialogueStateRule(object):
     Attributes:
         dialogue_state (str): The name of the dialogue state
         domain (str): The name of the domain to match against
-        entity_mappings (dict): The set of specific entity instantiations to match against
         entity_types (set): The set of entity types to match against
         intent (str): The name of the intent to match against
     """
@@ -33,15 +32,24 @@ class DialogueStateRule(object):
         Args:
             dialogue_state (str): The name of the dialogue state
             domain (str): The name of the domain to match against
-            entity_mappings (dict): The set of specific entity instantiations to match against
-            entity_types (set): The set of entity types to match against
+            has_entity (str|list|set): A synonym for the ``has_entities`` param
+            has_entities (str|list|set): A single entity type or a list of entity types to match
+                against.
             intent (str): The name of the intent to match against
         """
 
         self.dialogue_state = dialogue_state
 
+        key_kwargs = (('domain',), ('intent',), ('has_entity', 'has_entities'))
+        valid_kwargs = set()
+        for keys in key_kwargs:
+            valid_kwargs.update(keys)
+        for kwarg in kwargs:
+            if kwarg not in valid_kwargs:
+                raise TypeError(('DialogueStateRule() got an unexpected keyword argument'
+                                 ' \'{!s}\'').format(kwarg))
+
         resolved = {}
-        key_kwargs = [('domain',), ('intent',), ('entity', 'entities')]
         for keys in key_kwargs:
             if len(keys) == 2:
                 single, plural = keys
@@ -57,18 +65,15 @@ class DialogueStateRule(object):
 
         self.domain = resolved.get('domain', None)
         self.intent = resolved.get('intent', None)
-        entities = resolved.get('entities', None)
+        entities = resolved.get('has_entities', None)
         self.entity_types = None
-        self.entity_mappings = None
         if entities is not None:
             if isinstance(entities, str):
                 # Single entity type passed in
                 self.entity_types = frozenset((entities,))
-            elif isinstance(entities, list) or isinstance(entities, set):
+            elif isinstance(entities, (list, set)):
                 # List of entity types passed in
                 self.entity_types = frozenset(entities)
-            elif isinstance(entities, dict):
-                self.entity_mappings = entities
             else:
                 msg = 'Invalid entity specification for dialogue state rule: {!r}'
                 raise ValueError(msg.format(entities))
@@ -102,18 +107,6 @@ class DialogueStateRule(object):
             if len(self.entity_types & entity_types) < len(self.entity_types):
                 return False
 
-        # check entity mapping
-        if self.entity_mappings is not None:
-            matched_entities = set()
-            for entity in context['entities']:
-                if (entity['type'] in self.entity_mappings and
-                        entity['value'] == self.entity_mappings[entity.type]):
-                    matched_entities.add(entity.type)
-
-            # if there is not a matched entity for each mapping, fail
-            if len(matched_entities) < len(self.entity_mappings):
-                return False
-
         return True
 
     @property
@@ -126,17 +119,15 @@ class DialogueStateRule(object):
         Returns:
             int: A number representing the rule complexity
         """
-        complexity = [0] * 4
+        complexity = [0] * 3
         if self.domain:
             complexity[0] = 1
 
         if self.intent:
             complexity[1] = 1
-        # TODO: handle specification of multiple entity types or entity mappings
+
         if self.entity_types:
             complexity[2] = len(self.entity_types)
-        if self.entity_mappings:
-            complexity[3] = len(self.entity_mappings)
 
         return tuple(complexity)
 
@@ -155,6 +146,15 @@ class DialogueStateRule(object):
 
     @staticmethod
     def compare(this, that):
+        """Compares the complexity of two dialogue state rules
+
+        Args:
+            this (DialogueStateRule): a dialogue state rule
+            that (DialogueStateRule): a dialogue state rule
+
+        Returns:
+            int: the comparison result
+        """
         if not (isinstance(this, DialogueStateRule) and isinstance(that, DialogueStateRule)):
             return NotImplemented
         this_comp = this.complexity
@@ -217,13 +217,14 @@ class DialogueManager(object):
             handler = self._default_handler
         else:
             handler = self.handler_map[dialogue_state]
-        slots = {}  # TODO: where should slots come from??
+        # TODO: prepopulate slots
+        slots = {}
         responder = DialogueResponder(slots)
-        handler(context, slots, responder)
+        handler(context, responder)
         return {'dialogue_state': dialogue_state, 'client_actions': responder.client_actions}
 
     @staticmethod
-    def _default_handler(context, slots, responder):
+    def _default_handler(context, responder):
         # TODO: implement default handler
         pass
 
