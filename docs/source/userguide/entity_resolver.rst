@@ -191,4 +191,6 @@ The Entity Resolver returns a ranked list of the top 10 canonical forms for each
 **score**            A score which indicates the strength of the match. This score is a relative value (higher scores are better). It is not normalized accross all entity types or queries.
 
 **top synonym**      The synonym in the whitelist of this canonical form that most closely matched the user's query.
+
+**sort factor**      If the sort factor was provided in the entity mapping file, it will also be returned.
 ==================== ===
