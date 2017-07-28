@@ -6,6 +6,7 @@ from builtins import object, str
 from functools import cmp_to_key
 import logging
 import random
+import json
 
 from .. import path
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 SHOW_REPLY = 'show-reply'
 SHOW_PROMPT = 'show-prompt'
 SHOW_SUGGESTIONS = 'show-suggestions'
+SHOW_COLLECTION = 'show-collection'
 
 
 class DialogueStateRule(object):
@@ -273,7 +275,16 @@ class DialogueResponder(object):
         })
 
     def show(self, things):
-        raise NotImplementedError
+        """Sends a 'show-collection' client action
+
+        Args:
+            things (list): The list of dictionary objects
+        """
+        collection = things or []
+        self.respond({
+            'name': SHOW_COLLECTION,
+            'message': collection
+        })
 
     def suggest(self, suggestions=None):
         suggestions = suggestions or []
@@ -384,6 +395,9 @@ class Conversation(object):
 
                     texts.append(self._generate_suggestion_text(suggestion))
                 msg = msg.format(*texts)
+            elif action['name'] == SHOW_COLLECTION:
+                msg = '\n'.join(
+                    [json.dumps(item, indent=4, sort_keys=True) for item in action['message']])
         except (KeyError, ValueError, AttributeError):
             msg = "Unsupported response: {!r}".format(action)
 
