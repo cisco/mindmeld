@@ -146,10 +146,44 @@ class TaggerModel(Model):
             params (dict): Parameters of the classifier
         """
         model_class = self._get_model_constructor()
-        return model_class(self.config).fit(examples, labels, resources=self._resources)
+        init_params = {'config': self.config, 'resources': self._resources}
+        return model_class(**init_params).fit(examples, labels)
 
-    def _fit_cv(self, examples, labels):
-        raise NotImplementedError
+    def _convert_params(self, param_grid, y, is_grid=True):
+        """
+        Convert the params from the style given by the config to the style
+        passed in to the actual classifier.
+
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by parameter name
+
+        Returns:
+            (dict): revised param_grid
+        """
+
+        # todo: does this make sense for sequence models??
+        if 'class_weight' in param_grid:
+            raw_weights = param_grid['class_weight'] if is_grid else [param_grid['class_weight']]
+            weights = [{k if isinstance(k, int) else self._class_encoder.transform((k,))[0]: v
+                        for k, v in cw_dict.items()} for cw_dict in raw_weights]
+            param_grid['class_weight'] = weights if is_grid else weights[0]
+        elif 'class_bias' in param_grid:
+            # interpolate between class_bias=0 => class_weight=None
+            # and class_bias=1 => class_weight='balanced'
+            class_count = bincount(y)
+            classes = self._class_encoder.classes_
+            weights = []
+            raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]
+            for class_bias in raw_bias:
+                # these weights are same as sklearn's class_weight='balanced'
+                balanced_w = [old_div(len(y), (float(len(classes)) * c)) for c in class_count]
+                balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
+
+                weights.append({c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples})
+            param_grid['class_weight'] = weights if is_grid else weights[0]
+            del param_grid['class_bias']
+
+        return param_grid
 
     def predict(self, examples):
         """

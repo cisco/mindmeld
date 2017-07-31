@@ -22,7 +22,7 @@ S_TAG = 'S'
 
 
 class Tagger(object):
-    def __init__(self, config):
+    def __init__(self, **parameters):
         """
         Args:
             config (ModelConfig): model configuration
@@ -34,6 +34,7 @@ class Tagger(object):
         self._resources = {}
         self._clf = None
         self._current_params = {}
+
 
     def __getstate__(self):
         """Returns the information needed pickle an instance of this class.
@@ -65,6 +66,24 @@ class Tagger(object):
         Returns:
             (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
         """
+        raise NotImplementedError
+
+    def get_params(self, deep=True):
+        """Returns a dict of the __init__ parameters of the model
+        """
+        # return self._current_params
+        raise NotImplementedError
+
+    def set_params(self, **parameters):
+        """Sets the parameters
+        """
+        # for parameter, value in parameters.items():
+        #     self.setattr(parameter, value)
+        # return self
+
+        # for parameter, value in parameters.items():
+        #     self._current_params[parameter] = value
+        # return self
         raise NotImplementedError
 
     def _get_model_constructor(self):

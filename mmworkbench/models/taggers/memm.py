@@ -19,22 +19,50 @@ logger = logging.getLogger(__name__)
 
 class MemmModel(Tagger):
     """A maximum-entropy Markov model."""
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, **parameters):
+        self.set_params(**parameters)
+
+    def fit(self, examples, labels):
+        parameters = self._passed_params
+
+        # TODO: add error when config is not passed in
+        self.config = parameters['config']
+
         self._label_encoder = get_label_encoder(self.config)
-        self._class_encoder = SKLabelEncoder()
-        self._feat_vectorizer = DictVectorizer()
         self._feat_selector = self._get_feature_selector()
         self._feat_scaler = self._get_feature_scaler()
+        # Default tag scheme to IOB
+        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
 
-    def fit(self, examples, labels, resources=None):
-        self._resources = resources
         # Extract features and classes
         y = self._label_encoder.encode(labels, examples=examples)
-
         X, y, groups = self.get_feature_matrix(examples, y, fit=True)
-        self._clf = self._fit(X, y, self.config.params)
-        self._current_params = self.config.params
+
+        # Fit the underlying classifier
+        model_class = self._get_model_constructor()
+        self._clf = model_class(**self._current_params).fit(X, y)
+        return self
+
+    def get_params(self, deep=True):
+        return self._clf.get_params()
+
+    def set_params(self, **parameters):
+        """Sets the parameters
+        """
+        self._class_encoder = SKLabelEncoder()
+        self._feat_vectorizer = DictVectorizer()
+        self._passed_params = parameters
+        self._current_params = {}
+        self._resources = parameters.get('resources', {})
+
+        model_class = self._get_model_constructor()
+        self._clf = model_class()
+
+        for parameter, value in parameters.items():
+            if parameter == 'config' or parameter == 'resources':
+                continue
+            self._current_params[parameter] = value
+        self._clf.set_params(**self._current_params)
         return self
 
     def predict(self, examples):
@@ -142,14 +170,3 @@ class MemmModel(Tagger):
     def _get_model_constructor(self):
         """Returns the python class of the actual underlying model"""
         return LogisticRegression
-
-    def _fit(self, X, y, params):
-        """Trains a classifier without cross-validation.
-
-        Args:
-            X (numpy.matrix): The feature matrix for a dataset.
-            y (numpy.array): The target output values.
-            params (dict): Parameters of the classifier
-        """
-        model_class = self._get_model_constructor()
-        return model_class(**params).fit(X, y)

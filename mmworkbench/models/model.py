@@ -576,6 +576,68 @@ class Model(object):
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
 
+    def _fit_cv(self, X, y, groups=None, selection_settings=None):
+        """Summary
+
+        Args:
+            X (numpy.matrix): The feature matrix for a dataset.
+            y (numpy.array): The target output values.
+            selection_settings (None, optional): Description
+
+        """
+        selection_settings = selection_settings or self.config.param_selection
+        cv_iterator = self._get_cv_iterator(selection_settings)
+
+        if selection_settings is None:
+            return self._fit(X, y, self.config.params), self.config.params
+
+        cv_type = selection_settings['type']
+        num_splits = cv_iterator.get_n_splits(X, y, groups)
+        logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
+                    num_splits, '' if num_splits == 1 else 's')
+
+        scoring = selection_settings.get('scoring', self.DEFAULT_CV_SCORING)
+        n_jobs = selection_settings.get('n_jobs', -1)
+
+        param_grid = self._convert_params(selection_settings['grid'], y)
+        model_class = self._get_model_constructor()
+
+        crf_scoring = make_scorer(score_func=sequence_accuracy_score)
+        scoring = crf_scoring
+        param_grid['config'] = [self.config]
+        param_grid['resources'] = [self._resources]
+        init_params = {'config': self.config, 'resources': self._resources}
+        grid_cv = GridSearchCV(estimator=model_class(**init_params), scoring=scoring, param_grid=param_grid,
+                               cv=cv_iterator, n_jobs=n_jobs)
+        model = grid_cv.fit(X, y, groups)
+
+        for idx, params in enumerate(model.cv_results_['params']):
+            logger.debug('Candidate parameters: {}'.format(params))
+            std_err = 2.0 * model.cv_results_['std_test_score'][idx] / math.sqrt(model.n_splits_)
+            if scoring == ACCURACY_SCORING:
+                msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
+            elif scoring == LIKELIHOOD_SCORING:
+                msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
+            else:
+                msg = 'Candidate average seq2se2 accuracy: {:.2%} ± {:.2%}'
+            logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
+
+        if scoring == ACCURACY_SCORING:
+            msg = 'Best accuracy: {:.2%}, params: {}'
+            self.cv_loss_ = 1 - model.best_score_
+        elif scoring == LIKELIHOOD_SCORING:
+            msg = 'Best log likelihood: {:.4}, params: {}'
+            self.cv_loss_ = - model.best_score_
+        else:
+            msg = 'Best seq2seq accuracy: {:.2%}, params: {}'
+            self.cv_loss_ = 1 - model.best_score_
+        best_params = model.best_params_
+        best_params.pop('config')
+        best_params.pop('resources')
+        logger.info(msg.format(model.best_score_, best_params))
+
+        return model.best_estimator_, model.best_params_
+
     def select_params(self, examples, labels, selection_settings=None):
         raise NotImplementedError
 
@@ -791,62 +853,6 @@ class SkLearnModel(Model):
         params = self._convert_params(params, y, is_grid=False)
         model_class = self._get_model_constructor()
         return model_class(**params).fit(X, y)
-
-    def _fit_cv(self, X, y, groups=None, selection_settings=None):
-        """Summary
-
-        Args:
-            X (numpy.matrix): The feature matrix for a dataset.
-            y (numpy.array): The target output values.
-            selection_settings (None, optional): Description
-
-        """
-        selection_settings = selection_settings or self.config.param_selection
-        cv_iterator = self._get_cv_iterator(selection_settings)
-
-        if selection_settings is None:
-            return self._fit(X, y, self.config.params), self.config.params
-
-        cv_type = selection_settings['type']
-        num_splits = cv_iterator.get_n_splits(X, y, groups)
-        logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
-                    num_splits, '' if num_splits == 1 else 's')
-
-        scoring = selection_settings.get('scoring', self.DEFAULT_CV_SCORING)
-        n_jobs = selection_settings.get('n_jobs', -1)
-
-        param_grid = self._convert_params(selection_settings['grid'], y)
-        model_class = self._get_model_constructor()
-
-        crf_scoring = make_scorer(score_func=sequence_accuracy_score)
-        scoring = crf_scoring
-        grid_cv = GridSearchCV(estimator=model_class(), scoring=scoring, param_grid=param_grid,
-                               cv=cv_iterator, n_jobs=n_jobs)
-        model = grid_cv.fit(X, y, groups)
-
-        for idx, params in enumerate(model.cv_results_['params']):
-            logger.debug('Candidate parameters: {}'.format(params))
-            std_err = 2.0 * model.cv_results_['std_test_score'][idx] / math.sqrt(model.n_splits_)
-            if scoring == ACCURACY_SCORING:
-                msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
-            elif scoring == LIKELIHOOD_SCORING:
-                msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
-            else:
-                msg = 'Candidate average seq2se2 accuracy: {:.2%} ± {:.2%}'
-            logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
-
-        if scoring == ACCURACY_SCORING:
-            msg = 'Best accuracy: {:.2%}, params: {}'
-            self.cv_loss_ = 1 - model.best_score_
-        elif scoring == LIKELIHOOD_SCORING:
-            msg = 'Best log likelihood: {:.4}, params: {}'
-            self.cv_loss_ = - model.best_score_
-        else:
-            msg = 'Best seq2seq accuracy: {:.2%}, params: {}'
-            self.cv_loss_ = 1 - model.best_score_
-        logger.info(msg.format(model.best_score_, model.best_params_))
-
-        return model.best_estimator_, model.best_params_
 
     def predict(self, examples):
         X, _, _ = self.get_feature_matrix(examples)
