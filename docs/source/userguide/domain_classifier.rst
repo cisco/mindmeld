@@ -532,17 +532,17 @@ The statistics are split into three sections.
 
   Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
  
-  - **Classes are balanced**: When the number of training examples in your domains are comparable and each domain is equally important, focusing on the accuracy metric is usually good enough. An example of equally important domains is somthing like the home assistant app where smart home and weather are both important use cases with similar amounts of training data.
+  - **Classes are balanced**: When the number of training examples in your domains are comparable and each domain is equally important, focusing on the accuracy metric is usually good enough.
  
   - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
   
-  - **All F1 and accuracy scores are low**: Domain classification is performing poorly across all domains. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your domain structure and make sure queries in different domains have distinct vocabularies. You may need to combine domains or seperate them in different ways.
+  - **All F1 and accuracy scores are low**: Domain classification is performing poorly across all domains. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your domain structure and make sure queries in different domains have distinct vocabularies. You may need to combine domains or separate them, so that the resulting classes are easier for the classifier to distinguish.
 
   - **F1 weighted is higher than F1 macro**: Your domains with fewer evaluation examples are performing poorly. You may need to add more data to domains that have fewer examples. You could also try adding class weights to your hyperparameters.
  
-  - **F1 macro is higher than F1 weighted**: Your domains with more evaluation examples are performing poorly. Does the number of evaluation examples reflect the class distribution of your training examples? 
+  - **F1 macro is higher than F1 weighted**: Your domains with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
  
-  - **F1 micro is higher than F1 macro**: Certain domains are being misclassified more often than others. Check the class-wise statistics to identify these domains. Some domains may be too similar to another domain or you may need to add more training data to some domains.
+  - **F1 micro is higher than F1 macro**: Certain domains are being misclassified more often than others. Check the class-wise statistics below to identify these domains. Some domains may be too similar to another domain or you may need to add more training data to some domains.
  
   - **Some classes are more important than others**: If some domains are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
