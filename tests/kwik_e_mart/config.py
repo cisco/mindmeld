@@ -1,1 +1,1 @@
-APP_NAME = 'kwik_e_mart'
+APP_NAMESPACE = 'kwik_e_mart'

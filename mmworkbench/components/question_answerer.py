@@ -10,7 +10,7 @@ import json
 import logging
 import copy
 
-from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
+from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      does_index_exist)
 
@@ -34,7 +34,7 @@ class QuestionAnswerer(object):
         self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
         self._es_host = es_host
         self.__es_client = None
-        self._app_name = get_app_name(app_path)
+        self._app_namespace = get_app_namespace(app_path)
         self._es_field_info = {}
 
     @property
@@ -130,11 +130,11 @@ class QuestionAnswerer(object):
             Search: a Search object for filtered search.
         """
 
-        if not does_index_exist(app_name=self._app_name, index_name=index):
+        if not does_index_exist(app_namespace=self._app_namespace, index_name=index):
             raise ValueError('Knowledge base index \'{}\' does not exist.'.format(index))
 
         # get index name with app scope
-        index = get_scoped_index_name(self._app_name, index)
+        index = get_scoped_index_name(self._app_namespace, index)
 
         # load knowledge base field information for the specified index.
         self._load_field_info(index)
@@ -171,21 +171,24 @@ class QuestionAnswerer(object):
         raise NotImplementedError
 
     @classmethod
-    def load_kb(cls, app_name, index_name, data_file, es_host=None, es_client=None,
+    def load_kb(cls, app_namespace, index_name, data_file, es_host=None, es_client=None,
                 connect_timeout=2):
-        """Loads documents from disk into the specified index in the knowledge base. If an index
-        with the specified name doesn't exist, a new index with that name will be created in the
-        knowledge base.
+        """Loads documents from disk into the specified index in the knowledge
+        base. If an index with the specified name doesn't exist, a new index
+        with that name will be created in the knowledge base.
 
         Args:
-            app_name (str): The name of the app
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
             index_name (str): The name of the new index to be created
-            data_file (str): The path to the data file containing the documents to be imported
-                             into the knowledge base index. It could be either json or jsonl file.
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
             es_host (str): The Elasticsearch host server
             es_client (Elasticsearch): The Elasticsearch client
-            connect_timeout (int, optional): The amount of time for a connection to the
-            Elasticsearch host
+            connect_timeout (int, optional): The amount of time for a
+            connection to the Elasticsearch host
         """
 
         def _doc_generator(data_file):
@@ -208,8 +211,8 @@ class QuestionAnswerer(object):
                         doc = json.loads(line)
                         yield transform(doc)
 
-        load_index(app_name, index_name, _doc_generator(data_file), DEFAULT_ES_QA_MAPPING, DOC_TYPE,
-                   es_host, es_client, connect_timeout=connect_timeout)
+        load_index(app_namespace, index_name, _doc_generator(data_file), DEFAULT_ES_QA_MAPPING,
+                   DOC_TYPE, es_host, es_client, connect_timeout=connect_timeout)
 
 
 class FieldInfo:
