@@ -83,9 +83,9 @@ The most important component of developing a production quality entity resolver 
 
 5. Don’t worry about generating exhaustive lists of possible misspellings or pluralization, since the resolver will handle those cases.
 
-Collecting or generating sort factors is largely app specific. Use what makes the most sense for your use case. In most cases, these values are part of an existing dataset. For example, for the food ordering use case it could be something like the rating of a restaurant, the number of reviews for a restaurant, or the proximity of the restaurant to some location. Often times the sort factor is a value that can be scraped from a publically available dataset.
+Collecting or generating sort factors is largely app specific. Use what makes the most sense for your use case. In most cases, these values are part of an existing dataset. For example, for the food ordering use case it could be something like the rating of a restaurant or the number of reviews for a restaurant. Often times the sort factor is a value that can be scraped from a publically available dataset.
 
-The metric you decide to use as a sort factor will be scaled differently for different apps. For example, a restaurant rating will be between 1 and 5, but the number of song listens may be between 1 and over a hundred million. If you notice that the sort value is outweighting good text relevance matches for your use case, you may want to scale the sort factor to a lower max value. On the other hand, you can slightly boost the weight of the sort factor in ranking by scaling to a higher max value.
+The metric you decide to use as a sort factor will be scaled differently for different apps. For example, a restaurant rating will be between 1 and 5, but the number of song listens may be between 1 and over a hundred million. If you notice that the sort factor is outweighing good text relevance matches for your use case, you may want to scale the sort factor to a lower max value. On the other hand, you can slightly boost the weight of the sort factor in ranking by scaling to a higher max value.
 
 Configure the Entity Resolver (optional)
 ----------------------------------------
@@ -114,7 +114,7 @@ It is highly recommended that you install Elasticsearch to leverage Workbench's 
 Run the Entity Resolver
 -----------------------
 
-Once all of the Entity Mapping files are generated, it will be trained and used as part of the NLP pipeline. Using :meth:`nlp.build()` will fit the resolver and :meth:`nlp.process()` will include the resolved entities in the result. To try out the resolver as a stand alone component, you can train it as shown below.
+Once all of the Entity Mapping files are generated, it will be trained and used as part of the NLP pipeline. Using :meth:`NaturalLanguageProcessor.build()` will fit the resolver and :meth:`NaturalLanguageProcessor.process()` will include the resolved entities in the result. To try out the resolver as a stand alone component, you can train it as shown below.
 
 .. code-block:: python
 
@@ -181,7 +181,7 @@ Once the resolver is fit, you can pass Entity objects to test the Entity Resolve
       'score': 27.913887,
       'top_synonym': 'gluten free lamb platter'}]
 
-The Entity Resolver returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top 1 is sufficient, but in some cases it may be beneficial to look at other options if there are other constraints that the top few do not satisfy. The resolver returns:
+Each entry in the list of resolved entities contains:
 
 ==================== ===
 **canonical name**   The name used to refer to the real world entity.
@@ -194,3 +194,5 @@ The Entity Resolver returns a ranked list of the top 10 canonical forms for each
 
 **sort factor**      If the sort factor was provided in the entity mapping file, it will also be returned.
 ==================== ===
+
+The Entity Resolver returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top 1 is sufficient, but in some cases it may be beneficial to look at other options in the ranked list. For example, if you wanted to build a browsing functionality in your app it could be useful to display the top 3 results for the user to choose between. Another scenario in which you may want to look deeper into the ranked list is when the user provided some constraints in a previous query. The entity resolver does not have access to this previous context at resolution time, so the top ranked result may not satisfy previously defined constraints. You can iterate through the ranked list to find the first entry that satisfies the constraints, or you can use the Question Answerer to do a filtered query against the knowledge base. Note that some entity resolution functionality is provided in the Question Answerer for context aware resolution.
