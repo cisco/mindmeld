@@ -31,7 +31,7 @@ def es_client():
 
 @pytest.fixture
 def answerer(es_client):
-    QuestionAnswerer.load_kb(app_name='kwik_e_mart', index_name='store_name',
+    QuestionAnswerer.load_kb(app_namespace='kwik_e_mart', index_name='store_name',
                              data_file=STORE_DATA_FILE_PATH)
     es_client.indices.flush(index='_all')
 
@@ -41,7 +41,7 @@ def answerer(es_client):
 
 @pytest.fixture
 def food_ordering_answerer(resource_loader, es_client):
-    QuestionAnswerer.load_kb(app_name='food_ordering', index_name='menu_items',
+    QuestionAnswerer.load_kb(app_namespace='food_ordering', index_name='menu_items',
                              data_file=DISH_DATA_FILE_PATH)
     es_client.indices.flush(index='_all')
 
