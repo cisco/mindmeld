@@ -592,13 +592,13 @@ The statistics are split into four sections.
   
   - **All F1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
 
-  - **F1 weighted is higher than F1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples. You could also try adding class weights to your hyperparameters.
+  - **F1 weighted is higher than F1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples.
  
-  - **F1 macro is higher than F1 weighted**: Your entity types with more evaluation examples are performing poorly. Does the number of evaluation examples reflect the class distribution of your training examples? 
+  - **F1 macro is higher than F1 weighted**: Your entity types with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
  
-  - **F1 micro is higher than F1 macro**: Certain entity types are being misclassified more often than others. Check the class-wise statistics to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
+  - **F1 micro is higher than F1 macro**: Certain entity types are being misclassified more often than others. Check the class-wise statistics below to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
  
-  - **Some classes are more important than others**: If some intents are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
+  - **Some classes are more important than others**: If some entities are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
 **Class-wise Statistics**
   |
