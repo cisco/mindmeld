@@ -3,7 +3,7 @@ Platform Architecture
 
 The MindMeld Conversational AI Platform provides a robust end-to-end pipeline for building and deploying intelligent data-driven conversational apps. The high-level architecture of the platform is illustrated below.
 
-.. image:: /images/architecture.png
+.. image:: /images/architecture1.png
     :align: center
     :name: architecture_diagram
 
