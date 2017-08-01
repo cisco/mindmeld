@@ -40,9 +40,9 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
         es_client = Elasticsearch(es_host, http_auth=http_auth)
         return es_client
     except ElasticsearchException as e:
-        raise KnowledgeBaseError from e
-    except ImproperlyConfigured as e:
-        raise KnowledgeBaseError from e
+        raise KnowledgeBaseError
+    except ImproperlyConfigured:
+        raise KnowledgeBaseError
 
 
 def does_index_exist(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
@@ -57,13 +57,13 @@ def does_index_exist(app_namespace, index_name, es_host=None, es_client=None, co
         return es_client.indices.exists(index=scoped_index_name)
     except ConnectionError as e:
         logger.error('Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
         logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                      'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-        raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
-        raise KnowledgeBaseError from e
+        raise KnowledgeBaseError
+    except ElasticsearchException:
+        raise KnowledgeBaseError
 
 
 def get_field_names(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
@@ -81,13 +81,13 @@ def get_field_names(app_namespace, index_name, es_host=None, es_client=None, con
         return all_field_info.keys()
     except ConnectionError as e:
         logger.error('Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
         logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                      'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-        raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
-        raise KnowledgeBaseError from e
+        raise KnowledgeBaseError
+    except ElasticsearchException:
+        raise KnowledgeBaseError
 
 
 def create_index(app_namespace, index_name, mapping, es_host=None, es_client=None,
@@ -118,13 +118,13 @@ def create_index(app_namespace, index_name, mapping, es_host=None, es_client=Non
             logger.error('Index %r already exists.', index_name)
     except ConnectionError as e:
         logger.error('Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
         logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                      'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-        raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
-        raise KnowledgeBaseError from e
+        raise KnowledgeBaseError
+    except ElasticsearchException:
+        raise KnowledgeBaseError
 
 
 def delete_index(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
@@ -150,13 +150,13 @@ def delete_index(app_namespace, index_name, es_host=None, es_client=None, connec
                              .format(index_name, app_namespace))
     except ConnectionError as e:
         logger.error('Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
         logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                      'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-        raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
-        raise KnowledgeBaseError from e
+        raise KnowledgeBaseError
+    except ElasticsearchException:
+        raise KnowledgeBaseError
 
 
 def load_index(app_namespace, index_name, docs, mapping, doc_type, es_host=None,
@@ -204,10 +204,10 @@ def load_index(app_namespace, index_name, docs, mapping, doc_type, es_host=None,
         logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
     except ConnectionError as e:
         logger.error('Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
         logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                      'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-        raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
-        raise KnowledgeBaseError from e
+        raise KnowledgeBaseError
+    except ElasticsearchException:
+        raise KnowledgeBaseError

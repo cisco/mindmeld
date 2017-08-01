@@ -328,7 +328,8 @@ class EntityResolver(object):
                 result = {
                     'cname': hit['_source']['cname'],
                     'score': hit['_score'],
-                    'top_synonym': hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
+                    'top_synonym':
+                        hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
 
                 if hit['_source'].get('id'):
                     result['id'] = hit['_source'].get('id')
@@ -342,13 +343,13 @@ class EntityResolver(object):
         except ConnectionError as e:
             logger.error(
                 'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from e
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
         except TransportError as e:
             logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                          'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-            raise EntityResolverError from e
-        except ElasticsearchException as e:
-            raise EntityResolverError from e
+            raise EntityResolverError
+        except ElasticsearchException:
+            raise EntityResolverError
 
     def _predict_exact_match(self, entity):
         """Predicts the resolved value(s) for the given entity using the loaded entity map.
@@ -422,10 +423,10 @@ class EntityResolver(object):
         except ConnectionError as e:
             logger.error(
                 'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts) from e
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
         except TransportError as e:
             logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                          'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-            raise EntityResolverError from e
-        except ElasticsearchException as e:
-            raise EntityResolverError from e
+            raise EntityResolverError
+        except ElasticsearchException:
+            raise EntityResolverError

@@ -168,13 +168,13 @@ class QuestionAnswerer(object):
             except ConnectionError as e:
                 logger.error(
                     'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-                raise KnowledgeBaseConnectionError(es_host=self._es_client.transport.hosts) from e
+                raise KnowledgeBaseConnectionError(es_host=self._es_client.transport.hosts)
             except TransportError as e:
                 logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                              'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-                raise KnowledgeBaseError from e
-            except ElasticsearchException as e:
-                raise KnowledgeBaseError from e
+                raise KnowledgeBaseError
+            except ElasticsearchException:
+                raise KnowledgeBaseError
 
     def config(self, config):
         """Summary
@@ -553,13 +553,13 @@ class Search:
         except ConnectionError as e:
             logger.error(
                 'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-            raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts) from e
+            raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts)
         except TransportError as e:
             logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                          'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-            raise KnowledgeBaseError from e
-        except ElasticsearchException as e:
-            raise KnowledgeBaseError from e
+            raise KnowledgeBaseError
+        except ElasticsearchException:
+            raise KnowledgeBaseError
 
     class Clause:
         """This class models an abstract knowledge base clause."""
