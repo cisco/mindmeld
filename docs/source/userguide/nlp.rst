@@ -1,11 +1,14 @@
-Natural Language Processor
-==========================
+.. meta::
+    :scope: private
+
+Working with the Natural Language Processor
+===========================================
 
 We have seen how the :ref:`Natural Language Processor (NLP) <arch_nlp>` uses a pipeline of components to analyze the query. Workbench encapsulates this pipeline in a higher-level abstraction, in the form of the :class:`NaturalLanguageProcessor` Python class, or NLP class. This chapter focuses on the NLP class,  while subsequent chapters examine each individual component of the pipeline.
 
 .. note::
 
-   For a quick introduction, see :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-By-Step Guide.
+   :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-By-Step Guide is a pre-requisite for this chapter.
 
 .. _instantiate_nlp:
 
@@ -134,7 +137,7 @@ These steps are described further in upcoming chapters, along with default setti
 
 To identify the optimal configuration for each classifier, you should experiment by training, tuning and testing. Then, store the best machine learning settings in ``config.py``, for the :meth:`build` method to use instead of the Workbench defaults.
 
-Here's an example of a ``config.py`` file where the default configurations for the domain and intent classifiers are overridden by custom settings optimized for the app.
+Here's an example of a ``config.py`` file where custom settings optimized for the app override the default configurations for the domain and intent classifiers.
 
 .. code-block:: python
 
@@ -348,7 +351,6 @@ Configuring rest of the pipeline
 """"""""""""""""""""""""""""""""
 
 Since neither the entity resolver nor the language parser are supervised classifiers, they are configured differently from the rest of the NLP pipeline. See `Working with the Entity Resolver <entity_resolver>`_ and `Working with the Language Parser <parser>`_, respectively, to learn how to configure these components.
-
 
 .. _run_nlp:
 

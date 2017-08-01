@@ -1,11 +1,14 @@
-Dialogue Manager
-================
+.. meta::
+    :scope: private
+
+Working with the Dialogue Manager
+=================================
 
 The Dialogue Manager is the component responsible for managing the conversational aspect of your application. It uses pattern based rules to determine the dialogue state for each incoming request and implements handlers which execute business logic and return a natural language response to the user. Developing a dialogue manager for all but the simplest conversational apps can be a daunting task. Workbench mitigates the challenge by providing a pattern matching system and helpers for generating responses.
 
 .. note::
 
-  **Recommended prior reading:** 
+  **Recommended prior reading:**
 
   - :ref:`Step 4 Define the Dialogue State Handlers <define_dialogue_state_handlers>` (Step-By-Step Guide)
 
@@ -70,7 +73,7 @@ A request may satisfy multiple rules, but the dialogue manager will always resol
 Dialogue State Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Dialogue State Handlers are the functions which are invoked when a request matches one of the corresponding rules. Within a handler the developer can execute arbitrary code. Because different applications might 
+Dialogue State Handlers are the functions which are invoked when a request matches one of the corresponding rules. Within a handler the developer can execute arbitrary code. Because different applications might
 
 Dialogue State Handlers have two arguments: ``context`` and ``responder``.
 
@@ -125,7 +128,7 @@ Let's take a look at a basic example of a dialogue state handler for greeting a 
 .. code:: python
 
   @app.handle(intent='greet')
-  def welcome(context, responder): 
+  def welcome(context, responder):
       try:
           responder.slots['name'] = context['request]['session']['name']
           templates = ['Hello {name}', 'Hey {name}!', '{name}, how are you?']
@@ -136,7 +139,7 @@ Let's take a look at a basic example of a dialogue state handler for greeting a 
 
 This handler attempts to use the user's name, retrieving it from the request session.
 
-Examples 
+Examples
 ~~~~~~~~
 
 Review the following documents for more examples of dialogue manager implementations.

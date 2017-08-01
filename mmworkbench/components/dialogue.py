@@ -6,6 +6,7 @@ from builtins import object, str
 from functools import cmp_to_key
 import logging
 import random
+import json
 
 from .. import path
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 SHOW_REPLY = 'show-reply'
 SHOW_PROMPT = 'show-prompt'
 SHOW_SUGGESTIONS = 'show-suggestions'
+SHOW_COLLECTION = 'show-collection'
 
 
 class DialogueStateRule(object):
@@ -273,7 +275,16 @@ class DialogueResponder(object):
         })
 
     def show(self, things):
-        raise NotImplementedError
+        """Sends a 'show-collection' client action
+
+        Args:
+            things (list): The list of dictionary objects
+        """
+        collection = things or []
+        self.respond({
+            'name': SHOW_COLLECTION,
+            'message': collection
+        })
 
     def suggest(self, suggestions=None):
         suggestions = suggestions or []
@@ -348,7 +359,8 @@ class Conversation(object):
 
     def say(self, text):
         """Send a message in the conversation. The message will be processed by the app based on
-        the current state of the conversation.
+        the current state of the conversation and returns the extracted messages from the client
+        actions.
 
         Args:
             text (str): The text of a message
@@ -365,6 +377,23 @@ class Conversation(object):
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
         return response_texts
+
+    def process(self, text):
+        """Send a message in the conversation. The message will be processed by the app based on
+        the current state of the conversation and returns the response.
+
+        Args:
+            text (str): The text of a message
+
+        Returns:
+            (dictionary): The dictionary Response
+        """
+        response = self._app_manager.parse(text, session=self.session, frame=self.frame,
+                                           history=self.history)
+        response.pop('history')
+        self.history.insert(0, response)
+        self.frame = response['frame']
+        return response
 
     def _handle_client_action(self, action):
         try:
@@ -384,6 +413,9 @@ class Conversation(object):
 
                     texts.append(self._generate_suggestion_text(suggestion))
                 msg = msg.format(*texts)
+            elif action['name'] == SHOW_COLLECTION:
+                msg = '\n'.join(
+                    [json.dumps(item, indent=4, sort_keys=True) for item in action['message']])
         except (KeyError, ValueError, AttributeError):
             msg = "Unsupported response: {!r}".format(action)
 
@@ -398,3 +430,7 @@ class Conversation(object):
             pieces.append('({})'.format(suggestion['type']))
 
         return ' '.join(pieces)
+
+    def reset(self):
+        self.history = []
+        self.frame = {}

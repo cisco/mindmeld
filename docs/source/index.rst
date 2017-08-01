@@ -99,7 +99,7 @@ Contents
    :caption: User Guide
    :name: userguide
 
-   userguide/introduction
+   userguide/about
    userguide/getting_started
    userguide/architecture
    userguide/nlp
