@@ -698,4 +698,3 @@ You can load the saved model anytime using the :meth:`IntentClassifier.load` met
 
    >>> ic.load(model_path='experiments/intent_classifier.rforest.20170701.pkl')
    Loading intent classifier: domain='times_and_dates'
-
