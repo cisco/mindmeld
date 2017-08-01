@@ -4,31 +4,18 @@
 Working with the Domain Classifier
 ==================================
 
-The Domain Classifier  
+The Domain Classifier
 
  - is run as the first step in the natural language processing pipeline
  - is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that determines the target domain for a given query
  - is trained using all of the labeled queries across all the domains in an application
  - can be trained only when the labeled data contains more than one domain
- 
+
 Every Workbench app has exactly one domain classifier. The name of each domain folder serves as the label for the training queries contained within that folder.
 
 .. note::
-=======
-Domain Classifier
-=================
 
-The :ref:`Domain Classifier <arch_domain_model>` is run as the first step in the natural language processing pipeline to determine the target domain for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the domains in an application. The name of each domain folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. A Workbench app has exactly one domain classifier which gets trained only when the labeled data contains more than one domain.
-
-.. note::
-
-   **Recommended prior reading:**
-
-   - :ref:`Step 7: Train the Natural Language Processing Classifiers <domain_classification>` (Step-By-Step Guide)
-   - :doc:`Natural Language Processor <nlp>` (User Guide)
->>>>>>> develop
-
-   This is an in-depth tutorial to work through from start to finish. Before you begin, read :ref:`Step 7 <domain_classification>` of the Step-By-Step Guide. 
+   This is an in-depth tutorial to work through from start to finish. Before you begin, read :ref:`Step 7 <domain_classification>` of the Step-By-Step Guide.
 
 Access the domain classifier
 ----------------------------
@@ -122,7 +109,7 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
 
 Let's take a look at the allowed values for each setting in a domain classifier configuration.
 
-1. **Model Settings** 
+1. **Model Settings**
 
 ``'model_type'`` (:class:`str`)
   |
@@ -132,7 +119,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 ``'model_settings'`` (:class:`dict`)
   |
 
-  Always a dictionary with the single key ``'classifier_type'``, whose value specifies the machine learning model to use. Allowed values are shown in the table below. 
+  Always a dictionary with the single key ``'classifier_type'``, whose value specifies the machine learning model to use. Allowed values are shown in the table below.
 
 .. _sklearn_domain_models:
 
@@ -146,7 +133,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   =============== =======================================================
 
 
-2. **Feature Extraction Settings** 
+2. **Feature Extraction Settings**
 
 ``'features'`` (:class:`dict`)
   |
@@ -183,7 +170,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   |                       | along with popularity information as defined in the gazetteer.                                             |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'length'``          | Generates a set of features that capture query length information.                                         |
-  |                       | Computes the number of tokens and characters in the query, on both linear and log scales.                  | 
+  |                       | Computes the number of tokens and characters in the query, on both linear and log scales.                  |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'exact'``           | Returns the entire query text as a feature.                                                                |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
@@ -217,12 +204,12 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   |                       |                                                                                                                   |
   |                       | .. code-block:: python                                                                                            |
   |                       |                                                                                                                   |
-  |                       |    {                                                                                                              | 
+  |                       |    {                                                                                                              |
   |                       |      'penalty': ['l1', 'l2'],                                                                                     |
   |                       |      'C': [10, 100, 1000, 10000, 100000],                                                                         |
   |                       |       'fit_intercept': [True, False]                                                                              |
   |                       |    }                                                                                                              |
-  |                       |                                                                                                                   | 
+  |                       |                                                                                                                   |
   |                       | :ref:`The model table <sklearn_domain_models>` above lists hyperparameters available for each supported model.    |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
@@ -232,7 +219,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`          |
   |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`         |
   |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                 |
-  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`| 
+  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`|
   |                       |                                                                                                                   |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'k'``               | Number of folds (splits)                                                                                          |
@@ -245,13 +232,13 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 Training with custom configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To override Workbench's default domain classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments. 
+To override Workbench's default domain classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
 
 
 1. Application configuration file
 """""""""""""""""""""""""""""""""
 
-When you define custom classifier settings in ``config.py``, the :meth:`DomainClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench's defaults. To do this, define a dictionary of your custom settings, named :data:`DOMAIN_MODEL_CONFIG`. 
+When you define custom classifier settings in ``config.py``, the :meth:`DomainClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench's defaults. To do this, define a dictionary of your custom settings, named :data:`DOMAIN_MODEL_CONFIG`.
 
 Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the domain classifier.
 
@@ -289,7 +276,7 @@ For experimenting with the domain classifier, the recommended method is to use a
 
 **Feature extraction**
 
-Let's start with the baseline classifier we trained :ref:`earlier <baseline_domain_fit>`. Viewing the feature set reveals that, by default, the classifier just uses a bag of words (unigrams) for features. 
+Let's start with the baseline classifier we trained :ref:`earlier <baseline_domain_fit>`. Viewing the feature set reveals that, by default, the classifier just uses a bag of words (unigrams) for features.
 
 .. code-block:: python
 
@@ -311,7 +298,7 @@ We can also add more :ref:`supported features <domain_features>`. Suppose that o
 
 .. code-block:: python
 
-   >>> my_features['edge-ngrams'] = { 'lengths': [1, 2] } 
+   >>> my_features['edge-ngrams'] = { 'lengths': [1, 2] }
    >>> my_features
    {
     'bag-of-words': {'lengths': [1, 2, 3]},
@@ -397,7 +384,7 @@ For a list of configurable hyperparameters for each model, along with available 
 
 **Model selection**
 
-To try :ref:`machine learning models <sklearn_domain_models>` other than the default of logistic regression, we update the hyperparameter grid to be compatible with the desired model. 
+To try :ref:`machine learning models <sklearn_domain_models>` other than the default of logistic regression, we update the hyperparameter grid to be compatible with the desired model.
 
 For example, a :sk_guide:`support vector machine (SVM) <svm>` with the same features as before, and parameter selection settings updated to search over the :sk_api:`SVM hyperparameters <sklearn.svm.SVC.html#sklearn.svm.SVC>`, looks like this:
 
@@ -441,7 +428,7 @@ Meanwhile, a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :
 Run the domain classifier
 -------------------------
 
-Run the trained domain classifier on a test query using the :meth:`DomainClassifier.predict` method. At runtime, the natural language processor's :meth:`process` method calls :meth:`DomainClassifier.predict` to classify the domain for an incoming query. The :meth:`DomainClassifier.predict` method returns the label for the domain whose predicted probability is highest. 
+Run the trained domain classifier on a test query using the :meth:`DomainClassifier.predict` method. At runtime, the natural language processor's :meth:`process` method calls :meth:`DomainClassifier.predict` to classify the domain for an incoming query. The :meth:`DomainClassifier.predict` method returns the label for the domain whose predicted probability is highest.
 
 .. code-block:: python
 
@@ -506,7 +493,7 @@ In the example below, the model gets 1,811 out of 1,847 test queries correct, re
    Loading queries from file weather/check-weather/test.txt
    <StandardModelEvaluation score: 98.05%, 1811 of 1847 examples correct>
 
-The aggregate accuracy score we see above is only the beginning, because the :meth:`evaluate` method returns a rich object containing overall statistics, statistics by class, and a confusion matrix. 
+The aggregate accuracy score we see above is only the beginning, because the :meth:`evaluate` method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.
 
 Print all the model performance statistics reported by the :meth:`evaluate` method:
 
@@ -514,14 +501,14 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
 
    >>> eval = dc.evaluate()
    >>> eval.print_stats()
-   Overall Statistics: 
+   Overall Statistics:
 
        accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
           0.981       0.972        1811        5505          36          36       0.741       0.981
 
 
 
-   Statistics by Class: 
+   Statistics by Class:
 
                   class      f_beta   precision      recall     support          TP          TN          FP          FN
         times_and_dates       0.994       1.000       0.987          78          77        1769           0           1
@@ -531,7 +518,7 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
 
 
 
-   Confusion Matrix: 
+   Confusion Matrix:
 
                      times_and_..     smart_home        unknown
       times_and_..             77              1              0
@@ -610,7 +597,7 @@ Next, we look selectively at just the correct or incorrect predictions.
     ...
    ]
 
-Slicing and dicing these results for error analysis is easily done with `list comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_. 
+Slicing and dicing these results for error analysis is easily done with `list comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_.
 
 A simple example of this is inspecting incorrect predictions for a particular domain. For the ``times_and_dates`` domain, we get:
 
@@ -656,9 +643,9 @@ Next, we use a list comprehension to identify the kind of queries that the curre
     ...
    ]
 
-The result reveals queries where the domain was misclassified as ``smart_home``, and where the language pattern was the word "check" followed by a noun phrase. 
+The result reveals queries where the domain was misclassified as ``smart_home``, and where the language pattern was the word "check" followed by a noun phrase.
 
-Try looking for similar queries in the :doc:`training data <../blueprints/home_assistant>`. You should discover that the ``weather`` domain does indeed lack labeled training queries that fit the pattern. But the ``smart_home`` domain, and the ``check_thermostat`` intent in particular, has plenty of queries that fit. This explains why the model chose ``smart_home`` over ``weather`` when classifying such queries. 
+Try looking for similar queries in the :doc:`training data <../blueprints/home_assistant>`. You should discover that the ``weather`` domain does indeed lack labeled training queries that fit the pattern. But the ``smart_home`` domain, and the ``check_thermostat`` intent in particular, has plenty of queries that fit. This explains why the model chose ``smart_home`` over ``weather`` when classifying such queries.
 
 One potential solution is to add more training queries that fit the "check something" pattern to the ``weather`` domain. Then the classification model should more effectively learn to distinguish the two domains that it confused in our experiments thus far.
 
