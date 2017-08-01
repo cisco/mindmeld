@@ -130,19 +130,20 @@ You can configure pip and workbench easily by running these commands in a comman
 
 .. code-block:: shell
 
-  export USERNAME=<Your CEC Username>
-  curl -s -u $USERNAME https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh
-  if [[ `file -b mmworkbench_init.sh` =~ Bourne* ]]; then source mmworkbench_init.sh; else echo Your password is incorrect; fi
+  export USERNAME=<Username>
+  curl -s https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh
+  source mmworkbench_init.sh
 
 
-Notes on each line:
+Notes:
 
-#. Remember to modify the USERNAME to your actual CEC username.
-#. Downloads the setup script - you will be prompted for your MindMeld Learning Center password.
-#. Runs the setup script - you will be prompted for your password again.
+#. Remember to modify the ``Username`` to your actual mindmeld.com username.
+#. You will be prompted to enter your mindmeld.com password.
+#. This creates two configuration files: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. Previous files will be overwritten.
+#. If you enter an incorrect password, run the last command again.
 
 
-Proceed to :ref:`installing Workbench <getting_started_install_workbench>`.
+Proceed to :ref:`Install Workbench <getting_started_install_workbench>`.
 
 
 Manual Configuration
