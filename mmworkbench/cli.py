@@ -18,7 +18,7 @@ import click_log
 
 from . import path
 from .components import Conversation, QuestionAnswerer
-from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
+from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError,
                          EntityResolverConnectionError)
 
 from ._util import blueprint
@@ -50,6 +50,12 @@ def version_msg():
 @click_log.init(__package__)
 def cli(ctx):
     """Command line interface for mmworkbench."""
+
+    # configure logger settings for dependent libraries
+    urllib3_logger = logging.getLogger('urllib3')
+    urllib3_logger.setLevel(logging.ERROR)
+    es_logger = logging.getLogger('elasticsearch')
+    es_logger.setLevel(logging.ERROR)
 
     if ctx.obj is None:
         ctx.obj = {}
@@ -140,7 +146,13 @@ def clean(ctx):
 @click.argument('data_file', required=True)
 def load_index(es_host, app_namespace, index_name, data_file):
     """Loads data into a question answerer index."""
-    QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
+
+    try:
+        QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
+    except KnowledgeBaseConnectionError as e:
+        logger.error(e.message)
+    except KnowledgeBaseError as e:
+        logger.error(e.message)
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
@@ -198,6 +210,10 @@ def setup_blueprint(es_host, skip_kb, blueprint_name, app_path):
         blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
     except ValueError as e:
         logger.error(e)
+    except KnowledgeBaseConnectionError as e:
+        logger.error(e.message)
+    except KnowledgeBaseError as e:
+        logger.error(e.message)
 
 
 if __name__ == '__main__':

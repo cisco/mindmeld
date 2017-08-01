@@ -60,27 +60,44 @@ class SystemEntityResolutionError(Exception):
     pass
 
 
-class KnowledgeBaseConnectionError(WorkbenchError):
-    """An exception representing an issue connecting to a knowledge base"""
+class KnowledgeBaseError(WorkbenchError):
+    """An exception for unexpected error from knowledge base."""
+    def __init__(self, message):
+
+        super().__init__(message)
+
+
+class KnowledgeBaseConnectionError(KnowledgeBaseError):
+    """An exception for problem connecting to knowledge base."""
+    def __init__(self, es_host):
+
+        self.es_host = es_host
+        if (not es_host) or (not es_host[0]):
+            self.message = 'Unable to connect to Elasticsearch for knowledge base. Please' \
+                           ' verify your connection to localhost.'
+        else:
+            es_host = [host['host'] for host in es_host]
+            self.message = 'Unable to connect to knowledge base. Please verify' \
+                           ' your connection to: {hosts}.'.format(hosts=', '.join(es_host))
+        super().__init__(self.message)
+
+
+class EntityResolverError(WorkbenchError):
+    """An exception for unexpected error from entity resolver."""
+    def __init__(self, message):
+
+        super().__init__(message)
+
+
+class EntityResolverConnectionError(EntityResolverError):
+    """An exception for connection error to Elasticsearch for entity resolver"""
     def __init__(self, es_host):
         self.es_host = es_host
         if (not es_host) or (not es_host[0]):
-            self.message = 'Unable to connect to elasticsearch for knowledgebase - please' \
-                           ' verify your connection to local host.'
+            self.message = 'Unable to connect to Elasticsearch for entity resolution. ' \
+                           'Please verify your connection to localhost.'
         else:
             es_host = [host['host'] for host in es_host]
-            self.message = 'Unable to connect to elasticsearch for knowledgebase - please verify' \
-                           ' your connection to: {hosts}.'.format(hosts=', '.join(es_host))
-
-
-class EntityResolverConnectionError(WorkbenchError):
-    """An exception representing an issue connecting to elasticsearch for entity resolver"""
-    def __init__(self, es_host):
-        self.es_host = es_host
-        if (not es_host) or (not es_host[0]):
-            self.message = 'Unable to connect to elasticsearch for entity resolution -' \
-                           ' please verify your connection to local host.'
-        else:
-            es_host = [host['host'] for host in es_host]
-            self.message = 'Unable to connect to elasticsearch for entity resolution - verify' \
-                           ' your connection to: {hosts}.'.format(hosts=', '.join(es_host))
+            self.message = 'Unable to connect to Elasticsearch for entity resolution. ' \
+                           'Please verify your connection to: {hosts}.'.format(
+                            hosts=', '.join(es_host))
