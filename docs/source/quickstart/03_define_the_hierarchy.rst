@@ -97,7 +97,7 @@ Workbench provides a faster way to create your application structure for common 
 
 .. code-block:: console
 
-    $ python -c "import mmworkbench as wb; wb.blueprint('quickstart', 'my_app');"
+    $ python -c "import mmworkbench as wb; wb.blueprint('qwik_e_mart', 'my_app');"
 
 Running the :func:`blueprint()` method for our simple example application produces the root directory structure illustrated below.
 
