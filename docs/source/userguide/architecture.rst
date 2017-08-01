@@ -9,7 +9,8 @@ The MindMeld Conversational AI Platform provides a robust end-to-end pipeline fo
 
 .. note::
 
-    The Application Manager, while part of Workbench, orchestrates behind the scenes and never needs developer attention. The Gateway, while part of the platform, is outside of Workbench.
+    The Application Manager, while part of Workbench, orchestrates behind the scenes and never needs developer attention. 
+..    The Gateway, while part of the platform, is outside of Workbench.
 
 We will now explore the platform component by component.
 
@@ -188,14 +189,14 @@ For a practical introduction to dialogue state tracking in Workbench, see Step :
 
 
 
-.. _arch_gateway:
+.... _arch_gateway:
 
-Gateway
--------
+..Gateway
+..-------
 
-The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that Workbench-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with Workbench components with the aid of the Application Manager, as described below.
+..The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that Workbench-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with Workbench components with the aid of the Application Manager, as described below.
 
-Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
+..Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
 
 
 .. _arch_app_manager:
@@ -205,9 +206,9 @@ Application Manager
 
 As the core orchestrator of the MindMeld platform, the Application Manager:
 
-	- Receives the client request from the gateway
+	- Receives the client request from a supported endpoint
 	- Processes the request by passing it through all the Workbench-trained components of the MindMeld platform
-	- Returns the final response to the gateway once processing is complete
+	- Returns the final response to the endpoint once processing is complete
 
 The application manager works behind the scenes, hidden from the Workbench developer.
 
