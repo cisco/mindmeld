@@ -19,7 +19,7 @@ import click_log
 from . import path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError,
-                         EntityResolverConnectionError, WorkbenchError)
+                         WorkbenchError)
 
 from ._util import blueprint
 from ._version import current as __version__
