@@ -39,7 +39,7 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
         http_auth = (es_user, es_pass) if es_user and es_pass else None
         es_client = Elasticsearch(es_host, http_auth=http_auth)
         return es_client
-    except ElasticsearchException as e:
+    except ElasticsearchException:
         raise KnowledgeBaseError
     except ImproperlyConfigured:
         raise KnowledgeBaseError
