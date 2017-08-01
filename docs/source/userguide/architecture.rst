@@ -191,12 +191,12 @@ For a practical introduction to dialogue state tracking in Workbench, see Step :
 
 .... _arch_gateway:
 
-..Gateway
-..-------
+.. Gateway
+.. -------
 
-..The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that Workbench-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with Workbench components with the aid of the Application Manager, as described below.
+.. The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that Workbench-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with Workbench components with the aid of the Application Manager, as described below.
 
-..Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
+.. Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
 
 
 .. _arch_app_manager:
