@@ -16,11 +16,12 @@ from numpy import bincount
 from past.utils import old_div
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV
-from sklearn.feature_selection import SelectFromModel, SelectPercentile
-from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
+from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
+from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
@@ -28,7 +29,7 @@ from sklearn_crfsuite.metrics import sequence_accuracy_score
 
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC,
                       mask_numerics, register_model)
-from .model import EvaluatedExample, Model, StandardModelEvaluation
+from .model import EvaluatedExample, Model
 
 _NEG_INF = -1e10
 
@@ -58,13 +59,18 @@ def evaluate_seq2seq(y, y_pred, **kwargs):
     return 1 - error / float(len(y))
 
 
-class StandardModel(Model):
+class TextModel(Model):
     def __init__(self, config):
         super().__init__(config)
         self._class_encoder = SKLabelEncoder()
         self._feat_vectorizer = DictVectorizer()
         self._feat_selector = self._get_feature_selector()
         self._feat_scaler = self._get_feature_scaler()
+        self._meta_type = None
+        self._meta_feat_vectorizer = DictVectorizer(sparse=False)
+        self._base_clfs = {}
+        self.cv_loss_ = None
+        self.train_acc_ = None
 
     def __getstate__(self):
         """Returns the information needed pickle an instance of this class.
@@ -79,8 +85,15 @@ class StandardModel(Model):
 
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
-        # TODO: use general sklearn model
-        return LogisticRegression
+        classifier_type = self.config.model_settings['classifier_type']
+        try:
+            return {LOG_REG_TYPE: LogisticRegression,
+                    DECISION_TREE_TYPE: DecisionTreeClassifier,
+                    RANDOM_FOREST_TYPE: RandomForestClassifier,
+                    SVM_TYPE: SVC}[classifier_type]
+        except KeyError:
+            msg = '{}: Classifier type {!r} not recognized'
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type))
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -102,7 +115,7 @@ class StandardModel(Model):
         evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1],
                        config.label_type) for i, e in enumerate(examples)]
 
-        model_eval = StandardModelEvaluation(config, evaluations)
+        model_eval = TextModel(config, evaluations)
         return model_eval
 
     def fit(self, examples, labels, params=None):
@@ -123,10 +136,30 @@ class StandardModel(Model):
             (SkLearnModel): Returns self to match classifier scikit-learn
                 interfaces.
         """
+        """Trains this TextModel.
+
+        This method inspects instance attributes to determine the classifier
+        object and cross-validation strategy, and then fits the model to the
+        training examples passed in.
+
+        Args:
+            queries (list of Query): A list of queries.
+            classes (list of str): A parallel list to queries. The gold labels
+                for each query.
+            verbose (bool): Whether to show analysis output
+
+        Returns:
+            (TextModel): Returns self to match classifier scikit-learn
+                interfaces.
+        """
+        # Prepare resources
+        if self._resources.get(WORD_FREQ_RSC) is None and self.requires_resource(WORD_FREQ_RSC):
+            self.compile_word_freq_dict(examples)
+        if self._resources.get(QUERY_FREQ_RSC) is None and self.requires_resource(QUERY_FREQ_RSC):
+            self.compile_query_freq_dict(examples)
+
         params = params or self.config.params
         skip_param_selection = params is not None or self.config.param_selection is None
-
-        # Prepare resources
 
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
@@ -365,46 +398,6 @@ class StandardModel(Model):
                   'max-abs': MaxAbsScaler()}.get(scale_type)
         return scaler
 
-
-class TextModel(StandardModel):
-    """A machine learning classifier for text.
-
-    This class manages feature extraction, training, cross-validation, and
-    prediction. The design goal is that after providing initial settings like
-    hyperparameters, grid-searchable hyperparameters, feature extractors, and
-    cross-validation settings, TextModel manages all of the details
-    involved in training and prediction such that the input to training or
-    prediction is Query objects, and the output is class names, and no data
-    manipulation is needed from the client.
-
-    Attributes:
-        classifier_type (str): The name of the classifier type. Currently
-            recognized values are "logreg","dtree", "rforest" and "svm",
-            as well as "super-learner:logreg", "super-learner:dtree" etc.
-        hyperparams (dict): A kwargs dict of parameters that will be used to
-            initialize the classifier object.
-        grid_search_hyperparams (dict): Like 'hyperparams', but the values are
-            lists of parameters. The training process will grid search over the
-            Cartesian product of these parameter lists and select the best via
-            cross-validation.
-        feat_specs (dict): A mapping from feature extractor names, as given in
-            FEATURE_NAME_MAP, to a kwargs dict, which will be passed into the
-            associated feature extractor function.
-        cross_validation_settings (dict): A dict that contains "type", which
-            specifies the name of the cross-validation strategy, such as
-            "k-folds" or "shuffle". The remaining keys are parameters
-            specific to the cross-validation type, such as "k" when the type is
-            "k-folds".
-    """
-
-    def __init__(self, config):
-        super().__init__(config)
-        self._meta_type = None
-        self._meta_feat_vectorizer = DictVectorizer(sparse=False)
-        self._base_clfs = {}
-        self.cv_loss_ = None
-        self.train_acc_ = None
-
     def register_resources(self, gazetteers=None, word_freqs=None, query_freqs=None):
         """Loads resources that are built outside the classifier, e.g. gazetteers
 
@@ -457,42 +450,5 @@ class TextModel(StandardModel):
 
         self.register_resources(query_freqs=query_dict)
 
-    def _get_model_constructor(self):
-        """Returns the class of the actual underlying model"""
-        classifier_type = self.config.model_settings['classifier_type']
-        try:
-            return {LOG_REG_TYPE: LogisticRegression,
-                    DECISION_TREE_TYPE: DecisionTreeClassifier,
-                    RANDOM_FOREST_TYPE: RandomForestClassifier,
-                    SVM_TYPE: SVC}[classifier_type]
-        except KeyError:
-            msg = '{}: Classifier type {!r} not recognized'
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type))
 
-    def fit(self, examples, labels, params=None):
-        """Trains this TextModel.
-
-        This method inspects instance attributes to determine the classifier
-        object and cross-validation strategy, and then fits the model to the
-        training examples passed in.
-
-        Args:
-            queries (list of Query): A list of queries.
-            classes (list of str): A parallel list to queries. The gold labels
-                for each query.
-            verbose (bool): Whether to show analysis output
-
-        Returns:
-            (TextModel): Returns self to match classifier scikit-learn
-                interfaces.
-        """
-        if self._resources.get(WORD_FREQ_RSC) is None and self.requires_resource(WORD_FREQ_RSC):
-            self.compile_word_freq_dict(examples)
-        if self._resources.get(QUERY_FREQ_RSC) is None and self.requires_resource(QUERY_FREQ_RSC):
-            self.compile_query_freq_dict(examples)
-
-        return super().fit(examples, labels, params)
-
-
-register_model('maxent', StandardModel)
 register_model('text', TextModel)
