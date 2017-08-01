@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .. meta::
     :scope: private
 
