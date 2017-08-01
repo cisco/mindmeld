@@ -10,8 +10,9 @@ import json
 import logging
 import copy
 
-from ._config import get_app_name, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
-from ._elasticsearch_helpers import create_es_client, load_index, get_scoped_index_name
+from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
+from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
+                                     does_index_exist)
 
 from ..resource_loader import ResourceLoader
 
@@ -33,7 +34,7 @@ class QuestionAnswerer(object):
         self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
         self._es_host = es_host
         self.__es_client = None
-        self._app_name = get_app_name(app_path)
+        self._app_namespace = get_app_namespace(app_path)
         self._es_field_info = {}
 
     @property
@@ -112,8 +113,8 @@ class QuestionAnswerer(object):
 
         # add custom sort clause if specified.
         if sort_clause:
-            s = s.sort(field=sort_clause['field'],
-                       sort_type=sort_clause['type'],
+            s = s.sort(field=sort_clause.get('field'),
+                       sort_type=sort_clause.get('type'),
                        location=sort_clause.get('location'))
 
         results = s.execute()
@@ -129,8 +130,11 @@ class QuestionAnswerer(object):
             Search: a Search object for filtered search.
         """
 
+        if not does_index_exist(app_namespace=self._app_namespace, index_name=index):
+            raise ValueError('Knowledge base index \'{}\' does not exist.'.format(index))
+
         # get index name with app scope
-        index = get_scoped_index_name(self._app_name, index)
+        index = get_scoped_index_name(self._app_namespace, index)
 
         # load knowledge base field information for the specified index.
         self._load_field_info(index)
@@ -167,21 +171,24 @@ class QuestionAnswerer(object):
         raise NotImplementedError
 
     @classmethod
-    def load_kb(cls, app_name, index_name, data_file, es_host=None, es_client=None,
+    def load_kb(cls, app_namespace, index_name, data_file, es_host=None, es_client=None,
                 connect_timeout=2):
-        """Loads documents from disk into the specified index in the knowledge base. If an index
-        with the specified name doesn't exist, a new index with that name will be created in the
-        knowledge base.
+        """Loads documents from disk into the specified index in the knowledge
+        base. If an index with the specified name doesn't exist, a new index
+        with that name will be created in the knowledge base.
 
         Args:
-            app_name (str): The name of the app
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
             index_name (str): The name of the new index to be created
-            data_file (str): The path to the data file containing the documents to be imported
-                             into the knowledge base index. It could be either json or jsonl file.
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
             es_host (str): The Elasticsearch host server
             es_client (Elasticsearch): The Elasticsearch client
-            connect_timeout (int, optional): The amount of time for a connection to the
-            Elasticsearch host
+            connect_timeout (int, optional): The amount of time for a
+            connection to the Elasticsearch host
         """
 
         def _doc_generator(data_file):
@@ -204,8 +211,8 @@ class QuestionAnswerer(object):
                         doc = json.loads(line)
                         yield transform(doc)
 
-        load_index(app_name, index_name, _doc_generator(data_file), DEFAULT_ES_QA_MAPPING, DOC_TYPE,
-                   es_host, es_client, connect_timeout=connect_timeout)
+        load_index(app_namespace, index_name, _doc_generator(data_file), DEFAULT_ES_QA_MAPPING,
+                   DOC_TYPE, es_host, es_client, connect_timeout=connect_timeout)
 
 
 class FieldInfo:
@@ -730,21 +737,23 @@ class Search:
                 elif self.range_lte and self.range_lt:
                     raise ValueError(
                         'Invalid range parameters. Cannot specify both \'lte\' and \'lt\'.')
-                elif not self.field_info.is_number_field() and self.field_info.is_date_field():
+                elif not self.field_info.is_number_field() and not self.field_info.is_date_field():
                     raise ValueError(
                         'Range filter can only be defined for number or date field.')
 
     class SortClause(Clause):
         """This class models a knowledge base sort clause."""
-        SORT_TYPES = {'asc', 'desc', 'distance'}
+        SORT_ORDER_ASC = 'asc'
+        SORT_ORDER_DESC = 'desc'
+        SORT_DISTANCE = 'distance'
+        SORT_TYPES = {SORT_ORDER_ASC, SORT_ORDER_DESC, SORT_DISTANCE}
 
-        def __init__(self, field, field_info=None, sort_type='desc', field_stats=None,
+        def __init__(self, field, field_info=None, sort_type=None, field_stats=None,
                      location=None):
             """Initialize a knowledge base sort clause"""
             self.field = field
-            self.type = type
             self.location = location
-            self.sort_type = sort_type
+            self.sort_type = sort_type if sort_type else self.SORT_ORDER_DESC
             self.field_stats = field_stats
             self.field_info = field_info
 
@@ -792,6 +801,15 @@ class Search:
             # validate the sort type to be valid.
             if self.sort_type not in self.SORT_TYPES:
                 raise ValueError('Invalid value for sort type \'{}\''.format(self.sort_type))
+
+            if self.field == 'location' and self.sort_type != self.SORT_DISTANCE:
+                raise ValueError('Invalid value for sort type \'{}\''.format(self.sort_type))
+
+            if self.field == 'location' and not self.location:
+                raise ValueError('No origin location specified for sorting by distance.')
+
+            if self.sort_type == self.SORT_DISTANCE and self.field != 'location':
+                raise ValueError('Sort by distance is only supported using \'location\' field.')
 
             # validate the sort field is number, date or location field
             if not self.field_info.is_number_field() and not self.field_info.is_date_field() and \

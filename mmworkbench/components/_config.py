@@ -389,14 +389,14 @@ DEFAULT_RANKING_CONFIG = {
 }
 
 
-def get_app_name(app_path):
-    """Returns the name of the application at app_path"""
+def get_app_namespace(app_path):
+    """Returns the namespace of the application at app_path"""
     try:
-        return _get_config_module(app_path).APP_NAME
+        return _get_config_module(app_path).APP_NAMESPACE
     except (OSError, IOError):
         logger.debug('No app configuration file found')
     except AttributeError:
-        logger.debug('App name not set in app configuration')
+        logger.debug('App namespace not set in app configuration')
     return os.path.split(app_path)[1]
 
 
@@ -404,10 +404,6 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
     """Returns the application config if it exists, otherwise returns the default config."""
     try:
         module_conf = _get_config_module(app_path)
-
-        from pprint import pprint
-        pprint(module_conf)
-        pprint(app_path)
 
         attribute = {
             'domain': 'DOMAIN_MODEL_CONFIG',
