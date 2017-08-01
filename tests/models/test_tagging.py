@@ -33,7 +33,7 @@ class TestTagging:
         nlp.build()
         cls.nlp = nlp
 
-    test_data = [
+    test_data_1 = [
         ('set alarm for 1130',
          ['O||O|', 'O||O|', 'O||O|', 'O||B|sys_time'],
          "2017-07-31T11:30:00.000-07:00"),
@@ -42,7 +42,7 @@ class TestTagging:
          "1130-01-01T00:00:00.000-07:00"),
     ]
 
-    @pytest.mark.parametrize("query,tags,expected_time", test_data)
+    @pytest.mark.parametrize("query,tags,expected_time", test_data_1)
     def test_get_entities_from_tags_where_tag_idx_in_sys_candidate(self,
                                                                    query,
                                                                    tags,
@@ -60,14 +60,14 @@ class TestTagging:
         if res_entity[0].to_dict()['value']['grain'] == 'year':
             assert res_entity[0].to_dict()['value']['value'] == expected_time
 
-    test_data = [
+    test_data_2 = [
         ('set alarm for 1130',
          ['O||O|', 'O||O|', 'O||O|', 'O||O|']),
         ('the vikings fought on the year 1130',
          ['O||O|', 'O||O|', 'O||B|sys_time', 'O||O|', 'O||O|', 'O||O|', 'O||O|'])
     ]
 
-    @pytest.mark.parametrize("query,tags", test_data)
+    @pytest.mark.parametrize("query,tags", test_data_2)
     def test_get_entities_from_tags_where_tag_idx_not_in_sys_candidate(self,
                                                                        query,
                                                                        tags):
