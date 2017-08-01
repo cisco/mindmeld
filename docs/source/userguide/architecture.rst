@@ -9,7 +9,7 @@ The MindMeld Conversational AI Platform provides a robust end-to-end pipeline fo
 
 .. note::
 
-    The Application Manager, while part of Workbench, orchestrates behind the scenes and never needs developer attention. 
+    The Application Manager, while part of Workbench, orchestrates behind the scenes and never needs developer attention.
 ..    The Gateway, while part of the platform, is outside of Workbench.
 
 We will now explore the platform component by component.
@@ -187,16 +187,14 @@ Architecting the dialogue manager correctly is often one of the most challenging
 
 For a practical introduction to dialogue state tracking in Workbench, see Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide. The :doc:`Dialogue Manager <dm>` section of this guide provides further examples.
 
+.. .. _arch_gateway:
 
+.. Gateway
+.. -------
 
-.... _arch_gateway:
+.. The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that Workbench-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with Workbench components with the aid of the Application Manager, as described below.
 
-..Gateway
-..-------
-
-..The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that Workbench-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with Workbench components with the aid of the Application Manager, as described below.
-
-..Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
+.. Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
 
 
 .. _arch_app_manager:
