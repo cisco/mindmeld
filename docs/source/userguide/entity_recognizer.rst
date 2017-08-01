@@ -1,15 +1,14 @@
-Entity Recognizer
-=================
+.. meta::
+    :scope: private
+
+Working with the Entity Recognizer
+==================================
 
 The :ref:`Entity Recognizer <arch_entity_model>` is run as the third step in the natural language processing pipeline to detect all the relevant :term:`entities <entity>` in a given query. It is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the entity types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Entity recognition models are trained per intent. A Workbench app hence has one entity recognizer for every intent that requires entity detection.
 
 .. note::
 
-   **Recommended prior reading:**
-
-   - :ref:`Step 7: Train the Natural Language Processing Classifiers <entity_recognition>` (Step-By-Step Guide)
-   - :doc:`Natural Language Processor <nlp>` (User Guide)
-
+   :ref:`Step 7 <entity_recognition>` of the Step-By-Step Guide is a pre-requisite for this chapter.
 
 System entities and custom entities
 -----------------------------------
@@ -17,7 +16,7 @@ System entities and custom entities
 Entities in Workbench are categorized into two types:
 
 **System Entities**
-  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. Read more in the :doc:`System Entities <system_entities>` chapter. 
+  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. See :ref:`system-entities` below.
 
 **Custom Entities**
   Application-specific entities that need to be detected using a trained entity recognizer. These are generally `named entities <https://en.wikipedia.org/wiki/Named_entity>`_ which can only be recognized using statistical models that have been trained with deep domain knowledge.
@@ -116,7 +115,7 @@ To view the current :ref:`configuration <config>` being used by a trained classi
      'features': {
        'bag-of-words-seq': {
          'ngram_lengths_to_start_positions': {
-            1: [-2, -1, 0, 1, 2], 
+            1: [-2, -1, 0, 1, 2],
             2: [-2, -1, 0, 1]
          }
        },
@@ -141,7 +140,7 @@ To view the current :ref:`configuration <config>` being used by a trained classi
 
 Let's take a look at the allowed values for each setting in an entity recognizer configuration.
 
-1. **Model Settings** 
+1. **Model Settings**
 
 ``'model_type'`` (:class:`str`)
   |
@@ -180,7 +179,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                       |   and an 'S' tag representing single token entities.                                                              |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
 
-2. **Feature Extraction Settings** 
+2. **Feature Extraction Settings**
 
 ``'features'`` (:class:`dict`)
   |
@@ -381,7 +380,7 @@ By default, the classifier only extracts n-grams within a context window of two 
 
 Suppose w\ :sub:`i` represents the word at the *ith* index in the query, where the index is calculated relative to the current token. Then, the above feature configuration should extract the following n-grams (w\ :sub:`0` being the current token).
 
-  - Unigrams: { w\ :sub:`-3`, w\ :sub:`-2`, w\ :sub:`-1`, w\ :sub:`0`, w\ :sub:`1`, w\ :sub:`2`, w\ :sub:`3` } 
+  - Unigrams: { w\ :sub:`-3`, w\ :sub:`-2`, w\ :sub:`-1`, w\ :sub:`0`, w\ :sub:`1`, w\ :sub:`2`, w\ :sub:`3` }
 
   - Bigrams: { w\ :sub:`-3`\ w\ :sub:`-2`, w\ :sub:`-2`\ w\ :sub:`-1`, w\ :sub:`-1`\ w\ :sub:`0`,  w\ :sub:`0`\ w\ :sub:`1`, w\ :sub:`1`\ w\ :sub:`2`, w\ :sub:`2`\ w\ :sub:`3` }
 
@@ -526,14 +525,14 @@ To debug the classifier performance, it can often be helpful to look at the toke
 
    >>> eval = er.evaluate()
    >>> eval.print_stats()
-   Overall Statistics: 
+   Overall Statistics:
 
        accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
           0.971       0.970         201        1443           6           6       0.959       0.971
 
 
 
-   Statistics by Class: 
+   Statistics by Class:
 
                   class      f_beta   precision      recall     support          TP          TN          FP          FN
                   O||O|       0.984       0.969       1.000         155         155          47           5           0
@@ -547,7 +546,7 @@ To debug the classifier performance, it can often be helpful to look at the toke
 
 
 
-   Confusion Matrix: 
+   Confusion Matrix:
 
                             O||O|      S|city|O|      B|city|O|      I|city|O|      E|city|O|   O||B|sys_t..   O||E|sys_t..   O||S|sys_t..
              O||O|            155              0              0              0              0              0              0              0
@@ -561,7 +560,7 @@ To debug the classifier performance, it can often be helpful to look at the toke
 
 
 
-   Sequence Statistics: 
+   Sequence Statistics:
 
     sequence_accuracy
                 0.892
@@ -671,7 +670,7 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
      )
    ]
 
-In each of the above cases, the entity recognizer was unable to correctly detect the full ``city`` entity in the query. This is usually a sign that the training data lacks coverage for queries with language patterns or entities like those in the examples above. It could also mean that the gazetteer for this entity type is not comprehensive enough. 
+In each of the above cases, the entity recognizer was unable to correctly detect the full ``city`` entity in the query. This is usually a sign that the training data lacks coverage for queries with language patterns or entities like those in the examples above. It could also mean that the gazetteer for this entity type is not comprehensive enough.
 
 On inspecting the :doc:`training data <../blueprints/home_assistant>`, you will find that the ``check_weather`` intent indeed lacks labeled training queries like the first two queries above. This issue could potentially be solved by adding more relevant queries annotated with the ``city`` entity to the ``check_weather`` intent's training data, so the recognition model can generalize better. The last two queries above are misclassified due to a lack of slang terms and nicknames in the :doc:`gazetteer data <../blueprints/home_assistant>` for the ``city`` entity. This can be mitigated by expanding the ``city`` gazetteer to contain entries like "San Fran", "Big Apple" and other popular synonyms for location names that are relevant to the ``weather`` domain.
 
@@ -694,4 +693,141 @@ The saved model can then be loaded anytime using the :meth:`EntityRecognizer.loa
 
    >>> er.load(model_path='experiments/entity_recognizer.memm.20170701.pkl')
    Loading entity recognizer: domain='weather', intent='check_weather'
+
+.. _system-entities:
+
+More about System Entities
+--------------------------
+
+System entities are entities that Workbench automatically detects in a
+query. These entities are common across all Workbench applications, so
+there is no need to learn them through machine learning models. The
+following entities are currently automatically detected by Workbench:
+
++-----------------+------------------------------------------------------------+
+| System Entity   | Examples                                                   |
++=================+============================================================+
+| sys_time        | “today” , “Tuesday, Feb 18” , “last week” , “Mother’s      |
+|                 | day”                                                       |
++-----------------+------------------------------------------------------------+
+| sys_interval    | “tomorrow morning” , “from 9:30 - 11:00 on tuesday” ,      |
+|                 | “Friday 13th evening”                                      |
++-----------------+------------------------------------------------------------+
+| sys_temperature | “64°F” , “71° Fahrenheit” , “twenty seven celsius”         |
++-----------------+------------------------------------------------------------+
+| sys_number      | “fifteen” , “0.62” , “500k” , “66”                         |
++-----------------+------------------------------------------------------------+
+| sys_ordinal     | “3rd” , “fourth” , “first”                                 |
++-----------------+------------------------------------------------------------+
+| sys_distance    | “10 miles” , “2feet” , “0.2 inches” , “3’’ “5km” ,”12cm”   |
++-----------------+------------------------------------------------------------+
+| sys_volume      | “500 ml” , “5liters” , “2 gallons”                         |
++-----------------+------------------------------------------------------------+
+| sys_currency    | “forty dollars” , “9 bucks” , “$30”                        |
++-----------------+------------------------------------------------------------+
+| sys_email       | “help@cisco.com”                                           |
++-----------------+------------------------------------------------------------+
+| sys_url         | “washpo.com/info” , “foo.com/path/path?ext=%23&foo=bla” ,  |
+|                 | “localhost”                                                |
++-----------------+------------------------------------------------------------+
+| sys_phone-number| “+91 736 124 1231” , “+33 4 76095663” , “(626)-756-4757    |
+|                 | ext 900”                                                   |
++-----------------+------------------------------------------------------------+
+
+.. note::
+
+   ``sys_interval`` differs from ``sys_time`` since
+   ``sys_interval`` represents entities that have a time interval while
+   ``sys_time`` represents entities with a unit time value. For example,
+   “tomorrow morning” is a ``sys_interval`` entity since “morning”
+   encompasses any time between 4 am and 12 pm, whereas “tomorrow” is a
+   ``sys_time`` entity since it represents the unit date (eg. 2017-07-08).
+
+Annotating System Entities
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Users have to annotate system entities to let Workbench know which system
+entities are needed for the app. By annotating system entities,
+the user would train the entity recognition model on a much smaller
+training set since these system entities have already been pre-learned.
+Here are some examples of annotated system entities from the
+home-assistant blueprint application:
+
+.. code-block:: text
+
+    - adjust the temperature to {65|sys_temperature}
+    - {in the morning|sys_interval} set the temperature to {72|sys_temperature}
+    - change my {6:45|sys_time|old_time} alarm to {7 am|sys_time|new_time}
+    - move my {6 am|sys_time|old_time} alarm to {3pm in the afternoon|sys_time|new_time}
+    - what's the forecast for {tomorrow afternoon|sys_interval}
+
+Common issues with system entities
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-  **Misclassifying system entities**:
+
+.. code-block:: text
+
+    change my {6:45|sys_interval|old_time} alarm to {7 am|sys_time|new_time}
+
+In the above query, “6:45” is misclassified as a ``sys_interval``
+entity since it is a ``sys_time`` entity. During training, the following
+warning will be printed to stdout:
+
+.. code-block:: text
+
+    Unable to load query: Unable to resolve system entity of type 'sys_interval' for '6:45'. Entities found for the following types ['sys_time']
+
+.. tip::
+   Find the affected query and change the entity label from a ``sys_interval`` to a ``sys_time`` label.
+
+-  **Unsupported system entities**:
+
+.. code-block:: text
+
+    set my alarm {daily|sys_time}
+
+Since the token “daily” is not supported by Workbench as a system entity
+at the moment, the following warning will be printed:
+
+.. code-block:: text
+
+    Unable to load query: Unable to resolve system entity of type 'sys_time' for 'daily'.
+
+.. tip::
+   Label the token "daily" as a custom entity label, like "time", so the annotation would be as follows: "set my alarm {daily|time}".
+   Otherwise, the user can remove the entity label from tokens like "daily" or remove all queries that contain the unsupported tokens like "daily" entirely.
+
+Debugging System Entities
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To check which token spans in a query are detected as system entities,
+the following function can be invoked:
+
+.. code-block:: python
+
+    >>> from mmWorkbench.ser import parse_numerics
+    >>> parse_numerics("tomorrow morning at 9am")
+    {'data': [{'dimension': 'number',
+       'entity': {'end': 21, 'start': 20, 'text': '9'},
+       'likelihood': -0.11895194286136536,
+       'operator': 'equals',
+       'rule_count': 1,
+       'value': [9]},
+        .
+        .
+      {'dimension': 'time',
+       'entity': {'end': 23, 'start': 0, 'text': 'tomorrow morning at 9am'},
+       'grain': 'hour',
+       'likelihood': -23.558523074887038,
+       'operator': 'equals',
+       'rule_count': 8,
+       'value': ['2017-07-08T09:00:00.000-07:00']}],
+     'status': '200'}
+
+The dictionary returned by the ``parse_numerics`` function contains all
+the token spans detected as system entities. The relevant keys are
+``dimension``, which is the unit dimension of the token span and
+``value``, the quantity of the dimension.
+
 
