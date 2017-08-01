@@ -42,7 +42,7 @@ If you are on a Mac OS machine, it is recommended that you install `homebrew <ht
 
 Run ``brew --version`` to verify that homebrew is installed.
 
-This is not a requirement, but if your system cannot run homebrew you will need to find alternatives to some instructions in this document.
+If your system cannot run homebrew, you will need to find alternatives to some instructions in this document.
 
 Python
 ^^^^^^
@@ -57,7 +57,7 @@ In Workbench,
  - The latest version of Python 3 is recommended
  - Python 2.7+ should work, but is deprecated
 
-You can
+You can:
 
  - use `pyenv <https://github.com/pyenv/pyenv>`_ to manage multiple versions of Python
  - obtain Python at `python.org <https://www.python.org/>`_  if it is not already installed
@@ -70,11 +70,18 @@ on different projects without having conflicting library versions, and keep Work
 
 One solution is to use `virtualenv with pyenv <https://github.com/pyenv/pyenv-virtualenv>`_.
 
-Run ``pyenv --version`` to verify that Pyenv is installed.
+On Mac OS systems with `homebrew <https://brew.sh/>`_, 
 
-Run ``virtualenv --version`` to verify that Virtualenv is installed.
+ - install pyenv with: ``brew install pyenv``.
+ - install virtualenv with: ``brew install pyenv-virtualenv``. You'll also have to append these lines to your bash profile:
 
-Again, this is not a requirement, but if your system cannot run pyenv you will need to find alternatives to some instructions in this document.
+.. code-block:: console
+ 
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+
+If your system cannot run virtualenv with pyenv, you will need to find alternatives to some instructions in this document.
+
 
 Java 8
 ^^^^^^^
@@ -85,24 +92,27 @@ Run ``java -version`` to verify that Java 8 or newer is installed.
 
 If the command fails, or your Java version begins with 1.7, install Java 8.
 
- - On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew cask install java``
+On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew cask install java``
 
 Visit `java.com <https://www.java.com/inc/BrowserRedirect1.jsp?locale=en>`_ for detailed instructions.
 
 Elasticsearch
 ^^^^^^^^^^^^^
 
-Workbench requires Elasticsearch 5.0 or newer. Version 5.5.x is recommended.
+Workbench requires Elasticsearch 5.0 or newer.
 
 `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ is a highly scalable open-source
 full-text search and analytics engine. It can be installed locally or you can use a remote instance if you have access to one.
 
-  - On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew install elasticsearch``
+On Mac OS systems with `homebrew <https://brew.sh/>`_, install and run Elasticsearch with these commands:
+
+.. code-block:: console
+
+  brew install elasticsearch
+  brew services start elasticsearch
 
 For other systems, or for more information on configuring Elasticsearch, go
 `here <https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html>`_.
-
-After Elasticsearch has been configured simply run ``elasticsearch`` to start the process.
 
 Prepare your system
 ---------------------
@@ -171,45 +181,44 @@ Manual Configuration
 """"""""""""""""""""
 
 Pip
-'''
+''''
+To setup your ``~/.pip/pip.conf`` configuration file,
 
-The next two steps are for Mac OS. If you need information about configuring pip on a different OS, see the `pip documentation <http://pip.readthedocs.io/en/latest/user_guide/#configuration>`_.
+- Run these commands:
 
-Run ``ls -l ~/.pip`` to verify that there is a ``~/.pip`` folder on your system.
+.. code-block:: shell
 
- - Create the folder if it does not exist
-
-Run ``ls -l ~/.pip/pip.conf`` to verify that there is a ``~/.pip/pip.conf`` file on your system.
-
- - Create the file if it does not exist
-
-Add the following lines to your ``pip.conf`` file, substituting your username and password.
-
-.. code-block:: text
-
+  mkdir -p ~/.pip
+  cat >~/.pip/pip.conf <<EOL
   [global]
-  extra-index-url = https://{YOUR_USERNAME}:{YOUR_PASSWORD}@mindmeld.com/pypi/
+  extra-index-url = https://{YOUR_USERNAME}:{YOUR_PASSWORD}@mindmeld.com/pypi
   trusted-host = mindmeld.com
+  EOL
+
+- Remember to substitute in your MindMeld Learning Center username and password.
 
 These configuration changes enable pip to work with the MindMeld private Python Package Index (PyPI). MindMeld Workbench is not publicly available, and can only be installed from the MindMeld PyPI, which is hosted at https://mindmeld.com/pypi/.
 
+
 Workbench
 ''''''''''
+Workbench reads your credentials from its configuration file at ``~/.mmworkbench/config`` and uses them when performing actions that require authentication, such as accessing :doc:`blueprints <../blueprints/overview>`.
 
-Workbench reads your credentials from its configuration file, located at
-``~/.mmworkbench/config``, when performing actions that require authentication, such as accessing
-:doc:`blueprints <../blueprints/overview>`.
+To setup your ``~/.mmworkbench/config`` configuration file,
 
-Create the ``~/.mmworkbench`` folder.
+- Run these commands:
 
-Create the ``~/.mmworkbench/config`` file and add the following lines, substituting your username and password:
+.. code-block:: shell
 
-.. code-block:: text
-
+  mkdir -p ~/.mmworkbench
+  cat >~/.mmworkbench/config <<EOL
   [mmworkbench]
   mindmeld_url = https://mindmeld.com
   username = {YOUR_USERNAME}
   password = {YOUR_PASSWORD}
+  EOL
+
+- Remember to substitute in your MindMeld Learning Center username and password.
 
 
 .. _getting_started_install_workbench:
@@ -239,7 +248,7 @@ Start the numerical parser with this command:
 
   $ mmworkbench num-parse --start
 
-The numerical parser is the component that relies on Java 8.
+The numerical parser is a critical component that relies on Java 8. Do **not** skip this.
 
 .. _getting_started_begin_new_project:
 
