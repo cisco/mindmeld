@@ -17,7 +17,7 @@ class WorkbenchError(Exception):
         self.message = args[0] if len(args) > 0 else None
 
 
-class BadWorkbenchRequestError(Exception):
+class BadWorkbenchRequestError(WorkbenchError):
     status_code = 400
 
     def __init__(self, message, status_code=None, payload=None):
@@ -33,21 +33,21 @@ class BadWorkbenchRequestError(Exception):
         return obj
 
 
-class ClassifierLoadError(Exception):
+class ClassifierLoadError(WorkbenchError):
     pass
 
 
-class ProcessorError(Exception):
+class ProcessorError(WorkbenchError):
     """An exception which indicates an error with a processor."""
     pass
 
 
-class ParserTimeout(Exception):
+class ParserTimeout(WorkbenchError):
     """An exception for when parsing takes an unexpected length of time"""
     pass
 
 
-class MarkupError(Exception):
+class MarkupError(WorkbenchError):
     pass
 
 
@@ -55,7 +55,7 @@ class SystemEntityMarkupError(MarkupError):
     pass
 
 
-class SystemEntityResolutionError(Exception):
+class SystemEntityResolutionError(WorkbenchError):
     """An exception representing an error resolving a system entity"""
     pass
 

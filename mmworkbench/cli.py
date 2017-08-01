@@ -19,7 +19,7 @@ import click_log
 from . import path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError,
-                         EntityResolverConnectionError)
+                         EntityResolverConnectionError, WorkbenchError)
 
 from ._util import blueprint
 from ._version import current as __version__
@@ -102,7 +102,7 @@ def converse(ctx, session):
             for index, response in enumerate(responses):
                 prefix = 'App: ' if index == 0 else '...  '
                 click.secho(prefix + response, fg='blue', bg='white')
-    except EntityResolverConnectionError as ex:
+    except WorkbenchError as ex:
         logger.error(ex.message)
 
 
@@ -119,7 +119,7 @@ def build(ctx):
         nlp = app.app_manager.nlp
         nlp.build()
         nlp.dump()
-    except KnowledgeBaseConnectionError as ex:
+    except WorkbenchError as ex:
         logger.error(ex.message)
 
 
