@@ -14,6 +14,27 @@ For this release of MindMeld Workbench, you should
 
 The rest of this section describes how to install software pre-requisites.
 
+Optional: Docker
+^^^^^^^^^^^^^^^^
+
+If you're going to be using Workbench often, we recommend you do the full install and setup all dependencies locally. That will provide the optimal performance and experience.
+But if you want to get a quick taste of workbench, you can get setup with a provided ``Dockerfile`` and these steps:
+
+#. First, `install Docker <https://www.docker.com/community-edition#/download>`_, and run it.
+#. Then, run these commands:
+
+.. code-block:: shell
+
+  curl -s https://mindmeld.com/docker/wb3.tar.gz | tar xzvf -
+  cd wb3
+  ./buildme.sh
+  ./runme.sh
+
+You will be prompted for your mindmeld.com username and password. The build will take a few minutes. That's all! This will setup all dependencies and drop you inside a container.
+
+Proceed to :ref:`Begin New Project <getting_started_begin_new_project>`.
+
+
 Homebrew on Mac OS
 ^^^^^^^^^^^^^^^^^^
 
@@ -219,6 +240,8 @@ Start the numerical parser with this command:
   $ mmworkbench num-parse --start
 
 The numerical parser is the component that relies on Java 8.
+
+.. _getting_started_begin_new_project:
 
 Begin New Project
 -----------------
