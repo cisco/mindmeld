@@ -1,5 +1,8 @@
-Language Parser
-===============
+.. meta::
+    :scope: private
+
+Working with the Language Parser
+================================
 
 The :ref:`Language Parser <arch_parser>` (often referred to simply as the Parser) is run as the sixth and final step in the :ref:`natural language processing <arch_nlp>` pipeline to extract the relationships between :term:`entities <entity>` in a given :term:`query <query / request>`. It is a heuristic-driven `chart parser <https://en.wikipedia.org/wiki/Chart_parser>`_ that is configured to model the `dependencies <https://en.wikipedia.org/wiki/Dependency_grammar>`_ between different entity types in an application. The parser uses a developer-provided configuration to cluster the :doc:`recognized entities <entity_recognizer>` in a query together and group them into a meaningful hierarchy (called :term:`entity group`) that captures how different entities relate to each other.
 
@@ -40,7 +43,7 @@ Condition #1 ✓
 Condition #2 ✗
 ============ =
 
-The ``turn_appliance_on`` and ``turn_appliance_off`` intents in the :ref:`home assistant blueprint <home_model_hierarchy>` have a pair of related entity types named ``location`` and ``appliance``. The ``location`` entity identifies the specific ``appliance`` of interest by describing where it is located. The ``location`` entity is thus a dependent of the ``appliance`` head entity. 
+The ``turn_appliance_on`` and ``turn_appliance_off`` intents in the :ref:`home assistant blueprint <home_model_hierarchy>` have a pair of related entity types named ``location`` and ``appliance``. The ``location`` entity identifies the specific ``appliance`` of interest by describing where it is located. The ``location`` entity is thus a dependent of the ``appliance`` head entity.
 
 However, the home assistant blueprint app is only designed to support the operation of one appliance per query. In other words, the user cannot reference two different appliances in the same query such as "Switch off the {living room|location} {tv|appliance} and turn on the {bedroom|location} {tv|appliance}." A parser is therefore not required since the app already knows that all dependents must refer to the only head entity present in the query.
 
@@ -298,6 +301,6 @@ More generally, an entity is not assigned a 'children' property by the parser if
 
   #. The entity type is absent from the configuration altogether. The parser leaves such entities alone.
 
-An entity, together with its children forms an entity group. The entity groups in the above example are {"mujaddara wrap"}, {"two", "chicken kebab"} and {"palmyra"}. Childless entities are considered to be in a singleton group of their own. 
+An entity, together with its children forms an entity group. The entity groups in the above example are {"mujaddara wrap"}, {"two", "chicken kebab"} and {"palmyra"}. Childless entities are considered to be in a singleton group of their own.
 
 To better familiarize yourself with the language parser, use the :doc:`food ordering blueprint <../blueprints/food_ordering>` as a sandbox to test out the preconfigured parser and experiment with different configuration settings. Also, refer to the blueprint's application file (``app.py``) for examples on how to use the parser output within your :term:`dialogue state handlers <dialogue state handler>`.

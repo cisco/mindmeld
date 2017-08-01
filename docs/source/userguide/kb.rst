@@ -1,5 +1,5 @@
-Knowledge Base and Question Answerer
-====================================
+Working with the Knowledge Base and Question Answerer
+=====================================================
 
 What is Knowledge Base?
 -----------------------
