@@ -1,15 +1,16 @@
-Intent Classifier
-=================
+.. meta::
+    :scope: private
+
+Working with the Intent Classifier
+==================================
 
 The :ref:`Intent Classifier <arch_intent_model>` is run as the second step in the natural language processing pipeline to determine the target intent for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the intents in a given domain. The name of each intent folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Intent classification models are trained per domain. A Workbench app hence has one intent classifier for every domain with multiple intents.
 
 .. note::
 
-   **Recommended prior reading:**
+   :ref:`Step 7 <intent_classification>` of the Step-By-Step Guide is a pre-requisite for this chapter.
 
-   - :ref:`Step 7: Train the Natural Language Processing Classifiers <intent_classification>` (Step-By-Step Guide)
-   - :doc:`Natural Language Processor <nlp>` (User Guide)
-
+   Recommended prior reading: :doc:`Natural Language Processor <nlp>` chapter of the User Guide.
 
 Access an intent classifier
 ---------------------------
@@ -112,7 +113,7 @@ To view the current :ref:`configuration <config>` being used by a trained classi
 
 Let's take a look at the allowed values for each setting in an intent classifier configuration.
 
-1. **Model Settings** 
+1. **Model Settings**
 
 ``'model_type'`` (:class:`str`)
   |
@@ -122,7 +123,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
 ``'model_settings'`` (:class:`dict`)
   |
 
-  Is always a dictionary with a single key called ``'classifier_type'``. The value of the key specifies the machine learning model to use. Allowed values are 
+  Is always a dictionary with a single key called ``'classifier_type'``. The value of the key specifies the machine learning model to use. Allowed values are
 
 .. _sklearn_intent_models:
 
@@ -136,7 +137,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
   =============== =======================================================
 
 
-2. **Feature Extraction Settings** 
+2. **Feature Extraction Settings**
 
 ``'features'`` (:class:`dict`)
   |
@@ -302,7 +303,7 @@ You could also add other :ref:`supported features <intent_features>`. In some ca
 
 .. code-block:: python
 
-   >>> my_features['edge-ngrams'] = { 'lengths': [1, 2] } 
+   >>> my_features['edge-ngrams'] = { 'lengths': [1, 2] }
    >>> my_features
    {
     'bag-of-words': {'lengths': [1, 2, 3]},
@@ -439,7 +440,7 @@ A trained intent classifier can be run on a test query using the :meth:`IntentCl
 .. code-block:: python
 
    >>> ic.predict('cancel my morning alarm')
-   'remove_alarm'   
+   'remove_alarm'
 
 The :meth:`predict` method returns the label for the intent with highest predicted probability. It gets called by the natural language processor's :meth:`process` method at runtime to classify the intent for an incoming query.
 
@@ -486,14 +487,14 @@ The :meth:`evaluate` method returns a rich object that contains a lot more infor
 
    >>> eval = ic.evaluate()
    >>> eval.print_stats()
-   Overall Statistics: 
+   Overall Statistics:
 
        accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
           0.808       0.811          63         375          15          15       0.800       0.808
 
 
 
-   Statistics by Class: 
+   Statistics by Class:
 
                   class      f_beta   precision      recall     support          TP          TN          FP          FN
            change_alarm       0.857       1.000       0.750           8           6          70           0           2
@@ -505,7 +506,7 @@ The :meth:`evaluate` method returns a rich object that contains a lot more infor
 
 
 
-   Confusion Matrix: 
+   Confusion Matrix:
 
                      change_ala..      set_alarm   remove_ala..   check_alar..   start_time..
       change_ala..              6              1              1              0              0
@@ -532,6 +533,22 @@ The statistics are split into three sections.
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
+
+  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+ 
+  - **Classes are balanced**: When the number of training examples in your intents are comparable and each intent is equally important, focusing on the accuracy metric is usually good enough.
+ 
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  
+  - **All F1 and accuracy scores are low**: Intent classification is performing poorly across all intents. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your intent structure and make sure queries in different intents have distinct natural language patterns. You may need to combine intents or separate them, so that the resulting classes are easier for the classifier to distinguish.
+
+  - **F1 weighted is higher than F1 macro**: Your intents with fewer evaluation examples are performing poorly. You may need to add more data to intents that have fewer examples. You could also try adding class weights to your hyperparameters.
+ 
+  - **F1 macro is higher than F1 weighted**: Your intents with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+ 
+  - **F1 micro is higher than F1 macro**: Certain intents are being misclassified more often than others. Check the class-wise below statistics to identify these intents. Some intents may be too similar to another intent or you may need to add more training data to some intents.
+ 
+  - **Some classes are more important than others**: If some intents are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
 **Class-wise Statistics**
   |
@@ -602,7 +619,7 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
      }
     )
    ]
- 
+
 In this case, there was just one test query from the ``start_timer`` intent that got misclassified as ``set_alarm``. You can also see that the correct label did come in second, but was still beaten by a decent margin in classification probability.
 
 Here's an example listing all the misclassified queries from the ``check_alarm`` intent where the classifier's confidence for the true label was very low (<25%). These could often be indicative of the kind of queries that are lacking in the current training data.

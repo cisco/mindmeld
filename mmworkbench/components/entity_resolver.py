@@ -10,7 +10,7 @@ import logging
 import hashlib
 
 from ..core import Entity
-from ._config import get_app_name, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
+from ._config import get_app_namespace, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
 
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      delete_index, does_index_exist, get_field_names,
@@ -38,7 +38,7 @@ class EntityResolver(object):
             entity_type: The entity type associated with this entity resolver
             es_host (str): The Elasticsearch host server
         """
-        self._app_name = get_app_name(app_path)
+        self._app_namespace = get_app_namespace(app_path)
         self._resource_loader = resource_loader
         self._normalizer = resource_loader.query_factory.normalize
         self.type = entity_type
@@ -60,20 +60,25 @@ class EntityResolver(object):
         return self.__es_client
 
     @classmethod
-    def ingest_synonym(cls, app_name, index_name, index_type=INDEX_TYPE_SYNONYM,
+    def ingest_synonym(cls, app_namespace, index_name, index_type=INDEX_TYPE_SYNONYM,
                        field_name=None, data=[], es_host=None, es_client=None):
-        """Loads synonym documents from the mapping.json data into the specified index. If an index
-        with the specified name doesn't exist, a new index with that name will be created.
+        """Loads synonym documents from the mapping.json data into the
+        specified index. If an index with the specified name doesn't exist, a
+        new index with that name will be created.
 
         Args:
-            app_name (str): The name of the app
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
             index_name (str): The name of the new index to be created
-            index_type (str): specify whether to import to synonym index or knowledge base object
-                              index. INDEX_TYPE_SYNONYM is the default which indicates the synonyms
-                              to be imported to synonym index, while INDEX_TYPE_KB indicates that
-                              the synonyms should be imported into existing knowledge base index.
-            field_name (str): specify name of the knowledge base field that the synonym list
-                              corresponds to when index_type is INDEX_TYPE_SYNONYM.
+            index_type (str): specify whether to import to synonym index or
+                knowledge base object index. INDEX_TYPE_SYNONYM is the default
+                which indicates the synonyms to be imported to synonym index,
+                while INDEX_TYPE_KB indicates that the synonyms should be
+                imported into existing knowledge base index.
+            field_name (str): specify name of the knowledge base field that the
+                synonym list corresponds to when index_type is
+                INDEX_TYPE_SYNONYM.
             data (list): A list of documents to be loaded into the index
             es_host (str): The Elasticsearch host server
             es_client (Elasticsearch): The Elasticsearch client
@@ -110,7 +115,7 @@ class EntityResolver(object):
 
                 yield action
 
-        load_index(app_name, index_name, _action_generator(data), DEFAULT_ES_SYNONYM_MAPPING,
+        load_index(app_namespace, index_name, _action_generator(data), DEFAULT_ES_SYNONYM_MAPPING,
                    DOC_TYPE, es_host, es_client)
 
     def fit(self, clean=False):
@@ -132,7 +137,7 @@ class EntityResolver(object):
             return
 
         if clean:
-            delete_index(self._app_name, self._es_index_name, self._es_host,
+            delete_index(self._app_namespace, self._es_index_name, self._es_host,
                          self._es_client)
         entity_map = self._resource_loader.get_entity_map(self.type)
 
@@ -141,9 +146,9 @@ class EntityResolver(object):
 
         # create synonym index and import synonyms
         logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
-        EntityResolver.ingest_synonym(app_name=self._app_name, index_name=self._es_index_name,
-                                      data=entities, es_host=self._es_host,
-                                      es_client=self._es_client)
+        EntityResolver.ingest_synonym(app_namespace=self._app_namespace,
+                                      index_name=self._es_index_name, data=entities,
+                                      es_host=self._es_host, es_client=self._es_client)
 
         # It's supported to specify the KB object type and field name that the NLP entity type
         # corresponds to in the mapping.json file. In this case the synonym whitelist is also
@@ -156,10 +161,10 @@ class EntityResolver(object):
         if kb_index and kb_field:
             # validate the KB index and field are valid.
             # TODO: this validation can probably be in some other places like resource loader.
-            if not does_index_exist(self._app_name, kb_index, self._es_host, self._es_client):
+            if not does_index_exist(self._app_namespace, kb_index, self._es_host, self._es_client):
                 raise ValueError("Cannot import synonym data to knowledge base. The knowledge base "
                                  "index name \'{}\' is not valid.".format(kb_index))
-            if kb_field not in get_field_names(self._app_name, kb_index, self._es_host,
+            if kb_field not in get_field_names(self._app_namespace, kb_index, self._es_host,
                                                self._es_client):
                 raise ValueError("Cannot import synonym data to knowledge base. The knowledge base "
                                  "field name \'{}\' is not valid.".format(kb_field))
@@ -167,7 +172,7 @@ class EntityResolver(object):
                 raise ValueError("Knowledge base index and field cannot be specified for entities "
                                  "without ID.")
             logger.info("Importing synonym data to knowledge base index '{}'".format(kb_index))
-            EntityResolver.ingest_synonym(app_name=self._app_name, index_name=kb_index,
+            EntityResolver.ingest_synonym(app_namespace=self._app_namespace, index_name=kb_index,
                                           index_type='kb', field_name=kb_field, data=entities,
                                           es_host=self._es_host, es_client=self._es_client)
 
@@ -313,7 +318,7 @@ class EntityResolver(object):
             }
         }
 
-        index = get_scoped_index_name(self._app_name, self._es_index_name)
+        index = get_scoped_index_name(self._app_namespace, self._es_index_name)
         response = self._es_client.search(index=index, body=text_relevance_query)
         hits = response['hits']['hits']
 
@@ -397,7 +402,7 @@ class EntityResolver(object):
         """
         try:
             if self._use_text_rel:
-                scoped_index_name = get_scoped_index_name(self._app_name, self._es_index_name)
+                scoped_index_name = get_scoped_index_name(self._app_namespace, self._es_index_name)
                 if not self._es_client.indices.exists(index=scoped_index_name):
                     self.fit()
             else:

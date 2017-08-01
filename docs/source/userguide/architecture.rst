@@ -1,51 +1,60 @@
 Platform Architecture
 =====================
 
-The MindMeld Deep-Domain Conversational AI Platform provides a robust end-to-end pipeline for building and deploying intelligent data-driven conversational apps. The high level architecture of the platform is illustrated in the figure below.
+The MindMeld Conversational AI Platform provides a robust end-to-end pipeline for building and deploying intelligent data-driven conversational apps. The high-level architecture of the platform is illustrated below.
 
-.. image:: /images/architecture.png
+.. image:: /images/architecture1.png
     :align: center
     :name: architecture_diagram
 
-We will now take a look at each of the components in the MindMeld platform.
+.. note::
+
+    The Application Manager, while part of Workbench, orchestrates behind the scenes and never needs developer attention.
+..    The Gateway, while part of the platform, is outside of Workbench.
+
+We will now explore the platform component by component.
 
 .. _arch_nlp:
 
 Natural Language Processor
 --------------------------
 
-The Natural Language Processor (NLP) is tasked with understanding the user's natural language input. This involves processing the user query using a combination of techniques such as `pattern matching <https://en.wikipedia.org/wiki/Pattern_matching#Pattern_matching_and_strings>`_, `text classification <https://en.wikipedia.org/wiki/Text_classification>`_, `information extraction <https://en.wikipedia.org/wiki/Information_extraction>`_, and `parsing <https://en.wikipedia.org/wiki/Parsing>`_. The end goal is to produce a representation that captures all the salient pieces of information in the query. This summarized representation is then used by the app to decide on a suitable action or response to satisfy the user's goals.
+The Natural Language Processor (NLP) understands the user's natural language input, or query — that is, it produces a representation that captures all salient information in the query. This summarized representation is then used by the app to decide on a suitable action or response to satisfy the user's goals.
 
-The figure below shows the NLP output on a sample user input.
+The example below shows a user query and the resulting NLP output.
 
 .. image:: /images/nlp.png
     :align: center
     :name: nlp_output
 
+The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in Steps :doc:`3 <../quickstart/03_define_the_hierarchy>`, :doc:`6 <../quickstart/06_generate_representative_training_data>` and :doc:`7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-by-Step Guide. Apart from classifiers, the NLP also has modules for entity resolution and language parsing.
 
-The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in Steps :doc:`3 <../quickstart/03_define_the_hierarchy>`, :doc:`6 <../quickstart/06_generate_representative_training_data>` and :doc:`7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-by-Step Guide. In addition to the four layers of classifiers, the NLP also has modules for entity resolution and language parsing. The user query is processed sequentially by each of these six subcomponents in the left-to-right order shown in the :ref:`architecture diagram <architecture_diagram>` above. The role of each step in the NLP pipeline is described below.
+Therefore the NLP pipeline has six subcomponents: a four-layer classification hierarchy, plus the entity resolution and language parsing modules.
 
+The pipeline processes the user query sequentially in the left-to-right order shown in the :ref:`architecture diagram <architecture_diagram>` above. In doing this, the NLP applies a combination of techniques such as `pattern matching <https://en.wikipedia.org/wiki/Pattern_matching#Pattern_matching_and_strings>`_, `text classification <https://en.wikipedia.org/wiki/Text_classification>`_, `information extraction <https://en.wikipedia.org/wiki/Information_extraction>`_, and `parsing <https://en.wikipedia.org/wiki/Parsing>`_.
+
+Next, we examine the role of each step in the NLP pipeline.
 
 .. _arch_domain_model:
 
 Domain Classifier
 ~~~~~~~~~~~~~~~~~
 
-The Domain Classifier performs the first level of categorization on a user query by classifying it into one of a pre-defined set of domains that can be handled by the app. Each domain is a unique area of knowledge with its own vocabulary and specialized terminology.
+The Domain Classifier performs the first level of categorization on a user query by assigning it to one of a pre-defined set of domains that the app can handle. Each domain constitutes a unique area of knowledge with its own vocabulary and specialized terminology.
 
-For instance, a conversational app serving as a "Smart Home Assistant" would be expected to handle several distinct tasks such as:
+Consider a conversational app serving as a "Smart Home Assistant." This app would be expected to handle several distinct tasks, such as:
 
-* Setting the temperature on the thermostat
-* Toggling the light fixtures in different rooms
+* Setting the temperature on a thermostat
+* Toggling lights on and off in different rooms
 * Locking and unlocking different doors
 * Controlling multimedia devices around the home
 * Answering informational queries about time, weather, etc.
 
-The vocabulary used for instructing the app to change the settings on a thermostat is very different from interacting with the television. These could therefore be modeled as separate domains - a ``thermostat`` domain for handling all interactions related to the thermostat and a ``multimedia`` domain for talking to media devices in the house. Personal assistants like Siri, Cortana, Google Assistant and Alexa are trained to handle more than a dozen different domains like ``weather``, ``navigation``, ``sports``, ``music``, ``calendar``, etc.
+The vocabularies for setting a thermostat and for interacting with a television are very different. These could therefore be modeled as separate domains — a ``thermostat`` domain and a ``multimedia`` domain (assuming that the TV is one of several media devices in the house). Personal assistants like Siri, Cortana, Google Assistant and Alexa are trained to handle more than a dozen different domains like ``weather``, ``navigation``, ``sports``, ``music``, ``calendar``, etc.
 
-On the opposite end of the spectrum are apps with just one de facto domain. This is usually the case if all the functions that the app provides are conceptually related and span a single realm of knowledge. For instance, a "Food Ordering" app could potentially handle multiple tasks like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing all of these tasks are highly shared, and hence could be modeled as one single domain called ``food``.
+On the opposite end of the spectrum are apps with just one domain. Usually, all the functions that such apps provide are conceptually related and span a single realm of knowledge. For instance, a "Food Ordering" app could potentially handle multiple tasks like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing all of these tasks is almost entirely shared, and hence could be modeled as one single domain called ``food``. The number of domains thus depends on the scope of the application.
 
-The number of domains thus depends on the scope of the application. For apps with multiple domains, the :doc:`Domain Classifier User Guide <domain_classifier>` describes how Workbench can be used to train a machine-learned domain classification model.
+To learn how to train a machine-learned domain classification model in Workbench see the :doc:`Domain Classifier <domain_classifier>` section of this guide.
 
 
 .. _arch_intent_model:
@@ -53,9 +62,9 @@ The number of domains thus depends on the scope of the application. For apps wi
 Intent Classifier
 ~~~~~~~~~~~~~~~~~
 
-Once the domain has been determined, the Intent Classifier provides the next level of categorization by assigning each query to one of the intents defined for the app. The intent reflects what the user is trying to accomplish. For instance, the user may want to book a flight, search for movies from a catalog, know about the weather conditions or set the temperature on their home thermostat. Each of these is an example of a user intent. The intent also prescribes a specific action or answer type which defines the desired outcome for the query.
+Once the NLP determines which domain applies to a given query, the Intent Classifier provides the next level of categorization by assigning the query to one of the intents defined for the app. Intents reflect what a user is trying to accomplish. For instance, the user may want to book a flight, search for movies from a catalog, ask about the weather, or set the temperature on a home thermostat. Each of these is an example of a user intent. The intent also defines the desired outcome for the query, by prescribing that the app take a specific action and/or respond with a particular type of answer.
 
-Each domain in a conversational app usually has multiple intents. By convention, intent names are verbs that describe what the user is trying accomplish. Here are some example intents from the ``food`` domain in a "Food Ordering" app.
+Most domains in conversational apps have multiple intents. By convention, intent names are verbs that describe what the user is trying accomplish. Here are some example intents from the ``food`` domain in a "Food Ordering" app.
 
 +---------------------+-------------------------------------------------------------------------------------------+
 | Intent              | Description                                                                               |
@@ -69,17 +78,18 @@ Each domain in a conversational app usually has multiple intents. By convention,
 | place_order         | Place an order for pick up or delivery                                                    |
 +---------------------+-------------------------------------------------------------------------------------------+
 
-Every domain has its own separate intent classifier for categorizing the query into one of the intent defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query. Refer to the :doc:`Intent Classifier User Guide <intent_classifier>` for details on training intent classification models using Workbench.
+Every domain has its own separate intent classifier for categorizing the query into one of the intents defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query.
 
+To learn how to train intent classification models in Workbench, see the :doc:`Intent Classifier <intent_classifier>` section of this guide.
 
 .. _arch_entity_model:
 
 Entity Recognizer
 ~~~~~~~~~~~~~~~~~
 
-The next step in the NLP pipeline, the Entity Recognizer, identifies all the entities that are relevant to a given intent. An entity is any important word or phrase that provides the necessary information to understand and fulfill the user's end goal. For instance, if the user intent is to search for a movie, the relevant entities would be movie titles, genre, cast names, etc. If the intent is to update the thermostat, the entity would be the numerical value of the temperature to set the thermostat to.
+The next step in the NLP pipeline, the Entity Recognizer, identifies every entity in the query that corresponds to an entity pre-defined as relevant to a given intent. An entity is any word or phrase that provides information necessary to understand and fulfill the user's end goal. For instance, if the intent is to search for movies, relevant entities would include movie titles, genres, and actor names. If the intent is to adjust a thermostat, the entity would be the numerical value for setting the thermostat to a desired temperature.
 
-Each intent within a domain usually has multiple entities. By convention, entity names are nouns that describe the entity type. Here are some examples of entity types that might be required for different conversational intents.
+Most intents have multiple entities. By convention, entity names are nouns that describe the entity type. Here are some examples of entity types that might be required for different conversational intents.
 
 +---------+-------------------+-----------------------------------------------------------------------+
 | Domain  | Intent            | Entity Types                                                          |
@@ -93,15 +103,18 @@ Each intent within a domain usually has multiple entities. By convention, entity
 | food    | browse_dish       | dish_name, category, ingredient, spice_level, price_range             |
 +---------+-------------------+-----------------------------------------------------------------------+
 
-Since the set of relevant entity types might differ for each intent (even within the same domain), every intent has its own separate entity recognizer. Once the domain and intent have been established at runtime, the app uses the appropriate entity model to detect entities in the query that are specific to the predicted intent. We will get into the details of building machine-learned entity recognition models using Workbench in the :doc:`Entity Recognizer User Guide <entity_recognizer>`.
+Since the set of relevant entity types might differ for each intent (even within the same domain), every intent has its own entity recognizer. Once the app establishes the domain and intent for a given query, the app then uses the appropriate entity model to detect entities in the query that are specific to the predicted intent.
 
+To learn how to build machine-learned entity recognition models in Workbench, see the :doc:`Entity Recognizer <entity_recognizer>` section of this guide.
 
 .. _arch_role_model:
 
 Role Classifier
 ~~~~~~~~~~~~~~~
 
-The Role Classifier is the last level in the 4-layer NLP classification hierarchy. It assigns a differentiating label, called a role, to the entities extracted by the entity recognizer. Sub-categorizing entities in this manner is only necessary where an entity of a particular type can have multiple meanings depending on the context. For example, “9 AM” and “5 PM” could both be classified as time entities, but one might need to be interpreted as playing the role of an opening time and the other as playing the role of a closing time. The role classifiers label such entities with the appropriate roles.
+The Role Classifier is the last level in the four-layer NLP classification hierarchy. It assigns a differentiating label, called a role, to the entities extracted by the entity recognizer. Sub-categorizing entities in this manner is only necessary where an entity of a particular type can have multiple meanings depending on the context.
+
+For example, “7 PM” and “midnight” could both be time entities. But in a query like "French restaurants open from 7 pm until midnight," one plays the role of an opening time while the other plays the role of a closing time. In this situation, the entity recognizer would categorize both as time entities, then the role classifier would label each entity with the appropriate role. Role classifiers are trained separately for each entity that requires the additional categorization.
 
 Here are examples of some entity types that might require role classification when dealing with certain intents.
 
@@ -117,21 +130,18 @@ Here are examples of some entity types that might require role classification wh
 | banking | transfer_funds   | account_num | sender, recipient    |
 +---------+------------------+-------------+----------------------+
 
-Role classifiers are trained separately for each entity that requires the additional categorization. We describe how to build role classification models with Workbench in the :doc:`Role Classifier User Guide <role_classifier>`.
-
-After the domain, intent, entities and roles have been determined by the 4-level classifier hierarchy discussed above, the processed query is sent to the Entity Resolver and the Language Parser modules to complete the natural language understanding of the user input.
-
+To learn how to build role classification models in Workbench, see the :doc:`Role Classifier <role_classifier>` section of this guide.
 
 .. _arch_resolver:
 
 Entity Resolver
 ~~~~~~~~~~~~~~~
 
-The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity_resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" may get resolved to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" might be resolved to "San Francisco, CA". 
+The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity_resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" could resolve to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" could resolve to "San Francisco, CA."
 
-In conversational interactions, users generally refer to entities in informal terms, using abbreviations, nicknames, and other aliases, rather than their official standardized names. Robust entity resolution is hence key to a seamless conversational experience. The MindMeld Entity Resolver leverages advanced text relevance algorithms, similar to the ones used in state-of-the-art information retrieval systems to ensure high resolution accuracies.
+Robust entity resolution is key to a seamless conversational experience because users generally refer to entities informally, using abbreviations, nicknames, and other aliases, rather than by official standardized names. The Entity Resolver in Workbench ensures high resolution accuracy by applying text relevance algorithms similar to those used in state-of-the-art information retrieval systems. Each entity has its own resolver trained to capture all plausible names for the entity, and variants on those names.
 
-Each entity has its own resolver that is trained to capture all the name variations specific to that entity. We will learn more about how to build about entity resolvers using Workbench in the :doc:`Entity Resolver User Guide <entity_resolver>`.
+To learn how to build entity resolvers in Workbench, see the :doc:`Entity Resolver <entity_resolver>` section of this guide.
 
 
 .. _arch_parser:
@@ -141,28 +151,29 @@ Language Parser
 
 As described in the :doc:`Step-By-Step Guide <../quickstart/08_configure_the_language_parser>`, the Language Parser is the final module in the NLP pipeline. The parser finds relationships between the extracted entities and clusters them into meaningful entity groups. Each entity group has an inherent hierarchy, representing a real-world organizational structure.
 
-In the :ref:`example <nlp_output>` above, the resolved entities have been arranged into three separate entity groups, with each group describing a distinct real-world concept:
+We can arrange the resolved entities in the :ref:`example <nlp_output>` above into three entity groups, where each group describes a distinct real-world concept:
 
 .. image:: /images/entity_groups.png
     :align: center
 
-The first two groups represent the products to be ordered, whereas the last group contains the store information. The main entity at the top in each group is called the parent or the `head <https://en.wikipedia.org/wiki/Head_(linguistics)>`_, whereas the other entities are called its children or `dependents <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_. This structured representation of the user's natural language input can then be interpreted by the app to decide on the next action and/or response. E.g. submitting the order to a point-of-sale system to complete the user's order.
+The first two groups represent products to be ordered, whereas the last group contains store information. We call the main entity at the top in each group the *parent* or the `head <https://en.wikipedia.org/wiki/Head_(linguistics)>`_ whose *children* or `dependents <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_ are the entities further down the hierarchy. The app can interpret this structured representation of the user's natural language input to decide on the next action and/or response. In the example, the next action might be to submit the order to a point-of-sale system, thus completing the user's order.
 
-Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The MindMeld Language Parser, on the other hand, is a config-driven rule-based parser which works out-of-the-box without the need for training. Refer to the :doc:`User Guide <parser>` for details on how Workbench can be used to configure the parser for optimum performance for a specific app.
+Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The Language Parser in Workbench, by contrast, is a configuration-driven rule-based parser which works out-of-the-box with no need for training.
 
-The Natural Language Processor gets half of the job done, namely, understanding what the user wants. The next two components in the MindMeld pipeline address the other half by responding appropriately to the user and advancing the conversation.
-
+To learn how to configure the Workbench parser for optimum performance in a specific app, see the :doc:`Language Parser <parser>` section of this guide.
 
 .. _arch_qa:
 
 Question Answerer
 -----------------
 
-Most of the modern conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the important world knowledge for a given application use case. The component responsible for interfacing with the knowledge base is called the Question Answerer. See Steps :doc:`5 <../quickstart/05_create_the_knowledge_base>` and :doc:`9 <../quickstart/09_optimize_question_answering_performance>` of the Step-By-Step Guide for an introduction to the topics of Knowledge Base and Question Answering.
+Most conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the world knowledge that is important for a given application use case. The NLP pipeline component responsible for interfacing with the knowledge base is called the Question Answerer. See Steps :doc:`5 <../quickstart/05_create_the_knowledge_base>` and :doc:`9 <../quickstart/09_optimize_question_answering_performance>` of the Step-By-Step Guide.
 
-The question answerer uses information retrieval techniques to identify the best answer candidates from the knowledge base that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify the user requested dishes and answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.
+The question answerer retrieves information from the knowledge base to identify the best answer candidates that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify dishese the user requests and to answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.
 
-The MindMeld Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches. Refer to the :doc:`Question Answerer User Guide <kb>` for detailed documentation along with examples.
+The Workbench Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches.
+
+For documentation and examples, see the :doc:`Question Answerer<kb>` section of this guide.
 
 
 .. _arch_dm:
@@ -170,22 +181,20 @@ The MindMeld Question Answerer provides a flexible mechanism for retrieving and 
 Dialogue Manager
 ----------------
 
-The Dialogue Manager is a stateful component responsible for directing the flow of the conversation. It analyzes each incoming request and assigns it to a dialogue state handler which then executes the required logic and returns a response to the user.
+The Dialogue Manager directs the flow of the conversation. It is a stateful component which analyzes each incoming query, then assigns the query to a dialogue state handler which in turn executes appropriate logic and returns a response to the user.
 
-Architecting the dialogue manager correctly is often one of the most challenging software engineering tasks when building a conversational app for a non-trivial use case. Workbench offers a simple solution by abstracting away many of the underlying complexities of dialogue management and offering developers a simple but powerful mechanism for defining their application logic. Workbench provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. It also allows dialogue state handlers to invoke any arbitrary code for taking a specific action, completing a transaction or getting the information necessary for formulating a response.
+Architecting the dialogue manager correctly is often one of the most challenging software engineering tasks when building a conversational app for a non-trivial use case. Workbench abstracts away many underlying complexities of dialogue management to offer a simple but powerful mechanism for defining application logic. Workbench provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. It also allows dialogue state handlers to invoke any arbitrary code for taking a specific action, completing a transaction, or obtaining the information necessary to formulate a response.
 
-Refer to Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide for a practical introduction to dialogue state tracking using Workbench. We will see more examples in the :doc:`Dialogue Manager User Guide <dm>`. 
+For a practical introduction to dialogue state tracking in Workbench, see Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide. The :doc:`Dialogue Manager <dm>` section of this guide provides further examples.
 
+.. .. _arch_gateway:
 
+.. Gateway
+.. -------
 
-.. _arch_gateway:
+.. The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that Workbench-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with Workbench components with the aid of the Application Manager, as described below.
 
-Gateway
--------
-
-The Gateway is the component responsible for processing external requests via various endpoints, and for persisting user state. Supported endpoints include messaging platforms such as Cisco Spark or Facebook Messenger, intelligent assistants such as Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
-
-The gateway is able to identify users from various endpoints, load their context, and convert requests into a format the Workbench-trained components can consume. After a request has been processed, it converts responses to the appropriate client format, and sends the response back to the endpoint.
+.. Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
 
 
 .. _arch_app_manager:
@@ -193,13 +202,12 @@ The gateway is able to identify users from various endpoints, load their context
 Application Manager
 -------------------
 
-The Application Manager is the core orchestrator of the MindMeld platform. It performs the following functions:
+As the core orchestrator of the MindMeld platform, the Application Manager:
 
-    - Receives the client request from the gateway
-    - Processes the request by passing it through all the Workbench-trained components of the MindMeld platform
-    - Returns the final response back to the gateway once the processing is complete
+	- Receives the client request from a supported endpoint
+	- Processes the request by passing it through all the Workbench-trained components of the MindMeld platform
+	- Returns the final response to the endpoint once processing is complete
 
-The application manager is hidden from the Workbench developer, and accomplishes its tasks behind the scenes.
+The application manager works behind the scenes, hidden from the Workbench developer.
 
-
-That concludes our quick tour of the MindMeld Conversational AI platform. Now that we are familiar with all its components, the rest of this user guide will focus on hands-on tutorials using Workbench to build modern data-driven conversational apps that run on the MindMeld platform.
+That concludes our quick tour of the MindMeld Conversational AI platform. The rest of this guide consists of hands-on tutorials focusing on using Workbench to build data-driven conversational apps that run on the MindMeld platform.

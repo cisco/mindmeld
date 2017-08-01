@@ -1,7 +1,7 @@
-Step 10: Deploy Trained Models To Production
-============================================
+Step 10: Deploy Trained Models
+==============================
 
-Once your application has been built, Workbench makes it easy to test locally and then deploy into production. In :doc:`Step 4 <04_define_the_dialogue_handlers>`, we created an application container for your dialogue state handler logic. This was the ``app.py`` file in the application root directory. To provide the necessary interface to manage deployment, we now append the following two lines of code to this file.
+Once your application has been built, Workbench makes it easy to test locally. In :doc:`Step 4 <04_define_the_dialogue_handlers>`, we created an application container for your dialogue state handler logic. This was the ``app.py`` file in the application root directory. To provide the necessary interface to manage deployment, we now append the following two lines of code to this file.
 
 .. code:: python
 
@@ -24,13 +24,10 @@ Our ``app.py`` now looks something like the following.
   if __name__ == "__main__":
       app.cli()
 
-We can now test our application locally, or deploy remotely into a production environment.
+We can now test our application locally.
 
-Local Deployment
-~~~~~~~~~~~~~~~~
 
-If you have not already, you must build your models before the application can be run. To build
-your models use the ``build`` command:
+If you have not already, you must build your models before the application can be run. To build your models use the ``build`` command:
 
 .. code-block:: console
 

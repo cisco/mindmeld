@@ -135,12 +135,12 @@ def clean(ctx):
 
 @cli.command('load-kb', context_settings=CONTEXT_SETTINGS)
 @click.option('-n', '--es-host', required=False)
-@click.argument('app_name', required=True)
+@click.argument('app_namespace', required=True)
 @click.argument('index_name', required=True)
 @click.argument('data_file', required=True)
-def load_index(es_host, app_name, index_name, data_file):
+def load_index(es_host, app_namespace, index_name, data_file):
     """Loads data into a question answerer index."""
-    QuestionAnswerer.load_kb(app_name, index_name, data_file, es_host)
+    QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
@@ -157,7 +157,12 @@ def num_parser(ctx, start):
             return
 
         try:
-            mallard_service = subprocess.Popen(['java', '-jar', path.MALLARD_JAR_PATH])
+            # We redirect all the output of starting the process to /dev/null and all errors
+            # to stdout.
+            with open(os.devnull, 'w') as dev_null:
+                mallard_service = subprocess.Popen(['java', '-jar', path.MALLARD_JAR_PATH],
+                                                   stdout=dev_null, stderr=subprocess.STDOUT)
+
             # mallard takes some time to start so sleep for a bit
             time.sleep(5)
             logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
@@ -189,7 +194,10 @@ def _get_mallard_pid():
 @click.argument('app_path', required=False)
 def setup_blueprint(es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application."""
-    blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
+    try:
+        blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
+    except ValueError as e:
+        logger.error(e)
 
 
 if __name__ == '__main__':

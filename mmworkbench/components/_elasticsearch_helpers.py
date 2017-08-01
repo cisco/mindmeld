@@ -18,8 +18,8 @@ INDEX_TYPE_SYNONYM = 'syn'
 INDEX_TYPE_KB = 'kb'
 
 
-def get_scoped_index_name(app_name, index_name):
-    return '{}${}'.format(app_name, index_name)
+def get_scoped_index_name(app_namespace, index_name):
+    return '{}${}'.format(app_namespace, index_name)
 
 
 def create_es_client(es_host=None, es_user=None, es_pass=None):
@@ -39,11 +39,11 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
     return es_client
 
 
-def does_index_exist(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
+def does_index_exist(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
     """Return boolean flag to indicate whether the specified index exists."""
 
     es_client = es_client or create_es_client(es_host)
-    scoped_index_name = get_scoped_index_name(app_name, index_name)
+    scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
     try:
         # Confirm ES connection with a shorter timeout
@@ -54,14 +54,14 @@ def does_index_exist(app_name, index_name, es_host=None, es_client=None, connect
         raise KnowledgeBaseConnectionError()
 
 
-def get_field_names(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
+def get_field_names(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
     """Return a list of field names available in the specified index."""
 
     es_client = es_client or create_es_client(es_host)
-    scoped_index_name = get_scoped_index_name(app_name, index_name)
+    scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
     try:
-        if not does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
+        if not does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
             raise ValueError('Elasticsearch index \'{}\' does not exist.'.format(index_name))
 
         res = es_client.indices.get(index=scoped_index_name)
@@ -72,11 +72,12 @@ def get_field_names(app_name, index_name, es_host=None, es_client=None, connect_
         raise KnowledgeBaseConnectionError()
 
 
-def create_index(app_name, index_name, mapping, es_host=None, es_client=None, connect_timeout=2):
+def create_index(app_namespace, index_name, mapping, es_host=None, es_client=None,
+                 connect_timeout=2):
     """Creates a new index.
 
     Args:
-        app_name (str): The name of the app
+        app_namespace (str): The namespace of the app
         index_name (str): The name of the new index to be created
         mapping (str): The Elasticsearch index mapping to use
         es_host (str): The Elasticsearch host server
@@ -85,10 +86,10 @@ def create_index(app_name, index_name, mapping, es_host=None, es_client=None, co
             Elasticsearch host
     """
     es_client = es_client or create_es_client(es_host)
-    scoped_index_name = get_scoped_index_name(app_name, index_name)
+    scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
     try:
-        if not does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
+        if not does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
             # checks the existence of default index template, if not then creates it.
             if not es_client.indices.exists_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME):
                 es_client.indices.put_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME,
@@ -102,11 +103,11 @@ def create_index(app_name, index_name, mapping, es_host=None, es_client=None, co
         raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
 
 
-def delete_index(app_name, index_name, es_host=None, es_client=None, connect_timeout=2):
+def delete_index(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
     """Deletes an index.
 
     Args:
-        app_name (str): The name of the app
+        app_namespace (str): The namespace of the app
         index_name (str): The name of the index to be deleted
         es_host (str): The Elasticsearch host server
         es_client: The Elasticsearch client
@@ -114,10 +115,10 @@ def delete_index(app_name, index_name, es_host=None, es_client=None, connect_tim
             Elasticsearch host
     """
     es_client = es_client or create_es_client(es_host)
-    scoped_index_name = get_scoped_index_name(app_name, index_name)
+    scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
     try:
-        if does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
+        if does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
             logger.info('Deleting index %r', index_name)
             es_client.indices.delete(scoped_index_name)
     except ESConnectionError:
@@ -125,13 +126,13 @@ def delete_index(app_name, index_name, es_host=None, es_client=None, connect_tim
         raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
 
 
-def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
+def load_index(app_namespace, index_name, docs, mapping, doc_type, es_host=None,
                es_client=None, connect_timeout=2):
     """Loads documents from data into the specified index. If an index with the specified name
     doesn't exist, a new index with that name will be created.
 
     Args:
-        app_name (str): The name of the app
+        app_namespace (str): The namespace of the app
         index_name (str): The name of the new index to be created
         docs (iterable): An iterable which contains a collection of documents in the correct format
                          which should be imported into the index
@@ -142,14 +143,14 @@ def load_index(app_name, index_name, docs, mapping, doc_type, es_host=None,
         connect_timeout (int, optional): The amount of time for a connection to the
             Elasticsearch host
     """
-    scoped_index_name = get_scoped_index_name(app_name, index_name)
+    scoped_index_name = get_scoped_index_name(app_namespace, index_name)
     es_client = es_client or create_es_client(es_host)
     try:
         # create index if specified index does not exist
-        if does_index_exist(app_name, index_name, es_host, es_client, connect_timeout):
+        if does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
             logger.info('Loading index %r', index_name)
         else:
-            create_index(app_name, index_name, mapping, es_host=es_host, es_client=es_client)
+            create_index(app_namespace, index_name, mapping, es_host=es_host, es_client=es_client)
 
         count = 0
         for okay, result in streaming_bulk(es_client, docs,

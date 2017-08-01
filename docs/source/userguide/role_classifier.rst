@@ -1,16 +1,14 @@
-Role Classifier
-===============
+.. meta::
+    :scope: private
+
+Working with the Role Classifier
+================================
 
 The :ref:`Role Classifier <arch_role_model>` is run as the fourth step in the natural language processing pipeline to determine the target roles for entities in a given query. It is a machine-learned `classification <https://en.wikipedia.org/wiki/Statistical_classification>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the role types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Role classification models are trained per entity type. A Workbench app hence has one role classifier for every entity type with associated roles.
 
 .. note::
 
-   **Recommended prior reading:**
-
-   - :ref:`Step 7: Train the Natural Language Processing Classifiers <role_classification>` (Step-By-Step Guide)
-   - :doc:`Natural Language Processor <nlp>` (User Guide)
-   - :doc:`Entity Recognizer <entity_recognizer>` (User Guide)
-
+   :ref:`Step 7 <role_classification>` of the Step-By-Step Guide is a pre-requisite for this chapter.
 
 Access a role classifier
 ------------------------
@@ -117,7 +115,7 @@ To view the current :ref:`configuration <config>` being used by a trained classi
 
 Let's take a look at the allowed values for each setting in a role classifier configuration.
 
-1. **Model Settings** 
+1. **Model Settings**
 
 ``'model_type'`` (:class:`str`)
   |
@@ -129,7 +127,7 @@ Let's take a look at the allowed values for each setting in a role classifier co
 
   Is always ``None``.
 
-2. **Feature Extraction Settings** 
+2. **Feature Extraction Settings**
 
 ``'features'`` (:class:`dict`)
   |
@@ -168,7 +166,7 @@ Let's take a look at the allowed values for each setting in a role classifier co
   |                           | extracting features for the "6 AM" ``time`` entity,                                                        |
   |                           |                                                                                                            |
   |                           | - ``{1: [-2, -1]}`` would extract "change" and "my"                                                        |
-  |                           | - ``{2: [-2, -1]}`` would extract "change my" and "my 6"                                                   | 
+  |                           | - ``{2: [-2, -1]}`` would extract "change my" and "my 6"                                                   |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | ``'other-entities'``      | Encodes information about the other entities present in the query.                                         |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
@@ -309,7 +307,7 @@ By default, the classifier only extracts n-grams within a context window of two 
 
 Suppose w\ :sub:`i` represents the word at the *ith* index in the query, where the index is calculated relative to the start of the current entity span. Then, the above feature configuration should extract the following n-grams (w\ :sub:`0` is the first token of the current entity).
 
-  - Unigrams: { w\ :sub:`-3`, w\ :sub:`-2`, w\ :sub:`-1`, w\ :sub:`0`, w\ :sub:`1`, w\ :sub:`2`, w\ :sub:`3` } 
+  - Unigrams: { w\ :sub:`-3`, w\ :sub:`-2`, w\ :sub:`-1`, w\ :sub:`0`, w\ :sub:`1`, w\ :sub:`2`, w\ :sub:`3` }
 
   - Bigrams: { w\ :sub:`-3`\ w\ :sub:`-2`, w\ :sub:`-2`\ w\ :sub:`-1`, w\ :sub:`-1`\ w\ :sub:`0`,  w\ :sub:`0`\ w\ :sub:`1`, w\ :sub:`1`\ w\ :sub:`2`, w\ :sub:`2`\ w\ :sub:`3` }
 
@@ -349,7 +347,7 @@ These settings can then be passed to :meth:`fit` as an argument to the :data:`pa
 
 .. code-block:: python
 
-   >>>  
+   >>>
    Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='time'
    No app configuration file found. Using default role model configuration
    Selecting hyperparameters using k-fold cross validation with 10 splits
@@ -397,7 +395,7 @@ Once the entities have been detected, you can call the role classifier's :meth:`
 .. code-block:: python
 
    >>> rc.predict(query, entities, 0)
-   'oldtime'   
+   'oldtime'
    >>> rc.predict(query, entities, 1)
    'newtime'
 
@@ -425,14 +423,14 @@ The :meth:`evaluate` method returns a rich object that contains a lot more infor
 
    >>> eval = rc.evaluate()
    >>> eval.print_stats()
-   Overall Statistics: 
+   Overall Statistics:
 
        accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
           0.952       0.952          20          20           1           1       0.952       0.952
 
 
 
-   Statistics by Class: 
+   Statistics by Class:
 
                   class      f_beta   precision      recall     support          TP          TN          FP          FN
                 oldtime       0.957       0.917       1.000          11          11           9           1           0
@@ -440,7 +438,7 @@ The :meth:`evaluate` method returns a rich object that contains a lot more infor
 
 
 
-   Confusion Matrix: 
+   Confusion Matrix:
 
                           oldtime        newtime
            oldtime             11              0
@@ -464,6 +462,22 @@ The statistics are split into three sections.
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
+
+  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+ 
+  - **Classes are balanced**: When the number of annotations for each role are comparable and each role is equally important, focusing on the accuracy metric is usually good enough.
+ 
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  
+  - **All F1 and accuracy scores are low**: Role classification is performing poorly across all roles. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
+
+  - **F1 weighted is higher than F1 macro**: Your roles with fewer evaluation examples are performing poorly. You may need to add more data to roles that have fewer examples.
+ 
+  - **F1 macro is higher than F1 weighted**: Your roles with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+ 
+  - **F1 micro is higher than F1 macro**: Certain roles are being misclassified more often than others. Check the class-wise statistics below to identify these roles. Some roles may be too similar to another roles or you may need to add more training data.
+ 
+  - **Some classes are more important than others**: If some roles are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
 **Class-wise Statistics**
   |
