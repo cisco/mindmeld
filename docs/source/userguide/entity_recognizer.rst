@@ -10,10 +10,9 @@ The :ref:`Entity Recognizer <arch_entity_model>`
 
 Every Workbench app has one entity recognizer for every intent that requires entity detection.
 
-
 .. note::
 
-   This is an in-depth tutorial to work through from start to finish. Before you begin, read :ref:`Step 7 <domain_classification>` of the Step-By-Step Guide.
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Entity Recognition <entity_recognition>` section.
 
 
 System entities and custom entities
@@ -605,19 +604,19 @@ Let's decipher the statistical output of the :meth:`evaluate` method.
   ===========  ===
 
   Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
- 
+
   - **Classes are balanced**: When the number of annotated entities for each entity type are comparable and each entity type is equally important, focusing on the accuracy metric is usually good enough.
- 
+
   - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
-  
+
   - **All F1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
 
   - **F1 weighted is higher than F1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples.
- 
+
   - **F1 macro is higher than F1 weighted**: Your entity types with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
- 
+
   - **F1 micro is higher than F1 macro**: Certain entity types are being misclassified more often than others. Check the class-wise statistics below to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
- 
+
   - **Some classes are more important than others**: If some entities are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
 **Class-wise Statistics**
