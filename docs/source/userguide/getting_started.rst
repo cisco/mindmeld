@@ -324,6 +324,14 @@ Workbench provides several different blueprint applications to support many comm
 conversational applications. See :doc:`Workbench Blueprints<../blueprints/overview>` for more usage examples.
 
 
+Upgrade Workbench
+-----------------
+
+To upgrade to the latest version of Workbench, run ``pip install mmworkbench --upgrade``
+
+Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
+
+
 Command-Line Interfaces
 -----------------------
 
@@ -359,9 +367,37 @@ The commands available are:
 #. ``run`` : Starts the workbench service as a REST API.
 
 
-Upgrade Workbench
------------------
+Configure Logging
+------------------
 
-To upgrade to the latest version of Workbench, run ``pip install mmworkbench --upgrade``
+Workbench adheres to the standard `Python logging mechanism <https://docs.python.org/3/howto/logging.html>`_. 
+The default logging level is ``WARNING``, which can be overridden with a config file or from code. 
+The INFO logging level can be useful to see what's going on:
 
-Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
+.. code-block:: python
+  
+  import logging
+  logging.getLogger('mmworkbench’).setLevel(logging.INFO)
+
+configure_logs()
+^^^^^^^^^^^^^^^^
+
+There is a handy ``configure_logs()`` function available that wraps this and accepts 2 parameters: 
+
+#. `format message <https://docs.python.org/3/howto/logging.html#changing-the-format-of-displayed-messages>`_
+#. `logging level <https://docs.python.org/3/howto/logging.html#logging-levels>`_: in increasing order of severity, they are ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR`` and ``CRITICAL``.
+
+The method signature is:
+
+.. code-block:: python
+ 
+   configure_logs(format="%(message)s", level=logging.WARNING)
+
+
+Sample Code
+^^^^^^^^^^^^
+  
+.. code-block:: python
+
+  import mmworkbench as wb  
+  wb.configure_logs()
