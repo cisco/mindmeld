@@ -6,7 +6,7 @@ Working with the Intent Classifier
 
 The :ref:`Intent Classifier <arch_intent_model>`
 
- - is run as the second step in the :ref:`natural language processing pipeline <nlp>`
+ - is run as the second step in the :ref:`natural language processing pipeline <arch_nlp>`
  - is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that determines the target intent for a given query
  - is trained using all of the labeled queries across all the intents in a given domain
 
@@ -553,19 +553,19 @@ Let’s decipher the statistical output of the :meth:`evaluate` method.
   ===========  ===
 
   Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
- 
+
   - **Classes are balanced**: When the number of training examples in your intents are comparable and each intent is equally important, focusing on the accuracy metric is usually good enough.
- 
+
   - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
-  
+
   - **All F1 and accuracy scores are low**: Intent classification is performing poorly across all intents. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your intent structure and make sure queries in different intents have distinct natural language patterns. You may need to combine intents or separate them, so that the resulting classes are easier for the classifier to distinguish.
 
   - **F1 weighted is higher than F1 macro**: Your intents with fewer evaluation examples are performing poorly. You may need to add more data to intents that have fewer examples. You could also try adding class weights to your hyperparameters.
- 
+
   - **F1 macro is higher than F1 weighted**: Your intents with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
- 
+
   - **F1 micro is higher than F1 macro**: Certain intents are being misclassified more often than others. Check the class-wise below statistics to identify these intents. Some intents may be too similar to another intent or you may need to add more training data to some intents.
- 
+
   - **Some classes are more important than others**: If some intents are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
 **Class-wise Statistics**
