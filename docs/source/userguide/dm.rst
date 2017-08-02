@@ -1,6 +1,3 @@
-.. meta::
-    :scope: private
-
 Working with the Dialogue Manager
 =================================
 
@@ -8,9 +5,7 @@ The Dialogue Manager is the component responsible for managing the conversationa
 
 .. note::
 
-  **Recommended prior reading:**
-
-  - :ref:`Step 4 Define the Dialogue State Handlers <define_dialogue_state_handlers>` (Step-By-Step Guide)
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the section about defining the :ref:`Dialogue State Handlers <define_dialogue_state_handlers>`.
 
 The dialogue state is determined based on the request context and on the output from the natural language processor. When developing your application you will set up a system of rules to match requests to dialogue states using the a flexible syntax. Each dialogue state has a handler which contains logic to fulfill a user's request or gather more information if necessary and to generate a natural language response.
 
