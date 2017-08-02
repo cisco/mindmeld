@@ -1,3 +1,5 @@
+:orphan:
+
 .. meta::
     :scope: private
 

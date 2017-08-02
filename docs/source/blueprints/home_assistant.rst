@@ -9,69 +9,6 @@ This blueprint is great for:
    - Learning how to use system entities such as dates and times.
    - Learning how to use roles in the entity hierarchy.
 
-
-Quick Start
------------
-
-|
-
-1. Download
-^^^^^^^^^^^
-
-Open a python shell and type the following commands to download and set up the home assistant blueprint application.
-
-.. code:: python
-
-   >>> import mmworkbench as wb
-   >>> wb.configure_logs()
-   >>> wb.blueprint('home_assistant')
-
-
-2. Build
-^^^^^^^^
-
-Build the Natural Language Processing models that power the app.
-
-.. code:: python
-
-   >>> from mmworkbench.components import NaturalLanguageProcessor
-   >>> nlp = NaturalLanguageProcessor('home_assistant')
-   >>> nlp.build()
-
-You can also build and save the model directly from commandline.
-
-.. code:: bash
-
-   python app.py build
-
-3. Run
-^^^^^^
-
-Interact with the app in the python shell using the commands below. Try out the examples shown here as well as some queries of your own.
-
-.. code:: python
-
-   >>> from mmworkbench.components.dialogue import Conversation
-   >>> conv = Conversation(nlp=nlp, app_path='home_asssitant')
-   >>> conv.say('Hi')
-   ['Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.']
-   >>> conv.say('What is the weather today?')
-   ['The weather forecast in San Francisco is haze with a min of 66.2 F and a max of 89.6 F']
-   >>> conv.say('Set the temperature to 72')
-   ['The thermostat temperature in the home is now 72 degrees F.']
-
-Home Assistant uses Open Weather Map for retrieving weather forecast. You will need to register for a key online and set the environment variable:
-
-.. code:: bash
-
-  export OPEN_WEATHER_KEY=[YOUR-KEY]
-
-
-Deep Dive
----------
-
-|
-
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
@@ -82,130 +19,84 @@ This application provides a conversational interface for home automation systems
 
 The conversational user flows for a home assistant application can get complex depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.
 
-.. code:: bash
-
-   App: Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.
-
-   You: I want to turn on the lights in the kitchen
-
-   App: Ok. The kitchen lights have been turned on.
-
-   You: Turn the kitchen lights off
-
-   App: Ok. The kitchen lights have been turned off.
-
-   You: Turn on the thermostat
-
-   App: Ok. The thermostat in the home has been turned on.
-
-   You: Turn up the thermostat
-
-   App: The thermostat temperature in the home is now 73 degrees F.
-
-   You: Set the thermostat to 70
-
-   App: The thermostat temperature in the home is now 70 degrees F.
-
-   You: Lock all the doors
-
-   App: Ok. All doors have been locked.
-
-   You: What's the weather today?
-
-   App: The weather forecast in San Francisco is clouds with a min of 66.2 F and a max of 87.8 F.
-
-   You: Set a timer for 30 minutes
-
-   App: Ok. A timer for 30 minutes has been set.
-
-   You: Set alarm for 9am
-
-   App: Ok, I have set your alarm for 09:00:00.
+.. image:: /images/home_assistant_interactions.png
+    :width: 700px
+    :align: center
 
 In this blueprint, the application provides a conversational interface for users to check weather, set alarms and timers, and control the lights, doors, thermostat and different appliances in the house.
+
+.. _home_model_hierarchy:
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The home assistant blueprint is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the E-mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...
+The home assistant blueprint is organized into five domains: Greeting, Smart Home, Time & Dates, Weather and Unknown. In contrast with the Kwik-E-Mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...
 
-Below is the full list of intents for every domain:
+The full list of intents for all domains is illustrated below.
 
-   - Greeting
-       - greet
-       - exit
+.. image:: /images/hierarchy_home_assistant.png
+
+There are two types of entities: :doc:`Custom Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Custom entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are ``sys_temperature``, ``sys_time``, ``sys_interval``, etc.
+
+Home assistant defines and uses the following custom entities, which are grouped by intents below:
+
    - Smart Home
-       - check_thermostat
-       - close_door
-       - lock_door
-       - open_door
-       - set_thermostat
-       - specify_location
-       - turn_appliance_on
-       - turn_appliance_off
-       - turn_down_thermostat
-       - turn_lights_off
-       - turn_lights_on
-       - turn_off_thermostat
-       - turn_on_thermostat
-       - turn_up_thermostat
-       - unlock_door
+       - ``location``: detects household location, for example: "lock {back|location} door"
+       - ``appliance``: detects household appliances, for example: "can you turn on the {tv|appliance}?"
+       - ``all``: detects whether the user is referring to all household locations, instead of a specific location, for example: "turn on the lights in {all|all} room" and "lock the doors {everywhere|all}".
+       - ``color``: detects color of the lights, for example: "turn the lights to {soft white|color}"
+
    - Time and dates
-       - change_alarm
-       - check_alarm
-       - set_alarm
-       - start_timer
-       - stop_timer
+       - ``duration``: detects time duration, for example: "{15 minute|duration} alarm"
+       - ``interval``: detects time interval, for example: "cancel {tomorrow night|interval} s alarms"
+
    - Weather
-       - check_weather
-   - Unknown
-       - unknown
+       - ``city``: detects cities, for example: "what is the weather in {shanghai|city}"
+       - ``unit``: detects weather unit, for example: "what is the forecast for {london|city} in {celsius|unit}"
 
-There are two types of entities: :doc:`Named Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Named entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are ``sys_temperature``, ``sys_time``, ``sys_interval``, etc.
+Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature). Some examples for annotation with system entities: "set my thermostat to turn on at {6 am|sys_time}" and "turn the heat off at {76 degrees|sys_temperature}".
 
-Home assistant defines and uses the following named entities:
+In many queries, there might be more than one entity of the same type. For example, "change my alarm from 7 am to 6 am", both "7 am" and "6 am" are both system entities. Therefore, in order to distinguish between the two entities, we can use roles to annotate ``old_time`` for "7 am" and ``new_time`` for "6 am". We annotate the example as "change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}" with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles. For more information on the usage of role, check :doc:`Role Classifier <../userguide/role_classifier>`.
 
-    - ``all``: this entity is used to detect whether the user has asked for all entities, for example: ``turn on the lights in {all|all} room``.
-    - ``appliance``: this entity is used to detect household appliances, for example: ``can you turn on the {tv|appliance}?``
-    - ``city``: this entity is used to detect cities, for example: ``what is the weather in {shanghai|city}``
-    - ``color``: this entity is used to detect color of the lights, for example: ``turn the lights to {soft white|color}``
-    - ``interval``: this entity is used to detect time interval, for example: ``cancel {tomorrow night|interval} s alarms``
-    - ``location``: this entity is used to detect household location, for example: ``lock {back|location} door``
-    - ``unit``: this entity is used to detect weather unit, for example: ``what is the forecast for {london|city} in {celsius|unit}``
-    - ``duration``: this entity is used to detect time duration, for example: ``{15 minute|duration} alarm``
+To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
 
-Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature). Some examples for annotation with system entities: ``set my thermostat to turn on at {6 am|sys_time}`` and ``turn the heat off at {76 degrees|sys_temperature}``.
+.. code-block:: console
 
-In many queries, there might be more than one entity of the same type. For example, ``change my alarm from 7 am to 6 am``, both ``7 am`` and ``6 am`` are both system entities. Therefore, in order to distinguish between the two entities, we can use roles to annotate ``old_time`` for ``7 am`` and ``new_time`` for ``6 am``. We annotate the example as ``change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}`` with ``old_time`` and ``new_time`` as roles. This way, we can distinguish each entity based on their roles.
+    $ python -c "import mmworkbench as wb; wb.blueprint('home_assistant');"
 
-For more information on the usage of role, check :doc:`Role <../userguide/role_classifier>`.
+This should create a Workbench project folder called ``home_assistant`` in your current directory with the following structure:
+
+.. image:: /images/home_assistant_directory.png
+    :width: 250px
+    :align: center
+
 
 4. Dialogue States
 ^^^^^^^^^^^^^^^^^^
 
-Dialogue state logic can get arbitrarily complex. Simple handlers can just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In E-mart example, we can define a dialogue state for every intent. Workbench3 also supports defining a single dialogue state for multiple intents. In this section we will explore both options in detail.
+Dialogue state logic can get arbitrarily complex. Simple handlers can just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In Kwik-E-Mart example, we can define a dialogue state for every intent. Workbench3 also supports defining a single dialogue state for multiple intents. In this section we will explore both options in detail.
 
 Let's take a closer look at these intents for controlling doors: ``close_door``, ``open_door``, ``lock_door``, and ``unlock_door``. Now we can define a dialogue state for each of these intents.
 
 .. code:: python
 
   @app.handle(intent='close_door')
-  def close_door(context, slots, responder):
+  def close_door(context, responder):
 
       ...
 
   @app.handle(intent='open_door')
-  def open_door(context, slots, responder):
+  def open_door(context, responder):
 
       ...
 
   @app.handle(intent='lock_door')
-  def lock_door(context, slots, responder):
+  def lock_door(context, responder):
 
       ...
 
   @app.handle(intent='unlock_door')
-  def unlock_door(context, slots, responder):
+  def unlock_door(context, responder):
 
       ...
 
@@ -217,7 +108,7 @@ However, since close/open/lock/unlock door are very similar to each other in the
   @app.handle(intent='open_door')
   @app.handle(intent='lock_door')
   @app.handle(intent='unlock_door')
-  def handle_door(context, slots, responder):
+  def handle_door(context, responder):
 
       ...
 
@@ -238,94 +129,115 @@ We include a code snippet for ``specify_location`` for your reference.
 .. code:: python
 
   @app.handle(intent='specify_location')
-  def specify_location(context, slots, responder):
-  selected_all = False
-  selected_location = _get_location(context)
+  def specify_location(context, responder):
+      selected_all = False
+      selected_location = _get_location(context)
 
-  if selected_location:
-      try:
-          if context['frame']['desired_action'] == 'Close Door':
-              reply = self._handle_door_open_close_reply(
-                  selected_all, selected_location, context, desired_state="closed")
-          elif context['frame']['desired_action'] == 'Open Door':
-              reply = self._handle_door_open_close_reply(
-                  selected_all, selected_location, context, desired_state="opened")
-          elif context['frame']['desired_action'] == 'Lock Door':
-              reply = self._handle_door_lock_unlock_reply(
-                  selected_all, selected_location, context, desired_state="locked")
-          elif context['frame']['desired_action'] == 'Unlock Door':
-              reply = self._handle_door_lock_unlock_reply(
-                  selected_all, selected_location, context, desired_state="unlocked")
-          elif context['frame']['desired_action'] == 'Check Door':
-              reply = self._handle_check_door_reply(selected_location, context)
-          elif context['frame']['desired_action'] == 'Turn On Lights':
-              reply = self._handle_lights_reply(
-                  selected_all, selected_location, context, desired_state="on")
-          elif context['frame']['desired_action'] == 'Turn Off Lights':
-              reply = self._handle_lights_reply(
-                  selected_all, selected_location, context, desired_state="off")
-          elif context['frame']['desired_action'] == 'Check Lights':
-              reply = self._handle_check_lights_reply(selected_location, context)
-          elif context['frame']['desired_action'] == 'Turn On Appliance':
-              selected_appliance = context['frame']['appliance']
-              reply = self._handle_appliance_reply(
-                  selected_location, selected_appliance, desired_state="on")
-          elif context['frame']['desired_action'] == 'Turn Off Appliance':
-              selected_appliance = context['frame']['appliance']
-              reply = self._handle_appliance_reply(
-                  selected_location, selected_appliance, desired_state="off")
+      if selected_location:
+          try:
+              if context['frame']['desired_action'] == 'Close Door':
+                  reply = self._handle_door_open_close_reply(
+                      selected_all, selected_location, context, desired_state="closed")
+              elif context['frame']['desired_action'] == 'Open Door':
+                  reply = self._handle_door_open_close_reply(
+                      selected_all, selected_location, context, desired_state="opened")
+              elif context['frame']['desired_action'] == 'Lock Door':
+                  reply = self._handle_door_lock_unlock_reply(
+                      selected_all, selected_location, context, desired_state="locked")
+              elif context['frame']['desired_action'] == 'Unlock Door':
+                  reply = self._handle_door_lock_unlock_reply(
+                      selected_all, selected_location, context, desired_state="unlocked")
+              elif context['frame']['desired_action'] == 'Check Door':
+                  reply = self._handle_check_door_reply(selected_location, context)
+              elif context['frame']['desired_action'] == 'Turn On Lights':
+                  reply = self._handle_lights_reply(
+                      selected_all, selected_location, context, desired_state="on")
+              elif context['frame']['desired_action'] == 'Turn Off Lights':
+                  reply = self._handle_lights_reply(
+                      selected_all, selected_location, context, desired_state="off")
+              elif context['frame']['desired_action'] == 'Check Lights':
+                  reply = self._handle_check_lights_reply(selected_location, context)
+              elif context['frame']['desired_action'] == 'Turn On Appliance':
+                  selected_appliance = context['frame']['appliance']
+                  reply = self._handle_appliance_reply(
+                      selected_location, selected_appliance, desired_state="on")
+              elif context['frame']['desired_action'] == 'Turn Off Appliance':
+                  selected_appliance = context['frame']['appliance']
+                  reply = self._handle_appliance_reply(
+                      selected_location, selected_appliance, desired_state="off")
 
-          del context['frame']['desired_action']
+              del context['frame']['desired_action']
 
-      except KeyError:
-          reply = "Please specify an action to go along with that location."
+          except KeyError:
+              reply = "Please specify an action to go along with that location."
 
-      responder.reply(reply)
-  else:
-      prompt = "I'm sorry, I wasn't able to recognize that location, could you try again?"
-      responder.prompt(prompt)
+          responder.reply(reply)
+      else:
+          prompt = "I'm sorry, I wasn't able to recognize that location, could you try again?"
+          responder.prompt(prompt)
 
 
-Here is the full list of states in the home assistant blueprint:
+Here is the full list of intents and states in the home assistant blueprint.
 
-   - greet
-   - exit
-   - check_weather
-   - specify_location
-   - specify_time
-   - check_door
-   - close_door
-   - open_door
-   - lock_door
-   - unlock_door
-   - turn_appliance_on
-   - turn_appliance_off
-   - check_lights
-   - turn_lights_on
-   - turn_lights_off
-   - check_thermostat
-   - set_thermostat
-   - change_thermostat
-   - turn_thermostat
-   - change_alarm
-   - check_alarm
-   - remove_alarm
-   - set_alarm
-   - start_timer
-   - stop_timer
-   - unknown
-
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+|  Intent                                           |  Dialogue State Name           | Dialogue State Function                           |
++===================================================+================================+===================================================+
+| ``greet``                                         | ``greet``                      | Begin an interaction and welcome the user         |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``check_weather``                                 | ``check_weather``              | Check the weather                                 |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``check_door``                                    | ``check_door``                 | Check the door                                    |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``close_door``                                    | ``close_door``                 | Close the door                                    |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``open_door``                                     | ``open_door``                  | To open the door                                  |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``lock_door``                                     | ``lock_door``                  | To lock the door                                  |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``unlock_door``                                   | ``unlock_door``                | Unlock the door                                   |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``turn_appliance_on``                             | ``turn_appliance_on``          | Turn the appliance on                             |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``turn_appliance_off``                            | ``turn_appliance_off``         | Turn the appliance off                            |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``check_lights``                                  | ``check_lights``               | Check the lights                                  |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``turn_lights_on``                                | ``turn_lights_on``             | Turn the lights on                                |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``turn_lights_off``                               | ``turn_lights_off``            | Turn the lights off                               |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``check_thermostat``                              | ``check_thermostat``           | Check the thermostat                              |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``set_thermostat``                                | ``set_thermostat``             | Set the thermostat                                |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``turn_up_thermostat``,  ``turn_down_thermostat`` | ``change_thermostat``          | Change the thermostat                             |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``change_alarm``                                  | ``change_alarm``               | Change the alarm                                  |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``check_alarm``                                   | ``check_alarm``                | Check the alarm                                   |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``remove_alarm``                                  | ``remove_alarm``               | Remove the alarm                                  |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``set_alarm``                                     | ``set_alarm``                  | Set the alarm                                     |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``start_timer``                                   | ``start_timer``                | Start the timer                                   |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``stop_timer``                                    | ``stop_timer``                 | Stop the timer                                    |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``specify_location``                              | ``specify_location``           | Specify locations in the house                    |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``specify_time``                                  | ``specify_time``               | Specify the time in the follow up questions       |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``exit``                                          | ``exit``                       | End the current interaction                       |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``unknown``                                       | ``unknown``                    | Prompt a user who has gone off-topic              |
+|                                                   |                                | to get back to food ordering                      |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base. Workbench3 does need an Elasticsearch connection for validation, and therefore we still need a local instance of Elasticsearch running in the background. If you have homebrew, you can set one up quickly:
-
-.. code:: bash
-
-   >>> brew install elasticsearch
-   >>> elasticsearch
-
+The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base.
 
 6. Training Data
 ^^^^^^^^^^^^^^^^
@@ -337,10 +249,6 @@ The labeled data for training our NLP pipeline was created using a combination o
 +==============================================================+=========================================================================================================================+
 | Exploratory data generation for guiding the app design       | "How would you talk to a conversational app to control your smart home appliances?"                                     |
 +--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
-| Divide your application use case into separate domains       | If your application has to control appliances in a smart home, check the weather and control a smart alarm, divide these|
-|                                                              | use cases into separate domains: smart_home, times_and_dates, weather. One way to break an application into smaller     |
-|                                                              | domains is by clustering the queries by similar use case and then naming each cluster as a domain                       |
-+==============================================================+=========================================================================================================================+
 | Targeted query generation for training Domain and Intent     | For domain ``times_and_dates``, the following intents are constructed:                                                  |
 | Classifiers.                                                 | ``change_alarm``: "What would you say to the app to change your alarm time from a previous set time to a new set time?" |
 |                                                              | ``set_alarm``: "What would you say to the app to set a new alarm time?"                                                 |
@@ -354,19 +262,21 @@ The labeled data for training our NLP pipeline was created using a combination o
 |                                                              | ``location`` entity: "What are some names of locations in your home"                                                    |
 +--------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------+
 
+In summary, we start out with an exploratory data generation process to collect varied examples of how the end user would interact with the app. We then cluster that data into different domains based on functionality. For example, the home assistant application has to control appliances in a smart home, check the weather and control a smart alarm, so we divide these functions into the following domains: greeting, smart_home, times_and_dates and weather. Once we establish a clear domain-intent-entity-role hierarchy for the application, the next steps are to do targeted labeled data generation for each component in the hierarchy.
+
 The training data for intent classification and entity recognition can be found in the ``domains`` directory, whereas the data for entity resolution is in the ``entities`` directory, both located at the root level of the blueprint folder.
 
 .. admonition:: Exercise
 
    - Read :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about :doc:`NLP model evaluation and error analysis <../userguide/nlp>` in the user guide.
 
-   - To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (``city``, ``sys_time``) that your application needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your application.
+   - To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like ``greet`` and ``exit``. However, for core intents like ``check_weather`` in the ``weather`` domain, it's recommended that you collect new training data that is tailored towards the entities (``city``, ``duration``) that your application needs to support. Follow the same approach to gather new training data for the ``check_weather`` intent or any additional intents and entities needed for your application.
 
 
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To put the training data to use and train a baseline NLP system for your applicatio using Workbench's default machine learning settings, use the :meth:``build()`` method of the :class:``NaturalLanguageProcessor`` class:
+To put the training data to use and train a baseline NLP system for your application using Workbench's default machine learning settings, use the :meth:`build` method of the :class:`NaturalLanguageProcessor` class:
 
 .. code:: python
 
@@ -397,9 +307,9 @@ To put the training data to use and train a baseline NLP system for your applica
    Best accuracy: 98.43%, params: {'fit_intercept': True, 'C': 100, 'class_weight': {0: 0.99365079365079367, 1: 1.5915662650602409, 2: 1.3434782608695652, 3: 1.5222222222222221, 4: 0.91637426900584784, 5: 0.74743589743589745, 6: 1.9758620689655173, 7: 1.4254901960784312, 8: 1.0794871794871794, 9: 1.0645320197044335, 10: 1.1043715846994535, 11: 1.2563909774436088, 12: 1.3016260162601625, 13: 1.0775510204081633, 14: 1.8384615384615384}}
 .. tip::
 
-  During active development, it is helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what is happening behind the scenes. All code snippets here assume that logging level has been set to verbose (``wb.configure_logs()``).
+  During active development, it is helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what is happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
 
-You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` for the domain ``smart_home`` and about 99% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>` for the domain ``smart_home`` and intent ``turn_on_thermostat``. To see how the trained NLP pipeline performs on a test query, use the :meth:``process()`` method.
+You should see a cross validation accuracy of around 98% for the :doc:`Intent Classifier <../userguide/intent_classifier>` for the domain ``smart_home`` and about 99% for the :doc:`Entity Recognizer <../userguide/entity_recognizer>` for the domain ``smart_home`` and intent ``turn_on_thermostat``. To see how the trained NLP pipeline performs on a test query, use the :meth:`process` method.
 
 .. code:: python
 
@@ -435,9 +345,9 @@ A good place to start is by inspecting the baseline configuration used by the di
     'in-gaz': {}
    }
 
-You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier's :meth:``fit()`` method. Here are a couple of examples.
+You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier's :meth:`fit` method. Here are a couple of examples.
 
-For example, we can hange the feature extraction settings to use bag of bigrams in addition to the default bag of words:
+For example, we can change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
 
 .. code:: python
 
@@ -490,7 +400,7 @@ In another example, we can change the model for the intent classifier to Support
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 98.27%, params: {'C': 5000, 'kernel': 'rbf'}
 
-Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the :doc:`Intent Classifier <../userguide/intent_classifier>` in the user guide for a detailed discussion on training, tuning, and evaluating the various Workbench classifiers.
+Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the :doc:`NaturalLanguageProcessor <../userguide/nlp>` in the user guide for a detailed discussion on training, tuning, and evaluating the various Workbench classifiers.
 
 The home assistant application also has role classifiers to distinguish between different role labels. For example, the annotated data in the ``times_and_dates`` domain and ``check_alarm`` intent have two types of roles: ``old_time`` and ``new_time``. We use the role classifier to correctly classify these roles for the ``sys_time`` entity:
 
@@ -503,7 +413,7 @@ The home assistant application also has role classifiers to distinguish between 
 
 In the above case, the role classifier was able to correctly distinguish between ``new_time`` and ``old_time`` for all test cases.
 
-The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configurations that are namespaced by ``DOMAIN_MODEL_CONFIG and INTENT_MODEL_CONFIG`` respectively; other namespaces include ``ENTITY_MODEL_CONFIG and ROLE_MODEL_CONFIG``. If no custom model configuration is added to ``config.py`` file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
+The application configuration file, ``config.py``, at the top level of home assistant folder contains custom intent and domain classifier model configurations, defined as dictionaries named ``DOMAIN_MODEL_CONFIG`` and ``INTENT_MODEL_CONFIG`` respectively; other dictionaries include ``ENTITY_MODEL_CONFIG`` and ``ROLE_MODEL_CONFIG``. If no custom model configuration is added to ``config.py`` file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
 
 .. code:: python
 
@@ -542,7 +452,7 @@ The application configuration file, ``config.py``, at the top level of home assi
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The queries in the home assistant do not have complex relationships between entities. For example, for the annotated query ``is the {back|location} door closed or open``, there is no entity that describes the ``location`` entity. As queries become more complex, for example, ``is the {green|color} {back|location} door closed or open``, we would need to relate the ``color`` entity with the ``location`` entity. When this happens, we call these two related entities ``entity groups``.
-Since we do not have entity groups in the home assistant application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships will form. Please refer to :doc:`Entity Groups <../userguide/language_parsing.html?highlight=entity%20groups>` and :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
+Since we do not have entity groups in the home assistant application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships will form. Please refer to :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
 
 
 9. Using the Question Answerer
@@ -554,16 +464,16 @@ The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational application using the :class:``Conversation`` class in Workbench.
+Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational application using the :class:`Conversation` class in Workbench.
 
 .. code:: python
 
    >>> from mmworkbench.components.dialogue import Conversation
-   >>> conv = Conversation(nlp=nlp, app_path='home_asssitant')
+   >>> conv = Conversation(nlp=nlp, app_path='home_assistant')
    >>> conv.say('set alarm for 6am')
    ['Ok, I have set your alarm for 06:00:00.']
 
-The :meth:``say()`` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
+The :meth:`say` method packages the input text in a user request object and passes it to the Workbench Application Manager to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.
 
 You can also try out multi-turn dialogues:
 
@@ -583,9 +493,9 @@ You can also try out multi-turn dialogues:
    ['Bye!']
 
 
-We can also enter the conversation mode directly from the commandline.
+We can also enter the conversation mode directly from the command-line.
 
-.. code:: bash
+.. code:: console
 
    >>> python app.py converse
 
@@ -593,4 +503,6 @@ We can also enter the conversation mode directly from the commandline.
    You: What's the weather today in San Francisco?
    App: The weather forecast in San Francisco is clouds with a min of 62.6 F and a max of 89.6 F
 
-Exercise: test the app and play around with different language patterns to figure out the edge cases that our classifiers are not able to handle. The more language patterns we can collect in our training data, the better our classifiers can handle in live usage with real users. Good luck and have fun - now you have your very own Jarvis!
+.. admonition:: Exercise
+
+   - Test the app and play around with different language patterns to figure out the edge cases that our classifiers are not able to handle. The more language patterns we can collect in our training data, the better our classifiers can handle in live usage with real users. Good luck and have fun - now you have your very own Jarvis!

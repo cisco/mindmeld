@@ -1,16 +1,18 @@
-.. meta::
-    :scope: private
+Working with the Entity Recognizer
+==================================
 
-Entity Recognizer
-=================
+The :ref:`Entity Recognizer <arch_entity_model>`
 
-The Entity Recognizer is run as the third step in the natural language processing pipeline to detect all the relevant entities in a given query. It is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ model that is trained using all the labeled queries for a given intent. Labels are derived from the entity types annotated within the training queries. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Entity recognition models are trained per intent. A Workbench app hence has one entity recognizer for every intent that requires entity detection.
+ - is run as the third step in the :ref:`natural language processing pipeline <instantiate_nlp>`
+ - is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ model that detects all the relevant :term:`entities <entity>` in a given query
+ - is trained per intent, like all entity recognition models
+ - is trained using all the labeled queries for a given intent, with labels derived from the entity types annotated within the training queries
+
+Every Workbench app has one entity recognizer for every intent that requires entity detection.
 
 .. note::
 
-   For a quick introduction, refer to :ref:`Step 7 <entity_recognition>` of the Step-By-Step Guide.
-
-   Recommended prior reading: :doc:`Natural Language Processor <nlp>` chapter of the User Guide.
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Entity Recognition <entity_recognition>` section.
 
 
 System entities and custom entities
@@ -19,18 +21,17 @@ System entities and custom entities
 Entities in Workbench are categorized into two types:
 
 **System Entities**
-  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. Read more in the :doc:`System Entities <system_entities>` chapter. 
+  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. See :ref:`system-entities` below.
 
 **Custom Entities**
-  Application-specific entities that need to be detected using a trained entity recognizer. These are generally `named entities <https://en.wikipedia.org/wiki/Named_entity>`_ which can only be recognized using statistical models that have been trained with deep domain knowledge.
+  Application-specific `named entities <https://en.wikipedia.org/wiki/Named_entity>`_. These can only be detected by an entity recognizer that uses statistical models trained with deep domain knowledge.
 
 This chapter focuses on training entity recognition models for detecting all the custom entities used by your app.
-
 
 Access the entity recognizer
 ----------------------------
 
-Before using any of the NLP components, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
+To use any natural language processor component, you must first generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. Once you have training data, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
 
 .. code-block:: python
 
@@ -39,7 +40,7 @@ Before using any of the NLP components, you need to generate the necessary train
    >>> nlp
    <NaturalLanguageProcessor 'home_assistant' ready: False, dirty: False>
 
-Next, verify that the NLP has correctly identified all the domains and intents for your app.
+Verify that the NLP has correctly identified all the domains and intents for your app.
 
 .. code-block:: python
 
@@ -66,7 +67,7 @@ Next, verify that the NLP has correctly identified all the domains and intents f
     'check_weather': <IntentProcessor 'check_weather' ready: False, dirty: False>
    }
 
-Each intent has its own :class:`EntityRecognizer` which can be accessed using the :attr:`entity_recognizer` attribute of the corresponding intent.
+Access the :class:`EntityRecognizer` using the :attr:`entity_recognizer` attribute of an intent of your choice.
 
 .. code-block:: python
 
@@ -86,7 +87,7 @@ Each intent has its own :class:`EntityRecognizer` which can be accessed using th
 Train an entity recognizer
 --------------------------
 
-To train an entity recognition model for a specific intent, use the :meth:`EntityRecognizer.fit` method. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes to finish. If the logging level is set to ``INFO`` or below, you should see the build progress in the console and the cross-validation accuracy of the trained model.
+Use the :meth:`EntityRecognizer.fit` method to train an entity recognition model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracy of the trained model.
 
 .. _baseline_entity_fit:
 
@@ -101,15 +102,15 @@ To train an entity recognition model for a specific intent, use the :meth:`Entit
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 99.14%, params: {'C': 10000, 'penalty': 'l2'}
 
-The :meth:`fit` method loads all the necessary training queries and trains an entity recognition model using the provided machine learning settings. When the method is called without any parameters (as in the example above), it uses the settings from the :ref:`app's configuration file <build_nlp_with_config>` (``config.py``), if defined, or Workbench's preset :ref:`classifier configuration <config>`.
+The :meth:`fit` method loads all necessary training queries and trains an entity recognition model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the Workbench preset :ref:`classifier configuration <config>`.
 
-The quickest and recommended way to get started with any of the NLP classifiers is by using Workbench's default settings. The resulting baseline classifier should provide a reasonable starting point to bootstrap your machine learning experimentation from. You can then experiment with alternate settings to identify the optimal classifier configuration for your app.
+Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.
 
 
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To view the current :ref:`configuration <config>` being used by a trained classifier, use its :attr:`config` attribute. For example, here is the configuration being used by a baseline entity recognizer trained using Workbench's default settings.
+Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an  example where we view the configuration of a domain classifier trained using default settings:
 
 .. code-block:: python
 
@@ -118,7 +119,7 @@ To view the current :ref:`configuration <config>` being used by a trained classi
      'features': {
        'bag-of-words-seq': {
          'ngram_lengths_to_start_positions': {
-            1: [-2, -1, 0, 1, 2], 
+            1: [-2, -1, 0, 1, 2],
             2: [-2, -1, 0, 1]
          }
        },
@@ -143,27 +144,27 @@ To view the current :ref:`configuration <config>` being used by a trained classi
 
 Let's take a look at the allowed values for each setting in an entity recognizer configuration.
 
-1. **Model Settings** 
+1. **Model Settings**
 
 ``'model_type'`` (:class:`str`)
   |
 
-  Is always ``'memm'``, since Workbench currently only supports training a `maximum entropy markov model (MEMM) <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_ for entity recognition.
+  Always ``'memm'``, since the `maximum entropy markov model (MEMM) <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_ is currently the only supported model for training entity recognizers in Workbench.
 
 ``'model_settings'`` (:class:`dict`)
   |
 
-  Is a dictionary containing model-specific machine learning settings. The allowed keys are:
+  A dictionary containing model-specific machine learning settings. The allowed keys are:
 
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | Key                   | Value                                                                                                             |
   +=======================+===================================================================================================================+
-  | ``'feature_scaler'``  | The :sk_guide:`methodology <preprocessing.html#standardization-or-mean-removal-and-variance-scaling>` to use      |
-  |                       | for scaling raw feature values.                                                                                   |
+  | ``'feature_scaler'``  | The :sk_guide:`methodology <preprocessing.html#standardization-or-mean-removal-and-variance-scaling>` for         |
+  |                       | scaling raw feature values.                                                                                       |
   |                       |                                                                                                                   |
   |                       | Allowed values are:                                                                                               |
   |                       |                                                                                                                   |
-  |                       | - ``'none'``: No scaling, i.e. use raw feature values.                                                            |
+  |                       | - ``'none'``: No scaling, i.e., use raw feature values.                                                           |
   |                       |                                                                                                                   |
   |                       | - ``'std-dev'``: Standardize features by removing the mean and scaling to unit variance. See                      |
   |                       |   :sk_api:`StandardScaler <sklearn.preprocessing.StandardScaler>`.                                                |
@@ -171,23 +172,23 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                       | - ``'max-abs'``: Scale each feature by its maximum absolute value. See                                            |
   |                       |   :sk_api:`MaxAbsScaler <sklearn.preprocessing.MaxAbsScaler>`.                                                    |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | ``'tag_scheme'``      | The tagging scheme to use for generating per-token labels.                                                        |
+  | ``'tag_scheme'``      | The tagging scheme for generating per-token labels.                                                               |
   |                       |                                                                                                                   |
   |                       | Allowed values are:                                                                                               |
   |                       |                                                                                                                   |
   |                       | - ``'IOB'``: The `Inside-Outside-Beginning <https://en.wikipedia.org/wiki/Inside_Outside_Beginning>`_ tagging     |
   |                       |   format.                                                                                                         |
   |                       |                                                                                                                   |
-  |                       | - ``'IOBES'``: An extension to the IOB format with an 'E' tag representing the ending token in an entity span,    |
-  |                       |   and an 'S' tag representing single token entities.                                                              |
+  |                       | - ``'IOBES'``: An extension to IOB where 'E' represents the ending token in an entity span,                       |
+  |                       |   and 'S' represents a single-token entity.                                                                       |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
 
-2. **Feature Extraction Settings** 
+2. **Feature Extraction Settings**
 
 ``'features'`` (:class:`dict`)
   |
 
-  Is a dictionary where the keys are the names of the feature groups to be extracted. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for entity recognition.
+  A dictionary whose keys are names of feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for domain classification.
 
 .. _entity_features:
 
@@ -233,25 +234,25 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 ``'params'`` (:class:`dict`)
   |
 
-  Is a dictionary containing the values to be used for different model hyperparameters during training. Examples include the ``'C'`` parameter (inverse of regularization strength), the ``'penalty'`` parameter (norm used in penalization) and so on. The hyperparameters for the MEMM model are the same as those for a `maximum entropy model (MaxEnt) <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_. You can view the full list of allowed hyperparameters :sk_api:`here <sklearn.linear_model.LogisticRegression.html>`.
+  A dictionary of values to use for model hyperparameters during training. These include inverse of regularization strength as ``'C'``, the norm used in penalization as ``'penalty'``, and so on. The hyperparameters for the MEMM model are described `here <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_. The list of allowed hyperparameters is :sk_api:`here <sklearn.linear_model.LogisticRegression.html>`.
 
 ``'param_selection'`` (:class:`dict`)
   |
 
-  Is a dictionary containing the settings for :sk_guide:`hyperparameter selection <grid_search>`. This is used as an alternative to the ``'params'`` dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.
+  A dictionary of settings for :sk_guide:`hyperparameter selection <grid_search>`. Provides an alternative to the ``'params'`` dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.
 
-  Workbench needs two pieces of information from the developer to do parameter estimation:
+  To estimate parameters, Workbench needs two pieces of information from the developer:
 
-  #. The parameter space to search, captured by the value for the ``'grid'`` key
-  #. The strategy for splitting the labeled data into training and validation sets, specified by the ``'type'`` key
+  #. The parameter space to search, as the value for the ``'grid'`` key
+  #. The strategy for splitting the labeled data into training and validation sets, as the value for the ``'type'`` key
 
-  Depending on the splitting scheme selected, the :data:`param_selection` dictionary can contain other keys that define additional settings. The table below enumerates all the keys allowed in the dictionary.
+  Depending on the splitting scheme selected, the :data:`param_selection` dictionary can contain other keys that define additional settings. The table below enumerates the allowable keys.
 
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | Key                   | Value                                                                                                             |
   +=======================+===================================================================================================================+
-  | ``'grid'``            | A dictionary mapping each hyperparameter to a list of potential values to be searched. Here is an example grid    |
-  |                       | for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:                              |
+  | ``'grid'``            | A dictionary which maps each hyperparameter to a list of potential values to search.                              |
+  |                       | Here is an example for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:           |
   |                       |                                                                                                                   |
   |                       | .. code-block:: python                                                                                            |
   |                       |                                                                                                                   |
@@ -281,22 +282,22 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                       | - ``'log_loss'``: :sk_api:`Log loss (cross-entropy loss) <model_evaluation.html#log-loss>`                        |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
 
-  The :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy, to identify the parameters that give the highest accuracy. The optimal parameters can then be used in future calls to :meth:`fit` to skip the parameter selection process.
+  To identify the parameters that give the highest accuracy, the :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to :meth:`fit` can use these optimal parameters and skip the parameter selection process.
 
 .. _build_entity_with_config:
 
 Training with custom configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-There are two ways to override Workbench's default entity recognizer configuration with your custom settings.
+To override Workbench's default domain classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
 
 
 1. Application configuration file
 """""""""""""""""""""""""""""""""
 
-The first method, as described in the :ref:`NaturalLanguageProcessor <build_nlp_with_config>` chapter, is to define the classifier settings in your application configuration file, ``config.py``. Define a dictionary named :data:`ENTITY_MODEL_CONFIG` containing your custom settings. The :meth:`EntityRecognizer.fit` and :meth:`NaturalLanguageProcessor.build` methods will then use those settings instead of Workbench's defaults.
+When you define custom classifier settings in ``config.py``, the :meth:`EntityRecognizer.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench's defaults. To do this, define a dictionary of your custom settings, named :data:`ENTITY_MODEL_CONFIG`.
 
-Here's an example of a ``config.py`` file where the preset configuration for the entity recognizer is being overridden by custom settings that have been optimized for the app.
+Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the domain classifier.
 
 .. code-block:: python
 
@@ -329,14 +330,15 @@ Here's an example of a ``config.py`` file where the preset configuration for the
        }
    }
 
-Since this method requires updating a file each time you want to modify a setting, it's less suitable for rapid prototyping than the second method described below. The recommended use for this functionality is to store your optimal classifier settings, once you have identified them via experimentation. This ensures that the classifier training methods will use the optimized configuration to rebuild the models in the future. A common use case is retraining models on newly acquired training data, without retuning the underlying model settings.
+This method is recommended for storing your optimal classifier settings once you have identified them through experimentation. Then the classifier training methods will use the optimized configuration to rebuild the models. A common use case is retraining models on newly-acquired training data, without retuning the underlying model settings.
+
+Since this method requires updating a file each time you modify a setting, it's less suitable for rapid prototyping than the method described next.
 
 
 2. Arguments to the :meth:`fit` method
 """"""""""""""""""""""""""""""""""""""
 
-The recommended way to experiment with an entity recognizer is by using arguments to the :meth:`fit` method.
-
+For experimenting with an entity recognizer, the recommended method is to use arguments to the :meth:`fit` method. The main areas for exploration are feature extraction, hyperparameter tuning, and model selection.
 
 **Feature extraction**
 
@@ -359,7 +361,11 @@ Let's start with the baseline classifier that was trained :ref:`above <baseline_
      }
    }
 
-By default, the classifier only extracts n-grams within a context window of two tokens or less around the token of interest. It may be useful to have the classifier look at a larger context window since that could potentially provide more information than just the words in the immediate vicinity. To accomplish this, you need to change the ``'ngram_lengths_to_start_positions'`` settings to extract n-grams starting from tokens that are further away. Suppose you want to extract all the unigrams and bigrams in a window of three tokens around the current token, the :data:`my_features` dictionary should be updated as shown below.
+Notice that the ``'ngram_lengths_to_start_positions'`` settings tell the classifier to extract n-grams within a context window of two tokens or less around the token of interest — that is, just words in the immediate vicinity.
+
+Let's have the classifier look at a larger context window — extract n-grams starting from tokens that are further away. We'll see whether that provides better information than the smaller default window.
+
+Change the ``'ngram_lengths_to_start_positions'`` settings to extract all the unigrams and bigrams in a window of three tokens around the current token, as shown below.
 
 .. code-block:: python
 
@@ -383,11 +389,11 @@ By default, the classifier only extracts n-grams within a context window of two 
 
 Suppose w\ :sub:`i` represents the word at the *ith* index in the query, where the index is calculated relative to the current token. Then, the above feature configuration should extract the following n-grams (w\ :sub:`0` being the current token).
 
-  - Unigrams: { w\ :sub:`-3`, w\ :sub:`-2`, w\ :sub:`-1`, w\ :sub:`0`, w\ :sub:`1`, w\ :sub:`2`, w\ :sub:`3` } 
+  - Unigrams: { w\ :sub:`-3`, w\ :sub:`-2`, w\ :sub:`-1`, w\ :sub:`0`, w\ :sub:`1`, w\ :sub:`2`, w\ :sub:`3` }
 
   - Bigrams: { w\ :sub:`-3`\ w\ :sub:`-2`, w\ :sub:`-2`\ w\ :sub:`-1`, w\ :sub:`-1`\ w\ :sub:`0`,  w\ :sub:`0`\ w\ :sub:`1`, w\ :sub:`1`\ w\ :sub:`2`, w\ :sub:`2`\ w\ :sub:`3` }
 
-To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This trains the entity recognition model using the provided feature extraction settings, while continuing to use Workbench's defaults for model type (MEMM) and hyperparameter selection.
+To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This trains the entity recognition model using our new feature extraction settings, while continuing to use Workbench defaults for model type (MEMM) and hyperparameter selection.
 
 .. code-block:: python
 
@@ -399,7 +405,7 @@ To retrain the classifier with the updated feature set, pass in the :data:`my_fe
 
 **Hyperparameter tuning**
 
-Next, let's experiment with the model's hyperparameters. To get the hyperparameter selection settings for the current classifier, do:
+View the model's hyperparameters, keeping in mind the hyperparameters for the MEMM model in Workbench. These include: ``'C'``, the inverse of regularization strength; and, ``'fit_intercept'``, which says to add an intercept term to the decision function. The ``'fit_intercept'`` parameter is not shown in the response but defaults to ``'True'``.
 
 .. code-block:: python
 
@@ -415,7 +421,9 @@ Next, let's experiment with the model's hyperparameters. To get the hyperparamet
     'type': 'k-fold'
    }
 
-Let's reduce the range of values to search for the ``'C'`` parameter (inverse of regularization strength). You could also allow the hyperparameter estimation process to choose whether or not to add an intercept term to the decision function (added by default). The updated settings can then be passed to :meth:`fit` as an argument to the :data:`param_selection` parameter.
+For our first experiment, let's reduce the range of values to search for ``'C'``, and allow the hyperparameter estimation process to choose whether to add an intercept term to the decision function.
+
+Pass the updated settings to :meth:`fit` as an argument to the :data:`param_selection` parameter. The :meth:`fit` method then searches over the updated parameter grid, and prints the hyperparameter values for the model whose cross-validation accuracy is highest.
 
 .. code-block:: python
 
@@ -438,7 +446,7 @@ Let's reduce the range of values to search for the ``'C'`` parameter (inverse of
    Selecting hyperparameters using k-fold cross-validation with 5 splits
    Best accuracy: 99.09%, params: {'C': 100, 'fit_intercept': 'False', 'penalty': 'l1'}
 
-The :meth:`fit` method now searches over the updated parameter grid and prints the hyperparameter values for the model with the highest cross-validation accuracy. By default, the entity recognizer uses k-fold cross-validation with 5 folds. To use a different cross-validation strategy, you can modify the value for the ``'type'`` key in the :data:`my_param_settings`. For instance, to use five randomized folds:
+Finally, we'll override the default k-fold cross-validation, which is 10 folds, and specify five randomized folds instead. To so this, we modify the values of the ``'k'`` and ``'type'`` keys in :data:`my_param_settings`:
 
 .. code-block:: python
 
@@ -460,12 +468,11 @@ The :meth:`fit` method now searches over the updated parameter grid and prints t
    Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 99.39%, params: {'C': 100, 'fit_intercept': 'False', 'penalty': 'l1'}
 
-For a full list of configurable hyperparameters and available cross-validation methods, refer to the above section on defining :ref:`hyperparameter settings <entity_tuning>`.
-
+For a list of configurable hyperparameters for each model, along with available cross-validation methods, see :ref:`hyperparameter settings <entity_tuning>`.
 
 **Model settings**
 
-Lastly, let's try varying the model training settings. Start with the model settings of the current model:
+To vary the model training settings, start by inspecting the current settings:
 
 .. code-block:: python
 
@@ -473,7 +480,9 @@ Lastly, let's try varying the model training settings. Start with the model sett
    >>> my_model_settings
    {'feature_scaler': 'max-abs', 'tag_scheme': 'IOB'}
 
-The code below turns off feature scaling, changes the tagging scheme to IOBES and retrains the entity recognition model using these updated settings. It uses the Workbench defaults for feature extraction and hyperparameter selection settings.
+For an example experiment, we'll turn off feature scaling and change the tagging scheme to IOBES, while leaving defaults in place for feature extraction and hyperparameter selection.
+
+Retrain the entity recognition model with our updated settings:
 
 .. code-block:: python
 
@@ -486,7 +495,6 @@ The code below turns off feature scaling, changes the tagging scheme to IOBES an
    Selecting hyperparameters using k-fold cross-validation with 5 splits
    Best accuracy: 98.78%, params: {'C': 10000, 'penalty': 'l2'}
 
-
 Run the entity recognizer
 -------------------------
 
@@ -496,7 +504,9 @@ Entity recognition takes place in two steps:
 
   #. The predicted tags are then processed to extract the span and type of each entity in the query.
 
-A trained entity recognizer can be run on a test query using the :meth:`EntityRecognizer.predict` method.
+Run the trained entity recognizer on a test query using the :meth:`EntityRecognizer.predict` method.
+
+At runtime, the natural language processor's :meth:`process` method calls :meth:`predict` to recognize all the entities in an incoming query. The :meth:`predict` method returns a list of detected entities in the query.
 
 .. code-block:: python
 
@@ -504,15 +514,20 @@ A trained entity recognizer can be run on a test query using the :meth:`EntityRe
    (<QueryEntity 'San Francisco' ('city') char: [11-23], tok: [2-3]>,
     <QueryEntity 'next week' ('sys_time') char: [25-33], tok: [4-5]>)
 
-The :meth:`predict` method returns a list of detected entities in the query. It gets called by the natural language processor's :meth:`process` method at runtime to recognize all the entities in an incoming query.
-
-The :meth:`predict` method runs on one query at a time. To instead test a trained model on a batch of labeled test queries and evaluate classifier performance, see the next section.
-
+The :meth:`predict` and :meth:`predict_proba` methods take one query at a time. Next, we'll see how to test a trained model on a batch of labeled test queries.
 
 Evaluate classifier performance
 -------------------------------
 
-To evaluate the accuracy of your trained entity recognizer, you first need to create labeled test data, as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter. Once you have the test data files in the right place in your Workbench project, you can measure your model's performance using the :meth:`EntityRecognizer.evaluate` method.
+Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
+
+Then, when you are ready, use the :meth:`EntityRecognizer.evaluate` method, which
+
+ - strips away all ground truth annotations from the test queries,
+ - passes the resulting unlabeled queries to the trained entity recognizer for prediction, and
+ - compares the classifier's output predictions against the ground truth labels to compute the model's prediction accuracy.
+
+In the example below, the model gets 33 out of 37 test queries correct, resulting in an accuracy of about 89%.
 
 .. code-block:: python
 
@@ -520,22 +535,24 @@ To evaluate the accuracy of your trained entity recognizer, you first need to cr
    Loading queries from file weather/check_weather/test.txt
    <EntityModelEvaluation score: 89.19%, 33 of 37 examples correct>
 
-The :meth:`evaluate` method strips away all ground truth annotations from the test queries and passes in the resulting unlabeled queries to the trained entity recognizer for prediction. The classifier's output predictions are then compared against the ground truth labels to compute the model's prediction accuracy. In the above example, the model got 33 out of 37 test queries correct, resulting in an accuracy of about 89%. Note that this is query-level accuracy. For a prediction on a query to be graded as "correct", all the entities detected by the entity recognizer need to match exactly with the annotated entities in the test query.
+Note that this is *query-level* accuracy. A prediction on a query can only be graded as "correct" when all the entities detected by the entity recognizer exactly match exactly the annotated entities in the test query.
 
-To debug the classifier performance, it can often be helpful to look at the token-level labeling accuracies as well. The :meth:`evaluate` method returns a rich object that contains a lot more information over and above the aggregate query-level accuracy score. The code below prints all the model performance statistics reported by the :meth:`evaluate` method.
+The aggregate accuracy score we see above is only the beginning, because the :meth:`evaluate` method returns a rich object containing overall statistics, statistics by class, a confusion matrix, and sequence statistics.
+
+Print all the model performance statistics reported by the :meth:`evaluate` method:
 
 .. code-block:: python
 
    >>> eval = er.evaluate()
    >>> eval.print_stats()
-   Overall Statistics: 
+   Overall Statistics:
 
        accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
           0.971       0.970         201        1443           6           6       0.959       0.971
 
 
 
-   Statistics by Class: 
+   Statistics by Class:
 
                   class      f_beta   precision      recall     support          TP          TN          FP          FN
                   O||O|       0.984       0.969       1.000         155         155          47           5           0
@@ -549,7 +566,7 @@ To debug the classifier performance, it can often be helpful to look at the toke
 
 
 
-   Confusion Matrix: 
+   Confusion Matrix:
 
                             O||O|      S|city|O|      B|city|O|      I|city|O|      E|city|O|   O||B|sys_t..   O||E|sys_t..   O||S|sys_t..
              O||O|            155              0              0              0              0              0              0              0
@@ -563,12 +580,12 @@ To debug the classifier performance, it can often be helpful to look at the toke
 
 
 
-   Sequence Statistics: 
+   Sequence Statistics:
 
     sequence_accuracy
                 0.892
 
-The statistics are split into four sections.
+Let's decipher the statistical output of the :meth:`evaluate` method.
 
 **Overall Statistics**
   |
@@ -585,6 +602,22 @@ The statistics are split into four sections.
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
+
+  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+
+  - **Classes are balanced**: When the number of annotated entities for each entity type are comparable and each entity type is equally important, focusing on the accuracy metric is usually good enough.
+
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+
+  - **All F1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
+
+  - **F1 weighted is higher than F1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples.
+
+  - **F1 macro is higher than F1 weighted**: Your entity types with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+
+  - **F1 micro is higher than F1 macro**: Certain entity types are being misclassified more often than others. Check the class-wise statistics below to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
+
+  - **Some classes are more important than others**: If some entities are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
 **Class-wise Statistics**
   |
@@ -606,17 +639,17 @@ The statistics are split into four sections.
 **Confusion Matrix**
   |
 
-  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ with each row representing the number of instances in an actual class and each column representing the number of instances in a predicted class. It makes it easy to see if the classifier is frequently confusing two classes, i.e. commonly mislabelling one entity tag as another. For instance, in the above example, the entity recognizer has wrongly classified two instances of ``S|city|O|`` tokens as ``O||O|``.
+  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the entity recognizer wrongly classified two instances of ``S|city|O|`` tokens as ``O||O|``.
+
 
 **Sequence Statistics**
   |
 
   Sequence-level accuracy that tracks the fraction of queries for which the entity recognizer successfully identified **all** the expected entities.
 
+Now we have a wealth of information about the performance of our classifier. Let's go further and inspect the classifier's predictions at the level of individual queries, to better understand error patterns.
 
-While these detailed statistics provide a wealth of information about the classifier performance, you might additionally also want to inspect the classifier's prediction on individual queries to better understand error patterns.
-
-To view the classifier predictions for the entire test set, you can use the :attr:`results` attribute of the returned :obj:`eval` object.
+View the classifier predictions for the entire test set using the :attr:`results` attribute of the returned :obj:`eval` object. Each result is an instance of the :class:`EvaluatedExample` class which contains information about the original input query, the expected ground truth label, the predicted label, and the predicted probability distribution over all the class labels.
 
 .. code-block:: python
 
@@ -627,7 +660,7 @@ To view the classifier predictions for the entire test set, you can use the :att
      ...
    ]
 
-Each result is an instance of the :class:`EvaluatedExample` class which contains information about the original input query, the expected ground truth entities and the predicted entities. You can also selectively look at just the correct predictions or the incorrect predictions. The code below shows how to do that.
+Next, we look selectively at just the correct or incorrect predictions.
 
 .. code-block:: python
 
@@ -644,7 +677,9 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
      ...
    ]
 
-`List comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_ can be used to easily slice and dice the results for error analysis. For instance, to easily inspect all incorrect predictions where the first entity in the query is supposed to be of a particular type, say ``city``, you could do:
+Slicing and dicing these results for error analysis is easily done with `list comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_.
+
+A simple example of this is to inspect incorrect predictions where the query's first entity is supposed to be of a particular type. For the ``city`` type, we get:
 
 .. code-block:: python
 
@@ -673,27 +708,205 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
      )
    ]
 
-In each of the above cases, the entity recognizer was unable to correctly detect the full ``city`` entity in the query. This is usually a sign that the training data lacks coverage for queries with language patterns or entities like those in the examples above. It could also mean that the gazetteer for this entity type is not comprehensive enough. 
+The entity recognizer was unable to correctly detect the full ``city`` entity in *any* of the above queries. This is usually a sign that the training data lacks coverage for queries with language patterns or entities like those in the examples above. It could also mean that the gazetteer for this entity type is not comprehensive enough.
 
-On inspecting the :doc:`training data <../blueprints/home_assistant>`, you will find that the ``check_weather`` intent indeed lacks labeled training queries like the first two queries above. This issue could potentially be solved by adding more relevant queries annotated with the ``city`` entity to the ``check_weather`` intent's training data, so the recognition model can generalize better. The last two queries above are misclassified due to a lack of slang terms and nicknames in the :doc:`gazetteer data <../blueprints/home_assistant>` for the ``city`` entity. This can be mitigated by expanding the ``city`` gazetteer to contain entries like "San Fran", "Big Apple" and other popular synonyms for location names that are relevant to the ``weather`` domain.
+Start by looking for similar queries in the :doc:`training data <../blueprints/home_assistant>`. You should discover that the ``check_weather`` intent does indeed lack labeled training queries like the first two queries above.
 
-Error analysis on the results of the :meth:`evaluate` method can thus inform your experimentation and help in building better models. In the example  above, adding more data to the training set or the gazetteers was proposed as a solution for improving accuracy. While data augmentation should be your first step, you could also explore other techniques such as experimenting with different model types, features and hyperparameters, as described :ref:`earlier <build_entity_with_config>` in this chapter.
+To solve this problem, you could try adding more queries annotated with the ``city`` entity to the ``check_weather`` intent's training data. Then, the recognition model should be able to generalize better.
 
+
+The last two misclassified queries feature slang (``'san fran'`` and ``'the big apple'``) rather than formal city names. Noticing this, you should inspect the :doc:`gazetteer data <../blueprints/home_assistant>`. You should discover that this gazetteer does indeed lack slang terms and nicknames for cities.
+
+To mitigate this, try expanding the ``city`` gazetteer to contain entries like "San Fran", "Big Apple" and other popular synonyms for location names that are relevant to the ``weather`` domain.
+
+Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data and adding gazetteer entries based on what you find should be the first steps, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_entity_with_config>` in this chapter.
 
 Save model for future use
 -------------------------
 
-A trained entity recognizer can be saved for later use by calling the :meth:`EntityRecognizer.dump` method. The :meth:`dump` method serializes the trained model as a `pickle file <https://docs.python.org/3/library/pickle.html>`_ and saves it to the specified location on disk.
+Save the trained domain classifier for later use by calling the :meth:`EntityRecognizer.dump` method. The :meth:`dump` method serializes the trained model as a `pickle file <https://docs.python.org/3/library/pickle.html>`_ and saves it to the specified location on disk.
 
 .. code:: python
 
    >>> er.dump(model_path='experiments/entity_recognizer.memm.20170701.pkl')
    Saving entity recognizer: domain='weather', intent='check_weather'
 
-The saved model can then be loaded anytime using the :meth:`EntityRecognizer.load` method.
+You can load the saved model anytime using the :meth:`EntityRecognizer.load` method.
 
 .. code:: python
 
    >>> er.load(model_path='experiments/entity_recognizer.memm.20170701.pkl')
    Loading entity recognizer: domain='weather', intent='check_weather'
+
+.. _system-entities:
+
+More about system entities
+--------------------------
+
+System entities are generic application-agnostic entities that all Workbench applications detect automatically. There is no need to train models to learn system entities; they just work.
+
+Supported system entities are enumerated in the table below.
+
++-----------------+------------------------------------------------------------+
+| System Entity   | Examples                                                   |
++=================+============================================================+
+| sys_time        | “today” , “Tuesday, Feb 18” , “last week” , “Mother’s      |
+|                 | day”                                                       |
++-----------------+------------------------------------------------------------+
+| sys_interval    | “tomorrow morning” , “from 9:30 - 11:00 on tuesday” ,      |
+|                 | “Friday 13th evening”                                      |
++-----------------+------------------------------------------------------------+
+| sys_temperature | “64°F” , “71° Fahrenheit” , “twenty seven celsius”         |
++-----------------+------------------------------------------------------------+
+| sys_number      | “fifteen” , “0.62” , “500k” , “66”                         |
++-----------------+------------------------------------------------------------+
+| sys_ordinal     | “3rd” , “fourth” , “first”                                 |
++-----------------+------------------------------------------------------------+
+| sys_distance    | “10 miles” , “2feet” , “0.2 inches” , “3’’ “5km” ,”12cm”   |
++-----------------+------------------------------------------------------------+
+| sys_volume      | “500 ml” , “5liters” , “2 gallons”                         |
++-----------------+------------------------------------------------------------+
+| sys_currency    | “forty dollars” , “9 bucks” , “$30”                        |
++-----------------+------------------------------------------------------------+
+| sys_email       | “help@cisco.com”                                           |
++-----------------+------------------------------------------------------------+
+| sys_url         | “washpo.com/info” , “foo.com/path/path?ext=%23&foo=bla” ,  |
+|                 | “localhost”                                                |
++-----------------+------------------------------------------------------------+
+| sys_phone-number| “+91 736 124 1231” , “+33 4 76095663” , “(626)-756-4757    |
+|                 | ext 900”                                                   |
++-----------------+------------------------------------------------------------+
+
+Workbench does not assume that any of the system entities are needed in your app. It is the system entities *that you annotate in your training data* that Workbench knows are needed.
+
+.. note::
+   Workbench defines ``sys_time`` and ``sys_interval`` as subtly different entities.
+  |
+   The ``sys_time`` entity connotes a *value of a single unit of time*, where the unit can be a date, an hour, a week, and so on. For example, “tomorrow” is a ``sys_time`` entity because it corresponds to a single (unit) date, like "2017-07-08."
+  |
+  |
+   The ``sys_interval`` entity connotes a *time interval* that *spans several units* of time. For example, “tomorrow morning” is a ``sys_interval`` entity because “morning” corresponds to the span of hours from 4 am to 12 pm.
+
+Custom entities, system entities, and training set size
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Any application's training set must focus on capturing all the entity variations and language patterns for the *custom entities* that the app uses. By contrast, the part of the training set concerned with *system entities* can be relatively minimal, because Workbench does not need to train an entity recognition model to recognize system entities.
+
+Annotating system entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Assuming that you have defined the :ref:`domain-intent-entity-role hierarchy <model_hierarchy>` for your app, you know
+
+ - which system entities your app needs to use
+ - what roles (if any) apply to those system entities
+
+Use this knowledge to guide you in annotating any system entities in your training data.
+
+These examples of annotated system entities come from the Home Assistant blueprint application:
+
+.. code-block:: text
+
+    - adjust the temperature to {65|sys_temperature}
+    - {in the morning|sys_interval} set the temperature to {72|sys_temperature}
+    - change my {6:45|sys_time|old_time} alarm to {7 am|sys_time|new_time}
+    - move my {6 am|sys_time|old_time} alarm to {3pm in the afternoon|sys_time|new_time}
+    - what's the forecast for {tomorrow afternoon|sys_interval}
+
+For more examples, see the training data for any of the blueprint apps.
+
+Inspecting how Workbench detects system entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To see which token spans in a query are detected as system entities, and what system entities Workbench thinks they are, use the :func:`parse_numerics` function:
+
+.. code-block:: python
+
+    >>> from mmWorkbench.ser import parse_numerics
+    >>> parse_numerics("tomorrow morning at 9am")
+    {'data': [{'dimension': 'number',
+       'entity': {'end': 21, 'start': 20, 'text': '9'},
+       'likelihood': -0.11895194286136536,
+       'operator': 'equals',
+       'rule_count': 1,
+       'value': [9]},
+        .
+        .
+      {'dimension': 'time',
+       'entity': {'end': 23, 'start': 0, 'text': 'tomorrow morning at 9am'},
+       'grain': 'hour',
+       'likelihood': -23.558523074887038,
+       'operator': 'equals',
+       'rule_count': 8,
+       'value': ['2017-07-08T09:00:00.000-07:00']}],
+     'status': '200'}
+
+The :func:`parse_numerics` function returns a dictionary where the key is ``'data'`` and the value is a list of dictionaries. Each dictionary in this list represents a token span that Workbench has detected as a system entity.
+
+Significant keys and values within these inner dictionaries are shown in the table below.
+
++-----------+--------------------------------------------+-------------------------------------------------+
+| Key       | Value                                      | Meaning or content                              |
++===========+============================================+=================================================+
+| entity    | A dictionary whose keys are                | Where the entity starts and ends, and its text  |
+|           | ``start`` , ``end`` , and ``text``         |                                                 |
++-----------+--------------------------------------------+-------------------------------------------------+
+| dimension | ``time`` , ``number`` , or another label   | What type of numeric entity this is             |
++-----------+--------------------------------------------+-------------------------------------------------+
+| grain     | ``hour``, ``minute``, or another label     | The entity's unit of time;                      |
+|           |                                            | only present when dimension is ``time``         |
++-----------+--------------------------------------------+-------------------------------------------------+
+| value     | A list of numerics;                        | The numeric or value component                  |
+|           | usually a single value                     | of the entity's meaning                         |
++-----------+--------------------------------------------+-------------------------------------------------+
+
+This output is especially useful when debugging system entity behavior.
+
+When Workbench is unable to resolve a system entity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Two common mistakes when working with system entities are: annotating an entity as the wrong type, and, labeling an unsupported token as an entity. In these cases, Workbench will be unable to resolve the system entity.
+
+**Annotating a system entity as the wrong type**
+
+Because ``sys_interval`` and ``sys_time`` are so close in meaning, developers or annotation scripts sometimes use one in place of the other.
+
+In the example below, both entities should be annotated as ``sys_time``, but one was misclassified as ``sys_interval``:
+
+.. code-block:: text
+
+    change my {6:45|sys_interval|old_time} alarm to {7 am|sys_time|new_time}
+
+Workbench prints the following error during training:
+
+.. code-block:: text
+
+    Unable to load query: Unable to resolve system entity of type 'sys_interval' for '6:45'. Entities found for the following types ['sys_time']
+
+The solution is to change the first entity to ``{6:45|sys_time|old_time}``.
+
+**Unsupported tokens in system entities**
+
+Not all reasonable-sounding tokens are actually supported by a Workbench system entity.
+
+In the example below, the token "daily" is annotated as a ``sys_time`` entity:
+
+.. code-block:: text
+
+    set my alarm {daily|sys_time}
+
+Workbench prints the following error during training:
+
+.. code-block:: text
+
+    Unable to load query: Unable to resolve system entity of type 'sys_time' for 'daily'.
+
+Possible solutions:
+
+#. Add a custom entity that supports the token in question. For example, a ``frequency`` custom entity could support tokens like "daily", "weekly", and so on. The correctly-annotated query would be "set my alarm {daily|frequency}".
+
+#. Remove the entity label from tokens like "daily" and see if the app satisfactorily handles the queries anyway.
+
+#. Remove all queries that contain unsupported tokens like "daily" entirely from the training data.
+
+
 

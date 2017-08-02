@@ -6,7 +6,7 @@ In this step-by-step walkthrough, you'll build a conversational application that
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-Through a conversational interface, users should be able to browse through a content catalog containing movies and TV shows. They should be able to search using common filters for video content, such as: genre, cast, release year, etc... They should also be able to continue refining their search until they find the right content, and restart the search at any moment. The app will also support general actions such as greeting the user, providing help and responding to insults and compliments.
+Through a conversational interface, users should be able to browse through a content catalog containing movies and TV shows. The content found could then be played within a service similar to Netflix, Hulu, Amazon Video, etc.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -21,12 +21,14 @@ Here are some examples of scripted dialogue interactions for conversational flow
 
 .. admonition:: Exercise
 
-   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking for something unrelated to movies and TV shows, asking for something with to many filters so there are no results, asking for something that is not in the knowledge base, etc.
+   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking for something unrelated to movies and TV shows, asking for something with too many filters so there are no results, asking for something that is not in the app's catalog, etc.
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here is the NLP model hierarchy for our video discovery application.
+In this app users should be able to search using common filters for video content, such as: genre, cast, release year, etc... They should also be able to continue refining their search until they find the right content, and restart the search at any moment. The app will also support general actions such as greeting the user, providing help and responding to insults and compliments.
+
+Here is the NLP model hierarchy for supporting the mentioned functionality.
 
 .. image:: /images/video_discovery_hierarchy.png
     :width: 700px
@@ -44,7 +46,7 @@ The ``video_content`` domain supports the following intents:
   - ``start_over`` — User wants to abandon current selections and restart the ordering process.
   - ``exit`` - User wants to end the current conversation.
   - ``browse`` - User is searching for content, either for a specific movie or TV show or for a set of results.
-  - ``unsupported`` - User is asking for information related to movies or TV shows, but the app does not support thoese questions. For example, asking when a movie was released, or when it will be on given channel.
+  - ``unsupported`` - User is asking for information related to movies or TV shows, but the app does not support those questions. For example, asking when a movie was released, or when it will be on given channel.
 
 Similarly the ``unrelated`` domain supports the intents:
 
@@ -55,7 +57,7 @@ Similarly the ``unrelated`` domain supports the intents:
 For this app, only the ``browse`` intent requires entity recognition. This intent supports the following entity types:
 
    - ``cast`` — The name of an actor.
-   - ``country`` — The name of the country of origing of a movie or TV show.
+   - ``country`` — The name of the country of origin of a movie or TV show.
    - ``director`` — The name of a director.
    - ``genre`` — The name of a video genre.
    - ``sort`` — How the users want to sort the results: by most recent, most popular, etc...
@@ -64,7 +66,7 @@ For this app, only the ``browse`` intent requires entity recognition. This inten
 
 .. admonition:: Exercise
 
-   While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., ``get_cast_in_video``, ``get_releaseyear_for_video``, and so on) and entities (e.g., ``writers``, ``budget``, and so on) that make sense for a video discovery use case.
+   While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., ``get_cast_in_video``, ``get_release_year_for_video``, and so on) and entities (e.g., ``writers``, ``budget``, and so on) that make sense for a video discovery use case.
 
 To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice.
 
@@ -74,7 +76,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 This should create a Workbench project folder called ``video_discovery`` in your current directory with the following structure:
 
-.. image:: /images/food_ordering_directory.png
+.. image:: /images/directory_video_discovery.png
     :width: 250px
     :align: center
 
@@ -92,24 +94,24 @@ To support the functionality we envision, our app needs one dialogue state for e
 | | ``browse``     | | ``show_content``       | | Show the user a set of results and            |
 | |                | |                        | | refine them as the user provides more details |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``start_over`` | | ``start_over``         | | Cancel the ongoing search                     | 
+| | ``start_over`` | | ``start_over``         | | Cancel the ongoing search                     |
 | |                | |                        | | and prompt the user for a new request         |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``exit``       | | ``say_goodbye``        | | End the current interaction                   | 
+| | ``exit``       | | ``say_goodbye``        | | End the current interaction                   |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``help``       | | ``provide_help``       | | Provide help information                      | 
+| | ``help``       | | ``provide_help``       | | Provide help information                      |
 | |                | |                        | | in case the user gets stuck                   |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``unsupported``| | ``handle_unsupported`` | | Inform user the app does not provide that     | 
+| | ``unsupported``| | ``handle_unsupported`` | | Inform user the app does not provide that     |
 | |                | |                        | | information and get them back to video search |
 +------------------+--------------------------+-------------------------------------------------+
-| | ``compliment`` | | ``say_something_nice`` | | Compliment the user back and promt the user   |
-| |                | |                        | | to get back to video search                   | 
-+------------------+--------------------------+-------------------------------------------------+
-| | ``insult``     | | ``handle_insult``      | | Handle the insult and promt the user          | 
+| | ``compliment`` | | ``say_something_nice`` | | Compliment the user back and prompt the user  |
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
-| | others         | | ``default``            | | Prompt a user who has gone off-topic          | 
+| | ``insult``     | | ``handle_insult``      | | Handle the insult and prompt the user         |
+| |                | |                        | | to get back to video search                   |
++------------------+--------------------------+-------------------------------------------------+
+| | other intents  | | ``default``            | | Prompt a user who has gone off-topic          |
 | |                | |                        | | to get back to video search                   |
 +------------------+--------------------------+-------------------------------------------------+
 
@@ -124,7 +126,7 @@ For example, here's the ``say_goodbye`` state handler, where we clear the :doc:`
 .. code:: python
 
 	@app.handle(intent='exit')
-	def say_goodbye(context, slots, responder):
+	def say_goodbye(context, responder):
 	    """
 	    When the user ends a conversation, clear the dialogue frame and say goodbye.
 	    """
@@ -140,7 +142,7 @@ We can illustrate this with the general implementation of the ``show_content`` h
 .. code:: python
 
 	@app.handle(intent='browse')
-	def show_content(context, slots, responder):
+	def show_content(context, responder):
 	    """
 	    When the user looks for a movie or TV show, fetch the documents from the knowledge base
 	    with all entities we have so far.
@@ -152,10 +154,10 @@ We can illustrate this with the general implementation of the ``show_content`` h
 	    results = get_video_content(context['frame'])
 
 	    # Fill the slots with the frame.
-	    slots = fill_browse_slots(context['frame'], slots)
+	    responder.slots.update(browse_slots_for_frame(context['frame']))
 
 	    # Build response based on available slots and results.
-	    reply, videos_client_action, prompt = build_browse_response(context, slots, results)
+	    reply, videos_client_action, prompt = build_browse_response(context, responder.slots, results)
 
 	    responder.reply(reply)
 
@@ -163,9 +165,9 @@ We can illustrate this with the general implementation of the ``show_content`` h
 	    videos_client_action = video_results_to_action(results)
 	    responder.respond(videos_client_action)
 
-This code follows a series of steps to build the final answer to the user: it updates the :doc:`dialogue frame <../userguide/dm>` with the new found entities, fetches results from the knowledge base (in the ``get_video_content`` method), builds a response with the new entities (done in ``fill_browse_slots`` and ``build_browse_response``) and sends a response to the user.
+This code follows a series of steps to build the final answer to the user: it updates the :doc:`dialogue frame <../userguide/dm>` with the new found entities, fetches results from the knowledge base (in the ``get_video_content`` method), builds a response with the new entities (done in ``browse_slots_for_frame`` and ``build_browse_response``) and sends a response to the user.
 
-For more information on the ``show_content`` method and the functinos it uses, see the ``app.py`` file in the blueprint folder.
+For more information on the ``show_content`` method and the functions it uses, see the ``app.py`` file in the blueprint folder.
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
@@ -276,13 +278,13 @@ The labeled data for training our NLP pipeline was created using both in-house d
 | | Targeted synonym generation        | | ``country``: "What names would you use to refer                           |
 | | for training the Entity Resolver   | | to this country?"                                                         |
 | |                                    | |                                                                           |
-| |                                    | | ``genre``: "What are the different ways in which                          |      
+| |                                    | | ``genre``: "What are the different ways in which                          |
 | |                                    | | you would refer to this genre?"                                           |
 | |                                    | |                                                                           |
-| |                                    | | ``sort``: "What are the different ways in which                           |      
+| |                                    | | ``sort``: "What are the different ways in which                           |
 | |                                    | | you would speficy to sort movies or TV shows?"                            |
 | |                                    | |                                                                           |
-| |                                    | | ``type``: "What are the different ways in which                           |      
+| |                                    | | ``type``: "What are the different ways in which                           |
 | |                                    | | you would refer to this type?"                                            |
 +--------------------------------------+-----------------------------------------------------------------------------+
 
@@ -301,27 +303,47 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. code:: python
 
+   >>> from mmworkbench import configure_logs; configure_logs()
    >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
    >>> nlp = NaturalLanguageProcessor(app_path='video_discovery')
    >>> nlp.build()
 	Fitting domain classifier
-	Loading queries from file video_content/start_over/train.txt
-	Loading queries from file video_content/exit/train.txt
-	Loading queries from file video_content/unsupported/train_get_channel_00.txt
-	Loading queries from file video_content/unsupported/train_get_channel_01.txt
-	Loading queries from file video_content/unsupported/train_get_channel_02.txt
-	Loading queries from file video_content/unsupported/train_get_time_00.txt
-	Loading queries from file video_content/unsupported/train_get_time_01.txt
-	Loading queries from file video_content/unsupported/train_get_time_02.txt
+	No domain model configuration set. Using default.
+	Loading queries from file unrelated/insult/train.txt
+	Loading queries from file unrelated/general/train.txt
+	Loading queries from file unrelated/compliment/train.txt
 	Loading queries from file video_content/greet/train.txt
-	Loading queries from file video_content/help/train.txt
 	Loading queries from file video_content/browse/train_00.txt
-	Loading queries from file video_content/browse/train_01.txt
-	Loading queries from file video_content/browse/train_02.txt
-	Loading queries from file video_content/browse/train_03.txt
-	Loading queries from file video_content/browse/train_04.txt
-	Loading queries from file video_content/browse/train_05.txt
-	Loading queries from file video_content/browse/train_mturk_00.txt
+	...
+	Selecting hyperparameters using k-fold cross-validation with 10 splits
+	Best accuracy: 96.89%, params: {'fit_intercept': True, 'C': 10}
+	Fitting intent classifier: domain='unrelated'
+	No intent model configuration set. Using default.
+	Selecting hyperparameters using k-fold cross-validation with 10 splits
+	Best accuracy: 79.29%, params: {'class_weight': {0: 0.9618644067796609, 1: 1.0089999999999999, 2: 1.0395604395604394}, 'fit_intercept': False, 'C': 1000000}
+	Fitting entity recognizer: domain='unrelated', intent='insult'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting entity recognizer: domain='unrelated', intent='general'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting entity recognizer: domain='unrelated', intent='compliment'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting intent classifier: domain='video_content'
+	No intent model configuration set. Using default.
+	Selecting hyperparameters using k-fold cross-validation with 10 splits
+	Best accuracy: 96.50%, params: {'class_weight': {0: 0.58072419281491583, 1: 3.4295944233206592, 2: 0.98992735400949983, 3: 5.1416666666666666, 4: 2.904694092827004, 5: 0.67738804829588872}, 'fit_intercept': False, 'C': 1000000}
+	Fitting entity recognizer: domain='video_content', intent='greet'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting entity recognizer: domain='video_content', intent='help'
+	No entity model configuration set. Using default.
+	There are no labels in this label set, so we don't fit the model.
+	Fitting entity recognizer: domain='video_content', intent='browse'
+	No entity model configuration set. Using default.
+	Selecting hyperparameters using k-fold cross-validation with 5 splits
+	Best accuracy: 97.43%, params: {'penalty': 'l2', 'C': 100000000}
 	...
 
 .. tip::
@@ -334,81 +356,41 @@ To see how the trained NLP pipeline performs on a test query, use the :meth:`pro
 
    	>>> nlp.process("Show me movies with Brad Pitt")
 	{
-	  "text": "Show me movies with Brad Pitt",
 	  "intent": "browse",
 	  "entities": [
 	    {
-	      "text": "movies",
-	      "value": [
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        },
-	        {
-	          "score": 39.775864,
-	          "top_synonym": "movies",
-	          "cname": "movie"
-	        }
-	      ],
+	      "role": null,
 	      "type": "type",
 	      "span": {
 	        "start": 8,
 	        "end": 13
 	      },
-	      "role": null
+	      "text": "movies",
+	      "value": [
+	        {
+	          "cname": "movie",
+	          "top_synonym": "movies",
+	          "score": 18.921387
+	        },
+	        {
+	          "cname": "tv-show",
+	          "top_synonym": "tv miniseries",
+	          "score": 1.684855
+	        }
+	      ]
 	    },
 	    {
-	      "text": "Brad Pitt",
-	      "value": [],
+	      "role": null,
 	      "type": "cast",
 	      "span": {
 	        "start": 20,
 	        "end": 28
 	      },
-	      "role": null
+	      "text": "Brad Pitt",
+	      "value": []
 	    }
 	  ],
+	  "text": "Show me movies with Brad Pitt",
 	  "domain": "video_content"
 	}
 
@@ -460,6 +442,8 @@ Change the feature extraction settings to use bag of bigrams in addition to the 
    ...            }
    >>> ic.fit(features=features)
    Fitting intent classifier: domain='ordering'
+   Selecting hyperparameters using k-fold cross-validation with 10 splits
+   Best accuracy: 97.34%, params: {'fit_intercept': False, 'class_weight': {0: 0.40103456116416553, 1: 4.4708491761723703, 2: 0.98561050572785691, 3: 6.916666666666667, 4: 3.7209915611814348, 5: 0.53912578327984106}, 'C': 10000}
 
 You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various Workbench classifiers.
 
@@ -470,7 +454,9 @@ You can use similar options to inspect and experiment with the Entity Recognizer
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Our video discovery application does not use entity groups. This means we do not need to train the Workbench :doc:`Language Parser <../userguide/parser>` for this purpose.
+Our video discovery application does not have complex relationships between entities. For example, for the annotated query ``content with {Tom Hanks|cast}``, there is no entity that describes the ``cast`` entity.  As queries become more complex, for example, ``show me a {Tom Hanks|cast} {movie|type} and a {Jim Parsons|cast} {TV show|type}``, we would need to relate each ``cast`` entity to its corresponding ``type`` entity.
+
+Since we do not have entity groups in the video discovery application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships might form. Please refer to :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
 
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -478,7 +464,8 @@ Our video discovery application does not use entity groups. This means we do not
 The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top ten entries in our ``videos`` index and present them as suggestions to the user. For that, we sort the videos by popularity when using the :doc:`Question Answerer <../userguide/kb>`:
 
 .. code:: python
-	results = app.question_answerer.get(index=KB_INDEX_NAME,
+
+	 results = app.question_answerer.get(index=KB_INDEX_NAME,
                                             _sort='popularity', _sort_type='desc')
 
 In general the ``show_content`` handler retrieves documents from the knowledge base in different ways, depending on the entities found in the user's queries.
@@ -503,7 +490,7 @@ For instance:
    >>> conv.say("Show me movies with Tom Hanks")
    ['Done. Here are some movies with Tom Hanks:', "Unsupported response: {'videos': [{'release_year': 1994, 'type': 'movie', 'title': 'Forrest Gump'}, {'release_year': 1995, 'type': 'movie', 'title': 'Toy Story'}, {'release_year': 2016, 'type': 'movie', 'title': 'Inferno'}, {'release_year': 2006, 'type': 'movie', 'title': 'Cars'}, {'release_year': 2010, 'type': 'movie', 'title': 'Toy Story 3'}, {'release_year': 1999, 'type': 'movie', 'title': 'Toy Story 2'}, {'release_year': 2016, 'type': 'movie', 'title': 'Sully'}, {'release_year': 1998, 'type': 'movie', 'title': 'Saving Private Ryan'}, {'release_year': 2002, 'type': 'movie', 'title': 'Catch Me If You Can'}, {'release_year': 1999, 'type': 'movie', 'title': 'The Green Mile'}]}"]
 
-The :meth:`say()` method packages the input text in a :doc:`user request <../userguide/interface>` object and passes it to the Workbench :doc:`Application Manager <../userguide/application_manager>` to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested movies from a particular actor, in a single query. The app responded, as expected, with an initial response acknowledging the filters used and a list of videos.
+The :meth:`say()` method packages the input text in a user request object and passes it to the Workbench Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested movies from a particular actor, in a single query. The app responded, as expected, with an initial response acknowledging the filters used and a list of videos.
 
 You can also try out multi-turn dialogues:
 
@@ -522,4 +509,6 @@ You can also try out multi-turn dialogues:
 
    Test the app multiple times with different conversational flows. Keep track of all cases where the response does not make good sense. Then, analyze those cases in detail. You should be able to attribute each error to a specific step in our end-to-end processing (e.g., incorrect intent classification, missed entity recognition, unideal natural language response, and so on). Categorizing your errors in this manner helps you understand the strength of each component in your conversational AI pipeline and informs you about the possible next steps for improving the performance of each individual module.
 
-Refer to the User Guide for tips and best practices on testing your app before launch. Once you're satisfied with the performance of your app, you can deploy it to production as described in the :doc:`deployment <../userguide/deployment>` section of the User Guide.
+Refer to the User Guide for tips and best practices on testing your app before launch.
+
+.. Once you're satisfied with the performance of your app, you can deploy it to production as described in the :doc:`deployment <../userguide/deployment>` section of the User Guide.
