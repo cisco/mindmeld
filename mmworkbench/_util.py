@@ -5,7 +5,6 @@ project structure.
 """
 from __future__ import unicode_literals, absolute_import
 from builtins import object
-from future.utils import iteritems
 
 import datetime
 from email.utils import parsedate
@@ -20,8 +19,9 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from . import path
-from .exceptions import KnowledgeBaseConnectionError
 from .components import QuestionAnswerer
+from .exceptions import KnowledgeBaseConnectionError
+from .components._config import get_app_namespace
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ BLUEPRINT_URL = '{mindmeld_url}/blueprints/{blueprint}/{filename}'
 BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
 BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
-    'quickstart': {},
+    'kwik_e_mart': {},
     'food_ordering': {},
     'home_assistant': {'kb': False},
     'template': {'kb': False},
@@ -134,8 +134,7 @@ class Blueprint(object):
 
         app_path = app_path or os.path.join(os.getcwd(), name)
         app_path = os.path.abspath(app_path)
-        _, app_name = os.path.split(app_path)
-
+        app_namespace = get_app_namespace(app_path)
         es_host = es_host or os.environ.get('MM_ES_HOST', 'localhost')
         cache_dir = path.get_cached_blueprint_path(name)
         try:
@@ -155,7 +154,7 @@ class Blueprint(object):
             data_file = os.path.join(kb_dir, index)
 
             try:
-                QuestionAnswerer.load_kb(app_name, index_name, data_file, es_host)
+                QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
             except KnowledgeBaseConnectionError as ex:
                 logger.error('Cannot set up knowledge base. Unable to connect to Elasticsearch '
                              'instance at %r. Confirm it is running or specify an alternate '
@@ -196,7 +195,7 @@ class Blueprint(object):
             username = config['username']
             password = config['password']
         except Exception:
-            msg = 'Unable to locate AWS credentials. Cannot download blueprint.'
+            msg = 'Unable to locate MindMeld credentials. Cannot download blueprint.'
             logger.error(msg)
             raise EnvironmentError(msg)
 
@@ -265,9 +264,14 @@ def load_global_configuration():
     config['mindmeld_url'] = iniconfig.get('mmworkbench', 'mindmeld_url')
     config['username'] = iniconfig.get('mmworkbench', 'username')
     config['password'] = iniconfig.get('mmworkbench', 'password')
-    for key, value in iteritems(config):
-        if value is None:
-            config.pop(key)
+    bad_keys = set()
+    for key in config.keys():
+        if config[key] is None:
+            bad_keys.add(key)
+
+    for key in bad_keys:
+        config.pop(key)
+
     return config
 
 
