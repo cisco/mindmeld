@@ -1,6 +1,3 @@
-.. meta::
-    :scope: private
-
 Working with the Natural Language Processor
 ===========================================
 
@@ -8,7 +5,7 @@ We have seen how the :ref:`Natural Language Processor (NLP) <arch_nlp>` uses a p
 
 .. note::
 
-   :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-By-Step Guide is a pre-requisite for this chapter.
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`.
 
 .. _instantiate_nlp:
 
