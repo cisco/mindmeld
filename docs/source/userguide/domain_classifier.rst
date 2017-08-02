@@ -38,7 +38,7 @@ Access the :class:`DomainClassifier` using the :attr:`domain_classifier` attribu
 Train the domain classifier
 ---------------------------
 
-Use the :meth:`DomainClassifier.fit` method to train a domain classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracies for the classifiers.
+Use the :meth:`DomainClassifier.fit` method to train a domain classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracy for the classifier.
 
 .. _baseline_domain_fit:
 
@@ -73,14 +73,14 @@ Use the :meth:`DomainClassifier.fit` method to train a domain classification mod
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 99.50%, params: {'C': 10, 'fit_intercept': True}
 
-The :meth:`fit` method loads all necessary training queries and trains a domain classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the Workbench preset :ref:`classifier configuration <config>`.
+The :meth:`fit` method loads all necessary training queries and trains a domain classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If no custom settings for domain classification are defined in ``config.py``, the method uses the Workbench preset :ref:`classifier configuration <config>`.
 
 Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.
 
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an  example where we view the configuration of a domain classifier trained using default settings:
+Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an  example where we view the configuration of a baseline domain classifier trained using default settings:
 
 .. code-block:: python
 
@@ -273,7 +273,7 @@ For experimenting with the domain classifier, the recommended method is to use a
 
 **Feature extraction**
 
-Let's start with the baseline classifier we trained :ref:`earlier <baseline_domain_fit>`. Viewing the feature set reveals that, by default, the classifier just uses a bag of words (unigrams) for features.
+Let's start with the baseline classifier we trained :ref:`earlier <baseline_domain_fit>`. Viewing the feature set reveals that, by default, the classifier uses unigrams for its bag of words features.
 
 .. code-block:: python
 
@@ -291,7 +291,7 @@ Now we want the classifier to look at longer phrases, which carry more context t
 
    >>> my_features['bag-of-words']['lengths'] = [1, 2, 3]
 
-We can also add more :ref:`supported features <domain_features>`. Suppose that our domains are such that the natural language patterns at the start or the end of a query can be highly indicative of one domain or another. To capture this, we extract the leading and trailing phrases of different lengths — known as *edge n-grams* — from the query. The code below adds the new ``'edge-ngrams'`` feature to the existing :data:`my_features` dictionary.
+We can also add more :ref:`supported features <domain_features>`. Suppose that our domains are such that the natural language patterns at the start or the end of a query are highly indicative of one domain or another. To capture this, we extract the leading and trailing phrases of different lengths — known as *edge n-grams* — from the query. The code below adds the new ``'edge-ngrams'`` feature to the existing :data:`my_features` dictionary.
 
 .. code-block:: python
 
@@ -317,7 +317,7 @@ To retrain the classifier with the updated feature set, pass in the :data:`my_fe
 
 **Hyperparameter tuning**
 
-View the model's hyperparameters, keeping in mind the hyperparameters for logistic regression, the default model in Workbench. These include: ``'C'``, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to ``'l2'``.
+View the model's hyperparameters, keeping in mind the hyperparameters for logistic regression, the default model for domain classification in Workbench. These include: ``'C'``, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to ``'l2'``.
 
 .. code-block:: python
 
@@ -354,7 +354,7 @@ For our first experiment, let's reduce the range of values to search for ``'C'``
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 99.56%, params: {'C': 10, 'fit_intercept': False, 'penalty': 'l2'}
 
-Finally, we'll override the default k-fold cross-validation, which is 10 folds, and specify five randomized folds instead. To so this, we modify the values of the ``'k'`` and ``'type'`` keys in :data:`my_param_settings`:
+Finally, we'll try a new cross-validation strategy of randomized folds, replacing the default of k-fold. We'll also specify five folds instead of the default of ten folds. To so this, we modify the values of the   ``'type'`` and ``'k'`` keys in :data:`my_param_settings`:
 
 .. code-block:: python
 
@@ -381,7 +381,7 @@ For a list of configurable hyperparameters for each model, along with available 
 
 **Model selection**
 
-To try :ref:`machine learning models <sklearn_domain_models>` other than the default of logistic regression, we update the hyperparameter grid to be compatible with the desired model.
+To try :ref:`machine learning models <sklearn_domain_models>` other than the default of logistic regression, we specify the new model as the argument to ``model_settings``, then update the hyperparameter grid accordingly.
 
 For example, a :sk_guide:`support vector machine (SVM) <svm>` with the same features as before, and parameter selection settings updated to search over the :sk_api:`SVM hyperparameters <sklearn.svm.SVC.html#sklearn.svm.SVC>`, looks like this:
 
@@ -425,12 +425,16 @@ Meanwhile, a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :
 Run the domain classifier
 -------------------------
 
-Run the trained domain classifier on a test query using the :meth:`DomainClassifier.predict` method. At runtime, the natural language processor's :meth:`process` method calls :meth:`DomainClassifier.predict` to classify the domain for an incoming query. The :meth:`DomainClassifier.predict` method returns the label for the domain whose predicted probability is highest.
+Run the trained domain classifier on a test query using the :meth:`DomainClassifier.predict` method, which returns the label for the domain whose predicted probability is highest.
 
 .. code-block:: python
 
    >>> dc.predict('weather in san francisco?')
    'weather'
+
+.. note::
+
+   At runtime, the natural language processor's :meth:`process` method calls :meth:`DomainClassifier.predict` to classify the domain for an incoming query.
 
 We want to know how confident our trained model is in its prediction. To view the predicted probability distribution over all possible domain labels, use the :meth:`DomainClassifier.predict_proba` method. This is useful both for experimenting with classifier settings and for debugging classifier performance.
 
@@ -524,7 +528,7 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
            weather              0             32              1
 
 
-Let's decipher the statistical output of the :meth:`evaluate` method.
+Let's decipher the statistics output by the :meth:`evaluate` method.
 
 **Overall Statistics**
   |
@@ -630,7 +634,7 @@ A simple example of this is inspecting incorrect predictions for a particular do
 
 In this case, only one test query from the ``times_and_dates`` domain got misclassified as ``smart_home``. The correct label came in second, but lost by a significant margin in classification probability.
 
-Next, we use a list comprehension to identify the kind of queries that the current training data lacks. To do this, we list all misclassified queries from a given domain, where the classifier's confidence for the true label is very low. We'll demonstrate this with the ``weather`` domain and a confidence of <25%.
+Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all misclassified queries from a given domain, where the classifier's confidence for the true label is very low. We'll demonstrate this with the ``weather`` domain and a confidence of <25%.
 
 .. code-block:: python
 
@@ -656,11 +660,11 @@ Next, we use a list comprehension to identify the kind of queries that the curre
     ...
    ]
 
-The result reveals queries where the domain was misclassified as ``smart_home``, and where the language pattern was the word "check" followed by a noun phrase.
+The result reveals queries where the domain was misclassified as ``smart_home``, and where the language pattern was the word "check" followed some words, then the word "temperature" and some more words. We'll call this the "check ... temperature ..." pattern.
 
 Try looking for similar queries in the :doc:`training data <../blueprints/home_assistant>`. You should discover that the ``weather`` domain does indeed lack labeled training queries that fit the pattern. But the ``smart_home`` domain, and the ``check_thermostat`` intent in particular, has plenty of queries that fit. This explains why the model chose ``smart_home`` over ``weather`` when classifying such queries.
 
-One potential solution is to add more training queries that fit the "check something" pattern to the ``weather`` domain. Then the classification model should more effectively learn to distinguish the two domains that it confused in our experiments thus far.
+One potential solution is to add more training queries that fit the "check ... temperature ..." pattern to the ``weather`` domain. Then the classification model should more effectively learn to distinguish the two domains that it confused.
 
 Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data based on what you find should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_domain_with_config>` in this chapter.
 
