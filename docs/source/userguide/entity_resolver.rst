@@ -15,7 +15,6 @@ For some entity types, the entity's canonical form does not correspond with a kn
 
 To train the entity resolver, you must generate entity mapping files which include a synonym set for each entity as well as the optional sort factor. The details of the entity mappings and guidelines on synonym data collection are described in the following sections.
 
-
 Entity Mapping
 --------------
 

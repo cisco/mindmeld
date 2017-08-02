@@ -12,7 +12,12 @@ We have seen how the :ref:`Natural Language Processor (NLP) <arch_nlp>` uses a p
 Instantiate the NLP class
 -------------------------
 
-To use the natural language processor, you must first generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. Once you have training data, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
+Work with the natural language processor falls into two broad phases:
+
+ - First, generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
+ - Then, conduct experimentation in the Python shell.
+
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
 
 .. code-block:: python
 
@@ -124,9 +129,9 @@ In so doing, the :meth:`build` method:
 
     - Calls the :meth:`fit` method on the classifiers in the domain-intent-entity-role hierarchy to train them using the provided model, feature, and hyperparameter settings
 
-    - Builds the Entity Resolver using the provided entity mapping file
+    - Builds the :doc:`Entity Resolver<entity_resolver>` using the provided entity mapping file
 
-    - Configures the Language Parser using the provided parser configuration file
+    - Configures the :doc:`Language Parser<parser>` using the provided parser configuration file
 
 .. _build_nlp_with_config:
 
@@ -268,7 +273,7 @@ This snippet from a domain classifier configuration specifies a '`text classifie
    },
    ...
 
-This example, also from entity recognition, specifies '`maximum entropy markov model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_' as the machine learning algorithm and the '`Inside-Outside-Beginning <https://en.wikipedia.org/wiki/Inside_Outside_Beginning>`_' format as the tagging scheme. It further specifies the ':sk_api:`maximum absolute scaling <sklearn.preprocessing.MaxAbsScaler>`' feature transformation operation as a preprocessing step.
+This example, from entity recognition, specifies '`maximum entropy markov model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_' as the machine learning algorithm and the '`Inside-Outside-Beginning <https://en.wikipedia.org/wiki/Inside_Outside_Beginning>`_' format as the tagging scheme. It further specifies the ':sk_api:`maximum absolute scaling <sklearn.preprocessing.MaxAbsScaler>`' feature transformation operation as a preprocessing step.
 
 .. code:: python
 
@@ -404,7 +409,7 @@ Run the trained NLP pipeline on a test query using the :meth:`NaturalLanguagePro
     'text': "I'd like a mujaddara wrap and two chicken kebab from palmyra"
    }
 
-The return value is the dictionary described in the table below.
+The return value is a dictionary, as described in the table below.
 
 +----------+--------------------------------------------------------------------------+-----------------------------------------------+
 | Key      | Value                                                                    | Component(s) Responsible                      |
@@ -438,7 +443,7 @@ For more about the above steps, including outputs and methods for batch testing 
 Evaluate NLP performance
 ------------------------
 
-The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries prepared in :doc:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. Names of files containing test queries have the prefix ``test``. These files placed within the intent subfolders, alongside the training data files.
+The cross-validation accuracies for each classifier, reported during model training, can be good initial indicators of your NLP pipeline's performance. However, the true measure of a machine-learned system's real-world performance is its accuracy on previously unseen test data. The test data is a set of labeled queries prepared in :doc:`the same manner <../quickstart/06_generate_representative_training_data>` as the training data. Names of files containing test queries have the prefix ``test``. These files are placed within the intent subfolders, alongside the training data files.
 
 .. image:: /images/food_ordering_directory2.png
     :width: 350px
@@ -452,7 +457,7 @@ For more about how evaluation works for each individual classifier, see the `eva
 Optimize the NLP models
 -----------------------
 
-The typical experimentation flow for ML-based systems looks like this:
+The typical experimentation flow for Machine Learning-based systems looks like this:
 
   - Gather representative labeled data
 
