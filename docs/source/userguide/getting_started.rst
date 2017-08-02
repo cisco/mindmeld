@@ -142,36 +142,18 @@ To prepare to install Workbench in an isolated environment using pyenv and virtu
 Configure Pip and Workbench
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Workbench installation relies on ``pip``, a Python packaging system included by default with the Python binary installers.
-
-Run ``pip --version`` to verify that pip is installed.
-
- - You should have pip version 8 or 9
-
- - If you need upgrade pip module, run ``pip install --upgrade pip``
-
-
-Automatic Configuration
-"""""""""""""""""""""""
-
-You can configure pip and workbench easily by running these commands in a command-line terminal:
-
-.. highlight:: python
-   :linenothreshold: 2
+You can configure pip and workbench by running this command in a command-line terminal:
 
 .. code-block:: shell
 
-  export USERNAME=<Username>
-  curl -s https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh
-  source mmworkbench_init.sh
+  bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)
 
 
 Notes:
 
-#. Remember to modify the ``Username`` to your actual mindmeld.com username.
-#. You will be prompted to enter your mindmeld.com password.
+#. You will be prompted to enter your mindmeld.com username and password.
 #. This creates two configuration files: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. Previous files will be overwritten.
-#. If you enter an incorrect password, run the last command again.
+#. If you enter an incorrect password, run the command again.
 
 
 Proceed to :ref:`Install Workbench <getting_started_install_workbench>`.
@@ -401,3 +383,8 @@ Sample Code
 
   import mmworkbench as wb  
   wb.configure_logs()
+
+
+Troubleshooting
+---------------
+
