@@ -1,6 +1,3 @@
-.. meta::
-    :scope: private
-
 Working with the Language Parser
 ================================
 
@@ -8,11 +5,7 @@ The :ref:`Language Parser <arch_parser>` (often referred to simply as the Parser
 
 .. note::
 
-   **Recommended prior reading:**
-
-   - :doc:`Step 8: Configure the Language Parser<../quickstart/08_configure_the_language_parser>` (Step-By-Step Guide)
-   - :doc:`Natural Language Processor <nlp>` (User Guide)
-   - :doc:`Entity Recognizer <entity_recognizer>` (User Guide)
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to :doc:`Step 8: Configure the Language Parser<../quickstart/08_configure_the_language_parser>`. Also, review the :doc:`Natural Language Processor <nlp>` and :doc:`Entity Recognizer <entity_recognizer>` chapters of this guide.
 
 
 Do you need a parser?
