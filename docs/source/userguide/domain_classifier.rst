@@ -1,12 +1,9 @@
-.. meta::
-    :scope: private
-
 Working with the Domain Classifier
 ==================================
 
 The Domain Classifier
 
- - is run as the first step in the natural language processing pipeline
+ - is run as the first step in the :ref:`natural language processing pipeline <arch_nlp>`
  - is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that determines the target domain for a given query
  - is trained using all of the labeled queries across all the domains in an application
  - can be trained only when the labeled data contains more than one domain
@@ -15,7 +12,7 @@ Every Workbench app has exactly one domain classifier. The name of each domain f
 
 .. note::
 
-   This is an in-depth tutorial to work through from start to finish. Before you begin, read :ref:`Step 7 <domain_classification>` of the Step-By-Step Guide.
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Domain Classification <domain_classification>` section.
 
 Access the domain classifier
 ----------------------------
@@ -546,19 +543,19 @@ Let's decipher the statistical output of the :meth:`evaluate` method.
   ===========  ===
 
   Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
- 
+
   - **Classes are balanced**: When the number of training examples in your domains are comparable and each domain is equally important, focusing on the accuracy metric is usually good enough.
- 
+
   - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
-  
+
   - **All F1 and accuracy scores are low**: Domain classification is performing poorly across all domains. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your domain structure and make sure queries in different domains have distinct vocabularies. You may need to combine domains or separate them, so that the resulting classes are easier for the classifier to distinguish.
 
   - **F1 weighted is higher than F1 macro**: Your domains with fewer evaluation examples are performing poorly. You may need to add more data to domains that have fewer examples. You could also try adding class weights to your hyperparameters.
- 
+
   - **F1 macro is higher than F1 weighted**: Your domains with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
- 
+
   - **F1 micro is higher than F1 macro**: Certain domains are being misclassified more often than others. Check the class-wise statistics below to identify these domains. Some domains may be too similar to another domain or you may need to add more training data to some domains.
- 
+
   - **Some classes are more important than others**: If some domains are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
 **Class-wise Statistics**
