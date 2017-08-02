@@ -347,7 +347,23 @@ The INFO logging level can be useful to see what's going on:
   import logging
   logging.getLogger('mmworkbench’).setLevel(logging.INFO)
 
-There is a handy ``configure_logs()`` function available that wraps this and sets log format:
+configure_logs()
+^^^^^^^^^^^^^^^^
+
+There is a handy ``configure_logs()`` function available that wraps this and accepts 2 parameters: 
+
+#. `format message <https://docs.python.org/3/howto/logging.html#changing-the-format-of-displayed-messages>`_
+#. `logging level <https://docs.python.org/3/howto/logging.html#logging-levels>`_: in increasing order of severity, they are ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR`` and ``CRITICAL``.
+
+The method signature is:
+
+.. code-block:: python
+ 
+   configure_logs(format="%(message)s", level=logging.WARNING)
+
+
+Sample Code
+^^^^^^^^^^^^
   
 .. code-block:: python
 
