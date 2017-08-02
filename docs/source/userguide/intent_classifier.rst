@@ -1,6 +1,3 @@
-.. meta::
-    :scope: private
-
 Working with the Intent Classifier
 ==================================
 
