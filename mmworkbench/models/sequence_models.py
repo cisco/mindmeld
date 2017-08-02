@@ -9,13 +9,10 @@ from builtins import range, super
 import logging
 import random
 
-from .helpers import get_feature_extractor, register_model
-from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model, SkLearnModel
+from .helpers import register_model
+from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
-from .taggers import taggers
-from sklearn.feature_selection import SelectFromModel, SelectPercentile
-from sklearn.linear_model import LogisticRegression
 
 logger = logging.getLogger(__name__)
 
@@ -160,29 +157,7 @@ class TaggerModel(Model):
         Returns:
             (dict): revised param_grid
         """
-
-        # todo: does this make sense for sequence models??
-        if 'class_weight' in param_grid:
-            raw_weights = param_grid['class_weight'] if is_grid else [param_grid['class_weight']]
-            weights = [{k if isinstance(k, int) else self._class_encoder.transform((k,))[0]: v
-                        for k, v in cw_dict.items()} for cw_dict in raw_weights]
-            param_grid['class_weight'] = weights if is_grid else weights[0]
-        elif 'class_bias' in param_grid:
-            # interpolate between class_bias=0 => class_weight=None
-            # and class_bias=1 => class_weight='balanced'
-            class_count = bincount(y)
-            classes = self._class_encoder.classes_
-            weights = []
-            raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]
-            for class_bias in raw_bias:
-                # these weights are same as sklearn's class_weight='balanced'
-                balanced_w = [old_div(len(y), (float(len(classes)) * c)) for c in class_count]
-                balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
-
-                weights.append({c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples})
-            param_grid['class_weight'] = weights if is_grid else weights[0]
-            del param_grid['class_bias']
-
+        # todo should we do any parameter transformation for sequence models?
         return param_grid
 
     def predict(self, examples):

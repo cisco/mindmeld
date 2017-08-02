@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains some helper functions for the models package"""
 from __future__ import unicode_literals
+from sklearn.metrics import make_scorer
 
 import re
 
@@ -176,3 +177,27 @@ def get_ngram(tokens, start, length):
                  else tokens[index])
         ngram_tokens.append(token)
     return ' '.join(ngram_tokens)
+
+
+def get_entity_scorer():
+    return make_scorer(score_func=entity_accuracy_scoring)
+
+
+def entity_accuracy_scoring(expected, predicted):
+    num_examples = len(expected)
+    num_correct = sum(1 for expected_seq, predicted_seq in zip(expected, predicted)
+                      if entity_seqs_equal(expected_seq, predicted_seq))
+    return float(num_correct) / float(num_examples)
+
+
+def entity_seqs_equal(expected, predicted):
+    if len(expected) != len(predicted):
+        return False
+    for i in range(len(expected)):
+        if expected[i].entity.type != predicted[i].entity.type:
+            return False
+        if expected[i].span != predicted[i].span:
+            return False
+        if expected[i].text != predicted[i].text:
+            return False
+    return True

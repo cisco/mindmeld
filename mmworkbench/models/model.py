@@ -14,9 +14,9 @@ from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuff
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
-                             make_scorer, accuracy_score)
-from sklearn_crfsuite.metrics import sequence_accuracy_score
-from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
+                             accuracy_score)
+from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
+                      entity_seqs_equal, get_entity_scorer)
 from .taggers.taggers import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
@@ -105,16 +105,7 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
     def is_correct(self):
         # For entities compare just the type, span and text for each entity.
         if self.label_type == ENTITIES_LABEL_TYPE:
-            if len(self.expected) != len(self.predicted):
-                return False
-            for i in range(len(self.expected)):
-                if self.expected[i].entity.type != self.predicted[i].entity.type:
-                    return False
-                if self.expected[i].span != self.predicted[i].span:
-                    return False
-                if self.expected[i].text != self.predicted[i].text:
-                    return False
-            return True
+            return entity_seqs_equal(self.expected, self.predicted)
         # For other label_types compare the full objects
         else:
             return self.expected == self.predicted
@@ -563,8 +554,6 @@ class Model(object):
     Attributes:
         config (ModelConfig): The configuration for the model
     """
-    DEFAULT_CV_SCORING = ACCURACY_SCORING
-
     def __init__(self, config):
         self.config = config
         self._label_encoder = get_label_encoder(self.config)
@@ -572,6 +561,15 @@ class Model(object):
         self._resources = {}
         self._clf = None
         self.cv_loss_ = None
+        self.default_scorer = self.get_default_scorer(self.config)
+
+    def get_default_scorer(self, config):
+        if config.label_type == ENTITIES_LABEL_TYPE:
+            print("entity scoring")
+            return get_entity_scorer()
+        else:
+            print("accuracy scoring")
+            return ACCURACY_SCORING
 
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
@@ -596,18 +594,27 @@ class Model(object):
         logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
                     num_splits, '' if num_splits == 1 else 's')
 
-        scoring = selection_settings.get('scoring', self.DEFAULT_CV_SCORING)
+        # For entities you must use the default sequence scorer
+        if self.config.label_type == ENTITIES_LABEL_TYPE:
+            if selection_settings.get('scoring', 'seq_accuracy') is not 'seq_accuracy':
+                logger.info('You must use the sequence accuracy scorer for entity recognition. '
+                            'Using seq_accuracy instead of your specified scorer...')
+            scoring = self.default_scorer
+        else:
+            scoring = selection_settings.get('scoring', self.default_scorer)
         n_jobs = selection_settings.get('n_jobs', -1)
 
         param_grid = self._convert_params(selection_settings['grid'], y)
         model_class = self._get_model_constructor()
 
-        crf_scoring = make_scorer(score_func=sequence_accuracy_score)
-        scoring = crf_scoring
-        param_grid['config'] = [self.config]
-        param_grid['resources'] = [self._resources]
-        init_params = {'config': self.config, 'resources': self._resources}
-        grid_cv = GridSearchCV(estimator=model_class(**init_params), scoring=scoring, param_grid=param_grid,
+        if self.config.label_type == ENTITIES_LABEL_TYPE:
+            param_grid['config'] = [self.config]
+            param_grid['resources'] = [self._resources]
+            init_params = {'config': self.config, 'resources': self._resources}
+            estimator = model_class(**init_params)
+        else:
+            estimator = model_class()
+        grid_cv = GridSearchCV(estimator=estimator, scoring=scoring, param_grid=param_grid,
                                cv=cv_iterator, n_jobs=n_jobs)
         model = grid_cv.fit(X, y, groups)
 
