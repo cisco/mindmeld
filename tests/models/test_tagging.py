@@ -36,10 +36,10 @@ class TestTagging:
     test_data_1 = [
         ('set alarm for 1130',
          ['O||O|', 'O||O|', 'O||O|', 'O||B|sys_time'],
-         "2017-07-31T11:30:00.000-07:00"),
+         ["11:30:00.000-07:00", "23:30:00.000-07:00"]),
         ('the vikings fought on the year 1130',
          ['O||O|', 'O||O|', 'O||O|', 'O||O|', 'O||O|', 'O||O|', 'O||B|sys_time'],
-         "1130-01-01T00:00:00.000-07:00"),
+         ["1130-01-01T00:00:00.000-07:00"]),
     ]
 
     @pytest.mark.parametrize("query,tags,expected_time", test_data_1)
@@ -54,11 +54,11 @@ class TestTagging:
         res_entity = tagging.get_entities_from_tags(processed_query, tags)
 
         if res_entity[0].to_dict()['value']['grain'] == 'minute':
-            assert res_entity[0].to_dict()['value']['value'][MINUTE_GRAIN_INDEX:] == \
-                   expected_time[MINUTE_GRAIN_INDEX:]
+            assert res_entity[0].to_dict()['value']['value'][MINUTE_GRAIN_INDEX:] in \
+                   set(expected_time)
 
         if res_entity[0].to_dict()['value']['grain'] == 'year':
-            assert res_entity[0].to_dict()['value']['value'] == expected_time
+            assert res_entity[0].to_dict()['value']['value'] in set(expected_time)
 
     test_data_2 = [
         ('set alarm for 1130',
