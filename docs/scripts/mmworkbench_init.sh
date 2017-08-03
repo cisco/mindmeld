@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # needed for pyenv install fix
-xcode-select --install
+xcode-select --install 2&>/dev/null
 
 set -e
 
