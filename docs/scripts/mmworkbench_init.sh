@@ -83,6 +83,16 @@ check_dependency java
 check_dependency elasticsearch
 echo done
 
+echo
+read -p "Do you want to install the missing dependencies (Y/n): " RESPONSE
+# lowercase
+RESPONSE=$(echo "$RESPONSE" | tr '[:upper:]' '[:lower:]')
+if [[ (! $RESPONSE == "") && (! $RESPONSE == "y") && (! $RESPONSE == "yes") ]]; then
+	echo exiting
+	exit 1
+fi
+
+
 # Install stuff
 echo
 echo Installing missing dependencies
@@ -96,8 +106,8 @@ install_dependency elasticsearch
 
 
 echo done
-echo
 
+echo
 echo Setting up configuration files
 read -p "   Enter mindmeld.com username: " USERNAME
 echo -n "   Enter mindmeld.com password: "
