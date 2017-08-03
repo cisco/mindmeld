@@ -1,21 +1,24 @@
-.. meta::
-    :scope: private
-
 Working with the Intent Classifier
 ==================================
 
-The :ref:`Intent Classifier <arch_intent_model>` is run as the second step in the natural language processing pipeline to determine the target intent for a given query. It is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that is trained using all of the labeled queries across all the intents in a given domain. The name of each intent folder serves as the label for the training queries contained within that folder. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation. Intent classification models are trained per domain. A Workbench app hence has one intent classifier for every domain with multiple intents.
+The :ref:`Intent Classifier <arch_intent_model>`
+
+ - is run as the second step in the :ref:`natural language processing pipeline <arch_nlp>`
+ - is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that determines the target intent for a given query
+ - is trained using all of the labeled queries across all the intents in a given domain
+
+Every Workbench app has one intent classifier for every domain with multiple intents. The name of each intent folder serves as the label for the training queries contained within that folder.
+
+See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation.
 
 .. note::
 
-   :ref:`Step 7 <intent_classification>` of the Step-By-Step Guide is a pre-requisite for this chapter.
-
-   Recommended prior reading: :doc:`Natural Language Processor <nlp>` chapter of the User Guide.
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Intent Classification <intent_classification>` section.
 
 Access an intent classifier
 ---------------------------
 
-Before using any of the NLP components, you need to generate the necessary training data for your app by following the guidelines in :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. You can then start by :ref:`instantiating an object <instantiate_nlp>` of the :class:`NaturalLanguageProcessor` (NLP) class.
+Before using any of the NLP components, you need to generate the necessary training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. Once you have training data, import the :class:`NaturalLanguageProcessor` (NLP) class from the Workbench :mod:`nlp` module and :ref:`instantiate an object <instantiate_nlp>` with the path to your Workbench project.
 
 .. code-block:: python
 
@@ -24,7 +27,7 @@ Before using any of the NLP components, you need to generate the necessary train
    >>> nlp
    <NaturalLanguageProcessor 'home_assistant' ready: False, dirty: False>
 
-Next, verify that the NLP has correctly identified all the domains for your app.
+Verify that the NLP has correctly identified all the domains for your app.
 
 .. code-block:: python
 
@@ -36,7 +39,7 @@ Next, verify that the NLP has correctly identified all the domains for your app.
     'weather': <DomainProcessor 'weather' ready: False, dirty: False>
    }
 
-Each domain has its own :class:`IntentClassifier` which can be accessed using the :attr:`intent_classifier` attribute of the corresponding domain.
+Access the :class:`IntentClassifier` using the :attr:`intent_classifier` attribute of a domain of your choice.
 
 .. code-block:: python
 
@@ -54,7 +57,7 @@ Each domain has its own :class:`IntentClassifier` which can be accessed using th
 Train an intent classifier
 --------------------------
 
-To train an intent classification model for a specific domain, use the :meth:`IntentClassifier.fit` method. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes to finish. If the logging level is set to ``INFO`` or below, you should see the build progress in the console and the cross-validation accuracy of the trained model.
+Use the :meth:`IntentClassifier.fit` method to train an intent classification model for a domain of your choice. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes to finish. With logging level set to ``INFO`` or below, you should see the build progress in the console and the cross-validation accuracy of the trained model.
 
 .. _baseline_intent_fit:
 
@@ -75,15 +78,15 @@ To train an intent classification model for a specific domain, use the :meth:`In
    Best accuracy: 97.68%, params: {'C': 100, 'class_weight': {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4:    0.98433048433048431, 5: 3.3872549019607843}, 'fit_intercept': True}
 
 
-The :meth:`fit` method loads all the necessary training queries and trains an intent classification model using the provided machine learning settings. When the method is called without any parameters (as in the example above), it uses the settings from the :ref:`app's configuration file <build_nlp_with_config>` (``config.py``), if defined, or Workbench's preset :ref:`classifier configuration <config>`.
+The :meth:`fit` method loads all the necessary training queries and trains an intent classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the Workbench preset :ref:`classifier configuration <config>`.
 
-The quickest and recommended way to get started with any of the NLP classifiers is by using Workbench's default settings. The resulting baseline classifier should provide a reasonable starting point to bootstrap your machine learning experimentation from. You can then experiment with alternate settings to identify the optimal classifier configuration for your app.
+Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.
 
 
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To view the current :ref:`configuration <config>` being used by a trained classifier, use its :attr:`config` attribute. For example, here is the configuration being used by a baseline intent classifier trained using Workbench's default settings.
+Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here’s an example where we view the configuration of a baseline intent classifier trained using default settings:
 
 .. code-block:: python
 
@@ -118,22 +121,23 @@ Let's take a look at the allowed values for each setting in an intent classifier
 ``'model_type'`` (:class:`str`)
   |
 
-  Is always ``'text'``, since an intent classifier is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model.
+  Always ``'text'``, since an intent classifier is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model.
 
 ``'model_settings'`` (:class:`dict`)
   |
 
-  Is always a dictionary with a single key called ``'classifier_type'``. The value of the key specifies the machine learning model to use. Allowed values are
+  Always a dictionary with the single key ``'classifier_type'`` whose value specifies the machine learning model to use. Allowed values are shown in the table below.
+
 
 .. _sklearn_intent_models:
 
   =============== =======================================================
   Classifier Type Description (with list of configurable hyperparameters)
   =============== =======================================================
-  ``'logreg'``    :sk_guide:`Logistic regression <linear_model.html#logistic-regression>` (See :sk_api:`parameter list <sklearn.linear_model.LogisticRegression>`)
-  ``'svm'``       :sk_guide:`Support vector machine <svm.html#svm-classification>` (See :sk_api:`parameter list <sklearn.svm.SVC>`)
-  ``'dtree'``     :sk_guide:`Decision tree <tree.html#tree>` (See :sk_api:`parameter list <sklearn.tree.DecisionTreeClassifier>`)
-  ``'rforest'``   :sk_guide:`Random forest <ensemble.html#forest>` (See :sk_api:`parameter list <sklearn.ensemble.RandomForestClassifier>`)
+  ``'logreg'``    :sk_guide:`Logistic regression <linear_model.html#logistic-regression>` (see :sk_api:`parameter list <sklearn.linear_model.LogisticRegression>`)
+  ``'svm'``       :sk_guide:`Support vector machine <svm.html#svm-classification>` (see :sk_api:`parameter list <sklearn.svm.SVC>`)
+  ``'dtree'``     :sk_guide:`Decision tree <tree.html#tree>` (see :sk_api:`parameter list <sklearn.tree.DecisionTreeClassifier>`)
+  ``'rforest'``   :sk_guide:`Random forest <ensemble.html#forest>` (see :sk_api:`parameter list <sklearn.ensemble.RandomForestClassifier>`)
   =============== =======================================================
 
 
@@ -142,7 +146,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
 ``'features'`` (:class:`dict`)
   |
 
-  Is a dictionary where the keys are the names of the feature groups to be extracted. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for intent classification.
+  A dictionary whose keys are the names of the feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for intent classification.
 
 .. _intent_features:
 
@@ -151,30 +155,30 @@ Let's take a look at the allowed values for each setting in an intent classifier
   +=======================+============================================================================================================+
   | ``'bag-of-words'``    | Generates n-grams of the specified lengths from the query text.                                            |
   |                       |                                                                                                            |
-  |                       | Supported settings:                                                                                        |
-  |                       | A list containing the different n-gram lengths to extract.                                                 |
-  |                       | E.g., ``{'lengths': [1]}`` only extracts words (unigrams), whereas ``{'lengths': [1, 2, 3]}`` extracts     |
-  |                       | unigrams, bigrams and trigrams.                                                                            |
+  |                       | Settings:                                                                                                  |
+  |                       | A list of n-gram lengths to extract.                                                                       |
+  |                       | For instance, ``{'lengths': [1]}`` only extracts words (unigrams), whereas ``{'lengths': [1, 2, 3]}``      |
+  |                       | extracts unigrams, bigrams and trigrams.                                                                   |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
-  | ``'edge-ngrams'``     | Generates n-grams of the specified lengths from the edges (i.e. the start and the end) of the query.       |
+  | ``'edge-ngrams'``     | Generates n-grams of the specified lengths from the edges (i.e., start and end) of the query.              |
   |                       |                                                                                                            |
-  |                       | Supported settings:                                                                                        |
-  |                       | A list containing the different n-gram lengths to extract.                                                 |
-  |                       | E.g., ``{'lengths': [1]}`` only extracts the first and last word, whereas ``{'lengths': [1, 2, 3]}``       |
-  |                       | extracts all leading and trailing n-grams up to size 3.                                                    |
+  |                       | Settings:                                                                                                  |
+  |                       | A list of n-gram lengths to extract.                                                                       |
+  |                       | For instance, ``{'lengths': [1]}`` only extracts the first and last word,                                  |
+  |                       | whereas ``{'lengths': [1, 2, 3]}`` extracts all leading and trailing n-grams up to size 3.                 |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'freq'``            | Generates a log-scaled count for each frequency bin, where the count represents the number of query tokens |
-  |                       | whose frequency (as measured by number of occurrences in the training data) falls into that bin.           |
+  |                       | whose frequency falls into that bin. Frequency is measured by number of occurrences in the training data.  |
   |                       |                                                                                                            |
-  |                       | Supported settings:                                                                                        |
-  |                       | Number of bins to quantize the vocabulary frequency into.                                                  |
-  |                       | E.g., ``{'bins': 5}`` quantizes the vocabulary frequency into 5 bins.                                      |
+  |                       | Settings:                                                                                                  |
+  |                       | Number of bins.                                                                                            |
+  |                       | For instance, ``{'bins': 5}`` quantizes the vocabulary frequency into 5 bins.                              |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'in-gaz'``          | Generates a set of features indicating the presence of query n-grams in different entity gazetteers,       |
-  |                       | along with popularity information (as defined in the gazetteer).                                           |
+  |                       | along with popularity information as defined in the gazetteer.                                             |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
-  | ``'length'``          | Generates a set of features that capture query length information. Computes the number of tokens and       |
-  |                       | characters in the query, on both linear and log scales.                                                    |
+  | ``'length'``          | Generates a set of features that capture query length information.                                         |
+  |                       | Computes the number of tokens and characters in the query, on both linear and log scales.                  |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'exact'``           | Returns the entire query text as a feature.                                                                |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
@@ -186,25 +190,25 @@ Let's take a look at the allowed values for each setting in an intent classifier
 ``'params'`` (:class:`dict`)
   |
 
-  Is a dictionary containing the values to be used for different model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, the ``'penalty'`` parameter for logistic regression, the ``'max_depth'`` parameter for decision tree, and so on. The list of allowable hyperparameters depends on the selected model. Refer to the parameter list in :ref:`the model table <sklearn_intent_models>` above.
+  A dictionary of values to be used for model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, the ``'penalty'`` parameter for logistic regression, ``'max_depth'`` for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the parameter list in :ref:`the model table <sklearn_intent_models>` above.
 
 ``'param_selection'`` (:class:`dict`)
   |
 
-  Is a dictionary containing the settings for :sk_guide:`hyperparameter selection <grid_search>`. This is used as an alternative to the ``'params'`` dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.
+  A dictionary of settings for :sk_guide:`hyperparameter selection <grid_search>`. Provides an alternative to the ``'params'`` dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.
 
-  Workbench needs two pieces of information from the developer to do parameter estimation:
+  To estimate parameters, Workbench needs two pieces of information from the developer:
 
-  #. The parameter space to search, captured by the value for the ``'grid'`` key
-  #. The strategy for splitting the labeled data into training and validation sets, specified by the ``'type'`` key
+  #. The parameter space to search, as the value for the ``'grid'`` key
+  #. The strategy for splitting the labeled data into training and validation sets, as the value for the ``'type'`` key
 
-  Depending on the splitting scheme selected, the :data:`param_selection` dictionary can contain other keys that define additional settings. The table below enumerates all the keys allowed in the dictionary.
+  Depending on the splitting scheme selected, the :data:`param_selection` dictionary can contain other keys that define additional settings. The table below enumerates the allowable keys.
 
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | Key                   | Value                                                                                                             |
   +=======================+===================================================================================================================+
-  | ``'grid'``            | A dictionary mapping each hyperparameter to a list of potential values to be searched. Here is an example grid    |
-  |                       | for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:                              |
+  | ``'grid'``            | A dictionary which maps each hyperparameter to a list of potential values to search.                              |
+  |                       | Here is an example for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:           |
   |                       |                                                                                                                   |
   |                       | .. code-block:: python                                                                                            |
   |                       |                                                                                                                   |
@@ -214,7 +218,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       |       'fit_intercept': [True, False]                                                                              |
   |                       |    }                                                                                                              |
   |                       |                                                                                                                   |
-  |                       | :ref:`The model table <sklearn_intent_models>` above lists the hyperparameters available for each supported model.|
+  |                       | :ref:`The model table <sklearn_domain_models>` above lists hyperparameters available for each supported model.    |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
   |                       |                                                                                                                   |
@@ -229,22 +233,22 @@ Let's take a look at the allowed values for each setting in an intent classifier
   | ``'k'``               | Number of folds (splits)                                                                                          |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
 
-  The :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy, to identify the parameters that give the highest accuracy. The optimal parameters can then be used in future calls to :meth:`fit` to skip the parameter selection process.
+  To identify the parameters that give the highest accuracy, the :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to :meth:`fit` can use these optimal parameters and skip the parameter selection process.
 
 .. _build_intent_with_config:
 
 Training with custom configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-There are two ways to override Workbench's default intent classifier configuration with your custom settings.
+To override Workbench’s default intent classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
 
 
 1. Application configuration file
 """""""""""""""""""""""""""""""""
 
-The first method, as described in the :ref:`NaturalLanguageProcessor <build_nlp_with_config>` chapter, is to define the classifier settings in your application configuration file, ``config.py``. Define a dictionary named :data:`INTENT_MODEL_CONFIG` containing your custom settings. The :meth:`IntentClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods will then use those settings instead of Workbench's defaults.
+When you define custom classifier settings in  ``config.py``, the :meth:`IntentClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench’s defaults. To do this, define a dictionary of your custom settings, named :data:`INTENT_MODEL_CONFIG`.
 
-Here's an example of a ``config.py`` file where the preset configuration for the intent classifier is being overridden by custom settings that have been optimized for the app.
+Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the intent classifier.
 
 .. code-block:: python
 
@@ -269,18 +273,20 @@ Here's an example of a ``config.py`` file where the preset configuration for the
        }
    }
 
-Since this method requires updating a file each time you want to modify a setting, it's less suitable for rapid prototyping than the second method described below. The recommended use for this functionality is to store your optimal classifier settings, once you have identified them via experimentation. This ensures that the classifier training methods will use the optimized configuration to rebuild the models in the future. A common use case is retraining models on newly acquired training data, without retuning the underlying model settings.
+This method is recommended for storing your optimal classifier settings once you have identified them through experimentation. Then the classifier training methods will use the optimized configuration to rebuild the models. A common use case is retraining models on newly-acquired training data, without retuning the underlying model settings.
+
+Since this method requires updating a file each time you modify a setting, it’s less suitable for rapid prototyping than the method described next.
 
 
 2. Arguments to the :meth:`fit` method
 """"""""""""""""""""""""""""""""""""""
 
-The recommended way to experiment with an intent classifier is by using arguments to the :meth:`fit` method.
+For experimenting with an intent classifier, the recommended method is to use arguments to the :meth:`fit` method. The main areas for exploration are feature extraction, hyperparameter tuning, and model selection.
 
 
 **Feature extraction**
 
-Let's start with the baseline classifier that was trained :ref:`above <baseline_intent_fit>`. Here's how you get the default feature set used by the classifer.
+Let’s start with the baseline classifier we trained :ref:`earlier <baseline_intent_fit>`. Viewing the feature set reveals that, by default, the classifier just uses a bag of words (unigrams) for features.
 
 .. code-block:: python
 
@@ -293,13 +299,13 @@ Let's start with the baseline classifier that was trained :ref:`above <baseline_
     'length': {}
    }
 
-By default, the classifier only uses a bag of words (unigrams) as features. It may be useful to have the classifier look at longer phrases since they carry more context. To accomplish this, you need to change the ``'lengths'`` setting of the ``'bag-of-words'`` feature to extract longer n-grams. Suppose you want to extract single words (unigrams), bigrams and trigrams, the :data:`my_features` dictionary should be updated as shown below.
+Now we want the classifier to look at longer phrases, which carry more context than unigrams. Change the ``'lengths'`` setting of the ``'bag-of-words'`` feature to extract longer n-grams. For this example, to extract single words (unigrams), bigrams, and trigrams, we’ll edit the :data:`my_features` dictionary as shown below.
 
 .. code-block:: python
 
    >>> my_features['bag-of-words']['lengths'] = [1, 2, 3]
 
-You could also add other :ref:`supported features <intent_features>`. In some cases, the natural language patterns at the start or the end of a query can be highly indicative of of a certain intent. To capture this information, you can extract the leading and trailing phrases of different lengths, also called edge n-grams, from the query. The code below adds the new ``'edge-ngrams'`` feature to the existing :data:`my_features` dictionary.
+We can also add more :ref:`supported features <intent_features>`. Suppose that our domains are such that the natural language patterns at the start or the end of a query can be highly indicative of one intent or another. To capture this, we extract the leading and trailing phrases of different lengths — known as *edge n-grams* — from the query. The code below adds the new ``'edge-ngrams'`` feature to the existing :data:`my_features` dictionary.
 
 .. code-block:: python
 
@@ -313,7 +319,7 @@ You could also add other :ref:`supported features <intent_features>`. In some ca
     'length': {}
    }
 
-To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This trains the intent classification model using the provided feature extraction settings, while continuing to use Workbench's defaults for model type (logistic regression) and hyperparameter selection.
+To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method.  This trains the domain classification model with our new feature extraction settings, while continuing to use Workbench defaults for model type (logistic regression) and hyperparameter selection.
 
 .. code-block:: python
 
@@ -326,7 +332,7 @@ To retrain the classifier with the updated feature set, pass in the :data:`my_fe
 
 **Hyperparameter tuning**
 
-Next, let's experiment with the model's hyperparameters. To get the hyperparameter selection settings for the current classifier, do:
+View the model’s hyperparameters, keeping in mind the hyperparameters for logistic regression, the default model in Workbench. These include: ``'C'``, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to ``'l2'``.
 
 .. code-block:: python
 
@@ -342,7 +348,7 @@ Next, let's experiment with the model's hyperparameters. To get the hyperparamet
     'type': 'k-fold'
    }
 
-Let's reduce the range of values to search for the ``'C'`` parameter (inverse of regularization strength). Also, instead of always choosing an ``'l2'`` penalty by default, let's allow the hyperparameter estimation process to choose the ideal norm (``'l1'`` or ``'l2'``) for penalization. The updated settings can then be passed to :meth:`fit` as an argument to the :data:`param_selection` parameter.
+For our first experiment, let’s reduce the range of values to search for ``'C'``, and allow the hyperparameter estimation process to choose the ideal norm (``'l1'`` or ``'l2'``) for penalization. Pass the updated settings to :meth:`fit` as arguments to the :data:`param_selection` parameter. The :meth:`fit` method then searches over the updated parameter grid, and prints the hyperparameter values for the model whose cross-validation accuracy is highest.
 
 .. code-block:: python
 
@@ -365,7 +371,7 @@ Let's reduce the range of values to search for the ``'C'`` parameter (inverse of
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 97.97%, params: {'C': 100, 'class_weight': {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4: 0.98433048433048431, 5: 3.3872549019607843}, 'fit_intercept': False, 'penalty': 'l1'}
 
-The :meth:`fit` method now searches over the updated parameter grid and prints the hyperparameter values for the model with the highest cross-validation accuracy. By default, the intent classifier uses k-fold cross-validation with 10 folds. To use a different cross-validation strategy, you can modify the value for the ``'type'`` key in the :data:`my_param_settings`. For instance, to use five randomized folds:
+Finally, we’ll override the default k-fold cross-validation, which is 10 folds, and specify five randomized folds instead. To so this, we modify the values of the ``'k'`` and ``'type'`` keys in :data:`my_param_settings`:
 
 .. code-block:: python
 
@@ -388,12 +394,13 @@ The :meth:`fit` method now searches over the updated parameter grid and prints t
    Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 97.70%, params: {'C': 100, 'class_weight': {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4: 0.98433048433048431, 5: 3.3872549019607843}, 'fit_intercept': False, 'penalty': 'l2'}
 
-For a full list of configurable hyperparameters for each model and available cross-validation methods, refer to the above section on defining :ref:`hyperparameter settings <intent_tuning>`.
-
+For a list of configurable hyperparameters for each model, along with available cross-validation methods, see :ref:`hyperparameter settings <intent_tuning>`.
 
 **Model selection**
 
-Lastly, let's try other :ref:`machine learning models <sklearn_intent_models>` in place of the default logistic regression. The hyperparameter grid needs to updated accordingly to be compatible with the selected model. Here's an example using a :sk_guide:`support vector machine (SVM) <svm>` with the same features as before, and the parameter selection settings updated to search over the :sk_api:`SVM hyperparameters <sklearn.svm.SVC.html#sklearn.svm.SVC>`.
+To try :ref:`machine learning models <sklearn_intent_models>` other than the default of logistic regression, we update the hyperparameter grid to be compatible with the desired model.
+
+For example, a :sk_guide:`support vector machine (SVM) <svm>` with the same features as before, and parameter selection settings updated to search over the :sk_api:`SVM hyperparameters <sklearn.svm.SVC.html#sklearn.svm.SVC>`, looks like this:
 
 .. code-block:: python
 
@@ -416,7 +423,7 @@ Lastly, let's try other :ref:`machine learning models <sklearn_intent_models>` i
    Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 97.41%, params: {'C': 1, 'kernel': 'linear'}
 
-Here's another example that trains a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :sk_guide:`ensemble <ensemble>` classifier:
+Meanwhile, a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :sk_guide:`ensemble <ensemble>` classifier requires different parameters:
 
 .. code-block:: python
 
@@ -435,16 +442,16 @@ Here's another example that trains a :sk_api:`random forest <sklearn.ensemble.Ra
 Run the intent classifier
 -------------------------
 
-A trained intent classifier can be run on a test query using the :meth:`IntentClassifier.predict` method.
+Run the trained intent classifier on a test query using the :meth:`IntentClassifier.predict` method. At runtime, the natural language processor’s :meth:`process` method calls :meth:`IntentClassifier.predict` to classify the domain for an incoming query. The :meth:`IntentClassifier.predict` method returns the label for the intent whose predicted probability is highest.
 
 .. code-block:: python
 
    >>> ic.predict('cancel my morning alarm')
    'remove_alarm'
 
-The :meth:`predict` method returns the label for the intent with highest predicted probability. It gets called by the natural language processor's :meth:`process` method at runtime to classify the intent for an incoming query.
+We want to know how confident our trained model is in its prediction. To view the predicted probability distribution over all possible domain labels, use the :meth:`IntentClassifier.predict_proba` method. This is useful both for experimenting with classifier settings and for debugging classifier performance.
 
-When experimenting with different classifier settings or debugging classifier performance, it is often useful to inspect how confident a trained model is at predicting the right label. To view the predicted probability distribution over all the possible intent labels, use the :meth:`IntentClassifier.predict_proba` method.
+The result is a list of tuples whose first element is the intent label and whose second element is the associated classification probability. These are ranked by intent, from most likely to least likely.
 
 .. code-block:: python
 
@@ -458,15 +465,23 @@ When experimenting with different classifier settings or debugging classifier pe
     ('stop_timer', 0.0)]
    ]
 
-The result of :meth:`predict_proba` is a list of tuples ranked from the most likely intent to the least. The first element of each tuple is the intent label and the second element is the associated classification probability. Ideally, you want a classifier that assigns a high probability to the expected (correct) class label for a test query, while having very low prediction probabilities for the incorrect labels.
+An ideal classifier would assign a high probability to the expected (correct) class label for a test query, while assigning very low probabilities to incorrect labels.
 
-The :meth:`predict` and :meth:`predict_proba` methods run on one query at a time. To instead test a trained model on a batch of labeled test queries and evaluate classifier performance, see the next section.
+The :meth:`predict` and :meth:`predict_proba` methods take one query at a time. Next, we’ll see how to test a trained model on a batch of labeled test queries.
 
 
 Evaluate classifier performance
 -------------------------------
 
-To evaluate the accuracy of your trained intent classifier, you first need to create labeled test data, as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter. Once you have the test data files in the right place in your Workbench project, you can measure your model's performance using the :meth:`IntentClassifier.evaluate` method.
+Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
+
+Then, when you are ready, use the :meth:`IntentClassifier.evaluate` method, which
+
+ - strips away all ground truth annotations from the test queries,
+ - passes the resulting unlabeled queries to the trained intent classifier for prediction, and
+ - compares the classifier’s output predictions against the ground truth labels to compute the model’s prediction accuracy.
+
+In the example below, the model gets 63 out of 78 test queries correct, resulting in an accuracy of about 81%.
 
 .. code-block:: python
 
@@ -479,9 +494,9 @@ To evaluate the accuracy of your trained intent classifier, you first need to cr
    Loading queries from file times_and_dates/stop_timer/test.txt
    <StandardModelEvaluation score: 80.77%, 63 of 78 examples correct>
 
-The :meth:`evaluate` method strips away all ground truth annotations from the test queries and passes in the resulting unlabeled queries to the trained intent classifier for prediction. The classifier's output predictions are then compared against the ground truth labels to compute the model's prediction accuracy. In the above example, the model got 63 out of 78 test queries correct, resulting in an accuracy of about 81%
+The aggregate accuracy score we see above is only the beginning, because the :meth:`evaluate` method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.
 
-The :meth:`evaluate` method returns a rich object that contains a lot more information over and above the aggregate accuracy score. The code below prints all the model performance statistics reported by the :meth:`evaluate` method.
+Print all the model performance statistics reported by the :meth:`evaluate` method:
 
 .. code-block:: python
 
@@ -516,7 +531,7 @@ The :meth:`evaluate` method returns a rich object that contains a lot more infor
       start_time..              0              1              0              0              6
         stop_timer              0              0              1              0              1
 
-The statistics are split into three sections.
+Let’s decipher the statistical output of the :meth:`evaluate` method.
 
 **Overall Statistics**
   |
@@ -533,6 +548,22 @@ The statistics are split into three sections.
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
+
+  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+
+  - **Classes are balanced**: When the number of training examples in your intents are comparable and each intent is equally important, focusing on the accuracy metric is usually good enough.
+
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+
+  - **All F1 and accuracy scores are low**: Intent classification is performing poorly across all intents. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your intent structure and make sure queries in different intents have distinct natural language patterns. You may need to combine intents or separate them, so that the resulting classes are easier for the classifier to distinguish.
+
+  - **F1 weighted is higher than F1 macro**: Your intents with fewer evaluation examples are performing poorly. You may need to add more data to intents that have fewer examples. You could also try adding class weights to your hyperparameters.
+
+  - **F1 macro is higher than F1 weighted**: Your intents with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+
+  - **F1 micro is higher than F1 macro**: Certain intents are being misclassified more often than others. Check the class-wise below statistics to identify these intents. Some intents may be too similar to another intent or you may need to add more training data to some intents.
+
+  - **Some classes are more important than others**: If some intents are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
 **Class-wise Statistics**
   |
@@ -554,11 +585,11 @@ The statistics are split into three sections.
 **Confusion Matrix**
   |
 
-  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ with each row representing the number of instances in an actual class and each column representing the number of instances in a predicted class. It makes it easy to see if the classifier is frequently confusing two classes, i.e. commonly mislabelling one class as another. For instance, in the above example, the intent classifier has wrongly classified four instances of ``check_alarm`` queries as ``set_alarm``, and another four as ``remove_alarm``.
+  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the domain classifier wrongly classified four instances of ``check_alarm`` queries as ``set_alarm``, and another four as ``remove_alarm``.
 
-While these detailed statistics provide a wealth of information about the classifier performance, you might additionally also want to inspect the classifier's prediction on individual queries to better understand error patterns.
+Now we have a wealth of information about the performance of our classifier. Let’s go further and inspect the classifier’s predictions at the level of individual queries, to better understand error patterns.
 
-To view the classifier predictions for the entire test set, you can use the :attr:`results` attribute of the returned :obj:`eval` object.
+View the classifier predictions for the entire test set using the :attr:`results` attribute of the returned :obj:`eval` object. Each result is an instance of the :class:`EvaluatedExample` class which contains information about the original input query, the expected ground truth label, the predicted label, and the predicted probability distribution over all the class labels.
 
 .. code-block:: python
 
@@ -569,7 +600,7 @@ To view the classifier predictions for the entire test set, you can use the :att
     ...
    ]
 
-Each result is an instance of the :class:`EvaluatedExample` class which contains information about the original input query, the expected ground truth label, the predicted label, and the predicted probability distribution over all the class labels. You can also selectively look at just the correct predictions or the incorrect predictions. The code below shows how to do that.
+Next, we look selectively at just the correct or incorrect predictions.
 
 .. code-block:: python
 
@@ -586,7 +617,9 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
     ...
    ]
 
-`List comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_ can be used to easily slice and dice the results for error analysis. For instance, to easily inspect all the incorrect predictions for a particular intent, say ``start_timer``, you could do:
+Slicing and dicing these results for error analysis is easily done with `list comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_.
+
+A simple example of this is inspecting incorrect predictions for a particular intent. For the ``start_timer`` intent, we get:
 
 .. code-block:: python
 
@@ -604,9 +637,9 @@ Each result is an instance of the :class:`EvaluatedExample` class which contains
     )
    ]
 
-In this case, there was just one test query from the ``start_timer`` intent that got misclassified as ``set_alarm``. You can also see that the correct label did come in second, but was still beaten by a decent margin in classification probability.
+In this case, only one test query from the ``start_timer`` intent got misclassified as ``set_alarm``. The correct label came in second, but lost by a significant margin in classification probability.
 
-Here's an example listing all the misclassified queries from the ``check_alarm`` intent where the classifier's confidence for the true label was very low (<25%). These could often be indicative of the kind of queries that are lacking in the current training data.
+Next, we use a list comprehension to identify the kind of queries that the current training data lacks. To do this, we list all misclassified queries from a given intent, where the classifier’s confidence for the true label is very low. We’ll demonstrate this with the ``check_alarm`` intent and a confidence of <25%.
 
 .. code-block:: python
 
@@ -637,26 +670,28 @@ Here's an example listing all the misclassified queries from the ``check_alarm``
     ...
    ]
 
+The result reveals queries where the domain was misclassified as ``set_alarm``, and where the language pattern was some words followed the phrase "set an alarm" followed by more words. We'll call this the "... set an alarm ..." pattern.
 
-In both of the cases above, the intent was misclassified as ``set_alarm``. On inspecting the :doc:`training data <../blueprints/home_assistant>`, you will find that the ``check_alarm`` intent indeed lacks labeled training queries like the ones above. On the other hand, these queries are very similar in language patterns ("... set an alarm ...") to the training data for the ``set_alarm`` intent. The model hence chose ``set_alarm`` over ``check_alarm`` when classifying them. This issue could potentially be solved by adding more relevant training queries to the ``check_alarm`` intent, so the classification model can better learn to distinguish between these two confusable intents.
+Try looking for similar queries in the :doc:`training data <../blueprints/home_assistant>`. You should discover that the ``check_alarm`` intent does indeed lack labeled training queries that fit the pattern. But the ``set_alarm`` intent has plenty of queries that fit. This explains why the model chose ``set_alarm`` over ``check_alarm`` when classifying such queries.
 
-Error analysis on the results of the :meth:`evaluate` method can thus inform your experimentation and help in building better models. In the example  above, adding more training data was proposed as a solution for improving accuracy. While training data augmentation should be your first step, you could also explore other techniques such as experimenting with different model types, features and hyperparameters, as described :ref:`earlier <build_intent_with_config>` in this chapter.
+One potential solution is to add more training queries that fit the "... set an alarm ..." pattern to the ``check_alarm`` intent. Then the classification model should more effectively learn to distinguish the two intents that it confused in our experiments thus far.
+
+Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data based on what you find should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_intent_with_config>` in this chapter.
 
 
 Save model for future use
 -------------------------
 
-A trained intent classifier can be saved for later use by calling the :meth:`IntentClassifier.dump` method. The :meth:`dump` method serializes the trained model as a `pickle file <https://docs.python.org/3/library/pickle.html>`_ and saves it to the specified location on disk.
+Save the trained intent classifier for later use by calling the :meth:`IntentClassifier.dump` method. The :meth:`dump` method serializes the trained model as a `pickle file <https://docs.python.org/3/library/pickle.html>`_ and saves it to the specified location on disk.
 
 .. code:: python
 
    >>> ic.dump(model_path='experiments/intent_classifier.rforest.20170701.pkl')
    Saving intent classifier: domain='times_and_dates'
 
-The saved model can then be loaded anytime using the :meth:`IntentClassifier.load` method.
+You can load the saved model anytime using the :meth:`IntentClassifier.load` method.
 
 .. code:: python
 
    >>> ic.load(model_path='experiments/intent_classifier.rforest.20170701.pkl')
    Loading intent classifier: domain='times_and_dates'
-

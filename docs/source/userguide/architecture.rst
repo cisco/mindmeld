@@ -9,7 +9,7 @@ The MindMeld Conversational AI Platform provides a robust end-to-end pipeline fo
 
 .. note::
 
-    The Application Manager, while part of Workbench, orchestrates behind the scenes and never needs developer attention. 
+    The Application Manager, while part of Workbench, orchestrates behind the scenes and never needs developer attention.
 ..    The Gateway, while part of the platform, is outside of Workbench.
 
 We will now explore the platform component by component.
@@ -19,7 +19,7 @@ We will now explore the platform component by component.
 Natural Language Processor
 --------------------------
 
-The Natural Language Processor (NLP) understands the user's natural language input, or query — that is, it produces a representation that captures all salient information in the query. This summarized representation is then used by the app to decide on a suitable action or response to satisfy the user's goals.
+The Natural Language Processor (NLP) understands the user's query — that is, it produces a representation that captures all salient information in the query. This summarized representation is then used by the app to decide on a suitable action or response to satisfy the user's goals. (Throughout this guide the terms *query* and *natural language input* are interchangeable.)
 
 The example below shows a user query and the resulting NLP output.
 
@@ -27,9 +27,7 @@ The example below shows a user query and the resulting NLP output.
     :align: center
     :name: nlp_output
 
-The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in Steps :doc:`3 <../quickstart/03_define_the_hierarchy>`, :doc:`6 <../quickstart/06_generate_representative_training_data>` and :doc:`7 <../quickstart/07_train_the_natural_language_processing_classifiers>` of the Step-by-Step Guide. Apart from classifiers, the NLP also has modules for entity resolution and language parsing.
-
-Therefore the NLP pipeline has six subcomponents: a four-layer classification hierarchy, plus the entity resolution and language parsing modules.
+The Natural Language Processor analyzes the input using a hierarchy of machine-learned classification models, as introduced in :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`. Apart from these classifiers, the NLP also has modules for entity resolution and language parsing. Altogether, this makes six subcomponents: a four-layer classification hierarchy, plus the entity resolution and language parsing modules.
 
 The pipeline processes the user query sequentially in the left-to-right order shown in the :ref:`architecture diagram <architecture_diagram>` above. In doing this, the NLP applies a combination of techniques such as `pattern matching <https://en.wikipedia.org/wiki/Pattern_matching#Pattern_matching_and_strings>`_, `text classification <https://en.wikipedia.org/wiki/Text_classification>`_, `information extraction <https://en.wikipedia.org/wiki/Information_extraction>`_, and `parsing <https://en.wikipedia.org/wiki/Parsing>`_.
 
@@ -62,7 +60,7 @@ To learn how to train a machine-learned domain classification model in Workbench
 Intent Classifier
 ~~~~~~~~~~~~~~~~~
 
-Once the NLP determines which domain applies to a given query, the Intent Classifier provides the next level of categorization by assigning the query to one of the intents defined for the app. Intents reflect what a user is trying to accomplish. For instance, the user may want to book a flight, search for movies from a catalog, ask about the weather, or set the temperature on a home thermostat. Each of these is an example of a user intent. The intent also defines the desired outcome for the query, by prescribing that the app take a specific action and/or respond with a particular type of answer.
+Once the NLP determines the domain to which a given query belongs, the Intent Classifier provides the next level of categorization by assigning the query to one of the intents defined for the app. Intents reflect what a user is trying to accomplish. For instance, the user may want to book a flight, search for movies from a catalog, ask about the weather, or set the temperature on a home thermostat. Each of these is an example of a user intent. The intent also defines the desired outcome for the query, by prescribing that the app take a specific action and/or respond with a particular type of answer.
 
 Most domains in conversational apps have multiple intents. By convention, intent names are verbs that describe what the user is trying accomplish. Here are some example intents from the ``food`` domain in a "Food Ordering" app.
 
@@ -87,7 +85,7 @@ To learn how to train intent classification models in Workbench, see the :doc:`I
 Entity Recognizer
 ~~~~~~~~~~~~~~~~~
 
-The next step in the NLP pipeline, the Entity Recognizer, identifies every entity in the query that corresponds to an entity pre-defined as relevant to a given intent. An entity is any word or phrase that provides information necessary to understand and fulfill the user's end goal. For instance, if the intent is to search for movies, relevant entities would include movie titles, genres, and actor names. If the intent is to adjust a thermostat, the entity would be the numerical value for setting the thermostat to a desired temperature.
+The next step in the NLP pipeline, the Entity Recognizer, identifies every entity in the query that belongs to an entity type pre-defined as relevant to a given intent. An entity is any word or phrase that provides information necessary to understand and fulfill the user's end goal. For instance, if the intent is to search for movies, relevant entities would include movie titles, genres, and actor names. If the intent is to adjust a thermostat, the entity would be the numerical value for setting the thermostat to a desired temperature.
 
 Most intents have multiple entities. By convention, entity names are nouns that describe the entity type. Here are some examples of entity types that might be required for different conversational intents.
 
@@ -151,25 +149,27 @@ Language Parser
 
 As described in the :doc:`Step-By-Step Guide <../quickstart/08_configure_the_language_parser>`, the Language Parser is the final module in the NLP pipeline. The parser finds relationships between the extracted entities and clusters them into meaningful entity groups. Each entity group has an inherent hierarchy, representing a real-world organizational structure.
 
-We can arrange the resolved entities in the :ref:`example <nlp_output>` above into three entity groups, where each group describes a distinct real-world concept:
+The parser arranges the resolved entities in the :ref:`example <nlp_output>` above into three entity groups, where each group describes a distinct real-world concept:
 
 .. image:: /images/entity_groups.png
     :align: center
 
-The first two groups represent products to be ordered, whereas the last group contains store information. We call the main entity at the top in each group the *parent* or the `head <https://en.wikipedia.org/wiki/Head_(linguistics)>`_ whose *children* or `dependents <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_ are the entities further down the hierarchy. The app can interpret this structured representation of the user's natural language input to decide on the next action and/or response. In the example, the next action might be to submit the order to a point-of-sale system, thus completing the user's order.
+The first two groups represent products to be ordered, whereas the last group contains store information. We call the main entity at the top in each group the *parent* or the `head <https://en.wikipedia.org/wiki/Head_(linguistics)>`_ whose *children* or `dependents <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_ are the other entities in the group. The app can interpret this structured representation of the user's natural language input to decide on the next action and/or response. In the example, the next action might be to submit the order to a point-of-sale system, thus completing the user's order.
 
 Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The Language Parser in Workbench, by contrast, is a configuration-driven rule-based parser which works out-of-the-box with no need for training.
 
 To learn how to configure the Workbench parser for optimum performance in a specific app, see the :doc:`Language Parser <parser>` section of this guide.
+
+Now we have seen how the Natural Language Processor understands what the user wants. That is half of the job at hand. Responsibility for the other half — to respond appropriately to the user and advance the conversation — falls to the Question Answerer and the Dialogue Manager, respectively.
 
 .. _arch_qa:
 
 Question Answerer
 -----------------
 
-Most conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the world knowledge that is important for a given application use case. The NLP pipeline component responsible for interfacing with the knowledge base is called the Question Answerer. See Steps :doc:`5 <../quickstart/05_create_the_knowledge_base>` and :doc:`9 <../quickstart/09_optimize_question_answering_performance>` of the Step-By-Step Guide.
+Most conversational apps today rely on a Knowledge Base to understand user requests and answer questions. The knowledge base is a comprehensive repository of all the world knowledge that is important for a given application use case. The component responsible for interfacing with the knowledge base is called the Question Answerer. See Steps :doc:`5 <../quickstart/05_create_the_knowledge_base>` and :doc:`9 <../quickstart/09_optimize_question_answering_performance>` of the Step-By-Step Guide.
 
-The question answerer retrieves information from the knowledge base to identify the best answer candidates that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify dishese the user requests and to answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.
+The question answerer retrieves information from the knowledge base to identify the best answer candidates that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify dishes the user requests and to answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.
 
 The Workbench Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches.
 
@@ -185,11 +185,9 @@ The Dialogue Manager directs the flow of the conversation. It is a stateful comp
 
 Architecting the dialogue manager correctly is often one of the most challenging software engineering tasks when building a conversational app for a non-trivial use case. Workbench abstracts away many underlying complexities of dialogue management to offer a simple but powerful mechanism for defining application logic. Workbench provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. It also allows dialogue state handlers to invoke any arbitrary code for taking a specific action, completing a transaction, or obtaining the information necessary to formulate a response.
 
-For a practical introduction to dialogue state tracking in Workbench, see Step :doc:`4 <../quickstart/04_define_the_dialogue_handlers>` of the Step-By-Step guide. The :doc:`Dialogue Manager <dm>` section of this guide provides further examples.
+For a practical introduction to dialogue state tracking in Workbench, see :doc:`Step 4 <../quickstart/04_define_the_dialogue_handlers>`. The :doc:`Dialogue Manager <dm>` section of this guide provides further examples.
 
-
-
-.... _arch_gateway:
+.. .. _arch_gateway:
 
 .. Gateway
 .. -------

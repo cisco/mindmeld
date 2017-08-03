@@ -142,36 +142,18 @@ To prepare to install Workbench in an isolated environment using pyenv and virtu
 Configure Pip and Workbench
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Workbench installation relies on ``pip``, a Python packaging system included by default with the Python binary installers.
-
-Run ``pip --version`` to verify that pip is installed.
-
- - You should have pip version 8 or 9
-
- - If you need upgrade pip module, run ``pip install --upgrade pip``
-
-
-Automatic Configuration
-"""""""""""""""""""""""
-
-You can configure pip and workbench easily by running these commands in a command-line terminal:
-
-.. highlight:: python
-   :linenothreshold: 2
+You can configure pip and workbench by running this command in a command-line terminal:
 
 .. code-block:: shell
 
-  export USERNAME=<Username>
-  curl -s https://mindmeld.com/docs/scripts/mmworkbench_init.sh > mmworkbench_init.sh
-  source mmworkbench_init.sh
+  bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)
 
 
 Notes:
 
-#. Remember to modify the ``Username`` to your actual mindmeld.com username.
-#. You will be prompted to enter your mindmeld.com password.
+#. You will be prompted to enter your mindmeld.com username and password.
 #. This creates two configuration files: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. Previous files will be overwritten.
-#. If you enter an incorrect password, run the last command again.
+#. If you enter an incorrect password, run the command again.
 
 
 Proceed to :ref:`Install Workbench <getting_started_install_workbench>`.
@@ -324,6 +306,14 @@ Workbench provides several different blueprint applications to support many comm
 conversational applications. See :doc:`Workbench Blueprints<../blueprints/overview>` for more usage examples.
 
 
+Upgrade Workbench
+-----------------
+
+To upgrade to the latest version of Workbench, run ``pip install mmworkbench --upgrade``
+
+Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
+
+
 Command-Line Interfaces
 -----------------------
 
@@ -359,9 +349,42 @@ The commands available are:
 #. ``run`` : Starts the workbench service as a REST API.
 
 
-Upgrade Workbench
------------------
+Configure Logging
+------------------
 
-To upgrade to the latest version of Workbench, run ``pip install mmworkbench --upgrade``
+Workbench adheres to the standard `Python logging mechanism <https://docs.python.org/3/howto/logging.html>`_. 
+The default logging level is ``WARNING``, which can be overridden with a config file or from code. 
+The INFO logging level can be useful to see what's going on:
 
-Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
+.. code-block:: python
+  
+  import logging
+  logging.getLogger('mmworkbench’).setLevel(logging.INFO)
+
+configure_logs()
+^^^^^^^^^^^^^^^^
+
+There is a handy ``configure_logs()`` function available that wraps this and accepts 2 parameters: 
+
+#. `format message <https://docs.python.org/3/howto/logging.html#changing-the-format-of-displayed-messages>`_
+#. `logging level <https://docs.python.org/3/howto/logging.html#logging-levels>`_: in increasing order of severity, they are ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR`` and ``CRITICAL``.
+
+The method signature is:
+
+.. code-block:: python
+ 
+   configure_logs(format="%(message)s", level=logging.WARNING)
+
+
+Sample Code
+^^^^^^^^^^^^
+  
+.. code-block:: python
+
+  import mmworkbench as wb  
+  wb.configure_logs()
+
+
+Troubleshooting
+---------------
+
