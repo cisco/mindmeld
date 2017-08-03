@@ -22,29 +22,34 @@ To train the entity resolver, you must generate entity mapping files which inclu
 Entity Mapping
 --------------
 
-For each entity type, it is up to the developer to generate an entity mapping file which is used to train the entity resolver. The entity mapping is a JSON-formatted file that contains the information about the entities of the given type. Additionally it can have information about how the entity type corresponds to knowledge base object type when applicable.
+For each entity type, it is up to the developer to generate an entity mapping file which is used to train the entity resolver. The entity mapping is a JSON-formatted file that contains the information about the entities of the given type. Additionally it can have information about how the entity type corresponds to a knowledge base object type when applicable.
 
-================================ ===
-**knowledge base index name**    An optional knowledge base index name that the entity type corresponds to. For example, the ``dish`` entity type may correspond to ``menu_items`` object in the knowledge base. Together with knowledge base field name parameter they describe how the NLP entity type corresponds to a knowledge base object type. When specified, the entity information such as synonym whitelist is made available to the Question Answerer when formulating knowledge base filtered searches to disambiguate entities with custom constraints. See `Context Aware Entity Resolution`_ section   
+===================================== =================== ===
+**parameter name**                    **JSON field name** **description**
 
-**knowledge base field name**    An optional knowledge base field name that can be used to identify the object using the entity text. For example, the text span captured in entity type ``dish`` describes the dish name in users' requests and corresponds to the knowledge base text field ``name`` of the index ``menu_items``.   
+entities                              ``entities``        A list of dictionaries, one for each possible real world instance of the given entity type. See the table below for more details.
 
-**entities**                     A list of dictionaries, one for each real world entity of the given entity type. See the table below for more details.
-================================ ===
+knowledge base index name (optional)  ``kb_index_name``   Name of the knowledge base index that contains information about this entity type. For example, information about the ``dish`` entity type may be stored in the objects in the ``menu_items`` index in the knowledge base.    
 
-Each entity in the ``entities`` of the entity mapping file refers to a single real world entity and the attributes described in the table below. 
+knowledge base field name (optional)  ``kb_field_name``   Name of the knowledge base field name that this entity type corresponds to. In other words, the entity text is contained in this field of a knowledge base object. For example, the text span captured in entity type ``dish`` describes the dish name in a user's request and corresponds to the knowledge base text field ``name`` of the index ``menu_items``. The knowledge base index and the knowledge base field parameters together describe how the NLP entity type corresponds to a knowledge base object type. When specified, the synonym whitelist for such knowledge base-linked entities is accessible by the Question Answerer. It can then leverage that information when formulating knowledge base filtered searches to disambiguate entities with custom constraints. See `Context-Aware Entity Resolution`_ section
 
-==================== ===
-**canonical name**   The standardized or official name of the real world entity. Textual similarity with the canonical name is one of the primary factors used in entity resolution.
+===================================== =================== ===
 
-**unique ID**        An optional unique identifier. If there are multiple entries in the mapping file with the same canonical name, the ID is necessary for uniquely identifying each entry. If an entity has a corresponding entry in the Knowledge Base, this ID should be the same as the ID of the KB entry. You can then use the resolved ID to query the KB for the appropriate entry.
+Each entity in the ``entities`` of the entity mapping file refers to a single real world entity and has the attributes described in the table below. 
 
-**whitelist**        A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that is often referred to by different terms.
+====================== =================== ===
+**parameter name**.    **JSON field name** **description**
 
-**sort factor**      An optional numeric value. Entities with a higher sort factor will be ranked above those with a lower value and similar textual similarity.
-==================== ===
+canonical name         ``cname``           The standardized or official name of the real world entity. Textual similarity with the canonical name is one of the primary factors used in entity resolution.
 
-In the food ordering blueprint where a ``dish`` is an entity type, the ``dish`` entity mapping file contains a list of all possible dishes that a user could order. Here is an example of what a couple of entries in the ``dish`` entity mapping file may look like. 
+unique ID              ``id``              An optional unique identifier. If there are multiple entries in the mapping file with the same canonical name, the ID is necessary for uniquely identifying each entry. If an entity has a corresponding entry in the Knowledge Base, this ID should be the same as the ID of the KB entry. You can then use the resolved ID to query the KB for the appropriate entry.
+
+whitelist              ``whitelist``       A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that is often referred to by different terms.
+
+sort factor (optional) ``sort_factor``     An optional numeric value. Entities with a higher sort factor will be ranked above those with a lower value and similar textual similarity.
+====================== =================== ===
+
+In the food ordering blueprint where a ``dish`` is an entity type, the ``dish`` entity mapping file contains a list of all possible dishes that a user could order. Here is an example of what a couple of entries in the ``dish`` entity mapping file may look like.
 
 .. code-block:: javascript
 
@@ -213,12 +218,12 @@ Each entry in the list of resolved entities contains:
 **sort factor**      If the sort factor was provided in the entity mapping file, it will also be returned.
 ==================== ===
 
-The Entity Resolver returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top 1 is sufficient, but in some cases it may be beneficial to look at other options in the ranked list. For example, if you wanted to build a browsing functionality in your app it could be useful to display the top 3 results for the user to choose between. Another scenario in which you may want to look deeper into the ranked list is when the user provided some constraints in a previous query. The entity resolver does not have access to this previous context at resolution time, so the top ranked result may not satisfy previously defined constraints. See the next section for more details.
+The Entity Resolver returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top ranked value is sufficient, but in some cases it may be beneficial to look at other options in the ranked list. For example, if you wanted to build a browsing functionality in your app it could be useful to display the top 3 resolved values for the user to choose between. Another scenario in which you may want to look deeper into the ranked list is when the user provided some constraints in a previous query. The entity resolver does not have access to this previous context at resolution time, so the top ranked result may not satisfy previously defined constraints. See the next section for more details.
 
-Context Aware Entity Resolution
+Context-Aware Entity Resolution
 -------------------------------
 
-While the Entity Resolver finds the best matching canonical entity based on textual information and sorting factor provided in entity mapping file, it is very common to have application specific constraints in the context when resolving canonical entities. These constraints can come from data model hierarchy, proximity information, business logic and etc. Here are some examples:
+While the Entity Resolver finds the best matching canonical values based on text relevance and the provided sort factors, there could be scenarios where you may want to take certain application-specific constraints into context when resolving the recognized entities. These constraints can come from the data model hierarchy, proximity information, business logic and so on. Here are some examples:
 
 * resolve dish name ``Pad Thai`` within a selected restaurant.
 * resolve the nearest ``Best Buy``.
