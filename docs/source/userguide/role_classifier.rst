@@ -16,7 +16,12 @@ Every Workbench app has one role classifier for every entity type with associate
 Access a role classifier
 ------------------------
 
-To use any natural language processor component, you must first generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. Once you have training data, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
+Working with the natural language processor falls into two broad phases:
+
+ - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
+ - Then, conduct experimentation in the Python shell.
+
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` (NLP) class from the Workbench :mod:`nlp` module and :ref:`instantiate an object <instantiate_nlp>` with the path to your Workbench project.
 
 .. code-block:: python
 
