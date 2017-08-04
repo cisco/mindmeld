@@ -371,7 +371,7 @@ Instead of relying on default preset values, let’s reduce the range of values 
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 97.97%, params: {'C': 100, 'class_weight': {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4: 0.98433048433048431, 5: 3.3872549019607843}, 'fit_intercept': False, 'penalty': 'l1'}
 
-Finally, we’ll override the default k-fold cross-validation, which is 10 folds, and specify five randomized folds instead. To so this, we modify the values of the ``'k'`` and ``'type'`` keys in :data:`my_param_settings`:
+Finally, we’ll override the default k-fold cross-validation, which is 10 folds, and specify five randomized folds instead. To do this, we modify the values of the ``'k'`` and ``'type'`` keys in :data:`my_param_settings`:
 
 .. code-block:: python
 
