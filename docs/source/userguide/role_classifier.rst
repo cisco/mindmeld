@@ -403,7 +403,7 @@ Before you run the trained role classifier on a test query, you must first detec
 
 Now you can choose an entity from among those detected, and call the role classifier's :meth:`RoleClassifier.predict` method to classify it. Although it classifies a single entity, the :meth:`RoleClassifier.predict` method uses the full query text, and information about all its entities, for :ref:`feature extraction <role_features>`.
 
-Run the trained role classifier on the two entities from the example above, one by one:
+Run the trained role classifier on the two entities from the example above, one by one. The :meth:`predict` method returns the label for the role whose predicted probability is highest.
 
 .. code-block:: python
 
@@ -412,7 +412,9 @@ Run the trained role classifier on the two entities from the example above, one 
    >>> rc.predict(query, entities, 1)
    'newtime'
 
-At runtime, the natural language processor's :meth:`process` method calls :meth:`RoleClassifier.predict` to roles for all detected entities in the incoming query. The :meth:`predict` method returns the label for the role whose predicted probability is highest.
+.. note::
+
+   At runtime, the natural language processor's :meth:`process` method calls :meth:`RoleClassifier.predict` to roles for all detected entities in the incoming query.
 
 The :meth:`predict` method runs on one entity at a time. Next, we'll see how to test a trained model on a batch of labeled test queries.
 
@@ -421,7 +423,7 @@ Evaluate classifier performance
 
 To evaluate the accuracy of your trained role classifier, you first need to create labeled test data, as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter. Once you have the test data files in the right place in your Workbench project, you can measure your model's performance using the :meth:`RoleClassifier.evaluate` method.
 
-Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
+Before you can evaluate the accuracy of your trained role classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
 
 Then, when you are ready, use the :meth:`RoleClassifier.evaluate` method, which
 
@@ -467,7 +469,7 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
            newtime              1              9
 
 
-Let's decipher the statistical output of the :meth:`evaluate` method.
+Let's decipher the statists output by the :meth:`evaluate` method.
 
 **Overall Statistics**
   |
@@ -521,7 +523,7 @@ Let's decipher the statistical output of the :meth:`evaluate` method.
 **Confusion Matrix**
   |
 
-  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the domain classifier wrongly classified one instance of a ``newtime`` entity as ``oldtime``.
+  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the role classifier wrongly classified one instance of a ``newtime`` entity as ``oldtime``.
 
 Now we have a wealth of information about the performance of our classifier. Let's go further and inspect the classifier's predictions at the level of individual queries, to better understand error patterns.
 
@@ -572,7 +574,7 @@ Our example dataset is fairly small, and we get just one case of misclassificati
      )
    ]
 
-Next, we use a list comprehension to identify the kind of queries that the current training data lacks. To do this, we list all queries with a given role where the classifier's confidence for the true label was relatively low. We'll demonstrate this with the ``newtime`` role and a confidence of <60%.
+Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all queries with a given role where the classifier's confidence for the true label was relatively low. We'll demonstrate this with the ``newtime`` role and a confidence of <60%.
 
 .. code-block:: python
 
@@ -609,13 +611,13 @@ Try looking at the :doc:`training data <../blueprints/home_assistant>`. You shou
 
 One potential solution is to add more training queries for the ``newtime`` role, so the classification model can generalize better.
 
-Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data based on what you find should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_domain_with_config>` in this chapter.
+Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data based on what you find should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_role_with_config>` in this chapter.
 
 
 Save model for future use
 -------------------------
 
-Save the trained domain classifier for later use by calling the :meth:`RoleClassifier.dump` method. The :meth:`dump` method serializes the trained model as a `pickle file <https://docs.python.org/3/library/pickle.html>`_ and saves it to the specified location on disk.
+Save the trained role classifier for later use by calling the :meth:`RoleClassifier.dump` method. The :meth:`dump` method serializes the trained model as a `pickle file <https://docs.python.org/3/library/pickle.html>`_ and saves it to the specified location on disk.
 
 .. code:: python
 
