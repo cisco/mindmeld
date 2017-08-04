@@ -12,13 +12,13 @@ For this release of MindMeld Workbench, you should
 
  - have a username and password for the MindMeld Learning Center
 
-The rest of this section describes how to install software pre-requisites.
+The rest of this section describes how to install software pre-requisites on Mac OS X. Other platforms may work too but are not supported.
+
 
 Optional: Docker
 ^^^^^^^^^^^^^^^^
 
-If you're going to be using Workbench often, we recommend you do the full install and setup all dependencies locally. That will provide the optimal performance and experience.
-But if you want to get a quick taste of workbench, you can get setup with a provided ``Dockerfile`` and these steps:
+If you're going to be using Workbench often, we recommend you do the full install and setup all dependencies locally. That will provide the optimal performance and experience. But if you want to get a quick taste of workbench, you can get setup with a provided ``Dockerfile`` and these steps:
 
 #. First, `install Docker <https://www.docker.com/community-edition#/download>`_, and run it.
 #. Then, run these commands:
@@ -36,10 +36,10 @@ Proceed to :ref:`Begin New Project <getting_started_begin_new_project>`.
 
 .. _getting_started_automated_setup:
 
-Automated Setup
+Setup on Mac OS X
 ^^^^^^^^^^^^^^^^^
 
-If you are on a Mac OS machine, you can install dependencies for MindMeld Workbench and 
+On a Mac OS machine, you can install dependencies for MindMeld Workbench and 
 setup configuration files with the `mmworkbench_init.sh script <https://mindmeld.com/docs/scripts/mmworkbench_init.sh>`_.
 
 A few things to note before you run the script:
@@ -55,7 +55,7 @@ When you're ready to go, run this command:
   bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)"
 
 
-If you encounter any issues, look in :ref:`Troubleshooting <getting_started_troubleshooting>`.
+If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
 
 Install Workbench
