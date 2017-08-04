@@ -11,7 +11,7 @@ Every Workbench app has one role classifier for every entity type with associate
 
 .. note::
 
-    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`.
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Role Classification <role_classification>` section.
 
 Access a role classifier
 ------------------------
