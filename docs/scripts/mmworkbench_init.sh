@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # needed for pyenv install fix
-xcode-select --install 2&>/dev/null
+# xcode-select --install 2&>/dev/null
 
 set -e
 
@@ -45,16 +45,16 @@ function install_dependency {
 		echo "   " $command
 		if [[ $command == "brew" ]]; then
 			/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-		elif [[ $command == "python" ]]; then
-			brew install python
 		elif [[ $command == "pip" ]]; then
-			brew install python # this installs pip as well
+			sudo easy_install pip
 		elif [[ $command == "java" ]]; then
 			brew tap caskroom/cask
 			brew cask install java
 	    elif [[ $command == "elasticsearch" ]]; then
 	    	brew install elasticsearch
 			brew services start elasticsearch 
+	    elif [[ $command == "virtualenv" ]]; then
+			sudo pip install --upgrade virtualenv
 	    else
 			brew install $command
 		fi
@@ -65,22 +65,6 @@ function install_dependency {
 			brew tap caskroom/cask
 			brew cask install java
 		fi
-	fi
-}
-
-function check_virtualenv {
-	echo -n "   " pyenv-virtualenv "... "
-	if [[ `brew list pyenv-virtualenv 2> /dev/null` ]]; then
-		echo yes
-	else
-		echo no - will be installed at the very end since a shell restart is required
-	fi
-}
-
-function install_virtualenv {
-	if [[ ! `brew list pyenv-virtualenv 2> /dev/null` ]]; then
-		echo "   " Installing pyenv-virtualenv - MAKE SURE to follow the instructions at the end to add the provided lines to your profile and reload your shell
-		brew install pyenv-virtualenv
 	fi
 }
 
@@ -96,11 +80,7 @@ echo Checking dependencies already installed
 check_dependency brew
 check_dependency python
 check_dependency pip
-check_dependency pyenv
-
-# pyenv-virtualenv
-check_virtualenv
-
+check_dependency virtualenv
 check_dependency java
 check_dependency elasticsearch
 echo done
@@ -122,7 +102,7 @@ if [[ ${NEEDS_DEP_INSTALL} == 1 ]]; then
 	install_dependency brew
 	install_dependency python
 	install_dependency pip
-	install_dependency pyenv
+	install_dependency virtualenv
 	install_dependency java
 	install_dependency elasticsearch
 
@@ -174,6 +154,4 @@ trusted-host = mindmeld.com
 EOL
 
 echo ~/.pip/pip.conf created.
-
 echo
-install_virtualenv

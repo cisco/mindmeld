@@ -34,58 +34,64 @@ You will be prompted for your mindmeld.com username and password. The build will
 
 Proceed to :ref:`Begin New Project <getting_started_begin_new_project>`.
 
+.. _getting_started_automated_setup:
 
 Automated Setup
 ^^^^^^^^^^^^^^^^^
 
 If you are on a Mac OS machine, you can install dependencies for MindMeld Workbench and 
-setup configuration files by running this command:
+setup configuration files with the `mmworkbench_init.sh script <https://mindmeld.com/docs/scripts/mmworkbench_init.sh>`_.
+
+A few things to note before you run the script:
+
+- The script installs the following components will be installed after a confirmation prompt: ``brew``, ``python``, ``pip``, ``virtualenv``, Java 8 and ElasticSearch. 
+- You will be prompted to enter your mindmeld.com username and password. 
+- Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. Previous files are overwritten.
+
+When you're ready to go, run this command:
 
 .. code-block:: shell
 
   bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)"
 
 
-Notes:
-
-#. You will be prompted to enter your mindmeld.com username and password.
-#. This creates two configuration files: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. Previous files will be overwritten.
-#. If you enter an incorrect password, run the command again.
-
-
-The following components will be installed:
-
-- brew
-- pyenv
-- pyenv-virtualenv
-- Java 8
-- ElasticSearch
-
-For other platforms, or if you run into issues, you can try the :ref:`manual setup <getting_started_manual_setup>`.
+If you encounter any issues, look in :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
 
 Install Workbench
 -----------------
 
-Configure a Virtual Environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Virtual Environment
+^^^^^^^^^^^^^^^^^^^^
 
-To prepare to install Workbench in an isolated environment using pyenv and virtualenv, run these or equivalent commands:
+To prepare to install Workbench in an isolated environment using ``virtualenv``, follow the following steps.
+
+- Create your project folder and navigate to it:
 
 .. code-block:: console
 
-  # this is the parent of your Workbench project folder.
-  mkdir workbench-development
-  cd $_
+  $ mkdir ~/mmworkbench
+  $ cd $_
 
-  # install Python 3.6.1
-  pyenv install 3.6.1
+- Setup a virtual environment by running one of the following commands:
 
-  # create a new virtual environment using Python 3.6.1
-  pyenv virtualenv 3.6.1 workbench
+.. code-block:: console
 
-  # automatically activate the environment upon entering this directory
-  pyenv local workbench
+  $ virtualenv .             # for Python 2.7
+  $ virtualenv -p python3 .  # for Python 3.x
+
+- Activate the virtual environment:
+
+.. code-block:: console
+
+  $ virtualenv bin/activate
+
+
+Later, when you're done working with MindMeld Workbench, you can deactivate the virtual environment with the ``deactivate`` command.
+
+.. code-block:: console
+
+  $ deactivate
 
 
 pip install
@@ -98,14 +104,16 @@ Python package. This may take a few minutes.
 
   $ pip install mmworkbench
 
-If the following command returns no error, the installation was successful:
+If you see errors here, you likely entered incorrect credentials during :ref:`Setup <getting_started_automated_setup>`. Make sure you use your credentials for the MindMeld Learning Center.
+
+To verify your setup is good, run this command. If there is no error, the installation was successful:
 
 .. code-block:: console
 
     $ mmworkbench
 
-Start the Numerical Parser
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Numerical Parser
+^^^^^^^^^^^^^^^^^
 
 Start the numerical parser with this command:
 
@@ -264,84 +272,16 @@ Sample Code
   wb.configure_logs()
 
 
+.. _getting_started_troubleshooting:
+
 Troubleshooting
 ---------------
 
 
-
-.. _getting_started_manual_setup:
-
-Manual Setup
-^^^^^^^^^^^^
-
-Python
-"""""""
-
-Since Workbench is a Python-based machine learning library, you need Python on your system.
-
-Run ``python --version`` to verify that Python is installed.
-
-In Workbench,
-
- - Python 3.4 and newer are actively supported
- - The latest version of Python 3 is recommended
- - Python 2.7+ should work, but is deprecated
-
-You can:
-
- - use `pyenv <https://github.com/pyenv/pyenv>`_ to manage multiple versions of Python
- - obtain Python at `python.org <https://www.python.org/>`_  if it is not already installed
-
-Pyenv and Virtualenv
-""""""""""""""""""""""""""""
-
-It is strongly recommended that you install Workbench in an isolated environment. This way, you can work
-on different projects without having conflicting library versions, and keep Workbench separate from your other work.
-
-One solution is to use `virtualenv with pyenv <https://github.com/pyenv/pyenv-virtualenv>`_.
-
-On Mac OS systems with `homebrew <https://brew.sh/>`_, 
-
- - install pyenv with: ``brew install pyenv``.
- - install virtualenv with: ``brew install pyenv-virtualenv``. You'll also have to append these lines to your bash profile:
-
-.. code-block:: console
- 
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-
-If your system cannot run virtualenv with pyenv, you will need to find alternatives to some instructions in this document.
-
-
-Java 8
-"""""""
-
-Workbench requires Java 8 or newer.
-
-Run ``java -version`` to verify that Java 8 or newer is installed. 
-
-If the command fails, or your Java version begins with 1.7, install Java 8.
-
-On Mac OS systems with `homebrew <https://brew.sh/>`_, run ``brew cask install java``
-
-Visit `java.com <https://www.java.com/inc/BrowserRedirect1.jsp?locale=en>`_ for detailed instructions.
-
-Elasticsearch
-""""""""""""""
-
-Workbench requires Elasticsearch 5.0 or newer.
-
-`Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ is a highly scalable open-source
-full-text search and analytics engine. It can be installed locally or you can use a remote instance if you have access to one.
-
-On Mac OS systems with `homebrew <https://brew.sh/>`_, install and run Elasticsearch with these commands:
-
-.. code-block:: console
-
-  brew install elasticsearch
-  brew services start elasticsearch
-
-For other systems, or for more information on configuring Elasticsearch, go
-`here <https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html>`_.
-
-
++-------------+---------------------------+-----------------------------------+
+|    Context  |    Error                  |    Resolution                     |
++=============+===========================+===================================+
+| pip install | Could not find a version  | Verify your credentials for the   |
+|             | that satisfies the        | MindMeld Learning Center.         |
+|             | requirement mmworkbench   |                                   |
++-------------+---------------------------+-----------------------------------+
