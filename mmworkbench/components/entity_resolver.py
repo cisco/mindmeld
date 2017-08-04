@@ -321,6 +321,17 @@ class EntityResolver(object):
         try:
             index = get_scoped_index_name(self._app_namespace, self._es_index_name)
             response = self._es_client.search(index=index, body=text_relevance_query)
+        except ConnectionError as e:
+            logger.error(
+                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+        except TransportError as e:
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            raise EntityResolverError
+        except ElasticsearchException:
+            raise EntityResolverError
+        else:
             hits = response['hits']['hits']
 
             results = []
@@ -340,16 +351,6 @@ class EntityResolver(object):
                 results.append(result)
 
             return results[0:20]
-        except ConnectionError as e:
-            logger.error(
-                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
-            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
-        except TransportError as e:
-            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
-                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-            raise EntityResolverError
-        except ElasticsearchException:
-            raise EntityResolverError
 
     def _predict_exact_match(self, entity):
         """Predicts the resolved value(s) for the given entity using the loaded entity map.
