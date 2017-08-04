@@ -80,7 +80,7 @@ Using default settings is the recommended (and quickest) way to get started with
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an  example where we view the configuration of a baseline domain classifier trained using default settings:
+Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an example where we view the configuration of a baseline domain classifier trained using default settings:
 
 .. code-block:: python
 

@@ -78,7 +78,7 @@ Access the :class:`RoleClassifier` for an entity type of your choice, using the 
 Train a role classifier
 -----------------------
 
-Use the :meth:`RoleClassifier.fit` method to train a role classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracies for the classifiers.
+Use the :meth:`RoleClassifier.fit` method to train a role classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracy for the classifier.
 
 .. _baseline_role_fit:
 
@@ -244,7 +244,7 @@ To override Workbench's default role classifier configuration with custom settin
 
 When you define custom classifier settings in ``config.py``, the :meth:`RoleClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench's defaults. To do this, define a dictionary of your custom settings, named :data:`ROLE_MODEL_CONFIG`.
 
-Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the domain classifier.
+Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the role classifier.
 
 
 .. code-block:: python
@@ -279,7 +279,7 @@ Since this method requires updating a file each time you modify a setting, it's 
 2. Arguments to the :meth:`fit` method
 """"""""""""""""""""""""""""""""""""""
 
-For experimenting with the domain classifier, the recommended method is to use arguments to the :meth:`fit` method. The main areas for exploration are feature extraction and hyperparameter tuning.
+For experimenting with the role classifier, the recommended method is to use arguments to the :meth:`fit` method. The main areas for exploration are feature extraction and hyperparameter tuning.
 
 **Feature extraction**
 
