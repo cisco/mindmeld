@@ -23,7 +23,7 @@ Entities in Workbench are categorized into two types:
   Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. See :ref:`system-entities` below.
 
 **Custom Entities**
-  Application-specific entities that can only be detected by an entity recognizer that uses statistical models trained with deep domain knowledge. These are generally `named entities <https://en.wikipedia.org/wiki/Named_entity>`, like 'San Bernardino,' a proper name that could be a `location` entity. Custom entities that are *not* named entities are possible too, like 'toaster,' a common noun that could be an `appliance` entity.
+  Application-specific entities that can only be detected by an entity recognizer that uses statistical models trained with deep domain knowledge. These are generally `named entities <https://en.wikipedia.org/wiki/Named_entity>`_, like 'San Bernardino,' a proper name that could be a ``location`` entity. Custom entities that are *not* based on proper nouns (and therefore are not named entities) are also possible.
 
 This chapter focuses on training entity recognition models for detecting all the custom entities used by your app.
 
@@ -885,7 +885,7 @@ The solution is to change the first entity to ``{6:45|sys_time|old_time}``.
 
 **Unsupported tokens in system entities**
 
-Not all reasonable-sounding tokens are actually supported as values in a Workbench system entity.
+Not all reasonable-sounding tokens are actually supported by a Workbench system entity.
 
 In the example below, the token "daily" is annotated as a ``sys_time`` entity:
 
