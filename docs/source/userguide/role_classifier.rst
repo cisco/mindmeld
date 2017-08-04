@@ -611,7 +611,7 @@ Try looking at the :doc:`training data <../blueprints/home_assistant>`. You shou
 
 One potential solution is to add more training queries for the ``newtime`` role, so the classification model can generalize better.
 
-Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data based on what you find should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_role_with_config>` in this chapter.
+Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_role_with_config>` in this chapter.
 
 
 Save model for future use
