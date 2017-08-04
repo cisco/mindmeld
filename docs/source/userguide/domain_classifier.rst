@@ -406,7 +406,7 @@ For example, a :sk_guide:`support vector machine (SVM) <svm>` with the same feat
    Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 99.56%, params: {'C': 1000, 'kernel': 'rbf'}
 
-Meanwhile, a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :sk_guide:`ensemble <ensemble>` classifier requires different parameters:
+Meanwhile, a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :sk_guide:`ensemble <ensemble>` classifier would look like this:
 
 .. code-block:: python
 
