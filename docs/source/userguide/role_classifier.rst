@@ -122,6 +122,8 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
 
 Let's take a look at the allowed values for each setting in a role classifier configuration.
 
+.. _model_settings:
+
 1. **Model Settings**
 
 ``'model_type'`` (:class:`str`)
@@ -295,9 +297,7 @@ View the default feature set, as seen in the baseline classifier that we trained
      'other-entities': {}
    }
 
-Next, have the classifier look at a larger context window, and extract n-grams starting from tokens that are further away. We'll see whether that provides better information than the smaller default window.
-
-Change the 'ngram_lengths_to_start_positions' settings to extract all the unigrams and bigrams in a window of three tokens around the current token, as shown below.
+Next, have the classifier look at a larger context window, and extract n-grams starting from tokens that are further away. We'll see whether that provides better information than the smaller default window. Do this by changing the 'ngram_lengths_to_start_positions' settings to extract all the unigrams and bigrams in a window of three tokens around the current token, as shown below.
 
 .. code-block:: python
 
@@ -332,7 +332,7 @@ Retrain the classifier with the updated feature set by passing in the :data:`my_
 
 **Hyperparameter tuning**
 
-View the model's hyperparameters, keeping in mind the hyperparameters for the MaxEnt model in Workbench.These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
+View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <model_settings>` for the MaxEnt model in Workbench. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
 
 .. code-block:: python
 
@@ -340,7 +340,7 @@ View the model's hyperparameters, keeping in mind the hyperparameters for the Ma
    >>> my_params
    {'C': 100, 'penalty': 'l1'}
 
-For our first experiment, let's let Workbench select the ideal hyperparameters for the dataset by specifying a parameter search grid and a cross-validation strategy. Update the parameter selection settings such that the hyperparameter estimation process chooses the ideal ``'C'`` and ``'penalty'`` parameters using 10-fold cross-validation:
+Instead of relying on the default preset values for ``'C'`` and ``'penalty'``, let's specify a parameter search grid to let Workbench select ideal values for the dataset. We'll also specify a cross-validation strategy. Update the parameter selection settings such that the hyperparameter estimation process chooses the ideal ``'C'`` and ``'penalty'`` parameters using 10-fold cross-validation:
 
 .. code-block:: python
 
