@@ -68,22 +68,25 @@ class Tagger(object):
         raise NotImplementedError
 
     def get_params(self, deep=True):
-        """Returns a dict of the __init__ parameters of the model
-        """
-        # return self._current_params
-        raise NotImplementedError
+        return self._clf.get_params()
 
     def set_params(self, **parameters):
         """Sets the parameters
         """
-        # for parameter, value in parameters.items():
-        #     self.setattr(parameter, value)
-        # return self
+        self._config = parameters.get('config', None)
+        self._passed_params = parameters
+        self._current_params = {}
+        self._resources = parameters.get('resources', {})
 
-        # for parameter, value in parameters.items():
-        #     self._current_params[parameter] = value
-        # return self
-        raise NotImplementedError
+        model_class = self._get_model_constructor()
+        self._clf = model_class()
+
+        for parameter, value in parameters.items():
+            if parameter == 'config' or parameter == 'resources':
+                continue
+            self._current_params[parameter] = value
+        self._clf.set_params(**self._current_params)
+        return self
 
     def _get_model_constructor(self):
         """Returns the python class of the actual underlying model"""
