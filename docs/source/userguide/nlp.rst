@@ -12,7 +12,7 @@ We have seen how the :ref:`Natural Language Processor (NLP) <arch_nlp>` uses a p
 Instantiate the NLP class
 -------------------------
 
-Work with the natural language processor falls into two broad phases:
+Working with the natural language processor falls into two broad phases:
 
  - First, generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
  - Then, conduct experimentation in the Python shell.

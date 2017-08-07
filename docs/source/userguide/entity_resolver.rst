@@ -18,23 +18,41 @@ To train the entity resolver, you must generate entity mapping files which inclu
 Entity Mapping
 --------------
 
-For each entity type, it is up to the developer to generate an entity mapping file which is used to train the entity resolver. The entity mapping is a json file with a list of dictionaries, one for each possible real world entity of the given entity type. Each dictionary refers to a single real world entity and contains:
+For each entity type, it is up to the developer to generate an entity mapping file which is used to train the entity resolver. The entity mapping is a JSON-formatted file that contains the information about the entities of the given type. Additionally it can have information about how the entity type corresponds to a knowledge base object type when applicable.
 
-==================== ===
-**canonical name**   The standardized or official name of the real world entity. Textual similarity with the canonical name is one of the primary factors used in entity resolution.
+===================================== =================== ===
+**parameter name**                    **JSON field name** **description**
 
-**unique ID**        An optional unique identifier. If there are multiple entries in the mapping file with the same canonical name, the ID is necessary for uniquely identifying each entry. If an entity has a corresponding entry in the Knowledge Base, this ID should be the same as the ID of the KB entry. You can then use the resolved ID to query the KB for the appropriate entry.
+entities                              ``entities``        A list of dictionaries, one for each possible real world instance of the given entity type. See the table below for more details.
 
-**whitelist**        A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that is often referred to by different terms.
+knowledge base index name (optional)  ``kb_index_name``   Name of the knowledge base index that contains information about this entity type. For example, information about the ``dish`` entity type may be stored in the objects in the ``menu_items`` index in the knowledge base.    
 
-**sort factor**      An optional numeric value. Entities with a higher sort factor will be ranked above those with a lower value and similar textual similarity.
-==================== ===
+knowledge base field name (optional)  ``kb_field_name``   Name of the knowledge base field name that this entity type corresponds to. In other words, the entity text is contained in this field of a knowledge base object. For example, the text span captured in entity type ``dish`` describes the dish name in a user's request and corresponds to the knowledge base text field ``name`` of the index ``menu_items``. The knowledge base index and the knowledge base field parameters together describe how the NLP entity type corresponds to a knowledge base object type. When specified, the synonym whitelist for such knowledge base-linked entities is accessible by the Question Answerer. It can then leverage that information when formulating knowledge base filtered searches to disambiguate entities with custom constraints. See `Context-Aware Entity Resolution`_ section
+
+===================================== =================== ===
+
+Each entity in the ``entities`` of the entity mapping file refers to a single real world entity and has the attributes described in the table below. 
+
+====================== =================== ===
+**parameter name**.    **JSON field name** **description**
+
+canonical name         ``cname``           The standardized or official name of the real world entity. Textual similarity with the canonical name is one of the primary factors used in entity resolution.
+
+unique ID              ``id``              An optional unique identifier. If there are multiple entries in the mapping file with the same canonical name, the ID is necessary for uniquely identifying each entry. If an entity has a corresponding entry in the Knowledge Base, this ID should be the same as the ID of the KB entry. You can then use the resolved ID to query the KB for the appropriate entry.
+
+whitelist              ``whitelist``       A list of synonyms. The whitelist is the most important component of the entity mapping file, because it allows the resolver to consistently resolve to a given entity that is often referred to by different terms.
+
+sort factor (optional) ``sort_factor``     An optional numeric value. Entities with a higher sort factor will be ranked above those with a lower value and similar textual similarity.
+====================== =================== ===
 
 In the food ordering blueprint where a ``dish`` is an entity type, the ``dish`` entity mapping file contains a list of all possible dishes that a user could order. Here is an example of what a couple of entries in the ``dish`` entity mapping file may look like.
 
 .. code-block:: javascript
 
-    [
+    {
+      "kb_index_name": "menu_items",
+      "kb_field_name": "name",
+      "entities": [
         {
             "cname": "Baigan Bharta",
             "id": "B01DN55TFO",
@@ -58,7 +76,9 @@ In the food ordering blueprint where a ``dish`` is an entity type, the ``dish`` 
             "sort_factor": 4.2
         },
         ...
-    ]
+      ]
+    }
+    
 
 This file should be saved as ``mapping.json`` in the corresponding entity folder. For example, the ``mapping.json`` file for the ``category`` entity should exist in the following location:
 
@@ -194,4 +214,15 @@ Each entry in the list of resolved entities contains:
 **sort factor**      If the sort factor was provided in the entity mapping file, it will also be returned.
 ==================== ===
 
-The Entity Resolver returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top 1 is sufficient, but in some cases it may be beneficial to look at other options in the ranked list. For example, if you wanted to build a browsing functionality in your app it could be useful to display the top 3 results for the user to choose between. Another scenario in which you may want to look deeper into the ranked list is when the user provided some constraints in a previous query. The entity resolver does not have access to this previous context at resolution time, so the top ranked result may not satisfy previously defined constraints. In your :doc:`dialogue state handlers <../quickstart/04_define_the_dialogue_handlers>`, you can iterate through the ranked list to find the first entry that satisfies the constraints, or you can use the :doc:`Question Answerer <kb>` to do a filtered query against the knowledge base. Note that some entity resolution functionality is provided in the Question Answerer for context aware resolution.
+The Entity Resolver returns a ranked list of the top 10 canonical forms for each recognized entity. For most cases, taking the top ranked value is sufficient, but in some cases it may be beneficial to look at other options in the ranked list. For example, if you wanted to build a browsing functionality in your app it could be useful to display the top 3 resolved values for the user to choose between. Another scenario in which you may want to look deeper into the ranked list is when the user provided some constraints in a previous query. The entity resolver does not have access to this previous context at resolution time, so the top ranked result may not satisfy previously defined constraints. See the next section for more details.
+
+Context-Aware Entity Resolution
+-------------------------------
+
+While the Entity Resolver finds the best matching canonical values based on text relevance and the provided sort factors, there could be scenarios where you may want to take certain application-specific constraints into context when resolving the recognized entities. These constraints can come from the data model hierarchy, proximity information, business logic and so on. Here are some examples:
+
+* resolve dish name ``Pad Thai`` within a selected restaurant.
+* resolve the nearest ``Best Buy``.
+* resolve the best matching product ``cotton long sleeve shirts`` that is on sale.
+
+For these use cases you can iterate through the ranked list to find the first entry that satisfies the constraints in your :doc:`dialogue state handlers <../quickstart/04_define_the_dialogue_handlers>`, or you can use the :doc:`Question Answerer <kb>` to do a filtered search against the knowledge base to disambiguate entities with contextual constraints. See :doc:`Knowledge Base and Question Answerer guide <kb>` for more details.    

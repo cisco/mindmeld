@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
+# needed for pyenv install fix
+# xcode-select --install 2&>/dev/null
+
 set -e
 
+NEEDS_DEP_INSTALL=0
 
 function check_macos() {
 	platform=$(uname)
@@ -17,9 +21,20 @@ function check_dependency {
 
 	# output yes or no
 	if [[ `which $command` ]]; then
-		echo yes
+		if [[ $command == "java" ]]; then
+			version=$(java -version 2>&1 | head -1 | awk '{print $3}' | sed "s/\"//g")
+			if [[ $version == 1.8* ]]; then
+				echo yes
+			else
+				echo older version $version found. 1.8+ needed.
+				NEEDS_DEP_INSTALL=1
+			fi
+		else
+			echo yes
+		fi
 	else
 		echo no
+		NEEDS_DEP_INSTALL=1
 	fi
 }
 
@@ -27,38 +42,29 @@ function install_dependency {
 	local command=$1
 
 	if [[ ! `which $command` ]]; then
-		echo "   " Installing $command
-		if [[ $command="brew" ]]; then
+		echo "   " $command
+		if [[ $command == "brew" ]]; then
 			/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-		elif [[ $command="python" ]]; then
-			brew install python
-		elif [[ $command="pip" ]]; then
-			brew install python # this installs pip as well
-		elif [[ $command="java" ]]; then
+		elif [[ $command == "pip" ]]; then
+			sudo easy_install pip
+		elif [[ $command == "java" ]]; then
 			brew tap caskroom/cask
 			brew cask install java
-	    elif [[ $command="elasticsearch" ]]; then
+	    elif [[ $command == "elasticsearch" ]]; then
 	    	brew install elasticsearch
 			brew services start elasticsearch 
+	    elif [[ $command == "virtualenv" ]]; then
+			sudo pip install --upgrade virtualenv
 	    else
 			brew install $command
 		fi
-	fi
-}
-
-function check_virtualenv {
-	echo -n "   " pyenv-virtualenv "... "
-	if [[ `brew list pyenv-virtualenv` ]]; then
-		echo yes
-	else
-		echo no - will be installed at the very end since a shell restart is required
-	fi
-}
-
-function install_virtualenv {
-	if [[ ! `brew list pyenv-virtualenv` ]]; then
-		echo "   " Installing $command - make sure to follow the instructions at the end and restart your shell
-		brew install pyenv-virtualenv
+	elif [[ $command == "java" ]]; then
+		version=$(java -version 2>&1 | head -1 | awk '{print $3}' | sed "s/\"//g")
+		if [[ ! $version == 1.8* ]]; then
+			echo "   " $command ... 
+			brew tap caskroom/cask
+			brew cask install java
+		fi
 	fi
 }
 
@@ -74,38 +80,35 @@ echo Checking dependencies already installed
 check_dependency brew
 check_dependency python
 check_dependency pip
-check_dependency pyenv
-
-# pyenv-virtualenv
-check_virtualenv
-
+check_dependency virtualenv
 check_dependency java
 check_dependency elasticsearch
 echo done
 
-echo
-read -p "Do you want to install the missing dependencies (Y/n): " RESPONSE
-# lowercase
-RESPONSE=$(echo "$RESPONSE" | tr '[:upper:]' '[:lower:]')
-if [[ (! $RESPONSE == "") && (! $RESPONSE == "y") && (! $RESPONSE == "yes") ]]; then
-	echo exiting
-	exit 1
+if [[ ${NEEDS_DEP_INSTALL} == 1 ]]; then
+	echo
+	read -p "Do you want to install the missing dependencies (Y/n): " RESPONSE
+	# lowercase
+	RESPONSE=$(echo "$RESPONSE" | tr '[:upper:]' '[:lower:]')
+	if [[ (! $RESPONSE == "") && (! $RESPONSE == "y") && (! $RESPONSE == "yes") ]]; then
+		echo exiting
+		exit 1
+	fi
+
+	# Install stuff
+	echo
+	echo Installing missing dependencies
+
+	install_dependency brew
+	install_dependency python
+	install_dependency pip
+	install_dependency virtualenv
+	install_dependency java
+	install_dependency elasticsearch
+
+	echo done
 fi
 
-
-# Install stuff
-echo
-echo Installing missing dependencies
-
-install_dependency brew
-install_dependency python
-install_dependency pip
-install_dependency pyenv
-install_dependency java
-install_dependency elasticsearch
-
-
-echo done
 
 echo
 echo Setting up configuration files
@@ -151,6 +154,4 @@ trusted-host = mindmeld.com
 EOL
 
 echo ~/.pip/pip.conf created.
-
 echo
-install_virtualenv

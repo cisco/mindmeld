@@ -11,12 +11,17 @@ Every Workbench app has one role classifier for every entity type with associate
 
 .. note::
 
-    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`.
+    This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Role Classification <role_classification>` section.
 
 Access a role classifier
 ------------------------
 
-To use any natural language processor component, you must first generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. Once you have training data, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
+Working with the natural language processor falls into two broad phases:
+
+ - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
+ - Then, conduct experimentation in the Python shell.
+
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` (NLP) class from the Workbench :mod:`nlp` module and :ref:`instantiate an object <instantiate_nlp>` with the path to your Workbench project.
 
 .. code-block:: python
 
@@ -78,7 +83,7 @@ Access the :class:`RoleClassifier` for an entity type of your choice, using the 
 Train a role classifier
 -----------------------
 
-Use the :meth:`RoleClassifier.fit` method to train a role classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracies for the classifiers.
+Use the :meth:`RoleClassifier.fit` method to train a role classification model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracy for the classifier.
 
 .. _baseline_role_fit:
 
@@ -121,6 +126,8 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
    }
 
 Let's take a look at the allowed values for each setting in a role classifier configuration.
+
+.. _model_settings:
 
 1. **Model Settings**
 
@@ -244,7 +251,7 @@ To override Workbench's default role classifier configuration with custom settin
 
 When you define custom classifier settings in ``config.py``, the :meth:`RoleClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench's defaults. To do this, define a dictionary of your custom settings, named :data:`ROLE_MODEL_CONFIG`.
 
-Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the domain classifier.
+Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the role classifier.
 
 
 .. code-block:: python
@@ -279,7 +286,7 @@ Since this method requires updating a file each time you modify a setting, it's 
 2. Arguments to the :meth:`fit` method
 """"""""""""""""""""""""""""""""""""""
 
-For experimenting with the domain classifier, the recommended method is to use arguments to the :meth:`fit` method. The main areas for exploration are feature extraction and hyperparameter tuning.
+For experimenting with the role classifier, the recommended method is to use arguments to the :meth:`fit` method. The main areas for exploration are feature extraction and hyperparameter tuning.
 
 **Feature extraction**
 
@@ -295,9 +302,7 @@ View the default feature set, as seen in the baseline classifier that we trained
      'other-entities': {}
    }
 
-Next, have the classifier look at a larger context window, and extract n-grams starting from tokens that are further away. We'll see whether that provides better information than the smaller default window.
-
-Change the 'ngram_lengths_to_start_positions' settings to extract all the unigrams and bigrams in a window of three tokens around the current token, as shown below.
+Next, have the classifier look at a larger context window, and extract n-grams starting from tokens that are further away. We'll see whether that provides better information than the smaller default window. Do this by changing the 'ngram_lengths_to_start_positions' settings to extract all the unigrams and bigrams in a window of three tokens around the current token, as shown below.
 
 .. code-block:: python
 
@@ -332,7 +337,7 @@ Retrain the classifier with the updated feature set by passing in the :data:`my_
 
 **Hyperparameter tuning**
 
-View the model's hyperparameters, keeping in mind the hyperparameters for the MaxEnt model in Workbench.These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
+View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <model_settings>` for the MaxEnt model in Workbench. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
 
 .. code-block:: python
 
@@ -340,7 +345,7 @@ View the model's hyperparameters, keeping in mind the hyperparameters for the Ma
    >>> my_params
    {'C': 100, 'penalty': 'l1'}
 
-For our first experiment, let's let Workbench select the ideal hyperparameters for the dataset by specifying a parameter search grid and a cross-validation strategy. Update the parameter selection settings such that the hyperparameter estimation process chooses the ideal ``'C'`` and ``'penalty'`` parameters using 10-fold cross-validation:
+Instead of relying on the default preset values for ``'C'`` and ``'penalty'``, let's specify a parameter search grid to let Workbench select ideal values for the dataset. We'll also specify a cross-validation strategy. Update the parameter selection settings such that the hyperparameter estimation process chooses the ideal ``'C'`` and ``'penalty'`` parameters using 10-fold cross-validation:
 
 .. code-block:: python
 
@@ -403,7 +408,7 @@ Before you run the trained role classifier on a test query, you must first detec
 
 Now you can choose an entity from among those detected, and call the role classifier's :meth:`RoleClassifier.predict` method to classify it. Although it classifies a single entity, the :meth:`RoleClassifier.predict` method uses the full query text, and information about all its entities, for :ref:`feature extraction <role_features>`.
 
-Run the trained role classifier on the two entities from the example above, one by one:
+Run the trained role classifier on the two entities from the example above, one by one. The :meth:`predict` method returns the label for the role whose predicted probability is highest.
 
 .. code-block:: python
 
@@ -412,7 +417,9 @@ Run the trained role classifier on the two entities from the example above, one 
    >>> rc.predict(query, entities, 1)
    'newtime'
 
-At runtime, the natural language processor's :meth:`process` method calls :meth:`RoleClassifier.predict` to roles for all detected entities in the incoming query. The :meth:`predict` method returns the label for the role whose predicted probability is highest.
+.. note::
+
+   At runtime, the natural language processor's :meth:`process` method calls :meth:`RoleClassifier.predict` to roles for all detected entities in the incoming query.
 
 The :meth:`predict` method runs on one entity at a time. Next, we'll see how to test a trained model on a batch of labeled test queries.
 
@@ -421,7 +428,7 @@ Evaluate classifier performance
 
 To evaluate the accuracy of your trained role classifier, you first need to create labeled test data, as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter. Once you have the test data files in the right place in your Workbench project, you can measure your model's performance using the :meth:`RoleClassifier.evaluate` method.
 
-Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
+Before you can evaluate the accuracy of your trained role classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
 
 Then, when you are ready, use the :meth:`RoleClassifier.evaluate` method, which
 
@@ -467,7 +474,7 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
            newtime              1              9
 
 
-Let's decipher the statistical output of the :meth:`evaluate` method.
+Let's decipher the statists output by the :meth:`evaluate` method.
 
 **Overall Statistics**
   |
@@ -521,7 +528,7 @@ Let's decipher the statistical output of the :meth:`evaluate` method.
 **Confusion Matrix**
   |
 
-  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the domain classifier wrongly classified one instance of a ``newtime`` entity as ``oldtime``.
+  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the role classifier wrongly classified one instance of a ``newtime`` entity as ``oldtime``.
 
 Now we have a wealth of information about the performance of our classifier. Let's go further and inspect the classifier's predictions at the level of individual queries, to better understand error patterns.
 
@@ -572,7 +579,7 @@ Our example dataset is fairly small, and we get just one case of misclassificati
      )
    ]
 
-Next, we use a list comprehension to identify the kind of queries that the current training data lacks. To do this, we list all queries with a given role where the classifier's confidence for the true label was relatively low. We'll demonstrate this with the ``newtime`` role and a confidence of <60%.
+Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all queries with a given role where the classifier's confidence for the true label was relatively low. We'll demonstrate this with the ``newtime`` role and a confidence of <60%.
 
 .. code-block:: python
 
@@ -609,13 +616,13 @@ Try looking at the :doc:`training data <../blueprints/home_assistant>`. You shou
 
 One potential solution is to add more training queries for the ``newtime`` role, so the classification model can generalize better.
 
-Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data based on what you find should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_domain_with_config>` in this chapter.
+Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_role_with_config>` in this chapter.
 
 
 Save model for future use
 -------------------------
 
-Save the trained domain classifier for later use by calling the :meth:`RoleClassifier.dump` method. The :meth:`dump` method serializes the trained model as a `pickle file <https://docs.python.org/3/library/pickle.html>`_ and saves it to the specified location on disk.
+Save the trained role classifier for later use by calling the :meth:`RoleClassifier.dump` method. The :meth:`dump` method serializes the trained model as a `pickle file <https://docs.python.org/3/library/pickle.html>`_ and saves it to the specified location on disk.
 
 .. code:: python
 
