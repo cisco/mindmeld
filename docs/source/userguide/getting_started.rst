@@ -62,11 +62,11 @@ On a Mac OS machine, you can install the dependencies for MindMeld Workbench and
    - You will be prompted to enter your mindmeld.com username and password.
    - Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. **Previous files are overwritten.**
 
-When you're ready to go, run this command:
+When you're ready to go, open a terminal (shell) and run this command:
 
 .. code-block:: shell
 
-  bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)"
+  $ bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)"
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
