@@ -32,20 +32,9 @@ def get_tags_from_entities(query, entities, scheme='IOB'):
             '' if the IOB status is 'O'. The last two are like the first two,
             but for system entities.
     """
-
-    # Normal entities
-    app_entities = [e for e in entities if not e.entity.is_system_entity]
-    iobs, app_types = _get_tags_from_entities(query, app_entities, scheme)
-
-    # System entities
-    # This algorithm assumes that the query system entities are well-formed and
-    # only occur as standalone or fully inside an app entity.
-    sys_entities = [e for e in entities if e.entity.is_system_entity]
-    sys_iobs, sys_types = _get_tags_from_entities(query, sys_entities, scheme)
-
-    tags = ['|'.join(args) for args in
-            zip(iobs, app_types, sys_iobs, sys_types)]
-
+    entities = [e for e in entities]
+    iobs, types = _get_tags_from_entities(query, entities, scheme)
+    tags = ['|'.join(args) for args in zip(iobs, types)]
     return tags
 
 
@@ -88,10 +77,14 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
     Returns:
         (list of QueryEntity) The tuple containing the list of entities.
     """
-
     normalized_tokens = query.normalized_tokens
 
     entities = []
+
+    def _is_system_entity(entity_type):
+        if entity_type.split('_')[0] == 'sys':
+            return True
+        return False
 
     def _append_entity(token_start, entity_type, tokens):
         prefix = ' '.join(normalized_tokens[:token_start])
@@ -125,109 +118,83 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
     entity_tokens = []
     entity_start = None
     prev_ent_type = ''
-    sys_entity_start = None
-    prev_sys_type = ''
 
     for tag_idx, tag in enumerate(tags):
-        iob, ent_type, sys_iob, sys_type = tag.split('|')
+        iob, ent_type = tag.split('|')
 
-        # Close sysem entity and reset if the tag indicates a new entity
-        if (sys_entity_start is not None and
-                (sys_iob in (O_TAG, B_TAG, S_TAG) or sys_type != prev_sys_type)):
-            logger.debug("System entity closed at prev")
-            _append_system_entity(sys_entity_start, tag_idx, prev_sys_type)
-            sys_entity_start = None
-            prev_sys_type = ''
-
-        # Close regular entity and reset if the tag indicates a new entity
+        # Close entity and reset if the tag indicates a new entity
         if (entity_start is not None and
                 (iob in (O_TAG, B_TAG, S_TAG) or ent_type != prev_ent_type)):
             logger.debug("Entity closed at prev")
-            _append_entity(entity_start, prev_ent_type, entity_tokens)
+            if _is_system_entity(ent_type):
+                _append_system_entity(entity_start, tag_idx, prev_ent_type)
+            else:
+                _append_entity(entity_start, prev_ent_type, entity_tokens)
             entity_start = None
             prev_ent_type = ''
             entity_tokens = []
 
-            # Cut short any numeric entity that might continue beyond the entity
-            if sys_entity_start is not None:
-                _append_system_entity(sys_entity_start, tag_idx, prev_sys_type)
-            sys_entity_start = None
-            prev_sys_type = ''
-
-        # Check if a regular entity has started
+        # Check if an entity has started
         if iob in (B_TAG, S_TAG) or ent_type not in ('', prev_ent_type):
             entity_start = tag_idx
-        # Check if a numeric entity has started
-        if sys_iob in (B_TAG, S_TAG) or sys_type not in ('', prev_sys_type):
 
-            # During predict time, we construct sys_candidates for the input query.
-            # These candidates are "global" sys_candidates, in that the entire query
-            # is sent to Mallard to extract sys_candidates and not just a span range
-            # within the query. However, the tagging model could more restrictive in
-            # its classifier, so a sub-span of the original sys_candidate could be tagged
-            # as a sys_entity. For example, the query "set alarm for 1130", mallard
-            # provides the following sys_time entity candidate: "for 1130". However,
-            # our entity recognizer only tags the token "1130" as a sys-time entity,
-            # and not "at". Therefore, when we append system entities for this query,
-            # we pick the start of the sys_entity to be the sys_candidate's start span
-            # if the tagger identified a sys_entity within that sys_candidate's span
-            # range of the same sys_entity type. Else, we just use the tag_idx tracked
-            # in the control logic.
+            if _is_system_entity(ent_type):
+                # During predict time, we construct sys_candidates for the input query.
+                # These candidates are "global" sys_candidates, in that the entire query
+                # is sent to Mallard to extract sys_candidates and not just a span range
+                # within the query. However, the tagging model could more restrictive in
+                # its classifier, so a sub-span of the original sys_candidate could be tagged
+                # as a sys_entity. For example, the query "set alarm for 1130", mallard
+                # provides the following sys_time entity candidate: "for 1130". However,
+                # our entity recognizer only tags the token "1130" as a sys-time entity,
+                # and not "at". Therefore, when we append system entities for this query,
+                # we pick the start of the sys_entity to be the sys_candidate's start span
+                # if the tagger identified a sys_entity within that sys_candidate's span
+                # range of the same sys_entity type. Else, we just use the tag_idx tracked
+                # in the control logic.
 
-            picked_by_existing_system_entity_candidates = False
+                picked_by_existing_system_entity_candidates = False
 
-            for sys_candidate in query.get_system_entity_candidates(sys_type):
+                for sys_candidate in query.get_system_entity_candidates(ent_type):
 
-                start_span = sys_candidate.normalized_token_span.start
-                end_span = sys_candidate.normalized_token_span.end
+                    start_span = sys_candidate.normalized_token_span.start
+                    end_span = sys_candidate.normalized_token_span.end
 
-                if start_span <= tag_idx <= end_span:
-                    # We currently don't prioritize any sys_candidate if there are
-                    # multiple candidates that meet this conditional.
-                    # TODO: Assess if a priority is needed
-                    sys_entity_start = sys_candidate.normalized_token_span.start
-                picked_by_existing_system_entity_candidates = True
+                    if start_span <= tag_idx <= end_span:
+                        # We currently don't prioritize any sys_candidate if there are
+                        # multiple candidates that meet this conditional.
+                        # TODO: Assess if a priority is needed
+                        entity_start = sys_candidate.normalized_token_span.start
+                    picked_by_existing_system_entity_candidates = True
 
-            if not picked_by_existing_system_entity_candidates:
-                sys_entity_start = tag_idx
+                if not picked_by_existing_system_entity_candidates:
+                    entity_start = tag_idx
 
         # Append the current token to the current entity, if applicable.
         if iob != O_TAG and entity_start is not None:
             entity_tokens.append(normalized_tokens[tag_idx])
 
-        # Close the numeric entity if the tag indicates it closed
-        if (sys_entity_start is not None and
-                sys_iob in (E_TAG, S_TAG)):
-            logger.debug("System entity closed here")
-            _append_system_entity(sys_entity_start, tag_idx+1, sys_type)
-            sys_entity_start = None
-            sys_type = ''
-
-        # Close the regular entity if the tag indicates it closed
-        if (entity_start is not None and
-                iob in (E_TAG, S_TAG)):
+        # Close the entity if the tag indicates it closed
+        if (entity_start is not None and iob in (E_TAG, S_TAG)):
             logger.debug("Entity closed here")
-            _append_entity(entity_start, ent_type, entity_tokens)
+            if _is_system_entity(ent_type):
+                _append_system_entity(entity_start, tag_idx+1, ent_type)
+            else:
+                _append_entity(entity_start, ent_type, entity_tokens)
             entity_start = None
             ent_type = ''
             entity_tokens = []
 
-            # Cut short any numeric entity that might continue beyond the entity
-            if sys_entity_start is not None:
-                _append_system_entity(sys_entity_start, tag_idx+1, sys_type)
-            sys_entity_start = None
-            sys_type = ''
-
         prev_ent_type = ent_type
-        prev_sys_type = sys_type
 
     # Handle entities that end with the end of the query
     if entity_start is not None:
-        logger.debug("Entity closed at end: {}".format(entity_tokens))
-        _append_entity(entity_start, prev_ent_type, entity_tokens)
+        logger.debug("Entity closed at end")
+        if _is_system_entity(ent_type):
+            _append_system_entity(entity_start, len(tags), prev_ent_type)
+        else:
+            _append_entity(entity_start, prev_ent_type, entity_tokens)
     else:
         logger.debug("Entity did not end: {}".format(entity_start))
-    if sys_entity_start is not None:
-        _append_system_entity(sys_entity_start, len(tags), prev_sys_type)
 
     return tuple(entities)
