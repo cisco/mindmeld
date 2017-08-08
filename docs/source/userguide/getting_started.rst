@@ -285,3 +285,6 @@ Troubleshooting
 |             | that satisfies the        | MindMeld Learning Center.         |
 |             | requirement mmworkbench   |                                   |
 +-------------+---------------------------+-----------------------------------+
+| any         | code issue                | Upgrade to latest build:          |
+|             |                           | ``pip install mmworkbench -U``    |
++-------------+---------------------------+-----------------------------------+
