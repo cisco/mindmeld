@@ -191,8 +191,8 @@ Command-Line Interfaces
 
 MindMeld Workbench has two command-line interfaces for some of the common workflow tasks you'll be doing often:
 
-#. mmworkbench
-#. python app.py
+#. ``mmworkbench``
+#. ``python app.py``
 
 Builtin help is available with the standard `-h` flag.
 
@@ -241,7 +241,7 @@ Configure Logging
 
 Workbench adheres to the standard `Python logging mechanism <https://docs.python.org/3/howto/logging.html>`_. 
 The default logging level is ``WARNING``, which can be overridden with a config file or from code. 
-The INFO logging level can be useful to see what's going on:
+The ``INFO`` logging level can be useful to see what's going on:
 
 .. code-block:: python
   
@@ -253,18 +253,10 @@ configure_logs()
 
 There is a handy ``configure_logs()`` function available that wraps this and accepts 2 parameters: 
 
-#. `format message <https://docs.python.org/3/howto/logging.html#changing-the-format-of-displayed-messages>`_
-#. `logging level <https://docs.python.org/3/howto/logging.html#logging-levels>`_: in increasing order of severity, they are ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR`` and ``CRITICAL``.
+#. :data:`format`: The `logging format <https://docs.python.org/3/howto/logging.html#changing-the-format-of-displayed-messages>`_.
+#. :data:`level`: The `logging level <https://docs.python.org/3/howto/logging.html#logging-levels>`_.
 
-The method signature is:
-
-.. code-block:: python
- 
-   configure_logs(format="%(message)s", level=logging.WARNING)
-
-
-Sample Code
-^^^^^^^^^^^^
+Here's an example usage:
   
 .. code-block:: python
 
@@ -285,6 +277,6 @@ Troubleshooting
 |             | that satisfies the        | MindMeld Learning Center.         |
 |             | requirement mmworkbench   |                                   |
 +-------------+---------------------------+-----------------------------------+
-| any         | code issue                | Upgrade to latest build:          |
+| any         | Code issue                | Upgrade to latest build:          |
 |             |                           | ``pip install mmworkbench -U``    |
 +-------------+---------------------------+-----------------------------------+
