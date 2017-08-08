@@ -89,7 +89,6 @@ Here are the commands run by the script to install the required components:
 +---------------+--------------------------------------------------------------------------------------------------------+
 
 
-
 2. Set up a virtual environment
 """""""""""""""""""""""""""""""
 
