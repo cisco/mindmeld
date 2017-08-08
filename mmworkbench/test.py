@@ -1,4 +1,5 @@
 import os
+import sys
 from .path import get_current_app_path
 from .components import NaturalLanguageProcessor
 from .components.dialogue import Conversation
@@ -9,7 +10,8 @@ class ConversationTest(object):
 
     @classmethod
     def setup_class(cls):
-        app_path = get_current_app_path(os.path.dirname(os.path.realpath(__file__)))
+        app_path = get_current_app_path(os.path.dirname(os.path.realpath(
+            sys.modules[cls.__module__].__file__)))
         nlp = NaturalLanguageProcessor(app_path=app_path)
         nlp.load()
         cls.conv = Conversation(nlp=nlp, app_path=app_path)

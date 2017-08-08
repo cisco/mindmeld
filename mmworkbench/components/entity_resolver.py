@@ -16,8 +16,8 @@ from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_in
                                      delete_index, does_index_exist, get_field_names,
                                      INDEX_TYPE_KB, INDEX_TYPE_SYNONYM)
 
-from elasticsearch.exceptions import ConnectionError
-from ..exceptions import EntityResolverConnectionError
+from elasticsearch.exceptions import ConnectionError, TransportError, ElasticsearchException
+from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 logger = logging.getLogger(__name__)
 
@@ -318,26 +318,39 @@ class EntityResolver(object):
             }
         }
 
-        index = get_scoped_index_name(self._app_namespace, self._es_index_name)
-        response = self._es_client.search(index=index, body=text_relevance_query)
-        hits = response['hits']['hits']
+        try:
+            index = get_scoped_index_name(self._app_namespace, self._es_index_name)
+            response = self._es_client.search(index=index, body=text_relevance_query)
+        except ConnectionError as e:
+            logger.error(
+                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+        except TransportError as e:
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            raise EntityResolverError
+        except ElasticsearchException:
+            raise EntityResolverError
+        else:
+            hits = response['hits']['hits']
 
-        results = []
-        for hit in hits:
-            result = {
-                'cname': hit['_source']['cname'],
-                'score': hit['_score'],
-                'top_synonym': hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
+            results = []
+            for hit in hits:
+                result = {
+                    'cname': hit['_source']['cname'],
+                    'score': hit['_score'],
+                    'top_synonym':
+                        hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
 
-            if hit['_source'].get('id'):
-                result['id'] = hit['_source'].get('id')
+                if hit['_source'].get('id'):
+                    result['id'] = hit['_source'].get('id')
 
-            if hit['_source'].get('sort_factor'):
-                result['sort_factor'] = hit['_source'].get('sort_factor')
+                if hit['_source'].get('sort_factor'):
+                    result['sort_factor'] = hit['_source'].get('sort_factor')
 
-            results.append(result)
+                results.append(result)
 
-        return results[0:20]
+            return results[0:20]
 
     def _predict_exact_match(self, entity):
         """Predicts the resolved value(s) for the given entity using the loaded entity map.
@@ -407,5 +420,14 @@ class EntityResolver(object):
                     self.fit()
             else:
                 self.fit()
-        except ConnectionError:
+
+        except ConnectionError as e:
+            logger.error(
+                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
             raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+        except TransportError as e:
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            raise EntityResolverError
+        except ElasticsearchException:
+            raise EntityResolverError

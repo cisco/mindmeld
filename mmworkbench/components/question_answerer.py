@@ -13,8 +13,10 @@ import copy
 from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      does_index_exist)
+from elasticsearch import TransportError, ElasticsearchException, ConnectionError
 
 from ..resource_loader import ResourceLoader
+from ..exceptions import KnowledgeBaseError, KnowledgeBaseConnectionError
 
 logger = logging.getLogger(__name__)
 
@@ -155,12 +157,24 @@ class QuestionAnswerer(object):
         index_info = self._es_field_info.get(index, {})
 
         if not index_info:
-            self._es_field_info[index] = {}
-            res = self._es_client.indices.get(index=index)
-            all_field_info = res[index]['mappings']['document']['properties']
-            for field_name in all_field_info:
-                field_type = all_field_info[field_name].get('type')
-                self._es_field_info[index][field_name] = FieldInfo(field_name, field_type)
+            try:
+                # TODO: move the ES API call logic to ES helper
+                self._es_field_info[index] = {}
+                res = self._es_client.indices.get(index=index)
+                all_field_info = res[index]['mappings']['document']['properties']
+                for field_name in all_field_info:
+                    field_type = all_field_info[field_name].get('type')
+                    self._es_field_info[index][field_name] = FieldInfo(field_name, field_type)
+            except ConnectionError as e:
+                logger.error(
+                    'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+                raise KnowledgeBaseConnectionError(es_host=self._es_client.transport.hosts)
+            except TransportError as e:
+                logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                             'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+                raise KnowledgeBaseError
+            except ElasticsearchException:
+                raise KnowledgeBaseError
 
     def config(self, config):
         """Summary
@@ -530,10 +544,22 @@ class Search:
         Returns:
             a list of matching documents.
         """
-        es_query = self._build_es_query()
-        response = self.client.search(index=self.index, body=es_query)
-        results = [hit['_source'] for hit in response['hits']['hits']]
-        return results
+        try:
+            # TODO: move the ES API call logic to ES helper
+            es_query = self._build_es_query()
+            response = self.client.search(index=self.index, body=es_query)
+            results = [hit['_source'] for hit in response['hits']['hits']]
+            return results
+        except ConnectionError as e:
+            logger.error(
+                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+            raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts)
+        except TransportError as e:
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            raise KnowledgeBaseError
+        except ElasticsearchException:
+            raise KnowledgeBaseError
 
     class Clause:
         """This class models an abstract knowledge base clause."""
