@@ -33,7 +33,7 @@ function check_dependency {
 				NEEDS_DEP_INSTALL=1
 			fi
 		elif [[ $command == "virtualenv" ]]; then
-			if [[ `$command --version 2&> /dev/null` ]]; then
+			if [[ `$command --version 2> /dev/null` ]]; then
 				echo yes
 			else
 				echo no
