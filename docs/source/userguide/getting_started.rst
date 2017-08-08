@@ -85,7 +85,7 @@ Here are the commands run by the script to install the required components:
 +---------------+--------------------------------------------------------------------------------------------------------+
 | Java 8        |  ``brew tap caskroom/cask && brew cask install java``                                                  |  
 +---------------+--------------------------------------------------------------------------------------------------------+
-| ElasticSearch |  ``brew install elasticsearch && brew services start elasticsearch``                                   |
+| Elasticsearch |  ``brew install elasticsearch && brew services start elasticsearch``                                   |
 +---------------+--------------------------------------------------------------------------------------------------------+
 
 
