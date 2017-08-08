@@ -265,12 +265,12 @@ MindMeld Workbench has two command-line interfaces for some of the common workfl
 #. ``mmworkbench``
 #. ``python app.py``
 
-Built-in help is available with the standard `-h` flag.
+Built-in help is available with the standard :option:`-h` flag.
 
 mmworkbench
 ^^^^^^^^^^^
 
-The command-line interface (CLI) for MindMeld Workbench can be accessed with the `mmworkbench` command.
+The command-line interface (CLI) for MindMeld Workbench can be accessed with the ``mmworkbench`` command.
 This is most suitable for use in an app-agnostic context.
 
 The commands available are:
@@ -282,7 +282,7 @@ The commands available are:
 python app.py
 ^^^^^^^^^^^^^
 
-When you're in the context of a specific app, `python app.py` is more appropriate to use.
+When you're in the context of a specific app, ``python app.py`` is more appropriate to use.
 
 The commands available are:
 
@@ -323,18 +323,17 @@ Here's an example usage:
 Troubleshooting
 ---------------
 
-
-+-------------+----------------------------+-----------------------------------+
-|    Context  |    Error                   |    Resolution                     |
-+=============+============================+===================================+
-| pip install | Could not find a version   | Verify your credentials for the   |
-|             | that satisfies the         | MindMeld Learning Center.         |
-|             | requirement mmworkbench    |                                   |
-+-------------+----------------------------+-----------------------------------+
-| any         | Code issue                 | Upgrade to latest build:          |
-|             |                            | ``pip install mmworkbench -U``    |
-+-------------+----------------------------+-----------------------------------+
-|Elasticsearch| Elastic search not running | Run ``curl localhost:9200`` to    |
-|             |                            | verify that ElasticSearch is      |
-|             |                            | running.                          |
-+-------------+----------------------------+-----------------------------------+
++---------------+----------------------------------+-----------------------------------+
+|    Context    |    Error                         |    Resolution                     |
++===============+==================================+===================================+
+| pip install   | Could not find a version         | Verify your credentials for the   |
+|               | that satisfies the               | MindMeld Learning Center.         |
+|               | requirement mmworkbench          |                                   |
++---------------+----------------------------------+-----------------------------------+
+| any           | Code issue                       | Upgrade to latest build:          |
+|               |                                  | ``pip install mmworkbench -U``    |
++---------------+----------------------------------+-----------------------------------+
+| Elasticsearch | ``KnowledgeBaseConnectionError`` | Run ``curl localhost:9200`` to    |
+|               |                                  | verify that Elasticsearch is      |
+|               |                                  | running.                          |
++---------------+----------------------------------+-----------------------------------+
