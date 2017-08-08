@@ -785,6 +785,7 @@ Workbench does not assume that any of the system entities are needed in your app
 
 .. note::
    Workbench defines ``sys_time`` and ``sys_interval`` as subtly different entities.
+
   |
    The ``sys_time`` entity connotes a *value of a single unit of time*, where the unit can be a date, an hour, a week, and so on. For example, “tomorrow” is a ``sys_time`` entity because it corresponds to a single (unit) date, like "2017-07-08."
   |

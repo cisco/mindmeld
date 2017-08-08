@@ -36,7 +36,7 @@ The full list of intents for all domains is illustrated below.
 
 .. image:: /images/hierarchy_home_assistant.png
 
-There are two types of entities: :doc:`Custom Entities <../userguide/entity_recognizer>` and :doc:`System Entities <../userguide/system_entities>`. Custom entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are ``sys_temperature``, ``sys_time``, ``sys_interval``, etc.
+There are two types of entities: :doc:`Custom Entities <../userguide/entity_recognizer>` and :ref:`System Entities <system-entities>`. Custom entities are defined and used by application; the full list of values for each entity is defined in the file ``gazetteer.txt`` under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are ``sys_temperature``, ``sys_time``, ``sys_interval``, etc.
 
 Home assistant defines and uses the following custom entities, which are grouped by intents below:
 
