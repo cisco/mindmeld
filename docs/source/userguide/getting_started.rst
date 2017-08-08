@@ -8,15 +8,21 @@ Pre-requisites
 
 For this release of MindMeld Workbench, you should
 
- - be a seasoned Python developer with machine learning (ML) knowhow and experience with one or more popular ML frameworks or libraries
+ - be a seasoned Python developer with machine learning (ML) knowhow and experience with one or more popular ML frameworks or libraries, and
+ - have a username and password for the MindMeld Learning Center.
 
- - have a username and password for the MindMeld Learning Center
+Python 2.7 and 3.3+ will work but 3.3+ is recommended.
 
-The rest of this section describes how to install software pre-requisites on Mac OS X. Other platforms may work too but are not supported.
+You can pick the mechanism to install Workbench. The supported choices are as follows:
+
+- Docker
+- `virtualenv <https://virtualenv.pypa.io/en/stable/>`_
+
+Note that only Mac OS X is supported currently. Other platforms may work too but are not supported.
 
 
-Optional: Docker
-^^^^^^^^^^^^^^^^
+Docker
+^^^^^^^^
 
 If you're going to be using Workbench often, we recommend you do the full install and setup all dependencies locally. That will provide the optimal performance and experience. But if you want to get a quick taste of workbench, you can get setup with a provided ``Dockerfile`` and these steps:
 
@@ -36,7 +42,7 @@ Proceed to :ref:`Begin New Project <getting_started_begin_new_project>`.
 
 .. _getting_started_automated_setup:
 
-Setup on Mac OS X
+virtualenv
 ^^^^^^^^^^^^^^^^^
 
 On a Mac OS machine, you can install dependencies for MindMeld Workbench and 
@@ -44,9 +50,9 @@ setup configuration files with the `mmworkbench_init.sh script <https://mindmeld
 
 A few things to note before you run the script:
 
-- The script installs the following components will be installed after a confirmation prompt: ``brew``, ``python``, ``pip``, ``virtualenv``, Java 8 and ElasticSearch. 
+- The script installs the following components after a confirmation prompt: ``brew``, ``python``, ``pip``, ``virtualenv``, Java 8 and ElasticSearch. 
 - You will be prompted to enter your mindmeld.com username and password. 
-- Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. Previous files are overwritten.
+- Two configuration files are created: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. Previous files are overwritten.
 
 When you're ready to go, run this command:
 
@@ -54,8 +60,26 @@ When you're ready to go, run this command:
 
   bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)"
 
-
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
+
+Here are the commands run by the script to install the required components:
+
++---------------+--------------------------------------------------------------------------------------------------------+
+|    Component  |    Command                                                                                             |
++===============+========================================================================================================+
+| brew          |  ``/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"``|
++---------------+--------------------------------------------------------------------------------------------------------+
+| python        |  ``brew install python``                                                                               |
++---------------+--------------------------------------------------------------------------------------------------------+
+| pip           |  ``sudo -H easy_install pip``                                                                          |
++---------------+--------------------------------------------------------------------------------------------------------+
+| virtualenv    |  ``sudo -H pip install --upgrade virtualenv``                                                          |
++---------------+--------------------------------------------------------------------------------------------------------+
+| Java 8        |  ``brew tap caskroom/cask && brew cask install java``                                                  |  
++---------------+--------------------------------------------------------------------------------------------------------+
+| ElasticSearch |  ``brew install elasticsearch && brew services start elasticsearch``                                   |
++---------------+--------------------------------------------------------------------------------------------------------+
+
 
 
 Install Workbench
@@ -191,8 +215,8 @@ Command-Line Interfaces
 
 MindMeld Workbench has two command-line interfaces for some of the common workflow tasks you'll be doing often:
 
-#. mmworkbench
-#. python app.py
+#. ``mmworkbench``
+#. ``python app.py``
 
 Builtin help is available with the standard `-h` flag.
 
@@ -241,7 +265,7 @@ Configure Logging
 
 Workbench adheres to the standard `Python logging mechanism <https://docs.python.org/3/howto/logging.html>`_. 
 The default logging level is ``WARNING``, which can be overridden with a config file or from code. 
-The INFO logging level can be useful to see what's going on:
+The ``INFO`` logging level can be useful to see what's going on:
 
 .. code-block:: python
   
@@ -253,18 +277,10 @@ configure_logs()
 
 There is a handy ``configure_logs()`` function available that wraps this and accepts 2 parameters: 
 
-#. `format message <https://docs.python.org/3/howto/logging.html#changing-the-format-of-displayed-messages>`_
-#. `logging level <https://docs.python.org/3/howto/logging.html#logging-levels>`_: in increasing order of severity, they are ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR`` and ``CRITICAL``.
+#. :data:`format`: The `logging format <https://docs.python.org/3/howto/logging.html#changing-the-format-of-displayed-messages>`_.
+#. :data:`level`: The `logging level <https://docs.python.org/3/howto/logging.html#logging-levels>`_.
 
-The method signature is:
-
-.. code-block:: python
- 
-   configure_logs(format="%(message)s", level=logging.WARNING)
-
-
-Sample Code
-^^^^^^^^^^^^
+Here's an example usage:
   
 .. code-block:: python
 
@@ -284,4 +300,11 @@ Troubleshooting
 | pip install | Could not find a version  | Verify your credentials for the   |
 |             | that satisfies the        | MindMeld Learning Center.         |
 |             | requirement mmworkbench   |                                   |
++-------------+---------------------------+-----------------------------------+
+| any         | Code issue                | Upgrade to latest build:          |
+|             |                           | ``pip install mmworkbench -U``    |
++-------------+---------------------------+-----------------------------------+
+|ElasticSearch| not running               | run ``curl localhost:9200`` to    |
+|             |                           | verify that ElasticSearch is      |
+|             |                           | running.                         |
 +-------------+---------------------------+-----------------------------------+

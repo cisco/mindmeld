@@ -85,6 +85,7 @@ Every Workbench developer should know the terms defined in this section. It's be
         |
         | The app's natural language reply to the user. It could be in the form of a text-based response, a spoken voice response, or both, depending on the platform capabilities. Fully automated `natural language response generation <https://en.wikipedia.org/wiki/Natural_language_generation>`_ is still an area of active academic research. Real-world applications today, including all the popular personal assistants, instead rely on canned responses (**templates**) with placeholders (**slots**) that are filled in by the app at runtime.
         |
+
         +-------------------------------+-----------------------------------------------------------------------------+
         | Template with unfilled slots  |'``{flight}`` will depart from ``{gate}`` of ``{terminal}`` at ``{time}``.'  |
         +-------------------------------+-----------------------------------------------------------------------------+

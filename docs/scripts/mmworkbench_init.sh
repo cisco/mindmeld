@@ -6,6 +6,8 @@
 set -e
 
 NEEDS_DEP_INSTALL=0
+NEEDS_JAVA=0
+NEEDS_VIRTUALENV=0
 
 function check_macos() {
 	platform=$(uname)
@@ -27,6 +29,15 @@ function check_dependency {
 				echo yes
 			else
 				echo older version $version found. 1.8+ needed.
+				NEEDS_JAVA=1
+				NEEDS_DEP_INSTALL=1
+			fi
+		elif [[ $command == "virtualenv" ]]; then
+			if [[ `$command --version 2> /dev/null` ]]; then
+				echo yes
+			else
+				echo no
+				NEEDS_VIRTUALENV=1
 				NEEDS_DEP_INSTALL=1
 			fi
 		else
@@ -46,25 +57,22 @@ function install_dependency {
 		if [[ $command == "brew" ]]; then
 			/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 		elif [[ $command == "pip" ]]; then
-			sudo easy_install pip
+			sudo -H easy_install pip
 		elif [[ $command == "java" ]]; then
 			brew tap caskroom/cask
 			brew cask install java
 	    elif [[ $command == "elasticsearch" ]]; then
 	    	brew install elasticsearch
 			brew services start elasticsearch 
-	    elif [[ $command == "virtualenv" ]]; then
-			sudo pip install --upgrade virtualenv
 	    else
 			brew install $command
 		fi
-	elif [[ $command == "java" ]]; then
-		version=$(java -version 2>&1 | head -1 | awk '{print $3}' | sed "s/\"//g")
-		if [[ ! $version == 1.8* ]]; then
-			echo "   " $command ... 
-			brew tap caskroom/cask
-			brew cask install java
-		fi
+	elif [[ ($command == "java") && (${NEEDS_JAVA} == 1) ]]; then
+		echo "   " $command ... 
+		brew tap caskroom/cask
+		brew cask install java
+    elif [[ ($command == "virtualenv") && (${NEEDS_VIRTUALENV} == 1) ]]; then
+		sudo -H pip install --upgrade virtualenv
 	fi
 }
 
@@ -97,7 +105,7 @@ if [[ ${NEEDS_DEP_INSTALL} == 1 ]]; then
 
 	# Install stuff
 	echo
-	echo Installing missing dependencies
+	echo Installing missing dependencies. You may be asked for sudo permissions.
 
 	install_dependency brew
 	install_dependency python
