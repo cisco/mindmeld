@@ -30,7 +30,7 @@ Install with Docker
 The ``Dockerfile`` provided by MindMeld contains Workbench and all its dependencies. Follow these steps to get started using Docker:
 
 #. First, `install Docker <https://www.docker.com/community-edition#/download>`_, and run it.
-#. Then, run these commands:
+#. Then, run these commands in a terminal (shell):
 
 .. code-block:: shell
 
