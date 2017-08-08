@@ -446,7 +446,7 @@ class Search:
 
         return new_search
 
-    def sort(self, field, sort_type, location=None):
+    def sort(self, field, sort_type=None, location=None):
         """Specify custom sort criteria.
 
         Args:
@@ -509,15 +509,22 @@ class Search:
 
             if self._clauses['query']:
                 es_query_clauses = []
-
+                es_boost_functions = []
                 for clause in self._clauses['query']:
-                    es_query_clauses.append(clause.build_query())
+                    query_clause, boost_functions = clause.build_query()
+                    es_query_clauses.append(query_clause)
+                    es_boost_functions.extend(boost_functions)
 
                 if self._ranking_config['query_clauses_operator'] == 'and':
                     es_query['query']['function_score']['query']['bool']['must'] = es_query_clauses
                 else:
                     es_query['query']['function_score']['query']['bool']['should'] = \
                         es_query_clauses
+
+                # add all boost functions for the query clause
+                # right now the only boost functions supported are exact match boosting for
+                # CNAME and synonym whitelists.
+                es_query['query']['function_score']['functions'].extend(es_boost_functions)
 
             if self._clauses['filter']:
                 es_filter_clauses = {
@@ -587,6 +594,8 @@ class Search:
     class QueryClause(Clause):
         """This class models a knowledge base query clause."""
 
+        DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT = 100
+
         def __init__(self, field, field_info, value, synonym_field=None):
             """Initialize a knowledge base query clause."""
             self.field = field
@@ -621,8 +630,7 @@ class Search:
                         {
                             "match": {
                                 self.field + ".normalized_keyword": {
-                                    "query": self.value,
-                                    "boost": 10
+                                    "query": self.value
                                 }
                             }
                         },
@@ -637,6 +645,18 @@ class Search:
                 }
             }
 
+            # Boost function for boosting conditions, e.g. exact match boosting
+            boost_functions = [
+                {
+                    "filter": {
+                        "match": {
+                            self.field + ".normalized_keyword": self.value
+                        }
+                    },
+                    "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT
+                }
+            ]
+
             # generate ES syntax for matching on synonym whitelist if available.
             if self.syn_field:
                 clause['bool']['should'].append(
@@ -650,8 +670,7 @@ class Search:
                                         {
                                             "match": {
                                                 self.syn_field + ".name.normalized_keyword": {
-                                                    "query": self.value,
-                                                    "boost": 10
+                                                    "query": self.value
                                                 }
                                             }
                                         },
@@ -677,7 +696,22 @@ class Search:
                     }
                 )
 
-            return clause
+                boost_functions.append(
+                    {
+                        "filter": {
+                            "nested": {
+                                "path": self.syn_field,
+                                "query": {
+                                    "match": {
+                                        self.syn_field + ".name.normalized_keyword": self.value
+                                    }
+                                }
+                            }},
+                        "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT
+                    }
+                )
+
+            return clause, boost_functions
 
         def validate(self):
             if not self.field_info.is_text_field():
@@ -774,6 +808,10 @@ class Search:
         SORT_DISTANCE = 'distance'
         SORT_TYPES = {SORT_ORDER_ASC, SORT_ORDER_DESC, SORT_DISTANCE}
 
+        # default weight for adjusting sort scores so that they will be on the same scale when
+        # combined with text relevance scores.
+        DEFAULT_SORT_WEIGHT = 30
+
         def __init__(self, field, field_info=None, sort_type=None, field_stats=None,
                      location=None):
             """Initialize a knowledge base sort clause"""
@@ -818,7 +856,8 @@ class Search:
                         "origin": origin,
                         "scale": scale
                     }
-                }
+                },
+                "weight": self.DEFAULT_SORT_WEIGHT
             }
 
             return sort_clause
