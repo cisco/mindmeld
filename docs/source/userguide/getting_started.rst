@@ -94,7 +94,7 @@ Here are the commands run by the script to install the required components:
 
 To prepare an isolated environment for Workbench installation using ``virtualenv``, follow the following steps.
 
-- Create your project folder and navigate to it:
+- Create a folder for containing all your Workbench projects, and navigate to it:
 
 .. code-block:: console
 
