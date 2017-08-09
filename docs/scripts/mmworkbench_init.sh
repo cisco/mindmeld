@@ -124,6 +124,16 @@ read -p "   Enter mindmeld.com username: " USERNAME
 echo -n "   Enter mindmeld.com password: "
 read -s PASSWORD
 echo
+echo
+RESULT=`curl -s -H "Content-Type: application/json" -X POST https://mindmeld.com/signin -d '{"username": "'$USERNAME'", "password": "'$PASSWORD'"}'`
+RESULT=$(echo $RESULT | sed "s/{//" | sed "s/\"//g" | sed "s/:.*//" )
+
+if [[ $RESULT == "error" ]]; then
+	echo ERROR: Invalid credentials entered. Aborting.
+	exit 1
+else
+	echo Credentials are good.
+fi
 
 ###
 # .mmworkbench/config
