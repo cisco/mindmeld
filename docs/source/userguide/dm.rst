@@ -1,25 +1,31 @@
 Working with the Dialogue Manager
 =================================
 
-The Dialogue Manager is the component responsible for managing the conversational aspect of your application. It uses pattern based rules to determine the dialogue state for each incoming request and implements handlers which execute business logic and return a natural language response to the user. Developing a dialogue manager for all but the simplest conversational apps can be a daunting task. Workbench mitigates the challenge by providing a pattern matching system and helpers for generating responses.
+The Dialogue Manager
+
+ - manages the conversational aspect of a Workbench application
+ - uses pattern-based rules to determine the dialogue state for each incoming request
+ - implements handlers which execute business logic and return a natural language response to the user
+
+Developing a dialogue manager can be a daunting task for all but the simplest conversational apps. Workbench mitigates the challenge by providing a pattern-matching system and helpers for generating responses.
 
 .. note::
 
     This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the section about defining the :ref:`Dialogue State Handlers <define_dialogue_state_handlers>`.
 
-The dialogue state is determined based on the request context and on the output from the natural language processor. When developing your application you will set up a system of rules to match requests to dialogue states using the a flexible syntax. Each dialogue state has a handler which contains logic to fulfill a user's request or gather more information if necessary and to generate a natural language response.
-
-The primary dialogue manager concepts are request context, dialogue state rules, dialogue state handlers, and the responder.
+Let's explore the main concepts you'll apply when you develop a dialogue manager in Workbench: *dialogue states*, *dialogue state rules*, and *dialogue state handlers*.
 
 Dialogue States
-~~~~~~~~~~~~~~~
+---------------
 
-Each dialogue state represents a task the conversational agent can complete. It is usually named according to this task. Note that the naming is from the perspective of the conversational agent, as opposed to the user's intent, which is from the perspective of the user. Dialogue state rules and handlers are implemented in the application container (also known as the ``app.py``).
+For every incoming request, the dialogue manager (DM) determines which dialogue state applies. When developing your application, you set up a system of rules to match requests to dialogue states, using a flexible syntax that Workbench provides. Each dialogue state represents a task that the conversational agent can complete. Usually, you name the dialogue state for the task it represents, for example 'welcome' or 'send_store_hours.' Name the dialogue states from the perspective of the conversational agent. (By contrast, you name intents from the user's perspective).
+
+Each dialogue state has a handler which contains logic to fulfill a user's request or gather more information if necessary, and to generate a natural language response. Dialogue state rules and handlers are implemented in ``app.py``, the :ref:`application container <app_container>`.
 
 Dialogue State Rules
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
-Dialogue State Rules match requests to dialogue states based on the request context including the output of the Natural Language Processor. Each rule can have a single domain, a single intent and a set of entity  can match based on a set of entity types.
+Dialogue state rules match requests to dialogue states based on the request context, including the output from the natural language processor. Each rule specifies what to match, in the following form: exactly one domain, one intent, and a set of entity types. In single-domain apps the domain is omitted; in all apps, the entity types are optional. The exception to all this is the `default` state, which must match all requests, and therefore has neither domain, intent, nor entity types.
 
 To better understand dialogue state rules, let's jump into the skeleton of a dialogue manager for an app that provides store hours.
 
@@ -58,67 +64,85 @@ To better understand dialogue state rules, let's jump into the skeleton of a dia
       app.cli()
 
 
-This dialogue manager has six dialogue states: ``welcome``, ``say_goodbye``, ``prompt_for_store``, ``send_store_hours``, ``send_help``, and ``default``. The handler for each state is defined by the function of the same name. More on dialogue state handlers later. The rules for each state are specified by decorating a dialogue state handler with :py:meth:`app.handle`. As you can see in the example above, we use ``domain``, ``intent``, and ``has_entity`` parameters to specify the details of a rule. You can also use ``has_entities`` to specify multiple entities. A request satisfies a rule when its NLP result has the same domain, and/or intent, if specified, and has entities of the specified types. A dialogue state can have multiple rules, and if any of them match, the dialogue.
+This dialogue manager has six dialogue states: ``welcome``, ``say_goodbye``, ``prompt_for_store``, ``send_store_hours``, ``send_help``, and ``default``.
+
+In each state:
+
+ - There is a function whose name is the name of the state. This function defines the handler. (In the example, ``pass`` substitutes for detailed definitions, since we explain handlers in the next section.)
+
+ - Rules are specified by decorating the handler with the :py:meth:`app.handle` method, whose parameters can include ``domain``, ``intent``, and ``has_entity``. To specify multiple entities, we would use ``has_entities``.
+
+When the NLP result of a request and a dialogue state rule have the same combination of domain, intent, and entity types, then the request satisfies (matches) the rule. A dialogue state can have multiple rules, and if any of them match the request, the dialogue handler responds.
 
 Tie Breaking
 ^^^^^^^^^^^^
 
-A request may satisfy multiple rules, but the dialogue manager will always resolve to exactly one dialogue state. When a single request satisfies multiple rules, the most specific rule is used. The *specificity* of a rule is based on it's parameters. A rule with no parameters, like that used for the ``default`` dialogue state in our example above is the least specific rule. A rule which has a domain has some specificity, a rule which specifies an intent is more specific, and rules which include entities are the still more specific. Using more entities will further increase a rule's specificity. If a request matches two requests with the same specificity, the rule which was specified earliest in an ``app.py`` will be used.
+The DM always resolves to exactly one dialogue state.
+
+Rules are considered more or less *specific* according to what parameters they have:
+
+ - The least specific rule is one (like ``default`` in the example above) with no parameters
+ - A rule with a domain has some specificity
+ - A rule with an intent is more specific
+ - A rule with entities is still more specific
+ - A rule with *the most* entities is the most specific
+
+When a single request satisfies multiple rules, the DM chooses the most specific rule. If a request matches two requests with the same specificity, the DM chooses the rule that appears earliest in ``app.py``.
 
 Dialogue State Handlers
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
-Dialogue State Handlers are the functions which are invoked when a request matches one of the corresponding rules. Within a handler the developer can execute arbitrary code. Because different applications might
+Dialogue state handlers are the functions invoked when a request matches a rule for the handler's corresponding dialogue state. Workbench places no restrictions on the code within a handler. This is important because requirements differ for different applications, and developers must have the flexibility to organize code as they wish.
 
-Dialogue State Handlers have two arguments: ``context`` and ``responder``.
+Dialogue state handlers take two arguments: ``context`` and ``responder``.
 
 ``context``
 ^^^^^^^^^^^
 
-The ``context`` object is a dictionary containing the contextual information needed to manage dialogues. You can use this information to fulfill user requests, or determine additional information needed from the user, as well as to fill slots in your natural language templates.
+The ``context`` object is a dictionary containing the contextual information needed to manage dialogues. You can use this information to fulfill user requests, determine additional information needed from the user, or to fill slots in your natural language templates.
 
 +----------------+-------------------------------------------------------------------------------+
 | Key            | Value                                                                         |
 +================+===============================================================================+
-| ``'request'``  | a read-only dictionary containing the original user text and session details. |
+| ``'request'``  | Dictionary containing the original user text and session details (read-only)  |
 +----------------+-------------------------------------------------------------------------------+
-| ``'frame'``    | a dictionary which should be used to store information across dialogue turns, |
-|                | not intended for use by front-end clients.                                    |
+| ``'frame'``    | Dictionary for storing information across dialogue turns                      |
+|                | (not for use by front-end clients)                                            |
 +----------------+-------------------------------------------------------------------------------+
-| ``'domain'``   | the domain of the current message as classified by the natural                |
-|                | language processor.                                                           |
+| ``'domain'``   | Domain of the current message as classified by the natural                    |
+|                | language processor                                                            |
 +----------------+-------------------------------------------------------------------------------+
-| ``'intent'``   | the intent of the current message as classified by the natural                |
-|                | language processor.                                                           |
+| ``'intent'``   | Intent of the current message as classified by the natural                    |
+|                | language processor                                                            |
 +----------------+-------------------------------------------------------------------------------+
-| ``'entities'`` | the entities recognized in the current message by the natural                 |
-|                | language processor.                                                           |
+| ``'entities'`` | Entities in the current message, as recognized by the natural                 |
+|                | language processor                                                            |
 +----------------+-------------------------------------------------------------------------------+
-| ``'history'``  | a list containing previous requests and responses in the                      |
-|                | current conversation.                                                         |
+| ``'history'``  | List of previous requests and responses in the                                |
+|                | current conversation                                                          |
 +----------------+-------------------------------------------------------------------------------+
 
 ``responder``
 ^^^^^^^^^^^^^
 
-The ``responder`` object is used to send responses to the user. ``responder`` allows you to use templated natural language responses, as well as additional metadata needed to fulfill the request on the client endpoint. The ``responder`` has methods which accept template strings and a ``slots`` attribute which can store values to fill in the templates.
+Use the ``responder`` object to send responses to the user. You can use templated natural language responses, as well as metadata needed to fulfill the request on the client endpoint. The ``responder`` has methods which accept template strings, and a ``slots`` attribute to store values with which to fill in the templates.
 
 +------------------------------+-----------------------------------------------------------------+
 | Method                       | Description                                                     |
 +------------------------------+-----------------------------------------------------------------+
-| :py:meth:`responder.reply`   | Used to send a text or voice response and end the dialogue.     |
+| :py:meth:`responder.reply`   | Used to send a text or voice response and end the dialogue      |
 +------------------------------+-----------------------------------------------------------------+
 | :py:meth:`responder.prompt`  | Used to send a text or voice response and wait for a            |
-|                              | user response.                                                  |
+|                              | user response                                                   |
 +------------------------------+-----------------------------------------------------------------+
-| :py:meth:`responder.respond` | Used to send an arbitrary client action object.                 |
+| :py:meth:`responder.respond` | Used to send an arbitrary client action object                  |
 +------------------------------+-----------------------------------------------------------------+
 
 .. note::
 
-   :py:meth:`responder.reply` and :py:meth:`responder.prompt` accept a single template, or a list of templates. If a list is provided, one item will be selected at random. This makes your conversational agent a little more varied and life-like.
+   :py:meth:`responder.reply` and :py:meth:`responder.prompt` accept a single template, or a list of templates. If a list is provided, the DM selects one item at random. This makes your conversational agent a little more varied and life-like.
 
-Let's take a look at a basic example of a dialogue state handler for greeting a user.
+Consider a basic dialogue state handler that greets a user by name, retrieving the user's name from the request session.
 
 .. code:: python
 
@@ -132,19 +156,12 @@ Let's take a look at a basic example of a dialogue state handler for greeting a 
           templates = ['Hello', 'Hey!', 'How are you?']
       responder.prompt(templates)
 
-This handler attempts to use the user's name, retrieving it from the request session.
 
-Examples
-~~~~~~~~
+Next Steps
+----------
 
-Review the following documents for more examples of dialogue manager implementations.
+The concepts and techniques described up to this point are exactly what you will use in coding the dialogue handlers you defined (as directed in :ref:`Step 4 <define_dialogue_state_handlers>` of the Step-By-Step Guide). Before you begin, you may want to study how the dialogue managers are implemented in the Workbench blueprint apps:
 
- - :ref:`Step 4 <define_dialogue_state_handlers>` of the Step-By-Step Guide
- - :doc:`Food Ordering <../blueprints/food_ordering>` Blueprint
- - :doc:`Video Discovery <../blueprints/video_discovery>` Blueprint
- - :doc:`Home Assistant <../blueprints/home_assistant>` Blueprint
-
-
-
-
-
+ - :doc:`Food Ordering <../blueprints/food_ordering>`
+ - :doc:`Video Discovery <../blueprints/video_discovery>`
+ - :doc:`Home Assistant <../blueprints/home_assistant>`
