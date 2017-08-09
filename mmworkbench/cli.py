@@ -18,8 +18,8 @@ import click_log
 
 from . import path
 from .components import Conversation, QuestionAnswerer
-from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError,
-                         WorkbenchError)
+from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
+                         KnowledgeBaseError, WorkbenchError, AuthNotFoundError)
 
 from ._util import blueprint
 from ._version import current as __version__
@@ -209,6 +209,8 @@ def setup_blueprint(es_host, skip_kb, blueprint_name, app_path):
     try:
         blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
     except ValueError as e:
+        logger.error(e)
+    except AuthNotFoundError as e:
         logger.error(e)
     except KnowledgeBaseConnectionError as e:
         logger.error(e.message)
