@@ -115,8 +115,8 @@ class EntityResolver(object):
 
                 yield action
 
-        load_index(app_namespace, index_name, _action_generator(data), DEFAULT_ES_SYNONYM_MAPPING,
-                   DOC_TYPE, es_host, es_client)
+        load_index(app_namespace, index_name, _action_generator(data), len(data),
+                   DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE, es_host, es_client)
 
     def fit(self, clean=False):
         """Loads an entity mapping file to Elasticsearch for text relevance based entity resolution.

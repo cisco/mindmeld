@@ -204,6 +204,18 @@ class QuestionAnswerer(object):
             connect_timeout (int, optional): The amount of time for a
             connection to the Elasticsearch host
         """
+        def _doc_count(data_file):
+            with open(data_file) as data_fp:
+                line = data_fp.readline()
+                data_fp.seek(0)
+                if line.strip() == '[':
+                    docs = json.load(data_fp)
+                    return len(docs)
+                else:
+                    count = 0
+                    for _ in data_fp:
+                        count += 1
+                    return count
 
         def _doc_generator(data_file):
             def transform(doc):
@@ -225,7 +237,9 @@ class QuestionAnswerer(object):
                         doc = json.loads(line)
                         yield transform(doc)
 
-        load_index(app_namespace, index_name, _doc_generator(data_file), DEFAULT_ES_QA_MAPPING,
+        docs = _doc_generator(data_file)
+        docs_count = _doc_count(data_file)
+        load_index(app_namespace, index_name, docs, docs_count, DEFAULT_ES_QA_MAPPING,
                    DOC_TYPE, es_host, es_client, connect_timeout=connect_timeout)
 
 
