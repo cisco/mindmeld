@@ -91,6 +91,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         # If there is a prefix, we have to add one for the whitespace
         start = len(prefix) + 1 if len(prefix) else 0
         end = start - 1 + len(' '.join(tokens))
+
         norm_span = Span(start, end)
         entity = QueryEntity.from_query(query, normalized_span=norm_span, entity_type=entity_type)
         entities.append(entity)
@@ -103,6 +104,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         # If there is a prefix, we have to add one for the whitespace
         start = len(prefix) + 1 if len(prefix) else 0
         end = start - 1 + len(' '.join(normalized_tokens[token_start:token_end]))
+
         norm_span = Span(start, end)
 
         span = query.transform_span(norm_span, TEXT_FORM_NORMALIZED, TEXT_FORM_RAW)
@@ -126,7 +128,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         if (entity_start is not None and
                 (iob in (O_TAG, B_TAG, S_TAG) or ent_type != prev_ent_type)):
             logger.debug("Entity closed at prev")
-            if _is_system_entity(ent_type):
+            if _is_system_entity(prev_ent_type):
                 _append_system_entity(entity_start, tag_idx, prev_ent_type)
             else:
                 _append_entity(entity_start, prev_ent_type, entity_tokens)
@@ -171,7 +173,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
                     entity_start = tag_idx
 
         # Append the current token to the current entity, if applicable.
-        if iob != O_TAG and entity_start is not None:
+        if iob != O_TAG and entity_start is not None and not _is_system_entity(ent_type):
             entity_tokens.append(normalized_tokens[tag_idx])
 
         # Close the entity if the tag indicates it closed
@@ -190,7 +192,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
     # Handle entities that end with the end of the query
     if entity_start is not None:
         logger.debug("Entity closed at end")
-        if _is_system_entity(ent_type):
+        if _is_system_entity(prev_ent_type):
             _append_system_entity(entity_start, len(tags), prev_ent_type)
         else:
             _append_entity(entity_start, prev_ent_type, entity_tokens)
