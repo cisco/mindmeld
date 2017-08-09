@@ -16,7 +16,8 @@ from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, 
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
-from .tagging import get_tags_from_entities, get_entities_from_tags
+from .tagging import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
+                      BoundaryCounts)
 logger = logging.getLogger(__name__)
 
 # model scoring types
@@ -540,19 +541,27 @@ class EntityModelEvaluation(SequenceModelEvaluation):
     """
     def _get_entity_boundary_stats(self):
         """
-        TODO: calculate le, be, and lbe as described here:
+        Calculate le, be, lbe, tp, tn, fp, fn as defined here:
         https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html
         """
-        # raw_results = self.raw_results()
-        lbe = None
-        be = None
-        le = None
-        return lbe, be, le
+        boundary_counts = BoundaryCounts()
+        raw_results = self.raw_results()
+        for expected_sequence, predicted_sequence in zip(raw_results.predicted,
+                                                         raw_results.expected):
+            expected_seq_labels = [raw_results.text_labels[i] for i in expected_sequence]
+            predicted_seq_labels = [raw_results.text_labels[i] for i in predicted_sequence]
+            boundary_counts = get_boundary_counts(expected_seq_labels, predicted_seq_labels,
+                                                  boundary_counts)
+        return boundary_counts.to_dict()
+
+    def _print_boundary_stats(self, boundary_counts):
+        print(boundary_counts)
 
     def print_stats(self):
         stats = super(EntityModelEvaluation, self).print_stats()
         boundary_stats = self._get_entity_boundary_stats()
         stats['boundary_stats'] = boundary_stats
+        self._print_boundary_stats(boundary_stats)
         return stats
 
 
