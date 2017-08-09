@@ -335,4 +335,7 @@ Troubleshooting
 | Elasticsearch | ``KnowledgeBaseConnectionError`` | Run ``curl localhost:9200`` to    |
 |               |                                  | verify that Elasticsearch is      |
 |               |                                  | running.                          |
+|               |                                  | If you're using Docker, you can   |
+|               |                                  | increase memory to 4GB from       |
+|               |                                  | *Preferences | Advanced*.         |
 +---------------+----------------------------------+-----------------------------------+
