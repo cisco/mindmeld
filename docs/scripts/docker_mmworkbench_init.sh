@@ -9,9 +9,9 @@ echo
 echo Downloading Dockerfile and dependencies
 echo
 
-curl -s https://mindmeld.com/docker/wb3.tar.gz | tar xzvf -
-# curl -s https://mindmeld.com/docker/mindmeld_workbench.tar.gz | tar xzvf -
-cd wb3
+# curl -s https://mindmeld.com/docker/wb3.tar.gz | tar xzvf -
+curl -s https://mindmeld.com/docker/mindmeld_workbench.tar.gz | tar xzvf -
+cd mindmeld_workbench
 
 echo
 echo Building Docker image
