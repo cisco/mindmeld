@@ -230,7 +230,7 @@ Next, we get the entity recognizer for the desired intent and invoke its :meth:`
   ...                param_selection=hyperparam_settings)
   >>> recognizer.dump('models/experimentation/entity_model_memm.pkl')
 
-We have now trained and saved the ``get_name`` entity recognizer for the ``get_store_hours`` intent. If more entity recognizers were required, we would have repeated the same procedure for each entity in each intent. We test the trained entity recognizer using its :meth:`predict()` method.
+We have now trained and saved the entity recognizer for the ``get_store_hours`` intent. If more entity recognizers were required, we would have repeated the same procedure for each entity in each intent. We test the trained entity recognizer using its :meth:`predict()` method.
 
 .. code-block:: python
 
