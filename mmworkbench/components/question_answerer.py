@@ -453,7 +453,8 @@ class Search:
             field (str): knowledge base field for sort.
             sort_type (str): sorting type. valid values are 'asc', 'desc' and 'distance'. 'asc' and
                              'desc' can be used to sort numeric or date fields and 'distance' can
-                             be used to sort by distance on geo_point fields
+                             be used to sort by distance on geo_point fields. Default sort type
+                             is 'desc' if not specified.
             location (str): location (lat, lon) in geo_point format to be used as origin when
                             sorting by 'distance'
         """
