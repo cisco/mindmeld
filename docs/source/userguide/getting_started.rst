@@ -30,16 +30,15 @@ Install with Docker
 The ``Dockerfile`` provided by MindMeld contains Workbench and all its dependencies. Follow these steps to get started using Docker:
 
 #. First, `install Docker <https://www.docker.com/community-edition#/download>`_, and run it.
-#. Then, run these commands in a terminal (shell):
+#. Then, open a terminal (shell) and run this command:
 
 .. code-block:: shell
 
-   $ curl -s https://mindmeld.com/docker/wb3.tar.gz | tar xzvf -
-   $ cd wb3
-   $ ./buildme.sh
-   $ ./runme.sh
+  $ bash -c "$(curl -s  https://mindmeld.com/docs/scripts/docker_mmworkbench_init.sh)"
 
 You will be prompted for your mindmeld.com username and password. The build will take a few minutes. It sets up all dependencies and drops you inside a container.
+
+If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
 Proceed to :ref:`Begin New Project <getting_started_begin_new_project>`.
 
