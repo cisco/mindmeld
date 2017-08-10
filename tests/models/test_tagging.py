@@ -147,3 +147,53 @@ class TestTagging:
         processed_query = self.nlp.create_query(query)
         res_entity = tagging.get_entities_from_tags(processed_query, tags)
         assert len(res_entity) == 2
+
+    test_data_7 = [
+        (['O|', 'O|', 'B|A', 'I|A', 'O|'],
+         ['O|', 'O|', 'B|A', 'I|A', 'O|'],
+         {'tn': 2, 'tp': 1}),
+        (['O|', 'O|', 'O|', 'B|A', 'I|A', 'O|'],
+         ['O|', 'O|', 'B|A', 'I|A', 'O|', 'O|'],
+         {'tn': 2, 'be': 1}),
+        (['O|', 'O|', 'B|A', 'I|A', 'O|'],
+         ['O|', 'O|', 'O|', 'O|', 'O|'],
+         {'tn': 2, 'fn': 1}),
+        (['O|', 'O|', 'O|', 'O|', 'O|'],
+         ['O|', 'O|', 'B|A', 'I|A', 'O|'],
+         {'tn': 2, 'fp': 1}),
+        (['O|', 'O|', 'B|A', 'I|A', 'O|'],
+         ['O|', 'O|', 'B|B', 'I|B', 'O|'],
+         {'tn': 2, 'le': 1}),
+        (['O|', 'O|', 'O|', 'B|A', 'I|A', 'O|'],
+         ['O|', 'O|', 'B|B', 'I|B', 'O|', 'O|'],
+         {'tn': 2, 'lbe': 1}),
+        (['O|', 'O|'],
+         ['O|', 'O|'],
+         {'tn': 1}),
+        ([],
+         [],
+         {}),
+        (['B|A', 'I|A'],
+         ['B|A', 'I|A'],
+         {'tp': 1}),
+        (['B|A', 'I|A'],
+         ['B|B', 'I|B'],
+         {'le': 1}),
+        (['O|', 'B|A', 'I|A'],
+         ['B|B', 'I|B', 'O|'],
+         {'lbe': 1}),
+        (['O|', 'B|A', 'I|A', 'O|', 'B|C', 'O|'],
+         ['B|B', 'I|B', 'O|', 'O|', 'B|C', 'B|B'],
+         {'lbe': 1, 'tn': 1, 'tp': 1, 'fp': 1}),
+        (['O|', 'B|A', 'I|A', 'B|B', 'I|B', 'O|'],
+         ['B|A', 'I|A', 'O|', 'O|', 'B|A', 'I|A'],
+         {'lbe': 1, 'be': 1})
+    ]
+
+    @pytest.mark.parametrize("expected,predicted,expected_counts", test_data_7)
+    def test_get_boundary_counts(self, expected, predicted, expected_counts):
+        predicted_counts = tagging.get_boundary_counts(expected, predicted).to_dict()
+
+        for key in predicted_counts.keys():
+            if predicted_counts[key] != expected_counts.get(key, 0):
+                assert False
