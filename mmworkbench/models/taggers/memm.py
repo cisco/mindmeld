@@ -22,6 +22,7 @@ class MemmModel(Tagger):
         self.set_params(**parameters)
 
     def fit(self, examples, labels):
+        self._config = self._passed_params.get('config', None)
         self._class_encoder = SKLabelEncoder()
         self._feat_vectorizer = DictVectorizer()
         self._label_encoder = get_label_encoder(self._config)

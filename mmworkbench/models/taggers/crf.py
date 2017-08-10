@@ -16,20 +16,21 @@ logger = logging.getLogger(__name__)
 
 class ConditionalRandomFields(Tagger):
     """A Conditional Random Fields model."""
-    def __init__(self, config):
-        super().__init__(config)
-        self._feat_binner = self._get_feature_binner()
+    def __init__(self, **parameters):
+        self.set_params(**parameters)
 
-    def fit(self, examples, labels, resources=None):
-        self._resources = resources
+    def fit(self, examples, labels):
+        self._config = self._passed_params.get('config', None)
+        self._feat_binner = self._get_feature_binner()
+        self._tag_scheme = self._config.model_settings.get('tag_scheme', 'IOB').upper()
         # Extract features and classes
         all_tags = []
         for idx, label in enumerate(labels):
             all_tags.append(get_tags_from_entities(examples[idx], label, self._tag_scheme))
 
         X = self._get_features(examples, fit=True)
-        self._clf = self._fit(X, all_tags, self.config.params)
-        self._current_params = self.config.params
+        self._clf = self._fit(X, all_tags, self._config.params)
+        self._current_params = self._config.params
         return self
 
     def predict(self, examples):
@@ -65,8 +66,8 @@ class ConditionalRandomFields(Tagger):
         Returns:
             (list dict): features
         """
-        return extract_sequence_features(example, self.config.example_type,
-                                         self.config.features, self._resources)
+        return extract_sequence_features(example, self._config.example_type,
+                                         self._config.features, self._resources)
 
     def _preprocess_data(self, X, fit=False):
         """Converts data into formats of CRF suite.
