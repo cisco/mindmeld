@@ -86,8 +86,8 @@ python setup.py bdist_wheel --universal
 
 ### Publishing to PyPI
 
-You can publish to pypi.<dev||staging||prod> by pushing the .whl to s3://mindmeld-pypi/<dev||staging||prod>
+You can publish to pypi.<develop||staging||master> by pushing the .whl to s3://mindmeld-pypi/<develop||staging||master>
 
 ```
-aws s3 cp dist/mmworkbench-{new-version}-py2.py3-none-any.whl s3://mindmeld-pypi/<develop||staging||prod>/
+aws s3 cp dist/mmworkbench-{new-version}-py2.py3-none-any.whl s3://mindmeld-pypi/<develop||staging||master>/
 ```
