@@ -546,8 +546,8 @@ class EntityModelEvaluation(SequenceModelEvaluation):
         """
         boundary_counts = BoundaryCounts()
         raw_results = self.raw_results()
-        for expected_sequence, predicted_sequence in zip(raw_results.predicted,
-                                                         raw_results.expected):
+        for expected_sequence, predicted_sequence in zip(raw_results.expected,
+                                                         raw_results.predicted):
             expected_seq_labels = [raw_results.text_labels[i] for i in expected_sequence]
             predicted_seq_labels = [raw_results.text_labels[i] for i in predicted_sequence]
             boundary_counts = get_boundary_counts(expected_seq_labels, predicted_seq_labels,

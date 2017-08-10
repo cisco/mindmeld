@@ -192,7 +192,28 @@ class TestTagging:
 
     @pytest.mark.parametrize("expected,predicted,expected_counts", test_data_7)
     def test_get_boundary_counts(self, expected, predicted, expected_counts):
-        predicted_counts = tagging.get_boundary_counts(expected, predicted).to_dict()
+        predicted_counts = tagging.get_boundary_counts(expected, predicted,
+                                                       tagging.BoundaryCounts()).to_dict()
+
+        for key in predicted_counts.keys():
+            if predicted_counts[key] != expected_counts.get(key, 0):
+                assert False
+
+    test_data_8 = [
+        ([['B|A', 'I|A'], ['B|A', 'I|A'], ['O|', 'B|A', 'I|A'],
+          ['O|', 'B|A', 'I|A', 'O|', 'B|C', 'O|']],
+         [['B|A', 'I|A'], ['B|B', 'I|B'], ['B|B', 'I|B', 'O|'],
+          ['B|B', 'I|B', 'O|', 'O|', 'B|C', 'B|B']],
+         {'tp': 2, 'tn': 1, 'le': 1, 'fp': 1, 'lbe': 2})
+    ]
+
+    @pytest.mark.parametrize("expected,predicted,expected_counts", test_data_8)
+    def test_get_boundary_counts_sequential(self, expected, predicted, expected_counts):
+        boundary_counts = tagging.BoundaryCounts()
+        for expected_sequence, predicted_sequence in zip(expected, predicted):
+            boundary_counts = tagging.get_boundary_counts(expected_sequence, predicted_sequence,
+                                                          boundary_counts)
+        predicted_counts = boundary_counts.to_dict()
 
         for key in predicted_counts.keys():
             if predicted_counts[key] != expected_counts.get(key, 0):

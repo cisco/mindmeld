@@ -206,14 +206,14 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
 
 
 class BoundaryCounts():
-    def __init__(self, le=0, be=0, lbe=0, tp=0, tn=0, fp=0, fn=0):
-        self.le = le
-        self.be = be
-        self.lbe = lbe
-        self.tp = tp
-        self.tn = tn
-        self.fp = fp
-        self.fn = fn
+    def __init__(self):
+        self.le = 0
+        self.be = 0
+        self.lbe = 0
+        self.tp = 0
+        self.tn = 0
+        self.fp = 0
+        self.fn = 0
 
     def to_dict(self):
         return {'le': self.le, 'be': self.be, 'lbe': self.lbe,
@@ -271,7 +271,7 @@ def _determine_count_type(last_pred_entity, last_exp_entity, boundary_counts):
     return boundary_counts
 
 
-def get_boundary_counts(expected_sequence, predicted_sequence, boundary_counts=BoundaryCounts()):
+def get_boundary_counts(expected_sequence, predicted_sequence, boundary_counts):
     # Initialize values
 
     print(expected_sequence)
