@@ -569,9 +569,10 @@ class EntityModelEvaluation(SequenceModelEvaluation):
 
     def print_stats(self):
         stats = super(EntityModelEvaluation, self).print_stats()
-        boundary_stats = self._get_entity_boundary_stats()
-        stats['boundary_stats'] = boundary_stats
-        self._print_boundary_stats(boundary_stats)
+        if self._tag_scheme == 'IOB':
+            boundary_stats = self._get_entity_boundary_stats()
+            stats['boundary_stats'] = boundary_stats
+            self._print_boundary_stats(boundary_stats)
         return stats
 
 
