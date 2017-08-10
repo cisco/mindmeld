@@ -555,6 +555,16 @@ class EntityModelEvaluation(SequenceModelEvaluation):
         return boundary_counts.to_dict()
 
     def _print_boundary_stats(self, boundary_counts):
+        title_format = "{:>12}" * (len(boundary_counts))
+        table_titles = boundary_counts.keys()
+        stat_row_format = "{:>12}" * (len(boundary_counts))
+        print("Boundary Statistics: \n")
+        print(title_format.format(*table_titles))
+        row = []
+        for stat in table_titles:
+            row.append(boundary_counts[stat])
+        print(stat_row_format.format(*row))
+        print("\n\n")
         print(boundary_counts)
 
     def print_stats(self):

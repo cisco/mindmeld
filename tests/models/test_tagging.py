@@ -187,7 +187,10 @@ class TestTagging:
          {'lbe': 1, 'tn': 1, 'tp': 1, 'fp': 1}),
         (['O|', 'B|A', 'I|A', 'B|B', 'I|B', 'O|'],
          ['B|A', 'I|A', 'O|', 'O|', 'B|A', 'I|A'],
-         {'lbe': 1, 'be': 1})
+         {'lbe': 1, 'be': 1}),
+        (['O|', 'O|', 'B|A', 'I|A'],
+         ['O|', 'O|', 'B|A', 'O|'],
+         {'tn': 1, 'be': 1})
     ]
 
     @pytest.mark.parametrize("expected,predicted,expected_counts", test_data_7)
@@ -197,6 +200,7 @@ class TestTagging:
 
         for key in predicted_counts.keys():
             if predicted_counts[key] != expected_counts.get(key, 0):
+                print("predicted counts: {}".format(predicted_counts))
                 assert False
 
     test_data_8 = [

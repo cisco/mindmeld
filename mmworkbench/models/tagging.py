@@ -232,9 +232,16 @@ def _contains_O(entity):
     return False
 
 
+def _all_O(entity):
+    for token in entity:
+        if token[0] != O_TAG:
+            return False
+    return True
+
+
 def _is_boundary_error(pred_entity, exp_entity):
-    trimmed_pred_entity = [token for token in pred_entity if token[0] != O_TAG]
-    trimmed_exp_entity = [token for token in exp_entity if token[0] != O_TAG]
+    trimmed_pred_entity = [token[1] for token in pred_entity if token[0] == B_TAG]
+    trimmed_exp_entity = [token[1] for token in exp_entity if token[0] == B_TAG]
     return trimmed_pred_entity == trimmed_exp_entity
 
 
@@ -251,21 +258,21 @@ def _determine_count_type(last_pred_entity, last_exp_entity, boundary_counts):
     # TP if both are the same
     if last_pred_entity == last_exp_entity:
         boundary_counts.tp += 1
+    # FP if entity predicted but not expected
+    elif _all_O(last_exp_entity):
+        boundary_counts.fp += 1
+    # FN if entity expected but not predicted
+    elif _all_O(last_pred_entity):
+        boundary_counts.fn += 1
     # LE if wrong entity predicted
     elif not _contains_O(last_pred_entity) and not _contains_O(last_exp_entity):
         boundary_counts.le += 1
     # BE
-    elif _contains_O(last_pred_entity) and _contains_O(last_exp_entity):
+    elif _contains_O(last_pred_entity) or _contains_O(last_exp_entity):
         if _is_boundary_error(last_pred_entity, last_exp_entity):
             boundary_counts.be += 1
         else:
             boundary_counts.lbe += 1
-    # FP if entity predicted but not expected
-    elif _contains_O(last_exp_entity):
-        boundary_counts.fp += 1
-    # FN if entity expected but not predicted
-    elif _contains_O(last_pred_entity):
-        boundary_counts.fn += 1
     else:
         print('no known count type detected')
     return boundary_counts
@@ -273,11 +280,6 @@ def _determine_count_type(last_pred_entity, last_exp_entity, boundary_counts):
 
 def get_boundary_counts(expected_sequence, predicted_sequence, boundary_counts):
     # Initialize values
-
-    print(expected_sequence)
-    print(predicted_sequence)
-    print(boundary_counts.to_dict())
-
     in_coding_region = False
     start = True
     last_pred_entity = []
