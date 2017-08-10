@@ -105,13 +105,13 @@ To prepare an isolated environment for Workbench installation using ``virtualenv
 .. code-block:: console
 
   $ virtualenv .             # for Python 2.7
-  $ virtualenv -p python3 .  # for Python 3.x
+  $ virtualenv -p python3 .  # for Python 3.x (recommended)
 
 - Activate the virtual environment:
 
 .. code-block:: console
 
-  $ virtualenv bin/activate
+  $ source bin/activate
 
 
 Later, when you're done working with MindMeld Workbench, you can deactivate the virtual environment with the ``deactivate`` command.
