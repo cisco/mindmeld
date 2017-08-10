@@ -8,6 +8,7 @@ import logging
 from elasticsearch import (Elasticsearch, ImproperlyConfigured, ElasticsearchException,
                            ConnectionError, TransportError)
 from elasticsearch.helpers import streaming_bulk
+from tqdm import tqdm
 
 from ._config import DEFAULT_ES_INDEX_TEMPLATE, DEFAULT_ES_INDEX_TEMPLATE_NAME
 
@@ -159,7 +160,7 @@ def delete_index(app_namespace, index_name, es_host=None, es_client=None, connec
         raise KnowledgeBaseError
 
 
-def load_index(app_namespace, index_name, docs, mapping, doc_type, es_host=None,
+def load_index(app_namespace, index_name, docs, docs_count, mapping, doc_type, es_host=None,
                es_client=None, connect_timeout=2):
     """Loads documents from data into the specified index. If an index with the specified name
     doesn't exist, a new index with that name will be created.
@@ -169,6 +170,7 @@ def load_index(app_namespace, index_name, docs, mapping, doc_type, es_host=None,
         index_name (str): The name of the new index to be created
         docs (iterable): An iterable which contains a collection of documents in the correct format
                          which should be imported into the index
+        docs_count (int): The number of documents in doc
         mapping (str): The Elasticsearch index mapping to use
         doc_type (str): The document type
         es_host (str): The Elasticsearch host server
@@ -188,6 +190,9 @@ def load_index(app_namespace, index_name, docs, mapping, doc_type, es_host=None,
             create_index(app_namespace, index_name, mapping, es_host=es_host, es_client=es_client)
 
         count = 0
+        # create the progess bar with docs count
+        pbar = tqdm(total=docs_count)
+
         for okay, result in streaming_bulk(es_client, docs,
                                            index=scoped_index_name, doc_type=doc_type,
                                            chunk_size=50, raise_on_error=False):
@@ -200,7 +205,9 @@ def load_index(app_namespace, index_name, docs, mapping, doc_type, es_host=None,
                 logger.error('Failed to %s document %s: %r', action, doc_id, result)
             else:
                 count += 1
-                logger.debug('Loaded document: %s', doc_id)
+            pbar.update(1)
+        # close the progress bar and flush all output
+        pbar.close()
         logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
     except ConnectionError as e:
         logger.error('Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))

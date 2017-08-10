@@ -10,7 +10,7 @@ dependencies:
     - ~/mindmeld-workbench3/.tox
   override:
     - pip install -r dev-requirements.txt --extra-index-url=https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi
-    - tox --notest
+    - tox --notest -i https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi
   post:
     - sudo apt-get install libzmq-dev
     - python3 -m pip install --upgrade ipykernel
@@ -29,7 +29,7 @@ test:
     - while ! nc -z localhost 2626; do sleep 5; done;:
         timeout: 150
   override:
-    - tox
+    - tox -i https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi
   post:
     - MM_BRANCH=$CIRCLE_BRANCH make docs
 deployment:

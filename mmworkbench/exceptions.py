@@ -101,3 +101,7 @@ class EntityResolverConnectionError(EntityResolverError):
             self.message = 'Unable to connect to Elasticsearch for entity resolution. ' \
                            'Please verify your connection to: {hosts}.'.format(
                             hosts=', '.join(es_host))
+
+
+class AuthNotFoundError(WorkbenchError):
+    pass

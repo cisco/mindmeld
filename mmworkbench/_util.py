@@ -22,6 +22,7 @@ from . import path
 from .components import QuestionAnswerer
 from .exceptions import KnowledgeBaseConnectionError
 from .components._config import get_app_namespace
+from .exceptions import AuthNotFoundError
 
 
 logger = logging.getLogger(__name__)
@@ -189,15 +190,15 @@ class Blueprint(object):
 
         local_archive = os.path.join(cache_dir, filename)
 
-        try:
-            config = load_global_configuration()
-            mindmeld_url = config.get('mindmeld_url', 'https://www.mindmeld.com')
+        config = load_global_configuration()
+        mindmeld_url = config.get('mindmeld_url', 'https://www.mindmeld.com')
+        token = config.get('token', None)
+        if token:
+            username = 'token'
+            password = token
+        else:
             username = config['username']
             password = config['password']
-        except Exception:
-            msg = 'Unable to locate MindMeld credentials. Cannot download blueprint.'
-            logger.error(msg)
-            raise EnvironmentError(msg)
 
         remote_url = BLUEPRINT_URL.format(mindmeld_url=mindmeld_url, blueprint=name,
                                           filename=filename)
@@ -258,21 +259,41 @@ def load_global_configuration():
     Returns:
         dict: An object containing configuration values.
     """
-    config_file = path.get_user_config_path()
-    iniconfig = py.iniconfig.IniConfig(config_file)
-    config = {}
-    config['mindmeld_url'] = iniconfig.get('mmworkbench', 'mindmeld_url')
-    config['username'] = iniconfig.get('mmworkbench', 'username')
-    config['password'] = iniconfig.get('mmworkbench', 'password')
-    bad_keys = set()
-    for key in config.keys():
-        if config[key] is None:
-            bad_keys.add(key)
+    def _filter_bad_keys(config):
+        bad_keys = set()
+        for key in config.keys():
+            if config[key] is None:
+                bad_keys.add(key)
 
-    for key in bad_keys:
-        config.pop(key)
+        for key in bad_keys:
+            config.pop(key)
 
-    return config
+        return config
+
+    try:
+        config = {
+            'mindmeld_url': os.environ['MM_URL'],
+            'username': os.environ['MM_USERNAME'],
+            'password': os.environ['MM_PASSWORD']
+        }
+        return _filter_bad_keys(config)
+    except KeyError:
+        pass
+
+    try:
+        logging.info('loading auth from mmworkbench config file.')
+        config_file = path.get_user_config_path()
+        iniconfig = py.iniconfig.IniConfig(config_file)
+        config = {
+            'mindmeld_url': iniconfig.get('mmworkbench', 'mindmeld_url'),
+            'username': iniconfig.get('mmworkbench', 'username'),
+            'password': iniconfig.get('mmworkbench', 'password'),
+            'token': iniconfig.get('mmworkbench', 'token')
+        }
+        return _filter_bad_keys(config)
+    except OSError:
+        raise AuthNotFoundError(
+            'Cannot load auth from either the environment or the config file.')
 
 
 def load_configuration():
