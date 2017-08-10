@@ -22,7 +22,7 @@ Workbench provides four blueprints:
 | |  :doc:`Home Assistant <home_assistant>`       | | Users control devices                 | | ``home_assistant``         |
 | |                                               | | and appliances in a smart home        | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+
-| |  :doc:`Video Discovery <video_discovery>`     | | Users search for, ask questions about,| | ``video_assistant``        |
+| |  :doc:`Video Discovery <video_discovery>`     | | Users search for, ask questions about,| | ``video_discovery``        |
 | |                                               | | and ask to view movies and TV shows   | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+
 | | :doc:`Kwik-E-Mart <../quickstart/00_overview>`| | The Kwik-E-Mart app described         | | ``kwik_e_mart``            |
