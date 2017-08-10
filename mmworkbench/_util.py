@@ -192,8 +192,13 @@ class Blueprint(object):
 
         config = load_global_configuration()
         mindmeld_url = config.get('mindmeld_url', 'https://www.mindmeld.com')
-        username = config['username']
-        password = config['password']
+        token = config.get('token', None)
+        if token:
+            username = 'token'
+            password = token
+        else:
+            username = config['username']
+            password = config['password']
 
         remote_url = BLUEPRINT_URL.format(mindmeld_url=mindmeld_url, blueprint=name,
                                           filename=filename)
@@ -282,7 +287,8 @@ def load_global_configuration():
         config = {
             'mindmeld_url': iniconfig.get('mmworkbench', 'mindmeld_url'),
             'username': iniconfig.get('mmworkbench', 'username'),
-            'password': iniconfig.get('mmworkbench', 'password')
+            'password': iniconfig.get('mmworkbench', 'password'),
+            'token': iniconfig.get('mmworkbench', 'token')
         }
         return _filter_bad_keys(config)
     except OSError:
