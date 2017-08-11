@@ -104,46 +104,9 @@ def extract_other_entities_features():
     return extractor
 
 
-def extract_operator_value_features():
-    def extractor(example, resources):
-        _, entities, entity_index = example
-        features = {}
-        for idx, entity in enumerate(entities):
-            if idx == entity_index:
-                continue
-            if entity.entity.type == 'operator':
-                feat_name = 'operator-entities|value:{}'.format(entity.normalized_text)
-                features[feat_name] = 1
-
-        return features
-
-    return extractor
-
-
-# TODO: refactor to have an app level role classifier config and make
-# entity type/entity features more generic. App specific features are
-# extract_operator_value_features, extract_age_features
-def extract_age_features():
-    def extractor(example, resources):
-        _, entities, entity_index = example
-        features = {}
-        for i, entity in enumerate(entities):
-            if i == entity_index:
-                continue
-            if entity.entity.type == 'size':
-                feat_name = 'age-entities|value:{}'.format(entity.normalized_text)
-                features[feat_name] = 1
-
-        return features
-
-    return extractor
-
-
 register_features('entity', {
     'bag-of-words-before': extract_bag_of_words_before_features,
     'bag-of-words-after': extract_bag_of_words_after_features,
     'in-gaz': extract_in_gaz_features,
-    'other-entities': extract_other_entities_features,
-    'operator-entities': extract_operator_value_features,
-    'age-entities': extract_age_features
+    'other-entities': extract_other_entities_features
 })
