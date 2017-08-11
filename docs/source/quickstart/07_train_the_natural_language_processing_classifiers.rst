@@ -327,7 +327,11 @@ The code below illustrates how to train and evaluate the entity resolver model f
 
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('my_app')
-  >>> resolver = nlp.domains[0].intents['get_store_hours'].entities['store_name'].resolver
+  >>> # Workbench doesn't know about entities until the training queries have been loaded.
+  ... # Load queries for the relevant intent by calling build().
+  ... nlp.domains['store_info'].intents['get_store_hours'].build()
+  >>> # Get the entity resolver for the entity type of interest.
+  ... resolver = nlp.domains['store_info'].intents['get_store_hours'].entities['store_name'].entity_resolver
 
   >>> # Train the resolver model using the mapping file, if available.
   ... resolver.fit()
@@ -336,6 +340,6 @@ The code below illustrates how to train and evaluate the entity resolver model f
   ... recognizer = nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer
   >>> entities = recognizer.predict('When does the store on Elm Street close?')
   >>> resolver.predict(entities[0])
-  [{'cname': '23 Elm Street', 'id': '1'}]
+  [{'cname': '23 Elm Street', 'score': 40.69433, 'top_synonym': 'Elm Street', 'id': '1'}, ...]
 
 See the :doc:`User Guide <../userguide/entity_resolver>` for more about how to evaluate and optimize entity resolution models.
