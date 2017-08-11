@@ -314,7 +314,7 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
        'param_selection': {
            'type': 'k-fold',
            'k': 5,
-           'scoring': 'logloss',
+           'scoring': 'log_loss',
            'grid': {
                'penalty': ['l1', 'l2'],
                'C': [0.01, 1, 100, 10000]
