@@ -34,7 +34,7 @@ The ``Dockerfile`` provided by MindMeld contains Workbench and all its dependenc
 
 .. code-block:: shell
 
-  $ bash -c "$(curl -s  https://mindmeld.com/docs/scripts/docker_mmworkbench_init.sh)"
+  bash -c "$(curl -s  https://mindmeld.com/docs/scripts/docker_mmworkbench_init.sh)"
 
 You will be prompted for your Developer Token. The build will take a few minutes. It sets up all dependencies and drops you inside a container.
 
@@ -65,7 +65,7 @@ When you're ready to go, open a terminal (shell) and run this command:
 
 .. code-block:: shell
 
-  $ bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)"
+  bash -c "$(curl -s  https://mindmeld.com/docs/scripts/mmworkbench_init.sh)"
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
@@ -97,8 +97,8 @@ To prepare an isolated environment for Workbench installation using ``virtualenv
 
 .. code-block:: console
 
-  $ mkdir my_wb_workspace
-  $ cd my_wb_workspace
+  mkdir my_wb_workspace
+  cd my_wb_workspace
 
 - Setup a virtual environment by running one of the following commands:
 
@@ -111,14 +111,14 @@ To prepare an isolated environment for Workbench installation using ``virtualenv
 
 .. code-block:: console
 
-  $ source bin/activate
+  source bin/activate
 
 
 Later, when you're done working with MindMeld Workbench, you can deactivate the virtual environment with the ``deactivate`` command.
 
 .. code-block:: console
 
-  $ deactivate
+  deactivate
 
 
 3. Install the Workbench package
@@ -128,7 +128,7 @@ Now that your environment is set up, you can install MindMeld Workbench just as 
 
 .. code-block:: console
 
-  $ pip install mmworkbench
+  pip install mmworkbench
 
 If you see errors here, you likely entered incorrect credentials during :ref:`Setup <getting_started_virtualenv_setup>`. Make sure you use your credentials for the MindMeld Learning Center.
 
@@ -136,7 +136,7 @@ To verify your setup is good, run this command. If there is no error, the instal
 
 .. code-block:: console
 
-    $ mmworkbench
+  mmworkbench
 
 
 4. Start the numerical parser
@@ -146,7 +146,7 @@ Workbench uses a Java-based numerical parser for detecting certain numeric expre
 
 .. code-block:: console
 
-  $ mmworkbench num-parse --start
+  mmworkbench num-parse --start
 
 .. warning::
 
@@ -233,7 +233,7 @@ Using the command-line
 
 .. code-block:: console
 
-  $ mmworkbench blueprint template myapp
+  mmworkbench blueprint template myapp
 
 
 Using the Python shell
@@ -241,9 +241,9 @@ Using the Python shell
 
 .. code-block:: python
 
-    import mmworkbench as wb
-    wb.configure_logs()
-    wb.blueprint('template', 'my_app')
+  import mmworkbench as wb
+  wb.configure_logs()
+  wb.blueprint('template', 'my_app')
 
 The :doc:`Step-By-Step guide <../quickstart/00_overview>` walks through the methodology for building conversational apps using Workbench.
 
