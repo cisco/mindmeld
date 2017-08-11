@@ -9,7 +9,7 @@ These instructions explain how to install MindMeld Workbench on Mac OS X and set
 
    - be a seasoned Python developer with machine learning (ML) knowhow and experience with one or more popular ML frameworks or libraries
 
-   - have a username and password for the MindMeld Learning Center
+   - have a Developer Token for the MindMeld Learning Center.
 
 Installation
 ------------
@@ -36,7 +36,7 @@ The ``Dockerfile`` provided by MindMeld contains Workbench and all its dependenc
 
   $ bash -c "$(curl -s  https://mindmeld.com/docs/scripts/docker_mmworkbench_init.sh)"
 
-You will be prompted for your mindmeld.com username and password. The build will take a few minutes. It sets up all dependencies and drops you inside a container.
+You will be prompted for your Developer Token. The build will take a few minutes. It sets up all dependencies and drops you inside a container.
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
@@ -58,7 +58,7 @@ On a Mac OS machine, you can install the dependencies for MindMeld Workbench and
    A few things to note before you run the script:
 
    - The script installs the following components after a confirmation prompt: ``brew``, ``python``, ``pip``, ``virtualenv``, Java 8 and Elasticsearch. 
-   - You will be prompted to enter your mindmeld.com username and password.
+   - You will be prompted to enter your Developer Token.
    - Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. **Previous files are overwritten.**
 
 When you're ready to go, open a terminal (shell) and run this command:

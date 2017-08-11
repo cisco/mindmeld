@@ -120,12 +120,9 @@ fi
 
 echo
 echo Setting up configuration files
-read -p "   Enter mindmeld.com username: " USERNAME
-echo -n "   Enter mindmeld.com password: "
-read -s PASSWORD
+read -p "   Enter Developer Token: " TOKEN
 echo
-echo
-RESULT=`curl -s -H "Content-Type: application/json" -X POST https://mindmeld.com/signin -d '{"username": "'$USERNAME'", "password": "'$PASSWORD'"}'`
+RESULT=`curl -s -H "Content-Type: application/json" -X POST https://mindmeld.com/signin -d '{"username" : "token", "password": "'$TOKEN'"}'`
 RESULT=$(echo $RESULT | sed "s/{//" | sed "s/\"//g" | sed "s/:.*//" )
 
 if [[ $RESULT == "error" ]]; then
@@ -143,8 +140,7 @@ mkdir -p ~/.mmworkbench
 cat >~/.mmworkbench/config <<EOL
 [mmworkbench]
 mindmeld_url = https://mindmeld.com
-username = $USERNAME
-password = $PASSWORD
+token = $TOKEN
 EOL
 
 echo ~/.mmworkbench/config created.
@@ -167,7 +163,7 @@ touch ~/.pip/pip.conf
 # this will wipe out your existing pip.conf
 cat >~/.pip/pip.conf <<EOL
 [global]
-extra-index-url = https://$USERNAME:$PASSWORD@mindmeld.com/pypi
+extra-index-url = https://token:$TOKEN@mindmeld.com/pypi
 trusted-host = mindmeld.com
 EOL
 
