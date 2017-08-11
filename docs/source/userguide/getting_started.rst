@@ -97,15 +97,15 @@ To prepare an isolated environment for Workbench installation using ``virtualenv
 
 .. code-block:: console
 
-  $ mkdir ~/my_wb_workspace
-  $ cd $_
+  $ mkdir my_wb_workspace
+  $ cd my_wb_workspace
 
 - Setup a virtual environment by running one of the following commands:
 
 .. code-block:: console
 
-  $ virtualenv .             # for Python 2.7
   $ virtualenv -p python3 .  # for Python 3.x (recommended)
+  $ virtualenv .             # for Python 2.7
 
 - Activate the virtual environment:
 
@@ -185,7 +185,7 @@ To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run 
 .. code-block:: console
 
   $ mmworkbench blueprint food_ordering
-  $ cd $_
+  $ cd food_ordering
   $ python app.py build   # this will take a few minutes
   $ python app.py converse
  Loading intent classifier: domain='ordering'
