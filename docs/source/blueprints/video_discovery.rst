@@ -1,12 +1,12 @@
 Video Discovery
 ===============
 
-In this step-by-step walkthrough, you'll build a conversational application that allows users to browse and find movies and TV shows from a big content catalog, using the Workbench blueprint for this purpose.
+In this step-by-step walkthrough, you'll build a conversational application that allows users to browse and find movies and TV shows from a large content catalog, using the Workbench blueprint for this purpose.
 
 1. The Use Case
 ^^^^^^^^^^^^^^^
 
-Through a conversational interface, users should be able to browse through a content catalog containing movies and TV shows. The content found could then be played within a service similar to Netflix, Hulu, Amazon Video, etc.
+Through a conversational interface, users should be able to browse a content catalog of movies and TV shows, then play what they find through a service similar to Netflix, Hulu, or Amazon Video.
 
 2. Example Dialogue Interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -21,48 +21,53 @@ Here are some examples of scripted dialogue interactions for conversational flow
 
 .. admonition:: Exercise
 
-   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking for something unrelated to movies and TV shows, asking for something with too many filters so there are no results, asking for something that is not in the app's catalog, etc.
+   Pick a convenient textual or graphical representation. Try to design as many user flows as you can. Always capture the entire dialogue from start to finish. Think of scenarios that differ from the examples above, such as: asking for something unrelated to movies and TV shows, asking for something with too many filters so there are no results, asking for something that is not in the app's catalog, and so on.
 
 3. Domain-Intent-Entity Hierarchy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this app users should be able to search using common filters for video content, such as: genre, cast, release year, etc... They should also be able to continue refining their search until they find the right content, and restart the search at any moment. The app will also support general actions such as greeting the user, providing help and responding to insults and compliments.
+Users should be able to search for video content using common filters such as: ``genre``, ``cast``, ``release_year``, and so on. They should be able to continue refining their search until they find the right content, and to restart the search whenever they like. Generic actions like greeting the user, providing help, and responding to insults and compliments should also be supported.
 
-Here is the NLP model hierarchy for supporting the mentioned functionality.
+Based on this desired functionality, the developers of the video discovery app created the NLP model hierarchy below.
 
 .. image:: /images/video_discovery_hierarchy.png
     :width: 700px
     :align: center
 
-The 2 domains supported by this application are ``video_content`` and ``unrelated``:
+The are two domains:
 
-  - ``video_content`` - Supports the functionality for browsing through the video catalog.
-  - ``unrelated`` - Handles all the requests that are not related to the video catalog.
+  - ``video_content`` - Supports browsing the video catalog
+  - ``unrelated`` - Handles all requests not about video content
 
 The ``video_content`` domain supports the following intents:
 
-  - ``greet`` - User greets the app.
-  - ``help`` - User is confused or needs instructions on how to proceed.
-  - ``start_over`` — User wants to abandon current selections and restart the ordering process.
-  - ``exit`` - User wants to end the current conversation.
-  - ``browse`` - User is searching for content, either for a specific movie or TV show or for a set of results.
-  - ``unsupported`` - User is asking for information related to movies or TV shows, but the app does not support those questions. For example, asking when a movie was released, or when it will be on given channel.
+  - ``greet`` - User greets the app
+  - ``help`` - User is confused or needs instructions on how to proceed
+  - ``start_over`` — User wants to abandon current selections and restart the ordering process
+  - ``exit`` - User wants to end the current conversation
+  - ``browse`` - User is searching for content, either for a specific movie or TV show, or for a set of results
+  - ``unsupported`` - User is asking for information related to movies or TV shows, but the app does not support those questions
 
-Similarly the ``unrelated`` domain supports the intents:
+    - for example, asking when a movie was released, or when it will be shown on a given channel
 
-  - ``general`` - User asks general questions unrelated to video content. For example questions about weather, food, sports, etc...
-  - ``compliment`` - User gives a compliment to the app.
-  - ``insult`` - User gives an insult to the app.
+The ``unrelated`` domain supports the intents:
 
-For this app, only the ``browse`` intent requires entity recognition. This intent supports the following entity types:
+  - ``general`` - User asks general questions unrelated to video content
 
-   - ``cast`` — The name of an actor.
-   - ``country`` — The name of the country of origin of a movie or TV show.
-   - ``director`` — The name of a director.
-   - ``genre`` — The name of a video genre.
-   - ``sort`` — How the users want to sort the results: by most recent, most popular, etc...
-   - ``title`` — The title of a video in the catalog.
-   - ``type`` — The type of video the user is looking for: `movie` or `TV show`.
+    - for example questions about weather, food, sports, etc.
+
+  - ``compliment`` - User says something flattering to the app
+  - ``insult`` - User says something hostile to the app
+
+Only the ``browse`` intent requires entity recognition; it supports the following entity types:
+
+   - ``cast`` — The name of an actor
+   - ``country`` — The name of the country of origin of a movie or TV show
+   - ``director`` — The name of a director
+   - ``genre`` — The name of a video genre
+   - ``sort`` — How the users want to sort the results: by most recent, most popular, etc.
+   - ``title`` — The title of a video in the catalog
+   - ``type`` — The type of video the user is looking for: `movie` or `TV show`
 
 .. admonition:: Exercise
 
@@ -137,7 +142,7 @@ For example, here's the ``say_goodbye`` state handler, where we clear the :doc:`
 
 By contrast, the handler logic for the ``show_content`` dialogue state is more substantial, because it contains the core business logic for our application. In this dialogue state handler, we use the :doc:`Question Answerer <../userguide/kb>` to process the transaction.
 
-We can illustrate this with the general implementation of the ``show_content`` handler:
+You can see this in the general implementation of the ``show_content`` handler:
 
 .. code:: python
 
@@ -165,16 +170,16 @@ We can illustrate this with the general implementation of the ``show_content`` h
 	    videos_client_action = video_results_to_action(results)
 	    responder.respond(videos_client_action)
 
-This code follows a series of steps to build the final answer to the user: it updates the :doc:`dialogue frame <../userguide/dm>` with the new found entities, fetches results from the knowledge base (in the ``get_video_content`` method), builds a response with the new entities (done in ``browse_slots_for_frame`` and ``build_browse_response``) and sends a response to the user.
+This code follows a series of steps to build the final answer to the user: it updates the :doc:`dialogue frame <../userguide/dm>` with the new found entities, fetches results from the knowledge base (in the ``get_video_content`` method), builds a response with the new entities (done in ``browse_slots_for_frame`` and ``build_browse_response``), and sends a response to the user.
 
 For more information on the ``show_content`` method and the functions it uses, see the ``app.py`` file in the blueprint folder.
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The knowledge base for our video discovery app leverages publicly available information about movies and tv shows from the `The Movie DB <https://www.themoviedb.org/>`_ website. The knowledge base comprises one index in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
+The knowledge base for our video discovery app leverages publicly available information about movies and TV shows from the `The Movie DB <https://www.themoviedb.org/>`_ website. The knowledge base comprises one index in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
 
-   - ``videos`` — information about movies and tv shows
+   - ``videos`` — information about movies and TV shows
 
 For example, here's the knowledge base entry in the ``videos`` index for "Minions," a comedy movie in 2015:
 
@@ -200,7 +205,7 @@ For example, here's the knowledge base entry in the ``videos`` index for "Minion
         'popularity': 2.295467321653707
     }
 
-Here's a knowledge base entry also in the ``videos`` index for "The Big Bang Theory," a comedy TV show from 2007:
+Another entry in the ``videos`` index is for "The Big Bang Theory," a comedy TV show from 2007:
 
 .. code:: javascript
 
@@ -299,7 +304,7 @@ The ``domains`` directory contains the training data for domain and intent class
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, will train the NLP system using the annotated data.
+Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, trains the NLP system using the annotated data.
 
 .. code:: python
 
@@ -348,7 +353,7 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. tip::
 
-  During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+  During active development, it helps to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
 
 To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
 
@@ -428,9 +433,9 @@ Start by inspecting the baseline configurations that the different classifiers u
 	  }
 	}
 
-You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings by passing the appropriate parameters to the classifier's :meth:`fit()` method. Here are a few examples.
+You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings by passing the appropriate parameters to the classifier's :meth:`fit()` method.
 
-Change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
+For example, you can change the feature extraction settings to use bag of bigrams in addition to the default bag of words:
 
 .. code:: python
 
@@ -454,9 +459,11 @@ You can use similar options to inspect and experiment with the Entity Recognizer
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Our video discovery application does not have complex relationships between entities. For example, for the annotated query ``content with {Tom Hanks|cast}``, there is no entity that describes the ``cast`` entity.  As queries become more complex, for example, ``show me a {Tom Hanks|cast} {movie|type} and a {Jim Parsons|cast} {TV show|type}``, we would need to relate each ``cast`` entity to its corresponding ``type`` entity.
+The relationships between entities in the video discovery queries are simple ones. For example, in the annotated query ``content with {Tom Hanks|cast}``, the ``cast`` entity is self-sufficient, in that it is not described by any other entity.
 
-Since we do not have entity groups in the video discovery application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships might form. Please refer to :doc:`Language Parser <../userguide/parser>` to read more about entity groups and parser configurations.
+If you extended the app to support queries with more complex entity relationships, it would be necessary to specify *entity groups* and configure the parser accordingly. For example, in the query ``show me a {Tom Hanks|cast} {movie|type} and a {Jim Parsons|cast} {TV show|type}``, we would need to relate the ``cast`` entities to the ``type`` entities, because one kind of entity describes the other. Each pair of related entities would form an entity group. For more about entity groups and parser configurations, see the :doc:`Language Parser <../userguide/parser>` chapter of the User Guide.
+
+Since we do not have entity groups in the video discovery app, we do not need a parser configuration.
 
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -474,7 +481,7 @@ Look at the ``show_content`` implementation in ``app.py`` to better understand t
 
 .. admonition:: Exercise
 
-   - Think of other important data that would be useful to have in the knowledge base for a video discovery use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.
+   Think of other important data that would be useful to have in the knowledge base for a video discovery use case. Identify the ways that data could be leveraged to provide a more intelligent user experience.
 
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
