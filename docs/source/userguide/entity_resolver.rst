@@ -32,17 +32,15 @@ This discussion assumes that the app has a knowledge base. For apps with no know
 
 The Entity Resolver has two main tools at its disposal:
 
-   |
 1. **Synonym lists**
 
-   Even entities of the same type and with the same canonical name can differ in their properties. For example, there could be two dishes whose canonical name is 'House Salad,' but they are from different restaurants, and while one is a 'spinach salad,' the other is a 'tropical fruit salad.' For these two entities, then, the ``restaurant`` and ``salad_type`` properties would differ. Workbench captures these differences in *synonym lists* (described in the next section) which the entity resolver uses to select the most appropriate result for a given query.
+    Even entities of the same type and with the same canonical name can differ in their properties. For example, there could be two dishes whose canonical name is 'House Salad,' but they are from different restaurants, and while one is a 'spinach salad,' the other is a 'tropical fruit salad.' For these two entities, then, the ``restaurant`` and ``salad_type`` properties would differ. Workbench captures these differences in *synonym lists* (described in the next section) which the entity resolver uses to select the most appropriate result for a given query.
 
-   |
 2. **A numeric sort factor**
 
-   Textual similarity is the primary factor in entity resolution. When many entities are highly similar textually, Workbench uses a numeric value called the *sort factor* to boost the likelier ones. The sort factor means different things in different applications. A food ordering application might use restaurant ratings, while a music discovery application might use number of listens for an album, and so on.
+    Textual similarity is the primary factor in entity resolution. When many entities are highly similar textually, Workbench uses a numeric value called the *sort factor* to boost the likelier ones. The sort factor means different things in different applications. A food ordering application might use restaurant ratings, while a music discovery application might use number of listens for an album, and so on.
 
-   For music discovery, the sort factor could help the app choose between two different songs, sung by different artists, that have the same song title. For food ordering application, the sort factor could help the app choose between multiple 'Pad Thai' dishes, each from a different restaurant, and each with a different ID in the Knowledge Base.
+    For music discovery, the sort factor could help the app choose between two different songs, sung by different artists, that have the same song title. For food ordering application, the sort factor could help the app choose between multiple 'Pad Thai' dishes, each from a different restaurant, and each with a different ID in the Knowledge Base.
 
 These tools help when the knowledge base has multiple unique entries with different IDs but the same canonical name, and the entity resolver needs a way to make the best choice among them.
 
@@ -81,7 +79,7 @@ entities                              ``entities``        A list of dictionaries
 
 knowledge base index name (optional)  ``kb_index_name``   Name of the knowledge base index that contains information about this entity type. For example, information about the ``dish`` entity type may be stored in the objects in the ``menu_items`` index in the knowledge base.
 
-knowledge base field name (optional)  ``kb_field_name``   Name of the knowledge base field name that this entity type corresponds to. In other words, the entity text is contained in this field of a knowledge base object. For example, the text span captured in entity type ``dish`` describes the dish name in a user's request and corresponds to the knowledge base text field ``name`` of the index ``menu_items``. The knowledge base index and the knowledge base field parameters together describe how the NLP entity type corresponds to a knowledge base object type. When specified, the synonym whitelist for such knowledge base-linked entities is accessible by the Question Answerer. It can then leverage that information when formulating knowledge base filtered searches to disambiguate entities with custom constraints. See `Context-aware entity resolution`_ section
+knowledge base field name (optional)  ``kb_field_name``   Name of the knowledge base field name that this entity type corresponds to. In other words, the entity text is contained in this field of a knowledge base object. For example, the text span captured in entity type ``dish`` describes the dish name in a user's request and corresponds to the knowledge base text field ``name`` of the index ``menu_items``. The knowledge base index and the knowledge base field parameters together describe how the NLP entity type corresponds to a knowledge base object type. When specified, the synonym whitelist for such knowledge base-linked entities is accessible by the Question Answerer. It can then leverage that information when formulating knowledge base filtered searches to disambiguate entities with custom constraints. See `Consider context-aware entity resolution`_ section
 
 ===================================== =================== ===
 
@@ -163,16 +161,15 @@ Create the synonyms and make them available to your Workbench app, going entity 
 
 #. Open the ``mapping.json`` file for the entity type in a text editor
 
-   |
-   a. Choose a target entity from ``entities`` listed in the file
+    a. Choose a target entity from ``entities`` listed in the file
 
-   b. Locate the ``whitelist`` key in the dictionary that represents the target entity
+    b. Locate the ``whitelist`` key in the dictionary that represents the target entity
 
-   c. Create synonyms for the target entity 
+    c. Create synonyms for the target entity
 
-   d. Add each synonym to the list which is the value for ``whitelist``
+    d. Add each synonym to the list which is the value for ``whitelist``
 
-   e. Choose a new target entity (continue until you have covered all the entities for the entity type) 
+    e. Choose a new target entity (continue until you have covered all the entities for the entity type)
 
 #. Choose a new entity type (stop when you have covered all the entity types for the app) 
 
