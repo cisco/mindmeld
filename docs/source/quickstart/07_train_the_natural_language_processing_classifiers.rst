@@ -253,7 +253,11 @@ Let us see how Workbench can be used for training a role classifier for the ``sy
   >>> from mmworkbench.components.nlp import NaturalLanguageProcessor
   >>> nlp = NaturalLanguageProcessor('my_app')
   >>> get_hours_intent = nlp.domains['store_info'].intents['get_store_hours']
-  >>> clf = get_hours_intent.entities['sys_time'].role_classifier
+  >>> # Workbench doesn't know about entities until the training queries have been loaded.
+  ... # Load queries for the relevant intent by calling build().
+  ... get_hours_intent.build()
+  >>> # Get the role classifier for the 'sys_time' entity
+  ... clf = get_hours_intent.entities['sys_time'].role_classifier
   >>> clf.fit()
 
 Once the classifier is trained, we test it on a new query using the familiar :meth:`predict()` method. The :meth:`predict()` method of the role classifier requires both the full input query and the set of entities predicted by the entity recognizer.
