@@ -64,7 +64,7 @@ Queries can include more than one entity of the same type. In "change my alarm f
 
 .. admonition:: Exercise
 
-   While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., ``foo``, ``bar``, and so on) and entities (e.g., ``baz``, ``foobar``, and so on) that make sense for a home automation use case.
+   While the blueprint provides a good starting point, you may need additional intents and entities to support the desired scope of your app. Enumerate some other intents (e.g., ``dim_lights``, ``check_windows``, and so on) and entities (e.g., ``awning``, ``driveway``, and so on) that make sense for a home automation use case.
 
 To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
 
