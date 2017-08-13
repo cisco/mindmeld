@@ -9,10 +9,29 @@ These instructions explain how to install MindMeld Workbench on Mac OS X and set
 
    - be a seasoned Python developer with machine learning (ML) knowhow and experience with one or more popular ML frameworks or libraries
 
-   - have a Developer Token for the MindMeld Learning Center.
+   - have a username and password for the MindMeld Learning Center
 
-Installation
-------------
+
+Get your developer token
+------------------------
+
+Before proceeding to install Workbench, get your MindMeld developer token by following the instructions below.
+
+1. Sign in at `mindmeld.com <https://mindmeld.com/>`_ using your MindMeld Learning Center credentials.
+
+2. Once signed in, click on your CEC username near the top right hand corner of the page.
+
+.. image:: /images/mm_page_signed_in.png
+    :align: center
+
+3. Copy your developer token.
+
+.. image:: /images/mm_page_dev_token.png
+    :align: center
+
+
+Install Workbench
+-----------------
 
 You must choose the mechanism by which you install Workbench. The supported choices are:
 
@@ -36,7 +55,7 @@ The ``Dockerfile`` provided by MindMeld contains Workbench and all its dependenc
 
   bash -c "$(curl -s  https://mindmeld.com/docs/scripts/docker_mmworkbench_init.sh)"
 
-You will be prompted for your Developer Token. The build will take a few minutes. It sets up all dependencies and drops you inside a container.
+You will be prompted for your MindMeld developer token. The build will take a few minutes. It sets up all dependencies and drops you inside a container.
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
@@ -58,7 +77,7 @@ On a Mac OS machine, you can install the dependencies for MindMeld Workbench and
    A few things to note before you run the script:
 
    - The script installs the following components after a confirmation prompt: ``brew``, ``python``, ``pip``, ``virtualenv``, Java 8 and Elasticsearch. 
-   - You will be prompted to enter your Developer Token.
+   - You will be prompted to enter your MindMeld developer token.
    - Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. **Previous files are overwritten.**
 
 When you're ready to go, open a terminal (shell) and run this command:
