@@ -27,11 +27,7 @@ For applications with large- or medium-vocabulary content, having a knowledge ba
 
 For applications with small-vocabulary content, it is not necessary to have a knowledge base, especially when ranking and disambiguating entities is not required. One example is a home assistant for smart home automation.
 
-If you decide to use a knowledge base, the next question is what knowledge base to use.
-
 In its most basic form, a knowledge base is just a repository of objects of specified types. For example, a knowledge base that contains a large entertainment content catalog could include ``movie`` and ``tv_show`` among the types of its objects. A knowledge base that contains a directory of local businesses could have object types like ``restaurant``, ``hardware_store``, and so on. Objects typically have attributes which capture salient aspects of the concepts they describe. For example, a ``restaurant`` object might have attributes for ``address`` and ``phone_number``; a ``movie`` object might have attributes like ``cast_list``, ``runtime``, and ``release_date``.
-
-While use of many different types data stores is theoretically possible, Elasticsearch is the only supported knowledge base for Workbench at present.
 
 Decide How to Use Question Answering in your Application
 --------------------------------------------------------
@@ -89,11 +85,11 @@ To efficiently and accurately retrieve the most relevant information, the questi
 The following data types are supported:
 
 +----------------+--------------------------+-------------------------------------------------------------+
-| Field Name     | Data Format              | Description or Examples                                     |
+| Field Type     | Data Format              | Description or Examples                                     |
 +================+==========================+=============================================================+
-|   **id**       |    string                | unique identifier                                           |
+|   **id**       | string                   | unique identifier                                           |
 +----------------+--------------------------+-------------------------------------------------------------+
-|   **text**     |    string                | full-text queries, for example dish names like ``Pad Thai`` |
+|   **text**     | string                   | full-text values, for example dish names like ``Pad Thai``  |
 |                |                          | or movie names like ``Star Wars``                           |
 +----------------+--------------------------+-------------------------------------------------------------+
 |   **number**   | ``long``, ``integer``,   | numeric values                                              |
@@ -172,7 +168,7 @@ Good practice dictates that you inspect the data to identify noise and inconsist
 Import the Data into the Knowledge Base
 ---------------------------------------
 
-The :meth:`load_kb()` API loads data into the knowledge base from JSON-formatted data files. If the specified objects are already present in the knowledge base, the new objects are imported into the existing index. If no index for the specified objects exists, the question answerer creates one.
+The :meth:`load_kb()` API loads data into the knowledge base from JSON-formatted data files. If the index of specified objects is already present in the knowledge base, the new objects are imported into the existing index. If no index for the specified objects exists, the question answerer creates one.
 
 Use :meth:`load_kb()` to load a data file from a path and create an index for the objects in the data file. Substitute a data file, index name, and app name for those used in the example.
 
