@@ -68,7 +68,7 @@ Use the :meth:`build` method to load the training queries for an intent of your 
    >>> nlp.domains['times_and_dates'].intents['change_alarm'].build()
    >>> nlp.domains['times_and_dates'].intents['change_alarm'].entities
    {
-    'time': <EntityProcessor 'time' ready: True, dirty: True>
+    'sys_time': <EntityProcessor 'sys_time' ready: True, dirty: True>
    }
 
 Access the :class:`RoleClassifier` for an entity type of your choice, using the :attr:`role_classifier` attribute of the desired entity.
@@ -332,7 +332,7 @@ Retrain the classifier with the updated feature set by passing in the :data:`my_
 .. code-block:: python
 
    >>> rc.fit(features=my_features)
-   Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='time'
+   Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='sys_time'
    No app configuration file found. Using default role model configuration
 
 **Hyperparameter tuning**
@@ -364,7 +364,7 @@ Pass the updated settings to :meth:`fit` as an argument to the :data:`param_sele
 .. code-block:: python
 
    >>> rc.fit(param_selection=my_param_settings)
-   Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='time'
+   Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='sys_time'
    No app configuration file found. Using default role model configuration
    Selecting hyperparameters using k-fold cross validation with 10 splits
    Best accuracy: 96.59%, params: {'C': 1, 'penalty': 'l2'}
@@ -385,7 +385,7 @@ Now we'll try a different cross-validation strategy: five randomized folds. Modi
     'type': 'shuffle'
    }
    >>> rc.fit(param_selection=my_param_settings)
-   Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='time'
+   Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='sys_time'
    No app configuration file found. Using default role model configuration
    Selecting hyperparameters using shuffle cross validation with 5 splits
    Best accuracy: 97.78%, params: {'C': 1, 'penalty': 'l2'}
