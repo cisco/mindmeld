@@ -131,7 +131,7 @@ if [[ ${NEEDS_DEP_INSTALL} == 1 ]]; then
 fi
 
 echo
-echo Checking dependent sevices already started
+echo Checking dependent services already started
 check_service elasticsearch
 echo done
 
