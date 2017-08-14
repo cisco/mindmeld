@@ -23,6 +23,8 @@ requirements = [
     'scikit-learn>=0.18.1',
     'tqdm>=4.15.0',
     'urllib3<1.22,>=1.21.1',
+    'python-crfsuite>=0.9.2',
+    'sklearn-crfsuite>=0.3.6'
 ]
 
 setup_requirements = [
