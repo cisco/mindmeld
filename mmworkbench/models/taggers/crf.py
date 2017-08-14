@@ -29,8 +29,7 @@ class ConditionalRandomFields(Tagger):
             all_tags.append(get_tags_from_entities(examples[idx], label, self._tag_scheme))
 
         X = self._get_features(examples, fit=True)
-        self._clf = self._fit(X, all_tags, self._config.params)
-        self._current_params = self._config.params
+        self._clf = self._fit(X, all_tags, self._current_params)
         return self
 
     def predict(self, examples):
