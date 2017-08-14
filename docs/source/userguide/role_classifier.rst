@@ -165,8 +165,8 @@ Let's take a look at the allowed values for each setting in a role classifier co
   |                           | starting from the word after the current entity's first token, the settings can be modified to             |
   |                           | ``'ngram_lengths_to_start_positions': {1: [0, 1], 2: [0, 1]}``.                                            |
   |                           |                                                                                                            |
-  |                           | Suppose the query is "Change my {6 AM|time|oldtime} alarm to {7 AM|time|newtime}" and the classifier is    |
-  |                           | extracting features for the "6 AM" ``time`` entity. Then,                                                  |
+  |                           | Suppose the query is "Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}" and the        |
+  |                           | classifier is extracting features for the "6 AM" ``sys_time`` entity. Then,                                |
   |                           |                                                                                                            |
   |                           | - ``{1: [0, 1]}`` would extract "6" and "AM"                                                               |
   |                           | - ``{2: [0, 1]}`` would extract "6 AM" and "AM alarm"                                                      |
@@ -177,8 +177,8 @@ Let's take a look at the allowed values for each setting in a role classifier co
   |                           | A dictionary with n-gram lengths as keys and a list of different starting positions as values, similar     |
   |                           | to the ``'bag-of-words-after'`` feature group.                                                             |
   |                           |                                                                                                            |
-  |                           | If the query is "Change my {6 AM|time|oldtime} alarm to {7 AM|time|newtime}" and the classifier is         |
-  |                           | extracting features for the "6 AM" ``time`` entity,                                                        |
+  |                           | If the query is "Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}" and the classifier  |
+  |                           | is extracting features for the "6 AM" ``sys_time`` entity,                                                 |
   |                           |                                                                                                            |
   |                           | - ``{1: [-2, -1]}`` would extract "change" and "my"                                                        |
   |                           | - ``{2: [-2, -1]}`` would extract "change my" and "my 6"                                                   |
@@ -561,7 +561,7 @@ Next, we look selectively at just the correct or incorrect predictions.
 
 Slicing and dicing these results for error analysis is easily done with `list comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_.
 
-Our example dataset is fairly small, and we get just one case of misclassification. But for a real-world app with a large test set, we'd need to be able inspect incorrect predictions for a particular role. Try this using the ``newtime`` role from our example:
+Our example dataset is fairly small, and we get just one case of misclassification. But for a real-world app with a large test set, we'd need to be able inspect incorrect predictions for a particular role. Try this using the ``new_time`` role from our example:
 
 .. code-block:: python
 
