@@ -75,7 +75,7 @@ Access the :class:`RoleClassifier` for an entity type of your choice, using the 
 
 .. code-block:: python
 
-   >>> rc = nlp.domains['times_and_dates'].intents['change_alarm'].entities['time'].role_classifier
+   >>> rc = nlp.domains['times_and_dates'].intents['change_alarm'].entities['sys_time'].role_classifier
    >>> rc
    <RoleClassifier ready: True, dirty: True>
 
@@ -90,10 +90,10 @@ Use the :meth:`RoleClassifier.fit` method to train a role classification model. 
 .. code-block:: python
 
    >>> from mmworkbench import configure_logs; configure_logs()
-   >>> rc = nlp.domains['times_and_dates'].intents['change_alarm'].entities['time'].role_classifier
+   >>> rc = nlp.domains['times_and_dates'].intents['change_alarm'].entities['sys_time'].role_classifier
    >>> rc.fit()
-   Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='time'
-   No app configuration file found. Using default role model configuration
+   Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='sys_time'
+   No role model configuration set. Using default.
 
 The :meth:`fit` method loads all necessary training queries and trains a role classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the Workbench preset :ref:`classifier configuration <config>`.
 
@@ -401,10 +401,11 @@ Before you run the trained role classifier on a test query, you must first detec
 .. code-block:: python
 
    >>> query = 'Change my 6 AM alarm to 7 AM'
+   >>> er = nlp.domains['times_and_dates'].intents['change_alarm'].entity_recognizer
    >>> entities = er.predict(query)
    >>> entities
-   (<QueryEntity '6 AM' ('time') char: [10-13], tok: [2-3]>,
-    <QueryEntity '7 AM' ('time') char: [24-27], tok: [6-7]>)
+   (<QueryEntity '6 AM' ('sys_time') char: [10-13], tok: [2-3]>,
+    <QueryEntity '7 AM' ('sys_time') char: [24-27], tok: [6-7]>)
 
 Now you can choose an entity from among those detected, and call the role classifier's :meth:`RoleClassifier.predict` method to classify it. Although it classifies a single entity, the :meth:`RoleClassifier.predict` method uses the full query text, and information about all its entities, for :ref:`feature extraction <role_features>`.
 
@@ -413,9 +414,9 @@ Run the trained role classifier on the two entities from the example above, one 
 .. code-block:: python
 
    >>> rc.predict(query, entities, 0)
-   'oldtime'
+   'old_time'
    >>> rc.predict(query, entities, 1)
-   'newtime'
+   'new_time'
 
 .. note::
 
@@ -462,16 +463,16 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
    Statistics by Class:
 
                   class      f_beta   precision      recall     support          TP          TN          FP          FN
-                oldtime       0.957       0.917       1.000          11          11           9           1           0
-                newtime       0.947       1.000       0.900          10           9          11           0           1
+                old_time       0.957       0.917       1.000          11          11           9           1           0
+                new_time       0.947       1.000       0.900          10           9          11           0           1
 
 
 
    Confusion Matrix:
 
-                          oldtime        newtime
-           oldtime             11              0
-           newtime              1              9
+                          old_time        new_time
+           old_time             11              0
+           new_time              1              9
 
 
 Let's decipher the statists output by the :meth:`evaluate` method.
@@ -528,7 +529,7 @@ Let's decipher the statists output by the :meth:`evaluate` method.
 **Confusion Matrix**
   |
 
-  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the role classifier wrongly classified one instance of a ``newtime`` entity as ``oldtime``.
+  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the role classifier wrongly classified one instance of a ``new_time`` entity as ``old_time``.
 
 Now we have a wealth of information about the performance of our classifier. Let's go further and inspect the classifier's predictions at the level of individual queries, to better understand error patterns.
 
@@ -538,8 +539,8 @@ View the classifier predictions for the entire test set using the :attr:`results
 
    >>> eval.results
    [
-     EvaluatedExample(example=(<Query 'change my 6 am alarm'>, (<QueryEntity '6 am' ('time') char: [10-13], tok: [2-3]>,), 0), expected='oldtime', predicted='oldtime', probas={'newtime': 0.10062246873286373, 'oldtime': 0.89937753126713627}, label_type='class'),
-     EvaluatedExample(example=(<Query 'change my 6 am alarm to 7 am'>, (<QueryEntity '6 am' ('time') char: [10-13], tok: [2-3]>, <QueryEntity '7 am' ('time') char: [24-27], tok: [6-7]>), 0), expected='oldtime', predicted='oldtime', probas={'newtime': 0.028607105880949835, 'oldtime': 0.97139289411905017}, label_type='class'),
+     EvaluatedExample(example=(<Query 'change my 6 am alarm'>, (<QueryEntity '6 am' ('sys_time') char: [10-13], tok: [2-3]>,), 0), expected='old_time', predicted='old_time', probas={'sys_time': 0.10062246873286373, 'old_time': 0.89937753126713627}, label_type='class'),
+     EvaluatedExample(example=(<Query 'change my 6 am alarm to 7 am'>, (<QueryEntity '6 am' ('sys_time') char: [10-13], tok: [2-3]>, <QueryEntity '7 am' ('sys_time') char: [24-27], tok: [6-7]>), 0), expected='old_time', predicted='old_time', probas={'sys_time': 0.028607105880949835, 'old_time': 0.97139289411905017}, label_type='class'),
     ...
    ]
 
@@ -549,13 +550,13 @@ Next, we look selectively at just the correct or incorrect predictions.
 
    >>> list(eval.correct_results())
    [
-     EvaluatedExample(example=(<Query 'change my 6 am alarm'>, (<QueryEntity '6 am' ('time') char: [10-13], tok: [2-3]>,), 0), expected='oldtime', predicted='oldtime', probas={'newtime': 0.10062246873286373, 'oldtime': 0.89937753126713627}, label_type='class'),
-     EvaluatedExample(example=(<Query 'change my 6 am alarm to 7 am'>, (<QueryEntity '6 am' ('time') char: [10-13], tok: [2-3]>, <QueryEntity '7 am' ('time') char: [24-27], tok: [6-7]>), 0), expected='oldtime', predicted='oldtime', probas={'newtime': 0.028607105880949835, 'oldtime': 0.97139289411905017}, label_type='class'),
+     EvaluatedExample(example=(<Query 'change my 6 am alarm'>, (<QueryEntity '6 am' ('sys_time') char: [10-13], tok: [2-3]>,), 0), expected='old_time', predicted='old_time', probas={'new_time': 0.10062246873286373, 'old_time': 0.89937753126713627}, label_type='class'),
+     EvaluatedExample(example=(<Query 'change my 6 am alarm to 7 am'>, (<QueryEntity '6 am' ('sys_time') char: [10-13], tok: [2-3]>, <QueryEntity '7 am' ('sys_time') char: [24-27], tok: [6-7]>), 0), expected='old_time', predicted='old_time', probas={'new_time': 0.028607105880949835, 'old_time': 0.97139289411905017}, label_type='class'),
     ...
    ]
    >>> list(eval.incorrect_results())
    [
-     EvaluatedExample(example=(<Query 'replace the 8 am alarm with a 10 am alarm'>, (<QueryEntity '8 am' ('time') char: [12-15], tok: [2-3]>, <QueryEntity '10 am' ('time') char: [30-34], tok: [7-8]>), 1), expected='newtime', predicted='oldtime', probas={'newtime': 0.48770513415754235, 'oldtime': 0.51229486584245765}, label_type='class')
+     EvaluatedExample(example=(<Query 'replace the 8 am alarm with a 10 am alarm'>, (<QueryEntity '8 am' ('sys_time') char: [12-15], tok: [2-3]>, <QueryEntity '10 am' ('sys_time') char: [30-34], tok: [7-8]>), 1), expected='new_time', predicted='old_time', probas={'new_time': 0.48770513415754235, 'old_time': 0.51229486584245765}, label_type='class')
    ]
 
 Slicing and dicing these results for error analysis is easily done with `list comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_.
@@ -564,57 +565,57 @@ Our example dataset is fairly small, and we get just one case of misclassificati
 
 .. code-block:: python
 
-   >>> [(r.example, r.probas) for r in eval.incorrect_results() if r.expected == 'newtime']
+   >>> [(r.example, r.probas) for r in eval.incorrect_results() if r.expected == 'new_time']
    [
      (
        (
          <Query 'replace the 8 am alarm with a 10 am alarm'>,
-         (<QueryEntity '8 am' ('time') char: [12-15], tok: [2-3]>, <QueryEntity '10 am' ('time') char: [30-34], tok: [7-8]>),
+         (<QueryEntity '8 am' ('sys_time') char: [12-15], tok: [2-3]>, <QueryEntity '10 am' ('sys_time') char: [30-34], tok: [7-8]>),
          1
        ),
        {
-         'newtime': 0.48770513415754235,
-         'oldtime': 0.51229486584245765
+         'new_time': 0.48770513415754235,
+         'old_time': 0.51229486584245765
        }
      )
    ]
 
-Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all queries with a given role where the classifier's confidence for the true label was relatively low. We'll demonstrate this with the ``newtime`` role and a confidence of <60%.
+Next, we use a list comprehension to identify the kind of queries that the current training data might lack. To do this, we list all queries with a given role where the classifier's confidence for the true label was relatively low. We'll demonstrate this with the ``new_time`` role and a confidence of <60%.
 
 .. code-block:: python
 
    >>> [(r.example, r.probas) for r in eval.results
-   ... if r.expected == 'newtime' and r.probas['newtime'] < .6]
+   ... if r.expected == 'new_time' and r.probas['new_time'] < .6]
    [
      (
        (
          <Query 'replace the 8 am alarm with a 10 am alarm'>,
-         (<QueryEntity '8 am' ('time') char: [12-15], tok: [2-3]>, <QueryEntity '10 am' ('time') char: [30-34], tok: [7-8]>),
+         (<QueryEntity '8 am' ('sys_time') char: [12-15], tok: [2-3]>, <QueryEntity '10 am' ('sys_time') char: [30-34], tok: [7-8]>),
          1
        ),
        {
-         'newtime': 0.48770513415754235,
-         'oldtime': 0.51229486584245765
+         'new_time': 0.48770513415754235,
+         'old_time': 0.51229486584245765
        }
      ),
      (
        (
          <Query 'cancel my 6 am and replace it with a 6:30 am alarm'>,
-         (<QueryEntity '6 am' ('time') char: [10-13], tok: [2-3]>, <QueryEntity '6:30 am' ('time') char: [37-43], tok: [9-10]>),
+         (<QueryEntity '6 am' ('sys_time') char: [10-13], tok: [2-3]>, <QueryEntity '6:30 am' ('sys_time') char: [37-43], tok: [9-10]>),
          1
        ),
        {
-         'newtime': 0.5872536946800766,
-         'oldtime': 0.41274630531992335
+         'new_time': 0.5872536946800766,
+         'old_time': 0.41274630531992335
        }
      )
    ]
 
-For both of these results, the classifier's prediction probability for the ``'newtime'`` role was fairly low. The classifier got one of them wrong, and barely got the other one right with a confidence of about 59%.
+For both of these results, the classifier's prediction probability for the ``'new_time'`` role was fairly low. The classifier got one of them wrong, and barely got the other one right with a confidence of about 59%.
 
-Try looking at the :doc:`training data <../blueprints/home_assistant>`. You should discover that the ``newtime`` role does indeed lack labeled training queries like the ones above.
+Try looking at the :doc:`training data <../blueprints/home_assistant>`. You should discover that the ``new_time`` role does indeed lack labeled training queries like the ones above.
 
-One potential solution is to add more training queries for the ``newtime`` role, so the classification model can generalize better.
+One potential solution is to add more training queries for the ``new_time`` role, so the classification model can generalize better.
 
 Error analysis on the results of the :meth:`evaluate` method can inform your experimentation and help in building better models. Augmenting training data should be the first step, as in the above example. Beyond that, you can experiment with different model types, features, and hyperparameters, as described :ref:`earlier <build_role_with_config>` in this chapter.
 
@@ -627,12 +628,12 @@ Save the trained role classifier for later use by calling the :meth:`RoleClassif
 .. code:: python
 
    >>> rc.dump(model_path='experiments/role_classifier.maxent.20170701.pkl')
-   Saving role classifier: domain='times_and_dates', intent='change_alarm', entity_type='time'
+   Saving role classifier: domain='times_and_dates', intent='change_alarm', entity_type='sys_time'
 
 You can load the saved model anytime using the :meth:`RoleClassifier.load` method.
 
 .. code:: python
 
    >>> rc.load(model_path='experiments/role_classifier.maxent.20170701.pkl')
-   Loading role classifier: domain='times_and_dates', intent='change_alarm', entity_type='time'
+   Loading role classifier: domain='times_and_dates', intent='change_alarm', entity_type='sys_time'
 
