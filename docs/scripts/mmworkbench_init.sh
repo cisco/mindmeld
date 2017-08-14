@@ -76,6 +76,19 @@ function install_dependency {
 	fi
 }
 
+function check_service {
+	local command=$1
+	echo -n "   " $command "... "
+
+	if [[ ($command == "elasticsearch") && (! `curl -s http://localhost:9200/`) ]]; then
+		echo no
+		echo "   " starting elasticsearch ... 
+		brew services restart elasticsearch
+	else
+		echo yes
+	fi
+}
+
 # Gather Info
 echo
 echo The MindMeld Workbench Installer checks dependencies and installs them.
@@ -117,6 +130,10 @@ if [[ ${NEEDS_DEP_INSTALL} == 1 ]]; then
 	echo done
 fi
 
+echo
+echo Checking dependent sevices already started
+check_service elasticsearch
+echo done
 
 echo
 echo Setting up configuration files
