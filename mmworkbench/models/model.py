@@ -642,8 +642,11 @@ class Model(object):
             msg = 'Best seq2seq accuracy: {:.2%}, params: {}'
             self.cv_loss_ = 1 - model.best_score_
         best_params = model.best_params_
-        best_params.pop('config')
-        best_params.pop('resources')
+
+        if self.config.label_type == ENTITIES_LABEL_TYPE:
+            best_params.pop('config')
+            best_params.pop('resources')
+
         logger.info(msg.format(model.best_score_, best_params))
 
         return model.best_estimator_, model.best_params_

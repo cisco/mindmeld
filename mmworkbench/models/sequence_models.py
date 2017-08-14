@@ -108,13 +108,9 @@ class TaggerModel(Model):
         examples = [examples[i] for i in indices]
         labels = [labels[i] for i in indices]
 
-        # TODO: add this code back in
-        # distinct_labels = set(labels)
-        # if len(set(distinct_labels)) <= 1:
-        #     return None
-
         types = [entity.entity.type for label in labels for entity in label]
-        if len(set(types)) == 1:
+        self.types = types
+        if len(set(types)) < 1:
             self._no_entities = True
             logger.warning("There are no labels in this label set, "
                            "so we don't fit the model.")
@@ -166,8 +162,8 @@ class TaggerModel(Model):
             (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
         """
         if self._no_entities:
-            # TODO
-            return
+            # TODO: return what is being returned by memm in develop
+            return []
         return self._clf.predict(examples)
 
     def evaluate(self, examples, labels):

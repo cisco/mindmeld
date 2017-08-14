@@ -14,7 +14,7 @@ import os
 import pytest
 
 from mmworkbench import NaturalLanguageProcessor
-from mmworkbench.models import tagging
+from mmworkbench.models.taggers import taggers
 
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME)
@@ -51,7 +51,7 @@ class TestTagging:
         within the system candidates spans"""
 
         processed_query = self.nlp.create_query(query)
-        res_entity = tagging.get_entities_from_tags(processed_query, tags)
+        res_entity = taggers.get_entities_from_tags(processed_query, tags)
 
         if res_entity[0].to_dict()['value']['grain'] == 'minute':
             assert res_entity[0].to_dict()['value']['value'][MINUTE_GRAIN_INDEX:] in \
@@ -75,5 +75,5 @@ class TestTagging:
         the system candidates spans"""
 
         processed_query = self.nlp.create_query(query)
-        res_entity = tagging.get_entities_from_tags(processed_query, tags)
+        res_entity = taggers.get_entities_from_tags(processed_query, tags)
         assert res_entity == ()
