@@ -565,32 +565,35 @@ class Model(object):
 
     def get_default_scorer(self, config):
         if config.label_type == ENTITIES_LABEL_TYPE:
-            print("entity scoring")
             return get_entity_scorer()
         else:
-            print("accuracy scoring")
             return ACCURACY_SCORING
 
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
 
-    def _fit_cv(self, X, y, groups=None, selection_settings=None):
-        """Summary
+    def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
+        """Called by the fit method when cross validation parameters are passed in. Runs cross
+        validation and returns the best estimator and parameters.
 
         Args:
-            X (numpy.matrix): The feature matrix for a dataset.
-            y (numpy.array): The target output values.
-            selection_settings (None, optional): Description
+            examples (list): A list of examples. Should be in the format expected by the underlying
+                             estimator.
+            labels (list): The target output values.
+            groups (None, optional): Same length as examples and labels. Used to group examples when
+                                     splitting the dataset into train/test
+            selection_settings (None, optional): A dictionary containing the cross validation
+                                                 selection settings.
 
         """
         selection_settings = selection_settings or self.config.param_selection
         cv_iterator = self._get_cv_iterator(selection_settings)
 
         if selection_settings is None:
-            return self._fit(X, y, self.config.params), self.config.params
+            return self._fit(examples, labels, self.config.params), self.config.params
 
         cv_type = selection_settings['type']
-        num_splits = cv_iterator.get_n_splits(X, y, groups)
+        num_splits = cv_iterator.get_n_splits(examples, labels, groups)
         logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
                     num_splits, '' if num_splits == 1 else 's')
 
@@ -604,7 +607,7 @@ class Model(object):
             scoring = selection_settings.get('scoring', self.default_scorer)
         n_jobs = selection_settings.get('n_jobs', -1)
 
-        param_grid = self._convert_params(selection_settings['grid'], y)
+        param_grid = self._convert_params(selection_settings['grid'], labels)
         model_class = self._get_model_constructor()
 
         if self.config.label_type == ENTITIES_LABEL_TYPE:
@@ -616,7 +619,7 @@ class Model(object):
             estimator = model_class()
         grid_cv = GridSearchCV(estimator=estimator, scoring=scoring, param_grid=param_grid,
                                cv=cv_iterator, n_jobs=n_jobs)
-        model = grid_cv.fit(X, y, groups)
+        model = grid_cv.fit(examples, labels, groups)
 
         for idx, params in enumerate(model.cv_results_['params']):
             logger.debug('Candidate parameters: {}'.format(params))
