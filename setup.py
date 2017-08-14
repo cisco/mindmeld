@@ -4,10 +4,6 @@
 # pylint: disable=locally-disabled,invalid-name
 from setuptools import setup
 
-# TODO: convert readme to restuctured text
-with open('README.md') as readme_file:
-    readme = readme_file.read()
-
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
@@ -25,6 +21,7 @@ requirements = [
     'requests>=2.13.0',
     'scipy>=0.9',
     'scikit-learn>=0.18.1',
+    'tqdm>=4.15.0',
     'urllib3<1.22,>=1.21.1',
 ]
 
@@ -41,9 +38,9 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='3.0.0rc6',
+    version='3.0.0',
     description="A Python module for building natural language processing models.",
-    long_description=readme + '\n\n' + history,
+    long_description=history,
     author="MindMeld, Inc.",
     author_email='contact@mindmeld.com',
     url='https://github.com/mindmeld/mindmeld-workbench3',

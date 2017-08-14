@@ -13,8 +13,10 @@ import copy
 from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      does_index_exist)
+from elasticsearch import TransportError, ElasticsearchException, ConnectionError
 
 from ..resource_loader import ResourceLoader
+from ..exceptions import KnowledgeBaseError, KnowledgeBaseConnectionError
 
 logger = logging.getLogger(__name__)
 
@@ -155,12 +157,24 @@ class QuestionAnswerer(object):
         index_info = self._es_field_info.get(index, {})
 
         if not index_info:
-            self._es_field_info[index] = {}
-            res = self._es_client.indices.get(index=index)
-            all_field_info = res[index]['mappings']['document']['properties']
-            for field_name in all_field_info:
-                field_type = all_field_info[field_name].get('type')
-                self._es_field_info[index][field_name] = FieldInfo(field_name, field_type)
+            try:
+                # TODO: move the ES API call logic to ES helper
+                self._es_field_info[index] = {}
+                res = self._es_client.indices.get(index=index)
+                all_field_info = res[index]['mappings']['document']['properties']
+                for field_name in all_field_info:
+                    field_type = all_field_info[field_name].get('type')
+                    self._es_field_info[index][field_name] = FieldInfo(field_name, field_type)
+            except ConnectionError as e:
+                logger.error(
+                    'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+                raise KnowledgeBaseConnectionError(es_host=self._es_client.transport.hosts)
+            except TransportError as e:
+                logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                             'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+                raise KnowledgeBaseError
+            except ElasticsearchException:
+                raise KnowledgeBaseError
 
     def config(self, config):
         """Summary
@@ -190,6 +204,18 @@ class QuestionAnswerer(object):
             connect_timeout (int, optional): The amount of time for a
             connection to the Elasticsearch host
         """
+        def _doc_count(data_file):
+            with open(data_file) as data_fp:
+                line = data_fp.readline()
+                data_fp.seek(0)
+                if line.strip() == '[':
+                    docs = json.load(data_fp)
+                    return len(docs)
+                else:
+                    count = 0
+                    for _ in data_fp:
+                        count += 1
+                    return count
 
         def _doc_generator(data_file):
             def transform(doc):
@@ -211,7 +237,9 @@ class QuestionAnswerer(object):
                         doc = json.loads(line)
                         yield transform(doc)
 
-        load_index(app_namespace, index_name, _doc_generator(data_file), DEFAULT_ES_QA_MAPPING,
+        docs = _doc_generator(data_file)
+        docs_count = _doc_count(data_file)
+        load_index(app_namespace, index_name, docs, docs_count, DEFAULT_ES_QA_MAPPING,
                    DOC_TYPE, es_host, es_client, connect_timeout=connect_timeout)
 
 
@@ -432,14 +460,15 @@ class Search:
 
         return new_search
 
-    def sort(self, field, sort_type, location=None):
+    def sort(self, field, sort_type=None, location=None):
         """Specify custom sort criteria.
 
         Args:
             field (str): knowledge base field for sort.
             sort_type (str): sorting type. valid values are 'asc', 'desc' and 'distance'. 'asc' and
                              'desc' can be used to sort numeric or date fields and 'distance' can
-                             be used to sort by distance on geo_point fields
+                             be used to sort by distance on geo_point fields. Default sort type
+                             is 'desc' if not specified.
             location (str): location (lat, lon) in geo_point format to be used as origin when
                             sorting by 'distance'
         """
@@ -495,15 +524,22 @@ class Search:
 
             if self._clauses['query']:
                 es_query_clauses = []
-
+                es_boost_functions = []
                 for clause in self._clauses['query']:
-                    es_query_clauses.append(clause.build_query())
+                    query_clause, boost_functions = clause.build_query()
+                    es_query_clauses.append(query_clause)
+                    es_boost_functions.extend(boost_functions)
 
                 if self._ranking_config['query_clauses_operator'] == 'and':
                     es_query['query']['function_score']['query']['bool']['must'] = es_query_clauses
                 else:
                     es_query['query']['function_score']['query']['bool']['should'] = \
                         es_query_clauses
+
+                # add all boost functions for the query clause
+                # right now the only boost functions supported are exact match boosting for
+                # CNAME and synonym whitelists.
+                es_query['query']['function_score']['functions'].extend(es_boost_functions)
 
             if self._clauses['filter']:
                 es_filter_clauses = {
@@ -530,10 +566,22 @@ class Search:
         Returns:
             a list of matching documents.
         """
-        es_query = self._build_es_query()
-        response = self.client.search(index=self.index, body=es_query)
-        results = [hit['_source'] for hit in response['hits']['hits']]
-        return results
+        try:
+            # TODO: move the ES API call logic to ES helper
+            es_query = self._build_es_query()
+            response = self.client.search(index=self.index, body=es_query)
+            results = [hit['_source'] for hit in response['hits']['hits']]
+            return results
+        except ConnectionError as e:
+            logger.error(
+                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+            raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts)
+        except TransportError as e:
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            raise KnowledgeBaseError
+        except ElasticsearchException:
+            raise KnowledgeBaseError
 
     class Clause:
         """This class models an abstract knowledge base clause."""
@@ -560,6 +608,8 @@ class Search:
 
     class QueryClause(Clause):
         """This class models a knowledge base query clause."""
+
+        DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT = 100
 
         def __init__(self, field, field_info, value, synonym_field=None):
             """Initialize a knowledge base query clause."""
@@ -595,8 +645,7 @@ class Search:
                         {
                             "match": {
                                 self.field + ".normalized_keyword": {
-                                    "query": self.value,
-                                    "boost": 10
+                                    "query": self.value
                                 }
                             }
                         },
@@ -611,6 +660,18 @@ class Search:
                 }
             }
 
+            # Boost function for boosting conditions, e.g. exact match boosting
+            boost_functions = [
+                {
+                    "filter": {
+                        "match": {
+                            self.field + ".normalized_keyword": self.value
+                        }
+                    },
+                    "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT
+                }
+            ]
+
             # generate ES syntax for matching on synonym whitelist if available.
             if self.syn_field:
                 clause['bool']['should'].append(
@@ -624,8 +685,7 @@ class Search:
                                         {
                                             "match": {
                                                 self.syn_field + ".name.normalized_keyword": {
-                                                    "query": self.value,
-                                                    "boost": 10
+                                                    "query": self.value
                                                 }
                                             }
                                         },
@@ -651,7 +711,22 @@ class Search:
                     }
                 )
 
-            return clause
+                boost_functions.append(
+                    {
+                        "filter": {
+                            "nested": {
+                                "path": self.syn_field,
+                                "query": {
+                                    "match": {
+                                        self.syn_field + ".name.normalized_keyword": self.value
+                                    }
+                                }
+                            }},
+                        "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT
+                    }
+                )
+
+            return clause, boost_functions
 
         def validate(self):
             if not self.field_info.is_text_field():
@@ -748,6 +823,10 @@ class Search:
         SORT_DISTANCE = 'distance'
         SORT_TYPES = {SORT_ORDER_ASC, SORT_ORDER_DESC, SORT_DISTANCE}
 
+        # default weight for adjusting sort scores so that they will be on the same scale when
+        # combined with text relevance scores.
+        DEFAULT_SORT_WEIGHT = 30
+
         def __init__(self, field, field_info=None, sort_type=None, field_stats=None,
                      location=None):
             """Initialize a knowledge base sort clause"""
@@ -792,7 +871,8 @@ class Search:
                         "origin": origin,
                         "scale": scale
                     }
-                }
+                },
+                "weight": self.DEFAULT_SORT_WEIGHT
             }
 
             return sort_clause

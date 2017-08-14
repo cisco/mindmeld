@@ -22,10 +22,10 @@ Workbench provides four blueprints:
 | |  :doc:`Home Assistant <home_assistant>`       | | Users control devices                 | | ``home_assistant``         |
 | |                                               | | and appliances in a smart home        | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+
-| |  :doc:`Video Discovery <video_discovery>`     | | Users search for, ask questions about,| | ``video_assistant``        |
+| |  :doc:`Video Discovery <video_discovery>`     | | Users search for, ask questions about,| | ``video_discovery``        |
 | |                                               | | and ask to view movies and TV shows   | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+
-| | :doc:`Kwik-E-Mart <../quickstart/00_overview>`| | The Kwik-E-Mart app described         | | ``qwik_e_mart``            |
+| | :doc:`Kwik-E-Mart <../quickstart/00_overview>`| | The Kwik-E-Mart app described         | | ``kwik_e_mart``            |
 | |                                               | | in the Step-by-Step Guide             | |                            |
 +-------------------------------------------------+-----------------------------------------+------------------------------+
 
@@ -63,7 +63,7 @@ Depending on which blueprint you choose to run, this Quick Start should take bet
 
 Open a Python shell and type the following commands to download and set up the blueprint application of your choice.
 
-  - Use the appropriate Python blueprint name as the value of the ``bp_name`` variable (either ``food_ordering``, ``home_assistant``, ``video_assistant``, or ``qwik_e_mart``). In the example, we specify the Food Ordering blueprint.
+  - Use the appropriate Python blueprint name as the value of the ``bp_name`` variable (either ``food_ordering``, ``home_assistant``, ``video_assistant``, or ``kwik_e_mart``). In the example, we specify the Food Ordering blueprint.
 
 .. code:: python
 

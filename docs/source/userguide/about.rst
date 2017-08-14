@@ -13,6 +13,7 @@ This guide
 - shows how to create all the necessary data resources for building your app
 - explains in depth how all the different components in Workbench work, along with the configuration options available for each
 - illustrates how you can use advanced machine learning techniques to build intelligent conversational models
+
 .. - provides guidance on how to deploy your application to production and integrate it with client endpoints
 
 Audience

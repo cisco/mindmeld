@@ -17,7 +17,12 @@ Every Workbench app has exactly one domain classifier. The name of each domain f
 Access the domain classifier
 ----------------------------
 
-To use any natural language processor component, you must first generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`. Once you have training data, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
+Working with any natural language processor component falls into two broad phases:
+
+ - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
+ - Then, conduct experimentation in the Python shell.
+
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
 
 .. code-block:: python
 
@@ -80,7 +85,7 @@ Using default settings is the recommended (and quickest) way to get started with
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an  example where we view the configuration of a baseline domain classifier trained using default settings:
+Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an example where we view the configuration of a baseline domain classifier trained using default settings:
 
 .. code-block:: python
 
@@ -406,7 +411,7 @@ For example, a :sk_guide:`support vector machine (SVM) <svm>` with the same feat
    Selecting hyperparameters using shuffle cross-validation with 5 splits
    Best accuracy: 99.56%, params: {'C': 1000, 'kernel': 'rbf'}
 
-Meanwhile, a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :sk_guide:`ensemble <ensemble>` classifier requires different parameters:
+Meanwhile, a :sk_api:`random forest <sklearn.ensemble.RandomForestClassifier>` :sk_guide:`ensemble <ensemble>` classifier would look like this:
 
 .. code-block:: python
 

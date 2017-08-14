@@ -38,6 +38,7 @@ As the diagram illustrates, each dialogue state prescribes a natural language te
 
   By convention, dialogue state names are verbs that describe the action your application should take at particular points in the interaction.
 
+.. _app_container:
 
 Create the Application Container
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

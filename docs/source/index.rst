@@ -112,9 +112,10 @@ Contents
    userguide/kb
    userguide/dm
 
-.. toctree::
-   :maxdepth: 2
-   :caption: API
-   :name: internal
+..
+   .. toctree::
+      :maxdepth: 2
+      :caption: API
+      :name: internal
 
-   internal/api_reference
+      internal/api_reference
