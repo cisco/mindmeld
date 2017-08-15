@@ -22,6 +22,11 @@ class ConditionalRandomFields(Tagger):
         self._config = self._passed_params.get('config', None)
         self._feat_binner = self._get_feature_binner()
         self._tag_scheme = self._config.model_settings.get('tag_scheme', 'IOB').upper()
+
+        # If parameters were not set, check if they were passed through the config
+        if not self._current_params:
+            self._current_params = self._config.params
+
         # Extract features and classes
         all_tags = []
         for idx, label in enumerate(labels):

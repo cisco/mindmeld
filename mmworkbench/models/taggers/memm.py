@@ -28,6 +28,10 @@ class MemmModel(Tagger):
         # Default tag scheme to IOB
         self._tag_scheme = self._config.model_settings.get('tag_scheme', 'IOB').upper()
 
+        # If parameters were not set, check if they were passed through the config
+        if not self._current_params:
+            self._current_params = self._config.params
+
         # Extract features and classes
         y = self._label_encoder.encode(labels, examples=examples)
         X, y, groups = self.get_feature_matrix(examples, y, fit=True)
