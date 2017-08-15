@@ -83,7 +83,6 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
         response = requests.request('POST', url, json=data)
         return response.json()
     except requests.ConnectionError:
-        logger.error('Unable to connect to Mallard.')
         raise RuntimeError("Unable to connect to Mallard. Make sure it's running by typing "
                            "'mmworkbench num-parse' at the command line.")
     except Exception as ex:
