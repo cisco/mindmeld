@@ -1,5 +1,0 @@
-.. meta::
-    :scope: private
-
-Integration
-===========

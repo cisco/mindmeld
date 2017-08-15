@@ -7,12 +7,17 @@ from builtins import object
 
 import copy
 import logging
+import hashlib
 
 from ..core import Entity
-from ._config import get_app_name, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
+from ._config import get_app_namespace, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
 
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
-                                     delete_index)
+                                     delete_index, does_index_exist, get_field_names,
+                                     INDEX_TYPE_KB, INDEX_TYPE_SYNONYM)
+
+from elasticsearch.exceptions import ConnectionError, TransportError, ElasticsearchException
+from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +38,7 @@ class EntityResolver(object):
             entity_type: The entity type associated with this entity resolver
             es_host (str): The Elasticsearch host server
         """
-        self._app_name = get_app_name(app_path)
+        self._app_namespace = get_app_namespace(app_path)
         self._resource_loader = resource_loader
         self._normalizer = resource_loader.query_factory.normalize
         self.type = entity_type
@@ -55,37 +60,70 @@ class EntityResolver(object):
         return self.__es_client
 
     @classmethod
-    def ingest_synonym(cls, app_name, index_name, data, es_host=None, es_client=None):
-        """Loads synonym documents from the mapping.json data into the specified index. If an index
-        with the specified name doesn't exist, a new index with that name will be created.
+    def ingest_synonym(cls, app_namespace, index_name, index_type=INDEX_TYPE_SYNONYM,
+                       field_name=None, data=[], es_host=None, es_client=None):
+        """Loads synonym documents from the mapping.json data into the
+        specified index. If an index with the specified name doesn't exist, a
+        new index with that name will be created.
 
         Args:
-            app_name (str): The name of the app
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
             index_name (str): The name of the new index to be created
+            index_type (str): specify whether to import to synonym index or
+                knowledge base object index. INDEX_TYPE_SYNONYM is the default
+                which indicates the synonyms to be imported to synonym index,
+                while INDEX_TYPE_KB indicates that the synonyms should be
+                imported into existing knowledge base index.
+            field_name (str): specify name of the knowledge base field that the
+                synonym list corresponds to when index_type is
+                INDEX_TYPE_SYNONYM.
             data (list): A list of documents to be loaded into the index
             es_host (str): The Elasticsearch host server
             es_client (Elasticsearch): The Elasticsearch client
         """
-        def _doc_generator(docs):
+        def _action_generator(docs):
+
             for doc in docs:
-                base = {}
+                action = {}
+
+                # id
                 if doc.get('id'):
-                    base['_id'] = doc['id']
+                    action['_id'] = doc['id']
+                else:
+                    # generate hash from canonical name as ID
+                    action['_id'] = hashlib.sha256(doc.get('cname').encode('utf-8')).hexdigest()
+
+                # synonym whitelist
                 whitelist = doc['whitelist']
-                new_list = []
-                new_list.append({"name": doc['cname']})
+                syn_list = []
+                syn_list.append({"name": doc['cname']})
                 for syn in whitelist:
-                    new_list.append({"name": syn})
-                doc['whitelist'] = new_list
-                base.update(doc)
+                    syn_list.append({"name": syn})
 
-                yield base
+                # If index type is INDEX_TYPE_KB  we import the synonym into knowledge base object
+                # index by updating the knowledge base object with additional synonym whitelist
+                # field. Otherwise, by default we import to synonym index in ES.
+                if index_type == INDEX_TYPE_KB and field_name:
+                    syn_field = field_name + "$whitelist"
+                    action['_op_type'] = 'update'
+                    action['doc'] = {syn_field: syn_list}
+                else:
+                    action.update(doc)
+                    action['whitelist'] = syn_list
 
-        load_index(app_name, index_name, data, _doc_generator, DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE,
-                   es_host, es_client)
+                yield action
+
+        load_index(app_namespace, index_name, _action_generator(data), len(data),
+                   DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE, es_host, es_client)
 
     def fit(self, clean=False):
-        """Loads an entity mapping file to Elasticsearch for text relevance based entity resolution
+        """Loads an entity mapping file to Elasticsearch for text relevance based entity resolution.
+
+        In addition, the synonyms in entity mapping are imported to knowledge base indexes if the
+        corresponding knowledge base object index and field name are specified for the entity type.
+        The synonym info is then used by Question Answerer for text relevance matches.
 
         Args:
             clean (bool): If True, deletes and recreates the index from scratch instead of
@@ -99,12 +137,44 @@ class EntityResolver(object):
             return
 
         if clean:
-            delete_index(self._app_name, self._es_index_name, self._es_host,
+            delete_index(self._app_namespace, self._es_index_name, self._es_host,
                          self._es_client)
         entity_map = self._resource_loader.get_entity_map(self.type)
-        logger.info("Importing synonym data to ES index '{}'".format(self._es_index_name))
-        EntityResolver.ingest_synonym(self._app_name, self._es_index_name, entity_map,
-                                      self._es_host, self._es_client)
+
+        # list of canonical entities and their synonyms
+        entities = entity_map.get('entities')
+
+        # create synonym index and import synonyms
+        logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
+        EntityResolver.ingest_synonym(app_namespace=self._app_namespace,
+                                      index_name=self._es_index_name, data=entities,
+                                      es_host=self._es_host, es_client=self._es_client)
+
+        # It's supported to specify the KB object type and field name that the NLP entity type
+        # corresponds to in the mapping.json file. In this case the synonym whitelist is also
+        # imported to KB object index and the synonym info will be used when using Question Answerer
+        # for text relevance matches.
+        kb_index = entity_map.get('kb_index_name')
+        kb_field = entity_map.get('kb_field_name')
+
+        # if KB index and field name is specified then also import synonyms into KB object index.
+        if kb_index and kb_field:
+            # validate the KB index and field are valid.
+            # TODO: this validation can probably be in some other places like resource loader.
+            if not does_index_exist(self._app_namespace, kb_index, self._es_host, self._es_client):
+                raise ValueError("Cannot import synonym data to knowledge base. The knowledge base "
+                                 "index name \'{}\' is not valid.".format(kb_index))
+            if kb_field not in get_field_names(self._app_namespace, kb_index, self._es_host,
+                                               self._es_client):
+                raise ValueError("Cannot import synonym data to knowledge base. The knowledge base "
+                                 "field name \'{}\' is not valid.".format(kb_field))
+            if entities and not entities[0].get('id'):
+                raise ValueError("Knowledge base index and field cannot be specified for entities "
+                                 "without ID.")
+            logger.info("Importing synonym data to knowledge base index '{}'".format(kb_index))
+            EntityResolver.ingest_synonym(app_namespace=self._app_namespace, index_name=kb_index,
+                                          index_type='kb', field_name=kb_field, data=entities,
+                                          es_host=self._es_host, es_client=self._es_client)
 
     @staticmethod
     def _process_entity_map(entity_type, entity_map, normalizer):
@@ -248,26 +318,39 @@ class EntityResolver(object):
             }
         }
 
-        index = get_scoped_index_name(self._app_name, self._es_index_name)
-        response = self._es_client.search(index=index, body=text_relevance_query)
-        hits = response['hits']['hits']
+        try:
+            index = get_scoped_index_name(self._app_namespace, self._es_index_name)
+            response = self._es_client.search(index=index, body=text_relevance_query)
+        except ConnectionError as e:
+            logger.error(
+                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+        except TransportError as e:
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            raise EntityResolverError
+        except ElasticsearchException:
+            raise EntityResolverError
+        else:
+            hits = response['hits']['hits']
 
-        results = []
-        for hit in hits:
-            result = {
-                'cname': hit['_source']['cname'],
-                'score': hit['_score'],
-                'top_synonym': hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
+            results = []
+            for hit in hits:
+                result = {
+                    'cname': hit['_source']['cname'],
+                    'score': hit['_score'],
+                    'top_synonym':
+                        hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
 
-            if hit['_source'].get('id'):
-                result['id'] = hit['_source'].get('id')
+                if hit['_source'].get('id'):
+                    result['id'] = hit['_source'].get('id')
 
-            if hit['_source'].get('sort_factor'):
-                result['sort_factor'] = hit['_source'].get('sort_factor')
+                if hit['_source'].get('sort_factor'):
+                    result['sort_factor'] = hit['_source'].get('sort_factor')
 
-            results.append(result)
+                results.append(result)
 
-        return results[0:20]
+            return results[0:20]
 
     def _predict_exact_match(self, entity):
         """Predicts the resolved value(s) for the given entity using the loaded entity map.
@@ -330,9 +413,21 @@ class EntityResolver(object):
         Args:
             model_path (str): The location on disk where the model is stored
         """
-        if self._use_text_rel:
-            scoped_index_name = get_scoped_index_name(self._app_name, self._es_index_name)
-            if not self._es_client.indices.exists(index=scoped_index_name):
+        try:
+            if self._use_text_rel:
+                scoped_index_name = get_scoped_index_name(self._app_namespace, self._es_index_name)
+                if not self._es_client.indices.exists(index=scoped_index_name):
+                    self.fit()
+            else:
                 self.fit()
-        else:
-            self.fit()
+
+        except ConnectionError as e:
+            logger.error(
+                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+            raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
+        except TransportError as e:
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
+                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            raise EntityResolverError
+        except ElasticsearchException:
+            raise EntityResolverError

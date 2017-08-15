@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains some helper functions for the models package"""
 from __future__ import unicode_literals
+from sklearn.metrics import make_scorer
 
 import re
 
@@ -18,10 +19,10 @@ ENTITIES_LABEL_TYPE = 'entities'
 
 
 # resource/requirements names
-GAZETTEER_RSC = "gazetteers"
-WORD_FREQ_RSC = "w_freq"
-QUERY_FREQ_RSC = "q_freq"
-
+GAZETTEER_RSC = 'gazetteers'
+QUERY_FREQ_RSC = 'q_freq'
+SYS_TYPES_RSC = 'sys_types'
+WORD_FREQ_RSC = 'w_freq'
 
 OUT_OF_BOUNDS_TOKEN = '<$>'
 
@@ -104,7 +105,7 @@ def register_model(model_type, model_class):
 
     Args:
         model_type (str): The model type as specified in model configs
-        model_class (type): The model to register
+        model_class (class): The model to register
     """
     if model_type in MODEL_MAP:
         raise ValueError('Model {!r} is already registered.'.format(model_type))
@@ -176,3 +177,27 @@ def get_ngram(tokens, start, length):
                  else tokens[index])
         ngram_tokens.append(token)
     return ' '.join(ngram_tokens)
+
+
+def get_entity_scorer():
+    return make_scorer(score_func=entity_accuracy_scoring)
+
+
+def entity_accuracy_scoring(expected, predicted):
+    num_examples = len(expected)
+    num_correct = sum(1 for expected_seq, predicted_seq in zip(expected, predicted)
+                      if entity_seqs_equal(expected_seq, predicted_seq))
+    return float(num_correct) / float(num_examples)
+
+
+def entity_seqs_equal(expected, predicted):
+    if len(expected) != len(predicted):
+        return False
+    for i in range(len(expected)):
+        if expected[i].entity.type != predicted[i].entity.type:
+            return False
+        if expected[i].span != predicted[i].span:
+            return False
+        if expected[i].text != predicted[i].text:
+            return False
+    return True

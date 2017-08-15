@@ -11,8 +11,8 @@ import random
 
 from .helpers import register_model
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
-from .taggers import ConditionalRandomFields
-from .memm import MemmModel
+from .taggers.crf import ConditionalRandomFields
+from .taggers.memm import MemmModel
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,35 @@ DEFAULT_FEATURES = {
 
 
 class TaggerModel(Model):
-    """A machine learning classifier for tags."""
+    """A machine learning classifier for tags.
+
+    This class manages feature extraction, training, cross-validation, and
+    prediction. The design goal is that after providing initial settings like
+    hyperparameters, grid-searchable hyperparameters, feature extractors, and
+    cross-validation settings, TextModel manages all of the details
+    involved in training and prediction such that the input to training or
+    prediction is Query objects, and the output is class names, and no data
+    manipulation is needed from the client.
+
+    Attributes:
+        classifier_type (str): The name of the classifier type. Currently
+            recognized values are "logreg","dtree", "rforest" and "svm",
+            as well as "super-learner:logreg", "super-learner:dtree" etc.
+        hyperparams (dict): A kwargs dict of parameters that will be used to
+            initialize the classifier object.
+        grid_search_hyperparams (dict): Like 'hyperparams', but the values are
+            lists of parameters. The training process will grid search over the
+            Cartesian product of these parameter lists and select the best via
+            cross-validation.
+        feat_specs (dict): A mapping from feature extractor names, as given in
+            FEATURE_NAME_MAP, to a kwargs dict, which will be passed into the
+            associated feature extractor function.
+        cross_validation_settings (dict): A dict that contains "type", which
+            specifies the name of the cross-validation strategy, such as
+            "k-folds" or "shuffle". The remaining keys are parameters
+            specific to the cross-validation type, such as "k" when the type is
+            "k-folds".
+    """
 
     def __init__(self, config):
         if not config.features:
@@ -71,7 +99,6 @@ class TaggerModel(Model):
         """
         system_types = self._get_system_types()
         self.register_resources(sys_types=system_types)
-
         skip_param_selection = params is not None or self.config.param_selection is None
         params = params or self.config.params
 
@@ -81,16 +108,14 @@ class TaggerModel(Model):
         examples = [examples[i] for i in indices]
         labels = [labels[i] for i in indices]
 
-        """
-        # TODO: add this code back in
-        # distinct_labels = set(labels)
-        # if len(set(distinct_labels)) <= 1:
-        #     return None
-
-        if len(set(y)) == 1:
+        types = [entity.entity.type for label in labels for entity in label]
+        self.types = types
+        if len(set(types)) < 1:
             self._no_entities = True
+            logger.warning("There are no labels in this label set, "
+                           "so we don't fit the model.")
             return self
-        """
+
         if skip_param_selection:
             self._clf = self._fit(examples, labels, params)
             self._current_params = params
@@ -111,10 +136,22 @@ class TaggerModel(Model):
             params (dict): Parameters of the classifier
         """
         model_class = self._get_model_constructor()
-        return model_class(self.config).fit(examples, labels, resources=self._resources)
+        init_params = {'config': self.config, 'resources': self._resources}
+        return model_class(**init_params).fit(examples, labels)
 
-    def _fit_cv(self, examples, labels):
-        raise NotImplementedError
+    def _convert_params(self, param_grid, y, is_grid=True):
+        """
+        Convert the params from the style given by the config to the style
+        passed in to the actual classifier.
+
+        Args:
+            param_grid (dict): lists of classifier parameter values, keyed by parameter name
+
+        Returns:
+            (dict): revised param_grid
+        """
+        # todo should we do any parameter transformation for sequence models?
+        return param_grid
 
     def predict(self, examples):
         """
@@ -125,8 +162,7 @@ class TaggerModel(Model):
             (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
         """
         if self._no_entities:
-            # TODO
-            return
+            return [()]
         return self._clf.predict(examples)
 
     def evaluate(self, examples, labels):
@@ -141,6 +177,12 @@ class TaggerModel(Model):
                 evaluation
         """
         # TODO: also expose feature weights?
+
+        if self._no_entities:
+            logger.warning("There are no labels in this label set, "
+                           "so we don't run model evaluation.")
+            return
+
         predictions = self.predict(examples)
         evaluations = [EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
                        for i, e in enumerate(examples)]

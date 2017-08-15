@@ -1,7 +1,7 @@
-Step 10: Deploy Trained Models To Production
-============================================
+Step 10: Deploy Trained Models
+==============================
 
-Once your application has been built, Workbench makes it easy to test locally and then deploy into production. In :doc:`Step 4 <04_define_the_dialogue_handlers>`, we created an application container for your dialogue state handler logic. This was the ``app.py`` file in the application root directory. To provide the necessary interface to manage deployment, we now append the following two lines of code to this file.
+Once your application has been built, Workbench makes it easy to test locally. In :doc:`Step 4 <04_define_the_dialogue_handlers>`, we created an application container for your dialogue state handler logic. This was the ``app.py`` file in the application root directory. To provide the necessary interface to manage deployment, we now append the following two lines of code to this file.
 
 .. code:: python
 
@@ -24,13 +24,10 @@ Our ``app.py`` now looks something like the following.
   if __name__ == "__main__":
       app.cli()
 
-We can now test our application locally, or deploy remotely into a production environment.
+We can now test our application locally.
 
-Local Deployment
-~~~~~~~~~~~~~~~~
 
-If you have not already, you must build your models before the application can be run. To build
-your models use the ``build`` command:
+If you have not already, you must build your models before the application can be run. To build your models use the ``build`` command:
 
 .. code-block:: console
 
@@ -40,6 +37,7 @@ your models use the ``build`` command:
 To launch the web service use the ``run`` command:
 
 .. code-block:: console
+
     $ python app.py run
     Numerical parser running, PID 20248
     Loading intent classifier: domain='store_info'
@@ -77,9 +75,9 @@ To test using any REST client (such as Postman or Advanced Rest Client), send `P
 
 The web service responds with a JSON data structure containing the application response along with the detailed output for all of the machine learning components of the Workbench platform.
 
-See the :ref:`User Guide <userguide>` for more about the Workbench request and response interface format.
+.. See the :ref:`User Guide <userguide>` for more about the Workbench request and response interface format.
 
-MindMeld Cloud Deployment
-~~~~~~~~~~~~~~~~~~~~~~~~~
+.. Cloud Deployment
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Coming Soon
+.. Coming Soon

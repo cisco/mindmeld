@@ -1,43 +1,44 @@
 # -*- coding: utf-8 -*-
-"""This module contains the Memm entity recognizer."""
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import division
-from builtins import super
-
-import logging
+"""
+This module contains the Memm entity recognizer.
+"""
+from __future__ import print_function, absolute_import, unicode_literals, division
 
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 
+from .taggers import Tagger, START_TAG
+from ..helpers import extract_sequence_features, get_label_encoder
 
-from . import tagging
-from .taggers import Tagger
-from .helpers import extract_sequence_features, get_label_encoder
+import logging
 logger = logging.getLogger(__name__)
 
 
 class MemmModel(Tagger):
     """A maximum-entropy Markov model."""
-    def __init__(self, config):
-        super().__init__(config)
-        self._label_encoder = get_label_encoder(self.config)
+    def fit(self, examples, labels):
+        self._config = self._passed_params.get('config', None)
         self._class_encoder = SKLabelEncoder()
         self._feat_vectorizer = DictVectorizer()
+        self._label_encoder = get_label_encoder(self._config)
         self._feat_selector = self._get_feature_selector()
         self._feat_scaler = self._get_feature_scaler()
+        # Default tag scheme to IOB
+        self._tag_scheme = self._config.model_settings.get('tag_scheme', 'IOB').upper()
 
-    def fit(self, examples, labels, resources=None):
-        self._resources = resources
+        # If parameters were not set, check if they were passed through the config
+        if not self._current_params:
+            self._current_params = self._config.params
+
         # Extract features and classes
         y = self._label_encoder.encode(labels, examples=examples)
-
         X, y, groups = self.get_feature_matrix(examples, y, fit=True)
-        self._clf = self._fit(X, y, self.config.params)
-        self._current_params = self.config.params
+
+        # Fit the underlying classifier
+        model_class = self._get_model_constructor()
+        self._clf = model_class(**self._current_params).fit(X, y)
         return self
 
     def predict(self, examples):
@@ -49,7 +50,7 @@ class MemmModel(Tagger):
             return self._label_encoder.decode([], examples=[example])[0]
 
         predicted_tags = []
-        prev_tag = tagging.START_TAG
+        prev_tag = START_TAG
         for features in features_by_segment:
             features['prev_tag'] = prev_tag
             X, _ = self._preprocess_data([features])
@@ -68,8 +69,8 @@ class MemmModel(Tagger):
         Returns:
             (list dict): features
         """
-        return extract_sequence_features(example, self.config.example_type,
-                                         self.config.features, self._resources)
+        return extract_sequence_features(example, self._config.example_type,
+                                         self._config.features, self._resources)
 
     def get_feature_matrix(self, examples, y=None, fit=True):
         """Transforms a list of examples into a feature matrix.
@@ -90,7 +91,7 @@ class MemmModel(Tagger):
             groups.extend([i for _ in features_by_segment])
             for j, segment in enumerate(features_by_segment):
                 if j == 0:
-                    segment['prev_tag'] = tagging.START_TAG
+                    segment['prev_tag'] = START_TAG
                 elif fit:
                     segment['prev_tag'] = y[y_offset + j - 1]
 
@@ -106,20 +107,20 @@ class MemmModel(Tagger):
             (Object): a feature selector which returns a reduced feature matrix,
                 given the full feature matrix, X and the class labels, y
         """
-        if self.config.model_settings is None:
+        if self._config.model_settings is None:
             selector_type = None
         else:
-            selector_type = self.config.model_settings.get('feature_selector')
+            selector_type = self._config.model_settings.get('feature_selector')
         selector = {'l1': SelectFromModel(LogisticRegression(penalty='l1', C=1)),
                     'f': SelectPercentile()}.get(selector_type)
         return selector
 
     def _get_feature_scaler(self):
         """Get a feature value scaler based on the model settings"""
-        if self.config.model_settings is None:
+        if self._config.model_settings is None:
             scale_type = None
         else:
-            scale_type = self.config.model_settings.get('feature_scaler')
+            scale_type = self._config.model_settings.get('feature_scaler')
         scaler = {'std-dev': StandardScaler(with_mean=False),
                   'max-abs': MaxAbsScaler()}.get(scale_type)
         return scaler
@@ -145,14 +146,3 @@ class MemmModel(Tagger):
     def _get_model_constructor(self):
         """Returns the python class of the actual underlying model"""
         return LogisticRegression
-
-    def _fit(self, X, y, params):
-        """Trains a classifier without cross-validation.
-
-        Args:
-            X (numpy.matrix): The feature matrix for a dataset.
-            y (numpy.array): The target output values.
-            params (dict): Parameters of the classifier
-        """
-        model_class = self._get_model_constructor()
-        return model_class(**params).fit(X, y)

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 LABEL_SETS = {
     'train': 'train*.txt',
-    'heldout': 'heldout*.txt'
+    'test': 'test*.txt'
 }
 DEFAULT_LABEL_SET = 'train'
 
@@ -97,12 +97,13 @@ class ResourceLoader(object):
 
     def build_gazetteer(self, gaz_name, exclude_ngrams=False, force_reload=False):
         """Builds the specified gazetteer using the entity data and mapping files
+
         Args:
             gaz_name (str): The name of the gazetteer
             exclude_ngrams (bool, optional): Whether partial matches of
-                entities should be included in the gazetteer
+                 entities should be included in the gazetteer
             force_reload (bool, optional): Whether file should be forcefully
-                reloaded from disk
+                 reloaded from disk
         """
         popularity_cutoff = 0.0
 
@@ -117,7 +118,7 @@ class ResourceLoader(object):
         self._entity_files[gaz_name]['entity_data']['loaded'] = time.time()
 
         mapping = self.get_entity_map(gaz_name, force_reload=force_reload)
-        gaz.update_with_entity_map(mapping, self.query_factory.normalize)
+        gaz.update_with_entity_map(mapping.get('entities', []), self.query_factory.normalize)
 
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.dump(gaz_path)

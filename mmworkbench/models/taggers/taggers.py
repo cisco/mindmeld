@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
-"""This module contains constants and functions for sequence tagging."""
-from __future__ import absolute_import, unicode_literals
+"""
+This module contains all code required to perform sequence tagging.
+"""
+from __future__ import print_function, absolute_import, unicode_literals, division
 from builtins import zip
+
+from ...core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
+from ...ser import resolve_system_entity, SystemEntityResolutionError
 
 import logging
 
-from ..core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED
-from ..ser import resolve_system_entity, SystemEntityResolutionError
-
 logger = logging.getLogger(__name__)
+
 
 START_TAG = 'START'
 B_TAG = 'B'
@@ -16,6 +19,78 @@ I_TAG = 'I'
 O_TAG = 'O'
 E_TAG = 'E'
 S_TAG = 'S'
+
+
+class Tagger(object):
+    """A class for all sequence tagger models implemented in house. The interface for this class
+    is the same as an sklearn estimator.
+    """
+    def __init__(self, **parameters):
+        """To be consistent with the sklearn interface, all parameter setting and validation should be done
+        in set_params.
+        """
+        self.set_params(**parameters)
+
+    def __getstate__(self):
+        """Returns the information needed pickle an instance of this class.
+
+        By default, pickling removes attributes with names starting with
+        underscores. This overrides that behavior. For the _resources field,
+        we save the resources that are memory intensive
+        """
+        attributes = self.__dict__.copy()
+        resources_to_persist = set(['sys_types'])
+        for key in list(attributes['_resources'].keys()):
+            if key not in resources_to_persist:
+                del attributes['_resources'][key]
+        return attributes
+
+    def fit(self, examples, labels, resources=None):
+        """Trains the model
+
+        Args:
+            labeled_queries (list of mmworkbench.core.Query): a list of queries to train on
+            labels (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
+        """
+        raise NotImplementedError
+
+    def predict(self, examples):
+        """Predicts for a list of examples
+        Args:
+            examples (list of mmworkbench.core.Query): a list of queries to be predicted
+        Returns:
+            (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
+        """
+        raise NotImplementedError
+
+    def get_params(self, deep=True):
+        return self._clf.get_params()
+
+    def set_params(self, **parameters):
+        """Sets the parameters
+        """
+        self._passed_params = parameters
+        self._current_params = {}
+        self._resources = parameters.get('resources', {})
+
+        model_class = self._get_model_constructor()
+        self._clf = model_class()
+
+        for parameter, value in parameters.items():
+            if parameter == 'config' or parameter == 'resources':
+                continue
+            self._current_params[parameter] = value
+        self._clf.set_params(**self._current_params)
+        return self
+
+    def _get_model_constructor(self):
+        """Returns the python class of the actual underlying model"""
+        raise NotImplementedError
+
+
+"""
+Helpers for taggers
+"""
 
 
 def get_tags_from_entities(query, entities, scheme='IOB'):
@@ -157,9 +232,38 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         # Check if a regular entity has started
         if iob in (B_TAG, S_TAG) or ent_type not in ('', prev_ent_type):
             entity_start = tag_idx
+
         # Check if a numeric entity has started
         if sys_iob in (B_TAG, S_TAG) or sys_type not in ('', prev_sys_type):
-            sys_entity_start = tag_idx
+            # During predict time, we construct sys_candidates for the input query.
+            # These candidates are "global" sys_candidates, in that the entire query
+            # is sent to Mallard to extract sys_candidates and not just a span range
+            # within the query. However, the tagging model could more restrictive in
+            # its classifier, so a sub-span of the original sys_candidate could be tagged
+            # as a sys_entity. For example, the query "set alarm for 1130", mallard
+            # provides the following sys_time entity candidate: "for 1130". However,
+            # our entity recognizer only tags the token "1130" as a sys-time entity,
+            # and not "at". Therefore, when we append system entities for this query,
+            # we pick the start of the sys_entity to be the sys_candidate's start span
+            # if the tagger identified a sys_entity within that sys_candidate's span
+            # range of the same sys_entity type. Else, we just use the tag_idx tracked
+            # in the control logic.
+            picked_by_existing_system_entity_candidates = False
+
+            for sys_candidate in query.get_system_entity_candidates(sys_type):
+
+                start_span = sys_candidate.normalized_token_span.start
+                end_span = sys_candidate.normalized_token_span.end
+
+                if start_span <= tag_idx <= end_span:
+                    # We currently don't prioritize any sys_candidate if there are
+                    # multiple candidates that meet this conditional.
+                    # TODO: Assess if a priority is needed
+                    sys_entity_start = sys_candidate.normalized_token_span.start
+                picked_by_existing_system_entity_candidates = True
+
+            if not picked_by_existing_system_entity_candidates:
+                sys_entity_start = tag_idx
 
         # Append the current token to the current entity, if applicable.
         if iob != O_TAG and entity_start is not None:

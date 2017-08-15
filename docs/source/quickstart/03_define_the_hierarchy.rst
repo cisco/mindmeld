@@ -15,7 +15,7 @@ Next, the *entity recognizers* discern the words and phrases that must be identi
 
 A fourth and final classification step, called role classification, is required when entities of the same type need to be interpreted differently to understand the request. For example, "9 AM" and "5 PM" could both be classified as `time` entities, but one might need to be interpreted as playing the role of an `opening time` and the other as playing the role of a `closing time`. The *role classifiers* label such entities with the appropriate roles.
 
-See the :ref:`User Guide <userguide>` for an in-depth treatment of the NLP classifier hierarchy utilized by MindMeld Workbench.
+:doc:`Step 7 <07_train_the_natural_language_processing_classifiers>` and the :doc:`User Guide <../userguide/nlp>` provide more details on the NLP classifier hierarchy utilized by MindMeld Workbench.
 
 .. _model_hierarchy:
 
@@ -97,7 +97,7 @@ Workbench provides a faster way to create your application structure for common 
 
 .. code-block:: console
 
-    $ python -c "import mmworkbench as wb; wb.blueprint('quickstart', 'my_app');"
+    $ python -c "import mmworkbench as wb; wb.blueprint('kwik_e_mart', 'my_app');"
 
 Running the :func:`blueprint()` method for our simple example application produces the root directory structure illustrated below.
 
@@ -105,10 +105,10 @@ Running the :func:`blueprint()` method for our simple example application produc
     :width: 350px
     :align: center
 
-See the :ref:`User Guide <userguide>` for more about blueprints, and root folder organization and structure.
+See the :doc:`User Guide <../userguide/getting_started>` for more about blueprints, and root folder organization and structure.
 
 
-Notice that there is no folder for the ``date`` entity. None is needed, because we can use the Workbench *system entity* for time expressions, ``sys_time``, to capture the date information. A system entity is one that it is already built into the Workbench platform. Workbench provides several different system entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <userguide>` for details.
+Notice that there is no folder for the ``date`` entity. None is needed, because we can use the Workbench *system entity* for time expressions, ``sys_time``, to capture the date information. A system entity is one that it is already built into the Workbench platform. Workbench provides several different system entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <system-entities>` for details.
 
 Given the simple interaction proposed in the preceding section and hierarchy we have now defined, we would expect our trained natural language processing models to yield the results illustrated below.
 

@@ -150,25 +150,24 @@ class Tokenizer(object):
         return normalized_text
 
     def tokenize(self, text, keep_special_chars=True):
-        """
-        Tokenizes the input text, normalizes the token text and returns normalized tokens.
+        """Tokenizes the input text, normalizes the token text and returns normalized tokens.
 
         Currently it does the following during normalization:
         1. remove leading special characters except dollar sign and ampersand
         2. remove trailing special characters except ampersand
         3. remove special characters except ampersand when the preceding character is a letter and
-           the following characters is a number
+        the following characters is a number
         4. remove special characters except ampersand when the preceding character is a number and
-           the following character is a letter
+        the following character is a letter
         5. remove special characters except ampersand when both preceding and following characters
-           are letters
+        are letters
         6. remove special character except ampersand when the following character is '|'
         7. remove diacritics and replace it with equivalent ascii character when possible
 
         Note that the tokenizer also excludes a list of special characters used in annotations when
         the flag keep_special_chars is set to True
-
         """
+
         raw_tokens = self.tokenize_raw(text)
 
         norm_tokens = []
@@ -307,9 +306,12 @@ class Tokenizer(object):
             elif directions[n_idx][m_idx] == '↓':
                 n_idx -= 1
 
-        # this is naive and probably not robust
-        raw_to_norm_mapping = {v: k for k, v in mapping.items()}
+        # initialize the forward mapping (raw to normalized text)
+        raw_to_norm_mapping = {0: 0}
 
+        # naive approach for generating forward mapping. this is naive and probably not robust.
+        # all leading special characters will get mapped to index position 0 in normalized text.
+        raw_to_norm_mapping.update({v: k for k, v in mapping.items()})
         for i in range(0, m):
             if i not in raw_to_norm_mapping:
                 raw_to_norm_mapping[i] = raw_to_norm_mapping[i-1]

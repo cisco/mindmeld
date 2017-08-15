@@ -55,7 +55,7 @@ mkdir -p $ARCHIVE_DIR
 # Create and upload tarball
 pushd "$BLUEPRINT_DIR" > /dev/null
 
-tar -czf "$ARCHIVE_DIR/app.tar.gz" --exclude=data --exclude=indexes --exclude=.generated --exclude=*.pyc --exclude=**/*.pyc *
+tar -czf "$ARCHIVE_DIR/app.tar.gz" --exclude=data --exclude=indexes --exclude=.generated --exclude=*.pyc --exclude=__pycache__ --exclude=**/*.pyc *
 aws s3 cp "$ARCHIVE_DIR/app.tar.gz" "s3://mindmeld-blueprints-${MM_BRANCH}/$BLUEPRINT/"
 
 popd > /dev/null

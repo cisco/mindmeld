@@ -1,7 +1,7 @@
 Introducing MindMeld Workbench
 ==============================
 
-The MindMeld Conversational AI platform is one of the most advanced AI platforms available today for building production-quality conversational applications. It was created to provide the tools and techniques required to build highly useful and versatile conversational experiences. MindMeld Workbench, the core machine learning toolkit that powers the MindMeld platform, is a Python-based framework which encompasses all of the algorithms and utilities required to build modern, production-quality conversational applications. Evolved over several years of building and deploying dozens of the most advanced conversational experiences achievable, Workbench has been optimized for the needs of companies that want to build an advanced conversational assistant which demonstrates deep understanding of a particular use case or domain. MindMeld Workbench is a commercial software product which requires a license to use. To inquire about obtaining a license for MindMeld Workbench, please `contact MindMeld sales <mailto:info@mindmeld.com>`_.
+The MindMeld Conversational AI platform is among the most advanced AI platforms for building production-quality conversational applications. MindMeld Workbench, the machine learning toolkit at the core of the MindMeld platform, is a Python-based framework which encompasses all of the algorithms and utilities required for this purpose. Evolved over several years of building and deploying dozens of the most advanced conversational experiences achievable, Workbench is optimized for building advanced conversational assistants which demonstrate deep understanding of a particular use case or domain while providing highly useful and versatile conversational experiences.
 
 MindMeld Workbench is the only Conversational AI platform available today that provides tools and capabilities for every step in the workflow for a state-of-the-art conversational application. The architecture of MindMeld Workbench is illustrated below.
 
@@ -9,26 +9,25 @@ MindMeld Workbench is the only Conversational AI platform available today that p
 
 To summarize, the functionality available in Workbench includes:
 
-  - advanced natural language processing, consisting of
+  - advanced **Natural Language Processing**, consisting of
 
-    - Domain Classification
-    - Intent Classification
-    - Entity Recognition
-    - Entity Role Labeling
-    - Entity Resolution
-    - Language Parsing
-  - versatile dialogue management
-  - custom knowledge base creation
-  - advanced question answering
-  - training data collection and management support
-  - large-scale data analytics
+    - **Domain Classification**
+    - **Intent Classification**
+    - **Entity Recognition**
+    - **Entity Role Labeling**
+    - **Entity Resolution**
+    - **Language Parsing**
+  - versatile **dialogue management**
+  - custom **knowledge base creation**
+  - advanced **question answering**
+  - **training data collection and management** support
+  - **large-scale data analytics**
 
-This guide describes the capabilities of MindMeld Workbench in detail and illustrates standard approaches and best practices for creating production-quality conversational applications.
-
+This playbook describes the capabilities of MindMeld Workbench in detail and illustrates standard approaches and best practices for creating production-quality conversational applications.
 
 The MindMeld Workbench Philosophy
 ---------------------------------
-MindMeld Workbench is a Conversational AI platform that was specifically designed to meet the needs of enterprises that want to build and deploy production-quality conversational applications. To date, it has been used for applications in dozens of different domains by some of the largest global organizations. Over the course of these many different production deployments, MindMeld Workbench has evolved to be ideally suited for building production-quality, large-vocabulary language understanding capabilities for any custom application domain. As such, the architectural philosophy underpinning the Workbench platform has aligned around the guiding principles enumerated in the table below.
+MindMeld Workbench has been used for applications in dozens of different domains by some of the largest global organizations. Over the course of these production deployments, MindMeld Workbench has evolved to be ideally suited for building production-quality, large-vocabulary language understanding capabilities for any custom application domain. This has been achieved by following the architectural philosophy whose guiding principles are expressed in the table below.
 
 ===============================  =====
 **Power and Versatility**        Unlike GUI-based tools typically too rigid to accommodate the functionality required by many applications, Workbench provides powerful command-line utilities with the flexibility to accommodate nearly any product requirements.

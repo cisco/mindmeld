@@ -5,7 +5,6 @@ project structure.
 """
 from __future__ import unicode_literals, absolute_import
 from builtins import object
-from future.utils import iteritems
 
 import datetime
 from email.utils import parsedate
@@ -20,8 +19,10 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from . import path
-from .exceptions import KnowledgeBaseConnectionError
 from .components import QuestionAnswerer
+from .exceptions import KnowledgeBaseConnectionError
+from .components._config import get_app_namespace
+from .exceptions import AuthNotFoundError
 
 
 logger = logging.getLogger(__name__)
@@ -32,18 +33,20 @@ BLUEPRINT_URL = '{mindmeld_url}/blueprints/{blueprint}/{filename}'
 BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
 BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
 BLUEPRINTS = {
-    'quickstart': {},
+    'kwik_e_mart': {},
     'food_ordering': {},
-    'template': {}
+    'home_assistant': {'kb': False},
+    'template': {'kb': False},
+    'video_discovery': {}
 }
 
 
 class Blueprint(object):
     """This is a callable class used to set up a blueprint app.
 
-    In S3 the directory structure looks like this:
+    The MindMeld website hosts the blueprints in a directory structure like this:
 
-       - s3://mindmeld/workbench-data/blueprints/
+       - https://mindmeld.com/blueprints/
        |-food_ordering
        |  |-app.tar.gz
        |  |-kb.tar.gz
@@ -52,14 +55,15 @@ class Blueprint(object):
           |-kb.tar.gz
 
 
-    Within each blueprint dir `app.tar.gz` contains the workbench application
-    data (`app.py`, `domains`, `entities`, etc.) and `kb.tar.gz`
+    Within each blueprint directory `app.tar.gz` contains the workbench
+    application data (`app.py`, `domains`, `entities`, etc.) and `kb.tar.gz`
+    contains the a JSON file for each index in the knowledge base.
 
-    The blueprint method will check S3 for when the blueprint files were last
-    updated and compare that with any files in a local blueprint cache at
-    ~/.mmworkbench/blueprints. If the cache is out of date, the updated archive
-    is downloaded. The archive is then extracted into a directory named for the
-    blueprint.
+    The blueprint method will check the MindMeld website for when the blueprint
+    files were last updated and compare that with any files in a local
+    blueprint cache at ~/.mmworkbench/blueprints. If the cache is out of date,
+    the updated archive is downloaded. The archive is then extracted into a
+    directory named for the blueprint.
     """
     def __call__(self, name, app_path=None, es_host=None, skip_kb=False):
         """
@@ -80,8 +84,10 @@ class Blueprint(object):
         """
         if name not in BLUEPRINTS:
             raise ValueError('Unknown blueprint name: {!r}'.format(name))
+        bp_config = BLUEPRINTS[name]
+
         app_path = self.setup_app(name, app_path)
-        if not skip_kb:
+        if bp_config.get('kb', True) and not skip_kb:
             self.setup_kb(name, app_path, es_host=es_host)
         return app_path
 
@@ -129,8 +135,7 @@ class Blueprint(object):
 
         app_path = app_path or os.path.join(os.getcwd(), name)
         app_path = os.path.abspath(app_path)
-        _, app_name = os.path.split(app_path)
-
+        app_namespace = get_app_namespace(app_path)
         es_host = es_host or os.environ.get('MM_ES_HOST', 'localhost')
         cache_dir = path.get_cached_blueprint_path(name)
         try:
@@ -150,7 +155,7 @@ class Blueprint(object):
             data_file = os.path.join(kb_dir, index)
 
             try:
-                QuestionAnswerer.load_kb(app_name, index_name, data_file, es_host)
+                QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
             except KnowledgeBaseConnectionError as ex:
                 logger.error('Cannot set up knowledge base. Unable to connect to Elasticsearch '
                              'instance at %r. Confirm it is running or specify an alternate '
@@ -185,15 +190,15 @@ class Blueprint(object):
 
         local_archive = os.path.join(cache_dir, filename)
 
-        try:
-            config = load_global_configuration()
-            mindmeld_url = config.get('mindmeld_url', 'https://www.mindmeld.com')
+        config = load_global_configuration()
+        mindmeld_url = config.get('mindmeld_url', 'https://www.mindmeld.com')
+        token = config.get('token', None)
+        if token:
+            username = 'token'
+            password = token
+        else:
             username = config['username']
             password = config['password']
-        except Exception:
-            msg = 'Unable to locate AWS credentials. Cannot download blueprint.'
-            logger.error(msg)
-            raise EnvironmentError(msg)
 
         remote_url = BLUEPRINT_URL.format(mindmeld_url=mindmeld_url, blueprint=name,
                                           filename=filename)
@@ -204,7 +209,7 @@ class Blueprint(object):
             # authentication error
             msg = ('Invalid MindMeld credentials. Cannot download blueprint. Please confirm '
                    'they are correct and try again.')
-            logger.eror(msg)
+            logger.error(msg)
             raise EnvironmentError(msg)
         if res.status_code != 200:
             # Unknown error
@@ -254,16 +259,41 @@ def load_global_configuration():
     Returns:
         dict: An object containing configuration values.
     """
-    config_file = path.get_user_config_path()
-    iniconfig = py.iniconfig.IniConfig(config_file)
-    config = {}
-    config['mindmeld_url'] = iniconfig.get('mmworkbench', 'mindmeld_url')
-    config['username'] = iniconfig.get('mmworkbench', 'username')
-    config['password'] = iniconfig.get('mmworkbench', 'password')
-    for key, value in iteritems(config):
-        if value is None:
+    def _filter_bad_keys(config):
+        bad_keys = set()
+        for key in config.keys():
+            if config[key] is None:
+                bad_keys.add(key)
+
+        for key in bad_keys:
             config.pop(key)
-    return config
+
+        return config
+
+    try:
+        config = {
+            'mindmeld_url': os.environ['MM_URL'],
+            'username': os.environ['MM_USERNAME'],
+            'password': os.environ['MM_PASSWORD']
+        }
+        return _filter_bad_keys(config)
+    except KeyError:
+        pass
+
+    try:
+        logging.info('loading auth from mmworkbench config file.')
+        config_file = path.get_user_config_path()
+        iniconfig = py.iniconfig.IniConfig(config_file)
+        config = {
+            'mindmeld_url': iniconfig.get('mmworkbench', 'mindmeld_url'),
+            'username': iniconfig.get('mmworkbench', 'username'),
+            'password': iniconfig.get('mmworkbench', 'password'),
+            'token': iniconfig.get('mmworkbench', 'token')
+        }
+        return _filter_bad_keys(config)
+    except OSError:
+        raise AuthNotFoundError(
+            'Cannot load auth from either the environment or the config file.')
 
 
 def load_configuration():

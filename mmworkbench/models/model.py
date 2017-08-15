@@ -5,14 +5,17 @@ from builtins import object, super
 
 from collections import namedtuple
 import logging
+import math
 
 import numpy as np
-from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold,
+from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridSearchCV,
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
-from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix)
 
-from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
-from .tagging import get_tags_from_entities, get_entities_from_tags
+from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
+                             accuracy_score)
+from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
+                      entity_seqs_equal, get_entity_scorer)
+from .taggers.taggers import get_tags_from_entities, get_entities_from_tags
 logger = logging.getLogger(__name__)
 
 # model scoring types
@@ -23,7 +26,7 @@ _NEG_INF = -1e10
 
 
 class ModelConfig(object):
-    """A value object representing a model configuration
+    """A value object representing a model configuration.
 
     Attributes:
         model_type (str): The name of the model type. Will be used to find the
@@ -31,25 +34,24 @@ class ModelConfig(object):
         example_type (str): The type of the examples which will be passed into
             `fit()` and `predict()`. Used to select feature extractors
         label_type (str): The type of the labels which will be passed into
-            `fit()` and returned by `predict()`. Used to select the label
-            encoder
+            `fit()` and returned by `predict()`. Used to select the label encoder
         model_settings (dict): Settings specific to the model type specified
         params (dict): Params to pass to the underlying classifier
         param_selection (dict): Configuration for param selection (using cross
             validation)
             {'type': 'shuffle',
-             'n': 3,
-             'k': 10,
-             'n_jobs': 2,
-             'scoring': '',
-             'grid': {}
+            'n': 3,
+            'k': 10,
+            'n_jobs': 2,
+            'scoring': '',
+            'grid': {}
             }
         features (dict): The keys are the names of feature extractors and the
             values are either a kwargs dict which will be passed into the
             feature extractor function, or a callable which will be used as to
             extract features
-
     """
+
     __slots__ = ['model_type', 'example_type', 'label_type', 'features', 'model_settings', 'params',
                  'param_selection']
 
@@ -101,16 +103,7 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
     def is_correct(self):
         # For entities compare just the type, span and text for each entity.
         if self.label_type == ENTITIES_LABEL_TYPE:
-            if len(self.expected) != len(self.predicted):
-                return False
-            for i in range(len(self.expected)):
-                if self.expected[i].entity.type != self.predicted[i].entity.type:
-                    return False
-                if self.expected[i].span != self.predicted[i].span:
-                    return False
-                if self.expected[i].text != self.predicted[i].text:
-                    return False
-            return True
+            return entity_seqs_equal(self.expected, self.predicted)
         # For other label_types compare the full objects
         else:
             return self.expected == self.predicted
@@ -210,14 +203,14 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
     def raw_results(self):
         """
         Exposes raw vectors of expected and predicted for data scientists to use for any additional
-        evaluation metrics or to generate graphs of their choice
+        evaluation metrics or to generate graphs of their choice.
 
         Returns:
             NamedTuple: RawResults named tuple containing
                 expected: vector of predicted classes (numeric value)
                 predicted: vector of gold classes (numeric value)
                 text_labels: a list of all the text label values, the index of the text label in
-                             this array is the numeric label
+                this array is the numeric label
         """
         raise NotImplementedError
 
@@ -236,13 +229,13 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     def _get_common_stats(self, raw_expected, raw_predicted, text_labels):
         """
-         Prints a useful stats table and returns a structured stats object for evaluation.
+        Prints a useful stats table and returns a structured stats object for evaluation.
 
         Returns:
             dict: Structured dict containing evaluation statistics. Contains precision,
                   recall, f scores, support, etc.
         """
-        labels = range(len(text_labels)-1)
+        labels = range(len(text_labels))
 
         confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_expected,
                                                                 y_pred=raw_predicted)
@@ -277,6 +270,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         """
         precision, recall, f_beta, support = score(y_true=y_true, y_pred=y_pred,
                                                    labels=labels)
+
         stats = {
                     'precision': precision,
                     'recall': recall,
@@ -296,12 +290,13 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         f1_weighted = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='weighted')
         f1_macro = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='macro')
         f1_micro = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='micro')
+        accuracy = accuracy_score(y_true=y_true, y_pred=y_pred)
 
         stats_overall = {
             'f1_weighted': f1_weighted,
             'f1_macro': f1_macro,
             'f1_micro': f1_micro,
-            'accuracy': self.get_accuracy()
+            'accuracy': accuracy
         }
         return stats_overall
 
@@ -316,44 +311,32 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         confusion_mat = confusion_matrix(y_true=y_true, y_pred=y_pred)
         TP_arr, TN_arr, FP_arr, FN_arr = [], [], [], []
 
-        # binary class case
-        if len(confusion_mat) == 2:
-            TP = confusion_mat[1][1]
+        num_classes = len(confusion_mat)
+        for class_index in range(num_classes):
+            # TP is C_classindex, classindex
+            TP = confusion_mat[class_index][class_index]
             TP_arr.append(TP)
-            TN = confusion_mat[0][0]
+
+            # TN is the sum of Cij where i or j are not class_index
+            mask = np.ones((num_classes, num_classes))
+            mask[:, class_index] = 0
+            mask[class_index, :] = 0
+            TN = np.sum(mask*confusion_mat)
             TN_arr.append(TN)
-            FP = confusion_mat[0][1]
+
+            # FP is the sum of Cij where j is class_index but i is not
+            mask = np.zeros((num_classes, num_classes))
+            mask[:, class_index] = 1
+            mask[class_index, class_index] = 0
+            FP = np.sum(mask*confusion_mat)
             FP_arr.append(FP)
-            FN = confusion_mat[1][0]
+
+            # FN is the sum of Cij where i is class_index but j is not
+            mask = np.zeros((num_classes, num_classes))
+            mask[class_index, :] = 1
+            mask[class_index, class_index] = 0
+            FN = np.sum(mask*confusion_mat)
             FN_arr.append(FN)
-        # multi class case
-        else:
-            num_classes = len(confusion_mat)
-            for class_index in range(num_classes):
-                # TP is C_classindex, classindex
-                TP = confusion_mat[class_index][class_index]
-                TP_arr.append(TP)
-
-                # TN is the sum of Cij where i or j are not class_index
-                mask = np.ones((num_classes, num_classes))
-                mask[:, class_index] = 0
-                mask[class_index, :] = 0
-                TN = np.sum(mask*confusion_mat)
-                TN_arr.append(TN)
-
-                # FP is the sum of Cij where j is class_index but i is not
-                mask = np.zeros((num_classes, num_classes))
-                mask[:, class_index] = 1
-                mask[class_index, class_index] = 0
-                FP = np.sum(mask*confusion_mat)
-                FP_arr.append(FP)
-
-                # FN is the sum of Cij where i is class_index but j is not
-                mask = np.zeros((num_classes, num_classes))
-                mask[:, class_index] = 1
-                mask[class_index, class_index] = 0
-                FN = np.sum(mask*confusion_mat)
-                FN_arr.append(FN)
 
         Counts = namedtuple('Counts', ['TP', 'TN', 'FP', 'FN'])
         return {'confusion_matrix': confusion_mat,
@@ -377,7 +360,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
                                        if stat not in common_stats]
         print("Statistics by Class: \n")
         print(title_format.format("class", *table_titles))
-        for label in range(len(text_labels)-1):
+        for label in range(len(text_labels)):
             row = []
             for stat in table_titles:
                 row.append(stats[stat][label])
@@ -392,13 +375,18 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns:
             None
         """
-        labels = range(len(text_labels)-1)
+        # Doesn't print if there isn't enough space to display the full matrix.
+        if len(text_labels) > 10:
+            print("Not printing confusion matrix since it is too large. The full matrix is still"
+                  " included in the dictionary returned from print_stats().")
+            return
+        labels = range(len(text_labels))
         title_format = "{:>15}" * (len(labels)+1)
-        stat_row_format = "{:>15}" + "{:>15}" * (len(labels))
+        stat_row_format = "{:>15}" * (len(labels)+1)
         table_titles = [self._truncate_label(text_labels[label], 10) for label in labels]
         print("Confusion Matrix: \n")
         print(title_format.format("", *table_titles))
-        for label in range(len(text_labels)-1):
+        for label in range(len(text_labels)):
             print(stat_row_format.format(self._truncate_label(text_labels[label], 10),
                                          *matrix[label]))
         print("\n\n")
@@ -489,16 +477,28 @@ class SequenceModelEvaluation(ModelEvaluation):
 
     def _get_sequence_stats(self, y_true, y_pred, text_labels):
         """
-        TODO: Generates statistics at the sequence level (vs token level)
+        TODO: Generate additional sequence level stats
         """
-        num_error = 0.0
-        num_total = len(y_true)
-        for idx in range(num_total):
-            if y_true[idx] != y_pred[idx]:
-                num_error += 1
-        accuracy = 1.0 - num_error / num_total
-        print('ACCURACY::::{:.2%}'.format(accuracy))
-        return accuracy
+        sequence_accuracy = self.get_accuracy()
+        return {'sequence_accuracy': sequence_accuracy}
+
+    def _print_sequence_stats_table(self, sequence_stats):
+        """
+        Helper for printing a human readable table for sequence statistics
+
+        Returns:
+            None
+        """
+        title_format = "{:>18}" * (len(sequence_stats))
+        table_titles = ['sequence_accuracy']
+        stat_row_format = "{:>18.3f}" * (len(sequence_stats))
+        print("Sequence Statistics: \n")
+        print(title_format.format(*table_titles))
+        row = []
+        for stat in table_titles:
+            row.append(sequence_stats[stat])
+        print(stat_row_format.format(*row))
+        print("\n\n")
 
     def print_stats(self):
         raw_results = self.raw_results()
@@ -515,6 +515,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         self._print_overall_stats_table(stats['stats_overall'])
         self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
         self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
+        self._print_sequence_stats_table(stats['sequence_stats'])
         return stats
 
     def print_graphs(self):
@@ -551,8 +552,6 @@ class Model(object):
     Attributes:
         config (ModelConfig): The configuration for the model
     """
-    DEFAULT_CV_SCORING = ACCURACY_SCORING
-
     def __init__(self, config):
         self.config = config
         self._label_encoder = get_label_encoder(self.config)
@@ -560,9 +559,95 @@ class Model(object):
         self._resources = {}
         self._clf = None
         self.cv_loss_ = None
+        self.default_scorer = self.get_default_scorer(self.config)
+
+    def get_default_scorer(self, config):
+        if config.label_type == ENTITIES_LABEL_TYPE:
+            return get_entity_scorer()
+        else:
+            return ACCURACY_SCORING
 
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
+
+    def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
+        """Called by the fit method when cross validation parameters are passed in. Runs cross
+        validation and returns the best estimator and parameters.
+
+        Args:
+            examples (list): A list of examples. Should be in the format expected by the underlying
+                             estimator.
+            labels (list): The target output values.
+            groups (None, optional): Same length as examples and labels. Used to group examples when
+                                     splitting the dataset into train/test
+            selection_settings (None, optional): A dictionary containing the cross validation
+                                                 selection settings.
+
+        """
+        selection_settings = selection_settings or self.config.param_selection
+        cv_iterator = self._get_cv_iterator(selection_settings)
+
+        if selection_settings is None:
+            return self._fit(examples, labels, self.config.params), self.config.params
+
+        cv_type = selection_settings['type']
+        num_splits = cv_iterator.get_n_splits(examples, labels, groups)
+        logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
+                    num_splits, '' if num_splits == 1 else 's')
+
+        # For entities you must use the default sequence scorer
+        if self.config.label_type == ENTITIES_LABEL_TYPE:
+            if selection_settings.get('scoring', 'seq_accuracy') is not 'seq_accuracy':
+                logger.info('You must use the sequence accuracy scorer for entity recognition. '
+                            'Using seq_accuracy instead of your specified scorer...')
+            scoring = self.default_scorer
+        else:
+            scoring = selection_settings.get('scoring', self.default_scorer)
+        n_jobs = selection_settings.get('n_jobs', -1)
+
+        param_grid = self._convert_params(selection_settings['grid'], labels)
+        model_class = self._get_model_constructor()
+
+        if self.config.label_type == ENTITIES_LABEL_TYPE:
+            param_grid['config'] = [self.config]
+            param_grid['resources'] = [self._resources]
+            init_params = {'config': self.config, 'resources': self._resources}
+            estimator = model_class(**init_params)
+        else:
+            estimator = model_class()
+        grid_cv = GridSearchCV(estimator=estimator, scoring=scoring, param_grid=param_grid,
+                               cv=cv_iterator, n_jobs=n_jobs)
+        model = grid_cv.fit(examples, labels, groups)
+
+        for idx, params in enumerate(model.cv_results_['params']):
+            logger.debug('Candidate parameters: {}'.format(params))
+            std_err = 2.0 * model.cv_results_['std_test_score'][idx] / math.sqrt(model.n_splits_)
+            if scoring == ACCURACY_SCORING:
+                msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
+            elif scoring == LIKELIHOOD_SCORING:
+                msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
+            else:
+                msg = 'Candidate average seq2se2 accuracy: {:.2%} ± {:.2%}'
+            logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
+
+        if scoring == ACCURACY_SCORING:
+            msg = 'Best accuracy: {:.2%}, params: {}'
+            self.cv_loss_ = 1 - model.best_score_
+        elif scoring == LIKELIHOOD_SCORING:
+            msg = 'Best log likelihood: {:.4}, params: {}'
+            self.cv_loss_ = - model.best_score_
+        else:
+            msg = 'Best seq2seq accuracy: {:.2%}, params: {}'
+            self.cv_loss_ = 1 - model.best_score_
+        best_params = model.best_params_
+
+        if self.config.label_type == ENTITIES_LABEL_TYPE:
+            best_params.pop('config')
+            best_params.pop('resources')
+
+        logger.info(msg.format(model.best_score_, best_params))
+
+        return model.best_estimator_, model.best_params_
 
     def select_params(self, examples, labels, selection_settings=None):
         raise NotImplementedError
