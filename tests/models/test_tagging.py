@@ -80,17 +80,18 @@ class TestTagging:
 
     test_data_3 = [
         ('order 2 sandwiches',
-         ['O|', 'B|sys_number', 'B|dish', 'O|']),
+         ['O|', 'B|sys_number', 'B|dish']),
         ('I would like sandwiches, 3 orders please',
-         ['O|', 'O|', 'O|', 'B|dish', 'B|sys_number', 'O|', 'O|'])
+         ['O|', 'O|', 'O|', 'B|dish', 'B|sys_number', 'O|', 'O|']),
+        ('I would like eggplant parm, 3 orders please',
+         ['O|', 'O|', 'O|', 'B|dish', 'I|dish', 'B|sys_number', 'O|', 'O|'])
     ]
 
     @pytest.mark.parametrize("query,tags", test_data_3)
     def test_get_entities_from_tags_where_entity_truncated_by_new_entity(self,
                                                                          query,
                                                                          tags):
-        """Tests the behavior when the system entity tag index is outside
-        the system candidates spans"""
+        """Test the behavior when a new entity is directly after another entity"""
 
         processed_query = self.nlp.create_query(query)
         res_entity = tagging.get_entities_from_tags(processed_query, tags)
@@ -98,19 +99,18 @@ class TestTagging:
 
     test_data_4 = [
         ('order samosa, 2 naans, and daal',
-         ['O|', 'B|dish', 'B|sys_number', 'O|', 'B|dish'])
+         ['O|', 'B|dish', 'B|sys_number', 'B|dish', 'O|', 'B|dish'])
     ]
 
     @pytest.mark.parametrize("query,tags", test_data_4)
     def test_get_entities_from_tags_where_sys_entity_between_entities(self,
                                                                       query,
                                                                       tags):
-        """Tests the behavior when the system entity tag index is outside
-        the system candidates spans"""
+        """Tests the behavior when a system entity is between two entities"""
 
         processed_query = self.nlp.create_query(query)
         res_entity = tagging.get_entities_from_tags(processed_query, tags)
-        assert len(res_entity) == 3
+        assert len(res_entity) == 4
 
     test_data_5 = [
         ('order a samosa',
@@ -123,8 +123,7 @@ class TestTagging:
     def test_get_entities_from_tags_where_entities_end_with_query_end(self,
                                                                       query,
                                                                       tags):
-        """Tests the behavior when the system entity tag index is outside
-        the system candidates spans"""
+        """Tests the behavior when the entity is at the end of a query"""
 
         processed_query = self.nlp.create_query(query)
         res_entity = tagging.get_entities_from_tags(processed_query, tags)
@@ -141,8 +140,7 @@ class TestTagging:
     def test_get_entities_from_tags_with_multi_token_entities(self,
                                                               query,
                                                               tags):
-        """Tests the behavior when the system entity tag index is outside
-        the system candidates spans"""
+        """Tests the behavior with multi token entities"""
 
         processed_query = self.nlp.create_query(query)
         res_entity = tagging.get_entities_from_tags(processed_query, tags)
