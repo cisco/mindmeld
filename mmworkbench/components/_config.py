@@ -135,7 +135,10 @@ DEFAULT_ES_SYNONYM_MAPPING = {
 }
 
 DEFAULT_ROLE_MODEL_CONFIG = {
-    'model_type': 'maxent',
+    'model_type': 'text',
+    'model_settings': {
+        'classifier_type': 'logreg'
+    },
     'params': {
         'C': 100,
         'penalty': 'l1'
