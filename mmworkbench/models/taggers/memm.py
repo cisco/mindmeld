@@ -18,9 +18,6 @@ logger = logging.getLogger(__name__)
 
 class MemmModel(Tagger):
     """A maximum-entropy Markov model."""
-    def __init__(self, **parameters):
-        self.set_params(**parameters)
-
     def fit(self, examples, labels):
         self._config = self._passed_params.get('config', None)
         self._class_encoder = SKLabelEncoder()

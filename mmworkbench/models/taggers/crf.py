@@ -18,9 +18,6 @@ ZERO = 1e-20
 
 class ConditionalRandomFields(Tagger):
     """A Conditional Random Fields model."""
-    def __init__(self, **parameters):
-        self.set_params(**parameters)
-
     def fit(self, examples, labels):
         self._config = self._passed_params.get('config', None)
         self._feat_binner = self._get_feature_binner()

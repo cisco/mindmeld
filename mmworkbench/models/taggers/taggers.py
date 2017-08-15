@@ -26,17 +26,10 @@ class Tagger(object):
     is the same as an sklearn estimator.
     """
     def __init__(self, **parameters):
+        """To be consistent with the sklearn interface, all parameter setting and validation should be done
+        in set_params.
         """
-        Args:
-            config (ModelConfig): model configuration
-        """
-        # self.config = parameters['config']
-        # # Default tag scheme to IOB
-        # self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
-        # # Placeholders
-        # self._resources = {}
-        # self._clf = None
-        # self._current_params = {}
+        self.set_params(**parameters)
 
     def __getstate__(self):
         """Returns the information needed pickle an instance of this class.
