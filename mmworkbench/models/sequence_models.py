@@ -162,8 +162,7 @@ class TaggerModel(Model):
             (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
         """
         if self._no_entities:
-            # TODO: return what is being returned by memm in develop
-            return []
+            return [()]
         return self._clf.predict(examples)
 
     def evaluate(self, examples, labels):
