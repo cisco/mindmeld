@@ -232,9 +232,38 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         # Check if a regular entity has started
         if iob in (B_TAG, S_TAG) or ent_type not in ('', prev_ent_type):
             entity_start = tag_idx
+
         # Check if a numeric entity has started
         if sys_iob in (B_TAG, S_TAG) or sys_type not in ('', prev_sys_type):
-            sys_entity_start = tag_idx
+            # During predict time, we construct sys_candidates for the input query.
+            # These candidates are "global" sys_candidates, in that the entire query
+            # is sent to Mallard to extract sys_candidates and not just a span range
+            # within the query. However, the tagging model could more restrictive in
+            # its classifier, so a sub-span of the original sys_candidate could be tagged
+            # as a sys_entity. For example, the query "set alarm for 1130", mallard
+            # provides the following sys_time entity candidate: "for 1130". However,
+            # our entity recognizer only tags the token "1130" as a sys-time entity,
+            # and not "at". Therefore, when we append system entities for this query,
+            # we pick the start of the sys_entity to be the sys_candidate's start span
+            # if the tagger identified a sys_entity within that sys_candidate's span
+            # range of the same sys_entity type. Else, we just use the tag_idx tracked
+            # in the control logic.
+            picked_by_existing_system_entity_candidates = False
+
+            for sys_candidate in query.get_system_entity_candidates(sys_type):
+
+                start_span = sys_candidate.normalized_token_span.start
+                end_span = sys_candidate.normalized_token_span.end
+
+                if start_span <= tag_idx <= end_span:
+                    # We currently don't prioritize any sys_candidate if there are
+                    # multiple candidates that meet this conditional.
+                    # TODO: Assess if a priority is needed
+                    sys_entity_start = sys_candidate.normalized_token_span.start
+                picked_by_existing_system_entity_candidates = True
+
+            if not picked_by_existing_system_entity_candidates:
+                sys_entity_start = tag_idx
 
         # Append the current token to the current entity, if applicable.
         if iob != O_TAG and entity_start is not None:
