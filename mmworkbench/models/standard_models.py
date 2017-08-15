@@ -6,7 +6,6 @@ of text.
 from __future__ import absolute_import, division, unicode_literals
 
 import logging
-import math
 import random
 from builtins import range, super, zip
 from collections import Counter
@@ -18,13 +17,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import make_scorer
-from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-
-from sklearn_crfsuite.metrics import sequence_accuracy_score
 
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC,
                       mask_numerics, register_model)
