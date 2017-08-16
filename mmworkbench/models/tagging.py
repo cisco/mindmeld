@@ -208,9 +208,20 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
 
 
 class BoundaryCounts():
-    """This class stores the counts of the boundary evaluation metrics which includes:
-    1. le (label error), 2. be (boundary error), 3. lbe (label boundary error),
-    4. tp (true positive), 5. tn (true negative), 6 .fp (false positive), 7. fn (false negative)
+    """This class stores the counts of the boundary evaluation metrics.
+
+    Attributes:
+        le (int): Label error count. This is when the span is the same but the entity
+                  label is incorrect
+        be (int): Boundary error count. This is when the entity type is correct but the span is
+                  incorrect
+        lbe (int): Label boundary error count. This is when both the entity type and span are
+                   incorrect, but there was an entity predicted
+        tp (int): True positive count. When an entity was correctly predicted
+        tn (int): True negative count. Count of times it was correctly predicted that there is no
+                  entity
+        fp (int): False positive count. When an entity was predicted but one shouldn't have been
+        fn (int): False negative count. When an entity was not predicted where one should have been
     """
     def __init__(self):
         """Initializes the object with all counts set to 0"""

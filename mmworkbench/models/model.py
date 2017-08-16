@@ -569,7 +569,6 @@ class EntityModelEvaluation(SequenceModelEvaluation):
             row.append(boundary_counts[stat])
         print(stat_row_format.format(*row))
         print("\n\n")
-        print(boundary_counts)
 
     def print_stats(self):
         stats = super(EntityModelEvaluation, self).print_stats()
