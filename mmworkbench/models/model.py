@@ -743,8 +743,6 @@ class SkLearnModel(Model):
         params = params or self.config.params
         skip_param_selection = params is not None or self.config.param_selection is None
 
-        # Prepare resources
-
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
         random.shuffle(indices)
@@ -902,6 +900,29 @@ class SkLearnModel(Model):
                   'max-abs': MaxAbsScaler()}.get(scale_type)
         return scaler
 
+    def initialize_resources(self, resource_loader, examples=None, labels=None):
+        """Load the required resources based on feature extractor requirements.
+
+        Args:
+            resource_loader (ResourceLoader): application resource loader obj
+            examples (list): A list of examples.
+            labels (list): A parallel list to examples. The gold labels
+                for each example.
+        """
+
+        # get list of resources required by feature extractors
+        required_resources = set()
+        for name, kwargs in self.config.features.items():
+            required_resources.update(
+                get_feature_extractor(self.config.example_type, name).__dict__.get(
+                    'requirements', []))
+
+        # load required resources
+        for rname in required_resources:
+            if rname not in self._resources:
+                self._resources[rname] = resource_loader.load_feature_resource(
+                    rname, queries=examples, labels=labels)
+
     def get_feature_matrix(self, examples, y=None, fit=False):
         """Transforms a list of examples into a feature matrix.
 
@@ -912,6 +933,7 @@ class SkLearnModel(Model):
             (numpy.matrix): The feature matrix.
             (numpy.array): The group labels for examples.
         """
+
         groups = []
         feats = []
         for idx, example in enumerate(examples):

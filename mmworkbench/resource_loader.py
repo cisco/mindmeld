@@ -6,6 +6,8 @@ from __future__ import absolute_import, unicode_literals
 from builtins import object
 
 from copy import deepcopy
+from collections import Counter
+
 import fnmatch
 import json
 import logging
@@ -16,6 +18,9 @@ from . import markup, path
 from .exceptions import WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
+from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
+                             mask_numerics)
+from .core import Entity
 
 logger = logging.getLogger(__name__)
 
@@ -372,6 +377,66 @@ class ResourceLoader(object):
                         intent_table[file] = new_intent_table[file]
                     else:
                         intent_table[file]['modified'] = new_intent_table[file]['modified']
+
+    def _build_word_freq_dict(self, queries):
+        """Compiles unigram frequency dictionary of normalized query tokens
+
+        Args:
+            queries (list of Query): A list of all queries
+        """
+        # Unigram frequencies
+        tokens = [mask_numerics(tok) for q in queries
+                  for tok in q.normalized_tokens]
+        freq_dict = Counter(tokens)
+
+        return freq_dict
+
+    def _build_query_freq_dict(self, queries):
+        """Compiles frequency dictionary of normalized query strings
+
+        Args:
+            queries (list of Query): A list of all queries
+        """
+        # Whole query frequencies, with singletons removed
+        query_dict = Counter([u'<{}>'.format(q.normalized_text) for q in queries])
+        for query in query_dict:
+            if query_dict[query] < 2:
+                query_dict[query] = 0
+        query_dict += Counter()
+
+        return query_dict
+
+    def _get_sys_entity_types(self, entities):
+        """Get all system entity types from the entity labels.
+
+        Args:
+            entities (list of QueryEntity): a list of entities in labeled query
+        """
+
+        # Build entity types set
+        entity_types = set()
+        for label in entities:
+            for entity in label:
+                entity_types.add(entity.entity.type)
+
+        return set((t for t in entity_types if Entity.is_system_entity(t)))
+
+    def load_feature_resource(self, name, **kwargs):
+        """Load specified feature resource.
+
+        Args:
+            name (str): resource name
+        """
+        if name == GAZETTEER_RSC:
+            return self.get_gazetteers()
+        elif name == WORD_FREQ_RSC:
+            return self._build_word_freq_dict(queries=kwargs.get('queries'))
+        elif name == QUERY_FREQ_RSC:
+            return self._build_query_freq_dict(queries=kwargs.get('queries'))
+        elif name == SYS_TYPES_RSC:
+            return self._get_sys_entity_types(entities=kwargs.get('labels'))
+        else:
+            raise ValueError('Invalid resource name \'{}\'.'.format(name))
 
     @staticmethod
     def create_resource_loader(app_path, query_factory=None):

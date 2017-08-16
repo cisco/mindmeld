@@ -164,8 +164,8 @@ class Classifier(object):
         if len(set(classes)) <= 1:
             logger.warning('Not doing anything for fit since there is only one class')
             return
-        gazetteers = self._resource_loader.get_gazetteers()
-        model.register_resources(gazetteers=gazetteers)
+
+        model.initialize_resources(self._resource_loader, queries, classes)
         model.fit(queries, classes)
         self._model = model
         self.config = ClassifierConfig.from_model_config(self._model.config)
@@ -187,8 +187,7 @@ class Classifier(object):
             return
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
-        gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
+
         return self._model.predict([query])[0]
 
     def predict_proba(self, query):
@@ -207,8 +206,6 @@ class Classifier(object):
             return
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
-        gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
 
         predict_proba_result = self._model.predict_proba([query])
         class_proba_tuples = list(predict_proba_result[0][1].items())
@@ -228,8 +225,7 @@ class Classifier(object):
         if not self._model:
             logger.error('You must fit or load the model before running evaluate.')
             return
-        gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
+
         queries, labels = self._get_queries_and_labels(queries, label_set='test')
 
         if not queries:
@@ -289,8 +285,7 @@ class Classifier(object):
             msg = 'Unable to load {}. Pickle at {!r} cannot be read.'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
-            gazetteers = self._resource_loader.get_gazetteers()
-            self._model.register_resources(gazetteers=gazetteers)
+            self._model.initialize_resources(self._resource_loader)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.ready = True

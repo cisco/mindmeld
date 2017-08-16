@@ -5,6 +5,26 @@ from __future__ import absolute_import, unicode_literals
 from .helpers import GAZETTEER_RSC, register_features, get_ngram
 
 
+def requires(resource):
+    """
+    Decorator to enforce the resource dependencies of the active feature extractors
+
+    Args:
+        resource (str): the key of a classifier resource which must be initialized before
+            the given feature extractor is used
+
+    Returns:
+        (func): the feature extractor
+    """
+    def add_resource(func):
+        req = func.__dict__.get('requirements', [])
+        func.requirements = req + [resource]
+        return func
+
+    return add_resource
+
+
+@requires(GAZETTEER_RSC)
 def extract_in_gaz_features():
     def extractor(example, resources):
         _, entities, entity_index = example
