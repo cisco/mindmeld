@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, unicode_literals
 from builtins import range, zip, super
 from past.utils import old_div
 
-from collections import Counter
 import logging
 
 from numpy import bincount
@@ -20,7 +19,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from .model import EvaluatedExample, StandardModelEvaluation, SkLearnModel
 
-from .helpers import GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC, register_model, mask_numerics
+from .helpers import QUERY_FREQ_RSC, WORD_FREQ_RSC, register_model
 
 _NEG_INF = -1e10
 
