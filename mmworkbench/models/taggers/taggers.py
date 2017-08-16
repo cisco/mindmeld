@@ -83,6 +83,11 @@ class Tagger(object):
         self._clf.set_params(**self._current_params)
         return self
 
+    def update_resources(self, resources):
+        """Updates the resources
+        """
+        self._resources = resources
+
     def _get_model_constructor(self):
         """Returns the python class of the actual underlying model"""
         raise NotImplementedError

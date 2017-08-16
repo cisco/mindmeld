@@ -19,13 +19,13 @@ ZERO = 1e-20
 class ConditionalRandomFields(Tagger):
     """A Conditional Random Fields model."""
     def fit(self, examples, labels):
-        self._config = self._passed_params.get('config', None)
+        self.config = self._passed_params.get('config', None)
         self._feat_binner = self._get_feature_binner()
-        self._tag_scheme = self._config.model_settings.get('tag_scheme', 'IOB').upper()
+        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
 
         # If parameters were not set, check if they were passed through the config
         if not self._current_params:
-            self._current_params = self._config.params
+            self._current_params = self.config.params
 
         # Extract features and classes
         all_tags = []
@@ -69,8 +69,8 @@ class ConditionalRandomFields(Tagger):
         Returns:
             (list dict): features
         """
-        return extract_sequence_features(example, self._config.example_type,
-                                         self._config.features, self._resources)
+        return extract_sequence_features(example, self.config.example_type,
+                                         self.config.features, self._resources)
 
     def _preprocess_data(self, X, fit=False):
         """Converts data into formats of CRF suite.

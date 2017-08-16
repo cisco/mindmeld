@@ -19,18 +19,18 @@ logger = logging.getLogger(__name__)
 class MemmModel(Tagger):
     """A maximum-entropy Markov model."""
     def fit(self, examples, labels):
-        self._config = self._passed_params.get('config', None)
+        self.config = self._passed_params.get('config', None)
         self._class_encoder = SKLabelEncoder()
         self._feat_vectorizer = DictVectorizer()
-        self._label_encoder = get_label_encoder(self._config)
+        self._label_encoder = get_label_encoder(self.config)
         self._feat_selector = self._get_feature_selector()
         self._feat_scaler = self._get_feature_scaler()
         # Default tag scheme to IOB
-        self._tag_scheme = self._config.model_settings.get('tag_scheme', 'IOB').upper()
+        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
 
         # If parameters were not set, check if they were passed through the config
         if not self._current_params:
-            self._current_params = self._config.params
+            self._current_params = self.config.params
 
         # Extract features and classes
         y = self._label_encoder.encode(labels, examples=examples)
@@ -69,8 +69,8 @@ class MemmModel(Tagger):
         Returns:
             (list dict): features
         """
-        return extract_sequence_features(example, self._config.example_type,
-                                         self._config.features, self._resources)
+        return extract_sequence_features(example, self.config.example_type,
+                                         self.config.features, self._resources)
 
     def get_feature_matrix(self, examples, y=None, fit=True):
         """Transforms a list of examples into a feature matrix.
@@ -107,20 +107,20 @@ class MemmModel(Tagger):
             (Object): a feature selector which returns a reduced feature matrix,
                 given the full feature matrix, X and the class labels, y
         """
-        if self._config.model_settings is None:
+        if self.config.model_settings is None:
             selector_type = None
         else:
-            selector_type = self._config.model_settings.get('feature_selector')
+            selector_type = self.config.model_settings.get('feature_selector')
         selector = {'l1': SelectFromModel(LogisticRegression(penalty='l1', C=1)),
                     'f': SelectPercentile()}.get(selector_type)
         return selector
 
     def _get_feature_scaler(self):
         """Get a feature value scaler based on the model settings"""
-        if self._config.model_settings is None:
+        if self.config.model_settings is None:
             scale_type = None
         else:
-            scale_type = self._config.model_settings.get('feature_scaler')
+            scale_type = self.config.model_settings.get('feature_scaler')
         scaler = {'std-dev': StandardScaler(with_mean=False),
                   'max-abs': MaxAbsScaler()}.get(scale_type)
         return scaler

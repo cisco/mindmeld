@@ -191,6 +191,17 @@ class TaggerModel(Model):
         model_eval = EntityModelEvaluation(config, evaluations)
         return model_eval
 
+    def register_resources(self, **kwargs):
+        """Registers resources which are accessible to feature extractors
+
+        Args:
+            **kwargs: dictionary of resources to register
+
+        """
+        self._resources.update(kwargs)
+        if self._clf:
+            self._clf.update_resources(self._resources)
+
     def _get_system_types(self):
         sys_types = set()
         for gaz in self._resources['gazetteers'].values():
