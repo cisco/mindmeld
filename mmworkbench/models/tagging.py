@@ -16,6 +16,8 @@ I_TAG = 'I'
 O_TAG = 'O'
 E_TAG = 'E'
 S_TAG = 'S'
+# End tag is used by the evaluation algorithm to mark the end of query. This
+# differs from the E tag which is used to denote the end of an entity in IOBES tagging.
 END_TAG = 'END'
 
 
@@ -206,7 +208,12 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
 
 
 class BoundaryCounts():
+    """This class stores the counts of the boundary evaluation metrics which includes:
+    1. le (label error), 2. be (boundary error), 3. lbe (label boundary error),
+    4. tp (true positive), 5. tn (true negative), 6 .fp (false positive), 7. fn (false negative)
+    """
     def __init__(self):
+        """Initializes the object with all counts set to 0"""
         self.le = 0
         self.be = 0
         self.lbe = 0
@@ -216,16 +223,20 @@ class BoundaryCounts():
         self.fn = 0
 
     def to_dict(self):
+        """Converts the object to a dictionary"""
         return {'le': self.le, 'be': self.be, 'lbe': self.lbe,
                 'tp': self.tp, 'tn': self.tn, 'fp': self.fp, 'fn': self.fn}
 
 
 def _get_tag_label(token):
+    """Splits a token into its tag and label."""
     tag, label, = token.split('|')
     return tag, label
 
 
 def _contains_O(entity):
+    """Returns true if there is an O tag in the list of tokens we are considering
+    as an entity"""
     for token in entity:
         if token[0] == O_TAG:
             return True
@@ -233,6 +244,7 @@ def _contains_O(entity):
 
 
 def _all_O(entity):
+    """Returns true if all of the tokens we are considering as an entity contain O tags"""
     for token in entity:
         if token[0] != O_TAG:
             return False
@@ -240,12 +252,16 @@ def _all_O(entity):
 
 
 def _is_boundary_error(pred_entity, exp_entity):
+    """Returns true if the predicted and expected entity form a boundary error
+    """
     trimmed_pred_entity = [token[1] for token in pred_entity if token[0] == B_TAG]
     trimmed_exp_entity = [token[1] for token in exp_entity if token[0] == B_TAG]
     return trimmed_pred_entity == trimmed_exp_entity
 
 
 def _new_tag(last_entity, curr_tag):
+    """Returns true if the current tag is different than the tag of the last entity
+    """
     if len(last_entity) < 1 or not curr_tag:
         return False
     elif (last_entity[-1][0] == I_TAG or last_entity[-1][0] == B_TAG) and curr_tag == B_TAG:
@@ -255,6 +271,9 @@ def _new_tag(last_entity, curr_tag):
 
 
 def _determine_count_type(last_pred_entity, last_exp_entity, boundary_counts):
+    """Determines which of TP, FP, FN, LE, LBE, or BE the last predicted and expected entity
+    are and updates the boundary counts accordingly.
+    """
     # TP if both are the same
     if last_pred_entity == last_exp_entity:
         boundary_counts.tp += 1
@@ -267,18 +286,18 @@ def _determine_count_type(last_pred_entity, last_exp_entity, boundary_counts):
     # LE if wrong entity predicted
     elif not _contains_O(last_pred_entity) and not _contains_O(last_exp_entity):
         boundary_counts.le += 1
-    # BE
+    # BE and LBE
     elif _contains_O(last_pred_entity) or _contains_O(last_exp_entity):
         if _is_boundary_error(last_pred_entity, last_exp_entity):
             boundary_counts.be += 1
         else:
             boundary_counts.lbe += 1
-    else:
-        print('no known count type detected')
     return boundary_counts
 
 
 def get_boundary_counts(expected_sequence, predicted_sequence, boundary_counts):
+    """Gets the boundary counts for the expected and predicted sequence of entities.
+    """
     # Initialize values
     in_coding_region = False
     start = True

@@ -459,6 +459,10 @@ class StandardModelEvaluation(ModelEvaluation):
 
 
 class SequenceModelEvaluation(ModelEvaluation):
+    def __init__(self, config, results):
+        self._tag_scheme = config.model_settings.get('tag_scheme', 'IOB').upper()
+        super().__init__(config, results)
+
     def raw_results(self):
         """
         TODO: role evaluation?
