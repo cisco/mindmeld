@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-test_tagging
+test_tagger
 ----------------------------------
 
-Tests for `tagging` module.
+Tests for `tagger` module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 from __future__ import unicode_literals
@@ -94,7 +94,7 @@ class TestTagging:
         """Test the behavior when a new entity is directly after another entity"""
 
         processed_query = self.nlp.create_query(query)
-        res_entity = tagging.get_entities_from_tags(processed_query, tags)
+        res_entity = taggers.get_entities_from_tags(processed_query, tags)
         assert len(res_entity) == 2
 
     test_data_4 = [
@@ -109,7 +109,7 @@ class TestTagging:
         """Tests the behavior when a system entity is between two entities"""
 
         processed_query = self.nlp.create_query(query)
-        res_entity = tagging.get_entities_from_tags(processed_query, tags)
+        res_entity = taggers.get_entities_from_tags(processed_query, tags)
         assert len(res_entity) == 4
 
     test_data_5 = [
@@ -126,7 +126,7 @@ class TestTagging:
         """Tests the behavior when the entity is at the end of a query"""
 
         processed_query = self.nlp.create_query(query)
-        res_entity = tagging.get_entities_from_tags(processed_query, tags)
+        res_entity = taggers.get_entities_from_tags(processed_query, tags)
         assert len(res_entity) == 1
 
     test_data_6 = [
@@ -143,7 +143,7 @@ class TestTagging:
         """Tests the behavior with multi token entities"""
 
         processed_query = self.nlp.create_query(query)
-        res_entity = tagging.get_entities_from_tags(processed_query, tags)
+        res_entity = taggers.get_entities_from_tags(processed_query, tags)
         assert len(res_entity) == 2
 
     test_data_7 = [
@@ -193,8 +193,8 @@ class TestTagging:
 
     @pytest.mark.parametrize("expected,predicted,expected_counts", test_data_7)
     def test_get_boundary_counts(self, expected, predicted, expected_counts):
-        predicted_counts = tagging.get_boundary_counts(expected, predicted,
-                                                       tagging.BoundaryCounts()).to_dict()
+        predicted_counts = taggers.get_boundary_counts(expected, predicted,
+                                                       taggers.BoundaryCounts()).to_dict()
 
         for key in predicted_counts.keys():
             if predicted_counts[key] != expected_counts.get(key, 0):
@@ -211,9 +211,9 @@ class TestTagging:
 
     @pytest.mark.parametrize("expected,predicted,expected_counts", test_data_8)
     def test_get_boundary_counts_sequential(self, expected, predicted, expected_counts):
-        boundary_counts = tagging.BoundaryCounts()
+        boundary_counts = taggers.BoundaryCounts()
         for expected_sequence, predicted_sequence in zip(expected, predicted):
-            boundary_counts = tagging.get_boundary_counts(expected_sequence, predicted_sequence,
+            boundary_counts = taggers.get_boundary_counts(expected_sequence, predicted_sequence,
                                                           boundary_counts)
         predicted_counts = boundary_counts.to_dict()
 
