@@ -16,7 +16,7 @@ from sklearn.metrics import (f1_score, precision_recall_fscore_support as score,
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
                       entity_seqs_equal, get_entity_scorer)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
-                      BoundaryCounts)
+                              BoundaryCounts)
 logger = logging.getLogger(__name__)
 
 # model scoring types
@@ -678,7 +678,7 @@ class Model(object):
             elif scoring == LIKELIHOOD_SCORING:
                 msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
             else:
-                msg = 'Candidate average seq2se2 accuracy: {:.2%} ± {:.2%}'
+                msg = 'Candidate average seq2seq accuracy: {:.2%} ± {:.2%}'
             logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
 
         if scoring == ACCURACY_SCORING:
