@@ -121,6 +121,8 @@ def build(ctx):
         nlp.dump()
     except WorkbenchError as ex:
         logger.error(ex.message)
+    except RuntimeError as ex:
+        logger.error(ex)
 
 
 @cli.command('clean', context_settings=CONTEXT_SETTINGS)
