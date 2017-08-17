@@ -204,7 +204,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     def print_stats(self):
         """
-        Prints a useful stats table and returns a structured stats object for evaluation.
+        Prints a useful stats table for evaluation.
 
         Returns:
             dict: Structured dict containing evaluation statistics. Contains precision,
@@ -399,7 +399,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         # Doesn't print if there isn't enough space to display the full matrix.
         if len(text_labels) > 10:
             print("Not printing confusion matrix since it is too large. The full matrix is still"
-                  " included in the dictionary returned from print_stats().")
+                  " included in the dictionary returned from get_stats().")
             return
         labels = range(len(text_labels))
         title_format = "{:>15}" * (len(labels)+1)
@@ -465,7 +465,6 @@ class StandardModelEvaluation(ModelEvaluation):
         self._print_overall_stats_table(stats['stats_overall'])
         self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
         self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
-        return stats
 
     def print_graphs(self):
         """
@@ -550,7 +549,6 @@ class SequenceModelEvaluation(ModelEvaluation):
                                       'Tag-level statistics by class')
         self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
         self._print_sequence_stats_table(stats['sequence_stats'])
-        return stats
 
     def print_graphs(self):
         """
@@ -607,8 +605,6 @@ class EntityModelEvaluation(SequenceModelEvaluation):
         if self._tag_scheme == 'IOB':
             self._print_boundary_stats(stats['boundary_stats'])
         self._print_sequence_stats_table(stats['sequence_stats'])
-
-        return stats
 
 
 class Model(object):
