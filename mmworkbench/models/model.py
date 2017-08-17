@@ -839,15 +839,6 @@ class EntityLabelEncoder(LabelEncoder):
             all_tags.extend(get_tags_from_entities(examples[idx], label, scheme))
         return all_tags
 
-    def encode_multiple(self, labels, **kwargs):
-        examples = kwargs['examples']
-        scheme = self._get_tag_scheme()
-        # Here each label is a list of entities for the corresponding example
-        all_tags = []
-        for idx, label in enumerate(labels):
-            all_tags.append(get_tags_from_entities(examples[idx], label, scheme))
-        return all_tags
-
     def decode(self, tags_by_example, **kwargs):
         # TODO: support decoding multiple queries at once
         scheme = self._get_tag_scheme()

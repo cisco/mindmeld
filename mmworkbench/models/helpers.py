@@ -193,11 +193,11 @@ def entity_accuracy_scoring(expected, predicted):
 def entity_seqs_equal(expected, predicted):
     if len(expected) != len(predicted):
         return False
-    for i in range(len(expected)):
-        if expected[i].entity.type != predicted[i].entity.type:
+    for expected_entity, predicted_entity in zip(expected, predicted):
+        if expected_entity.entity.type != predicted_entity.entity.type:
             return False
-        if expected[i].span != predicted[i].span:
+        if expected_entity.span != predicted_entity.span:
             return False
-        if expected[i].text != predicted[i].text:
+        if expected_entity.text != predicted_entity.text:
             return False
     return True
