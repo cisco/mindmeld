@@ -192,9 +192,19 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             if not result.is_correct:
                 yield result
 
+    def get_stats(self):
+        """
+        Returns a structured stats object for evaluation.
+
+        Returns:
+            dict: Structured dict containing evaluation statistics. Contains precision,
+                  recall, f scores, support, etc.
+        """
+        raise NotImplementedError
+
     def print_stats(self):
         """
-         Prints a useful stats table and returns a structured stats object for evaluation.
+        Prints a useful stats table and returns a structured stats object for evaluation.
 
         Returns:
             dict: Structured dict containing evaluation statistics. Contains precision,
@@ -439,12 +449,18 @@ class StandardModelEvaluation(ModelEvaluation):
 
         return RawResults(predicted=predicted, expected=expected, text_labels=text_labels)
 
-    def print_stats(self):
+    def get_stats(self):
         raw_results = self.raw_results()
         stats = self._get_common_stats(raw_results.expected,
                                        raw_results.predicted,
                                        raw_results.text_labels)
         # Note can add any stats specific to the standard model to any of the tables here
+
+        return stats
+
+    def print_stats(self):
+        raw_results = self.raw_results()
+        stats = self.get_stats()
 
         self._print_overall_stats_table(stats['stats_overall'])
         self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
@@ -464,9 +480,6 @@ class SequenceModelEvaluation(ModelEvaluation):
         super().__init__(config, results)
 
     def raw_results(self):
-        """
-        TODO: role evaluation?
-        """
         text_labels = []
         predicted, expected = [], []
         predicted_flat, expected_flat = [], []
@@ -515,7 +528,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         print(stat_row_format.format(*row))
         print("\n\n")
 
-    def print_stats(self):
+    def get_stats(self):
         raw_results = self.raw_results()
         stats = self._get_common_stats(raw_results.expected_flat,
                                        raw_results.predicted_flat,
@@ -526,6 +539,11 @@ class SequenceModelEvaluation(ModelEvaluation):
         stats['sequence_stats'] = sequence_stats
 
         # Note: can add any stats specific to the sequence model to any of the tables here
+        return stats
+
+    def print_stats(self):
+        raw_results = self.raw_results()
+        stats = self.get_stats()
 
         self._print_overall_stats_table(stats['stats_overall'], 'Overall tag-level statistics')
         self._print_class_stats_table(stats['class_stats'], raw_results.text_labels,
@@ -571,12 +589,25 @@ class EntityModelEvaluation(SequenceModelEvaluation):
         print(stat_row_format.format(*row))
         print("\n\n")
 
-    def print_stats(self):
-        stats = super(EntityModelEvaluation, self).print_stats()
+    def get_stats(self):
+        stats = super().get_stats()
         if self._tag_scheme == 'IOB':
             boundary_stats = self._get_entity_boundary_stats()
             stats['boundary_stats'] = boundary_stats
-            self._print_boundary_stats(boundary_stats)
+        return stats
+
+    def print_stats(self):
+        raw_results = self.raw_results()
+        stats = self.get_stats()
+
+        self._print_overall_stats_table(stats['stats_overall'], 'Overall tag-level statistics')
+        self._print_class_stats_table(stats['class_stats'], raw_results.text_labels,
+                                      'Tag-level statistics by class')
+        self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
+        if self._tag_scheme == 'IOB':
+            self._print_boundary_stats(stats['boundary_stats'])
+        self._print_sequence_stats_table(stats['sequence_stats'])
+
         return stats
 
 
