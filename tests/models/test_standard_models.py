@@ -12,14 +12,35 @@ from __future__ import unicode_literals
 
 import os
 
+import pytest
+
 from mmworkbench import markup
 from mmworkbench.models import ModelConfig, CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE
 from mmworkbench.models.standard_models import TextModel
+from mmworkbench.tokenizer import Tokenizer
+from mmworkbench.query_factory import QueryFactory
 from mmworkbench.resource_loader import ResourceLoader
 
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME)
-APP_RES_LOADER = ResourceLoader.create_resource_loader(APP_PATH)
+
+
+@pytest.fixture
+def tokenizer():
+    """A tokenizer for normalizing text"""
+    return Tokenizer()
+
+
+@pytest.fixture
+def query_factory(tokenizer):
+    """For creating queries"""
+    return QueryFactory(tokenizer)
+
+
+@pytest.fixture
+def resource_loader(query_factory):
+    """A resource loader"""
+    return ResourceLoader(APP_PATH, query_factory)
 
 
 class TestTextModel:
@@ -61,7 +82,7 @@ class TestTextModel:
                 labeled_data.append(markup.load_query(text, intent=intent))
         cls.labeled_data = labeled_data
 
-    def test_fit(self):
+    def test_fit(self, resource_loader):
         """Tests that a basic fit succeeds"""
         config = ModelConfig(**{
             'model_type': 'text',
@@ -85,12 +106,12 @@ class TestTextModel:
         model = TextModel(config)
         examples = [q.query for q in self.labeled_data]
         labels = [q.intent for q in self.labeled_data]
-        model.initialize_resources(APP_RES_LOADER, examples, labels)
+        model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
         assert model._current_params == {'fit_intercept': True, 'C': 100}
 
-    def test_fit_cv(self):
+    def test_fit_cv(self, resource_loader):
         """Tests fitting with param selection"""
         config = ModelConfig(**{
             'model_type': 'text',
@@ -118,12 +139,12 @@ class TestTextModel:
         model = TextModel(config)
         examples = [q.query for q in self.labeled_data]
         labels = [q.intent for q in self.labeled_data]
-        model.initialize_resources(APP_RES_LOADER, examples, labels)
+        model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
         assert model._current_params
 
-    def test_fit_predict(self):
+    def test_fit_predict(self, resource_loader):
         """Tests prediction after a fit"""
         config = ModelConfig(**{
             'model_type': 'text',
@@ -147,7 +168,7 @@ class TestTextModel:
         model = TextModel(config)
         examples = [q.query for q in self.labeled_data]
         labels = [q.intent for q in self.labeled_data]
-        model.initialize_resources(APP_RES_LOADER, examples, labels)
+        model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
         assert model.predict([markup.load_query('hi').query]) == 'greet'
