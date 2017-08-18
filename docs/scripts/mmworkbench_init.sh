@@ -52,7 +52,13 @@ function check_dependency {
 function install_dependency {
 	local command=$1
 
-	if [[ ! `which $command` ]]; then
+	if [[ ($command == "java") && (${NEEDS_JAVA} == 1) ]]; then
+		echo "   " $command ...
+		brew tap caskroom/cask
+		brew cask install java
+    elif [[ ($command == "virtualenv") && (${NEEDS_VIRTUALENV} == 1) ]]; then
+		sudo -H pip install --upgrade virtualenv
+	elif [[ ! `which $command` ]]; then
 		echo "   " $command
 		if [[ $command == "brew" ]]; then
 			/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -67,12 +73,6 @@ function install_dependency {
 	    else
 			brew install $command
 		fi
-	elif [[ ($command == "java") && (${NEEDS_JAVA} == 1) ]]; then
-		echo "   " $command ... 
-		brew tap caskroom/cask
-		brew cask install java
-    elif [[ ($command == "virtualenv") && (${NEEDS_VIRTUALENV} == 1) ]]; then
-		sudo -H pip install --upgrade virtualenv
 	fi
 }
 
