@@ -135,6 +135,24 @@ class TaggerModel(Model):
         init_params = {'config': self.config, 'resources': self._resources}
         return model_class(**init_params).fit(examples, labels)
 
+    def _get_cv_scorer(self, selection_settings):
+        # For entities you must use the default sequence scorer
+        if selection_settings.get('scoring', 'seq_accuracy') is not 'seq_accuracy':
+            logger.info('You must use the sequence accuracy scorer for entity recognition. '
+                        'Using seq_accuracy instead of your specified scorer...')
+        return self.default_scorer
+
+    def _get_cv_estimator_and_params(self, model_class, param_grid):
+        param_grid['config'] = [self.config]
+        param_grid['resources'] = [self._resources]
+        init_params = {'config': self.config, 'resources': self._resources}
+        return model_class(**init_params), param_grid
+
+    def _process_cv_best_params(self, best_params):
+        best_params.pop('config')
+        best_params.pop('resources')
+        return best_params
+
     def _convert_params(self, param_grid, y, is_grid=True):
         """
         Convert the params from the style given by the config to the style

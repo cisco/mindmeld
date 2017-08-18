@@ -646,26 +646,12 @@ class Model(object):
         logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
                     num_splits, '' if num_splits == 1 else 's')
 
-        # For entities you must use the default sequence scorer
-        if self.config.label_type == ENTITIES_LABEL_TYPE:
-            if selection_settings.get('scoring', 'seq_accuracy') is not 'seq_accuracy':
-                logger.info('You must use the sequence accuracy scorer for entity recognition. '
-                            'Using seq_accuracy instead of your specified scorer...')
-            scoring = self.default_scorer
-        else:
-            scoring = selection_settings.get('scoring', self.default_scorer)
+        scoring = self._get_cv_scorer(selection_settings)
         n_jobs = selection_settings.get('n_jobs', -1)
 
         param_grid = self._convert_params(selection_settings['grid'], labels)
         model_class = self._get_model_constructor()
-
-        if self.config.label_type == ENTITIES_LABEL_TYPE:
-            param_grid['config'] = [self.config]
-            param_grid['resources'] = [self._resources]
-            init_params = {'config': self.config, 'resources': self._resources}
-            estimator = model_class(**init_params)
-        else:
-            estimator = model_class()
+        estimator, param_grid = self._get_cv_estimator_and_params(model_class, param_grid)
         grid_cv = GridSearchCV(estimator=estimator, scoring=scoring, param_grid=param_grid,
                                cv=cv_iterator, n_jobs=n_jobs)
         model = grid_cv.fit(examples, labels, groups)
@@ -690,15 +676,20 @@ class Model(object):
         else:
             msg = 'Best seq2seq accuracy: {:.2%}, params: {}'
             self.cv_loss_ = 1 - model.best_score_
-        best_params = model.best_params_
 
-        if self.config.label_type == ENTITIES_LABEL_TYPE:
-            best_params.pop('config')
-            best_params.pop('resources')
-
+        best_params = self._process_cv_best_params(model.best_params_)
         logger.info(msg.format(model.best_score_, best_params))
 
         return model.best_estimator_, model.best_params_
+
+    def _get_cv_scorer(self, selection_settings):
+        return selection_settings.get('scoring', self.default_scorer)
+
+    def _get_cv_estimator_and_params(self, model_class, param_grid):
+        return model_class(), param_grid
+
+    def _process_cv_best_params(self, best_params):
+        return best_params
 
     def select_params(self, examples, labels, selection_settings=None):
         raise NotImplementedError
