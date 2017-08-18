@@ -64,11 +64,13 @@ function install_dependency {
 	    elif [[ $command == "elasticsearch" ]]; then
 	    	brew install elasticsearch
 			brew services start elasticsearch 
+	    elif [[ $command == "virtualenv" ]]; then
+	    	sudo -H pip install --upgrade virtualenv
 	    else
 			brew install $command
 		fi
 	elif [[ ($command == "java") && (${NEEDS_JAVA} == 1) ]]; then
-		echo "   " $command ... 
+		echo "   " $command ...
 		brew tap caskroom/cask
 		brew cask install java
     elif [[ ($command == "virtualenv") && (${NEEDS_VIRTUALENV} == 1) ]]; then
