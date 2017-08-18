@@ -37,15 +37,14 @@ class TaggerModel(Model):
     This class manages feature extraction, training, cross-validation, and
     prediction. The design goal is that after providing initial settings like
     hyperparameters, grid-searchable hyperparameters, feature extractors, and
-    cross-validation settings, TextModel manages all of the details
+    cross-validation settings, TaggerModel manages all of the details
     involved in training and prediction such that the input to training or
     prediction is Query objects, and the output is class names, and no data
     manipulation is needed from the client.
 
     Attributes:
         classifier_type (str): The name of the classifier type. Currently
-            recognized values are "logreg","dtree", "rforest" and "svm",
-            as well as "super-learner:logreg", "super-learner:dtree" etc.
+            recognized values are "memm","crf", and "lstm"
         hyperparams (dict): A kwargs dict of parameters that will be used to
             initialize the classifier object.
         grid_search_hyperparams (dict): Like 'hyperparams', but the values are
