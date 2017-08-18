@@ -73,7 +73,7 @@ function install_dependency {
 		echo "   " $command ...
 		brew tap caskroom/cask
 		brew cask install java
-    elif [[ ($command == "virtualenv") && (${NEED_VIRTUALENV} == 1) ]]; then
+    elif [[ ($command == "virtualenv") && (${NEEDS_VIRTUALENV} == 1) ]]; then
 		sudo -H pip install --upgrade virtualenv
 	fi
 }

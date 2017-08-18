@@ -227,7 +227,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                           | as its value. As in the ``'bag-of-words-seq'`` feature, each starting position is a token index, relative  |
   |                           | to the the current token.                                                                                  |
   |                           |                                                                                                            |
-  |                           | ``start_positions: [-1, 0, 1]`` will extract features indicating whether the current token or its          |
+  |                           | E.g.,``'start_positions': [-1, 0, 1]`` will extract features indicating whether the current token or its   |
   |                           | immediate neigbors are system entities.                                                                    |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
 
