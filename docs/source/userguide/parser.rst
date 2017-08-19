@@ -17,9 +17,9 @@ Not every Workbench app needs a parser.
 Some parsing terminology
 -------------------------
 
-In this guide, the terms *language parser* and *parser* are interchangeable. To understand how the parser works, you need to understand *entity groups*.
+In this guide, the terms *language parser* and *parser* are interchangeable. To understand how the parser works, you need to understand **entity groups**.
 
-The main entity in an entity group is the **head** entity. The other, **dependent** entities, are attributes of the main entity. These terms reflect the `linguistic (syntactic) function <https://en.wikipedia.org/wiki/Dependency_grammar>`_ of the entities within the group.
+The main entity in an entity group is the **head** entity. The other, **dependent** entities, are attributes of the main entity. The terms, *head* and *dependent*, reflect the `linguistic (syntactic) function <https://en.wikipedia.org/wiki/Dependency_grammar>`_ of the entities within the group.
 
 **Head** and **dependent** entities are also called **parent** and **child** entities, respectively. This is because the hierarchy inherent in any entity group can be seen as a tree data structure, where **parent** and **child** denote the relationship between the nodes in the `tree representation <https://en.wikipedia.org/wiki/Tree_(data_structure)>`_.
 
@@ -131,7 +131,7 @@ First, specify that a ``dish`` entity can have an ``option`` entity and a numeri
        'option': ['sys_number']
    }
 
-Next, specify the :term:`role` types for some head and dependent entities. We'll say that ``option`` entities with a ``beverage`` role type can only be grouped with ``dish`` entities that also have a ``beverage`` role. Likewise, ``option`` entities with a ``baked_good`` role type can only be grouped with ``dish`` entities that also have a ``baked_good`` role. Now the parser can only group options with compatible dishes.
+If the blueprint were to be extended with role types for subclassifying some of the entity types, you can additionally specify the :term:`role` for some head and dependent entities. We can say that ``option`` entities with a ``beverage`` role type can only be grouped with ``dish`` entities that also have a ``beverage`` role. Likewise, ``option`` entities with a ``baked_good`` role type can only be grouped with ``dish`` entities that also have a ``baked_good`` role. Now the parser will only group options with compatible dishes.
 
 .. code-block:: python
 
@@ -171,9 +171,7 @@ Load the configuration by calling the :meth:`build` method on the :class:`Natura
 Run the parser
 --------------
 
-Run the trained parser on a test query using the :meth:`NaturalLanguageProcessor.process` method.
-
- - The parser runs as the last step in the NLP pipeline, building on top of the information provided by all the previous NLP models. The most convenient way to run a configured parser is to use :meth:`NaturalLanguageProcessor.process`, which sends the query for processing by each NLP pipeline component in sequence, then returns the aggregated output from all the components. See :ref:`Run the NLP pipeline<run_nlp>`.
+The parser runs as the last step in the NLP pipeline, building on top of the information provided by all the previous NLP models. The most convenient way to run a configured parser is to use the :meth:`NaturalLanguageProcessor.process` method, which sends the query for processing by each NLP pipeline component in sequence, then returns the aggregated output from all the components.
 
 In the output of :meth:`NaturalLanguageProcessor.process`:
 
@@ -260,12 +258,11 @@ Inspect an individual entity. We'll choose the only entity which has a dependent
      'value': [ ... ]
    }
 
-In the example, we see the entity groups {"two", "chicken kebab"}, {"mujaddara wrap"}, and {"palmyra"}, in which the group with head "chicken kebab" has dependent "two,"
-and the remaining entities, "mujaddara wrap" and "palymra" are childless because the parser found no dependent entities for them.
+The remaining entities in the query, "mujaddara wrap" (``dish``) and "palymra" (``restaurant``), are childless because the parser found no dependent entities for them. This example thus has three entity groups in total: {"two", "chicken kebab"}, {"mujaddara wrap"}, and {"palmyra"}.
 
 .. note::
 
-   The parser never assigns a 'children' property to an entity when any of the following are true:
+   The parser does not assign a 'children' property to an entity when any of the following are true:
 
    #. The entity type is a potential head according to the configuration, but the parser finds no compatible dependents in the query.
 
@@ -276,7 +273,7 @@ and the remaining entities, "mujaddara wrap" and "palymra" are childless because
 Test out the preconfigured parser and experiment with different configuration settings, using the :doc:`food ordering blueprint <../blueprints/food_ordering>` as a sandbox.
 Study the blueprint's application file (``app.py``) for examples on how to use parser output within :term:`dialogue state handlers <dialogue state handler>`. Continue this exercise until you the language parser and its capabilities feel familiar to you.
 
-Your app should exhibit decent baseline parsing accuracy out-of-the-box using default parser settings. To improve its accuracy further, you can optimize the parser settings for the nature of your data. If you decide to experiment in this way, run your parser in an advanced configuration as described in the next section.
+Your app should exhibit decent baseline parsing accuracy out-of-the-box using default parser settings. To improve its accuracy further, you can optimize the parser settings for the nature of your data. If you decide to experiment in this way, run your parser using an advanced configuration as described in the next section.
 
 .. _advanced_parser_config:
 
@@ -380,4 +377,4 @@ What is significant about the query above is that it contains multiple head enti
 Experimenting with an advanced configuration (optional)
 -------------------------------------------------------
 
-Now you are ready to define an advanced configuration, :ref:`load the configuration <load_config>`, and :ref:`run the parser <run_parser>`. Observe the effects of your per-dependent configuration settings on parser accuracy, and if desired, iterate on the whole process.
+Once you have defined an advanced configuration, :ref:`load the configuration <load_config>`, and :ref:`run the parser <run_parser>`. Observe the effects of your per-dependent configuration settings on parser accuracy, and if desired, iterate on the whole process.
