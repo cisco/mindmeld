@@ -74,18 +74,15 @@ class EntityRecognizer(Classifier):
         # Load labeled data
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
 
+        # initialize resources
+        model.initialize_resources(self._resource_loader, queries, labels)
+
         # Build entity types set
         self.entity_types = set()
         for label in labels:
             for entity in label:
                 self.entity_types.add(entity.entity.type)
 
-        sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
-
-        # Get gazetteers (they will be built if necessary)
-        gazetteers = self._resource_loader.get_gazetteers()
-
-        model.register_resources(gazetteers=gazetteers, sys_types=sys_types)
         model.fit(queries, labels)
         self._model = model
         self.config = ClassifierConfig.from_model_config(self._model.config)

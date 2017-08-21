@@ -86,10 +86,7 @@ class RoleClassifier(Classifier):
             for label in labels:
                 self.roles.add(label)
 
-            # Get gazetteers (they will be built if necessary)
-            gazetteers = self._resource_loader.get_gazetteers()
-
-            model.register_resources(gazetteers=gazetteers)
+            model.initialize_resources(self._resource_loader, queries, labels)
             model.fit(examples, labels)
             self._model = model
             self.config = ClassifierConfig.from_model_config(self._model.config)
