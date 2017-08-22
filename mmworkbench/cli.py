@@ -104,6 +104,7 @@ def converse(ctx, session):
                 click.secho(prefix + response, fg='blue', bg='white')
     except WorkbenchError as ex:
         logger.error(ex.message)
+        ctx.exit(1)
 
 
 @cli.command('build', context_settings=CONTEXT_SETTINGS)
@@ -121,8 +122,10 @@ def build(ctx):
         nlp.dump()
     except WorkbenchError as ex:
         logger.error(ex.message)
+        ctx.exit(1)
     except RuntimeError as ex:
         logger.error(ex)
+        ctx.exit(1)
 
 
 @cli.command('clean', context_settings=CONTEXT_SETTINGS)
@@ -142,19 +145,19 @@ def clean(ctx):
 
 
 @cli.command('load-kb', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
 @click.option('-n', '--es-host', required=False)
 @click.argument('app_namespace', required=True)
 @click.argument('index_name', required=True)
 @click.argument('data_file', required=True)
-def load_index(es_host, app_namespace, index_name, data_file):
+def load_index(ctx, es_host, app_namespace, index_name, data_file):
     """Loads data into a question answerer index."""
 
     try:
         QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
-    except KnowledgeBaseConnectionError as e:
-        logger.error(e.message)
-    except KnowledgeBaseError as e:
-        logger.error(e.message)
+    except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
+        logger.error(ex.message)
+        ctx.exit(1)
 
 
 @cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
@@ -165,7 +168,7 @@ def num_parser(ctx, start):
     if start:
         pid = _get_mallard_pid()
 
-        if len(pid) > 0:
+        if pid:
             # if mallard is already running, leave it be
             logger.info('Numerical parser running, PID %s', pid[0])
             return
@@ -202,22 +205,21 @@ def _get_mallard_pid():
 
 
 @cli.command('blueprint', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
 @click.option('-n', '--es-host')
 @click.option('--skip-kb', is_flag=True, help="Skip setting up the knowledge base")
 @click.argument('blueprint_name', required=True)
 @click.argument('app_path', required=False)
-def setup_blueprint(es_host, skip_kb, blueprint_name, app_path):
+def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application."""
     try:
         blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
-    except ValueError as e:
-        logger.error(e)
-    except AuthNotFoundError as e:
-        logger.error(e)
-    except KnowledgeBaseConnectionError as e:
-        logger.error(e.message)
-    except KnowledgeBaseError as e:
-        logger.error(e.message)
+    except ValueError as ex:
+        logger.error(ex)
+        ctx.exit(1)
+    except (AuthNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
+        logger.error(ex.message)
+        ctx.exit(1)
 
 
 if __name__ == '__main__':
