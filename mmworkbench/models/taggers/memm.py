@@ -30,8 +30,10 @@ class MemmModel(Tagger):
     def get_params(self, deep=True):
         return self._clf.get_params()
 
-    # TODO: update predict
-    def predict(self, examples, config, resources):
+    def predict(self, X):
+        return self._clf.predict(X)
+
+    def process_and_predict(self, examples, config, resources):
         return [self._predict_example(example, config, resources) for example in examples]
 
     def _predict_example(self, example, config, resources):
@@ -45,8 +47,8 @@ class MemmModel(Tagger):
         for features in features_by_segment:
             features['prev_tag'] = prev_tag
             X, _ = self.preprocess_data([features])
-            prediction = self._clf.predict(X)
-            predicted_tag = self._class_encoder.inverse_transform(prediction)[0]
+            prediction = self.predict(X)
+            predicted_tag = self.class_encoder.inverse_transform(prediction)[0]
             predicted_tags.append(predicted_tag)
             prev_tag = predicted_tag
 
@@ -109,22 +111,22 @@ class MemmModel(Tagger):
         return scaler
 
     def setup_model(self, selector_type, scale_type):
-        self._class_encoder = SKLabelEncoder()
-        self._feat_vectorizer = DictVectorizer()
+        self.class_encoder = SKLabelEncoder()
+        self.feat_vectorizer = DictVectorizer()
         self._feat_selector = self._get_feature_selector(selector_type)
         self._feat_scaler = self._get_feature_scaler(scale_type)
 
 
     def preprocess_data(self, X, y=None, fit=False):
         if fit:
-            y = self._class_encoder.fit_transform(y)
-            X = self._feat_vectorizer.fit_transform(X)
+            y = self.class_encoder.fit_transform(y)
+            X = self.feat_vectorizer.fit_transform(X)
             if self._feat_scaler is not None:
                 X = self._feat_scaler.fit_transform(X)
             if self._feat_selector is not None:
                 X = self._feat_selector.fit_transform(X, y)
         else:
-            X = self._feat_vectorizer.transform(X)
+            X = self.feat_vectorizer.transform(X)
             if self._feat_scaler is not None:
                 X = self._feat_scaler.transform(X)
             if self._feat_selector is not None:

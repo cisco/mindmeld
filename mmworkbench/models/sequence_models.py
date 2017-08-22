@@ -146,8 +146,8 @@ class TaggerModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
-            best_clf, best_params = self._fit_cv(examples, labels)
-            self._clf = best_clf
+            _, best_params = self._fit_cv(X, y, groups)
+            self._clf = self._fit(X, y, best_params)
             self._current_params = best_params
 
         return self
@@ -162,27 +162,6 @@ class TaggerModel(Model):
         """
         self._clf.set_params(**params)
         return self._clf.fit(X, y)
-
-    def _fit_cv(self, X, y, params):
-        return None
-
-    # def _get_cv_scorer(self, selection_settings):
-    #     # For entities you must use the default sequence scorer
-    #     if selection_settings.get('scoring', 'seq_accuracy') is not 'seq_accuracy':
-    #         logger.info('You must use the sequence accuracy scorer for entity recognition. '
-    #                     'Using seq_accuracy instead of your specified scorer...')
-    #     return self.default_scorer
-
-    # def _get_cv_estimator_and_params(self, model_class, param_grid):
-    #     param_grid['config'] = [self.config]
-    #     param_grid['resources'] = [self._resources]
-    #     init_params = {'config': self.config, 'resources': self._resources}
-    #     return model_class(**init_params), param_grid
-
-    # def _process_cv_best_params(self, best_params):
-    #     best_params.pop('config')
-    #     best_params.pop('resources')
-    #     return best_params
 
     def _convert_params(self, param_grid, y, is_grid=True):
         """
@@ -219,8 +198,9 @@ class TaggerModel(Model):
 
         if self._no_entities:
             return [()]
-
-        predicted_tags = self._clf.predict(examples, self.config, self._resources)
+        # Process the data to generate features and predict the tags
+        predicted_tags = self._clf.process_and_predict(examples, self.config, self._resources)
+        # Decode the tags to labels
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
                   for example_predicted_tags, example in zip(predicted_tags, examples)]
         return labels
@@ -259,8 +239,6 @@ class TaggerModel(Model):
 
         """
         self._resources.update(kwargs)
-        # if self._clf:
-        #     self._clf.update_resources(self._resources)
 
     def _get_system_types(self):
         sys_types = set()

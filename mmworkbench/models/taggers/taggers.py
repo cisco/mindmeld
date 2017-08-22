@@ -38,14 +38,9 @@ class Tagger(object):
         """Returns the information needed pickle an instance of this class.
 
         By default, pickling removes attributes with names starting with
-        underscores. This overrides that behavior. For the _resources field,
-        we save the resources that are memory intensive
+        underscores.
         """
         attributes = self.__dict__.copy()
-        resources_to_persist = set(['sys_types'])
-        for key in list(attributes['_resources'].keys()):
-            if key not in resources_to_persist:
-                del attributes['_resources'][key]
         return attributes
 
     def fit(self, examples, labels, resources=None):
