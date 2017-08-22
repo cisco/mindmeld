@@ -88,21 +88,39 @@ class ConditionalRandomFields(Tagger):
 # Feature extraction for CRF
 
 class FeatureMapper(object):
-    def __init__(self):
-        self.feat_name = None
+    """
+    Mapper for one feature to map numerical values to corresponding bins which are generated
+    by the mean and standard deviation of this feature.
+
+    The size and number of bins are decided by num_std and size_std. For example, say
+    num_std = 2 and size_std = 0.5, then the bins would look like:
+
+    bucket 0: (-INF, mean - std * 2)
+    bucket 1: [mean - std * 2, mean - std * 1.5)
+    bucket 2: [mean - std * 1.5, mean - std * 1)
+    ...
+    bucket 8: [mean + std * 1.5, mean + std * 2)
+    bucket 9: [mean + std * 2, INF)
+
+    Args:
+        num_std (int): number of standard deviations to generate the bins
+        size_std (float): size of each bin in standard deviation
+    """
+    def __init__(self, num_std=2, size_std=0.5):
+        self._num_std = num_std
+        self._size_std = size_std
+
         self.values = []
         self.std = None
         self.mean = None
-
-        self.std_bins = []
-
-        self._num_std = 2
-        self._size_std = 0.5
+        self._std_bins = []
 
     def add_value(self, value):
+        """Collect values for this feature."""
         self.values.append(value)
 
     def fit(self):
+        """Calculate statistics and then create the bins."""
         self.std = np.std(self.values)
         self.mean = np.mean(self.values)
 
@@ -114,22 +132,31 @@ class FeatureMapper(object):
             range_start += self.std * self._size_std
             bins.append(range_start)
             num_bin -= 1
-        self.std_bins = np.array(bins)
+        self._std_bins = np.array(bins)
 
     def map_bucket(self, value):
-        return np.searchsorted(self.std_bins, value)
+        """
+        Get corresponding bucket number for this value.
+
+        Args:
+           value (float): numerical value of this feature
+        """
+        return np.searchsorted(self._std_bins, value)
 
 
 class FeatureBinner(object):
+    """
+    Class to convert features with numerical values to categorical values.
+    """
     def __init__(self):
         self.features = {}
 
     def fit(self, X_train):
         """
-        Get necessary information for each bucket
+        Create and fit FeatureMapper for numerical features.
 
         Args:
-            X_train (list of list of list): training data
+            X_train (list of list of dict): training data
         """
         for sentence in X_train:
             for word in sentence:
@@ -141,7 +168,7 @@ class FeatureBinner(object):
 
     def transform(self, X_train):
         """
-        Get necessary information for each bucket
+        Convert numerical values to categorical values.
 
         Args:
             X_train (list of list of dict): training data
@@ -160,10 +187,23 @@ class FeatureBinner(object):
         return new_X_train
 
     def fit_transform(self, X_train):
+        """
+        Run fit and transform at once.
+
+        Args:
+            X_train (list of list of dict): training data
+        """
         self.fit(X_train)
         return self.transform(X_train)
 
     def _collect_feature(self, feat_name, feat_value):
+        """
+        Collect numerical feature values to fit corresponding mapper.
+
+        Args:
+            feat_name (str): feature name
+            feat_value (any): feature value
+        """
         try:
             feat_value = float(feat_value)
         except Exception:
@@ -175,6 +215,13 @@ class FeatureBinner(object):
         self.features[feat_name] = mapper
 
     def _map_feature(self, feat_name, feat_value):
+        """
+        Map numerical feature values to categorical values.
+
+        Args:
+            feat_name (str): feature name
+            feat_value (any): feature value
+        """
         try:
             feat_value = float(feat_value)
         except Exception:
