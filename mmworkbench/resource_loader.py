@@ -398,7 +398,7 @@ class ResourceLoader(object):
             queries (list of Query): A list of all queries
         """
         # Whole query frequencies, with singletons removed
-        query_dict = Counter([u'<{}>'.format(q.normalized_text) for q in kwargs.get('query')])
+        query_dict = Counter([u'<{}>'.format(q.normalized_text) for q in kwargs.get('queries')])
         for query in query_dict:
             if query_dict[query] < 2:
                 query_dict[query] = 0
