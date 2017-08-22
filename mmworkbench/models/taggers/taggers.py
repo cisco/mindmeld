@@ -86,14 +86,29 @@ class Tagger(object):
         self._clf.set_params(**self._current_params)
         return self
 
+    def preprocess_data(self):
+        """
+        """
+        raise NotImplementedError
+
+    def extract_features(self):
+        raise NotImplementedError
+
+    def encode_labels(self):
+        raise NotImplementedError
+
+    def prepare_resources(self):
+        raise NotImplementedError
+
     def update_resources(self, resources):
         """Updates the resources
         """
         self._resources = resources
 
-    def _get_model_constructor(self):
-        """Returns the python class of the actual underlying model"""
+    def setup_model(self):
         raise NotImplementedError
+
+
 
 
 """

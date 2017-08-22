@@ -6,7 +6,7 @@ from builtins import range, super
 import logging
 import random
 
-from .helpers import register_model
+from .helpers import register_model, get_label_encoder, extract_sequence_features
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
@@ -112,8 +112,37 @@ class TaggerModel(Model):
                            "so we don't fit the model.")
             return self
 
+        # TODO: check if there at least more than one label
+        # # TODO: add this code back in
+        # # distinct_labels = set(labels)
+        # # if len(set(distinct_labels)) <= 1:
+        # #     return None
+
+        # Get model classifier and initialize
+        self._clf = self._get_model_constructor()()
+
+        if self.config.model_settings is None:
+            selector_type = None
+            scale_type = None
+        else:
+            selector_type = self.config.model_settings.get('feature_selector')
+            scale_type = self.config.model_settings.get('feature_scaler')
+        self._clf.setup_model(selector_type, scale_type)
+
+        # Extract labels - label encoders are the same accross all entity recognition models
+        self._label_encoder = get_label_encoder(self.config)
+        y = self._label_encoder.encode(labels, examples=examples)
+
+        # Extract features
+        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y,
+                                                  fit=True)
+
+        # Preprocess data -> remove this
+        X, y = self._clf.preprocess_data(X, y, fit=True)
+
+        # Fit the model
         if skip_param_selection:
-            self._clf = self._fit(examples, labels, params)
+            self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
             # run cross validation to select params
@@ -123,7 +152,7 @@ class TaggerModel(Model):
 
         return self
 
-    def _fit(self, examples, labels, params):
+    def _fit(self, X, y, params):
         """Trains a classifier without cross-validation.
 
         Args:
@@ -131,27 +160,29 @@ class TaggerModel(Model):
             labels (list of tuples of mmworkbench.core.QueryEntity): a list of expected labels
             params (dict): Parameters of the classifier
         """
-        model_class = self._get_model_constructor()
-        init_params = {'config': self.config, 'resources': self._resources}
-        return model_class(**init_params).fit(examples, labels)
+        self._clf.set_params(**params)
+        return self._clf.fit(X, y)
 
-    def _get_cv_scorer(self, selection_settings):
-        # For entities you must use the default sequence scorer
-        if selection_settings.get('scoring', 'seq_accuracy') is not 'seq_accuracy':
-            logger.info('You must use the sequence accuracy scorer for entity recognition. '
-                        'Using seq_accuracy instead of your specified scorer...')
-        return self.default_scorer
+    def _fit_cv(self, X, y, params):
+        return None
 
-    def _get_cv_estimator_and_params(self, model_class, param_grid):
-        param_grid['config'] = [self.config]
-        param_grid['resources'] = [self._resources]
-        init_params = {'config': self.config, 'resources': self._resources}
-        return model_class(**init_params), param_grid
+    # def _get_cv_scorer(self, selection_settings):
+    #     # For entities you must use the default sequence scorer
+    #     if selection_settings.get('scoring', 'seq_accuracy') is not 'seq_accuracy':
+    #         logger.info('You must use the sequence accuracy scorer for entity recognition. '
+    #                     'Using seq_accuracy instead of your specified scorer...')
+    #     return self.default_scorer
 
-    def _process_cv_best_params(self, best_params):
-        best_params.pop('config')
-        best_params.pop('resources')
-        return best_params
+    # def _get_cv_estimator_and_params(self, model_class, param_grid):
+    #     param_grid['config'] = [self.config]
+    #     param_grid['resources'] = [self._resources]
+    #     init_params = {'config': self.config, 'resources': self._resources}
+    #     return model_class(**init_params), param_grid
+
+    # def _process_cv_best_params(self, best_params):
+    #     best_params.pop('config')
+    #     best_params.pop('resources')
+    #     return best_params
 
     def _convert_params(self, param_grid, y, is_grid=True):
         """
@@ -175,9 +206,24 @@ class TaggerModel(Model):
         Returns:
             (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
         """
+        # Ideal format (doesn't work for memm):
+            # Extract features
+            # Preprocess data
+            # Predict
+            # Decode labels
+
+        # Format that works with memm:
+            # Predict
+                # Different format from fit() interface
+            # Decode labels
+
         if self._no_entities:
             return [()]
-        return self._clf.predict(examples)
+
+        predicted_tags = self._clf.predict(examples, self.config, self._resources)
+        labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
+                  for example_predicted_tags, example in zip(predicted_tags, examples)]
+        return labels
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -213,8 +259,8 @@ class TaggerModel(Model):
 
         """
         self._resources.update(kwargs)
-        if self._clf:
-            self._clf.update_resources(self._resources)
+        # if self._clf:
+        #     self._clf.update_resources(self._resources)
 
     def _get_system_types(self):
         sys_types = set()
