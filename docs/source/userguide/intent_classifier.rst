@@ -511,34 +511,39 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
 
    >>> eval = ic.evaluate()
    >>> eval.print_stats()
-   Overall Statistics:
+   Overall statistics:
 
-       accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
-          0.808       0.811          63         375          15          15       0.800       0.808
-
-
-
-   Statistics by Class:
-
-                  class      f_beta   precision      recall     support          TP          TN          FP          FN
-           change_alarm       0.857       1.000       0.750           8           6          70           0           2
-              set_alarm       0.667       0.500       1.000           8           8          62           8           0
-           remove_alarm       0.871       0.818       0.931          29          27          43           6           2
-            check_alarm       0.750       1.000       0.600          20          12          58           0           8
-            start_timer       0.857       0.857       0.857           7           6          70           1           1
-             stop_timer       0.800       1.000       0.667           6           4          72           0           2
+      accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
+         0.983       0.982         339        2064           6           6       0.942       0.983
 
 
 
-   Confusion Matrix:
+   Statistics by class:
 
-                     change_ala..      set_alarm   remove_ala..   check_alar..   start_time..
-      change_ala..              6              1              1              0              0
-         set_alarm              0              8              0              0              0
-      remove_ala..              0              2             27              0              0
-      check_alar..              0              4              4             12              0
-      start_time..              0              1              0              0              6
-        stop_timer              0              0              1              0              1
+                 class      f_beta   precision      recall     support          tp          tn          fp          fn
+          change_alarm       0.952       1.000       0.909          11          10         334           0           1
+          remove_alarm       0.947       0.964       0.931          29          27         315           1           2
+           check_alarm       0.974       1.000       0.950          20          19         325           0           1
+             set_alarm       0.889       0.800       1.000           8           8         335           2           0
+          specify_time       0.994       0.989       1.000         264         264          78           3           0
+           start_timer       0.833       1.000       0.714           7           5         338           0           2
+            stop_timer       1.000       1.000       1.000           6           6         339           0           0
+
+
+
+   Confusion matrix:
+
+                    change_ala..   remove_ala..   check_alar..      set_alarm   specify_ti..   start_time..     stop_timer
+     change_ala..             10              1              0              0              0              0              0
+     remove_ala..              0             27              0              0              2              0              0
+     check_alar..              0              0             19              1              0              0              0
+        set_alarm              0              0              0              8              0              0              0
+     specify_ti..              0              0              0              0            264              0              0
+     start_time..              0              0              0              1              1              5              0
+       stop_timer              0              0              0              0              0              0              6
+
+
+Note that all of these statistics are returned in a structured dictionary instead of printed to the console by using :meth:`eval.get_stats()`.
 
 Let’s decipher the statistics output by the :meth:`evaluate` method.
 
@@ -550,10 +555,10 @@ Let’s decipher the statistics output by the :meth:`evaluate` method.
   ===========  ===
   accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`
   f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
@@ -562,15 +567,15 @@ Let’s decipher the statistics output by the :meth:`evaluate` method.
 
   - **Classes are balanced**: When the number of training examples in your intents are comparable and each intent is equally important, focusing on the accuracy metric is usually good enough.
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the f1 scores into account.
 
-  - **All F1 and accuracy scores are low**: Intent classification is performing poorly across all intents. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your intent structure and make sure queries in different intents have distinct natural language patterns. You may need to combine intents or separate them, so that the resulting classes are easier for the classifier to distinguish.
+  - **All f1 and accuracy scores are low**: Intent classification is performing poorly across all intents. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your intent structure and make sure queries in different intents have distinct natural language patterns. You may need to combine intents or separate them, so that the resulting classes are easier for the classifier to distinguish.
 
-  - **F1 weighted is higher than F1 macro**: Your intents with fewer evaluation examples are performing poorly. You may need to add more data to intents that have fewer examples. You could also try adding class weights to your hyperparameters.
+  - **F1 weighted is higher than f1 macro**: Your intents with fewer evaluation examples are performing poorly. You may need to add more data to intents that have fewer examples. You could also try adding class weights to your hyperparameters.
 
-  - **F1 macro is higher than F1 weighted**: Your intents with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+  - **F1 macro is higher than f1 weighted**: Your intents with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than F1 macro**: Certain intents are being misclassified more often than others. Check the class-wise below statistics to identify these intents. Some intents may be too similar to another intent or you may need to add more training data to some intents.
+  - **F1 micro is higher than f1 macro**: Certain intents are being misclassified more often than others. Check the class-wise below statistics to identify these intents. Some intents may be too similar to another intent or you may need to add more training data to some intents.
 
   - **Some classes are more important than others**: If some intents are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
@@ -585,10 +590,10 @@ Let’s decipher the statistics output by the :meth:`evaluate` method.
   precision    `Precision <https://en.wikipedia.org/wiki/Precision_and_recall#Precision>`_
   recall       `Recall <https://en.wikipedia.org/wiki/Precision_and_recall#Recall>`_
   support      Number of test queries in this intent (based on ground truth)
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   ===========  ===
 
 **Confusion Matrix**

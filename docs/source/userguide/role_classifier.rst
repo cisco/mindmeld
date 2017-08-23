@@ -453,27 +453,29 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
 
    >>> eval = rc.evaluate()
    >>> eval.print_stats()
-   Overall Statistics:
+   Overall statistics:
 
-       accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
-          0.952       0.952          20          20           1           1       0.952       0.952
-
-
-
-   Statistics by Class:
-
-                  class      f_beta   precision      recall     support          TP          TN          FP          FN
-                old_time       0.957       0.917       1.000          11          11           9           1           0
-                new_time       0.947       1.000       0.900          10           9          11           0           1
+      accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
+         1.000       1.000          21          21           0           0       1.000       1.000
 
 
 
-   Confusion Matrix:
+   Statistics by class:
 
-                          old_time        new_time
-           old_time             11              0
-           new_time              1              9
+                 class      f_beta   precision      recall     support          tp          tn          fp          fn
+              old_time       1.000       1.000       1.000          11          11          10           0           0
+              new_time       1.000       1.000       1.000          10          10          11           0           0
 
+
+
+   Confusion matrix:
+
+                        old_time       new_time
+         old_time             11              0
+         new_time              0             10
+
+
+Note that all of these statistics are returned in a structured dictionary instead of printed to the console by using :meth:`eval.get_stats()`.
 
 Let's decipher the statists output by the :meth:`evaluate` method.
 
@@ -485,10 +487,10 @@ Let's decipher the statists output by the :meth:`evaluate` method.
   ===========  ===
   accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`
   f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
@@ -497,15 +499,15 @@ Let's decipher the statists output by the :meth:`evaluate` method.
 
   - **Classes are balanced**: When the number of annotations for each role are comparable and each role is equally important, focusing on the accuracy metric is usually good enough.
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the f1 scores into account.
 
-  - **All F1 and accuracy scores are low**: Role classification is performing poorly across all roles. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
+  - **All f1 and accuracy scores are low**: Role classification is performing poorly across all roles. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
 
-  - **F1 weighted is higher than F1 macro**: Your roles with fewer evaluation examples are performing poorly. You may need to add more data to roles that have fewer examples.
+  - **F1 weighted is higher than f1 macro**: Your roles with fewer evaluation examples are performing poorly. You may need to add more data to roles that have fewer examples.
 
-  - **F1 macro is higher than F1 weighted**: Your roles with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+  - **F1 macro is higher than f1 weighted**: Your roles with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than F1 macro**: Certain roles are being misclassified more often than others. Check the class-wise statistics below to identify these roles. Some roles may be too similar to another roles or you may need to add more training data.
+  - **F1 micro is higher than f1 macro**: Certain roles are being misclassified more often than others. Check the class-wise statistics below to identify these roles. Some roles may be too similar to another roles or you may need to add more training data.
 
   - **Some classes are more important than others**: If some roles are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
@@ -520,10 +522,10 @@ Let's decipher the statists output by the :meth:`evaluate` method.
   precision    `Precision <https://en.wikipedia.org/wiki/Precision_and_recall#Precision>`_
   recall       `Recall <https://en.wikipedia.org/wiki/Precision_and_recall#Recall>`_
   support      Number of test entities with this role (based on ground truth)
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   ===========  ===
 
 **Confusion Matrix**

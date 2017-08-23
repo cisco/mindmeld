@@ -549,45 +549,45 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
 
    >>> eval = er.evaluate()
    >>> eval.print_stats()
-   Overall Statistics:
+   Overall tag-level statistics:
 
-       accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
-          0.971       0.970         201        1443           6           6       0.959       0.971
-
-
-
-   Statistics by Class:
-
-                  class      f_beta   precision      recall     support          TP          TN          FP          FN
-                  O||O|       0.984       0.969       1.000         155         155          47           5           0
-              S|city|O|       0.939       0.958       0.920          25          23         181           1           2
-              B|city|O|       0.875       1.000       0.778           9           7         198           0           2
-              I|city|O|       1.000       1.000       1.000           2           2         205           0           0
-              E|city|O|       0.875       1.000       0.778           9           7         198           0           2
-          O||B|sys_time       1.000       1.000       1.000           3           3         204           0           0
-          O||E|sys_time       1.000       1.000       1.000           3           3         204           0           0
-          O||S|sys_time       1.000       1.000       1.000           1           1         206           0           0
+      accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
+         1.000       1.000         100         200           0           0       1.000       1.000
 
 
 
-   Confusion Matrix:
+   Tag-level statistics by class:
 
-                            O||O|      S|city|O|      B|city|O|      I|city|O|      E|city|O|   O||B|sys_t..   O||E|sys_t..   O||S|sys_t..
-             O||O|            155              0              0              0              0              0              0              0
-         S|city|O|              2             23              0              0              0              0              0              0
-         B|city|O|              1              1              7              0              0              0              0              0
-         I|city|O|              0              0              0              2              0              0              0              0
-         E|city|O|              2              0              0              0              7              0              0              0
-      O||B|sys_t..              0              0              0              0              0              3              0              0
-      O||E|sys_t..              0              0              0              0              0              0              3              0
-      O||S|sys_t..              0              0              0              0              0              0              0              1
+                 class      f_beta   precision      recall     support          tp          tn          fp          fn
+                    O|       1.000       1.000       1.000          50          50          50           0           0
+            B|sys_time       1.000       1.000       1.000          21          21          79           0           0
+            I|sys_time       1.000       1.000       1.000          29          29          71           0           0
 
 
 
-   Sequence Statistics:
+   Confusion matrix:
 
-    sequence_accuracy
-                0.892
+                              O|     B|sys_time     I|sys_time
+               O|             50              0              0
+       B|sys_time              0             21              0
+       I|sys_time              0              0             29
+
+
+
+   Segment-level statistics:
+
+            le          be         lbe          tp          tn          fp          fn
+             0           0           0          21          24           0           0
+
+
+
+   Sequence-level statistics:
+
+     sequence_accuracy
+                 1.000
+
+
+Note that all of these statistics are returned in a structured dictionary instead of printed to the console by using :meth:`eval.get_stats()`.
 
 Let's decipher the statistics output by the :meth:`evaluate` method.
 
@@ -599,10 +599,10 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
   ===========  ===
   accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`
   f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
@@ -611,15 +611,15 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 
   - **Classes are balanced**: When the number of annotated entities for each entity type are comparable and each entity type is equally important, focusing on the accuracy metric is usually good enough.
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the f1 scores into account.
 
-  - **All F1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
+  - **All f1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
 
-  - **F1 weighted is higher than F1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples.
+  - **F1 weighted is higher than f1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples.
 
-  - **F1 macro is higher than F1 weighted**: Your entity types with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+  - **F1 macro is higher than f1 weighted**: Your entity types with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than F1 macro**: Certain entity types are being misclassified more often than others. Check the class-wise statistics below to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
+  - **F1 micro is higher than f1 macro**: Certain entity types are being misclassified more often than others. Check the class-wise statistics below to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
 
   - **Some classes are more important than others**: If some entities are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
@@ -634,10 +634,10 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
   precision    `Precision <https://en.wikipedia.org/wiki/Precision_and_recall#Precision>`_
   recall       `Recall <https://en.wikipedia.org/wiki/Precision_and_recall#Recall>`_
   support      Number of test entities with this entity type (based on ground truth)
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   ===========  ===
 
 **Confusion Matrix**
