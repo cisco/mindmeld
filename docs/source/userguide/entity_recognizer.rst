@@ -591,10 +591,10 @@ Note that all of these statistics are returned in a structured dictionary instea
 
 Let's decipher the statistics output by the :meth:`evaluate` method.
 
-**Overall Statistics**
+**Overall tag-level statistics**
   |
 
-  Aggregate token-level stats measured across the entire test set:
+  Aggregate IOB or IOBES tag-level stats measured across the entire test set:
 
   ===========  ===
   accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`
@@ -609,41 +609,74 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 
   Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
 
-  - **Classes are balanced**: When the number of annotated entities for each entity type are comparable and each entity type is equally important, focusing on the accuracy metric is usually good enough.
+  - **Classes are balanced**: When the number of annotated entities for each entity type are comparable and each entity type is equally important, focusing on the accuracy metric is usually good enough. For entity recognition it is very unlikely that your data would fall into this category, since the O tag (used for words that are not part of an entity) usually occurs much more often than the I/B/E/S tags (for words that are part of an entity)
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the f1 scores into account.
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the f1 scores into account. For entity recognition it is even more important to consider segment level statistics described below. In fact, by primarily optimizing for f1, your model will tend to predict no entity rather than predict one that is uncertain about. For a more detailed description on this phenomena read `this <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_ blog post.
 
-  - **All f1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
+  - **All f1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. Also look at segment-level statistics for a more intuitive breakdown of where the model is making errors.
 
-  - **F1 weighted is higher than f1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples.
+  - **F1 weighted is higher than f1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples. Likely you will have to add more training queries with labeled entities, specifically entities of the type that are performing worst as indicated in the tag-level statistics table.
 
   - **F1 macro is higher than f1 weighted**: Your entity types with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than f1 macro**: Certain entity types are being misclassified more often than others. Check the class-wise statistics below to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
+  - **F1 micro is higher than f1 macro**: Certain entity types are being misclassified more often than others. Check the tag-level statistics by class below to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
 
-  - **Some classes are more important than others**: If some entities are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
+  - **Some classes are more important than others**: If some entities are more important than others for your use case, it is good to focus more on the tag-level statistics by class described below.
 
-**Class-wise Statistics**
+**Tag-level statistics by class**
   |
 
-  Stats computed at a per-class level:
+  Tag-level statistics that are calculated for each class (IOB or IOBES tag):
 
   ===========  ===
   class        Entity tag (in IOB or IOBES format)
   f_beta       :sk_api:`F-beta score <sklearn.metrics.fbeta_score>`
   precision    `Precision <https://en.wikipedia.org/wiki/Precision_and_recall#Precision>`_
   recall       `Recall <https://en.wikipedia.org/wiki/Precision_and_recall#Recall>`_
-  support      Number of test entities with this entity type (based on ground truth)
+  support      Number of test entities with this entity tag (based on ground truth)
   tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   ===========  ===
 
-**Confusion Matrix**
+
+**Confusion matrix**
   |
 
-  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one class as another. In the above example, the entity recognizer wrongly classified two instances of ``S|city|O|`` tokens as ``O||O|``.
+  A `confusion matrix <https://en.wikipedia.org/wiki/Confusion_matrix>`_ where each row represents the number of instances in an actual class and each column represents the number of instances in a predicted class. This reveals whether the classifier tends to confuse two classes, i.e., mislabel one tag as another.
+
+
+**Segment-level statistics**
+  |
+
+  While tag level statistics are useful to analyze, they don't tell the full story for entity recognition in an intuitive way. A helpful way to think about the entity recognition classifier is that it is performing two tasks: 1) identifying the span of words that should be part of an entity and 2) selecting the label for the identified entity. When the recognizer makes a mistake it could misidentify the label, misidentify the span boundary, or misidentify both.
+
+  The segment level statistics consider the errors at the predicted entity level.
+
+  ===========  ===
+  le           **Label error.** This is when the classifier correctly predicted the existence of an entity and the span of that entity, but chose the wrong label. For example, the classifier recognized that 'pad thai' is an entity in the query 'Order some pad thai', but thought it was a restaurant entity instead of a dish entity.
+  be           **Boundary error.** Occurs when the classifier correctly predicts the existence of an entity and its label but misclassifies its span. For example, it predicted 'some pad thai' was a dish entity instead of just 'pad thai' in the query 'Order some pad thai'
+  lbe          **Label boundary error.** The classifier correctly predicts the existence of an entity, but gets both the label and the span wrong. For example in the query 'Order some pad thai', if the classifier thought that 'some pad thai' was an option instead of a dish it would be a label boundary error.
+  tp           **True positive.** The classifier correctly predicts an entity, its label, and its span.
+  tn           **True negative.** The classifier correctly predicts that there is a segment where there are no entities. For example, the query 'Hi there' has no entities and this segment would be counted as a true negative.
+  fp           **False positive.** The classifier predicted the existence of an entity where there wasn't one. For example, if the classifier predicted that 'there' was a dish entity in the query 'Hi there' that would be a false positive.
+  fn           **False negative.** The classifier never predicted an entity when there should have been one. E.g. in the query 'Order some pad thai' no entity was predicted.
+  ===========  ===
+
+  Note that the true positive, true negative, false positive, and false negative values are different when calculated at a segment level rather than a tag level. To illustrate this difference consider the following example:
+
+  ::
+
+             I’ll  have  an      eggplant  parm    please
+    Exp:     O.    O     O       B|dish    I|dish  O
+    Pred:    O.    O.    B|dish  I|dish.   O.      O
+
+  In the traditional tag level, predicting B|dish instead of O and predicting I|dish instead of B|dish would both be **false positives**. There would also be **3 true negatives** for correctly predicting O.
+
+  At the segment level, however, this would be just **2 true negatives** (one for the segment 'I'll have' and one for the segment 'please'), and **1 label boundary error** (for the segment 'an eggplant parm').
+
+  The benefit of considering errors at a segment level is that it is intuitive and it provides even better metrics to optimize your model for entity recognition as described in more detail `here <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_.
 
 
 **Sequence Statistics**
