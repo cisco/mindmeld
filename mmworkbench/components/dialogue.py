@@ -353,7 +353,6 @@ class Conversation(object):
                 If passed, changes to this processor will affect the response from `say()`
             session (dict, optional): The session to be used in the conversation
         """
-        # Assume that the name of the app is the last dir in the path
         package_name = os.path.basename(app_path)
         app = app or _get_app_module(package_name, app_path)
         app.lazy_init(nlp)
