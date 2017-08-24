@@ -313,14 +313,15 @@ class DialogueResponder(object):
         return items
 
 
-def _get_app_module(app_name, app_path):
+def _get_app_module(package_name, app_path):
     module_path = path.get_app_module_path(app_path)
-    package_path = module_path.replace('/{app_name}/app.py'.format(app_name=app_name), '')
+    package_path = os.path.dirname(os.path.dirname(module_path))
 
     import imp
-    fp, pathname, description = imp.find_module(app_name, path=[package_path])
-    imp.load_module(app_name, fp, pathname, description)
-    app_module = imp.load_source('{app_name}.app'.format(app_name=app_name), module_path)
+    fp, pathname, description = imp.find_module(package_name, path=[package_path])
+    imp.load_module(package_name, fp, pathname, description)
+    app_module = imp.load_source(
+        '{package_name}.app'.format(package_name=package_name), module_path)
     app = app_module.app
     return app
 
@@ -353,8 +354,8 @@ class Conversation(object):
             session (dict, optional): The session to be used in the conversation
         """
         # Assume that the name of the app is the last dir in the path
-        app_name = os.path.basename(app_path)
-        app = app or _get_app_module(app_name, app_path)
+        package_name = os.path.basename(app_path)
+        app = app or _get_app_module(package_name, app_path)
         app.lazy_init(nlp)
         self._app_manager = app.app_manager
         if not self._app_manager.ready:

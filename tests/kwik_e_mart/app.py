@@ -5,6 +5,8 @@ from builtins import next
 
 from mmworkbench import Application
 
+if __name__ == "__main__" and __package__ is None:
+    __package__ = 'kwik_e_mart'
 
 app = Application(__name__)
 
