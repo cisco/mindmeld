@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 
 from .taggers import Tagger, START_TAG
-from ..helpers import extract_sequence_features, get_label_encoder
+from ..helpers import extract_sequence_features
 
 import logging
 logger = logging.getLogger(__name__)
@@ -76,12 +76,12 @@ class MemmModel(Tagger):
             (numpy.array): The group labels for examples.
         """
         groups = []
-        feats = []
+        X = []
         y_offset = 0
         for i, example in enumerate(examples):
             features_by_segment = self.extract_example_features(example, config,
                                                                 resources)
-            feats.extend(features_by_segment)
+            X.extend(features_by_segment)
             groups.extend([i for _ in features_by_segment])
             for j, segment in enumerate(features_by_segment):
                 if j == 0:
@@ -90,7 +90,8 @@ class MemmModel(Tagger):
                     segment['prev_tag'] = y[y_offset + j - 1]
 
             y_offset += len(features_by_segment)
-        return feats, y, groups
+        X, y = self.preprocess_data(X, y, fit)
+        return X, y, groups
 
     def _get_feature_selector(self, selector_type):
         """Get a feature selector instance based on the feature_selector model
@@ -115,7 +116,6 @@ class MemmModel(Tagger):
         self.feat_vectorizer = DictVectorizer()
         self._feat_selector = self._get_feature_selector(selector_type)
         self._feat_scaler = self._get_feature_scaler(scale_type)
-
 
     def preprocess_data(self, X, y=None, fit=False):
         if fit:

@@ -25,85 +25,125 @@ END_TAG = 'END'
 
 
 class Tagger(object):
-    """A class for all sequence tagger models implemented in house. The interface for this class
-    is the same as an sklearn estimator.
+    """A class for all sequence tagger models implemented in house.
+    It is importent to follow this interface exactly when implementing a new model so that your
+    model is configured and trained as expected in the Workbench pipeline. Note that this follows
+    the sklearn estimator interface so that GridSearchCV can be used on our sequence models.
     """
     def __init__(self, **parameters):
-        """To be consistent with the sklearn interface, all parameter setting and validation should be done
-        in set_params.
+        """To be consistent with the sklearn interface, __init__ and set_params should have the same
+        effect. We do all parameter setting and validation in set_params which is called from here.
+
+        Args:
+            **parameters: Arbitrary keyword arguments. The keys are model parameter names and the
+                          values are what they should be set to
+        Returns:
+            self
         """
         self.set_params(**parameters)
 
     def __getstate__(self):
-        """Returns the information needed pickle an instance of this class.
-
-        By default, pickling removes attributes with names starting with
-        underscores.
+        """Returns the information needed pickle an instance of this class. By default, pickling removes
+        attributes with names starting with underscores.
         """
         attributes = self.__dict__.copy()
         return attributes
 
-    def fit(self, examples, labels, resources=None):
-        """Trains the model
+    def fit(self, X, y):
+        """Trains the model. X and y are the format of what is returned by extract_features. There is no
+        restriction on their type or content. X should be the fully processed data with extracted
+        features that are ready to be used to train the model. y should be a list of classes as
+        encoded by the label_encoder
 
         Args:
-            labeled_queries (list of mmworkbench.core.Query): a list of queries to train on
-            labels (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
+            X (list): Generally a list of feature vectors, one for each training example
+            y (list): A list of classification labels (encoded by the label_encoder, NOT Workbench
+                      entity objects)
+        Returns:
+            self
         """
         raise NotImplementedError
 
-    def predict(self, examples):
-        """Predicts for a list of examples
+    def predict(self, X):
+        """Predicts the labels from a feature matrix X. Again X is the format of what is returned by
+        extract_features.
+
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries to be predicted
+            X (list): A list of feature vectors, one for each example
         Returns:
-            (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
+            (list of classification labels): a list of predicted labels (in an encoded format)
         """
         raise NotImplementedError
 
     def get_params(self, deep=True):
-        return self._clf.get_params()
+        """Gets a dictionary of all of the current model parameters and their values
+
+        Args:
+            deep (bool): Not used, needed for sklearn compatibility
+        Returns:
+            (dict): A dictionary of the model parameter names as keys and their set values
+        """
+        raise NotImplementedError
 
     def set_params(self, **parameters):
-        """Sets the parameters
-        """
-        self._passed_params = parameters
-        self._current_params = {}
-        self._resources = parameters.get('resources', {})
+        """Sets the model parameters.
 
-        model_class = self._get_model_constructor()
-        self._clf = model_class()
-
-        for parameter, value in parameters.items():
-            if parameter == 'config' or parameter == 'resources':
-                continue
-            self._current_params[parameter] = value
-        self._clf.set_params(**self._current_params)
-        return self
-
-    def preprocess_data(self):
-        """
+        Args:
+            **parameters: Arbitrary keyword arguments. The keys are model parameter names and the
+                          values are what they should be set to
+        Returns:
+            self
         """
         raise NotImplementedError
 
-    def extract_features(self):
-        raise NotImplementedError
+    def setup_model(self, config):
+        """Does any setup that should be run only once. Will be called before the first call
+        to extract_features. This is often used to initialize model options based on what is
+        passed in through the Workbench config. For example, it could be used to initialize which
+        dimensionality reduction method to use in extract_features given the user provided model
+        settings.
 
-    def encode_labels(self):
-        raise NotImplementedError
-
-    def prepare_resources(self):
-        raise NotImplementedError
-
-    def update_resources(self, resources):
-        """Updates the resources
+        Args:
+            config (ModelConfig): A Workbench model config object. This contains information such as
+                                  model settings that can be used to setup the model.
         """
-        self._resources = resources
+        return None
 
-    def setup_model(self):
+    def extract_features(self, examples, config, resources):
+        """Extracts all features from a list of Workbench examples. Processes the data and returns the
+        features in the format that is expected as an input to fit(). Note that the Workbench config
+        and resources are passed in each time to make the underlying model implementation stateless.
+
+        Args:
+            examples (list of mmworkbench.core.Query): A list of queries to extract features for
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+        Returns:
+            (list of feature vectors): X
+            (list of labels): y
+            (list of groups): A list of groups to be used for splitting with sklearn GridSearchCV
+        """
         raise NotImplementedError
 
+    def extract_and_predict(self, examples, config, resources):
+        """Does both feature extraction and prediction. Often necessary for sequence models when the
+        prediction of the previous example is used as a feature for the next example. If this is
+        not the case, extract is simple called before predict here. Note that the Workbench config
+        and resources are passed in each time to make the underlying model implementation stateless.
 
+        Args:
+            examples (list of mmworkbench.core.Query): A list of queries to extract features for and
+                                                       predict
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+        Returns:
+            (list of classification labels): A list of predicted labels (in encoded format)
+        """
+        X, _, _ = self.extract_features(examples, config, resources)
+        y = self.predict(X)
+        return y
 
 
 """

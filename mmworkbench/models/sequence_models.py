@@ -6,7 +6,7 @@ from builtins import range, super
 import logging
 import random
 
-from .helpers import register_model, get_label_encoder, extract_sequence_features
+from .helpers import register_model, get_label_encoder
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
@@ -137,9 +137,6 @@ class TaggerModel(Model):
         X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y,
                                                   fit=True)
 
-        # Preprocess data -> remove this
-        X, y = self._clf.preprocess_data(X, y, fit=True)
-
         # Fit the model
         if skip_param_selection:
             self._clf = self._fit(X, y, params)
@@ -185,17 +182,6 @@ class TaggerModel(Model):
         Returns:
             (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
         """
-        # Ideal format (doesn't work for memm):
-            # Extract features
-            # Preprocess data
-            # Predict
-            # Decode labels
-
-        # Format that works with memm:
-            # Predict
-                # Different format from fit() interface
-            # Decode labels
-
         if self._no_entities:
             return [()]
         # Process the data to generate features and predict the tags
