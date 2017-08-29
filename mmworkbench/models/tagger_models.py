@@ -135,8 +135,7 @@ class TaggerModel(Model):
         y = self._label_encoder.encode(labels, examples=examples)
 
         # Extract features
-        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y=y,
-                                                  fit=True)
+        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y, fit=True)
 
         # Fit the model
         if skip_param_selection:

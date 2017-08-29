@@ -17,36 +17,17 @@ GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
 class LSTMModel(Tagger):
     """"A LSTM model."""
 
-    def __init__(self, config, resources):
-        self.config = config
-        self._resources = resources
-        self.embedding = Embedding(self.config.params)
-        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
-        self._label_encoder = get_label_encoder(self.config)
-
-    def fit(self, examples, labels, resources=None):
-        # Extract features and classes
-        X, gaz = self._get_features(examples)
-        embedding_matrix = self.embedding.get_encoding_matrix()
-        embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
-
-        all_tags = []
-        for idx, label in enumerate(labels):
-            all_tags.append(get_tags_from_entities(examples[idx], label, self._tag_scheme))
-
-        encoded_labels = self.embedding.encode_labels(all_tags)
-        labels_dict = self.embedding.label_encoding
-
+    def fit(self, X, encoded_labels, resources=None):
         examples = np.asarray(X, dtype='int32')
         labels = np.asarray(encoded_labels, dtype='int32')
         seq_len = np.ones(len(examples)) * int(self.config.params['padding_length'])
-        gaz = np.asarray(gaz, dtype='int32')
+        gaz = np.asarray(self.gaz, dtype='int32')
 
         self.config.params["seq_len"] = seq_len
-        self.config.params["output_dimension"] = len(labels_dict.keys())
-        self.config.params["embedding_matrix"] = embedding_matrix
-        self.config.params["labels_dict"] = labels_dict
-        self.config.params["embedding_gaz_matrix"] = embedding_gaz_matrix
+        self.config.params["output_dimension"] = len(self.labels_dict.keys())
+        self.config.params["embedding_matrix"] = self.embedding_matrix
+        self.config.params["labels_dict"] = self.labels_dict
+        self.config.params["embedding_gaz_matrix"] = self.embedding_gaz_matrix
         self.config.params["gaz_features"] = gaz
 
         self._clf = self._fit(examples, labels, self.config.params)
@@ -73,6 +54,19 @@ class LSTMModel(Tagger):
         prediction_wrapper = self._label_encoder.decode(tags_by_example, examples=examples)
         return prediction_wrapper
 
+    def set_params(self,
+                   padding_length,
+                   token_pretrained_embedding_filepath,
+                   token_lstm_hidden_state_dimension,
+                   dropout_rate,
+                   maximum_number_of_epochs,
+                   learning_rate,
+                   display_step,
+                   batch_size,
+                   optimizer,
+                   token_embedding_dimension):
+        return
+
     def _get_model_constructor(self):
         """Returns the python class of the actual underlying model"""
         return LstmNetwork
@@ -87,6 +81,33 @@ class LSTMModel(Tagger):
                 padded_query[i] = label_query.query.normalized_tokens[i]
             queries.append(padded_query)
         return queries
+
+    def extract_features(self, examples, config, resources, y=None, fit=True):
+        self.config = config
+        self._resources = resources
+        self.embedding = Embedding(self.config.params)
+        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
+        self._label_encoder = get_label_encoder(self.config)
+
+        # Extract features and classes
+        X, self.gaz = self._get_features(examples)
+        self.embedding_matrix = self.embedding.get_encoding_matrix()
+        self.embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
+
+        all_tags = []
+
+        index_offset = 0
+        for example in examples:
+            all_tags.append(y[index_offset: index_offset + len(example.normalized_tokens)])
+            index_offset = index_offset + len(example.normalized_tokens)
+
+        encoded_labels = self.embedding.encode_labels(all_tags)
+        self.labels_dict = self.embedding.label_encoding
+
+        return X, encoded_labels, None
+
+    def setup_model(self, selector_type, scale_type):
+        return 1
 
     def _get_features(self, examples):
         """Transforms a list of examples into a feature matrix.

@@ -211,8 +211,6 @@ class LstmNetwork:
                 batch_gaz = gaz[batch * batch_size: (batch * batch_size) + batch_size]
                 seq_len = np.ones(len(batch_examples)) * int(self.padding_length)
 
-                print("display step: {}".format(self.display_step))
-
                 if batch % int(self.display_step) == 0:
                     acc, loss = self.session.run([self.accuracy, self.cost],
                                                  feed_dict=self.construct_feed_dictionary(
