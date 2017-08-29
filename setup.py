@@ -23,8 +23,9 @@ requirements = [
     'scikit-learn>=0.18.1,<=0.18.2',
     'tqdm>=4.15.0,<=4.15.0',
     'urllib3<1.22,>=1.21.1',
-    'python-crfsuite==0.9.2',
+    'python-crfsuite>=0.9.2',
     'sklearn-crfsuite>=0.3.6',
+    'tensorflow>=1.2.1'
 ]
 
 setup_requirements = [

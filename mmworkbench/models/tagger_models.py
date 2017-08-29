@@ -11,12 +11,14 @@ from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
+from .taggers.lstm import LSTMModel
 
 logger = logging.getLogger(__name__)
 
 # classifier types
 CRF_TYPE = 'crf'
 MEMM_TYPE = 'memm'
+LSTM_TYPE = 'lstm'
 
 # for default model scoring types
 ACCURACY_SCORING = 'accuracy'
@@ -250,6 +252,7 @@ class TaggerModel(Model):
             return {
                 MEMM_TYPE: MemmModel,
                 CRF_TYPE: ConditionalRandomFields,
+                LSTM_TYPE: LSTMModel,
             }[classifier_type]
         except KeyError:
             msg = '{}: Classifier type {!r} not recognized'
