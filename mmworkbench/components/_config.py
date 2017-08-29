@@ -63,30 +63,24 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
     'model_type': 'tagger',
     'label_type': 'entities',
     'model_settings': {
-        'classifier_type': 'memm',
+        'classifier_type': 'lstm',
         'tag_scheme': 'IOB',
         'feature_scaler': 'max-abs'
     },
-    'param_selection': {
-        'type': 'k-fold',
-        'k': 5,
-        'scoring': 'accuracy',
-        'grid': {
-            'penalty': ['l1', 'l2'],
-            'C': [0.01, 1, 100, 10000, 1000000, 100000000]
-        },
+    'params': {
+        'padding_length': 19,
+        'batch_size': 128,
+        'display_step': 20,
+        'maximum_number_of_epochs': 1,
+        'optimizer': 'adam',
+        'learning_rate': 0.005,
+        'dropout_rate': 0.7,
+        'token_lstm_hidden_state_dimension': 300,
+        'token_embedding_dimension': 300,
+        'token_pretrained_embedding_filepath': 'glove.6B.300d.txt'
     },
     'features': {
-        'bag-of-words-seq': {
-            'ngram_lengths_to_start_positions': {
-                1: [-2, -1, 0, 1, 2],
-                2: [-2, -1, 0, 1]
-            }
-        },
         'in-gaz-span-seq': {},
-        'sys-candidates-seq': {
-            'start_positions': [-1, 0, 1]
-        }
     }
 }
 
