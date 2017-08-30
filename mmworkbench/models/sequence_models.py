@@ -120,21 +120,14 @@ class TaggerModel(Model):
 
         # Get model classifier and initialize
         self._clf = self._get_model_constructor()()
-
-        if self.config.model_settings is None:
-            selector_type = None
-            scale_type = None
-        else:
-            selector_type = self.config.model_settings.get('feature_selector')
-            scale_type = self.config.model_settings.get('feature_scaler')
-        self._clf.setup_model(selector_type, scale_type)
+        self._clf.setup_model(self.config)
 
         # Extract labels - label encoders are the same accross all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
 
         # Extract features
-        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y,
+        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y=y,
                                                   fit=True)
 
         # Fit the model
@@ -185,7 +178,7 @@ class TaggerModel(Model):
         if self._no_entities:
             return [()]
         # Process the data to generate features and predict the tags
-        predicted_tags = self._clf.process_and_predict(examples, self.config, self._resources)
+        predicted_tags = self._clf.extract_and_predict(examples, self.config, self._resources)
         # Decode the tags to labels
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
                   for example_predicted_tags, example in zip(predicted_tags, examples)]

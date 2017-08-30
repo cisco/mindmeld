@@ -86,7 +86,8 @@ class Tagger(object):
         raise NotImplementedError
 
     def set_params(self, **parameters):
-        """Sets the model parameters.
+        """Sets the model parameters. Defaults should be set for all parameters such that a model
+        is initialized with reasonable default parameters if none are explicitly passed in.
 
         Args:
             **parameters: Arbitrary keyword arguments. The keys are model parameter names and the

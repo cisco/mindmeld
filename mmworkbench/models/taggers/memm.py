@@ -33,14 +33,13 @@ class MemmModel(Tagger):
     def predict(self, X):
         return self._clf.predict(X)
 
-    def process_and_predict(self, examples, config, resources):
+    def extract_and_predict(self, examples, config, resources):
         return [self._predict_example(example, config, resources) for example in examples]
 
     def _predict_example(self, example, config, resources):
         features_by_segment = self.extract_example_features(example, config, resources)
         if len(features_by_segment) == 0:
             return []
-            # return self._label_encoder.decode([], examples=[example])[0]
 
         predicted_tags = []
         prev_tag = START_TAG
@@ -53,7 +52,6 @@ class MemmModel(Tagger):
             prev_tag = predicted_tag
 
         return predicted_tags
-        # return self._label_encoder.decode([predicted_tags], examples=[example])[0]
 
     def extract_example_features(self, example, config, resources):
         """Extracts feature dicts for each token in an example.
@@ -66,7 +64,9 @@ class MemmModel(Tagger):
         return extract_sequence_features(example, config.example_type, config.features, resources)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
-        """Transforms a list of examples into a feature matrix.
+        """Transforms a list of examples into a feature matrix. Use extract_and_predict if you are
+        extracting features for an example at test time, since the previous tag prediction is needed
+        as a feature of the next tag.
 
         Args:
             examples (list): The examples.
@@ -111,7 +111,13 @@ class MemmModel(Tagger):
                   'max-abs': MaxAbsScaler()}.get(scale_type)
         return scaler
 
-    def setup_model(self, selector_type, scale_type):
+    def setup_model(self, config):
+        if config.model_settings is None:
+            selector_type = None
+            scale_type = None
+        else:
+            selector_type = config.model_settings.get('feature_selector')
+            scale_type = config.model_settings.get('feature_scaler')
         self.class_encoder = SKLabelEncoder()
         self.feat_vectorizer = DictVectorizer()
         self._feat_selector = self._get_feature_selector(selector_type)
