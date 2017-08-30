@@ -2,7 +2,7 @@ from ...path import WORKBENCH_ROOT
 import os
 import numpy as np
 
-DEFAULT_LABEL = 'O||O|'
+DEFAULT_LABEL = 'B|UNK'
 
 
 class Embedding:

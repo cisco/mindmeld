@@ -2,13 +2,13 @@ import numpy as np
 import re
 
 from ..helpers import extract_sequence_features
-from .taggers import Tagger, get_tags_from_entities
+from .taggers import Tagger, get_tags_from_entities, get_entities_from_tags
 from .bi_directional_lstm import LstmNetwork
 from .embeddings import Embedding
 from ..helpers import extract_sequence_features, get_label_encoder
 
 DEFAULT_PADDED_TOKEN = '<UNK>'
-DEFAULT_LABEL = 'O||O|'
+DEFAULT_LABEL = 'B|UNK'
 DEFAULT_GAZ_LABEL = 'O'
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
@@ -30,14 +30,15 @@ class LSTMModel(Tagger):
         self.config.params["embedding_gaz_matrix"] = self.embedding_gaz_matrix
         self.config.params["gaz_features"] = gaz
 
+        print("Num of labels: {}".format(len(self.labels_dict.keys())))
+
         self._clf = self._fit(examples, labels, self.config.params)
         return self
 
-    def process_and_predict(self, examples, config, resources):
+    def process_and_predict(self, examples, config=None, resources=None):
         return self.predict(examples)
 
     def predict(self, examples):
-        import pdb; pdb.set_trace()
         X, gaz = self._get_features(examples)
         embedding_matrix = self.embedding.get_encoding_matrix()
         embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
@@ -55,20 +56,23 @@ class LSTMModel(Tagger):
 
         tags_by_example = self._clf.predict(encoded_examples)
 
-        prediction_wrapper = self._label_encoder.decode(tags_by_example, examples=examples)
-        return prediction_wrapper
+        resized_predicted_tags = []
+        for idx, example in enumerate(examples):
+            resized_predicted_tags.append(tags_by_example[idx][:len(example.normalized_tokens)])
+
+        return resized_predicted_tags
 
     def set_params(self,
-                   padding_length,
-                   token_pretrained_embedding_filepath,
-                   token_lstm_hidden_state_dimension,
-                   dropout_rate,
-                   maximum_number_of_epochs,
-                   learning_rate,
-                   display_step,
-                   batch_size,
-                   optimizer,
-                   token_embedding_dimension):
+                   padding_length=None,
+                   token_pretrained_embedding_filepath=None,
+                   token_lstm_hidden_state_dimension=None,
+                   dropout_rate=None,
+                   maximum_number_of_epochs=None,
+                   learning_rate=None,
+                   display_step=None,
+                   batch_size=None,
+                   optimizer=None,
+                   token_embedding_dimension=None):
         return
 
     def _get_model_constructor(self):

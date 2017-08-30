@@ -69,9 +69,9 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
     },
     'params': {
         'padding_length': 19,
-        'batch_size': 128,
+        'batch_size': 20,
         'display_step': 20,
-        'maximum_number_of_epochs': 1,
+        'maximum_number_of_epochs': 20,
         'optimizer': 'adam',
         'learning_rate': 0.005,
         'dropout_rate': 0.7,
