@@ -1,8 +1,7 @@
 import numpy as np
 import re
 
-from ..helpers import extract_sequence_features
-from .taggers import Tagger, get_tags_from_entities, get_entities_from_tags
+from .taggers import Tagger
 from .bi_directional_lstm import LstmNetwork
 from .embeddings import Embedding
 from ..helpers import extract_sequence_features, get_label_encoder
@@ -66,7 +65,9 @@ class LSTMModel(Tagger):
                    padding_length=None,
                    token_pretrained_embedding_filepath=None,
                    token_lstm_hidden_state_dimension=None,
-                   dropout_rate=None,
+                   dense_keep_probability=None,
+                   lstm_input_keep_prob=None,
+                   lstm_output_keep_prob=None,
                    maximum_number_of_epochs=None,
                    learning_rate=None,
                    display_step=None,
