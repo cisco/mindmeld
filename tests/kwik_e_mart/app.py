@@ -6,6 +6,9 @@ from builtins import next
 from mmworkbench import Application
 
 if __name__ == "__main__" and __package__ is None:
+    import os
+    from mmworkbench.path import load_app_package
+    load_app_package(os.path.dirname(os.path.realpath(__file__)))
     __package__ = 'kwik_e_mart'
 
 app = Application(__name__)
