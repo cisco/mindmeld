@@ -106,6 +106,7 @@ class EntityRecognizer(Classifier):
         er_data = {'model': self._model, 'entity_types': self.entity_types}
         joblib.dump(er_data, model_path)
 
+        #TODO: Remove this conditional once model saving is implemented for LSTM
         if not type(self._model._clf).__name__ == 'LSTMModel':
             er_data = {'model': self._model, 'entity_types': self.entity_types}
             joblib.dump(er_data, model_path)

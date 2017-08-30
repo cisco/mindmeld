@@ -9,32 +9,36 @@ logger = logging.getLogger(__name__)
 
 class LstmNetwork:
     """
-    This class is the implementation of a Bi-Directional LSTM network in Tensorflow.
+    This class is the implementation of a BiDirectional LSTM network in TensorFlow.
     """
 
-    def __init__(self,
-                 seq_len,
-                 maximum_number_of_epochs,
-                 batch_size,
-                 token_lstm_hidden_state_dimension,
-                 learning_rate,
-                 optimizer,
-                 output_dimension,
-                 display_step,
-                 padding_length,
-                 embedding_matrix,
-                 token_embedding_dimension,
-                 token_pretrained_embedding_filepath,
-                 dense_keep_probability,
-                 lstm_input_keep_prob,
-                 lstm_output_keep_prob,
-                 labels_dict,
-                 embedding_gaz_matrix,
-                 gaz_features):
-
+    def __init__(self, **params):
+        # We have to reset the graph on every dataset since the input, gaz and output dimensions for each
+        # domain,intent training data is different. So the graph cannot be reused.
         tf.reset_default_graph()
+
         self.session = tf.Session()
-        self.seq_len = seq_len
+        self.set_params(**params)
+
+    def set_params(self,
+                   maximum_number_of_epochs=20,
+                   batch_size=20,
+                   token_lstm_hidden_state_dimension=300,
+                   learning_rate=0.005,
+                   optimizer='adam',
+                   output_dimension=None,
+                   display_step=20,
+                   padding_length=19,
+                   embedding_matrix=None,
+                   token_embedding_dimension=None,
+                   token_pretrained_embedding_filepath=None,
+                   dense_keep_probability=None,
+                   lstm_input_keep_prob=None,
+                   lstm_output_keep_prob=None,
+                   labels_dict=None,
+                   embedding_gaz_matrix=None,
+                   gaz_features=None):
+
         self.maximum_number_of_epochs = maximum_number_of_epochs
         self.batch_size = batch_size
         self.token_lstm_hidden_state_dimension = token_lstm_hidden_state_dimension
@@ -53,26 +57,21 @@ class LstmNetwork:
         self.embedding_gaz_matrix = embedding_gaz_matrix
         self.gaz_features = gaz_features
 
+    def construct_tf_variables(self):
         self.word_embedding_dimension = self.embedding_matrix.shape[0]
         self.word_vocab_size = self.embedding_matrix.shape[1]
+
         self.input = tf.placeholder(tf.int32, [None, self.padding_length])
         self.gaz_input = tf.placeholder(tf.int32, [None, self.padding_length])
         self.embedding_matrix_tensor = tf.placeholder(tf.float32, [None, self.token_embedding_dimension])
         self.embedding_matrix_gaz_tensor = tf.placeholder(tf.float32, [None, self.embedding_gaz_matrix.shape[1]])
         self.label_tensor = tf.placeholder(tf.int32, [None, int(self.padding_length), self.output_dimension])
-        self.sequence_lengths = tf.placeholder(tf.int32, shape=[None], name="sequence_lengths")
+        self.sequence_lengths = tf.placeholder(tf.int32, shape=[None])
 
-        # input_tensor = tf.nn.embedding_lookup(self.embedding_matrix_tensor, self.input)
-        # gaz_tensor = tf.nn.embedding_lookup(self.embedding_matrix_gaz_tensor, self.gaz_input)
-        #
-        # x_concat = tf.concat([input_tensor, gaz_tensor], axis=-1)
+        word_and_gaz_embedding = self._construct_embedding_network()
+        self.output_tensor = self._construct_network(word_and_gaz_embedding)
 
-        combined_embedding = self._construct_embedding_network()
-        self.output_tensor = self._construct_network(combined_embedding)
-
-        self.optimizer, self.cost = self._define_optimizer_and_cost(
-            self.output_tensor, self.label_tensor, self.sequence_lengths)
-
+        self.optimizer, self.cost = self._define_optimizer_and_cost(self.output_tensor, self.label_tensor)
         self.accuracy = self._calculate_accuracy(self.output_tensor, self.label_tensor)
 
     def _construct_embedding_network(self):
@@ -142,12 +141,11 @@ class LstmNetwork:
 
         return combined_embedding
 
-    def _define_optimizer_and_cost(self, output_tensor, label_tensor, sequence_lengths):
+    def _define_optimizer_and_cost(self, output_tensor, label_tensor):
         """ This function defines the optimizer and cost function of the LSTM model
         Args:
             output_tensor (Tensor): Output tensor of the LSTM network
             label_tensor (Tensor): Label tensor of the true labels of the data
-            sequence_lengths (Tensor): The sequence lengths of each query
 
         Returns:
             The optimizer function to reduce loss and the loss values
@@ -156,8 +154,7 @@ class LstmNetwork:
             logits=output_tensor,
             labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax')
         cost = tf.reduce_mean(losses, name='cross_entropy_mean_loss')
-        optimizer = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate)).minimize(
-            cost)
+        optimizer = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate)).minimize(cost)
         return optimizer, cost
 
     def _calculate_accuracy(self, output_tensor, label_tensor):
