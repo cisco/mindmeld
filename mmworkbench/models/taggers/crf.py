@@ -6,7 +6,7 @@ from __future__ import print_function, absolute_import, unicode_literals, divisi
 from sklearn_crfsuite import CRF
 
 from ..helpers import extract_sequence_features
-from .taggers import Tagger, get_tags_from_entities, get_entities_from_tags
+from .taggers import Tagger
 
 import logging
 import numpy as np
@@ -18,36 +18,19 @@ ZERO = 1e-20
 
 class ConditionalRandomFields(Tagger):
     """A Conditional Random Fields model."""
-    def fit(self, examples, labels):
-        self.config = self._passed_params.get('config', None)
-        self._feat_binner = self._get_feature_binner()
-        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
-
-        # If parameters were not set, check if they were passed through the config
-        if not self._current_params:
-            self._current_params = self.config.params
-
-        # Extract features and classes
-        all_tags = []
-        for idx, label in enumerate(labels):
-            all_tags.append(get_tags_from_entities(examples[idx], label, self._tag_scheme))
-
-        X = self._get_features(examples, fit=True)
-        self._clf = self._fit(X, all_tags, self._current_params)
+    def fit(self, X, y):
+        self._clf.fit(X, y)
         return self
 
-    def predict(self, examples):
-        X = self._get_features(examples)
-        tags_by_example = self._clf.predict(X)
-        labels = [get_entities_from_tags(examples[idx], tags, self._tag_scheme)
-                  for idx, tags in enumerate(tags_by_example)]
-        return labels
+    def set_params(self, **parameters):
+        self._clf = CRF()
+        self._clf.set_params(**parameters)
 
-    def _get_model_constructor(self):
-        """Returns the python class of the actual underlying model"""
-        return CRF
+    def predict(self, X):
+        y = self._clf.predict(X)
+        return y
 
-    def _get_features(self, examples, fit=False):
+    def extract_features(self, examples, config, resources, y=None, fit=True):
         """Transforms a list of examples into a feature matrix.
 
         Args:
@@ -55,13 +38,14 @@ class ConditionalRandomFields(Tagger):
         Returns:
             (list of list of str): features in CRF suite format
         """
+        # Extract features and classes
         feats = []
         for idx, example in enumerate(examples):
-            feats.append(self._extract_features(example))
+            feats.append(self.extract_example_features(example, config, resources))
         X = self._preprocess_data(feats, fit)
-        return X
+        return X, y, None
 
-    def _extract_features(self, example):
+    def extract_example_features(self, example, config, resources):
         """Extracts feature dicts for each token in an example.
 
         Args:
@@ -69,8 +53,8 @@ class ConditionalRandomFields(Tagger):
         Returns:
             (list dict): features
         """
-        return extract_sequence_features(example, self.config.example_type,
-                                         self.config.features, self._resources)
+        return extract_sequence_features(example, config.example_type,
+                                         config.features, resources)
 
     def _preprocess_data(self, X, fit=False):
         """Converts data into formats of CRF suite.
@@ -94,19 +78,8 @@ class ConditionalRandomFields(Tagger):
             new_X.append(feat_list)
         return new_X
 
-    def _fit(self, X, y, params):
-        """Trains a classifier without cross-validation.
-
-        Args:
-            X (list of list of list of str): a list of queries to train on
-            y (list of list of str): a list of expected labels
-            params (dict): Parameters of the classifier
-        """
-        model_class = self._get_model_constructor()
-        return model_class(**params).fit(X, y)
-
-    def _get_feature_binner(self):
-        return FeatureBinner()
+    def setup_model(self, config):
+        self._feat_binner = FeatureBinner()
 
 
 # Feature extraction for CRF

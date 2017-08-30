@@ -77,6 +77,7 @@ class MemmModel(Tagger):
         """
         groups = []
         X = []
+        y_flat = [tag for example in y for tag in example]
         y_offset = 0
         for i, example in enumerate(examples):
             features_by_segment = self.extract_example_features(example, config,
@@ -87,10 +88,10 @@ class MemmModel(Tagger):
                 if j == 0:
                     segment['prev_tag'] = START_TAG
                 elif fit:
-                    segment['prev_tag'] = y[y_offset + j - 1]
+                    segment['prev_tag'] = y_flat[y_offset + j - 1]
 
             y_offset += len(features_by_segment)
-        X, y = self.preprocess_data(X, y, fit)
+        X, y = self.preprocess_data(X, y_flat, fit)
         return X, y, groups
 
     def _get_feature_selector(self, selector_type):

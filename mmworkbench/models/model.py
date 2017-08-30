@@ -474,8 +474,10 @@ class SequenceModelEvaluation(ModelEvaluation):
         predicted_flat, expected_flat = [], []
 
         for result in self.results:
-            raw_predicted = self.label_encoder.encode([result.predicted], examples=[result.example])
-            raw_expected = self.label_encoder.encode([result.expected], examples=[result.example])
+            raw_predicted = self.label_encoder.encode([result.predicted],
+                                                      examples=[result.example])[0]
+            raw_expected = self.label_encoder.encode([result.expected],
+                                                     examples=[result.example])[0]
 
             vec = []
             for entity in raw_predicted:
@@ -487,7 +489,6 @@ class SequenceModelEvaluation(ModelEvaluation):
                 text_labels, vec = self._update_raw_result(entity, text_labels, vec)
             expected.append(vec)
             expected_flat.extend(vec)
-
         return RawResults(predicted=predicted, expected=expected,
                           text_labels=text_labels, predicted_flat=predicted_flat,
                           expected_flat=expected_flat)
@@ -878,7 +879,7 @@ class EntityLabelEncoder(LabelEncoder):
         # Here each label is a list of entities for the corresponding example
         all_tags = []
         for idx, label in enumerate(labels):
-            all_tags.extend(get_tags_from_entities(examples[idx], label, scheme))
+            all_tags.append(get_tags_from_entities(examples[idx], label, scheme))
         return all_tags
 
     def decode(self, tags_by_example, **kwargs):
