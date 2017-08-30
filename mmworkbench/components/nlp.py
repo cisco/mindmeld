@@ -229,6 +229,7 @@ class DomainProcessor(Processor):
 
     def _build(self):
         # train intent model
+        print("Domain: {}".format(self.name))
         if len(self.intents) > 1:
             self.intent_classifier.fit()
 
@@ -319,6 +320,8 @@ class IntentProcessor(Processor):
 
     def _build(self):
         """Builds the models for this intent"""
+
+        print("Intent: {}".format(self.name))
 
         # train entity recognizer
         self.entity_recognizer.fit()

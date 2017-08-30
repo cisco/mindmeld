@@ -33,12 +33,16 @@ class LSTMModel(Tagger):
         self._clf = self._fit(examples, labels, self.config.params)
         return self
 
+    def process_and_predict(self, examples, config, resources):
+        return self.predict(examples)
+
     def predict(self, examples):
+        import pdb; pdb.set_trace()
         X, gaz = self._get_features(examples)
         embedding_matrix = self.embedding.get_encoding_matrix()
         embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
 
-        examples = np.asarray(X, dtype='int32')
+        encoded_examples = np.asarray(X, dtype='int32')
         gaz = np.asarray(gaz, dtype='int32')
 
         self.config.params["embedding_matrix"] = embedding_matrix
@@ -49,7 +53,7 @@ class LSTMModel(Tagger):
         self._clf.embedding_gaz_matrix = embedding_gaz_matrix
         self._clf.gaz_features = gaz
 
-        tags_by_example = self._clf.predict(examples)
+        tags_by_example = self._clf.predict(encoded_examples)
 
         prediction_wrapper = self._label_encoder.decode(tags_by_example, examples=examples)
         return prediction_wrapper
