@@ -130,13 +130,13 @@ class TaggerModel(Model):
         self._clf = self._get_model_constructor()()
         self._clf.setup_model(self.config)
 
-
         # Extract labels - label encoders are the same accross all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
 
         # Extract features
-        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y, fit=True)
+        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y,
+                                                  fit=True)
 
         # Fit the model
         if skip_param_selection:

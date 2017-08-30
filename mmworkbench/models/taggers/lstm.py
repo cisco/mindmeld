@@ -19,19 +19,14 @@ class LSTMModel(Tagger):
     def fit(self, X, encoded_labels, resources=None):
         examples = np.asarray(X, dtype='int32')
         labels = np.asarray(encoded_labels, dtype='int32')
-        seq_len = np.ones(len(examples)) * int(self.config.params['padding_length'])
         gaz = np.asarray(self.gaz, dtype='int32')
 
-        self.config.params["seq_len"] = seq_len
         self.config.params["output_dimension"] = len(self.labels_dict.keys())
         self.config.params["embedding_matrix"] = self.embedding_matrix
         self.config.params["labels_dict"] = self.labels_dict
         self.config.params["embedding_gaz_matrix"] = self.embedding_gaz_matrix
         self.config.params["gaz_features"] = gaz
-
-        print("Num of labels: {}".format(len(self.labels_dict.keys())))
-
-        self._clf = self._fit(examples, labels, self.config.params)
+        self._fit(examples, labels, **self.config.params)
         return self
 
     def process_and_predict(self, examples, config=None, resources=None):
@@ -61,20 +56,8 @@ class LSTMModel(Tagger):
 
         return resized_predicted_tags
 
-    def set_params(self,
-                   padding_length=None,
-                   token_pretrained_embedding_filepath=None,
-                   token_lstm_hidden_state_dimension=None,
-                   dense_keep_probability=None,
-                   lstm_input_keep_prob=None,
-                   lstm_output_keep_prob=None,
-                   maximum_number_of_epochs=None,
-                   learning_rate=None,
-                   display_step=None,
-                   batch_size=None,
-                   optimizer=None,
-                   token_embedding_dimension=None):
-        return
+    def set_params(self, **parameters):
+        self._clf = LstmNetwork(**parameters)
 
     def _get_model_constructor(self):
         """Returns the python class of the actual underlying model"""
@@ -197,7 +180,7 @@ class LSTMModel(Tagger):
             new_X.append(feat_list)
         return new_X
 
-    def _fit(self, X, y, params):
+    def _fit(self, X, y, **params):
         """Trains a classifier without cross-validation.
 
         Args:
@@ -205,5 +188,7 @@ class LSTMModel(Tagger):
             y (list of list of str): a list of expected labels
             params (dict): Parameters of the classifier
         """
-        model_class = self._get_model_constructor()
-        return model_class(**params).fit(X, y)
+        import pdb; pdb.set_trace()
+        self._clf.set_params(**params)
+        self._clf.construct_tf_variables()
+        return self._clf.fit(X, y)
