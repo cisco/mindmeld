@@ -26,6 +26,7 @@ class LSTMModel(Tagger):
         self.config.params["labels_dict"] = self.labels_dict
         self.config.params["embedding_gaz_matrix"] = self.embedding_gaz_matrix
         self.config.params["gaz_features"] = gaz
+
         self._fit(examples, labels, **self.config.params)
         return self
 
@@ -81,6 +82,16 @@ class LSTMModel(Tagger):
         self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
         self._label_encoder = get_label_encoder(self.config)
 
+        # Extract the sequence length for each query
+        seq_length = []
+        for example in examples:
+            if len(example.normalized_tokens) > self.config.params['padding_length']:
+                seq_length.append(int(self.config.params['padding_length']))
+            else:
+                seq_length.append(len(example.normalized_tokens))
+
+        self.config.params["sequence_lengths"] = seq_length
+
         # Extract features and classes
         X, self.gaz = self._get_features(examples)
         self.embedding_matrix = self.embedding.get_encoding_matrix()
@@ -99,7 +110,8 @@ class LSTMModel(Tagger):
         return X, encoded_labels, None
 
     def setup_model(self, selector_type, scale_type):
-        return 1
+        # NoOp
+        return
 
     def _get_features(self, examples):
         """Transforms a list of examples into a feature matrix.
@@ -188,7 +200,6 @@ class LSTMModel(Tagger):
             y (list of list of str): a list of expected labels
             params (dict): Parameters of the classifier
         """
-        import pdb; pdb.set_trace()
         self._clf.set_params(**params)
         self._clf.construct_tf_variables()
         return self._clf.fit(X, y)

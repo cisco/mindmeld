@@ -7,7 +7,8 @@ DEFAULT_LABEL = 'B|UNK'
 
 class Embedding:
     """
-    This class encodes and constructs embeddings for the tokens of the input queries, gazetteers and labels.
+    This class encodes and constructs embeddings for the tokens of the input queries,
+    gazetteers and labels.
     """
     def __init__(self, parameters):
         self.parameters = parameters
