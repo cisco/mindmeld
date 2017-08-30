@@ -59,6 +59,9 @@ DEFAULT_INTENT_MODEL_CONFIG = {
     }
 }
 
+# TODO: Remove this config and set it to the original defaults
+# after the code is approved.
+
 DEFAULT_ENTITY_MODEL_CONFIG = {
     'model_type': 'tagger',
     'label_type': 'entities',
@@ -70,8 +73,8 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
     'params': {
         'padding_length': 19,
         'batch_size': 20,
-        'display_step': 20,
-        'maximum_number_of_epochs': 70,
+        'display_epoch': 20,
+        'number_of_epochs': 20,
         'optimizer': 'adam',
         'learning_rate': 0.005,
         'dense_keep_probability': 0.5,
