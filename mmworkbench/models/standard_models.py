@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, unicode_literals
 from builtins import range, zip, super
 from past.utils import old_div
 
-from collections import Counter
 import logging
 
 from numpy import bincount
@@ -20,7 +19,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from .model import EvaluatedExample, StandardModelEvaluation, SkLearnModel
 
-from .helpers import GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC, register_model, mask_numerics
+from .helpers import QUERY_FREQ_RSC, WORD_FREQ_RSC, register_model
 
 _NEG_INF = -1e10
 
@@ -88,59 +87,8 @@ class TextModel(SkLearnModel):
         attributes = self.__dict__.copy()
         attributes['_resources'] = {WORD_FREQ_RSC: self._resources.get(WORD_FREQ_RSC, {}),
                                     QUERY_FREQ_RSC: self._resources.get(QUERY_FREQ_RSC, {})}
+
         return attributes
-
-    def register_resources(self, gazetteers=None, word_freqs=None, query_freqs=None):
-        """Loads resources that are built outside the classifier, e.g. gazetteers
-
-        Args:
-            gazetteers (dict of Gazetteer): domain gazetteer data
-            word_freqs (dict of int): unigram frequencies in queries
-            query_freqs (dict of int): whole query index with frequencies
-        """
-        if gazetteers is not None:
-            self._resources[GAZETTEER_RSC] = gazetteers
-            if self._meta_type == SUPER_LEARNER_TYPE:
-                for model in self._base_clfs.values():
-                    model.register_resources(gazetteers=gazetteers)
-        if word_freqs is not None:
-            self._resources[WORD_FREQ_RSC] = word_freqs
-            if self._meta_type == SUPER_LEARNER_TYPE:
-                for model in self._base_clfs.values():
-                    model.register_resources(word_freqs=word_freqs)
-        if query_freqs is not None:
-            self._resources[QUERY_FREQ_RSC] = query_freqs
-            if self._meta_type == SUPER_LEARNER_TYPE:
-                for model in self._base_clfs.values():
-                    model.register_resources(query_freqs=query_freqs)
-
-    def compile_word_freq_dict(self, queries):
-        """Compiles unigram frequency dictionary of normalized query tokens
-
-        Args:
-            queries (list of Query): A list of all queries
-        """
-        # Unigram frequencies
-        tokens = [mask_numerics(tok) for q in queries
-                  for tok in q.normalized_tokens]
-        freq_dict = Counter(tokens)
-
-        self.register_resources(word_freqs=freq_dict)
-
-    def compile_query_freq_dict(self, queries):
-        """Compiles frequency dictionary of normalized query strings
-
-        Args:
-            queries (list of Query): A list of all queries
-        """
-        # Whole query frequencies, with singletons removed
-        query_dict = Counter([u'<{}>'.format(q.normalized_text) for q in queries])
-        for query in query_dict:
-            if query_dict[query] < 2:
-                query_dict[query] = 0
-        query_dict += Counter()
-
-        self.register_resources(query_freqs=query_dict)
 
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
@@ -171,11 +119,6 @@ class TextModel(SkLearnModel):
             (TextModel): Returns self to match classifier scikit-learn
                 interfaces.
         """
-        if self._resources.get(WORD_FREQ_RSC) is None and self.requires_resource(WORD_FREQ_RSC):
-            self.compile_word_freq_dict(examples)
-        if self._resources.get(QUERY_FREQ_RSC) is None and self.requires_resource(QUERY_FREQ_RSC):
-            self.compile_query_freq_dict(examples)
-
         return super().fit(examples, labels, params)
 
     def evaluate(self, examples, labels):

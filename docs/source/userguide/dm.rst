@@ -149,7 +149,7 @@ Consider a basic dialogue state handler that greets a user by name, retrieving t
   @app.handle(intent='greet')
   def welcome(context, responder):
       try:
-          responder.slots['name'] = context['request]['session']['name']
+          responder.slots['name'] = context['request']['session']['name']
           templates = ['Hello {name}', 'Hey {name}!', '{name}, how are you?']
       except KeyError:
           # name was not included in request
