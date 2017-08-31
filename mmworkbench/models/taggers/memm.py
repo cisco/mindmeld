@@ -33,26 +33,6 @@ class MemmModel(Tagger):
     def predict(self, X):
         return self._clf.predict(X)
 
-    def extract_and_predict(self, examples, config, resources):
-        return [self._predict_example(example, config, resources) for example in examples]
-
-    def _predict_example(self, example, config, resources):
-        features_by_segment = self.extract_example_features(example, config, resources)
-        if len(features_by_segment) == 0:
-            return []
-
-        predicted_tags = []
-        prev_tag = START_TAG
-        for features in features_by_segment:
-            features['prev_tag'] = prev_tag
-            X, _ = self.preprocess_data([features])
-            prediction = self.predict(X)
-            predicted_tag = self.class_encoder.inverse_transform(prediction)[0]
-            predicted_tags.append(predicted_tag)
-            prev_tag = predicted_tag
-
-        return predicted_tags
-
     def extract_example_features(self, example, config, resources):
         """Extracts feature dicts for each token in an example.
 
@@ -91,8 +71,28 @@ class MemmModel(Tagger):
                     segment['prev_tag'] = y_flat[y_offset + j - 1]
 
             y_offset += len(features_by_segment)
-        X, y = self.preprocess_data(X, y_flat, fit)
+        X, y = self._preprocess_data(X, y_flat, fit)
         return X, y, groups
+
+    def extract_and_predict(self, examples, config, resources):
+        return [self._predict_example(example, config, resources) for example in examples]
+
+    def _predict_example(self, example, config, resources):
+        features_by_segment = self.extract_example_features(example, config, resources)
+        if len(features_by_segment) == 0:
+            return []
+
+        predicted_tags = []
+        prev_tag = START_TAG
+        for features in features_by_segment:
+            features['prev_tag'] = prev_tag
+            X, _ = self._preprocess_data([features])
+            prediction = self.predict(X)
+            predicted_tag = self.class_encoder.inverse_transform(prediction)[0]
+            predicted_tags.append(predicted_tag)
+            prev_tag = predicted_tag
+
+        return predicted_tags
 
     def _get_feature_selector(self, selector_type):
         """Get a feature selector instance based on the feature_selector model
@@ -124,7 +124,7 @@ class MemmModel(Tagger):
         self._feat_selector = self._get_feature_selector(selector_type)
         self._feat_scaler = self._get_feature_scaler(scale_type)
 
-    def preprocess_data(self, X, y=None, fit=False):
+    def _preprocess_data(self, X, y=None, fit=False):
         if fit:
             y = self.class_encoder.fit_transform(y)
             X = self.feat_vectorizer.fit_transform(X)

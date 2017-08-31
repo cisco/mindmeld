@@ -25,10 +25,10 @@ class ConditionalRandomFields(Tagger):
     def set_params(self, **parameters):
         self._clf = CRF()
         self._clf.set_params(**parameters)
+        return self
 
     def predict(self, X):
-        y = self._clf.predict(X)
-        return y
+        return self._clf.predict(X)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
         """Transforms a list of examples into a feature matrix.
