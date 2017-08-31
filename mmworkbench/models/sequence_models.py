@@ -239,4 +239,4 @@ class TaggerModel(Model):
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
 
 
-register_model('tag', TaggerModel)
+register_model('tagger', TaggerModel)
