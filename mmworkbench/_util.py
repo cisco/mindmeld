@@ -272,10 +272,10 @@ def load_global_configuration():
 
     try:
         config = {
-            'mindmeld_url': os.environ['MM_URL'],
-            'username': os.environ['MM_USERNAME'],
-            'password': os.environ['MM_PASSWORD'],
-            'token': os.environ['MM_TOKEN']
+            'mindmeld_url': os.environ.get('MM_URL', None),
+            'username': os.environ.get('MM_USERNAME', None),
+            'password': os.environ.get('MM_PASSWORD', None),
+            'token': os.environ.get('MM_TOKEN', None)
         }
         return _filter_bad_keys(config)
     except KeyError:
