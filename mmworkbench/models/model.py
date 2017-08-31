@@ -830,6 +830,31 @@ class Model(object):
                 return True
         return False
 
+    def initialize_resources(self, resource_loader, examples=None, labels=None):
+        """Load the required resources for feature extractors. Each feature extractor uses
+        @requires decorator to declare required resources. Based on feature list in model config
+        a list of required resources are compiled, and the passed in resource loader is then used to
+        load the resources accordingly.
+        Args:
+            resource_loader (ResourceLoader): application resource loader object
+            examples (list): Optional. A list of examples.
+            labels (list): Optional. A parallel list to examples. The gold labels
+                           for each example.
+        """
+
+        # get list of resources required by feature extractors
+        required_resources = set()
+        for name, kwargs in self.config.features.items():
+            required_resources.update(
+                get_feature_extractor(self.config.example_type, name).__dict__.get(
+                    'requirements', []))
+
+        # load required resources if not present in model resources
+        for rname in required_resources:
+            if rname not in self._resources:
+                self._resources[rname] = resource_loader.load_feature_resource(
+                    rname, queries=examples, labels=labels)
+
 
 class LabelEncoder(object):
     """The label encoder is responsible for converting between rich label

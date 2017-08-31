@@ -10,11 +10,12 @@ import re
 
 from ..core import resolve_entity_conflicts
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                      register_features, mask_numerics, get_ngram)
+                      register_features, mask_numerics, get_ngram, requires)
 
 # TODO: clean this up a LOT
 
 
+@requires(GAZETTEER_RSC)
 def extract_in_gaz_span_features():
     """Returns a feature extractor for properties of spans in gazetteers
     """
@@ -257,6 +258,7 @@ def extract_in_gaz_span_features():
     return _extractor
 
 
+@requires(GAZETTEER_RSC)
 def extract_in_gaz_ngram_features():
     """Returns a feature extractor for surrounding ngrams in gazetteers
     """
@@ -362,6 +364,7 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions):
     return _extractor
 
 
+@requires(SYS_TYPES_RSC)
 def extract_sys_candidate_features(start_positions=(0,)):
     """Return an extractor for features based on a heuristic guess of numeric
     candidates at/near the current token.
@@ -399,25 +402,6 @@ def update_features_sequence(feat_seq, update_feat_seq):
     """
     for i in range(len(feat_seq)):
         feat_seq[i].update(update_feat_seq[i])
-
-
-def requires(resource):
-    """
-    Decorator to enforce the resource dependencies of the active feature extractors
-
-    Args:
-        resource (str): the key of a classifier resource which must be initialized before
-            the given feature extractor is used
-
-    Returns:
-        (func): the feature extractor
-    """
-    def add_resource(func):
-        req = func.__dict__.get('requirements', [])
-        func.requirements = req + [resource]
-        return func
-
-    return add_resource
 
 
 @requires(WORD_FREQ_RSC)

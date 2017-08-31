@@ -21,8 +21,7 @@ from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, 
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, WORD_FREQ_RSC,
-                      mask_numerics, register_model)
+from .helpers import QUERY_FREQ_RSC, WORD_FREQ_RSC, register_model
 from .model import EvaluatedExample, Model, StandardModelEvaluation
 
 _NEG_INF = -1e10
@@ -65,6 +64,7 @@ class TextModel(Model):
         attributes = self.__dict__.copy()
         attributes['_resources'] = {WORD_FREQ_RSC: self._resources.get(WORD_FREQ_RSC, {}),
                                     QUERY_FREQ_RSC: self._resources.get(QUERY_FREQ_RSC, {})}
+
         return attributes
 
     def _get_model_constructor(self):
@@ -136,11 +136,6 @@ class TextModel(Model):
             (TextModel): Returns self to match classifier scikit-learn
                 interfaces.
         """
-        # Prepare resources
-        if self._resources.get(WORD_FREQ_RSC) is None and self.requires_resource(WORD_FREQ_RSC):
-            self.compile_word_freq_dict(examples)
-        if self._resources.get(QUERY_FREQ_RSC) is None and self.requires_resource(QUERY_FREQ_RSC):
-            self.compile_query_freq_dict(examples)
 
         params = params or self.config.params
         skip_param_selection = params is not None or self.config.param_selection is None
@@ -325,58 +320,6 @@ class TextModel(Model):
         scaler = {'std-dev': StandardScaler(with_mean=False),
                   'max-abs': MaxAbsScaler()}.get(scale_type)
         return scaler
-
-    def register_resources(self, gazetteers=None, word_freqs=None, query_freqs=None):
-        """Loads resources that are built outside the classifier, e.g. gazetteers
-
-        Args:
-            gazetteers (dict of Gazetteer): domain gazetteer data
-            word_freqs (dict of int): unigram frequencies in queries
-            query_freqs (dict of int): whole query index with frequencies
-        """
-        if gazetteers is not None:
-            self._resources[GAZETTEER_RSC] = gazetteers
-            if self._meta_type == SUPER_LEARNER_TYPE:
-                for model in self._base_clfs.values():
-                    model.register_resources(gazetteers=gazetteers)
-        if word_freqs is not None:
-            self._resources[WORD_FREQ_RSC] = word_freqs
-            if self._meta_type == SUPER_LEARNER_TYPE:
-                for model in self._base_clfs.values():
-                    model.register_resources(word_freqs=word_freqs)
-        if query_freqs is not None:
-            self._resources[QUERY_FREQ_RSC] = query_freqs
-            if self._meta_type == SUPER_LEARNER_TYPE:
-                for model in self._base_clfs.values():
-                    model.register_resources(query_freqs=query_freqs)
-
-    def compile_word_freq_dict(self, queries):
-        """Compiles unigram frequency dictionary of normalized query tokens
-
-        Args:
-            queries (list of Query): A list of all queries
-        """
-        # Unigram frequencies
-        tokens = [mask_numerics(tok) for q in queries
-                  for tok in q.normalized_tokens]
-        freq_dict = Counter(tokens)
-
-        self.register_resources(word_freqs=freq_dict)
-
-    def compile_query_freq_dict(self, queries):
-        """Compiles frequency dictionary of normalized query strings
-
-        Args:
-            queries (list of Query): A list of all queries
-        """
-        # Whole query frequencies, with singletons removed
-        query_dict = Counter([u'<{}>'.format(q.normalized_text) for q in queries])
-        for query in query_dict:
-            if query_dict[query] < 2:
-                query_dict[query] = 0
-        query_dict += Counter()
-
-        self.register_resources(query_freqs=query_dict)
 
 
 register_model('text', TextModel)

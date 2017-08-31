@@ -201,3 +201,23 @@ def entity_seqs_equal(expected, predicted):
         if expected_entity.text != predicted_entity.text:
             return False
     return True
+
+
+def requires(resource):
+    """
+    Decorator to enforce the resource dependencies of the active feature extractors
+
+    Args:
+        resource (str): the key of a classifier resource which must be initialized before
+            the given feature extractor is used
+
+    Returns:
+        (func): the feature extractor
+    """
+    def add_resource(func):
+        req = func.__dict__.get('requirements', set())
+        req.add(resource)
+        func.requirements = req
+        return func
+
+    return add_resource
