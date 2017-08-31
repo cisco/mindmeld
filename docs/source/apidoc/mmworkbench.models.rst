@@ -21,14 +21,6 @@ mmworkbench.models.helpers module
     :undoc-members:
     :show-inheritance:
 
-mmworkbench.models.maxent module
---------------------------------
-
-.. automodule:: mmworkbench.models.maxent
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 mmworkbench.models.model module
 -------------------------------
 

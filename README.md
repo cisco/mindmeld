@@ -86,7 +86,7 @@ python setup.py bdist_wheel --universal
 
 ### Publishing to PyPI
 
-You can publish to pypi.<dev||staging||master> by pushing the .whl to s3://mindmeld-pypi/<dev||staging||master>
+You can publish to pypi by pushing the .whl to s3://mindmeld-pypi/<develop||staging||master>.
 
 ```
 aws s3 cp dist/mmworkbench-{new-version}-py2.py3-none-any.whl s3://mindmeld-pypi/<develop||staging||master>/
@@ -94,6 +94,6 @@ aws s3 cp dist/mmworkbench-{new-version}-py2.py3-none-any.whl s3://mindmeld-pypi
 
 Currently we do not have a deployment process that takes a package from `dev` to `staging` to `master`.
 
-Hence you should deploy to three environments simultaneously.
+Hence you should deploy to all three environments.
 
 Usually it takes about 5 - 10 minutes to for the PyPI server to update, and you can check at `https://mindmeld.com/packages/`.

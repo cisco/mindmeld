@@ -71,6 +71,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx.ext.extlinks',  # Markup to shorten external links
     'nbsphinx',
     'scope'
 ]
@@ -473,3 +474,9 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+# Markup to shorten external links (http://www.sphinx-doc.org/en/stable/ext/extlinks.html)
+extlinks = {
+    'sk_guide': ('http://scikit-learn.org/stable/modules/%s', None),
+    'sk_api': ('http://scikit-learn.org/stable/modules/generated/%s', None)
+}

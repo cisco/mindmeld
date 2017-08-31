@@ -1,3 +1,5 @@
+.. _define_dialogue_state_handlers:
+
 Step 4: Define the Dialogue State Handlers
 ==========================================
 
@@ -36,6 +38,7 @@ As the diagram illustrates, each dialogue state prescribes a natural language te
 
   By convention, dialogue state names are verbs that describe the action your application should take at particular points in the interaction.
 
+.. _app_container:
 
 Create the Application Container
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,8 +52,11 @@ In MindMeld Workbench, the *application container* is a Python file which contai
   app = Application(__name__)
 
   @app.handle(intent='greet')
-  def welcome(context, slots, responder):
+  def welcome(context, responder):
       responder.reply('Hello')
+
+  if __name__ == '__main__':
+      app.cli()
 
 Your directory structure should now resemble the following.
 
@@ -72,7 +78,7 @@ Implement the Dialogue State Handlers
 
 We have already defined the dialogue handlers that the interaction in :doc:`Step 2 <02_script_interactions>` requires.
 
-Now, to finish implementing the dialogue handlers, we need to add the desired response for each dialogue state. As we do so, we will learn about capabilities of Workbench which are explained further in the :ref:`User Guide <userguide>`.
+Now, to finish implementing the dialogue handlers, we need to add the desired response for each dialogue state. As we do so, we will learn about capabilities of Workbench which are explained further in the :doc:`User Guide <../userguide/dm>`.
 
 First, consider the handler for the ``welcome`` dialogue state.
 
@@ -83,36 +89,38 @@ First, consider the handler for the ``welcome`` dialogue state.
   app = Application(__name__)
 
   @app.handle(intent='greet')
-  def welcome(context, slots, responder):
-      slots['name'] = context['request']['session']['name']
+  def welcome(context, responder):
+      responder.slots['name'] = context['request']['session']['name']
       responder.prompt('Hello, {name}. I can help you find store hours '
                        'for your local Kwik-E-Mart. How can I help?')
+
+  if __name__ == '__main__':
+      app.cli()
 
 Following convention, we use the dialogue state name, ``welcome``, as the method name of the dialogue state handler, :func:`welcome()`.
 
 The ``@app.handle()`` decorator specifies the pattern which must be matched to invoke the handler method. Here, the pattern specified is simply ``intent='greet'``. In other words, if the natural language processor predicts that the intent of the incoming request is ``greet``, the :func:`welcome()` handler is invoked.
 
-Every dialogue handler returns a ``response`` object that specifies the natural language text and any other data to be returned in the response. Text strings contained in this response can use templated expressions in standard Python string formatting syntax, like ``'Hello, {name}.'`` in our example. Templated expressions are populated with real values before the response is returned to the client. Workbench uses the :data:`slots` object to store the named string values which populate the templates.
+Every dialogue handler uses the ``responder`` object to specify the natural language text and any other data to be returned in the response. Text strings contained in this response can use templated expressions in standard Python string formatting syntax, like ``'Hello, {name}.'`` in our example. Templated expressions are populated with real values before the response is returned to the client. Workbench uses the ``responder``'s :data:`slots` attribute to store the named string values which populate the templates.
 
-The code snippet also introduces the :data:`context` object, which Workbench uses to keep track of all of the state information associated with the conversational interaction as it progresses. This state information can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information. The contents of the :data:`context` can be very useful for implementing custom dialogue state handling logic. See the :ref:`User Guide <userguide>` for details.
+The code snippet also introduces the :data:`context` object, which Workbench uses to keep track of all of the state information associated with the conversational interaction as it progresses. This state information can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information. The contents of the :data:`context` can be very useful for implementing custom dialogue state handling logic. See the :doc:`User Guide <../userguide/dm>` for details.
 
 Let's follow this same approach to define handlers for the dialogue states ``send_store_hours``, ``send_nearest_store``, and ``say_goodbye``. The resulting `app.py` file looks like the following.
 
 .. code:: python
 
-  from mmworkbench import Application, QuestionAnswerer, context, slots
+  from mmworkbench import Application
 
-  qa = QuestionAnswerer()
-  app = Application(__name__, qa)
+  app = Application(__name__)
 
   @app.handle(intent='greet')
-  def welcome(context, slots, responder):
-      slots['name'] = context['request']['session']['name']
+  def welcome(context, responder):
+      responder.slots['name'] = context['request']['session']['name']
       responder.prompt('Hello, {name}. I can help you find store hours '
                        'for your local Kwik-E-Mart. How can I help?')
 
   @app.handle(intent='get_store_hours')
-  def send_store_hours(context, slots, responder):
+  def send_store_hours(context, responder):
       active_store = context['frame'].get('target_store')
       store_entity = next((e for e in context['entities'] if e['type'] == 'location'), None)
       if store_entity:
@@ -121,33 +129,36 @@ Let's follow this same approach to define handlers for the dialogue states ``sen
           context['frame']['target_store'] = active_store
 
       if active_store:
-          slots['store_name'] = active_store['store_name']
-          slots['open_time'] = active_store['open_time']
-          slots['close_time'] = active_store['close_time']
+          responder.slots['store_name'] = active_store['store_name']
+          responder.slots['open_time'] = active_store['open_time']
+          responder.slots['close_time'] = active_store['close_time']
           responder.reply('The {store_name} Kwik-E-Mart opens at {open_time} and '
                           'closes at {close_time}.')
       else:
           responder.prompt('Which store would you like to know about?')
 
   @app.handle(intent='find_nearest_store')
-  def send_nearest_store(context, slots, responder):
+  def send_nearest_store(context, responder):
       location = context['request']['session']['location']
       stores = app.question_answerer.get(index='stores', sort='location', location=location)
 
       target_store = stores[0]
       context['frame']['target_store'] = target_store
 
-      slots['store_name'] = target_store['store_name']
+      responder.slots['store_name'] = target_store['store_name']
       responder.reply('Your nearest Kwik-E-Mart is located at {store_name}.')
 
   @app.handle(intent='exit')
-  def say_goodbye(context, slots, responder):
+  def say_goodbye(context, responder):
       responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
 
   @app.handle()
-  def default(context, slots, responder):
+  def default(context, responder):
       responder.prompt('Sorry, not sure what you meant there. I can help you find '
                        'store hours for your local Kwik-E-Mart.')
+
+  if __name__ == '__main__':
+      app.cli()
 
 This code snippet introduces the `QuestionAnswerer` class. In Workbench, `QuestionAnswerer` is the module that creates and searches across a knowledge base of information relevant to your application. In this example, the ``send_nearest_store`` dialogue state relies on the `QuestionAnswerer` component to retrieve the closest retail store location from the knowledge base. The `QuestionAnswerer` is discussed further in the next section.
 

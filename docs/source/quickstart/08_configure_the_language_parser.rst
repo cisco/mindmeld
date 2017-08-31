@@ -103,7 +103,7 @@ Some of the entities in the Natural Language Processor's output now include a ``
     >>> Nlp.parser.load()
 
 
-The Workbench language parser is a versatile component which can be used to implement a variety of parsing strategies for your application. The :ref:`User Guide <userguide>` explains the different options available to fine-tune the behavior of the parser, and covers how to define your own custom parsing logic and train a state-of-the-art statistical parser using annotated data.
+The Workbench language parser is a versatile component which can be used to implement a variety of parsing strategies for your application. The :doc:`User Guide <../userguide/parser>` explains the different options available to fine-tune the behavior of the parser, and covers how to define your own custom parsing logic and train a state-of-the-art statistical parser using annotated data.
 
 Not every scenario warrants using the language parser. For instance, in our simple Kwik-E-Mart store information app, the two kinds of entities, ``sys_time`` and ``store_name``, are distinct and unrelated pieces of information. Running the parser would only yield two singleton entity groups with heads but no dependents.
 

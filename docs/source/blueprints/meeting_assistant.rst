@@ -1,4 +1,0 @@
-Meeting Assistant
-=================
-
-Coming soon

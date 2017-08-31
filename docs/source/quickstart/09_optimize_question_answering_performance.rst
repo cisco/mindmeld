@@ -96,3 +96,5 @@ as follows:
     "phone_number": "(+1) 650-555-4500",
     "location": {"latitude": 37.790426, "longitude": -122.405752}
   }
+
+See the :doc:`User Guide <../userguide/kb>` for more about how to use the Question Answerer to find answers to questions, validate user requests, disambiguate entities, and offer alternative suggestions.
