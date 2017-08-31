@@ -23,7 +23,7 @@ INTENT_MODEL_CONFIG = {
 }
 
 ENTITY_MODEL_CONFIG = {
-    'model_type': 'tag',
+    'model_type': 'tagger',
     'label_type': 'entities',
     'model_settings': {
         'classifier_type': 'memm',
