@@ -8,7 +8,6 @@ from __future__ import absolute_import, division, unicode_literals
 import logging
 import random
 from builtins import range, super, zip
-from collections import Counter
 
 import numpy as np
 from numpy import bincount
