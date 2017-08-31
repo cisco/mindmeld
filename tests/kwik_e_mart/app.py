@@ -2,12 +2,12 @@
 """This module contains the Kwik-E-Mart workbench demo application"""
 from __future__ import unicode_literals
 from builtins import next
-
+import os
+from mmworkbench.path import load_app_package
 from mmworkbench import Application
 
+
 if __name__ == "__main__" and __package__ is None:
-    import os
-    from mmworkbench.path import load_app_package
     load_app_package(os.path.dirname(os.path.realpath(__file__)))
     __package__ = 'kwik_e_mart'
 
