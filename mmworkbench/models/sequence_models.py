@@ -93,8 +93,6 @@ class TaggerModel(Model):
             labels (list of tuples of mmworkbench.core.QueryEntity): a list of expected labels
             params (dict): Parameters of the classifier
         """
-        system_types = self._get_system_types()
-        self.register_resources(sys_types=system_types)
         skip_param_selection = params is not None or self.config.param_selection is None
         params = params or self.config.params
 
@@ -209,21 +207,6 @@ class TaggerModel(Model):
         config = self._get_effective_config()
         model_eval = EntityModelEvaluation(config, evaluations)
         return model_eval
-
-    def register_resources(self, **kwargs):
-        """Registers resources which are accessible to feature extractors
-
-        Args:
-            **kwargs: dictionary of resources to register
-
-        """
-        self._resources.update(kwargs)
-
-    def _get_system_types(self):
-        sys_types = set()
-        for gaz in self._resources['gazetteers'].values():
-            sys_types.update(gaz['sys_types'])
-        return sys_types
 
     def _get_model_constructor(self):
         """Returns the python class of the actual underlying model"""

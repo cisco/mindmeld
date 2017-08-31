@@ -116,26 +116,9 @@ class TextModel(Model):
                 selection will be bypassed if this is provided
 
         Returns:
-            (SkLearnModel): Returns self to match classifier scikit-learn
-                interfaces.
-        """
-        """Trains this TextModel.
-
-        This method inspects instance attributes to determine the classifier
-        object and cross-validation strategy, and then fits the model to the
-        training examples passed in.
-
-        Args:
-            queries (list of Query): A list of queries.
-            classes (list of str): A parallel list to queries. The gold labels
-                for each query.
-            verbose (bool): Whether to show analysis output
-
-        Returns:
             (TextModel): Returns self to match classifier scikit-learn
                 interfaces.
         """
-
         params = params or self.config.params
         skip_param_selection = params is not None or self.config.param_selection is None
 
