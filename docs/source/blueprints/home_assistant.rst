@@ -42,7 +42,7 @@ The full list of intents for all domains is illustrated below.
 
 There are two types of entities in Workbench: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined in Workbench. Examples include ``sys_temperature``, ``sys_time``, and ``sys_interval``. Custom entities are defined by the developers of each application. Within each entity folder, the file ``gazetteer.txt`` contains the full list of values for each custom entity.
 
-Home assistant defines and uses the following custom entities, which are grouped by intents below:
+Home assistant defines and uses the following custom entities, which are grouped by domains below:
 
    - Smart Home
        - ``location``: detects household location, for example: "lock {back|location} door"
