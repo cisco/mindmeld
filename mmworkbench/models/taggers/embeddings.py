@@ -55,7 +55,7 @@ class Embedding:
             encoded_query.append(self.word_to_encoding[token])
         return encoded_query
 
-    def transform(self, queries, is_gaz=False):
+    def transform(self, queries):
         """ Transforms an input list of queries into encoded queries using integer tokens
         Args:
             queries (list): A list of queries
@@ -78,7 +78,6 @@ class Embedding:
         Returns:
             A list of the binary encodings of the gaz tokens
         """
-        # TODO: Extract pos, cont and end correctly to reduce dimensions
         encoded_query = []
         for token in list_of_gaz_tokens:
             if token not in self.gaz_word_to_encoding:
@@ -153,8 +152,10 @@ class Embedding:
         return embedding_matrix_gaz
 
     def encode_labels(self, labels):
-        """
-        Encodes the labels of the queries
+        """Encodes the labels of the queries
+
+        Args:
+            labels (list): List of labels
 
         Returns:
             list of encoded labels
@@ -163,6 +164,7 @@ class Embedding:
 
         transformed_labels = []
         for query_label in labels:
+            # We pad the query to the padding length size
             if len(query_label) > padding_length:
                 query_label = query_label[:padding_length]
             else:
