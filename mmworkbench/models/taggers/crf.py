@@ -38,6 +38,9 @@ class ConditionalRandomFields(Tagger):
 
         Args:
             examples (list of mmworkbench.core.Query): a list of queries
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
         Returns:
             (list of list of str): features in CRF suite format
         """
@@ -52,7 +55,10 @@ class ConditionalRandomFields(Tagger):
         """Extracts feature dicts for each token in an example.
 
         Args:
-            example (mmworkbench.core.Query): an query
+            example (mmworkbench.core.Query): a query
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
         Returns:
             (list dict): features
         """
@@ -64,6 +70,7 @@ class ConditionalRandomFields(Tagger):
 
         Args:
             X (list of dict): features of an example
+            fit (bool, optional): True if processing data at fit time, false for predict time.
         Returns:
             (list of list of str): features in CRF suite format
         """

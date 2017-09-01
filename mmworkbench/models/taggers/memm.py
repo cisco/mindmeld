@@ -38,6 +38,10 @@ class MemmModel(Tagger):
 
         Args:
             example (mmworkbench.core.Query): an query
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+
         Returns:
             (list dict): features
         """
@@ -49,7 +53,10 @@ class MemmModel(Tagger):
         as a feature of the next tag.
 
         Args:
-            examples (list): The examples.
+            examples (list of core.Query): The examples.
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
 
         Returns:
             (numpy.matrix): The feature matrix.
