@@ -130,7 +130,7 @@ class Tagger(object):
     def extract_and_predict(self, examples, config, resources):
         """Does both feature extraction and prediction. Often necessary for sequence models when the
         prediction of the previous example is used as a feature for the next example. If this is
-        not the case, extract is simple called before predict here. Note that the Workbench config
+        not the case, extract is simply called before predict here. Note that the Workbench config
         and resources are passed in each time to make the underlying model implementation stateless.
 
         Args:

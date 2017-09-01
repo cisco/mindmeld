@@ -63,7 +63,7 @@ def extract_sequence_features(example, example_type, feature_config, resources):
     """Extracts feature dicts for each token in an example.
 
     Args:
-        example (mmworkbench.core.Query): an query
+        example (mmworkbench.core.Query): a query
         example_type (str): The type of example
         feature_config (dict): The config for features
         resources (dict): Resources of this model
@@ -180,10 +180,18 @@ def get_ngram(tokens, start, length):
 
 
 def get_seq_accuracy_scorer():
+    """
+    Returns a scorer that can be used by sklearn's GridSearchCV based on the
+    sequence_accuracy_scoring method below.
+    """
     return make_scorer(score_func=sequence_accuracy_scoring)
 
 
 def get_seq_tag_accuracy_scorer():
+    """
+    Returns a scorer that can be used by sklearn's GridSearchCV based on the
+    sequence_tag_accuracy_scoring method below.
+    """
     return make_scorer(score_func=sequence_tag_accuracy_scoring)
 
 
@@ -221,6 +229,15 @@ def sequence_tag_accuracy_scoring(y_true, y_pred):
 
 
 def entity_seqs_equal(expected, predicted):
+    """
+    Returns true if the expected entities and predicted entities all match, returns
+    false otherwise. Note that for entity comparison, we compare that the span, text,
+    and type of all the entities match.
+
+    Args:
+        expected (list of core.Entity): A list of the expected entities for some query
+        predicted (list of core.Entity): A list of the predicted entities for some query
+    """
     if len(expected) != len(predicted):
         return False
     for expected_entity, predicted_entity in zip(expected, predicted):

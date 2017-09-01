@@ -633,7 +633,7 @@ class Model(object):
             labels (list): The target output values.
             groups (None, optional): Same length as examples and labels. Used to group examples when
                                      splitting the dataset into train/test
-            selection_settings (None, optional): A dictionary containing the cross validation
+            selection_settings (dict, optional): A dictionary containing the cross validation
                                                  selection settings.
 
         """

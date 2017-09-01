@@ -72,7 +72,7 @@ class TaggerModel(Model):
         self._no_entities = False
 
     def __getstate__(self):
-        """Returns the information needed pickle an instance of this class.
+        """Returns the information needed to pickle an instance of this class.
 
         By default, pickling removes attributes with names starting with
         underscores. This overrides that behavior. For the _resources field,
@@ -104,7 +104,7 @@ class TaggerModel(Model):
 
         types = [entity.entity.type for label in labels for entity in label]
         self.types = types
-        if len(set(types)) < 1:
+        if len(set(types)) == 0:
             self._no_entities = True
             logger.warning("There are no labels in this label set, "
                            "so we don't fit the model.")
@@ -215,7 +215,6 @@ class TaggerModel(Model):
             return {
                 MEMM_TYPE: MemmModel,
                 CRF_TYPE: ConditionalRandomFields,
-                # LSTM_TYPE: LSTMModel,
             }[classifier_type]
         except KeyError:
             msg = '{}: Classifier type {!r} not recognized'
