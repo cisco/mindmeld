@@ -543,7 +543,7 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
        stop_timer              0              0              0              0              0              0              6
 
 
-Note that all of these statistics are returned in a structured dictionary instead of printed to the console by using :meth:`eval.get_stats()`.
+The :meth:`eval.get_stats()` method returns all the above statistics in a structured dictionary without printing them to the console.
 
 Let’s decipher the statistics output by the :meth:`evaluate` method.
 
