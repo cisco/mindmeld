@@ -24,10 +24,12 @@ class LstmModel(Tagger):
         gaz = np.asarray(self.gaz, dtype='int32')
 
         self.config.params["output_dimension"] = len(self.labels_dict.keys())
-        self.config.params["embedding_matrix"] = self.embedding_matrix
         self.config.params["labels_dict"] = self.labels_dict
+
+        self.config.params["embedding_matrix"] = self.embedding_matrix
         self.config.params["embedding_gaz_matrix"] = self.embedding_gaz_matrix
         self.config.params["gaz_features"] = gaz
+        self.config.params["sequence_lengths"] = self._extract_seq_length(examples)
 
         self._fit(examples, labels, **self.config.params)
         return self
@@ -46,16 +48,14 @@ class LstmModel(Tagger):
         self.config.params["embedding_matrix"] = embedding_matrix
         self.config.params["embedding_gaz_matrix"] = embedding_gaz_matrix
         self.config.params["gaz_features"] = gazetteers
+        self.config.params["sequence_lengths"] = self._extract_seq_length(examples)
 
-        self._clf.embedding_matrix = embedding_matrix
-        self._clf.embedding_gaz_matrix = embedding_gaz_matrix
-        self._clf.gaz_features = gazetteers
-
-        tags_by_example = self._clf.predict(encoded_examples)
+        tags_by_example = self._predict(encoded_examples, **self.config.params)
 
         resized_predicted_tags = []
         for idx, example in enumerate(examples):
-            resized_predicted_tags.append(tags_by_example[idx][:len(example.normalized_tokens)])
+            resized_predicted_tags.append(
+                tags_by_example[idx][:len(example.normalized_tokens)])
 
         return resized_predicted_tags
 
@@ -76,22 +76,29 @@ class LstmModel(Tagger):
             queries.append(padded_query)
         return queries
 
+    def _extract_seq_length(self, examples):
+        """Extract sequence lengths from the input examples
+        Args:
+            examples (list of Query objects): List of input queries
+
+        Returns:
+            (list): List of seq lengths for each query
+        """
+        seq_lengths = []
+        for example in examples:
+            if len(example.normalized_tokens) > self.config.params['padding_length']:
+                seq_lengths.append(int(self.config.params['padding_length']))
+            else:
+                seq_lengths.append(len(example.normalized_tokens))
+
+        return seq_lengths
+
     def extract_features(self, examples, config, resources, y=None, fit=True):
         self.config = config
         self._resources = resources
         self.embedding = Embedding(self.config.params)
         self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
         self._label_encoder = get_label_encoder(self.config)
-
-        # Extract the sequence length for each query
-        seq_length = []
-        for example in examples:
-            if len(example.normalized_tokens) > self.config.params['padding_length']:
-                seq_length.append(int(self.config.params['padding_length']))
-            else:
-                seq_length.append(len(example.normalized_tokens))
-
-        self.config.params["sequence_lengths"] = seq_length
 
         # Extract features and classes
         X, self.gaz = self._get_features(examples)
@@ -194,3 +201,13 @@ class LstmModel(Tagger):
         self._clf.set_params(**params)
         self._clf.construct_tf_variables()
         return self._clf.fit(X, y)
+
+    def _predict(self, X, **params):
+        """Trains a classifier without cross-validation.
+
+        Args:
+            X (list of list of list of str): a list of queries to train on
+            params (dict): Parameters of the classifier
+        """
+        self._clf.set_params(**params)
+        return self._clf.predict(X)

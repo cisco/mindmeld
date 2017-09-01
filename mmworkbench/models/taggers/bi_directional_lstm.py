@@ -235,9 +235,12 @@ class LstmNetwork:
 
         score = 0
         for idx, query in enumerate(reshaped_output):
-            considered_query = query[:seq_lengths[idx]]
-            if considered_query == reshaped_labels[idx]:
+            seq_len = seq_lengths[idx]
+            predicted_tags = reshaped_output[idx][:seq_len]
+            actual_tags = reshaped_labels[idx][:seq_len]
+            if np.array_equal(predicted_tags, actual_tags):
                 score += 1
+
         return score
 
     def _construct_network(self, input_tensor):
@@ -338,7 +341,7 @@ class LstmNetwork:
         Args:
             batch_examples (ndarray): A batch of examples
             batch_gaz (ndarray): A batch of gazetteer features
-            batch_seq_len (list): A batch of sequence length of each query
+            batch_seq_len (ndarray): A batch of sequence length of each query
             batch_labels (ndarray): A batch of labels
 
         Returns:
@@ -427,30 +430,31 @@ class LstmNetwork:
             Array of decoded predicted tags
         """
         gaz = self.gaz_features
-        seq_len = np.ones(len(examples)) * int(self.padding_length)
+        seq_len = np.array(self.sequence_lengths)
 
         self.dense_keep_probability = 1.0
         self.lstm_input_keep_prob = 1.0
         self.lstm_output_keep_prob = 1.0
 
-        output_tensor = self.session.run(
-            self.output_tensor,
-            feed_dict=self.construct_feed_dictionary(examples, gaz, seq_len))
+        output = self.session.run(
+            [self.output_tensor],
+            feed_dict=self.construct_feed_dictionary(examples,
+                                                     gaz,
+                                                     seq_len))
 
-        output_tensor = tf.reshape(
-            output_tensor, [-1, int(self.padding_length), self.output_dimension])
-        output_tensor = tf.argmax(output_tensor, 2)
-        output_array = self.session.run(output_tensor)
+        output = np.reshape(output,
+                            [-1, int(self.padding_length), self.output_dimension])
+        output = np.argmax(output, 2)
 
         id_to_label = {}
         for key_name in self.labels_dict.keys():
             id_to_label[self.labels_dict[key_name]] = key_name
 
         decoded_queries = []
-        for i in range(len(output_array)):
+        for idx, encoded_predict in enumerate(output):
             decoded_query = []
-            for j in range(len(output_array[0])):
-                decoded_query.append(id_to_label[output_array[i][j]])
+            for tag in encoded_predict[:self.sequence_lengths[idx]]:
+                decoded_query.append(id_to_label[tag])
             decoded_queries.append(decoded_query)
 
         return decoded_queries
