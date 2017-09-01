@@ -37,7 +37,7 @@ class MemmModel(Tagger):
         """Extracts feature dicts for each token in an example.
 
         Args:
-            example (mmworkbench.core.Query): an query
+            example (mmworkbench.core.Query): a query
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction

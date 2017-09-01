@@ -82,8 +82,8 @@ class ConditionalRandomFields(Tagger):
             feat_list = []
             for feature in feat_seq:
                 temp_list = []
-                for elem in sorted(feature.keys()):
-                    temp_list.append(elem + '=' + str(feature[elem]))
+                for feat_type in sorted(feature.keys()):
+                    temp_list.append("{}={}".format(feat_type, str(feature[feat_type])))
                 feat_list.append(temp_list)
             new_X.append(feat_list)
         return new_X
@@ -214,6 +214,7 @@ class FeatureBinner(object):
         try:
             feat_value = float(feat_value)
         except Exception:
+            # Skip collection of non numerical features
             return
         mapper = self.features.get(feat_name, FeatureMapper())
         mapper.feat_name = feat_name
@@ -232,6 +233,7 @@ class FeatureBinner(object):
         try:
             feat_value = float(feat_value)
         except Exception:
+            # Don't do bucketing of non numerical features
             return {feat_name: feat_value}
         if feat_name not in self.features:
             return {feat_name: feat_value}
