@@ -59,35 +59,6 @@ def get_feature_extractor(example_type, name):
     return FEATURE_MAP[example_type][name]
 
 
-def extract_sequence_features(example, example_type, feature_config, resources):
-    """Extracts feature dicts for each token in an example.
-
-    Args:
-        example (mmworkbench.core.Query): a query
-        example_type (str): The type of example
-        feature_config (dict): The config for features
-        resources (dict): Resources of this model
-    Returns:
-        (list dict): features
-    """
-    feat_seq = []
-    for name, kwargs in feature_config.items():
-        if callable(kwargs):
-            # a feature extractor function was passed in directly
-            feat_extractor = kwargs
-        else:
-            feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
-
-        update_feat_seq = feat_extractor(example, resources)
-        if not feat_seq:
-            feat_seq = update_feat_seq
-        else:
-            for idx, features in enumerate(update_feat_seq):
-                feat_seq[idx].update(features)
-
-    return feat_seq
-
-
 def get_label_encoder(config):
     """Gets a label encoder given the label type from the config
 

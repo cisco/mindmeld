@@ -5,8 +5,7 @@ This module contains the Memm entity recognizer.
 from __future__ import print_function, absolute_import, unicode_literals, division
 from sklearn_crfsuite import CRF
 
-from ..helpers import extract_sequence_features
-from .taggers import Tagger
+from .taggers import Tagger, extract_sequence_features
 
 import logging
 import numpy as np

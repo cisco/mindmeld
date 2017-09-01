@@ -9,8 +9,7 @@ from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 
-from .taggers import Tagger, START_TAG
-from ..helpers import extract_sequence_features
+from .taggers import Tagger, START_TAG, extract_sequence_features
 
 import logging
 logger = logging.getLogger(__name__)
