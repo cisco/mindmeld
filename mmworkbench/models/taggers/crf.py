@@ -27,6 +27,9 @@ class ConditionalRandomFields(Tagger):
         self._clf.set_params(**parameters)
         return self
 
+    def get_params(self, deep=True):
+        return self._clf.get_params()
+
     def predict(self, X):
         return self._clf.predict(X)
 
