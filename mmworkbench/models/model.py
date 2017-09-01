@@ -14,7 +14,7 @@ from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridS
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal, get_entity_scorer)
+                      entity_seqs_equal, get_seq_accuracy_scorer, get_seq_tag_accuracy_scorer)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # model scoring types
 ACCURACY_SCORING = 'accuracy'
 LIKELIHOOD_SCORING = 'log_loss'
+SEQUENCE_MODELS = ['crf']
 
 _NEG_INF = -1e10
 
@@ -611,11 +612,11 @@ class Model(object):
         self._resources = {}
         self._clf = None
         self.cv_loss_ = None
-        self.default_scorer = self.get_default_scorer(self.config)
+        self.default_scorer = self._get_default_scorer(self.config)
 
-    def get_default_scorer(self, config):
-        if config.label_type == ENTITIES_LABEL_TYPE:
-            return get_entity_scorer()
+    def _get_default_scorer(self, config):
+        if config.model_settings['classifier_type'] in SEQUENCE_MODELS:
+            return get_seq_tag_accuracy_scorer()
         else:
             return ACCURACY_SCORING
 
@@ -684,7 +685,13 @@ class Model(object):
         return model.best_estimator_, model.best_params_
 
     def _get_cv_scorer(self, selection_settings):
-        return selection_settings.get('scoring', self.default_scorer)
+        scorer = selection_settings.get('scoring', self.default_scorer)
+        if scorer == 'seq_accuracy':
+            return get_seq_accuracy_scorer()
+        elif scorer == 'seq_tag_accuracy':
+            return get_seq_tag_accuracy_scorer()
+        else:
+            return scorer
 
     def _get_cv_estimator_and_params(self, model_class, param_grid):
         return model_class(), param_grid

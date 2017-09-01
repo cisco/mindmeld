@@ -179,15 +179,45 @@ def get_ngram(tokens, start, length):
     return ' '.join(ngram_tokens)
 
 
-def get_entity_scorer():
-    return make_scorer(score_func=entity_accuracy_scoring)
+def get_seq_accuracy_scorer():
+    return make_scorer(score_func=sequence_accuracy_scoring)
 
 
-def entity_accuracy_scoring(expected, predicted):
-    num_examples = len(expected)
-    num_correct = sum(1 for expected_seq, predicted_seq in zip(expected, predicted)
-                      if entity_seqs_equal(expected_seq, predicted_seq))
-    return float(num_correct) / float(num_examples)
+def get_seq_tag_accuracy_scorer():
+    return make_scorer(score_func=sequence_tag_accuracy_scoring)
+
+
+def sequence_accuracy_scoring(y_true, y_pred):
+    """
+    Accuracy score which calculates two sequences to be equal only if all of
+    their predicted tags are equal.
+    """
+    total = len(y_true)
+    if not total:
+        return 0
+
+    matches = sum(1 for yseq_true, yseq_pred in zip(y_true, y_pred)
+                  if yseq_true == yseq_pred)
+
+    return float(matches) / float(total)
+
+
+def sequence_tag_accuracy_scoring(y_true, y_pred):
+    """
+    Accuracy score which calculates the number of tags that were predicted
+    correctly.
+    """
+    y_true_flat = [tag for seq in y_true for tag in seq]
+    y_pred_flat = [tag for seq in y_pred for tag in seq]
+
+    total = len(y_true_flat)
+    if not total:
+        return 0
+
+    matches = sum(1 for (y_true_tag, y_pred_tag) in zip(y_true_flat, y_pred_flat)
+                  if y_true_tag == y_pred_tag)
+
+    return float(matches) / float(total)
 
 
 def entity_seqs_equal(expected, predicted):

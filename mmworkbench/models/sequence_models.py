@@ -111,10 +111,10 @@ class TaggerModel(Model):
             return self
 
         # TODO: check if there at least more than one label
-        # # TODO: add this code back in
-        # # distinct_labels = set(labels)
-        # # if len(set(distinct_labels)) <= 1:
-        # #     return None
+        # TODO: add this code back in
+        # distinct_labels = set(labels)
+        # if len(set(distinct_labels)) <= 1:
+        #     return None
 
         # Get model classifier and initialize
         self._clf = self._get_model_constructor()()
