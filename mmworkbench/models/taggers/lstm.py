@@ -11,10 +11,12 @@ DEFAULT_LABEL = 'B|UNK'
 DEFAULT_GAZ_LABEL = 'O'
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
+REGEX_TYPE_POSITIONAL_INDEX = 1
 
 
-class LSTMModel(Tagger):
-    """"A LSTM model."""
+class LstmModel(Tagger):
+    """"This class encapsulates the bi-directional LSTM model and provides
+    the correct interface for use"""
 
     def fit(self, X, encoded_labels, resources=None):
         examples = np.asarray(X, dtype='int32')
@@ -34,20 +36,20 @@ class LSTMModel(Tagger):
         return self.predict(examples)
 
     def predict(self, examples):
-        X, gaz = self._get_features(examples)
+        X, gazetteers = self._get_features(examples)
         embedding_matrix = self.embedding.get_encoding_matrix()
         embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
 
         encoded_examples = np.asarray(X, dtype='int32')
-        gaz = np.asarray(gaz, dtype='int32')
+        gazetteers = np.asarray(gazetteers, dtype='int32')
 
         self.config.params["embedding_matrix"] = embedding_matrix
         self.config.params["embedding_gaz_matrix"] = embedding_gaz_matrix
-        self.config.params["gaz_features"] = gaz
+        self.config.params["gaz_features"] = gazetteers
 
         self._clf.embedding_matrix = embedding_matrix
         self._clf.embedding_gaz_matrix = embedding_gaz_matrix
-        self._clf.gaz_features = gaz
+        self._clf.gaz_features = gazetteers
 
         tags_by_example = self._clf.predict(encoded_examples)
 
@@ -61,7 +63,6 @@ class LSTMModel(Tagger):
         self._clf = LstmNetwork(**parameters)
 
     def _get_model_constructor(self):
-        """Returns the python class of the actual underlying model"""
         return LstmNetwork
 
     def _preprocess_query_data(self, list_of_gold_queries, padding_length):
@@ -99,6 +100,8 @@ class LSTMModel(Tagger):
 
         all_tags = []
 
+        # This index offset is used to track which query in the input tag flat list we
+        # are currently located at to that the appropriate tags are extracted per query
         index_offset = 0
         for example in examples:
             all_tags.append(y[index_offset: index_offset + len(example.normalized_tokens)])
@@ -107,10 +110,13 @@ class LSTMModel(Tagger):
         encoded_labels = self.embedding.encode_labels(all_tags)
         self.labels_dict = self.embedding.label_encoding
 
-        return X, encoded_labels, None
+        # There are no groups in this model
+        groups = None
 
-    def setup_model(self, selector_type, scale_type):
-        # NoOp
+        return X, encoded_labels, groups
+
+    def setup_model(self, selector_type=None, scale_type=None):
+        # This is a no-op since the model setup is taken care by the underlying model
         return
 
     def _get_features(self, examples):
@@ -140,10 +146,8 @@ class LSTMModel(Tagger):
         padding_length = self.config.params['padding_length']
 
         extracted_gaz_tokens = [DEFAULT_GAZ_LABEL] * padding_length
-        extracted_sequence_features = extract_sequence_features(example,
-                                                                self.config.example_type,
-                                                                self.config.features,
-                                                                self._resources)
+        extracted_sequence_features = extract_sequence_features(
+            example, self.config.example_type, self.config.features, self._resources)
 
         for index, extracted_gaz in enumerate(extracted_sequence_features):
             if len(extracted_gaz.keys()) > 0 and index < padding_length:
@@ -151,12 +155,18 @@ class LSTMModel(Tagger):
                 for key in extracted_gaz.keys():
                     regex_match = re.match(GAZ_PATTERN_MATCH, key)
                     if regex_match:
-                        combined_gaz_features.add(regex_match.group(1))
-                        # TODO: Found a lot of gaz features had both start and end
-                        # for the positive info, so I removed that feature
 
-                        # combined_gaz_features.add("{}-{}".format(
-                        #     regex_match.group(1), regex_match.group(2)))
+                        # Examples of gaz features here are:
+                        # in-gaz|type:city|pos:start|p_fe,
+                        # in-gaz|type:city|pos:end|pct-char-len
+                        # There were many gaz features of the same type that had
+                        # bot start and end position tags for a given token.
+                        # Due to this, we did not implement functionality to
+                        # extract the positional information due to the noise
+                        # associated with it.
+
+                        combined_gaz_features.add(
+                            regex_match.group(REGEX_TYPE_POSITIONAL_INDEX))
 
                 if len(combined_gaz_features) == 0:
                     extracted_gaz_tokens[index] = DEFAULT_GAZ_LABEL
@@ -172,25 +182,6 @@ class LSTMModel(Tagger):
         padded_query = self.embedding.transform_example(padded_query)
 
         return padded_query, encoded_gaz
-
-    def _preprocess_data(self, X):
-        """Converts data into formats of CRF suite.
-
-        Args:
-            X (list of dict): features of an example
-        Returns:
-            (list of list of str): features in CRF suite format
-        """
-        new_X = []
-        for feat_seq in X:
-            feat_list = []
-            for feature in feat_seq:
-                temp_list = []
-                for elem in sorted(feature.keys()):
-                    temp_list.append(elem + '=' + str(feature[elem]))
-                feat_list.append(temp_list)
-            new_X.append(feat_list)
-        return new_X
 
     def _fit(self, X, y, **params):
         """Trains a classifier without cross-validation.
