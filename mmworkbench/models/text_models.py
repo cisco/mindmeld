@@ -128,10 +128,9 @@ class TextModel(Model):
         examples = [examples[i] for i in indices]
         labels = [labels[i] for i in indices]
 
-        # TODO: add this code back in
-        # distinct_labels = set(labels)
-        # if len(set(distinct_labels)) <= 1:
-        #     return None
+        distinct_labels = set(labels)
+        if len(set(distinct_labels)) <= 1:
+            return self
 
         # Extract features and classes
         y = self._label_encoder.encode(labels)
