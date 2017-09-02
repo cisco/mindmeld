@@ -60,8 +60,10 @@ DEFAULT_INTENT_MODEL_CONFIG = {
 }
 
 DEFAULT_ENTITY_MODEL_CONFIG = {
-    'model_type': 'memm',
+    'model_type': 'tagger',
+    'label_type': 'entities',
     'model_settings': {
+        'classifier_type': 'memm',
         'tag_scheme': 'IOB',
         'feature_scaler': 'max-abs'
     },
@@ -133,7 +135,10 @@ DEFAULT_ES_SYNONYM_MAPPING = {
 }
 
 DEFAULT_ROLE_MODEL_CONFIG = {
-    'model_type': 'maxent',
+    'model_type': 'text',
+    'model_settings': {
+        'classifier_type': 'logreg'
+    },
     'params': {
         'C': 100,
         'penalty': 'l1'

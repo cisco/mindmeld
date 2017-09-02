@@ -142,7 +142,6 @@ class EntityRecognizer(Classifier):
             str: The predicted class label
 
         """
-
         prediction = super().predict(query) or ()
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
