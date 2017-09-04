@@ -189,7 +189,7 @@ class EntityResolver(object):
         item_map = {}
         syn_map = {}
         seen_ids = []
-        for item in entity_map:
+        for item in entity_map.get('entities'):
             cname = item['cname']
             item_id = item.get('id')
             if cname in item_map:
