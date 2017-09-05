@@ -139,7 +139,7 @@ class Embedding:
         Returns:
             Embedding matrix ndarray
         """
-        gaz_dim = len(self.gaz_word_to_encoding_extracted.keys())
+        gaz_dim = self.parameters['gaz_dimension']
         num_entites = len(self.gaz_word_to_encoding.keys())
         embedding_matrix_gaz = np.zeros((num_entites, gaz_dim))
 
@@ -191,3 +191,27 @@ class Embedding:
             encoded_labels.append(encoded_sentence_label)
 
         return encoded_labels
+
+    @staticmethod
+    def transform_query_using_embeddings(encoded_examples, embeddings_matrix):
+        """Transform the encoded examples to its respective embeddings based on the
+        embeddings matrix. The encoded examples could be queries or gazetteers
+
+        Args:
+            encoded_examples (ndarray): encoded examples
+            embeddings_matrix (ndarray): embedding matrix
+
+        Returns:
+            transformed embedding matrix
+        """
+        examples_shape = np.shape(encoded_examples)
+        final_dimension = np.shape(embeddings_matrix)[1]
+
+        transformed_examples = np.zeros((examples_shape[0], examples_shape[1], final_dimension))
+
+        for query_index in range(len(encoded_examples)):
+            for word_index in range(len(transformed_examples[query_index])):
+                transformed_examples[query_index][word_index] = \
+                    embeddings_matrix[encoded_examples[query_index][word_index]]
+
+        return transformed_examples

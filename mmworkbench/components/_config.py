@@ -74,15 +74,16 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
         'padding_length': 19,
         'batch_size': 20,
         'display_epoch': 20,
-        'number_of_epochs': 40,
+        'number_of_epochs': 20,
         'optimizer': 'adam',
         'learning_rate': 0.005,
-        'dense_keep_probability': 0.5,
+        'dense_keep_prob': 0.5,
         'lstm_input_keep_prob': 0.5,
         'lstm_output_keep_prob': 0.5,
         'token_lstm_hidden_state_dimension': 300,
         'token_embedding_dimension': 300,
-        'token_pretrained_embedding_filepath': 'glove.6B.300d.txt'
+        'token_pretrained_embedding_filepath': 'glove.6B.300d.txt',
+        'gaz_encoding_dimension': 100
     },
     'features': {
         'in-gaz-span-seq': {},

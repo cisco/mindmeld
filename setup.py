@@ -25,7 +25,6 @@ requirements = [
     'urllib3<1.22,>=1.21.1',
     'python-crfsuite>=0.9.2',
     'sklearn-crfsuite>=0.3.6',
-    'bleach=1.5.0',
     'tensorflow>=1.2.1'
 ]
 
