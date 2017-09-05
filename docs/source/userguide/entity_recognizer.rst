@@ -531,13 +531,13 @@ Then, when you are ready, use the :meth:`EntityRecognizer.evaluate` method, whic
  - passes the resulting unlabeled queries to the trained entity recognizer for prediction, and
  - compares the classifier's output predictions against the ground truth labels to compute the model's prediction accuracy.
 
-In the example below, the model gets 33 out of 37 test queries correct, resulting in an accuracy of about 89%.
+In the example below, the model gets 35 out of 37 test queries correct, resulting in an accuracy of about 94.6%.
 
 .. code-block:: python
 
    >>> er.evaluate()
    Loading queries from file weather/check_weather/test.txt
-   <EntityModelEvaluation score: 89.19%, 33 of 37 examples correct>
+   <EntityModelEvaluation score: 94.59%, 35 of 37 examples correct>
 
 Note that this is *query-level* accuracy. A prediction on a query can only be graded as "correct" when all the entities detected by the entity recognizer exactly match exactly the annotated entities in the test query.
 
@@ -552,39 +552,43 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
    Overall tag-level statistics:
 
       accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
-         1.000       1.000         100         200           0           0       1.000       1.000
+         0.986       0.985         204         825           3           3       0.975       0.986
 
 
 
    Tag-level statistics by class:
 
                  class      f_beta   precision      recall     support          tp          tn          fp          fn
-                    O|       1.000       1.000       1.000          50          50          50           0           0
-            B|sys_time       1.000       1.000       1.000          21          21          79           0           0
-            I|sys_time       1.000       1.000       1.000          29          29          71           0           0
+                    O|       0.990       0.981       1.000         155         155          49           3           0
+                B|city       0.985       1.000       0.971          34          33         173           0           1
+            B|sys_time       1.000       1.000       1.000           4           4         203           0           0
+            I|sys_time       1.000       1.000       1.000           3           3         204           0           0
+                I|city       0.900       1.000       0.818          11           9         196           0           2
 
 
 
    Confusion matrix:
 
-                              O|     B|sys_time     I|sys_time
-               O|             50              0              0
-       B|sys_time              0             21              0
-       I|sys_time              0              0             29
+                              O|         B|city     B|sys_time     I|sys_time         I|city
+               O|            155              0              0              0              0
+           B|city              1             33              0              0              0
+       B|sys_time              0              0              4              0              0
+       I|sys_time              0              0              0              3              0
+           I|city              2              0              0              0              9
 
 
 
    Segment-level statistics:
 
             le          be         lbe          tp          tn          fp          fn
-             0           0           0          21          24           0           0
+             0           1           0          36          42           0           1
 
 
 
    Sequence-level statistics:
 
      sequence_accuracy
-                 1.000
+                 0.946
 
 
 The :meth:`eval.get_stats()` method returns all the above statistics in a structured dictionary without printing them to the console.
