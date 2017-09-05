@@ -1,10 +1,10 @@
 import numpy as np
 import re
 
-from .taggers import Tagger
+from .taggers import Tagger, extract_sequence_features
 from .bi_directional_lstm import LstmNetwork
 from .embeddings import Embedding
-from ..helpers import extract_sequence_features, get_label_encoder
+from ..helpers import get_label_encoder
 
 DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_LABEL = 'B|UNK'
@@ -23,27 +23,20 @@ class LstmModel(Tagger):
         labels = np.asarray(encoded_labels, dtype='int32')
         gaz = np.asarray(self.gaz, dtype='float32')
         self.config.params['gaz_features'] = gaz
-
         self._fit(examples, labels, **self.config.params)
         return self
 
     def process_and_predict(self, examples, config=None, resources=None):
         return self.predict(examples)
 
-    def predict(self, examples):
-        X, gaz = self._get_features(examples)
+    def predict(self, X):
         encoded_examples = np.asarray(X, dtype='float32')
-        gaz = np.asarray(gaz, dtype='float32')
-
-        self.config.params['gaz_features'] = gaz
-        self.config.params['sequence_lengths'] = self._extract_seq_length(examples)
-
         tags_by_example = self._predict(encoded_examples, **self.config.params)
+        seq_lens = self.config.params['sequence_lengths']
 
         resized_predicted_tags = []
-        for idx, example in enumerate(examples):
-            resized_predicted_tags.append(
-                tags_by_example[idx][:len(example.normalized_tokens)])
+        for query, seq_len in zip(tags_by_example, seq_lens):
+            resized_predicted_tags.append(query[:seq_len])
 
         return resized_predicted_tags
 
@@ -86,7 +79,6 @@ class LstmModel(Tagger):
         self._resources = resources
 
         self.config.params['gaz_dimension'] = len(self._resources['gazetteers'].keys())
-        self.config.params['sequence_lengths'] = self._extract_seq_length(examples)
 
         self.embedding = Embedding(self.config.params)
         self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
@@ -95,18 +87,16 @@ class LstmModel(Tagger):
         # Extract features and classes
         X, self.gaz = self._get_features(examples)
 
-        all_tags = []
-        # This index offset is used to track which query in the input tag flat list we
-        # are currently located at to that the appropriate tags are extracted per query
-        index_offset = 0
-        for example in examples:
-            all_tags.append(y[index_offset: index_offset + len(example.normalized_tokens)])
-            index_offset = index_offset + len(example.normalized_tokens)
+        self.config.params['gaz_features'] = self.gaz
+        self.config.params['sequence_lengths'] = self._extract_seq_length(examples)
 
-        encoded_labels = self.embedding.encode_labels(all_tags)
-
-        self.config.params['output_dimension'] = len(self.embedding.label_encoding.keys())
-        self.config.params['labels_dict'] = self.embedding.label_encoding
+        if y:
+            encoded_labels = self.embedding.encode_labels(y)
+            self.config.params['output_dimension'] = len(self.embedding.label_encoding.keys())
+            self.config.params['labels_dict'] = self.embedding.label_encoding
+        else:
+            # Predict time since the label is not available
+            encoded_labels = None
 
         # There are no groups in this model
         groups = None

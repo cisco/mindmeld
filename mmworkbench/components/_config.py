@@ -74,7 +74,7 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
         'padding_length': 19,
         'batch_size': 20,
         'display_epoch': 20,
-        'number_of_epochs': 20,
+        'number_of_epochs': 50,
         'optimizer': 'adam',
         'learning_rate': 0.005,
         'dense_keep_prob': 0.5,
