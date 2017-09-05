@@ -31,16 +31,16 @@ class LstmNetwork:
                    output_dimension=None,
                    display_epoch=20,
                    padding_length=19,
-                   embedding_matrix=None,
                    token_embedding_dimension=None,
                    token_pretrained_embedding_filepath=None,
-                   dense_keep_probability=None,
-                   lstm_input_keep_prob=None,
-                   lstm_output_keep_prob=None,
+                   dense_keep_prob=0.5,
+                   lstm_input_keep_prob=0.5,
+                   lstm_output_keep_prob=0.5,
                    labels_dict=None,
-                   embedding_gaz_matrix=None,
                    gaz_features=None,
-                   sequence_lengths=None):
+                   sequence_lengths=None,
+                   gaz_encoding_dimension=100,
+                   gaz_dimension=8):
         """Initialize params
 
         Args:
@@ -56,19 +56,17 @@ class LstmNetwork:
             network displays common stats like accuracy
             padding_length (int): The length of each query, which is
             fixed, so some queries will be cut short in length
-            embedding_matrix (ndarray): Each row represents a real vector
             representing the word embedding, the row index
             is the word's index
             token_embedding_dimension (int): The embedding dimension of the word
             token_pretrained_embedding_filepath (str): The pretrained embedding file-path
-            dense_keep_probability (float): The dropout rate of the dense layers
+            dense_keep_prob (float): The dropout rate of the dense layers
             lstm_input_keep_prob (float): The dropout rate of the inputs to the LSTM cell
             lstm_output_keep_prob (float): The dropout rate of the outputs of the LSTM cell
             labels_dict (dict): A dictionary of label to label encoding
-            embedding_gaz_matrix (ndarray): Each row represents an binary encoding of a
-            gazetteer word
             gaz_features (list): A list of list of gazetteer features for each query
             sequence_lengths (list): A list of actual sequence lengths for each query
+            gaz_encoding_dimension (int): The gazetteer encoding dimension
         """
 
         self.number_of_epochs = number_of_epochs
@@ -79,34 +77,33 @@ class LstmNetwork:
         self.output_dimension = output_dimension
         self.padding_length = padding_length
         self.display_epoch = display_epoch
-        self.embedding_matrix = embedding_matrix
         self.token_embedding_dimension = token_embedding_dimension
         self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
-        self.dense_keep_probability = dense_keep_probability
+        self.dense_keep_probability = dense_keep_prob
         self.lstm_input_keep_prob = lstm_input_keep_prob
         self.lstm_output_keep_prob = lstm_output_keep_prob
         self.labels_dict = labels_dict
-        self.embedding_gaz_matrix = embedding_gaz_matrix
         self.gaz_features = gaz_features
         self.sequence_lengths = sequence_lengths
+        self.gaz_encoding_dimension = gaz_encoding_dimension
+        self.gaz_dimension = gaz_dimension
 
     def construct_tf_variables(self):
         """
         Constructs the variables and operations in the tensorflow session graph
         """
-        self.word_embedding_dimension = self.embedding_matrix.shape[0]
-        self.word_vocab_size = self.embedding_matrix.shape[1]
 
-        self.input = tf.placeholder(tf.int32, [None, self.padding_length])
+        self.tf_keep_probability = tf.placeholder(tf.float32)
+        self.tf_lstm_input_keep_prob = tf.placeholder(tf.float32)
+        self.tf_lstm_output_keep_prob = tf.placeholder(tf.float32)
 
-        self.gaz_input = tf.placeholder(
-            tf.int32, [None, self.padding_length])
+        self.input = tf.placeholder(tf.float32, [None,
+                                                 self.padding_length,
+                                                 self.token_embedding_dimension])
 
-        self.embedding_matrix_tensor = tf.placeholder(
-            tf.float32, [None, self.token_embedding_dimension])
-
-        self.embedding_matrix_gaz_tensor = tf.placeholder(
-            tf.float32, [None, self.embedding_gaz_matrix.shape[1]])
+        self.gaz_input = tf.placeholder(tf.float32, [None,
+                                                     self.padding_length,
+                                                     self.gaz_dimension])
 
         self.label_tensor = tf.placeholder(
             tf.int32, [None, int(self.padding_length), self.output_dimension])
@@ -126,74 +123,15 @@ class LstmNetwork:
         Returns:
             Combined embeddings of the word and gazetteer embeddings
         """
+        initializer = tf.contrib.layers.xavier_initializer(seed=1)
 
-        # Sequence lengths tensor
-        batch_size = tf.shape(self.sequence_lengths_tensor)[0]
-
-        # GAZ CONSTRUCTION
-        gaz_one_hot = tf.one_hot(
-            indices=tf.cast(self.gaz_input, tf.int32),
-            depth=self.embedding_gaz_matrix.shape[1],
-            dtype=tf.float32)
-
-        gaz_embedding_matrix_weights = tf.Variable(
-            self.embedding_gaz_matrix,
-            dtype=tf.float32,
-            trainable=False)
-
-        gaz_embedding_matrix_weights = tf.reshape(
-            tf.tile(gaz_embedding_matrix_weights, [batch_size, 1]),
-            [batch_size, self.embedding_gaz_matrix.shape[0],
-             self.embedding_gaz_matrix.shape[1]])
-
-        # Each word gets turned into a binary vector that represents
-        # presense in gazetteers
-        gaz_embedding = tf.matmul(
-            gaz_embedding_matrix_weights,
-            gaz_one_hot,
-            transpose_b=True)
-        gaz_embedding = tf.transpose(gaz_embedding, [0, 2, 1])
-
-        dense_gaz_embedding = tf.contrib.layers.fully_connected(gaz_embedding, 100)
-
-        # WORD EMBEDDING CONSTRUCTION
-
-        # Shape: batch_size BY query_padding_length BY word_vocab_size
-        words_one_hot = tf.one_hot(
-            indices=tf.cast(self.input, tf.int32),
-            depth=self.word_vocab_size,
-            dtype=tf.float32)
-
-        word_embedding_matrix_weights = tf.Variable(
-            self.embedding_matrix,
-            dtype=tf.float32,
-            trainable=False)
-
-        # Duplicate/tile the matrix weights batch_size number of times so each example has
-        # the weights to multiply by. Shape: (word_embedding_dimension*batch_size)
-        # BY word_vocab_size
-        word_embedding_matrix_weights = tf.tile(
-            word_embedding_matrix_weights, [batch_size, 1])
-
-        # Must reshape so each batch_size dimension has a copy of the word
-        # embedding matrix weights
-        # Shape: batch_size BY word_embedding_dimension BY word_vocab_size
-        word_embedding_matrix_weights = tf.reshape(word_embedding_matrix_weights,
-                                                   [batch_size,
-                                                    self.word_embedding_dimension,
-                                                    self.word_vocab_size])
-
-        # Extract the column vector that corresponds to the embedding
-        # Shape: batch_size BY word_embedding_dimension BY query_padding_length
-        word_embedding = tf.matmul(word_embedding_matrix_weights, words_one_hot, transpose_b=True)
-
-        # Transpose because for each batch we want the first dimension to
-        # correspond to words, second to embedding
-        word_embedding = tf.transpose(word_embedding, [0, 2, 1])
+        dense_gaz_embedding = tf.contrib.layers.fully_connected(
+            inputs=self.gaz_input,
+            num_outputs=self.gaz_encoding_dimension,
+            weights_initializer=initializer)
 
         # Combined the two embeddings
-        combined_embedding = tf.concat([word_embedding, dense_gaz_embedding], axis=2)
-
+        combined_embedding = tf.concat([self.input, dense_gaz_embedding], axis=2)
         return combined_embedding
 
     def _define_optimizer_and_cost(self, output_tensor, label_tensor):
@@ -255,7 +193,6 @@ class LstmNetwork:
         Returns:
             The number of queries where all the tags are correct
         """
-
         n_hidden = int(self.token_lstm_hidden_state_dimension)
 
         # We cannot use the static batch size variable since for the last batch set
@@ -263,7 +200,7 @@ class LstmNetwork:
         batch_size_dim = tf.shape(input_tensor)[0]
 
         # We use the xavier initializer for some of it's gradient control properties
-        initializer = tf.contrib.layers.xavier_initializer()
+        initializer = tf.contrib.layers.xavier_initializer(seed=1)
 
         # Forward LSTM construction
         lstm_cell_for = tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
@@ -271,8 +208,8 @@ class LstmNetwork:
 
         lstm_cell_for = tf.contrib.rnn.DropoutWrapper(
             lstm_cell_for,
-            input_keep_prob=self.lstm_input_keep_prob,
-            output_keep_prob=self.lstm_output_keep_prob
+            input_keep_prob=self.tf_lstm_input_keep_prob,
+            output_keep_prob=self.tf_lstm_output_keep_prob
         )
 
         # Backward LSTM construction
@@ -281,22 +218,33 @@ class LstmNetwork:
 
         lstm_cell_back = tf.contrib.rnn.DropoutWrapper(
             lstm_cell_back,
-            input_keep_prob=self.lstm_input_keep_prob,
-            output_keep_prob=self.lstm_output_keep_prob
+            input_keep_prob=self.tf_lstm_input_keep_prob,
+            output_keep_prob=self.tf_lstm_output_keep_prob
         )
 
         # LSTM state construction
         initial_cell_state = tf.get_variable(
-            "initial_cell_state", shape=[1, n_hidden], dtype=tf.float32, initializer=initializer)
+            "initial_cell_state",
+            shape=[1, n_hidden],
+            dtype=tf.float32,
+            initializer=initializer)
 
         initial_output_state = tf.get_variable(
-            "initial_output_state", shape=[1, n_hidden], dtype=tf.float32, initializer=initializer)
+            "initial_output_state",
+            shape=[1, n_hidden],
+            dtype=tf.float32,
+            initializer=initializer)
 
         initial_cell_state_2 = tf.get_variable(
-            "initial_cell_state_2", shape=[1, n_hidden], dtype=tf.float32, initializer=initializer)
+            "initial_cell_state_2",
+            shape=[1, n_hidden],
+            dtype=tf.float32,
+            initializer=initializer)
 
         initial_output_state_2 = tf.get_variable(
-            "initial_output_state_2", shape=[1, n_hidden], dtype=tf.float32,
+            "initial_output_state_2",
+            shape=[1, n_hidden],
+            dtype=tf.float32,
             initializer=initializer)
 
         initial_state = {}
@@ -320,13 +268,13 @@ class LstmNetwork:
         # Construct the output later
         output = tf.concat([output_fw, output_bw], axis=-1)
         output = tf.reshape(output, [-1, 2 * n_hidden])
-        output = tf.nn.dropout(output, float(self.dense_keep_probability))
+        output = tf.nn.dropout(output, self.tf_keep_probability)
 
         weights = tf.get_variable("weights_out", shape=[2 * n_hidden, self.output_dimension],
-                                  dtype="float32", initializer=tf.random_normal_initializer())
+                                  dtype="float32", initializer=initializer)
 
         biases = tf.get_variable("bias_out", shape=[self.output_dimension],
-                                 dtype="float32", initializer=tf.random_normal_initializer())
+                                 dtype="float32", initializer=initializer)
 
         output_tensor = tf.matmul(output, weights) + biases
         return output_tensor
@@ -347,12 +295,14 @@ class LstmNetwork:
         Returns:
             The feed dictionary
         """
+
         return_dict = {
             self.input: batch_examples,
             self.sequence_lengths_tensor: batch_seq_len,
             self.gaz_input: batch_gaz,
-            self.embedding_matrix_tensor: self.embedding_matrix,
-            self.embedding_matrix_gaz_tensor: self.embedding_gaz_matrix
+            self.tf_keep_probability: self.dense_keep_probability,
+            self.tf_lstm_input_keep_prob: self.lstm_input_keep_prob,
+            self.tf_lstm_output_keep_prob: self.lstm_output_keep_prob
         }
 
         if len(batch_labels) > 0:

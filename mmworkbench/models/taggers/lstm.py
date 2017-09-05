@@ -19,17 +19,10 @@ class LstmModel(Tagger):
     the correct interface for use"""
 
     def fit(self, X, encoded_labels, resources=None):
-        examples = np.asarray(X, dtype='int32')
+        examples = np.asarray(X, dtype='float32')
         labels = np.asarray(encoded_labels, dtype='int32')
-        gaz = np.asarray(self.gaz, dtype='int32')
-
-        self.config.params["output_dimension"] = len(self.labels_dict.keys())
-        self.config.params["labels_dict"] = self.labels_dict
-
-        self.config.params["embedding_matrix"] = self.embedding_matrix
-        self.config.params["embedding_gaz_matrix"] = self.embedding_gaz_matrix
-        self.config.params["gaz_features"] = gaz
-        self.config.params["sequence_lengths"] = self._extract_seq_length(examples)
+        gaz = np.asarray(self.gaz, dtype='float32')
+        self.config.params['gaz_features'] = gaz
 
         self._fit(examples, labels, **self.config.params)
         return self
@@ -38,17 +31,12 @@ class LstmModel(Tagger):
         return self.predict(examples)
 
     def predict(self, examples):
-        X, gazetteers = self._get_features(examples)
-        embedding_matrix = self.embedding.get_encoding_matrix()
-        embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
+        X, gaz = self._get_features(examples)
+        encoded_examples = np.asarray(X, dtype='float32')
+        gaz = np.asarray(gaz, dtype='float32')
 
-        encoded_examples = np.asarray(X, dtype='int32')
-        gazetteers = np.asarray(gazetteers, dtype='int32')
-
-        self.config.params["embedding_matrix"] = embedding_matrix
-        self.config.params["embedding_gaz_matrix"] = embedding_gaz_matrix
-        self.config.params["gaz_features"] = gazetteers
-        self.config.params["sequence_lengths"] = self._extract_seq_length(examples)
+        self.config.params['gaz_features'] = gaz
+        self.config.params['sequence_lengths'] = self._extract_seq_length(examples)
 
         tags_by_example = self._predict(encoded_examples, **self.config.params)
 
@@ -96,17 +84,18 @@ class LstmModel(Tagger):
     def extract_features(self, examples, config, resources, y=None, fit=True):
         self.config = config
         self._resources = resources
+
+        self.config.params['gaz_dimension'] = len(self._resources['gazetteers'].keys())
+        self.config.params['sequence_lengths'] = self._extract_seq_length(examples)
+
         self.embedding = Embedding(self.config.params)
         self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
         self._label_encoder = get_label_encoder(self.config)
 
         # Extract features and classes
         X, self.gaz = self._get_features(examples)
-        self.embedding_matrix = self.embedding.get_encoding_matrix()
-        self.embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
 
         all_tags = []
-
         # This index offset is used to track which query in the input tag flat list we
         # are currently located at to that the appropriate tags are extracted per query
         index_offset = 0
@@ -115,7 +104,9 @@ class LstmModel(Tagger):
             index_offset = index_offset + len(example.normalized_tokens)
 
         encoded_labels = self.embedding.encode_labels(all_tags)
-        self.labels_dict = self.embedding.label_encoding
+
+        self.config.params['output_dimension'] = len(self.embedding.label_encoding.keys())
+        self.config.params['labels_dict'] = self.embedding.label_encoding
 
         # There are no groups in this model
         groups = None
@@ -127,7 +118,7 @@ class LstmModel(Tagger):
         return
 
     def _get_features(self, examples):
-        """Transforms a list of examples into a feature matrix.
+        """Extracts the word and gazetteer embeddings from the input examples
 
         Args:
             examples (list of mmworkbench.core.Query): a list of queries
@@ -140,6 +131,12 @@ class LstmModel(Tagger):
             x_feat, gaz_feat = self._extract_features(example)
             x_feats.append(x_feat)
             gaz_feats.append(gaz_feat)
+
+        embedding_matrix = self.embedding.get_encoding_matrix()
+        embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
+
+        x_feats = self.embedding.transform_query_using_embeddings(x_feats, embedding_matrix)
+        gaz_feats = self.embedding.transform_query_using_embeddings(gaz_feats, embedding_gaz_matrix)
         return x_feats, gaz_feats
 
     def _extract_features(self, example):
