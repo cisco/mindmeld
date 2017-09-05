@@ -490,7 +490,7 @@ Then, when you are ready, use the :meth:`IntentClassifier.evaluate` method, whic
  - passes the resulting unlabeled queries to the trained intent classifier for prediction, and
  - compares the classifier’s output predictions against the ground truth labels to compute the model’s prediction accuracy.
 
-In the example below, the model gets 63 out of 78 test queries correct, resulting in an accuracy of about 81%.
+In the example below, the model gets 339 out of 345 test queries correct, resulting in an accuracy of about 98.3%.
 
 .. code-block:: python
 
@@ -501,7 +501,7 @@ In the example below, the model gets 63 out of 78 test queries correct, resultin
    Loading queries from file times_and_dates/set_alarm/test.txt
    Loading queries from file times_and_dates/start_timer/test.txt
    Loading queries from file times_and_dates/stop_timer/test.txt
-   <StandardModelEvaluation score: 80.77%, 63 of 78 examples correct>
+   <StandardModelEvaluation score: 98.26%, 339 of 345 examples correct>
 
 The aggregate accuracy score we see above is only the beginning, because the :meth:`evaluate` method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.
 

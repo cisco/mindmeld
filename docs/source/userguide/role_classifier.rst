@@ -455,24 +455,24 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
    >>> eval.print_stats()
    Overall statistics:
 
-      accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
-         1.000       1.000          21          21           0           0       1.000       1.000
+       accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
+          0.952       0.952          20          20           1           1       0.952       0.952
 
 
 
    Statistics by class:
 
-                 class      f_beta   precision      recall     support          tp          tn          fp          fn
-              old_time       1.000       1.000       1.000          11          11          10           0           0
-              new_time       1.000       1.000       1.000          10          10          11           0           0
+                  class      f_beta   precision      recall     support          tp          tn          fp          fn
+                old_time       0.957       0.917       1.000          11          11           9           1           0
+                new_time       0.947       1.000       0.900          10           9          11           0           1
 
 
 
    Confusion matrix:
 
-                        old_time       new_time
-         old_time             11              0
-         new_time              0             10
+                          old_time        new_time
+           old_time             11              0
+           new_time              1              9
 
 
 The :meth:`eval.get_stats()` method returns all the above statistics in a structured dictionary without printing them to the console.

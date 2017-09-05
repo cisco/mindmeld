@@ -470,7 +470,7 @@ Then, when you are ready, use the :meth:`DomainClassifier.evaluate` method, whic
  - passes the resulting unlabeled queries to the trained domain classifier for prediction, and
  - compares the classifier's output predictions against the ground truth labels to compute the model's prediction accuracy.
 
-In the example below, the model gets 1,811 out of 1,847 test queries correct, resulting in an accuracy of 98%.
+In the example below, the model gets 2,550 out of 2,563 test queries correct, resulting in an accuracy of 99.5%.
 
 .. code-block:: python
 
@@ -497,7 +497,7 @@ In the example below, the model gets 1,811 out of 1,847 test queries correct, re
    Loading queries from file smart_home/turn_up_thermostat/test.txt
    Loading queries from file smart_home/unlock_door/test.txt
    Loading queries from file weather/check-weather/test.txt
-   <StandardModelEvaluation score: 98.05%, 1811 of 1847 examples correct>
+   <StandardModelEvaluation score: 99.49%, 2550 of 2563 examples correct>
 
 The aggregate accuracy score we see above is only the beginning, because the :meth:`evaluate` method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.
 
