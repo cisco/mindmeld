@@ -60,8 +60,10 @@ DEFAULT_INTENT_MODEL_CONFIG = {
 }
 
 DEFAULT_ENTITY_MODEL_CONFIG = {
-    'model_type': 'memm',
+    'model_type': 'tagger',
+    'label_type': 'entities',
     'model_settings': {
+        'classifier_type': 'memm',
         'tag_scheme': 'IOB',
         'feature_scaler': 'max-abs'
     },
