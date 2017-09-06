@@ -654,9 +654,9 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 **Segment-level statistics**
   |
 
-  While tag level statistics are useful to analyze, they don't tell the full story for entity recognition in an intuitive way. A helpful way to think about the entity recognizer is that it is performing two tasks: 1) identifying the span of words that should be part of an entity and 2) selecting the label for the identified entity. When the recognizer makes a mistake it could misidentify the label, misidentify the span boundary, or misidentify both.
+  While tag-level statistics are useful to analyze, they don't tell the full story for entity recognition in an intuitive way. A helpful way to think about the entity recognizer is that it is performing two tasks: 1) identifying the span of words that should be part of an entity and 2) selecting the label for the identified entity. When the recognizer makes a mistake it could misidentify the label, misidentify the span boundary, or misidentify both.
 
-  The segment-level statistics consider the errors at the predicted entity level.
+  The segment-level statistics capture the distribution of these error types across all the segments in a query.
 
   A segment is either:
 
@@ -667,7 +667,7 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
   ===========  ===
   le           **Label error.** This is when the classifier correctly predicted the existence of an entity and the span of that entity, but chose the wrong label. For example, the classifier recognized that 'pad thai' is an entity in the query 'Order some pad thai', but thought it was a restaurant entity instead of a dish entity.
   be           **Boundary error.** Occurs when the classifier correctly predicts the existence of an entity and its label but misclassifies its span. For example, it predicted 'some pad thai' was a dish entity instead of just 'pad thai' in the query 'Order some pad thai'
-  lbe          **Label boundary error.** The classifier correctly predicts the existence of an entity, but gets both the label and the span wrong. For example in the query 'Order some pad thai', if the classifier thought that 'some pad thai' was an option instead of a dish it would be a label boundary error.
+  lbe          **Label-boundary error.** The classifier correctly predicts the existence of an entity, but gets both the label and the span wrong. For example in the query 'Order some pad thai', if the classifier thought that 'some pad thai' was an option instead of a dish it would be a label-boundary error.
   tp           **True positive.** The classifier correctly predicts an entity, its label, and its span.
   tn           **True negative.** The classifier correctly predicts that there is a segment where there are no entities. For example, the query 'Hi there' has no entities and this segment would be counted as a true negative.
   fp           **False positive.** The classifier predicted the existence of an entity where there wasn't one. For example, if the classifier predicted that 'there' was a dish entity in the query 'Hi there' that would be a false positive.
@@ -682,9 +682,9 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
     Exp:     O.    O     O       B|dish    I|dish  O
     Pred:    O.    O.    B|dish  I|dish.   O.      O
 
-  In the traditional level statistics, predicting B|dish instead of O and predicting I|dish instead of B|dish would both be **false positives**. There would also be **3 true negatives** for correctly predicting O.
+  In the traditional tag-level statistics, predicting B|dish instead of O and predicting I|dish instead of B|dish would both be **false positives**. There would also be **3 true negatives** for correctly predicting O.
 
-  At the segment level, however, this would be just **2 true negatives** (one for the segment 'I'll have' and one for the segment 'please'), and **1 label boundary error** (for the segment 'an eggplant parm').
+  At the segment level, however, this would be just **2 true negatives** (one for the segment 'I'll have' and one for the segment 'please'), and **1 label-boundary error** (for the segment 'an eggplant parm').
 
   The benefit of considering errors at a segment level is that it is often more intuitive and may even provide better metrics to optimize against, as described in more detail `here <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_.
 
@@ -720,8 +720,7 @@ Next, we look selectively at just the correct or incorrect predictions.
    >>> list(eval.incorrect_results())
    [
      EvaluatedExample(example=<Query 'taipei current temperature'>, expected=(<QueryEntity 'taipei' ('city') char: [0-5], tok: [0-0]>,), predicted=(), probas=None, label_type='entities'),
-     EvaluatedExample(example=<Query 'london weather'>, expected=(<QueryEntity 'london' ('city') char: [0-5], tok: [0-0]>,), predicted=(), probas=None, label_type='entities'),
-     ...
+     EvaluatedExample(example=<Query 'london weather'>, expected=(<QueryEntity 'london' ('city') char: [0-5], tok: [0-0]>,), predicted=(), probas=None, label_type='entities')
    ]
 
 Slicing and dicing these results for error analysis is easily done with `list comprehensions <https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions>`_.
