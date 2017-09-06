@@ -10,8 +10,16 @@ class Embedding:
     This class encodes and constructs embeddings for the tokens of the input queries,
     gazetteers and labels.
     """
-    def __init__(self, parameters):
-        self.parameters = parameters
+    def __init__(self,
+                 token_pretrained_embedding_filepath,
+                 token_embedding_dimension,
+                 gaz_dimension,
+                 padding_length):
+
+        self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
+        self.token_embedding_dimension = token_embedding_dimension
+        self.gaz_dimension = gaz_dimension
+        self.padding_length = padding_length
         self.word_to_embedding = {}
         self._extract_embeddings()
         self.word_to_encoding = {}
@@ -29,7 +37,7 @@ class Embedding:
     def _extract_embeddings(self):
         """ Extracts embeddings from the embedding file and stores these vectors in a dictionary
         """
-        glove_file_name = self.parameters["token_pretrained_embedding_filepath"]
+        glove_file_name = self.token_pretrained_embedding_filepath
         glove_lines = open(os.path.abspath(os.path.join(WORKBENCH_ROOT, glove_file_name)))
         for line in glove_lines:
             values = line.split()
@@ -118,7 +126,7 @@ class Embedding:
         Returns:
             Embedding matrix ndarray
         """
-        embedding_dim = int(self.parameters["token_embedding_dimension"])
+        embedding_dim = int(self.token_embedding_dimension)
         num_words = len(self.word_to_encoding.keys())
         embedding_matrix = np.zeros((num_words, embedding_dim))
         for word, i in self.word_to_encoding.items():
@@ -139,7 +147,7 @@ class Embedding:
         Returns:
             Embedding matrix ndarray
         """
-        gaz_dim = self.parameters['gaz_dimension']
+        gaz_dim = self.gaz_dimension
         num_entites = len(self.gaz_word_to_encoding.keys())
         embedding_matrix_gaz = np.zeros((num_entites, gaz_dim))
 
@@ -160,8 +168,7 @@ class Embedding:
         Returns:
             list of encoded labels
         """
-        padding_length = self.parameters["padding_length"]
-
+        padding_length = self.padding_length
         transformed_labels = []
         for query_label in labels:
             # We pad the query to the padding length size
