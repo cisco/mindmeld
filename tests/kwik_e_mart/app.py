@@ -7,9 +7,12 @@ from mmworkbench.path import load_app_package
 from mmworkbench import Application
 
 
+# Load this app package dynamically
 if __name__ == "__main__" and __package__ is None:
     load_app_package(os.path.dirname(os.path.realpath(__file__)))
     __package__ = 'kwik_e_mart'
+
+# Load any relative path here
 
 app = Application(__name__)
 
