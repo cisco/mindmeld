@@ -470,7 +470,7 @@ Then, when you are ready, use the :meth:`DomainClassifier.evaluate` method, whic
  - passes the resulting unlabeled queries to the trained domain classifier for prediction, and
  - compares the classifier's output predictions against the ground truth labels to compute the model's prediction accuracy.
 
-In the example below, the model gets 1,811 out of 1,847 test queries correct, resulting in an accuracy of 98%.
+In the example below, the model gets 2,550 out of 2,563 test queries correct, resulting in an accuracy of 99.5%.
 
 .. code-block:: python
 
@@ -497,7 +497,7 @@ In the example below, the model gets 1,811 out of 1,847 test queries correct, re
    Loading queries from file smart_home/turn_up_thermostat/test.txt
    Loading queries from file smart_home/unlock_door/test.txt
    Loading queries from file weather/check-weather/test.txt
-   <StandardModelEvaluation score: 98.05%, 1811 of 1847 examples correct>
+   <StandardModelEvaluation score: 99.49%, 2550 of 2563 examples correct>
 
 The aggregate accuracy score we see above is only the beginning, because the :meth:`evaluate` method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.
 
@@ -507,31 +507,33 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
 
    >>> eval = dc.evaluate()
    >>> eval.print_stats()
-   Overall Statistics:
+   Overall statistics:
 
-       accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
-          0.981       0.972        1811        5505          36          36       0.741       0.981
-
-
-
-   Statistics by Class:
-
-                  class      f_beta   precision      recall     support          TP          TN          FP          FN
-        times_and_dates       0.994       1.000       0.987          78          77        1769           0           1
-             smart_home       0.974       0.949       1.000         629         629        1184          34           0
-                unknown       0.999       0.999       0.998        1107        1105         739           1           2
-                weather       0.000       0.000       0.000          33           0        1813           1          33
+      accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
+         0.995       0.995        2550        7676          13          13       0.954       0.995
 
 
 
-   Confusion Matrix:
+   Statistics by class:
 
-                     times_and_..     smart_home        unknown
-      times_and_..             77              1              0
-        smart_home              0            629              0
-           unknown              0              1           1105
-           weather              0             32              1
+                 class      f_beta   precision      recall     support          tp          tn          fp          fn
+            smart_home       0.994       0.990       0.998        1074        1072        1478          11           2
+               weather       0.825       1.000       0.703          37          26        2526           0          11
+               unknown       1.000       1.000       1.000        1107        1107        1456           0           0
+       times_and_dates       0.997       0.994       1.000         345         345        2216           2           0
 
+
+
+   Confusion matrix:
+
+                      smart_home        weather        unknown   times_and_..
+       smart_home           1072              0              0              2
+          weather             11             26              0              0
+          unknown              0              0           1107              0
+     times_and_..              0              0              0            345
+
+
+The :meth:`eval.get_stats()` method returns all the above statistics in a structured dictionary without printing them to the console.
 
 Let's decipher the statistics output by the :meth:`evaluate` method.
 
@@ -542,28 +544,28 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 
   ===========  ===
   accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`.
-  f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`. By weighting the F1 scores by class support this takes class imbalance into account.
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`, which is the mean of F1 scores calculated by class.
-  f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`, which is the F1 calculated with the global precision and recall metrics.
+  f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`. By weighting the f1 scores by class support this takes class imbalance into account.
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`, which is the mean of f1 scores calculated by class.
+  f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`, which is the f1 calculated with the global precision and recall metrics.
   ===========  ===
 
   Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
 
   - **Classes are balanced**: When the number of training examples in your domains are comparable and each domain is equally important, focusing on the accuracy metric is usually good enough.
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  - **Classes are imbalanced**: When classes are imbalanced it is important to take the f1 scores into account.
 
-  - **All F1 and accuracy scores are low**: Domain classification is performing poorly across all domains. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your domain structure and make sure queries in different domains have distinct vocabularies. You may need to combine domains or separate them, so that the resulting classes are easier for the classifier to distinguish.
+  - **All f1 and accuracy scores are low**: Domain classification is performing poorly across all domains. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your domain structure and make sure queries in different domains have distinct vocabularies. You may need to combine domains or separate them, so that the resulting classes are easier for the classifier to distinguish.
 
-  - **F1 weighted is higher than F1 macro**: Your domains with fewer evaluation examples are performing poorly. You may need to add more data to domains that have fewer examples. You could also try adding class weights to your hyperparameters.
+  - **F1 weighted is higher than f1 macro**: Your domains with fewer evaluation examples are performing poorly. You may need to add more data to domains that have fewer examples. You could also try adding class weights to your hyperparameters.
 
-  - **F1 macro is higher than F1 weighted**: Your domains with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+  - **F1 macro is higher than f1 weighted**: Your domains with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than F1 macro**: Certain domains are being misclassified more often than others. Check the class-wise statistics below to identify these domains. Some domains may be too similar to another domain or you may need to add more training data to some domains.
+  - **F1 micro is higher than f1 macro**: Certain domains are being misclassified more often than others. Check the class-wise statistics below to identify these domains. Some domains may be too similar to another domain or you may need to add more training data to some domains.
 
   - **Some classes are more important than others**: If some domains are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
 
@@ -578,10 +580,10 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
   precision    `Precision <https://en.wikipedia.org/wiki/Precision_and_recall#Precision>`_
   recall       `Recall <https://en.wikipedia.org/wiki/Precision_and_recall#Recall>`_
   support      Number of test queries in this domain (based on ground truth)
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   ===========  ===
 
 **Confusion Matrix**
