@@ -648,8 +648,7 @@ class Model(object):
         logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
                     num_splits, '' if num_splits == 1 else 's')
 
-        scoring = self._get_cv_scorer(selection_settings,
-                                      self.config.model_settings['classifier_type'])
+        scoring = self._get_cv_scorer(selection_settings)
         n_jobs = selection_settings.get('n_jobs', -1)
 
         param_grid = self._convert_params(selection_settings['grid'], labels)
@@ -682,7 +681,8 @@ class Model(object):
 
         return model.best_estimator_, model.best_params_
 
-    def _get_cv_scorer(self, selection_settings, classifier_type):
+    def _get_cv_scorer(self, selection_settings):
+        classifier_type = self.config.model_settings['classifier_type']
         scorer = selection_settings.get('scoring', self.default_scorer)
         if scorer == 'seq_accuracy':
             if classifier_type not in SEQUENCE_MODELS:
