@@ -648,7 +648,8 @@ class Model(object):
         logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
                     num_splits, '' if num_splits == 1 else 's')
 
-        scoring = self._get_cv_scorer(selection_settings)
+        scoring = self._get_cv_scorer(selection_settings,
+                                      self.config.model_settings['classifier_type'])
         n_jobs = selection_settings.get('n_jobs', -1)
 
         param_grid = self._convert_params(selection_settings['grid'], labels)
@@ -669,14 +670,11 @@ class Model(object):
                 msg = 'Candidate average seq2seq accuracy: {:.2%} ± {:.2%}'
             logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
 
-        if scoring == ACCURACY_SCORING:
-            msg = 'Best accuracy: {:.2%}, params: {}'
-            self.cv_loss_ = 1 - model.best_score_
-        elif scoring == LIKELIHOOD_SCORING:
+        if scoring == LIKELIHOOD_SCORING:
             msg = 'Best log likelihood: {:.4}, params: {}'
             self.cv_loss_ = - model.best_score_
         else:
-            msg = 'Best seq2seq accuracy: {:.2%}, params: {}'
+            msg = 'Best accuracy: {:.2%}, params: {}'
             self.cv_loss_ = 1 - model.best_score_
 
         best_params = self._process_cv_best_params(model.best_params_)
@@ -684,11 +682,14 @@ class Model(object):
 
         return model.best_estimator_, model.best_params_
 
-    def _get_cv_scorer(self, selection_settings):
+    def _get_cv_scorer(self, selection_settings, classifier_type):
         scorer = selection_settings.get('scoring', self.default_scorer)
         if scorer == 'seq_accuracy':
+            if classifier_type not in SEQUENCE_MODELS:
+                logger.error("Sequence accuracy is only available for the following "
+                             "models: {}".format(str(SEQUENCE_MODELS)))
             return get_seq_accuracy_scorer()
-        elif scorer == 'seq_tag_accuracy':
+        elif scorer == 'accuracy' and classifier_type in SEQUENCE_MODELS:
             return get_seq_tag_accuracy_scorer()
         else:
             return scorer
