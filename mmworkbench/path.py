@@ -187,6 +187,19 @@ def get_indexes(app_path):
     return next(os.walk(indexes_dir))[1]
 
 
+def load_app_package(app_path):
+    """
+    Args:
+        path (str): The path to the app data (for example: /user/joe/home_assistant)
+    """
+    import imp
+    package_name = os.path.basename(app_path)
+    package_path = os.path.dirname(app_path)
+
+    fp, pathname, description = imp.find_module(package_name, path=[package_path])
+    imp.load_module(package_name, fp, pathname, description)
+
+
 # Files and folders
 
 @safe_path

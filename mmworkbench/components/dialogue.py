@@ -7,6 +7,7 @@ from functools import cmp_to_key
 import logging
 import random
 import json
+import os
 
 from .. import path
 
@@ -312,11 +313,15 @@ class DialogueResponder(object):
         return items
 
 
-def _get_app_module(app_path):
+def _get_app_module(package_name, app_path):
     module_path = path.get_app_module_path(app_path)
+    package_path = os.path.dirname(os.path.dirname(module_path))
 
     import imp
-    app_module = imp.load_source('app_module', module_path)
+    fp, pathname, description = imp.find_module(package_name, path=[package_path])
+    imp.load_module(package_name, fp, pathname, description)
+    app_module = imp.load_source(
+        '{package_name}.app'.format(package_name=package_name), module_path)
     app = app_module.app
     return app
 
@@ -348,7 +353,8 @@ class Conversation(object):
                 If passed, changes to this processor will affect the response from `say()`
             session (dict, optional): The session to be used in the conversation
         """
-        app = app or _get_app_module(app_path)
+        package_name = os.path.basename(app_path)
+        app = app or _get_app_module(package_name, app_path)
         app.lazy_init(nlp)
         self._app_manager = app.app_manager
         if not self._app_manager.ready:
