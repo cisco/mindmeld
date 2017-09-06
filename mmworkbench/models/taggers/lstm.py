@@ -6,7 +6,6 @@ import logging
 
 from .taggers import Tagger, extract_sequence_features
 from .embeddings import Embedding
-from ..helpers import get_label_encoder
 
 DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_LABEL = 'B|UNK'
@@ -22,18 +21,15 @@ class LstmModel(Tagger):
     """"This class encapsulates the bi-directional LSTM model and provides
     the correct interface for use by the tagger model"""
 
-    def fit(self, X, encoded_labels, resources=None):
+    def fit(self, X, y):
         examples = np.asarray(X, dtype='float32')
-        labels = np.asarray(encoded_labels, dtype='int32')
-        self._fit(examples, labels, **self.config.params)
+        labels = np.asarray(y, dtype='int32')
+        self._fit(examples, labels)
         return self
-
-    def process_and_predict(self, examples, config=None, resources=None):
-        return self.predict(examples)
 
     def predict(self, X):
         encoded_examples = np.asarray(X, dtype='float32')
-        tags_by_example = self._predict(encoded_examples, **self.config.params)
+        tags_by_example = self._predict(encoded_examples)
 
         resized_predicted_tags = []
         for query, seq_len in zip(tags_by_example, self.sequence_lengths):
@@ -111,26 +107,23 @@ class LstmModel(Tagger):
             self.tf_lstm_output, self.tf_label)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
-        self.config = config
-        self._resources = resources
-        self.gaz_dimension = len(self._resources['gazetteers'].keys())
+        self.resources = resources
+        self.gaz_dimension = len(self.resources['gazetteers'].keys())
+        self.example_type = config.example_type
+        self.features = config.features
 
         self.token_pretrained_embedding_filepath = \
-            self.config.params.get('token_pretrained_embedding_filepath')
+            config.params.get('token_pretrained_embedding_filepath')
 
-        self.padding_length = self.config.params.get('padding_length')
+        self.padding_length = config.params.get('padding_length')
         self.embedding = Embedding(self.token_pretrained_embedding_filepath,
                                    self.token_embedding_dimension,
                                    self.gaz_dimension,
                                    self.padding_length)
 
-        self._tag_scheme = self.config.model_settings.get('tag_scheme', 'IOB').upper()
-        self._label_encoder = get_label_encoder(self.config)
-
         # Extract features and classes
         X, gaz = self._get_features(examples)
         self.gaz_features = np.asarray(gaz, dtype='float32')
-
         self.sequence_lengths = self._extract_seq_length(examples)
 
         if y:
@@ -146,7 +139,7 @@ class LstmModel(Tagger):
 
         return X, encoded_labels, groups
 
-    def setup_model(self, selector_type=None, scale_type=None):
+    def setup_model(self, config=None):
         # We have to reset the graph on every dataset since the input, gaz and output
         # dimensions for each domain,intent training data is different. So the graph
         # cannot be reused.
@@ -397,7 +390,7 @@ class LstmModel(Tagger):
         """
         extracted_gaz_tokens = [DEFAULT_GAZ_LABEL] * self.padding_length
         extracted_sequence_features = extract_sequence_features(
-            example, self.config.example_type, self.config.features, self._resources)
+            example, self.example_type, self.features, self.resources)
 
         for index, extracted_gaz in enumerate(extracted_sequence_features):
             if len(extracted_gaz.keys()) > 0 and index < self.padding_length:
@@ -433,7 +426,7 @@ class LstmModel(Tagger):
 
         return padded_query, encoded_gaz
 
-    def _fit(self, X, y, **params):
+    def _fit(self, X, y):
         """Trains a classifier without cross-validation. It iterates through
         the data, feeds batches to the tensorflow session graph and fits the
         model based on the feed forward and back propagation steps.
@@ -441,9 +434,7 @@ class LstmModel(Tagger):
         Args:
             X (list of list of list of str): a list of queries to train on
             y (list of list of str): a list of expected labels
-            params (dict): Parameters of the classifier
         """
-        self.set_params(**params)
         self.construct_tf_variables()
 
         self.session.run([tf.global_variables_initializer(),
@@ -497,15 +488,13 @@ class LstmModel(Tagger):
 
         return self
 
-    def _predict(self, X, **params):
+    def _predict(self, X):
         """Trains a classifier without cross-validation.
 
         Args:
             X (list of list of list of str): a list of queries to train on
             params (dict): Parameters of the classifier
         """
-        self.set_params(**params)
-
         gaz = self.gaz_features
         seq_len = np.array(self.sequence_lengths)
 
