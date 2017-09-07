@@ -3,6 +3,8 @@ import os
 import numpy as np
 
 DEFAULT_LABEL = 'B|UNK'
+DEFAULT_PADDED_TOKEN = '<UNK>'
+DEFAULT_GAZ_LABEL = 'O'
 
 
 class Embedding:
@@ -34,51 +36,33 @@ class Embedding:
         self.next_available_gaz_token_extracted = 0
         self.next_available_label_token = 0
 
-    def _extract_embeddings(self):
-        """ Extracts embeddings from the embedding file and stores these vectors in a dictionary
-        """
-        glove_file_name = self.token_pretrained_embedding_filepath
-        glove_lines = open(os.path.abspath(os.path.join(WORKBENCH_ROOT, glove_file_name)))
-        for line in glove_lines:
-            values = line.split()
-            word = values[0]
-            coefs = np.asarray(values[1:], dtype='float32')
-            self.word_to_embedding[word] = coefs
-        glove_lines.close()
-
     def transform_example(self, list_of_tokens):
         """ Transforms input query into an encoded query using integer tokens
+        with the appropriate padding
+
         Args:
             list_of_tokens (list): A list of tokens
 
         Returns:
             A list of the encoded tokens
         """
-        encoded_query = []
-        for token in list_of_tokens:
-            if token not in self.word_to_encoding:
-                self.word_to_encoding[token] = self.next_available_token
-                self.encoding_to_word[self.next_available_token] = token
-                self.next_available_token += 1
-            encoded_query.append(self.word_to_encoding[token])
+
+        # Encode DEFAULT_LABEL if it has not already
+        self._word_encoding_transform(DEFAULT_LABEL)
+        encoded_query = [self.word_to_encoding[DEFAULT_LABEL]] * self.padding_length
+
+        for idx, token in enumerate(list_of_tokens):
+            if idx >= self.padding_length:
+                break
+
+            self._word_encoding_transform(token)
+            encoded_query[idx] = self.word_to_encoding[token]
+
         return encoded_query
-
-    def transform(self, queries):
-        """ Transforms an input list of queries into encoded queries using integer tokens
-        Args:
-            queries (list): A list of queries
-
-        Returns:
-            A list of the encoded queries
-        """
-        encoded_queries = []
-        for query in queries:
-            encoded_queries.append(self.transform_example(query))
-        return encoded_queries
 
     def transform_gaz_query(self, list_of_gaz_tokens):
         """
-        Transforms a list of gaz tokens to binary encodings
+        Transforms a list of gaz tokens to binary encodings with padding
 
         Args:
             list_of_gaz_tokens (list): A list of gaz tokens
@@ -86,38 +70,18 @@ class Embedding:
         Returns:
             A list of the binary encodings of the gaz tokens
         """
-        encoded_query = []
-        for token in list_of_gaz_tokens:
-            if token not in self.gaz_word_to_encoding:
-                gaz_indices = set(token.split(","))
-                for i in gaz_indices:
-                    if i not in self.gaz_word_to_encoding_extracted:
-                        self.gaz_word_to_encoding_extracted[i] = \
-                            self.next_available_gaz_token_extracted
-                        self.gaz_encoding_to_word_extracted[
-                            self.next_available_gaz_token_extracted] = i
-                        self.next_available_gaz_token_extracted += 1
+        # Encode DEFAULT_GAZ_LABEL if it has not already
+        self._gaz_encoding_transform(DEFAULT_GAZ_LABEL)
+        encoded_query = [self.gaz_word_to_encoding[DEFAULT_GAZ_LABEL]] * self.padding_length
 
-                self.gaz_word_to_encoding[token] = self.next_available_gaz_token
-                self.gaz_encoding_to_word[self.next_available_gaz_token] = token
-                self.next_available_gaz_token += 1
-            encoded_query.append(self.gaz_word_to_encoding[token])
+        for idx, token in enumerate(list_of_gaz_tokens):
+            if idx >= self.padding_length:
+                break
+
+            self._gaz_encoding_transform(token)
+            encoded_query[idx] = self.gaz_word_to_encoding[token]
+
         return encoded_query
-
-    def transform_gaz(self, gaz_queries):
-        """
-        Transforms a list of gaz tokens to binary encodings
-
-        Args:
-            gaz_queries (list): A list of gaz token queries
-
-        Returns:
-            A list of the binary encodings of the gaz tokens
-        """
-        encoded_queries = []
-        for query in gaz_queries:
-            encoded_queries.append(self.transform_gaz_query(query))
-        return encoded_queries
 
     def get_encoding_matrix(self):
         """
@@ -167,14 +131,13 @@ class Embedding:
         Returns:
             list of encoded labels
         """
-        padding_length = self.padding_length
         transformed_labels = []
         for query_label in labels:
             # We pad the query to the padding length size
-            if len(query_label) > padding_length:
-                query_label = query_label[:padding_length]
+            if len(query_label) > self.padding_length:
+                query_label = query_label[:self.padding_length]
             else:
-                diff = padding_length - len(query_label)
+                diff = self.padding_length - len(query_label)
                 for i in range(diff):
                     query_label.append(DEFAULT_LABEL)
 
@@ -221,3 +184,36 @@ class Embedding:
                     embeddings_matrix[encoded_examples[query_index][word_index]]
 
         return transformed_examples
+
+    def _extract_embeddings(self):
+        """ Extracts embeddings from the embedding file and stores these vectors in a dictionary
+        """
+        glove_file_name = self.token_pretrained_embedding_filepath
+        glove_lines = open(os.path.abspath(os.path.join(WORKBENCH_ROOT, glove_file_name)))
+        for line in glove_lines:
+            values = line.split()
+            word = values[0]
+            coefs = np.asarray(values[1:], dtype='float32')
+            self.word_to_embedding[word] = coefs
+        glove_lines.close()
+
+    def _gaz_encoding_transform(self, token):
+        if token not in self.gaz_word_to_encoding:
+            gaz_indices = set(token.split(","))
+            for i in gaz_indices:
+                if i not in self.gaz_word_to_encoding_extracted:
+                    self.gaz_word_to_encoding_extracted[i] = \
+                        self.next_available_gaz_token_extracted
+                    self.gaz_encoding_to_word_extracted[
+                        self.next_available_gaz_token_extracted] = i
+                    self.next_available_gaz_token_extracted += 1
+
+            self.gaz_word_to_encoding[token] = self.next_available_gaz_token
+            self.gaz_encoding_to_word[self.next_available_gaz_token] = token
+            self.next_available_gaz_token += 1
+
+    def _word_encoding_transform(self, token):
+        if token not in self.word_to_encoding:
+            self.word_to_encoding[token] = self.next_available_token
+            self.encoding_to_word[self.next_available_token] = token
+            self.next_available_token += 1
