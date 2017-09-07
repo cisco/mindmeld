@@ -205,7 +205,7 @@ class ResourceLoader(object):
         except (OSError, IOError):
             # required file doesnt exist -- notify and error out
             logger.warning('Entity data file not found at %r. '
-                           'Proceed with empty entity data.', entity_data_path)
+                           'Proceeding with empty entity data.', entity_data_path)
 
             # mark the modified time as now if the entity file does not exist
             # so that the gazetteer gets rebuilt properly.
@@ -218,7 +218,7 @@ class ResourceLoader(object):
         except (OSError, IOError):
             # required file doesnt exist
             logger.warning('Entity mapping file not found at %r. '
-                           'Proceed with empty entity data', mapping_path)
+                           'Proceeding with empty entity data.', mapping_path)
 
             # mark the modified time as now if the entity mapping file does not exist
             # so that the gazetteer gets rebuilt properly.
