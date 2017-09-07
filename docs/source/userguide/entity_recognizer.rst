@@ -4,7 +4,7 @@ Working with the Entity Recognizer
 The :ref:`Entity Recognizer <arch_entity_model>`
 
  - is run as the third step in the :ref:`natural language processing pipeline <instantiate_nlp>`
- - is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ model that detects all the relevant :term:`entities <entity>` in a given query
+ - is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ or tagging model that detects all the relevant :term:`entities <entity>` in a given query
  - is trained per intent, using all the labeled queries for a given intent, with labels derived from the entity types annotated within the training queries
 
 Every Workbench app has one entity recognizer for every intent that requires entity detection.
@@ -91,7 +91,7 @@ Access the :class:`EntityRecognizer` an intent of your choice, using the :attr:`
 Train an entity recognizer
 --------------------------
 
-Use the :meth:`EntityRecognizer.fit` method to train an entity recognition model. Depending on the size of the training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracy of the trained model.
+Use the :meth:`EntityRecognizer.fit` method to train an entity recognition model. Depending on the size of the training data and the selected model, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracy of the trained model.
 
 .. _baseline_entity_fit:
 
@@ -114,7 +114,7 @@ Using default settings is the recommended (and quickest) way to get started with
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an  example where we view the configuration of a entity recognizer trained using default settings:
+Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an example where we view the configuration of an entity recognizer trained using default settings:
 
 .. code-block:: python
 
@@ -132,8 +132,12 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
          'start_positions': [-1, 0, 1]
        }
      },
-     'model_settings': {'feature_scaler': 'max-abs', 'tag_scheme': 'IOB'},
-     'model_type': 'memm',
+     'model_settings': {
+       'classifier_type': 'memm',
+       'feature_scaler': 'max-abs',
+       'tag_scheme': 'IOB'
+     },
+     'model_type': 'tagger',
      'param_selection': {
        'grid': {
          'C': [0.01, 1, 100, 10000, 1000000, 100000000],
@@ -153,18 +157,30 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 ``'model_type'`` (:class:`str`)
   |
 
-  Always ``'memm'``, since the `maximum entropy markov model (MEMM) <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_ is currently the only supported model for training entity recognizers in Workbench.
+  Always ``'tagger'``, since the entity recognizer is a tagger model. `Tagging, sequence tagging, or sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ are common terms used in NLP literature for models that generate a tag for each token in a sequence. Taggers are most commonly used for part of speech tagging or named entity recognition.
+
 
 ``'model_settings'`` (:class:`dict`)
   |
 
-  A dictionary containing model-specific machine learning settings. The allowed keys are:
+  A dictionary containing model-specific machine learning settings. It must always contain a key ``'classifier_type'``, whose value specifies the machine learning model to use. Allowed values are shown in the table below.
+
+  .. _er_models:
+
+  =============== =======================================================
+  Classifier Type Description (with list of configurable hyperparameters)
+  =============== =======================================================
+  ``'memm'``      `maximum entropy markov model (memm) <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_, memm :sk_api:`hyperparameters <sklearn.linear_model.LogisticRegression.html>`
+  ``'crf'``       `conditional random field (crf) <https://en.wikipedia.org/wiki/Conditional_random_field>`_, crf `hyperparameters <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_
+  =============== =======================================================
+
+  For tagger models, there are other model settings that can be specified such as the tag scheme. The allowed keys are:
 
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | Key                   | Value                                                                                                             |
   +=======================+===================================================================================================================+
   | ``'feature_scaler'``  | The :sk_guide:`methodology <preprocessing.html#standardization-or-mean-removal-and-variance-scaling>` for         |
-  |                       | scaling raw feature values.                                                                                       |
+  |                       | scaling raw feature values. This is only applicable to the memm model.                                            |
   |                       |                                                                                                                   |
   |                       | Allowed values are:                                                                                               |
   |                       |                                                                                                                   |
@@ -238,7 +254,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 ``'params'`` (:class:`dict`)
   |
 
-  A dictionary of values to use for model hyperparameters during training. These include inverse of regularization strength as ``'C'``, the norm used in penalization as ``'penalty'``, and so on. The hyperparameters for the MEMM model are the same as those for a `maximum entropy model (MaxEnt) <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_. The list of allowed hyperparameters is :sk_api:`here <sklearn.linear_model.LogisticRegression.html>`.
+  A dictionary of values to be used for model hyperparameters during training. Examples include the norm used in penalization as ``'penalty'`` for MEMM, the coefficients for L1 and L2 regularization ``'c1'`` and ``'c2'`` for CRF, and so on. The list of allowable hyperparameters depends on the model selected. See the parameter list in :ref:`the model table <er_models>` above.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -266,7 +282,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                       |       'fit_intercept': [True, False]                                                                              |
   |                       |    }                                                                                                              |
   |                       |                                                                                                                   |
-  |                       | See the full list of allowed hyperparameters :sk_api:`here <sklearn.linear_model.LogisticRegression.html>`.       |
+  |                       | :ref:`The model table <er_models>` above lists hyperparameters available for each supported model.                |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
   |                       |                                                                                                                   |
@@ -282,8 +298,8 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'scoring'``         | The metric to use for evaluating model performance. One of:                                                       |
   |                       |                                                                                                                   |
-  |                       | - ``'accuracy'``: :sk_guide:`Accuracy score <model_evaluation.html#accuracy-score>`                               |
-  |                       | - ``'log_loss'``: :sk_api:`Log loss (cross-entropy loss) <model_evaluation.html#log-loss>`                        |
+  |                       | - ``'accuracy'``: `Accuracy score at a tag level                                                                  |
+  |                       | - ``'seq_accuracy'``: Accuracy score at a full sequence level (not available for memm)                            |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
 
   To identify the parameters that give the highest accuracy, the :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to :meth:`fit` can use these optimal parameters and skip the parameter selection process.
@@ -306,15 +322,16 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
 .. code-block:: python
 
    ENTITY_MODEL_CONFIG = {
-       'model_type': 'memm',
+       'model_type': 'tagger',
        'model_settings': {
+           'classifier_type': 'memm',
            'tag_scheme': 'IOBES',
            'feature_scaler': 'max-abs'
        },
        'param_selection': {
            'type': 'k-fold',
            'k': 5,
-           'scoring': 'log_loss',
+           'scoring': 'accuracy',
            'grid': {
                'penalty': ['l1', 'l2'],
                'C': [0.01, 1, 100, 10000]
