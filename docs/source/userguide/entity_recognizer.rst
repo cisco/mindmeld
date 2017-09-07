@@ -682,9 +682,9 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
     Exp:     O.    O     O       B|dish    I|dish  O
     Pred:    O.    O.    B|dish  I|dish.   O.      O
 
-  In the traditional tag-level statistics, predicting B|dish instead of O and predicting I|dish instead of B|dish would both be **false positives**. There would also be **3 true negatives** for correctly predicting O.
+  In the traditional tag-level statistics, predicting ``B|dish`` instead of ``O`` and predicting ``I|dish`` instead of ``B|dish`` would both be `false positives`. There would also be `3 true negatives` for correctly predicting ``O``.
 
-  At the segment level, however, this would be just **2 true negatives** (one for the segment 'I'll have' and one for the segment 'please'), and **1 label-boundary error** (for the segment 'an eggplant parm').
+  At the segment level, however, this would be just `2 true negatives` (one for the segment 'I'll have' and one for the segment 'please'), and `1 label-boundary error` (for the segment 'an eggplant parm').
 
   The benefit of considering errors at a segment level is that it is often more intuitive and may even provide better metrics to optimize against, as described in more detail `here <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_.
 
