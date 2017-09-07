@@ -160,8 +160,6 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   Always ``'tagger'``, since the entity recognizer is a tagger model. `Tagging, sequence tagging, or sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ are common terms used in NLP literature for models that generate a tag for each token in a sequence. Taggers are most commonly used for part of speech tagging or named entity recognition.
 
 
-  since the `maximum entropy markov model (MEMM) <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_ is currently the only supported model for training entity recognizers in Workbench.
-
 ``'model_settings'`` (:class:`dict`)
   |
 
@@ -306,10 +304,8 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'scoring'``         | The metric to use for evaluating model performance. One of:                                                       |
   |                       |                                                                                                                   |
-  |                       | TODO: update this                                                                                                 |
-  |                       | - ``'seq_tag_accuracy'``: :sk_guide:`Accuracy score <model_evaluation.html#accuracy-score>`                       |
-  |                       | - ``'seq_accuracy'``: :sk_guide:`Accuracy score <model_evaluation.html#accuracy-score>`                           |
-  |                       | - ``'log_loss'``: :sk_api:`Log loss (cross-entropy loss) <model_evaluation.html#log-loss>`                        |
+  |                       | - ``'accuracy'``: `Accuracy score at a tag level                                                                  |
+  |                       | - ``'seq_accuracy'``: Accuracy score at a full sequence level (not available for memm)                            |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
 
   To identify the parameters that give the highest accuracy, the :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to :meth:`fit` can use these optimal parameters and skip the parameter selection process.
@@ -341,7 +337,7 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
        'param_selection': {
            'type': 'k-fold',
            'k': 5,
-           'scoring': 'log_loss',
+           'scoring': 'accuracy',
            'grid': {
                'penalty': ['l1', 'l2'],
                'C': [0.01, 1, 100, 10000]
