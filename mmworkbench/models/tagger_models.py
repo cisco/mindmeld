@@ -206,8 +206,9 @@ class TaggerModel(Model):
         scorer = selection_settings.get('scoring', default_scorer)
         if scorer == SEQ_ACCURACY_SCORING:
             if classifier_type not in SEQUENCE_MODELS:
-                logger.error("Sequence accuracy is only available for the following "
-                             "models: {}".format(str(SEQUENCE_MODELS)))
+                logger.error("Sequence accuracy is only available for the following models: "
+                             "{}. Using tag level accuracy instead...".format(str(SEQUENCE_MODELS)))
+                return ACCURACY_SCORING
             return get_seq_accuracy_scorer()
         elif scorer == ACCURACY_SCORING and classifier_type in SEQUENCE_MODELS:
             return get_seq_tag_accuracy_scorer()
