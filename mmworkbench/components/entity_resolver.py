@@ -142,13 +142,14 @@ class EntityResolver(object):
         entity_map = self._resource_loader.get_entity_map(self.type)
 
         # list of canonical entities and their synonyms
-        entities = entity_map.get('entities')
+        entities = entity_map.get('entities', [])
 
-        # create synonym index and import synonyms
-        logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
-        EntityResolver.ingest_synonym(app_namespace=self._app_namespace,
-                                      index_name=self._es_index_name, data=entities,
-                                      es_host=self._es_host, es_client=self._es_client)
+        if entities:
+            # create synonym index and import synonyms
+            logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
+            EntityResolver.ingest_synonym(app_namespace=self._app_namespace,
+                                          index_name=self._es_index_name, data=entities,
+                                          es_host=self._es_host, es_client=self._es_client)
 
         # It's supported to specify the KB object type and field name that the NLP entity type
         # corresponds to in the mapping.json file. In this case the synonym whitelist is also
