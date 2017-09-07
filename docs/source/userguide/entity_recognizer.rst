@@ -254,11 +254,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 ``'params'`` (:class:`dict`)
   |
 
-  A dictionary of values to use for model hyperparameters during training. These include inverse of regularization strength as ``'C'``, the norm used in penalization as ``'penalty'``, and so on.
-
-  The hyperparameters for the MEMM model are the same as those for a `maximum entropy model (MaxEnt) <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_. The list of allowed hyperparameters is :sk_api:`here <sklearn.linear_model.LogisticRegression.html>`.
-
-  The hyperparameters for the CRF model are listed `here <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_.
+  A dictionary of values to be used for model hyperparameters during training. Examples include the norm used in penalization as ``'penalty'`` for MEMM, the coefficients for L1 and L2 regularization ``'c1'`` and ``'c2'`` for CRF, and so on. The list of allowable hyperparameters depends on the model selected. See the parameter list in :ref:`the model table <er_models>` above.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -286,9 +282,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                       |       'fit_intercept': [True, False]                                                                              |
   |                       |    }                                                                                                              |
   |                       |                                                                                                                   |
-  |                       | See the full list of allowed hyperparameters for memm                                                             |
-  |                       | :sk_api:`here <sklearn.linear_model.LogisticRegression.html>` and for crf                                         |
-  |                       | `here <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_.                                             |
+  |                       | :ref:`The model table <er_models>` above lists hyperparameters available for each supported model.                |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
   |                       |                                                                                                                   |
