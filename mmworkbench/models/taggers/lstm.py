@@ -81,6 +81,9 @@ class LstmModel(Tagger):
         self.lstm_input_keep_prob = parameters.get('lstm_input_keep_prob', 0.5)
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
+        self.multiple_window_sizes = parameters.get('multiple_window_sizes', False)
+        self.char_window_sizes = parameters.get('char_window_sizes')
+        self.fixed_char_window_size = parameters.get('fixed_char_window_size')
 
     def get_params(self, deep=True):
         return self.__dict__
@@ -160,7 +163,7 @@ class LstmModel(Tagger):
             embedded_labels = None
 
         # Extract features and classes
-        x_sequence_embeddings_arr, self.gaz_features_arr = self._get_features(examples)
+        x_sequence_embeddings_arr, self.gaz_features_arr, self.char_features_arr = self._get_features(examples)
         self.sequence_lengths = self._extract_seq_length(examples)
 
         # There are no groups in this model
@@ -182,6 +185,7 @@ class LstmModel(Tagger):
                                   batch_examples,
                                   batch_gaz,
                                   batch_seq_len,
+                                  batch_char,
                                   batch_labels=list()):
         """Constructs the feed dictionary that is used to feed data into the tensors
 
@@ -201,6 +205,7 @@ class LstmModel(Tagger):
             self.dense_keep_prob_tf: self.dense_keep_probability,
             self.lstm_input_keep_prob_tf: self.lstm_input_keep_prob,
             self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob
+            self.tf_char_input: batch_char
         }
 
         if len(batch_labels) > 0:
@@ -222,9 +227,73 @@ class LstmModel(Tagger):
             num_outputs=self.gaz_encoding_dimension,
             weights_initializer=initializer)
 
+        batch_size_dim = tf.shape(self.tf_query_input)[0]
+
+        word_level_char_embeddings_list = []
+        self.multiple_window_sizes = False
+        if self.multiple_window_sizes:
+            for window_size in self.char_window_sizes:
+                word_level_char_embeddings_list.append(self.apply_convolution(self.tf_char_input,
+                                                                              batch_size_dim,
+                                                                              window_size,
+                                                                              self.character_embedding_dimension))
+            word_level_char_embedding = tf.concat(word_level_char_embeddings_list, 2)
+        else:
+            word_level_char_embedding = self.apply_convolution(self.tf_char_input, batch_size_dim,
+                                                               self.fixed_char_window_size,
+                                                               self.character_embedding_dimension)
+
         # Combined the two embeddings
-        combined_embedding_tf = tf.concat([self.query_input_tf, dense_gaz_embedding_tf], axis=2)
+        combined_embedding_tf = tf.concat([self.query_input_tf, word_level_char_embedding], axis=2)
+        combined_embedding_tf = tf.concat([combined_embedding_tf, dense_gaz_embedding_tf], axis=2)
         return combined_embedding_tf
+
+    def apply_convolution(self, input_tensor, batch_size, char_window_size, embedding_dimension):
+        """
+        :param input_tensor:
+        :param batch_size:
+        :param char_window_size:
+        :param embedding_dimension:
+        :return:
+        """
+        convolution_reshaped_char_embedding = tf.reshape(input_tensor,
+                                                         [-1, self.padding_length,
+                                                          self.max_char_per_word,
+                                                          embedding_dimension, 1])
+
+
+        # first dimension 1 because want to apply this to every word
+        char_convolution_filter = tf.Variable(tf.random_normal(
+            [1, char_window_size, embedding_dimension,
+             1, self.character_embedding_dimension], dtype=tf.float32))
+
+        # Strides is None because we want to advance one character at a time and one word at a time
+        conv_output = tf.nn.convolution(convolution_reshaped_char_embedding, char_convolution_filter, padding='SAME')
+
+        # Max pool over each word, captured by the size of the filter corresponding to an entire single word
+        max_pool = tf.nn.pool(
+            conv_output, window_shape=[1, self.max_char_per_word, embedding_dimension],
+            pooling_type='MAX', padding='VALID')
+
+        # Transpose because shape before is batch_size BY query_padding_length BY 1 BY 1 BY num_filters
+        # 1's refer to number of input channels and dimension because our window has height equal to
+        # char_embedding_dimension and encompases the entire dimension
+        max_pool = tf.transpose(max_pool, [0, 1, 4, 2, 3])
+        max_pool = tf.reshape(max_pool, [batch_size, self.padding_length, self.character_embedding_dimension])
+
+        char_convolution_bias = tf.Variable(tf.random_normal([self.character_embedding_dimension, ]))
+
+        char_convolution_bias = tf.tile(char_convolution_bias, [self.padding_length])
+        char_convolution_bias = tf.reshape(char_convolution_bias,
+                                           [self.padding_length, self.character_embedding_dimension])
+
+        char_convolution_bias = tf.tile(char_convolution_bias, [batch_size, 1])
+        char_convolution_bias = tf.reshape(char_convolution_bias,
+                                           [batch_size, self.padding_length,
+                                            self.character_embedding_dimension])
+
+        word_level_char_embedding = tf.nn.relu(max_pool + char_convolution_bias)
+        return word_level_char_embedding
 
     def _define_optimizer_and_cost(self, output_tensor, label_tensor):
         """ This function defines the optimizer and cost function of the LSTM model
@@ -406,14 +475,17 @@ class LstmModel(Tagger):
         """
         x_feats_array = []
         gaz_feats_array = []
+        char_feats_array = []
         for idx, example in enumerate(examples):
-            x_feat, gaz_feat = self._extract_features(example)
+            x_feat, gaz_feat, char_feat = self._extract_features(example)
             x_feats_array.append(x_feat)
             gaz_feats_array.append(gaz_feat)
+            char_feats_array.append(char_feat)
 
         x_feats_array = self.query_encoder.get_embeddings_from_encodings(x_feats_array)
         gaz_feats_array = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats_array)
-        return x_feats_array, gaz_feats_array
+
+        return x_feats_array, gaz_feats_array, char_feats_array
 
     def _extract_features(self, example):
         """Extracts feature dicts for each token in an example.
@@ -457,8 +529,9 @@ class LstmModel(Tagger):
 
         encoded_gaz = self.gaz_encoder.encode_sequence_of_tokens(extracted_gaz_tokens)
         padded_query = self.query_encoder.encode_sequence_of_tokens(example.normalized_tokens)
+        padded_char = self.embedding.transform_char_query(example.normalized_tokens)
 
-        return padded_query, encoded_gaz
+        return padded_query, encoded_gaz, padded_char
 
     def _fit(self, X, y):
         """Trains a classifier without cross-validation. It iterates through
@@ -481,6 +554,7 @@ class LstmModel(Tagger):
             np.random.shuffle(indices)
 
             gaz = self.gaz_features_arr[indices]
+            char = self.char_features_arr[indices]
             examples = X[indices]
             labels = y[indices]
             batch_size = int(self.batch_size)
@@ -495,6 +569,7 @@ class LstmModel(Tagger):
                 batch_labels = labels[batch_start_index:batch_end_index]
                 batch_gaz = gaz[batch_start_index:batch_end_index]
                 batch_seq_len = seq_len[batch_start_index:batch_end_index]
+                batch_char = char[batch_start_index:batch_end_index]
 
                 if batch % int(self.display_epoch) == 0:
                     output, loss, _ = self.session.run([self.lstm_output_tf,
@@ -504,6 +579,7 @@ class LstmModel(Tagger):
                                                         batch_examples,
                                                         batch_gaz,
                                                         batch_seq_len,
+                                                        batch_char,
                                                         batch_labels))
 
                     score = self._calculate_score(output, batch_labels, batch_seq_len)
@@ -517,7 +593,8 @@ class LstmModel(Tagger):
                                                                             accuracy))
                 else:
                     self.session.run(self.optimizer_tf, feed_dict=self.construct_feed_dictionary(
-                        batch_examples, batch_gaz, batch_seq_len, batch_labels))
+                        batch_examples, batch_gaz, batch_seq_len, batch_char, batch_labels))
+
         return self
 
     def _predict(self, X):
@@ -530,6 +607,7 @@ class LstmModel(Tagger):
             (list): A list of decoded labelled predicted by the model
         """
         seq_len_arr = np.array(self.sequence_lengths)
+        char = self.char_features_arr
 
         # During predict time, we make sure no nodes are dropped out
         self.dense_keep_probability = 1.0
@@ -538,7 +616,7 @@ class LstmModel(Tagger):
 
         output = self.session.run(
             [self.lstm_output_tf],
-            feed_dict=self.construct_feed_dictionary(X, self.gaz_features_arr, seq_len_arr))
+            feed_dict=self.construct_feed_dictionary(X, self.gaz_features_arr, seq_len_arr, char))
 
         output = np.reshape(output, [-1, int(self.padding_length), self.output_dimension])
         output = np.argmax(output, 2)

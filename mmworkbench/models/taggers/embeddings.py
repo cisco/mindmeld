@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_LABEL = 'B|UNK'
 DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_GAZ_LABEL = 'O'
+DEFAULT_CHAR_TOKEN = '`'
 
 GLOVE_DOWNLOAD_LINK = 'http://nlp.stanford.edu/data/glove.6B.zip'
 EMBEDDING_FILE_PATH_TEMPLATE = 'glove.6B.{}d.txt'
@@ -156,6 +157,7 @@ class SequenceEmbedding(object):
     def __init__(self,
                  sequence_padding_length,
                  default_token,
+                 max_char_per_word,
                  use_pretrained_embeddings=False,
                  token_embedding_dimension=None,
                  token_pretrained_embedding_filepath=None):
@@ -172,6 +174,7 @@ class SequenceEmbedding(object):
             the embeddings from
         """
 
+        np.random.seed(seed=1)
         self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
         self.token_embedding_dimension = token_embedding_dimension
         self.sequence_padding_length = sequence_padding_length
@@ -286,6 +289,25 @@ class WordSequenceEmbedding(SequenceEmbedding):
                 embedding_matrix[i] = embedding_vector
         return embedding_matrix
 
+    def get_char_encoding_matrix(self):
+        """
+        Constructs the encoding matrix of char encoding to char embedding
+
+        Returns:
+            Embedding matrix ndarray
+        """
+        num_chars = len(self.char_to_encoding.keys())
+        embedding_matrix = np.zeros((num_chars, self.character_embedding_dimension))
+        for char, i in self.char_to_encoding.items():
+            embedding_vector = self.char_to_embedding.get(char)
+            if embedding_vector is None:
+                random_char = np.random.uniform(-1, 1, size=(self.character_embedding_dimension,))
+                embedding_matrix[i] = random_char
+                self.char_to_embedding[char] = random_char
+            else:
+                # words not found in embedding index will be all-zeros.
+                embedding_matrix[i] = embedding_vector
+        return embedding_matrix
 
 class LabelSequenceEmbedding(SequenceEmbedding):
     """This class is a container for building sequence embeddings for a sequence of labels.
@@ -357,3 +379,9 @@ class GazetteerSequenceEmbedding(SequenceEmbedding):
             self.token_to_encoding_mapping[token] = self.available_token_encoding
             self.encoding_to_token_mapping[self.available_token_encoding] = token
             self.available_token_encoding += 1
+
+    def _char_encoding_transform(self, char_token):
+        if char_token not in self.char_to_encoding:
+            self.char_to_encoding[char_token] = self.next_available_char_token
+            self.encoding_to_char[self.next_available_char_token] = char_token
+            self.next_available_char_token += 1
