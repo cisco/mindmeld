@@ -233,10 +233,9 @@ class LstmModel(Tagger):
         self.multiple_window_sizes = False
         if self.multiple_window_sizes:
             for window_size in self.char_window_sizes:
-                word_level_char_embeddings_list.append(self.apply_convolution(self.tf_char_input,
-                                                                              batch_size_dim,
-                                                                              window_size,
-                                                                              self.character_embedding_dimension))
+                word_level_char_embeddings_list.append(
+                    self.apply_convolution(self.tf_char_input, batch_size_dim,
+                                           window_size, self.character_embedding_dimension))
             word_level_char_embedding = tf.concat(word_level_char_embeddings_list, 2)
         else:
             word_level_char_embedding = self.apply_convolution(self.tf_char_input, batch_size_dim,
@@ -261,31 +260,36 @@ class LstmModel(Tagger):
                                                           self.max_char_per_word,
                                                           embedding_dimension, 1])
 
-
         # first dimension 1 because want to apply this to every word
         char_convolution_filter = tf.Variable(tf.random_normal(
             [1, char_window_size, embedding_dimension,
              1, self.character_embedding_dimension], dtype=tf.float32))
 
         # Strides is None because we want to advance one character at a time and one word at a time
-        conv_output = tf.nn.convolution(convolution_reshaped_char_embedding, char_convolution_filter, padding='SAME')
+        conv_output = tf.nn.convolution(convolution_reshaped_char_embedding,
+                                        char_convolution_filter, padding='SAME')
 
-        # Max pool over each word, captured by the size of the filter corresponding to an entire single word
+        # Max pool over each word, captured by the size of the filter corresponding to an entire
+        # single word
         max_pool = tf.nn.pool(
             conv_output, window_shape=[1, self.max_char_per_word, embedding_dimension],
             pooling_type='MAX', padding='VALID')
 
-        # Transpose because shape before is batch_size BY query_padding_length BY 1 BY 1 BY num_filters
-        # 1's refer to number of input channels and dimension because our window has height equal to
-        # char_embedding_dimension and encompases the entire dimension
+        # Transpose because shape before is batch_size BY query_padding_length BY 1 BY 1
+        # BY num_filters 1's refer to number of input channels and dimension because our
+        # window has height equal to char_embedding_dimension and encompases the entire
+        # dimension
         max_pool = tf.transpose(max_pool, [0, 1, 4, 2, 3])
-        max_pool = tf.reshape(max_pool, [batch_size, self.padding_length, self.character_embedding_dimension])
+        max_pool = tf.reshape(max_pool, [batch_size, self.padding_length,
+                                         self.character_embedding_dimension])
 
-        char_convolution_bias = tf.Variable(tf.random_normal([self.character_embedding_dimension, ]))
+        char_convolution_bias = tf.Variable(
+            tf.random_normal([self.character_embedding_dimension, ]))
 
         char_convolution_bias = tf.tile(char_convolution_bias, [self.padding_length])
         char_convolution_bias = tf.reshape(char_convolution_bias,
-                                           [self.padding_length, self.character_embedding_dimension])
+                                           [self.padding_length,
+                                            self.character_embedding_dimension])
 
         char_convolution_bias = tf.tile(char_convolution_bias, [batch_size, 1])
         char_convolution_bias = tf.reshape(char_convolution_bias,
@@ -485,7 +489,11 @@ class LstmModel(Tagger):
         x_feats_array = self.query_encoder.get_embeddings_from_encodings(x_feats_array)
         gaz_feats_array = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats_array)
 
-        return x_feats_array, gaz_feats_array, char_feats_array
+        embedding_char_matrix = self.embedding.get_char_encoding_matrix()
+        char_feats = self.embedding.transform_char_query_using_embeddings(char_feats_array,
+                                                                          embedding_char_matrix)
+
+        return x_feats_array, gaz_feats_array, char_feats
 
     def _extract_features(self, example):
         """Extracts feature dicts for each token in an example.
