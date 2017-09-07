@@ -126,13 +126,12 @@ class Embedding:
         Returns:
             Embedding matrix ndarray
         """
-        embedding_dim = int(self.token_embedding_dimension)
         num_words = len(self.word_to_encoding.keys())
-        embedding_matrix = np.zeros((num_words, embedding_dim))
+        embedding_matrix = np.zeros((num_words, self.token_embedding_dimension))
         for word, i in self.word_to_encoding.items():
             embedding_vector = self.word_to_embedding.get(word)
             if embedding_vector is None:
-                random_word = np.random.uniform(-1, 1, size=(embedding_dim,))
+                random_word = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
                 embedding_matrix[i] = random_word
                 self.word_to_embedding[word] = random_word
             else:
