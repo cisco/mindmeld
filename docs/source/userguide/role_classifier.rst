@@ -119,8 +119,8 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
        'in-gaz': {},
        'other-entities': {}
      },
-     'model_settings': None,
-     'model_type': 'maxent',
+     'model_settings': {'classifier_type': 'logreg'},
+     'model_type': 'text',
      'param_selection': None,
      'params': {'C': 100, 'penalty': 'l1'}
    }
@@ -134,12 +134,23 @@ Let's take a look at the allowed values for each setting in a role classifier co
 ``'model_type'`` (:class:`str`)
   |
 
-  Always ``'maxent'``, since `maximum entropy model (MaxEnt) <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_ is currently the only supported model for role classification in Workbench.
+  Always ``'text'``, since role classification is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model.
 
 ``'model_settings'`` (:class:`dict`)
   |
 
-  Always ``None``.
+  Always a dictionary with the single key ``'classifier_type'``, whose value specifies the machine learning model to use. Allowed values are shown in the table below.
+
+.. _sklearn_role_models:
+
+  =============== =======================================================
+  Classifier Type Description (with list of configurable hyperparameters)
+  =============== =======================================================
+  ``'logreg'``    :sk_guide:`Logistic regression <linear_model.html#logistic-regression>` (see :sk_api:`parameter list <sklearn.linear_model.LogisticRegression>`)
+  ``'svm'``       :sk_guide:`Support vector machine <svm.html#svm-classification>` (see :sk_api:`parameter list <sklearn.svm.SVC>`)
+  ``'dtree'``     :sk_guide:`Decision tree <tree.html#tree>` (see :sk_api:`parameter list <sklearn.tree.DecisionTreeClassifier>`)
+  ``'rforest'``   :sk_guide:`Random forest <ensemble.html#forest>` (see :sk_api:`parameter list <sklearn.ensemble.RandomForestClassifier>`)
+  =============== =======================================================
 
 2. **Feature Extraction Settings**
 
