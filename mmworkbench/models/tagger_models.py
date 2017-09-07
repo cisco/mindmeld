@@ -20,6 +20,7 @@ MEMM_TYPE = 'memm'
 
 # for default model scoring types
 ACCURACY_SCORING = 'accuracy'
+SEQ_ACCURACY_SCORING = 'seq_accuracy'
 SEQUENCE_MODELS = ['crf']
 
 DEFAULT_FEATURES = {
@@ -203,12 +204,12 @@ class TaggerModel(Model):
         # Gets the scorer based on what is passed in to the selection settings (reverts to
         # default if nothing is passed in)
         scorer = selection_settings.get('scoring', default_scorer)
-        if scorer == 'seq_accuracy':
+        if scorer == SEQ_ACCURACY_SCORING:
             if classifier_type not in SEQUENCE_MODELS:
                 logger.error("Sequence accuracy is only available for the following "
                              "models: {}".format(str(SEQUENCE_MODELS)))
             return get_seq_accuracy_scorer()
-        elif scorer == 'accuracy' and classifier_type in SEQUENCE_MODELS:
+        elif scorer == ACCURACY_SCORING and classifier_type in SEQUENCE_MODELS:
             return get_seq_tag_accuracy_scorer()
         else:
             return scorer
