@@ -204,7 +204,7 @@ Let's take a look at the allowed values for each setting in a role classifier co
 ``'params'`` (:class:`dict`)
   |
 
-  A dictionary of values to be used for model hyperparameters during training. These include inverse of regularization strength as ``'C'``, the norm used in penalization as ``'penalty'``, and so on. The list of allowed hyperparameters is :sk_api:`here <sklearn.linear_model.LogisticRegression.html>`.
+  A dictionary of values to be used for model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, ``'penalty'`` for logistic regression, ``'max_depth'`` for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the parameter list in :ref:`the model table <_sklearn_role_models>` above.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -268,7 +268,8 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
 .. code-block:: python
 
    ROLE_MODEL_CONFIG = {
-       'model_type': 'maxent',
+       'model_type': 'text',
+       'model_settings': {'classifier_type': 'logreg'}
        'params': {
            'C': 10,
            'penalty': 'l2'
@@ -338,7 +339,7 @@ Suppose w\ :sub:`i` represents the word at the *ith* index in the query, where t
 
   - Bigrams: { w\ :sub:`-3`\ w\ :sub:`-2`, w\ :sub:`-2`\ w\ :sub:`-1`, w\ :sub:`-1`\ w\ :sub:`0`,  w\ :sub:`0`\ w\ :sub:`1`, w\ :sub:`1`\ w\ :sub:`2`, w\ :sub:`2`\ w\ :sub:`3` }
 
-Retrain the classifier with the updated feature set by passing in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This applies our new feature extraction settings, while retaining the Workbench defaults for model type (MaxEnt) and hyperparameter selection.
+Retrain the classifier with the updated feature set by passing in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This applies our new feature extraction settings, while retaining the Workbench defaults for model and classifier types (logreg) and hyperparameter selection.
 
 .. code-block:: python
 
@@ -348,7 +349,7 @@ Retrain the classifier with the updated feature set by passing in the :data:`my_
 
 **Hyperparameter tuning**
 
-View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <model_settings>` for the MaxEnt model in Workbench. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
+View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <model_settings>` for logistic regression, the default model for role classification in Workbench. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
 
 .. code-block:: python
 
