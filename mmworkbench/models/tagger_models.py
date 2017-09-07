@@ -6,7 +6,8 @@ from builtins import range, super
 import logging
 import random
 
-from .helpers import register_model, get_label_encoder
+from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
+                      get_seq_tag_accuracy_scorer)
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
@@ -16,6 +17,10 @@ logger = logging.getLogger(__name__)
 # classifier types
 CRF_TYPE = 'crf'
 MEMM_TYPE = 'memm'
+
+# for default model scoring types
+ACCURACY_SCORING = 'accuracy'
+SEQUENCE_MODELS = ['crf']
 
 DEFAULT_FEATURES = {
     'bag-of-words-seq': {
@@ -181,6 +186,32 @@ class TaggerModel(Model):
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
                   for example_predicted_tags, example in zip(predicted_tags, examples)]
         return labels
+
+    def _get_cv_scorer(self, selection_settings):
+        """
+        Returns the scorer to use based on the selection settings and classifier type,
+        defaulting to tag accuracy.
+        """
+        classifier_type = self.config.model_settings['classifier_type']
+
+        # Sets the default scorer based on the classifier type
+        if classifier_type in SEQUENCE_MODELS:
+            default_scorer = get_seq_tag_accuracy_scorer()
+        else:
+            default_scorer = ACCURACY_SCORING
+
+        # Gets the scorer based on what is passed in to the selection settings (reverts to
+        # default if nothing is passed in)
+        scorer = selection_settings.get('scoring', default_scorer)
+        if scorer == 'seq_accuracy':
+            if classifier_type not in SEQUENCE_MODELS:
+                logger.error("Sequence accuracy is only available for the following "
+                             "models: {}".format(str(SEQUENCE_MODELS)))
+            return get_seq_accuracy_scorer()
+        elif scorer == 'accuracy' and classifier_type in SEQUENCE_MODELS:
+            return get_seq_tag_accuracy_scorer()
+        else:
+            return scorer
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
