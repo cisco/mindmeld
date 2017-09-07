@@ -14,15 +14,13 @@ from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridS
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal, get_seq_accuracy_scorer, get_seq_tag_accuracy_scorer)
+                      entity_seqs_equal)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 logger = logging.getLogger(__name__)
 
-# model scoring types
-ACCURACY_SCORING = 'accuracy'
+# model scoring type
 LIKELIHOOD_SCORING = 'log_loss'
-SEQUENCE_MODELS = ['crf']
 
 _NEG_INF = -1e10
 
@@ -612,13 +610,6 @@ class Model(object):
         self._resources = {}
         self._clf = None
         self.cv_loss_ = None
-        self.default_scorer = self._get_default_scorer(self.config)
-
-    def _get_default_scorer(self, config):
-        if config.model_settings['classifier_type'] in SEQUENCE_MODELS:
-            return get_seq_tag_accuracy_scorer()
-        else:
-            return ACCURACY_SCORING
 
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
@@ -661,22 +652,17 @@ class Model(object):
         for idx, params in enumerate(model.cv_results_['params']):
             logger.debug('Candidate parameters: {}'.format(params))
             std_err = 2.0 * model.cv_results_['std_test_score'][idx] / math.sqrt(model.n_splits_)
-            if scoring == ACCURACY_SCORING:
-                msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
-            elif scoring == LIKELIHOOD_SCORING:
+            if scoring == LIKELIHOOD_SCORING:
                 msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
             else:
-                msg = 'Candidate average seq2seq accuracy: {:.2%} ± {:.2%}'
+                msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
             logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
 
-        if scoring == ACCURACY_SCORING:
-            msg = 'Best accuracy: {:.2%}, params: {}'
-            self.cv_loss_ = 1 - model.best_score_
-        elif scoring == LIKELIHOOD_SCORING:
+        if scoring == LIKELIHOOD_SCORING:
             msg = 'Best log likelihood: {:.4}, params: {}'
             self.cv_loss_ = - model.best_score_
         else:
-            msg = 'Best seq2seq accuracy: {:.2%}, params: {}'
+            msg = 'Best accuracy: {:.2%}, params: {}'
             self.cv_loss_ = 1 - model.best_score_
 
         best_params = self._process_cv_best_params(model.best_params_)
@@ -685,13 +671,10 @@ class Model(object):
         return model.best_estimator_, model.best_params_
 
     def _get_cv_scorer(self, selection_settings):
-        scorer = selection_settings.get('scoring', self.default_scorer)
-        if scorer == 'seq_accuracy':
-            return get_seq_accuracy_scorer()
-        elif scorer == 'seq_tag_accuracy':
-            return get_seq_tag_accuracy_scorer()
-        else:
-            return scorer
+        """
+        Returns the scorer to use based on the selection settings and classifier type.
+        """
+        raise NotImplementedError
 
     def _get_cv_estimator_and_params(self, model_class, param_grid):
         return model_class(), param_grid
