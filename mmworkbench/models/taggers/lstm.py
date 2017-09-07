@@ -5,11 +5,8 @@ import math
 import logging
 
 from .taggers import Tagger, extract_sequence_features
-from .embeddings import Embedding
+from .embeddings import Embedding, DEFAULT_GAZ_LABEL
 
-DEFAULT_PADDED_TOKEN = '<UNK>'
-DEFAULT_LABEL = 'B|UNK'
-DEFAULT_GAZ_LABEL = 'O'
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
 REGEX_TYPE_POSITIONAL_INDEX = 1
@@ -388,41 +385,40 @@ class LstmModel(Tagger):
         Returns:
             (list dict): features
         """
-        extracted_gaz_tokens = [DEFAULT_GAZ_LABEL] * self.padding_length
+        extracted_gaz_tokens = []
         extracted_sequence_features = extract_sequence_features(
             example, self.example_type, self.features, self.resources)
 
         for index, extracted_gaz in enumerate(extracted_sequence_features):
-            if len(extracted_gaz.keys()) > 0 and index < self.padding_length:
-                combined_gaz_features = set()
-                for key in extracted_gaz.keys():
-                    regex_match = re.match(GAZ_PATTERN_MATCH, key)
-                    if regex_match:
+            if extracted_gaz == {}:
+                extracted_gaz_tokens.append(DEFAULT_GAZ_LABEL)
+                continue
 
-                        # Examples of gaz features here are:
-                        # in-gaz|type:city|pos:start|p_fe,
-                        # in-gaz|type:city|pos:end|pct-char-len
-                        # There were many gaz features of the same type that had
-                        # bot start and end position tags for a given token.
-                        # Due to this, we did not implement functionality to
-                        # extract the positional information due to the noise
-                        # associated with it.
+            combined_gaz_features = set()
+            for key in extracted_gaz.keys():
+                regex_match = re.match(GAZ_PATTERN_MATCH, key)
+                if regex_match:
+                    # Examples of gaz features here are:
+                    # in-gaz|type:city|pos:start|p_fe,
+                    # in-gaz|type:city|pos:end|pct-char-len
+                    # There were many gaz features of the same type that had
+                    # bot start and end position tags for a given token.
+                    # Due to this, we did not implement functionality to
+                    # extract the positional information due to the noise
+                    # associated with it.
+                    combined_gaz_features.add(
+                        regex_match.group(REGEX_TYPE_POSITIONAL_INDEX))
 
-                        combined_gaz_features.add(
-                            regex_match.group(REGEX_TYPE_POSITIONAL_INDEX))
+            if len(combined_gaz_features) == 0:
+                extracted_gaz_tokens.append(DEFAULT_GAZ_LABEL)
+            else:
+                extracted_gaz_tokens.append(",".join(list(combined_gaz_features)))
 
-                if len(combined_gaz_features) == 0:
-                    extracted_gaz_tokens[index] = DEFAULT_GAZ_LABEL
-                else:
-                    extracted_gaz_tokens[index] = ",".join(list(combined_gaz_features))
-
-        padded_query = [DEFAULT_PADDED_TOKEN] * self.padding_length
-        max_sequence_length = min(len(example.normalized_tokens), self.padding_length)
-        for i in range(max_sequence_length):
-            padded_query[i] = example.normalized_tokens[i]
+        assert len(extracted_gaz_tokens) == len(example.normalized_tokens), \
+            "The length of the gaz and example query have to be the same"
 
         encoded_gaz = self.embedding.transform_gaz_query(extracted_gaz_tokens)
-        padded_query = self.embedding.transform_example(padded_query)
+        padded_query = self.embedding.transform_example(example.normalized_tokens)
 
         return padded_query, encoded_gaz
 
