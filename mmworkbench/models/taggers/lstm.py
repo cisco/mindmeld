@@ -121,7 +121,10 @@ class LstmModel(Tagger):
         if y:
             # Train time
             self.resources = resources
-            self.gaz_dimension = len(self.resources['gazetteers'].keys())
+
+            # The gaz dimension are the sum total of the gazetteer entities and
+            # the 'other' gaz entity, which is the entity for all non-gazetteer tokens
+            self.gaz_dimension = len(self.resources['gazetteers'].keys()) + 1
             self.example_type = config.example_type
             self.features = config.features
 
@@ -133,10 +136,9 @@ class LstmModel(Tagger):
             self.label_encoder = LabelTokenSequenceEmbedding(self.padding_length,
                                                              DEFAULT_LABEL)
 
-            self.query_encoder = WordTokenSequenceEmbedding(self.padding_length,
-                                                            DEFAULT_PADDED_TOKEN,
-                                                            self.token_embedding_dimension,
-                                                            self.token_pretrained_embedding_filepath)
+            self.query_encoder = WordTokenSequenceEmbedding(
+                self.padding_length, DEFAULT_PADDED_TOKEN, True,
+                self.token_embedding_dimension, self.token_pretrained_embedding_filepath)
 
             self.gaz_encoder = GazetteerTokenSequenceEmbedding(self.padding_length,
                                                                DEFAULT_GAZ_LABEL,
@@ -150,7 +152,7 @@ class LstmModel(Tagger):
 
             self.output_dimension = len(self.label_encoder.token_to_encoding_mapping.keys())
         else:
-            # Predict time since the label is not available
+            # Predict time
             embedded_labels = None
 
         # Extract features and classes
@@ -387,7 +389,7 @@ class LstmModel(Tagger):
         Args:
             examples (list of mmworkbench.core.Query): a list of queries
         Returns:
-            (list of list of str): features in CRF suite format
+            (tuple): Word embeddings and Gazetteer one-hot embeddings
         """
         x_feats = []
         gaz_feats = []
