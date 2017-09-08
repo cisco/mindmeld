@@ -5,11 +5,16 @@ import math
 import logging
 
 from .taggers import Tagger, extract_sequence_features
-from .embeddings import Embedding, DEFAULT_GAZ_LABEL
+from .embeddings import LabelTokenSequenceEmbedding, \
+    WordTokenSequenceEmbedding, \
+    GazetteerTokenSequenceEmbedding
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
 REGEX_TYPE_POSITIONAL_INDEX = 1
+DEFAULT_LABEL = 'B|UNK'
+DEFAULT_PADDED_TOKEN = '<UNK>'
+DEFAULT_GAZ_LABEL = 'O'
 
 logger = logging.getLogger(__name__)
 
@@ -84,18 +89,27 @@ class LstmModel(Tagger):
         self.tf_lstm_input_keep_prob = tf.placeholder(tf.float32)
         self.tf_lstm_output_keep_prob = tf.placeholder(tf.float32)
 
-        self.tf_query_input = tf.placeholder(tf.float32, [None,
-                                                          self.padding_length,
-                                                          self.token_embedding_dimension])
+        self.tf_query_input = tf.placeholder(tf.float32,
+                                             [None,
+                                              self.padding_length,
+                                              self.token_embedding_dimension],
+                                             name='tf_query_input')
 
-        self.tf_gaz_input = tf.placeholder(tf.float32, [None,
-                                                        self.padding_length,
-                                                        self.gaz_dimension])
+        self.tf_gaz_input = tf.placeholder(tf.float32,
+                                           [None,
+                                            self.padding_length,
+                                            self.gaz_dimension],
+                                           name='tf_gaz_input')
 
-        self.tf_label = tf.placeholder(
-            tf.int32, [None, int(self.padding_length), self.output_dimension])
+        self.tf_label = tf.placeholder(tf.int32,
+                                       [None,
+                                        int(self.padding_length),
+                                        self.output_dimension],
+                                       name='tf_label')
 
-        self.tf_sequence_length = tf.placeholder(tf.int32, shape=[None])
+        self.tf_sequence_length = tf.placeholder(tf.int32,
+                                                 shape=[None],
+                                                 name='tf_sequence_length')
 
         word_and_gaz_embedding = self._construct_embedding_network()
         self.tf_lstm_output = self._construct_network(word_and_gaz_embedding)
@@ -104,37 +118,50 @@ class LstmModel(Tagger):
             self.tf_lstm_output, self.tf_label)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
-        self.resources = resources
-        self.gaz_dimension = len(self.resources['gazetteers'].keys())
-        self.example_type = config.example_type
-        self.features = config.features
+        if y:
+            # Train time
+            self.resources = resources
+            self.gaz_dimension = len(self.resources['gazetteers'].keys())
+            self.example_type = config.example_type
+            self.features = config.features
 
-        self.token_pretrained_embedding_filepath = \
-            config.params.get('token_pretrained_embedding_filepath')
+            self.token_pretrained_embedding_filepath = \
+                config.params.get('token_pretrained_embedding_filepath')
 
-        self.padding_length = config.params.get('padding_length')
-        self.embedding = Embedding(self.token_pretrained_embedding_filepath,
-                                   self.token_embedding_dimension,
-                                   self.gaz_dimension,
-                                   self.padding_length)
+            self.padding_length = config.params.get('padding_length')
+
+            self.label_encoder = LabelTokenSequenceEmbedding(self.padding_length,
+                                                             DEFAULT_LABEL)
+
+            self.query_encoder = WordTokenSequenceEmbedding(self.padding_length,
+                                                            DEFAULT_PADDED_TOKEN,
+                                                            self.token_embedding_dimension,
+                                                            self.token_pretrained_embedding_filepath)
+
+            self.gaz_encoder = GazetteerTokenSequenceEmbedding(self.padding_length,
+                                                               DEFAULT_GAZ_LABEL,
+                                                               self.gaz_dimension)
+
+            encoded_labels = []
+            for sequence in y:
+                encoded_labels.append(self.label_encoder.encode_sequence_of_tokens(sequence))
+
+            embedded_labels = self.label_encoder.get_embeddings_from_encodings(encoded_labels)
+
+            self.output_dimension = len(self.label_encoder.token_to_encoding_mapping.keys())
+        else:
+            # Predict time since the label is not available
+            embedded_labels = None
 
         # Extract features and classes
         X, gaz = self._get_features(examples)
         self.gaz_features = np.asarray(gaz, dtype='float32')
         self.sequence_lengths = self._extract_seq_length(examples)
 
-        if y:
-            encoded_labels = self.embedding.encode_labels(y)
-            self.output_dimension = len(self.embedding.label_encoding.keys())
-            self.labels_dict = self.embedding.label_encoding
-        else:
-            # Predict time since the label is not available
-            encoded_labels = None
-
         # There are no groups in this model
         groups = None
 
-        return X, encoded_labels, groups
+        return X, embedded_labels, groups
 
     def setup_model(self, config=None):
         # We have to reset the graph on every dataset since the input, gaz and output
@@ -160,7 +187,6 @@ class LstmModel(Tagger):
         Returns:
             The feed dictionary
         """
-
         return_dict = {
             self.tf_query_input: batch_examples,
             self.tf_sequence_length: batch_seq_len,
@@ -370,11 +396,8 @@ class LstmModel(Tagger):
             x_feats.append(x_feat)
             gaz_feats.append(gaz_feat)
 
-        embedding_matrix = self.embedding.get_encoding_matrix()
-        embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
-
-        x_feats = self.embedding.transform_query_using_embeddings(x_feats, embedding_matrix)
-        gaz_feats = self.embedding.transform_query_using_embeddings(gaz_feats, embedding_gaz_matrix)
+        x_feats = self.query_encoder.get_embeddings_from_encodings(x_feats)
+        gaz_feats = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats)
         return x_feats, gaz_feats
 
     def _extract_features(self, example):
@@ -417,8 +440,8 @@ class LstmModel(Tagger):
         assert len(extracted_gaz_tokens) == len(example.normalized_tokens), \
             "The length of the gaz and example query have to be the same"
 
-        encoded_gaz = self.embedding.transform_gaz_query(extracted_gaz_tokens)
-        padded_query = self.embedding.transform_example(example.normalized_tokens)
+        encoded_gaz = self.gaz_encoder.encode_sequence_of_tokens(extracted_gaz_tokens)
+        padded_query = self.query_encoder.encode_sequence_of_tokens(example.normalized_tokens)
 
         return padded_query, encoded_gaz
 
@@ -506,15 +529,11 @@ class LstmModel(Tagger):
         output = np.reshape(output, [-1, int(self.padding_length), self.output_dimension])
         output = np.argmax(output, 2)
 
-        id_to_label = {}
-        for key_name in self.labels_dict.keys():
-            id_to_label[self.labels_dict[key_name]] = key_name
-
         decoded_queries = []
         for idx, encoded_predict in enumerate(output):
             decoded_query = []
             for tag in encoded_predict[:self.sequence_lengths[idx]]:
-                decoded_query.append(id_to_label[tag])
+                decoded_query.append(self.label_encoder.encoding_to_token_mapping[tag])
             decoded_queries.append(decoded_query)
 
         return decoded_queries
