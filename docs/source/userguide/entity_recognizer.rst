@@ -754,31 +754,31 @@ Supported system entities are enumerated in the table below.
 +-----------------+------------------------------------------------------------+
 | System Entity   | Examples                                                   |
 +=================+============================================================+
-| sys_time        | “today” , “Tuesday, Feb 18” , “last week” , “Mother’s      |
-|                 | day”                                                       |
+| sys_time        | "today" , "Tuesday, Feb 18" , "last week" , "Mother’s      |
+|                 | day"                                                       |
 +-----------------+------------------------------------------------------------+
-| sys_interval    | “tomorrow morning” , “from 9:30 - 11:00 on tuesday” ,      |
-|                 | “Friday 13th evening”                                      |
+| sys_interval    | "tomorrow morning" , "from 9:30 - 11:00 on tuesday" ,      |
+|                 | "Friday 13th evening"                                      |
 +-----------------+------------------------------------------------------------+
-| sys_temperature | “64°F” , “71° Fahrenheit” , “twenty seven celsius”         |
+| sys_temperature | "64°F" , "71° Fahrenheit" , "twenty seven celsius"         |
 +-----------------+------------------------------------------------------------+
-| sys_number      | “fifteen” , “0.62” , “500k” , “66”                         |
+| sys_number      | "fifteen" , "0.62" , "500k" , "66"                         |
 +-----------------+------------------------------------------------------------+
-| sys_ordinal     | “3rd” , “fourth” , “first”                                 |
+| sys_ordinal     | "3rd" , "fourth" , "first"                                 |
 +-----------------+------------------------------------------------------------+
-| sys_distance    | “10 miles” , “2feet” , “0.2 inches” , “3’’ “5km” ,”12cm”   |
+| sys_distance    | "10 miles" , "2feet" , "0.2 inches" , "3’’ "5km" ,"12cm"   |
 +-----------------+------------------------------------------------------------+
-| sys_volume      | “500 ml” , “5liters” , “2 gallons”                         |
+| sys_volume      | "500 ml" , "5liters" , "2 gallons"                         |
 +-----------------+------------------------------------------------------------+
-| sys_currency    | “forty dollars” , “9 bucks” , “$30”                        |
+| sys_currency    | "forty dollars" , "9 bucks" , "$30"                        |
 +-----------------+------------------------------------------------------------+
-| sys_email       | “help@cisco.com”                                           |
+| sys_email       | "help@cisco.com"                                           |
 +-----------------+------------------------------------------------------------+
-| sys_url         | “washpo.com/info” , “foo.com/path/path?ext=%23&foo=bla” ,  |
-|                 | “localhost”                                                |
+| sys_url         | "washpo.com/info" , "foo.com/path/path?ext=%23&foo=bla" ,  |
+|                 | "localhost"                                                |
 +-----------------+------------------------------------------------------------+
-| sys_phone-number| “+91 736 124 1231” , “+33 4 76095663” , “(626)-756-4757    |
-|                 | ext 900”                                                   |
+| sys_phone-number| "+91 736 124 1231" , "+33 4 76095663" , "(626)-756-4757    |
+|                 | ext 900"                                                   |
 +-----------------+------------------------------------------------------------+
 
 Workbench does not assume that any of the system entities are needed in your app. It is the system entities *that you annotate in your training data* that Workbench knows are needed.
@@ -787,10 +787,10 @@ Workbench does not assume that any of the system entities are needed in your app
    Workbench defines ``sys_time`` and ``sys_interval`` as subtly different entities.
 
   |
-   The ``sys_time`` entity connotes a *value of a single unit of time*, where the unit can be a date, an hour, a week, and so on. For example, “tomorrow” is a ``sys_time`` entity because it corresponds to a single (unit) date, like "2017-07-08."
+   The ``sys_time`` entity connotes a *value of a single unit of time*, where the unit can be a date, an hour, a week, and so on. For example, "tomorrow" is a ``sys_time`` entity because it corresponds to a single (unit) date, like "2017-07-08."
   |
   |
-   The ``sys_interval`` entity connotes a *time interval* that *spans several units* of time. For example, “tomorrow morning” is a ``sys_interval`` entity because “morning” corresponds to the span of hours from 4 am to 12 pm.
+   The ``sys_interval`` entity connotes a *time interval* that *spans several units* of time. For example, "tomorrow morning" is a ``sys_interval`` entity because "morning" corresponds to the span of hours from 4 am to 12 pm.
 
 Custom entities, system entities, and training set size
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

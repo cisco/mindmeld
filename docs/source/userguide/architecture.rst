@@ -112,7 +112,7 @@ Role Classifier
 
 The Role Classifier is the last level in the four-layer NLP classification hierarchy. It assigns a differentiating label, called a role, to the entities extracted by the entity recognizer. Sub-categorizing entities in this manner is only necessary where an entity of a particular type can have multiple meanings depending on the context.
 
-For example, “7 PM” and “midnight” could both be time entities. But in a query like "French restaurants open from 7 pm until midnight," one plays the role of an opening time while the other plays the role of a closing time. In this situation, the entity recognizer would categorize both as time entities, then the role classifier would label each entity with the appropriate role. Role classifiers are trained separately for each entity that requires the additional categorization.
+For example, "7 PM" and "midnight" could both be time entities. But in a query like "French restaurants open from 7 pm until midnight," one plays the role of an opening time while the other plays the role of a closing time. In this situation, the entity recognizer would categorize both as time entities, then the role classifier would label each entity with the appropriate role. Role classifiers are trained separately for each entity that requires the additional categorization.
 
 Here are examples of some entity types that might require role classification when dealing with certain intents.
 
