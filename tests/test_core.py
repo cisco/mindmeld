@@ -243,4 +243,3 @@ def test_create_entity_from_query(query_factory):
 
     assert entity.span.start == 18
     assert entity.span.end == 21
-
