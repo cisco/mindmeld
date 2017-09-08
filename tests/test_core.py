@@ -233,3 +233,14 @@ def test_nested_and_query_entity_equality():
 
     assert not entity_a == entity_b
     assert entity_a != entity_b
+
+
+def test_create_entity_from_query(query_factory):
+    """Tests the QueryEntity generated has the correct character indices based on raw query"""
+    query = query_factory.create_query("!!Connect me with Paul's meeting room please.")
+    norm_span = Span(16, 19)
+    entity = QueryEntity.from_query(query, normalized_span=norm_span, entity_type='test_type')
+
+    assert entity.span.start == 18
+    assert entity.span.end == 21
+
