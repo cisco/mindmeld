@@ -1,13 +1,13 @@
 import os
-import sys
 import zipfile
 import logging
 
 from tqdm import tqdm
 import numpy as np
+from six.moves.urllib.request import urlretrieve
 
-from ...path import WORKBENCH_ROOT
-from ...exceptions import PretrainedEmbeddingDownloadError
+from ...path import EMBEDDINGS_FILE_PATH
+from ...exceptions import EmbeddingDownloadError
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +16,8 @@ DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_GAZ_LABEL = 'O'
 
 GLOVE_DOWNLOAD_LINK = 'http://nlp.stanford.edu/data/glove.6B.zip'
-EMBEDDINGS_LOCAL_DIR = 'data/glove.6B.zip'
-EMBEDDING_FILE_TEMPLATE = 'glove.6B.{}d.txt'
+EMBEDDING_FILE_TEMPLATE = 'glove.6B/glove.6B.{}d.txt'
+ALLOWED_WORD_EMBEDDING_DIMENSIONS = [50, 100, 200, 300]
 
 
 class TqdmUpTo(tqdm):
@@ -36,7 +36,7 @@ class TqdmUpTo(tqdm):
         self.update(b * bsize - self.n)  # will also set self.n = b * bsize
 
 
-class GloVeEmbeddingDict:
+class GloVeEmbeddingsContainer:
     """This class is responsible for the downloading, extraction and storing of
     word embeddings based on the GloVe format"""
 
@@ -45,16 +45,15 @@ class GloVeEmbeddingDict:
         self.token_pretrained_embedding_filepath = \
             token_pretrained_embedding_filepath
 
-        allowed_dims = "50,100,200,300"
+        self.token_dimension = token_dimension
 
-        if str(token_dimension) not in allowed_dims:
+        if self.token_dimension not in ALLOWED_WORD_EMBEDDING_DIMENSIONS:
             logger.info("Token dimension {} not supported, "
                         "chose from these dimensions: {}. "
                         "Selected 300 by default".format(token_dimension,
-                                                         allowed_dims))
+                                                         str(ALLOWED_WORD_EMBEDDING_DIMENSIONS)))
             self.token_dimension = 300
 
-        self.token_dimension = token_dimension
         self.word_to_embedding = {}
         self._extract_embeddings()
 
@@ -70,13 +69,6 @@ class GloVeEmbeddingDict:
 
         logger.info("Downloading embedding from {}".format(GLOVE_DOWNLOAD_LINK))
 
-        # urllibretrieve is called differently between python 2 and 3.
-        if sys.version_info[0] >= 3:
-            from urllib.request import urlretrieve
-        else:
-            # Python 2 support
-            from urllib import urlretrieve
-
         # Make the folder that will contain the embeddings
         if not os.path.exists('data'):
             os.makedirs('data')
@@ -86,9 +78,7 @@ class GloVeEmbeddingDict:
 
             try:
                 file_handle, _ = urlretrieve(
-                    GLOVE_DOWNLOAD_LINK,
-                    os.path.join(WORKBENCH_ROOT, EMBEDDINGS_LOCAL_DIR),
-                    reporthook=t.update_to)
+                    GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to)
 
             except Exception as e:
                 logger.error("There was an issue downloading from this "
@@ -127,28 +117,27 @@ class GloVeEmbeddingDict:
 
         file_name = EMBEDDING_FILE_TEMPLATE.format(self.token_dimension)
 
-        zip_folder_location = os.path.join(WORKBENCH_ROOT, EMBEDDINGS_LOCAL_DIR)
-        if os.path.isfile(zip_folder_location):
+        if os.path.isfile(EMBEDDINGS_FILE_PATH):
             logger.info("Extracting embeddings from default folder "
-                        "location {}".format(zip_folder_location))
-            zip_file_object = zipfile.ZipFile(zip_folder_location, 'r')
+                        "location {}".format(EMBEDDINGS_FILE_PATH))
+            zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
             with zip_file_object.open(file_name) as embedding_file:
                 self._extract_and_map(embedding_file)
             return
 
-        logger.info("Default folder location {} does not exist".format(zip_folder_location))
+        logger.info("Default folder location {} does not exist".format(EMBEDDINGS_FILE_PATH))
 
         zip_file_object = self._download_embeddings_and_return_zip_handle()
 
         if not zip_file_object:
-            raise PretrainedEmbeddingDownloadError("Failed to download embeddings")
+            raise EmbeddingDownloadError("Failed to download embeddings")
 
         with zip_file_object.open(file_name) as embedding_file:
             self._extract_and_map(embedding_file)
         return
 
 
-class TokenSequenceEmbedding(object):
+class SequenceEmbedding(object):
     """Base class for encoding a sequence of tokens and transforming the encodings
     into one-hot or word vector based embeddings
     """
@@ -166,7 +155,7 @@ class TokenSequenceEmbedding(object):
 
         if use_pretrained_embeddings:
             self.token_to_embedding_mapping = \
-                GloVeEmbeddingDict(
+                GloVeEmbeddingsContainer(
                     token_embedding_dimension,
                     token_pretrained_embedding_filepath).get_pretrained_word_to_embeddings_dict()
         else:
@@ -178,6 +167,10 @@ class TokenSequenceEmbedding(object):
         self.available_token_encoding = 0
         self.default_token = default_token
 
+        # This matrix represents the mapping from the integer encoding of the token to its
+        # corresponding embedding vector (one hot or word vector). For example, word token
+        # "cat" is mapped to integer 1, which is mapped to the word vector [0.1, -0.5, ..]
+        # This matrix will have the row vector [0.1, -0.5, ..] mapped to index 1.
         self.token_encoding_to_embedding_matrix = {}
 
     def encode_sequence_of_tokens(self, token_sequence):
@@ -239,7 +232,9 @@ class TokenSequenceEmbedding(object):
         raise NotImplementedError
 
     def _encode_token(self, token):
-        """Encodes a token to a basic integer based encoding
+        """Encodes a token to a basic integer based encoding ie we map the
+        word to the next available integer value. Example: "cat" is mapped to 0,
+        the next word "dog" will be mapped to 1 etc.
 
         Args:
             token (str): Individual token
@@ -250,7 +245,7 @@ class TokenSequenceEmbedding(object):
             self.available_token_encoding += 1
 
 
-class WordTokenSequenceEmbedding(TokenSequenceEmbedding):
+class WordSequenceEmbedding(SequenceEmbedding):
 
     def _construct_embedding_matrix_from_token_encoding(self):
         num_words = len(self.token_to_encoding_mapping.keys())
@@ -266,7 +261,7 @@ class WordTokenSequenceEmbedding(TokenSequenceEmbedding):
         return embedding_matrix
 
 
-class LabelTokenSequenceEmbedding(TokenSequenceEmbedding):
+class LabelSequenceEmbedding(SequenceEmbedding):
 
     def _construct_embedding_matrix_from_token_encoding(self):
         num_words = len(self.token_to_encoding_mapping.keys())
@@ -279,7 +274,7 @@ class LabelTokenSequenceEmbedding(TokenSequenceEmbedding):
         return embedding_matrix
 
 
-class GazetteerTokenSequenceEmbedding(TokenSequenceEmbedding):
+class GazetteerSequenceEmbedding(SequenceEmbedding):
 
     def __init__(self,
                  sequence_padding_length,
