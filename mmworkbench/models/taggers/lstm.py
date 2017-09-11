@@ -15,6 +15,7 @@ REGEX_TYPE_POSITIONAL_INDEX = 1
 DEFAULT_LABEL = 'B|UNK'
 DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_GAZ_LABEL = 'O'
+RANDOM_SEED = 1
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,7 @@ class LstmModel(Tagger):
             # The gaz dimension are the sum total of the gazetteer entities and
             # the 'other' gaz entity, which is the entity for all non-gazetteer tokens
             self.gaz_dimension = len(self.resources['gazetteers'].keys()) + 1
+
             self.example_type = config.example_type
             self.features = config.features
 
@@ -211,7 +213,7 @@ class LstmModel(Tagger):
         Returns:
             Combined embeddings of the word and gazetteer embeddings
         """
-        initializer = tf.contrib.layers.xavier_initializer(seed=1)
+        initializer = tf.contrib.layers.xavier_initializer(seed=RANDOM_SEED)
 
         dense_gaz_embedding = tf.contrib.layers.fully_connected(
             inputs=self.tf_gaz_input,
@@ -234,11 +236,9 @@ class LstmModel(Tagger):
         """
         losses = tf.nn.softmax_cross_entropy_with_logits(
             logits=output_tensor,
-            labels=tf.reshape(label_tensor,
-                              [-1, self.output_dimension]), name='softmax')
+            labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax')
         cost = tf.reduce_mean(losses, name='cross_entropy_mean_loss')
-        optimizer = tf.train.AdamOptimizer(
-            learning_rate=float(self.learning_rate)).minimize(cost)
+        optimizer = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate)).minimize(cost)
         return optimizer, cost
 
     def _calculate_score(self, output_array, label_array, seq_lengths):
@@ -269,6 +269,58 @@ class LstmModel(Tagger):
 
         return score
 
+    def _construct_lstm_state(self, initializer, hidden_dimension, batch_size, name):
+        """Construct the LSTM initial state
+
+        Args:
+            initializer (tf.contrib.layers.xavier_initializer): initializer used
+            hidden_dimension: num dimensions of the hidden state variable
+            batch_size: the batch size of the data
+            name: suffix of the variable going to be used
+
+        Returns:
+            (LSTMStateTuple): LSTM state information
+        """
+
+        initial_cell_state = tf.get_variable(
+            "initial_cell_state_{}".format(name),
+            shape=[1, hidden_dimension],
+            dtype=tf.float32,
+            initializer=initializer)
+
+        initial_output_state = tf.get_variable(
+            "initial_output_state_{}".format(name),
+            shape=[1, hidden_dimension],
+            dtype=tf.float32,
+            initializer=initializer)
+
+        c_states = tf.tile(initial_cell_state, tf.stack([batch_size, 1]))
+        h_states = tf.tile(initial_output_state, tf.stack([batch_size, 1]))
+
+        return tf.contrib.rnn.LSTMStateTuple(c_states, h_states)
+
+    def _construct_regularized_lstm_cell(self, hidden_dimensions, initializer):
+        """Construct a regularized lstm cell based on a dropout layer
+
+        Args:
+            initializer (tf.contrib.layers.xavier_initializer): initializer used
+            hidden_dimensions: num dimensions of the hidden state variable
+
+        Returns:
+            (DropoutWrapper): regularized LSTM cell
+        """
+
+        lstm_cell = tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
+            hidden_dimensions, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
+
+        lstm_cell = tf.contrib.rnn.DropoutWrapper(
+            lstm_cell,
+            input_keep_prob=self.tf_lstm_input_keep_prob,
+            output_keep_prob=self.tf_lstm_output_keep_prob
+        )
+
+        return lstm_cell
+
     def _construct_lstm_network(self, input_tensor):
         """ This function constructs the Bi-Directional LSTM network
 
@@ -285,81 +337,38 @@ class LstmModel(Tagger):
         batch_size_dim = tf.shape(input_tensor)[0]
 
         # We use the xavier initializer for some of it's gradient control properties
-        initializer = tf.contrib.layers.xavier_initializer(seed=1)
+        initializer = tf.contrib.layers.xavier_initializer(seed=RANDOM_SEED)
 
         # Forward LSTM construction
-        lstm_cell_for = tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
-            n_hidden, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
-
-        lstm_cell_for = tf.contrib.rnn.DropoutWrapper(
-            lstm_cell_for,
-            input_keep_prob=self.tf_lstm_input_keep_prob,
-            output_keep_prob=self.tf_lstm_output_keep_prob
-        )
+        lstm_cell_forward = self._construct_regularized_lstm_cell(n_hidden, initializer)
+        initial_state_forward = self._construct_lstm_state(
+            initializer, n_hidden, batch_size_dim, 'forward')
 
         # Backward LSTM construction
-        lstm_cell_back = tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
-            n_hidden, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
-
-        lstm_cell_back = tf.contrib.rnn.DropoutWrapper(
-            lstm_cell_back,
-            input_keep_prob=self.tf_lstm_input_keep_prob,
-            output_keep_prob=self.tf_lstm_output_keep_prob
-        )
-
-        # LSTM state construction
-        initial_cell_state = tf.get_variable(
-            "initial_cell_state",
-            shape=[1, n_hidden],
-            dtype=tf.float32,
-            initializer=initializer)
-
-        initial_output_state = tf.get_variable(
-            "initial_output_state",
-            shape=[1, n_hidden],
-            dtype=tf.float32,
-            initializer=initializer)
-
-        initial_cell_state_2 = tf.get_variable(
-            "initial_cell_state_2",
-            shape=[1, n_hidden],
-            dtype=tf.float32,
-            initializer=initializer)
-
-        initial_output_state_2 = tf.get_variable(
-            "initial_output_state_2",
-            shape=[1, n_hidden],
-            dtype=tf.float32,
-            initializer=initializer)
-
-        initial_state = {}
-        c_states = tf.tile(initial_cell_state, tf.stack([batch_size_dim, 1]))
-        h_states = tf.tile(initial_output_state, tf.stack([batch_size_dim, 1]))
-        initial_state["forward"] = tf.contrib.rnn.LSTMStateTuple(c_states, h_states)
-
-        c_states = tf.tile(initial_cell_state_2, tf.stack([batch_size_dim, 1]))
-        h_states = tf.tile(initial_output_state_2, tf.stack([batch_size_dim, 1]))
-        initial_state["backward"] = tf.contrib.rnn.LSTMStateTuple(c_states, h_states)
+        lstm_cell_backward = self._construct_regularized_lstm_cell(n_hidden, initializer)
+        initial_state_backward = self._construct_lstm_state(
+            initializer, n_hidden, batch_size_dim, 'backward')
 
         # Combined the forward and backward LSTM networks
         (output_fw, output_bw), _ = tf.nn.bidirectional_dynamic_rnn(
-            lstm_cell_for, lstm_cell_back,
+            cell_fw=lstm_cell_forward,
+            cell_bw=lstm_cell_backward,
             inputs=input_tensor,
             sequence_length=self.tf_sequence_length,
             dtype=tf.float32,
-            initial_state_fw=initial_state["forward"],
-            initial_state_bw=initial_state["backward"])
+            initial_state_fw=initial_state_forward,
+            initial_state_bw=initial_state_backward)
 
         # Construct the output later
         output = tf.concat([output_fw, output_bw], axis=-1)
         output = tf.reshape(output, [-1, 2 * n_hidden])
         output = tf.nn.dropout(output, self.tf_dense_keep_prob)
 
-        weights = tf.get_variable("weights_out", shape=[2 * n_hidden, self.output_dimension],
-                                  dtype="float32", initializer=initializer)
+        weights = tf.get_variable('output_weights', shape=[2 * n_hidden, self.output_dimension],
+                                  dtype='float32', initializer=initializer)
 
-        biases = tf.get_variable("bias_out", shape=[self.output_dimension],
-                                 dtype="float32", initializer=initializer)
+        biases = tf.get_variable('output_bias', shape=[self.output_dimension],
+                                 dtype='float32', initializer=initializer)
 
         output_tensor = tf.matmul(output, weights) + biases
         return output_tensor
@@ -476,30 +485,29 @@ class LstmModel(Tagger):
             seq_len = np.array(self.sequence_lengths)[indices]
 
             for batch in range(num_batches):
-                batch_examples = \
-                    examples[batch * batch_size: (batch * batch_size) + batch_size]
-                batch_labels = \
-                    labels[batch * batch_size: (batch * batch_size) + batch_size]
-                batch_gaz = \
-                    gaz[batch * batch_size: (batch * batch_size) + batch_size]
-                batch_seq_len = \
-                    seq_len[batch * batch_size: (batch * batch_size) + batch_size]
+
+                batch_start_index = batch * batch_size
+                batch_end_index = (batch * batch_size) + batch_size
+
+                batch_examples = examples[batch_start_index:batch_end_index]
+                batch_labels = labels[batch_start_index:batch_end_index]
+                batch_gaz = gaz[batch_start_index:batch_end_index]
+                batch_seq_len = seq_len[batch_start_index:batch_end_index]
 
                 if batch % int(self.display_epoch) == 0:
-                    output, loss = self.session.run(
-                        [self.tf_lstm_output, self.cost],
-                        feed_dict=self.construct_feed_dictionary(
-                            batch_examples, batch_gaz, batch_seq_len, batch_labels))
+                    output, loss = self.session.run([self.tf_lstm_output, self.cost],
+                                                    feed_dict=self.construct_feed_dictionary(
+                                                        batch_examples,
+                                                        batch_gaz,
+                                                        batch_seq_len,
+                                                        batch_labels))
 
                     score = self._calculate_score(output, batch_labels, batch_seq_len)
                     accuracy = score / (len(batch_examples) * 1.0)
 
-                    logger.info("Iteration number " +
-                                str(batch * batch_size) +
-                                ", Minibatch Loss= " +
-                                "{:.5f}".format(loss) +
-                                ", Training Accuracy= " +
-                                "{:.5f}".format(accuracy))
+                    logger.info("Iteration number " + str(batch * batch_size) +
+                                ", Minibatch Loss= " + "{:.5f}".format(loss) +
+                                ", Training Accuracy= " + "{:.5f}".format(accuracy))
                 else:
                     self.session.run(self.optimizer,
                                      feed_dict=self.construct_feed_dictionary(
