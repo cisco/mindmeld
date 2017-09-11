@@ -5,9 +5,9 @@ import math
 import logging
 
 from .taggers import Tagger, extract_sequence_features
-from .embeddings import LabelTokenSequenceEmbedding, \
-    WordTokenSequenceEmbedding, \
-    GazetteerTokenSequenceEmbedding
+from .embeddings import LabelSequenceEmbedding, \
+    WordSequenceEmbedding, \
+    GazetteerSequenceEmbedding
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
@@ -81,13 +81,16 @@ class LstmModel(Tagger):
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
 
+    def get_params(self, deep=True):
+        return self.__dict__
+
     def construct_tf_variables(self):
         """
         Constructs the variables and operations in the tensorflow session graph
         """
-        self.tf_keep_probability = tf.placeholder(tf.float32)
-        self.tf_lstm_input_keep_prob = tf.placeholder(tf.float32)
-        self.tf_lstm_output_keep_prob = tf.placeholder(tf.float32)
+        self.tf_dense_keep_prob = tf.placeholder(tf.float32, name='dense_keep_prob')
+        self.tf_lstm_input_keep_prob = tf.placeholder(tf.float32, name='input_keep_prob')
+        self.tf_lstm_output_keep_prob = tf.placeholder(tf.float32, name='output_keep_prob')
 
         self.tf_query_input = tf.placeholder(tf.float32,
                                              [None,
@@ -107,12 +110,11 @@ class LstmModel(Tagger):
                                         self.output_dimension],
                                        name='tf_label')
 
-        self.tf_sequence_length = tf.placeholder(tf.int32,
-                                                 shape=[None],
+        self.tf_sequence_length = tf.placeholder(tf.int32, shape=[None],
                                                  name='tf_sequence_length')
 
         word_and_gaz_embedding = self._construct_embedding_network()
-        self.tf_lstm_output = self._construct_network(word_and_gaz_embedding)
+        self.tf_lstm_output = self._construct_lstm_network(word_and_gaz_embedding)
 
         self.optimizer, self.cost = self._define_optimizer_and_cost(
             self.tf_lstm_output, self.tf_label)
@@ -133,16 +135,16 @@ class LstmModel(Tagger):
 
             self.padding_length = config.params.get('padding_length')
 
-            self.label_encoder = LabelTokenSequenceEmbedding(self.padding_length,
-                                                             DEFAULT_LABEL)
+            self.label_encoder = LabelSequenceEmbedding(self.padding_length,
+                                                        DEFAULT_LABEL)
 
-            self.query_encoder = WordTokenSequenceEmbedding(
+            self.query_encoder = WordSequenceEmbedding(
                 self.padding_length, DEFAULT_PADDED_TOKEN, True,
                 self.token_embedding_dimension, self.token_pretrained_embedding_filepath)
 
-            self.gaz_encoder = GazetteerTokenSequenceEmbedding(self.padding_length,
-                                                               DEFAULT_GAZ_LABEL,
-                                                               self.gaz_dimension)
+            self.gaz_encoder = GazetteerSequenceEmbedding(self.padding_length,
+                                                          DEFAULT_GAZ_LABEL,
+                                                          self.gaz_dimension)
 
             encoded_labels = []
             for sequence in y:
@@ -171,7 +173,6 @@ class LstmModel(Tagger):
         # cannot be reused.
         tf.reset_default_graph()
         self.session = tf.Session()
-        return
 
     def construct_feed_dictionary(self,
                                   batch_examples,
@@ -193,7 +194,7 @@ class LstmModel(Tagger):
             self.tf_query_input: batch_examples,
             self.tf_sequence_length: batch_seq_len,
             self.tf_gaz_input: batch_gaz,
-            self.tf_keep_probability: self.dense_keep_probability,
+            self.tf_dense_keep_prob: self.dense_keep_probability,
             self.tf_lstm_input_keep_prob: self.lstm_input_keep_prob,
             self.tf_lstm_output_keep_prob: self.lstm_output_keep_prob
         }
@@ -268,7 +269,7 @@ class LstmModel(Tagger):
 
         return score
 
-    def _construct_network(self, input_tensor):
+    def _construct_lstm_network(self, input_tensor):
         """ This function constructs the Bi-Directional LSTM network
 
         Args:
@@ -352,7 +353,7 @@ class LstmModel(Tagger):
         # Construct the output later
         output = tf.concat([output_fw, output_bw], axis=-1)
         output = tf.reshape(output, [-1, 2 * n_hidden])
-        output = tf.nn.dropout(output, self.tf_keep_probability)
+        output = tf.nn.dropout(output, self.tf_dense_keep_prob)
 
         weights = tf.get_variable("weights_out", shape=[2 * n_hidden, self.output_dimension],
                                   dtype="float32", initializer=initializer)

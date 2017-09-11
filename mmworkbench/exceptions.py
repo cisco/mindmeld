@@ -33,7 +33,7 @@ class BadWorkbenchRequestError(WorkbenchError):
         return obj
 
 
-class PretrainedEmbeddingDownloadError(WorkbenchError):
+class EmbeddingDownloadError(WorkbenchError):
     pass
 
 
