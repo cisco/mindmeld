@@ -33,6 +33,10 @@ class BadWorkbenchRequestError(WorkbenchError):
         return obj
 
 
+class EmbeddingDownloadError(WorkbenchError):
+    pass
+
+
 class ClassifierLoadError(WorkbenchError):
     pass
 

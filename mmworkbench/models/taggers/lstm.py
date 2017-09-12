@@ -5,11 +5,17 @@ import math
 import logging
 
 from .taggers import Tagger, extract_sequence_features
-from .embeddings import Embedding, DEFAULT_GAZ_LABEL
+from .embeddings import LabelSequenceEmbedding, \
+    WordSequenceEmbedding, \
+    GazetteerSequenceEmbedding
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
 REGEX_TYPE_POSITIONAL_INDEX = 1
+DEFAULT_LABEL = 'B|UNK'
+DEFAULT_PADDED_TOKEN = '<UNK>'
+DEFAULT_GAZ_LABEL = 'O'
+RANDOM_SEED = 1
 
 logger = logging.getLogger(__name__)
 
@@ -76,65 +82,92 @@ class LstmModel(Tagger):
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
 
+    def get_params(self, deep=True):
+        return self.__dict__
+
     def construct_tf_variables(self):
         """
         Constructs the variables and operations in the tensorflow session graph
         """
-        self.tf_keep_probability = tf.placeholder(tf.float32)
-        self.tf_lstm_input_keep_prob = tf.placeholder(tf.float32)
-        self.tf_lstm_output_keep_prob = tf.placeholder(tf.float32)
+        self.tf_dense_keep_prob = tf.placeholder(tf.float32, name='dense_keep_prob')
+        self.tf_lstm_input_keep_prob = tf.placeholder(tf.float32, name='input_keep_prob')
+        self.tf_lstm_output_keep_prob = tf.placeholder(tf.float32, name='output_keep_prob')
 
-        self.tf_query_input = tf.placeholder(tf.float32, [None,
-                                                          self.padding_length,
-                                                          self.token_embedding_dimension])
+        self.tf_query_input = tf.placeholder(tf.float32,
+                                             [None,
+                                              self.padding_length,
+                                              self.token_embedding_dimension],
+                                             name='tf_query_input')
 
-        self.tf_gaz_input = tf.placeholder(tf.float32, [None,
-                                                        self.padding_length,
-                                                        self.gaz_dimension])
+        self.tf_gaz_input = tf.placeholder(tf.float32,
+                                           [None,
+                                            self.padding_length,
+                                            self.gaz_dimension],
+                                           name='tf_gaz_input')
 
-        self.tf_label = tf.placeholder(
-            tf.int32, [None, int(self.padding_length), self.output_dimension])
+        self.tf_label = tf.placeholder(tf.int32,
+                                       [None,
+                                        int(self.padding_length),
+                                        self.output_dimension],
+                                       name='tf_label')
 
-        self.tf_sequence_length = tf.placeholder(tf.int32, shape=[None])
+        self.tf_sequence_length = tf.placeholder(tf.int32, shape=[None],
+                                                 name='tf_sequence_length')
 
         word_and_gaz_embedding = self._construct_embedding_network()
-        self.tf_lstm_output = self._construct_network(word_and_gaz_embedding)
+        self.tf_lstm_output = self._construct_lstm_network(word_and_gaz_embedding)
 
         self.optimizer, self.cost = self._define_optimizer_and_cost(
             self.tf_lstm_output, self.tf_label)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
-        self.resources = resources
-        self.gaz_dimension = len(self.resources['gazetteers'].keys())
-        self.example_type = config.example_type
-        self.features = config.features
+        if y:
+            # Train time
+            self.resources = resources
 
-        self.token_pretrained_embedding_filepath = \
-            config.params.get('token_pretrained_embedding_filepath')
+            # The gaz dimension are the sum total of the gazetteer entities and
+            # the 'other' gaz entity, which is the entity for all non-gazetteer tokens
+            self.gaz_dimension = len(self.resources['gazetteers'].keys()) + 1
 
-        self.padding_length = config.params.get('padding_length')
-        self.embedding = Embedding(self.token_pretrained_embedding_filepath,
-                                   self.token_embedding_dimension,
-                                   self.gaz_dimension,
-                                   self.padding_length)
+            self.example_type = config.example_type
+            self.features = config.features
+
+            self.token_pretrained_embedding_filepath = \
+                config.params.get('token_pretrained_embedding_filepath')
+
+            self.padding_length = config.params.get('padding_length')
+
+            self.label_encoder = LabelSequenceEmbedding(self.padding_length,
+                                                        DEFAULT_LABEL)
+
+            self.query_encoder = WordSequenceEmbedding(
+                self.padding_length, DEFAULT_PADDED_TOKEN, True,
+                self.token_embedding_dimension, self.token_pretrained_embedding_filepath)
+
+            self.gaz_encoder = GazetteerSequenceEmbedding(self.padding_length,
+                                                          DEFAULT_GAZ_LABEL,
+                                                          self.gaz_dimension)
+
+            encoded_labels = []
+            for sequence in y:
+                encoded_labels.append(self.label_encoder.encode_sequence_of_tokens(sequence))
+
+            embedded_labels = self.label_encoder.get_embeddings_from_encodings(encoded_labels)
+
+            self.output_dimension = len(self.label_encoder.token_to_encoding_mapping.keys())
+        else:
+            # Predict time
+            embedded_labels = None
 
         # Extract features and classes
         X, gaz = self._get_features(examples)
         self.gaz_features = np.asarray(gaz, dtype='float32')
         self.sequence_lengths = self._extract_seq_length(examples)
 
-        if y:
-            encoded_labels = self.embedding.encode_labels(y)
-            self.output_dimension = len(self.embedding.label_encoding.keys())
-            self.labels_dict = self.embedding.label_encoding
-        else:
-            # Predict time since the label is not available
-            encoded_labels = None
-
         # There are no groups in this model
         groups = None
 
-        return X, encoded_labels, groups
+        return X, embedded_labels, groups
 
     def setup_model(self, config=None):
         # We have to reset the graph on every dataset since the input, gaz and output
@@ -142,7 +175,6 @@ class LstmModel(Tagger):
         # cannot be reused.
         tf.reset_default_graph()
         self.session = tf.Session()
-        return
 
     def construct_feed_dictionary(self,
                                   batch_examples,
@@ -160,12 +192,11 @@ class LstmModel(Tagger):
         Returns:
             The feed dictionary
         """
-
         return_dict = {
             self.tf_query_input: batch_examples,
             self.tf_sequence_length: batch_seq_len,
             self.tf_gaz_input: batch_gaz,
-            self.tf_keep_probability: self.dense_keep_probability,
+            self.tf_dense_keep_prob: self.dense_keep_probability,
             self.tf_lstm_input_keep_prob: self.lstm_input_keep_prob,
             self.tf_lstm_output_keep_prob: self.lstm_output_keep_prob
         }
@@ -182,7 +213,7 @@ class LstmModel(Tagger):
         Returns:
             Combined embeddings of the word and gazetteer embeddings
         """
-        initializer = tf.contrib.layers.xavier_initializer(seed=1)
+        initializer = tf.contrib.layers.xavier_initializer(seed=RANDOM_SEED)
 
         dense_gaz_embedding = tf.contrib.layers.fully_connected(
             inputs=self.tf_gaz_input,
@@ -205,11 +236,9 @@ class LstmModel(Tagger):
         """
         losses = tf.nn.softmax_cross_entropy_with_logits(
             logits=output_tensor,
-            labels=tf.reshape(label_tensor,
-                              [-1, self.output_dimension]), name='softmax')
+            labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax')
         cost = tf.reduce_mean(losses, name='cross_entropy_mean_loss')
-        optimizer = tf.train.AdamOptimizer(
-            learning_rate=float(self.learning_rate)).minimize(cost)
+        optimizer = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate)).minimize(cost)
         return optimizer, cost
 
     def _calculate_score(self, output_array, label_array, seq_lengths):
@@ -240,7 +269,59 @@ class LstmModel(Tagger):
 
         return score
 
-    def _construct_network(self, input_tensor):
+    def _construct_lstm_state(self, initializer, hidden_dimension, batch_size, name):
+        """Construct the LSTM initial state
+
+        Args:
+            initializer (tf.contrib.layers.xavier_initializer): initializer used
+            hidden_dimension: num dimensions of the hidden state variable
+            batch_size: the batch size of the data
+            name: suffix of the variable going to be used
+
+        Returns:
+            (LSTMStateTuple): LSTM state information
+        """
+
+        initial_cell_state = tf.get_variable(
+            "initial_cell_state_{}".format(name),
+            shape=[1, hidden_dimension],
+            dtype=tf.float32,
+            initializer=initializer)
+
+        initial_output_state = tf.get_variable(
+            "initial_output_state_{}".format(name),
+            shape=[1, hidden_dimension],
+            dtype=tf.float32,
+            initializer=initializer)
+
+        c_states = tf.tile(initial_cell_state, tf.stack([batch_size, 1]))
+        h_states = tf.tile(initial_output_state, tf.stack([batch_size, 1]))
+
+        return tf.contrib.rnn.LSTMStateTuple(c_states, h_states)
+
+    def _construct_regularized_lstm_cell(self, hidden_dimensions, initializer):
+        """Construct a regularized lstm cell based on a dropout layer
+
+        Args:
+            initializer (tf.contrib.layers.xavier_initializer): initializer used
+            hidden_dimensions: num dimensions of the hidden state variable
+
+        Returns:
+            (DropoutWrapper): regularized LSTM cell
+        """
+
+        lstm_cell = tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
+            hidden_dimensions, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
+
+        lstm_cell = tf.contrib.rnn.DropoutWrapper(
+            lstm_cell,
+            input_keep_prob=self.tf_lstm_input_keep_prob,
+            output_keep_prob=self.tf_lstm_output_keep_prob
+        )
+
+        return lstm_cell
+
+    def _construct_lstm_network(self, input_tensor):
         """ This function constructs the Bi-Directional LSTM network
 
         Args:
@@ -256,81 +337,38 @@ class LstmModel(Tagger):
         batch_size_dim = tf.shape(input_tensor)[0]
 
         # We use the xavier initializer for some of it's gradient control properties
-        initializer = tf.contrib.layers.xavier_initializer(seed=1)
+        initializer = tf.contrib.layers.xavier_initializer(seed=RANDOM_SEED)
 
         # Forward LSTM construction
-        lstm_cell_for = tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
-            n_hidden, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
-
-        lstm_cell_for = tf.contrib.rnn.DropoutWrapper(
-            lstm_cell_for,
-            input_keep_prob=self.tf_lstm_input_keep_prob,
-            output_keep_prob=self.tf_lstm_output_keep_prob
-        )
+        lstm_cell_forward = self._construct_regularized_lstm_cell(n_hidden, initializer)
+        initial_state_forward = self._construct_lstm_state(
+            initializer, n_hidden, batch_size_dim, 'forward')
 
         # Backward LSTM construction
-        lstm_cell_back = tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
-            n_hidden, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
-
-        lstm_cell_back = tf.contrib.rnn.DropoutWrapper(
-            lstm_cell_back,
-            input_keep_prob=self.tf_lstm_input_keep_prob,
-            output_keep_prob=self.tf_lstm_output_keep_prob
-        )
-
-        # LSTM state construction
-        initial_cell_state = tf.get_variable(
-            "initial_cell_state",
-            shape=[1, n_hidden],
-            dtype=tf.float32,
-            initializer=initializer)
-
-        initial_output_state = tf.get_variable(
-            "initial_output_state",
-            shape=[1, n_hidden],
-            dtype=tf.float32,
-            initializer=initializer)
-
-        initial_cell_state_2 = tf.get_variable(
-            "initial_cell_state_2",
-            shape=[1, n_hidden],
-            dtype=tf.float32,
-            initializer=initializer)
-
-        initial_output_state_2 = tf.get_variable(
-            "initial_output_state_2",
-            shape=[1, n_hidden],
-            dtype=tf.float32,
-            initializer=initializer)
-
-        initial_state = {}
-        c_states = tf.tile(initial_cell_state, tf.stack([batch_size_dim, 1]))
-        h_states = tf.tile(initial_output_state, tf.stack([batch_size_dim, 1]))
-        initial_state["forward"] = tf.contrib.rnn.LSTMStateTuple(c_states, h_states)
-
-        c_states = tf.tile(initial_cell_state_2, tf.stack([batch_size_dim, 1]))
-        h_states = tf.tile(initial_output_state_2, tf.stack([batch_size_dim, 1]))
-        initial_state["backward"] = tf.contrib.rnn.LSTMStateTuple(c_states, h_states)
+        lstm_cell_backward = self._construct_regularized_lstm_cell(n_hidden, initializer)
+        initial_state_backward = self._construct_lstm_state(
+            initializer, n_hidden, batch_size_dim, 'backward')
 
         # Combined the forward and backward LSTM networks
         (output_fw, output_bw), _ = tf.nn.bidirectional_dynamic_rnn(
-            lstm_cell_for, lstm_cell_back,
+            cell_fw=lstm_cell_forward,
+            cell_bw=lstm_cell_backward,
             inputs=input_tensor,
             sequence_length=self.tf_sequence_length,
             dtype=tf.float32,
-            initial_state_fw=initial_state["forward"],
-            initial_state_bw=initial_state["backward"])
+            initial_state_fw=initial_state_forward,
+            initial_state_bw=initial_state_backward)
 
         # Construct the output later
         output = tf.concat([output_fw, output_bw], axis=-1)
         output = tf.reshape(output, [-1, 2 * n_hidden])
-        output = tf.nn.dropout(output, self.tf_keep_probability)
+        output = tf.nn.dropout(output, self.tf_dense_keep_prob)
 
-        weights = tf.get_variable("weights_out", shape=[2 * n_hidden, self.output_dimension],
-                                  dtype="float32", initializer=initializer)
+        weights = tf.get_variable('output_weights', shape=[2 * n_hidden, self.output_dimension],
+                                  dtype='float32', initializer=initializer)
 
-        biases = tf.get_variable("bias_out", shape=[self.output_dimension],
-                                 dtype="float32", initializer=initializer)
+        biases = tf.get_variable('output_bias', shape=[self.output_dimension],
+                                 dtype='float32', initializer=initializer)
 
         output_tensor = tf.matmul(output, weights) + biases
         return output_tensor
@@ -361,7 +399,7 @@ class LstmModel(Tagger):
         Args:
             examples (list of mmworkbench.core.Query): a list of queries
         Returns:
-            (list of list of str): features in CRF suite format
+            (tuple): Word embeddings and Gazetteer one-hot embeddings
         """
         x_feats = []
         gaz_feats = []
@@ -370,11 +408,8 @@ class LstmModel(Tagger):
             x_feats.append(x_feat)
             gaz_feats.append(gaz_feat)
 
-        embedding_matrix = self.embedding.get_encoding_matrix()
-        embedding_gaz_matrix = self.embedding.get_gaz_encoding_matrix()
-
-        x_feats = self.embedding.transform_query_using_embeddings(x_feats, embedding_matrix)
-        gaz_feats = self.embedding.transform_query_using_embeddings(gaz_feats, embedding_gaz_matrix)
+        x_feats = self.query_encoder.get_embeddings_from_encodings(x_feats)
+        gaz_feats = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats)
         return x_feats, gaz_feats
 
     def _extract_features(self, example):
@@ -417,8 +452,8 @@ class LstmModel(Tagger):
         assert len(extracted_gaz_tokens) == len(example.normalized_tokens), \
             "The length of the gaz and example query have to be the same"
 
-        encoded_gaz = self.embedding.transform_gaz_query(extracted_gaz_tokens)
-        padded_query = self.embedding.transform_example(example.normalized_tokens)
+        encoded_gaz = self.gaz_encoder.encode_sequence_of_tokens(extracted_gaz_tokens)
+        padded_query = self.query_encoder.encode_sequence_of_tokens(example.normalized_tokens)
 
         return padded_query, encoded_gaz
 
@@ -450,30 +485,29 @@ class LstmModel(Tagger):
             seq_len = np.array(self.sequence_lengths)[indices]
 
             for batch in range(num_batches):
-                batch_examples = \
-                    examples[batch * batch_size: (batch * batch_size) + batch_size]
-                batch_labels = \
-                    labels[batch * batch_size: (batch * batch_size) + batch_size]
-                batch_gaz = \
-                    gaz[batch * batch_size: (batch * batch_size) + batch_size]
-                batch_seq_len = \
-                    seq_len[batch * batch_size: (batch * batch_size) + batch_size]
+
+                batch_start_index = batch * batch_size
+                batch_end_index = (batch * batch_size) + batch_size
+
+                batch_examples = examples[batch_start_index:batch_end_index]
+                batch_labels = labels[batch_start_index:batch_end_index]
+                batch_gaz = gaz[batch_start_index:batch_end_index]
+                batch_seq_len = seq_len[batch_start_index:batch_end_index]
 
                 if batch % int(self.display_epoch) == 0:
-                    output, loss = self.session.run(
-                        [self.tf_lstm_output, self.cost],
-                        feed_dict=self.construct_feed_dictionary(
-                            batch_examples, batch_gaz, batch_seq_len, batch_labels))
+                    output, loss = self.session.run([self.tf_lstm_output, self.cost],
+                                                    feed_dict=self.construct_feed_dictionary(
+                                                        batch_examples,
+                                                        batch_gaz,
+                                                        batch_seq_len,
+                                                        batch_labels))
 
                     score = self._calculate_score(output, batch_labels, batch_seq_len)
                     accuracy = score / (len(batch_examples) * 1.0)
 
-                    logger.info("Iteration number " +
-                                str(batch * batch_size) +
-                                ", Minibatch Loss= " +
-                                "{:.5f}".format(loss) +
-                                ", Training Accuracy= " +
-                                "{:.5f}".format(accuracy))
+                    logger.info("Iteration number " + str(batch * batch_size) +
+                                ", Minibatch Loss= " + "{:.5f}".format(loss) +
+                                ", Training Accuracy= " + "{:.5f}".format(accuracy))
                 else:
                     self.session.run(self.optimizer,
                                      feed_dict=self.construct_feed_dictionary(
@@ -506,15 +540,11 @@ class LstmModel(Tagger):
         output = np.reshape(output, [-1, int(self.padding_length), self.output_dimension])
         output = np.argmax(output, 2)
 
-        id_to_label = {}
-        for key_name in self.labels_dict.keys():
-            id_to_label[self.labels_dict[key_name]] = key_name
-
         decoded_queries = []
         for idx, encoded_predict in enumerate(output):
             decoded_query = []
             for tag in encoded_predict[:self.sequence_lengths[idx]]:
-                decoded_query.append(id_to_label[tag])
+                decoded_query.append(self.label_encoder.encoding_to_token_mapping[tag])
             decoded_queries.append(decoded_query)
 
         return decoded_queries
