@@ -21,11 +21,9 @@ The questions and answers below explain how to use this Conversational AI Playbo
 
 ----
 
-..
+**Q:** What is Conversational AI? Why does MindMeld Workbench exist and what does it do?
 
-        **Q:** What is Conversational AI? Why does MindMeld Workbench exist and what does it do?
-
-        **A:** Read the :ref:`intro`. This explains what Workbench does differently from other platforms and toolkits.
+**A:** Read the :ref:`intro`. This explains what Workbench does differently from other platforms and toolkits.
 
 ----
 
