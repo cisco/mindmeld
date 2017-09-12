@@ -105,3 +105,7 @@ class EntityResolverConnectionError(EntityResolverError):
 
 class AuthNotFoundError(WorkbenchError):
     pass
+
+
+class WorkbenchVersionError(WorkbenchError):
+    pass
