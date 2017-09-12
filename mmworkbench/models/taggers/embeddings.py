@@ -6,7 +6,7 @@ from tqdm import tqdm
 import numpy as np
 from six.moves.urllib.request import urlretrieve
 
-from ...path import EMBEDDINGS_FILE_PATH
+from ...path import EMBEDDINGS_FILE_PATH, EMBEDDINGS_FOLDER_PATH
 from ...exceptions import EmbeddingDownloadError
 
 logger = logging.getLogger(__name__)
@@ -70,8 +70,8 @@ class GloVeEmbeddingsContainer:
         logger.info("Downloading embedding from {}".format(GLOVE_DOWNLOAD_LINK))
 
         # Make the folder that will contain the embeddings
-        if not os.path.exists('data'):
-            os.makedirs('data')
+        if not os.path.exists(EMBEDDINGS_FOLDER_PATH):
+            os.makedirs(EMBEDDINGS_FOLDER_PATH)
 
         with TqdmUpTo(unit='B', unit_scale=True, miniters=1,
                       desc=GLOVE_DOWNLOAD_LINK) as t:
@@ -88,6 +88,8 @@ class GloVeEmbeddingsContainer:
 
             file_name = EMBEDDING_FILE_TEMPLATE.format(self.token_dimension)
             zip_file_object = zipfile.ZipFile(file_handle, 'r')
+
+            print(zip_file_object.namelist())
 
             if file_name not in zip_file_object.namelist():
                 logger.info("Embedding file with {} dimensions "
@@ -120,6 +122,8 @@ class GloVeEmbeddingsContainer:
         if os.path.isfile(EMBEDDINGS_FILE_PATH):
             logger.info("Extracting embeddings from default folder "
                         "location {}".format(EMBEDDINGS_FILE_PATH))
+
+            import pdb; pdb.set_trace()
             zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
             with zip_file_object.open(file_name) as embedding_file:
                 self._extract_and_map(embedding_file)
