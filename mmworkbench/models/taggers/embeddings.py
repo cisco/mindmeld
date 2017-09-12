@@ -16,7 +16,8 @@ DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_GAZ_LABEL = 'O'
 
 GLOVE_DOWNLOAD_LINK = 'http://nlp.stanford.edu/data/glove.6B.zip'
-EMBEDDING_FILE_TEMPLATE = 'glove.6B/glove.6B.{}d.txt'
+EMBEDDING_FILE_PATH_TEMPLATE_WITHOUT_FOLDER_PATH = 'glove.6B.{}d.txt'
+EMBEDDING_FILE_PATH_TEMPLATE_WITH_FOLDER_PATH = 'glove.6B/glove.6B.{}d.txt'
 ALLOWED_WORD_EMBEDDING_DIMENSIONS = [50, 100, 200, 300]
 
 
@@ -86,7 +87,8 @@ class GloVeEmbeddingsContainer:
                              "{}".format(GLOVE_DOWNLOAD_LINK, e))
                 return
 
-            file_name = EMBEDDING_FILE_TEMPLATE.format(self.token_dimension)
+            file_name = EMBEDDING_FILE_PATH_TEMPLATE_WITHOUT_FOLDER_PATH.format(
+                self.token_dimension)
             zip_file_object = zipfile.ZipFile(file_handle, 'r')
 
             print(zip_file_object.namelist())
@@ -117,7 +119,7 @@ class GloVeEmbeddingsContainer:
 
         logger.info("Provided file location {} does not exist".format(str(file_location)))
 
-        file_name = EMBEDDING_FILE_TEMPLATE.format(self.token_dimension)
+        file_name = EMBEDDING_FILE_PATH_TEMPLATE_WITH_FOLDER_PATH.format(self.token_dimension)
 
         if os.path.isfile(EMBEDDINGS_FILE_PATH):
             logger.info("Extracting embeddings from default folder "
