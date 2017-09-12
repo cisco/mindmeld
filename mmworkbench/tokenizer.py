@@ -89,8 +89,13 @@ class Tokenizer(object):
         keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")
         regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")
 
+        # handle the apostrophes used at the end of a possessive form, e.g. dennis'
+        keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")
+        regex_list.append("?P<apos_poss>(?<=[^\\s])'$")
+
         # Replace lookup based on regex
         self.replace_lookup = {'apos_s': (" 's", None),
+                               'apos_poss': ("", None),
                                'bar': (' ', None),
                                'begspace': ('', None),
                                'end': (' ', None),
