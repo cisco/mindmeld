@@ -68,9 +68,8 @@ class EntityRecognizer(Classifier):
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
         # create model with given params
-        model_config = self._get_model_config(**kwargs)
-        self._model_config = model_config
-        model = create_model(model_config)
+        self._model_config = self._get_model_config(**kwargs)
+        model = create_model(self._model_config)
 
         # Load labeled data
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
@@ -112,7 +111,7 @@ class EntityRecognizer(Classifier):
         else:
             tf_model_path = model_path.split('.')[0] + 'lstm'
             er_data = {'model': tf_model_path, 'entity_types': self.entity_types,
-                       'model_name': model_name}
+                       'model_name': model_name, 'model_config': self._model_config}
             self._model.dump(tf_model_path)
         joblib.dump(er_data, model_path)
 
@@ -135,9 +134,9 @@ class EntityRecognizer(Classifier):
                 self._model = er_data['model']
             else:
                 tf_model_path = er_data['model']
-                self._model.load(tf_model_path + '.meta')
-            # self._model = create_model(self._model_config)
-            print(tf_model_path)
+                self._model_config = er_data['model_config']
+                self._model = create_model(self._model_config)
+                self._model.load(tf_model_path)
         except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
