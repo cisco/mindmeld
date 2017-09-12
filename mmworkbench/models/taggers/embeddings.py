@@ -78,8 +78,7 @@ class GloVeEmbeddingsContainer:
                       desc=GLOVE_DOWNLOAD_LINK) as t:
 
             try:
-                file_handle, _ = urlretrieve(
-                    GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to)
+                urlretrieve(GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to)
 
             except Exception as e:
                 logger.error("There was an issue downloading from this "
@@ -87,9 +86,10 @@ class GloVeEmbeddingsContainer:
                              "{}".format(GLOVE_DOWNLOAD_LINK, e))
                 return
 
-            file_name = EMBEDDING_FILE_PATH_TEMPLATE_WITHOUT_FOLDER_PATH.format(
+            file_name = EMBEDDING_FILE_PATH_TEMPLATE_WITH_FOLDER_PATH.format(
                 self.token_dimension)
-            zip_file_object = zipfile.ZipFile(file_handle, 'r')
+
+            zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
 
             print(zip_file_object.namelist())
 
@@ -125,8 +125,8 @@ class GloVeEmbeddingsContainer:
             logger.info("Extracting embeddings from default folder "
                         "location {}".format(EMBEDDINGS_FILE_PATH))
 
-            import pdb; pdb.set_trace()
             zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
+
             with zip_file_object.open(file_name) as embedding_file:
                 self._extract_and_map(embedding_file)
             return
