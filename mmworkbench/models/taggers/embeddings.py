@@ -108,7 +108,7 @@ class GloVeEmbeddingsContainer:
         if file_location and os.path.isfile(file_location):
             logger.info("Extracting embeddings from provided "
                         "file location {}".format(str(file_location)))
-            with open(file_location) as embedding_file:
+            with open(file_location, 'r') as embedding_file:
                 self._extract_and_map(embedding_file)
             return
 
