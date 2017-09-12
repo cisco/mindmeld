@@ -518,3 +518,21 @@ class LstmModel(Tagger):
             decoded_queries.append(decoded_query)
 
         return decoded_queries
+
+    def dump(self, path='lstm-model'):
+        """
+        Saves the Tensorflow model
+        """
+        saver = tf.train.Saver()
+        saver.save(self.session, path)
+        self.session.close()
+        # tf.reset_default_graph()
+
+    def load(self, path='lstm-model'):
+        """
+        Loads the Tensorflow model
+        """
+        self.session = tf.Session()
+        saver = tf.train.import_meta_graph(path)
+        saver.restore(self.session, tf.train.latest_checkpoint('./'))
+

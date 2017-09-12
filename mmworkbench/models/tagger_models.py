@@ -71,6 +71,9 @@ class TaggerModel(Model):
 
         super().__init__(config)
 
+        self._clf = self._get_model_constructor()()
+        self._clf.setup_model(self.config)
+
         self._no_entities = False
 
     def __getstate__(self):
@@ -119,8 +122,8 @@ class TaggerModel(Model):
         #     return None
 
         # Get model classifier and initialize
-        self._clf = self._get_model_constructor()()
-        self._clf.setup_model(self.config)
+        # self._clf = self._get_model_constructor()()
+        # self._clf.setup_model(self.config)
 
         # Extract labels - label encoders are the same accross all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
@@ -223,6 +226,12 @@ class TaggerModel(Model):
         except KeyError:
             msg = '{}: Classifier type {!r} not recognized'
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
+
+    def dump(self, path):
+        self._clf.dump(path)
+
+    def load(self, path):
+        self._clf.load(path)
 
 
 register_model('tagger', TaggerModel)
