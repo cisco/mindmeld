@@ -10,6 +10,7 @@ import json
 import os
 
 from .. import path
+from ..exceptions import WorkbenchImportError
 
 logger = logging.getLogger(__name__)
 
@@ -315,15 +316,24 @@ class DialogueResponder(object):
 
 def _get_app_module(package_name, app_path):
     module_path = path.get_app_module_path(app_path)
-    package_path = os.path.dirname(os.path.dirname(module_path))
 
-    import imp
-    fp, pathname, description = imp.find_module(package_name, path=[package_path])
-    imp.load_module(package_name, fp, pathname, description)
-    app_module = imp.load_source(
-        '{package_name}.app'.format(package_name=package_name), module_path)
-    app = app_module.app
-    return app
+    if not os.path.isfile(module_path):
+        raise WorkbenchImportError('Cannot import the app at {path}'.format(app=module_path))
+
+    try:
+        # Get the absolute path from the relative path (such as home_assistant/app.py)
+        module_path = os.path.abspath(module_path)
+        package_path = os.path.dirname(os.path.dirname(module_path))
+
+        import imp
+        fp, pathname, description = imp.find_module(package_name, path=[package_path])
+        imp.load_module(package_name, fp, pathname, description)
+        app_module = imp.load_source(
+            '{package_name}.app'.format(package_name=package_name), module_path)
+        app = app_module.app
+        return app
+    except ImportError as ex:
+        raise WorkbenchImportError(ex.message)
 
 
 class Conversation(object):
