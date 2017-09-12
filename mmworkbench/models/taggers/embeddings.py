@@ -149,6 +149,18 @@ class SequenceEmbedding(object):
                  use_pretrained_embeddings=False,
                  token_embedding_dimension=None,
                  token_pretrained_embedding_filepath=None):
+        """Initializes the SequenceEmbedding class
+
+        Args:
+            sequence_padding_length (int): padding length of the sequence after which
+            the sequence is cut off
+            default_token (str): The default token if the sequence is too short for
+            the fixed padding length
+            use_pretrained_embeddings (bool): If true, extract pretrained embeddings
+            token_embedding_dimension (int): The embedding dimension of the token
+            token_pretrained_embedding_filepath (str): The embedding filepath to extract
+            the embeddings from
+        """
 
         self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
         self.token_embedding_dimension = token_embedding_dimension
@@ -208,7 +220,7 @@ class SequenceEmbedding(object):
             (ndarray): transformed embedding matrix
         """
         self.token_encoding_to_embedding_matrix = \
-            self._construct_embedding_matrix_from_token_encoding()
+            self._construct_embedding_matrix()
 
         examples_shape = np.shape(encoded_sequences)
         final_dimension = np.shape(self.token_encoding_to_embedding_matrix)[1]
@@ -224,7 +236,7 @@ class SequenceEmbedding(object):
 
         return sequence_embeddings
 
-    def _construct_embedding_matrix_from_token_encoding(self):
+    def _construct_embedding_matrix(self):
         """Constructs the encoding matrix of word encoding to word embedding
 
         Returns:
@@ -247,8 +259,11 @@ class SequenceEmbedding(object):
 
 
 class WordSequenceEmbedding(SequenceEmbedding):
+    """This class is a container for building sequence embeddings for a typical query, for example:
+    'I would like to order a coffee'. We use pretrained word vector embeddings for this class.
+    """
 
-    def _construct_embedding_matrix_from_token_encoding(self):
+    def _construct_embedding_matrix(self):
         num_words = len(self.token_to_encoding_mapping.keys())
         embedding_matrix = np.zeros((num_words, self.token_embedding_dimension))
         for word, i in self.token_to_encoding_mapping.items():
@@ -263,8 +278,11 @@ class WordSequenceEmbedding(SequenceEmbedding):
 
 
 class LabelSequenceEmbedding(SequenceEmbedding):
+    """This class is a container for building sequence embeddings for a sequence of labels.
+    We use a one-hot encoding based embedding representation for this class.
+    """
 
-    def _construct_embedding_matrix_from_token_encoding(self):
+    def _construct_embedding_matrix(self):
         num_words = len(self.token_to_encoding_mapping.keys())
         embedding_matrix = np.zeros((num_words, num_words))
 
@@ -276,6 +294,12 @@ class LabelSequenceEmbedding(SequenceEmbedding):
 
 
 class GazetteerSequenceEmbedding(SequenceEmbedding):
+    """This class is a container for building sequence embeddings for a sequence of gazetteer
+    labels. This container's embedding representation is a binarized encoding (not 1-hot)
+    since many gazetteers can map to the same token. For example: for the token 'cat', the gaz
+    'animals' and 'felines' can map to it, so it's representation would be 11, where the '1'
+    in index 0 represents 'animals' and '1' in index 1 represents 'felines'.
+    """
 
     def __init__(self,
                  sequence_padding_length,
@@ -296,7 +320,7 @@ class GazetteerSequenceEmbedding(SequenceEmbedding):
         self.default_token = default_token
         self.token_encoding_to_embedding_matrix = {}
 
-    def _construct_embedding_matrix_from_token_encoding(self):
+    def _construct_embedding_matrix(self):
         gaz_dim = self.token_embedding_dimension
         num_entites = len(self.token_to_encoding_mapping.keys())
         embedding_matrix_gaz = np.zeros((num_entites, gaz_dim))
