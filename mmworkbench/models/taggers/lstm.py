@@ -565,4 +565,3 @@ class LstmModel(Tagger):
         self.session = tf.Session()
         saver = tf.train.import_meta_graph(path)
         saver.restore(self.session, tf.train.latest_checkpoint('./'))
-

@@ -104,18 +104,17 @@ class EntityRecognizer(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        # TODO: Remove this conditional once model saving is implemented for LSTM
-        print(type(self._model._clf).__name__)
-        # if not type(self._model._clf).__name__ == 'LstmModel':
-        #     er_data = {'model': self._model, 'entity_types': self.entity_types}
-        #     joblib.dump(er_data, model_path)
-        # else:
-        tf_model_path = model_path.split('.')[0] + 'lstm'
-        er_data = {'model': tf_model_path, 'entity_types': self.entity_types}
-        self._model.dump(tf_model_path)
+        model_name = type(self._model._clf).__name__
+
+        if not model_name == 'LstmModel':
+            er_data = {'model': self._model, 'entity_types': self.entity_types,
+                       'model_name': model_name}
+        else:
+            tf_model_path = model_path.split('.')[0] + 'lstm'
+            er_data = {'model': tf_model_path, 'entity_types': self.entity_types,
+                       'model_name': model_name}
+            self._model.dump(tf_model_path)
         joblib.dump(er_data, model_path)
-        print(model_path)
-        print(tf_model_path)
 
         self.dirty = False
 
@@ -128,15 +127,16 @@ class EntityRecognizer(Classifier):
         """
         logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
-            # er_data = joblib.load(model_path)
-            # self._model = er_data['model']
-            # self.entity_types = er_data['entity_types']
             er_data = joblib.load(model_path)
-            tf_model_path = er_data['model']
+            model_name = er_data['model_name']
             self.entity_types = er_data['entity_types']
-            # self._model = er_data['model']
+
+            if not model_name == 'LstmModel':
+                self._model = er_data['model']
+            else:
+                tf_model_path = er_data['model']
+                self._model.load(tf_model_path + '.meta')
             # self._model = create_model(self._model_config)
-            self._model.load(tf_model_path + '.meta')
             print(tf_model_path)
         except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
