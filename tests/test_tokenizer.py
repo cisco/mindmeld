@@ -79,16 +79,16 @@ def test_normalize_5(tokenizer):
 def test_normalize_apos(tokenizer):
 
     # verify that apostrophe at the end of a possessive form is removed
-    raw = 'join Dennis\' pmr'
+    raw = "join Dennis' pmr"
     normalized = tokenizer.normalize(raw, True)
 
-    assert normalized == 'join dennis pmr'
+    assert normalized == "join dennis pmr"
 
     # verify that apostrophe in the middle of an entity is not removed
-    raw = 'join O\'reilly pmr'
+    raw = "join O'reilly's pmr"
     normalized = tokenizer.normalize(raw, True)
 
-    assert normalized == 'join o\'reilly pmr'
+    assert normalized == "join o'reilly 's pmr"
 
 
 def test_mapping(tokenizer):
