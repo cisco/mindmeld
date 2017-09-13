@@ -10,6 +10,7 @@ import json
 import os
 
 from .. import path
+from ..exceptions import WorkbenchImportError
 
 logger = logging.getLogger(__name__)
 
@@ -313,17 +314,25 @@ class DialogueResponder(object):
         return items
 
 
-def _get_app_module(package_name, app_path):
+def _get_app_module(app_path):
+    # Get the absolute path from the relative path (such as home_assistant/app.py)
+    app_path = os.path.abspath(app_path)
+    package_name = os.path.basename(app_path)
     module_path = path.get_app_module_path(app_path)
-    package_path = os.path.dirname(os.path.dirname(module_path))
 
-    import imp
-    fp, pathname, description = imp.find_module(package_name, path=[package_path])
-    imp.load_module(package_name, fp, pathname, description)
-    app_module = imp.load_source(
-        '{package_name}.app'.format(package_name=package_name), module_path)
-    app = app_module.app
-    return app
+    if not os.path.isfile(module_path):
+        raise WorkbenchImportError('Cannot import the app at {path}.'.format(app=module_path))
+
+    try:
+        path.load_app_package(app_path)
+
+        import imp
+        app_module = imp.load_source(
+            '{package_name}.app'.format(package_name=package_name), module_path)
+        app = app_module.app
+        return app
+    except ImportError as ex:
+        raise WorkbenchImportError(ex.msg)
 
 
 class Conversation(object):
@@ -353,9 +362,7 @@ class Conversation(object):
                 If passed, changes to this processor will affect the response from `say()`
             session (dict, optional): The session to be used in the conversation
         """
-        if not app:
-            package_name = os.path.basename(app_path)
-            app = _get_app_module(package_name, app_path)
+        app = app or _get_app_module(app_path)
         app.lazy_init(nlp)
         self._app_manager = app.app_manager
         if not self._app_manager.ready:

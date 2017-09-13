@@ -109,3 +109,7 @@ class AuthNotFoundError(WorkbenchError):
 
 class WorkbenchVersionError(WorkbenchError):
     pass
+
+
+class WorkbenchImportError(WorkbenchError):
+    pass
