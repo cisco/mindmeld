@@ -157,30 +157,30 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 ``'model_type'`` (:class:`str`)
   |
 
-  Always ``'tagger'``, since the entity recognizer is a tagger model. `Tagging, sequence tagging, or sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ are common terms used in NLP literature for models that generate a tag for each token in a sequence. Taggers are most commonly used for part of speech tagging or named entity recognition.
+  Always ``'tagger'``, since the entity recognizer is a tagger model. `Tagging, sequence tagging, or sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ are common terms used in NLP literature for models that generate a tag for each token in a sequence. Taggers are most commonly used for part-of-speech tagging or named entity recognition.
 
 
 ``'model_settings'`` (:class:`dict`)
   |
 
-  A dictionary containing model-specific machine learning settings. It must always contain a key ``'classifier_type'``, whose value specifies the machine learning model to use. Allowed values are shown in the table below.
+  A dictionary containing model-specific machine learning settings. The key ``'classifier_type'``, whose value specifies the machine learning model to use, is required. Allowed values are shown in the table below.
 
   .. _er_models:
 
-  =============== =======================================================
-  Classifier Type Description (with list of configurable hyperparameters)
-  =============== =======================================================
-  ``'memm'``      `maximum entropy markov model (memm) <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_, memm :sk_api:`hyperparameters <sklearn.linear_model.LogisticRegression.html>`
-  ``'crf'``       `conditional random field (crf) <https://en.wikipedia.org/wiki/Conditional_random_field>`_, crf `hyperparameters <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_
-  =============== =======================================================
+  =============== ============================================================================================ ==========================================
+  Value           Classifier                                                                                   Reference for configurable hyperparameters
+  =============== ============================================================================================ ==========================================
+  ``'memm'``      `Maximum Entropy Markov Model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_ :sk_api:`sklearn.linear_model.LogisticRegression <sklearn.linear_model.LogisticRegression.html>`
+  ``'crf'``       `Conditional random field <https://en.wikipedia.org/wiki/Conditional_random_field>`_         `sklearn-crfsuite API Reference <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_
+  =============== ============================================================================================ ==========================================
 
-  For tagger models, there are other model settings that can be specified such as the tag scheme. The allowed keys are:
+  Tagger models allow you to specify the additional model settings shown below.
 
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | Key                   | Value                                                                                                             |
   +=======================+===================================================================================================================+
   | ``'feature_scaler'``  | The :sk_guide:`methodology <preprocessing.html#standardization-or-mean-removal-and-variance-scaling>` for         |
-  |                       | scaling raw feature values. This is only applicable to the memm model.                                            |
+  |                       | scaling raw feature values. Applicable to the MEMM model only.                                                    |
   |                       |                                                                                                                   |
   |                       | Allowed values are:                                                                                               |
   |                       |                                                                                                                   |
@@ -199,8 +199,8 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                       | - ``'IOB'``: The `Inside-Outside-Beginning <https://en.wikipedia.org/wiki/Inside_Outside_Beginning>`_ tagging     |
   |                       |   format.                                                                                                         |
   |                       |                                                                                                                   |
-  |                       | - ``'IOBES'``: An extension to IOB where 'E' represents the ending token in an entity span,                       |
-  |                       |   and 'S' represents a single-token entity.                                                                       |
+  |                       | - ``'IOBES'``: An extension to IOB where ``'E'`` represents the ending token in an entity span,                   |
+  |                       |   and ``'S'`` represents a single-token entity.                                                                   |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
 
 2. **Feature Extraction Settings**
@@ -215,22 +215,34 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | Group Name                | Description                                                                                                |
   +===========================+============================================================================================================+
-  | ``'bag-of-words-seq'``    | Generates n-grams of specified lengths from the query text surrounding the current token.                  |
+  | ``'bag-of-words-seq'``    | Generates n-grams of specified lengths from the query text                                                 |
+  |                           | surrounding the current token.                                                                             |
   |                           |                                                                                                            |
-  |                           | Supported settings:                                                                                        |
-  |                           | A dictionary with n-gram lengths as keys and a list of different starting positions as values.             |
-  |                           | Each starting position is a token index, relative to the the current token.                                |
+  |                           | Settings:                                                                                                  |
   |                           |                                                                                                            |
-  |                           | E.g.,``'ngram_lengths_to_start_positions': {1: [0], 2: [0]}`` will extract all words (unigrams) and bigrams|
-  |                           | starting with the current token. To additionally include unigrams and bigrams starting from the words      |
-  |                           | before and after the current token, the settings can be modified to                                        |
-  |                           | ``'ngram_lengths_to_start_positions': {1: [-1, 0, 1], 2: [-1, 0, 1]}``.                                    |
+  |                           | A dictionary with n-gram lengths as keys                                                                   |
+  |                           | and a list of starting positions as values.                                                                |
+  |                           | Each starting position is a token index,                                                                   |
+  |                           | relative to the current token.                                                                             |
   |                           |                                                                                                            |
-  |                           | Suppose the query is "weather in {San Francisco|location} {next week|sys_time}" and the classifier is      |
-  |                           | extracting features for the token "Francisco". Then,                                                       |
+  |                           | Examples:                                                                                                  |
   |                           |                                                                                                            |
-  |                           | - ``{1: [-1, 0, 1]}`` would extract "San", "Francisco", and "next"                                         |
-  |                           | - ``{2: [-1, 0, 1]}`` would extract "in San", "San Francisco",  and "Francisco next"                       |
+  |                           | ``'ngram_lengths_to_start_positions': {1: [0], 2: [0]}``                                                   |
+  |                           |                                                                                                            |
+  |                           |  - extracts all words (unigrams) and bigrams starting with the current token                               |
+  |                           |                                                                                                            |
+  |                           | ``'ngram_lengths_to_start_positions': {1: [-1, 0, 1], 2: [-1, 0, 1]}``                                     |
+  |                           |                                                                                                            |
+  |                           |  - additionally includes unigrams and bigrams starting from the words before and after the current token   |
+  |                           |                                                                                                            |
+  |                           | Given the query "weather in {San Francisco|location} {next week|sys_time}"                                 |
+  |                           | and a classifier extracting features for the token "Francisco":                                            |
+  |                           |                                                                                                            |
+  |                           | ``{1: [-1, 0, 1]}``                                                                                        |
+  |                           |  - extracts "San", "Francisco", and "next"                                                                 |
+  |                           |                                                                                                            |
+  |                           | ``{2: [-1, 0, 1]}``                                                                                        |
+  |                           |  - extracts "in San", "San Francisco", and "Francisco next"                                                |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | ``'in-gaz-span-seq'``     | Generates a set of features indicating the presence of the current token in different entity gazetteers,   |
   |                           | along with popularity information (as defined in the gazetteer).                                           |
@@ -238,13 +250,16 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   | ``'sys-candidates-seq'``  | Generates a set of features indicating the presence of system entities in the query text surrounding the   |
   |                           | current token.                                                                                             |
   |                           |                                                                                                            |
-  |                           | Supported settings:                                                                                        |
+  |                           | Settings:                                                                                                  |
+  |                           |                                                                                                            |
   |                           | A dictionary with a single key named ``'start_positions'`` and a list of different starting positions      |
   |                           | as its value. As in the ``'bag-of-words-seq'`` feature, each starting position is a token index, relative  |
   |                           | to the the current token.                                                                                  |
   |                           |                                                                                                            |
-  |                           | E.g.,``'start_positions': [-1, 0, 1]`` will extract features indicating whether the current token or its   |
-  |                           | immediate neigbors are system entities.                                                                    |
+  |                           | Example:                                                                                                   |
+  |                           |                                                                                                            |
+  |                           | ``'start_positions': [-1, 0, 1]``                                                                          |
+  |                           |  - extracts features indicating whether the current token or its immediate neigbors are system entities    |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
 
 .. _entity_tuning:
@@ -254,7 +269,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 ``'params'`` (:class:`dict`)
   |
 
-  A dictionary of values to be used for model hyperparameters during training. Examples include the norm used in penalization as ``'penalty'`` for MEMM, the coefficients for L1 and L2 regularization ``'c1'`` and ``'c2'`` for CRF, and so on. The list of allowable hyperparameters depends on the model selected. See the parameter list in :ref:`the model table <er_models>` above.
+  A dictionary of values to be used for model hyperparameters during training. Examples include the norm used in penalization as ``'penalty'`` for MEMM, the coefficients for L1 and L2 regularization ``'c1'`` and ``'c2'`` for CRF, and so on. The list of allowable hyperparameters depends on the model selected. See the :ref:`reference links <er_models>` above for parameter lists.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -282,7 +297,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                       |       'fit_intercept': [True, False]                                                                              |
   |                       |    }                                                                                                              |
   |                       |                                                                                                                   |
-  |                       | :ref:`The model table <er_models>` above lists hyperparameters available for each supported model.                |
+  |                       | See the :ref:`reference links <er_models>` above for details on the hyperparameters available for each model.     |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
   |                       |                                                                                                                   |
@@ -298,8 +313,8 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
   | ``'scoring'``         | The metric to use for evaluating model performance. One of:                                                       |
   |                       |                                                                                                                   |
-  |                       | - ``'accuracy'``: `Accuracy score at a tag level                                                                  |
-  |                       | - ``'seq_accuracy'``: Accuracy score at a full sequence level (not available for memm)                            |
+  |                       | - ``'accuracy'``: Accuracy score at a tag level                                                                   |
+  |                       | - ``'seq_accuracy'``: Accuracy score at a full sequence level (not available for MEMM)                            |
   +-----------------------+-------------------------------------------------------------------------------------------------------------------+
 
   To identify the parameters that give the highest accuracy, the :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to :meth:`fit` can use these optimal parameters and skip the parameter selection process.
@@ -628,21 +643,21 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
 
-  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+  When interpreting these statistics, consider whether your app and evaluation results fall into one of the cases below, and if so, apply the accompanying guideline. This list is basic, not exhaustive, but should get you started.
 
-  - **Classes are balanced**: When the number of annotated entities for each entity type are comparable and each entity type is equally important, focusing on the accuracy metric is usually good enough. For entity recognition it is very unlikely that your data would fall into this category, since the O tag (used for words that are not part of an entity) usually occurs much more often than the I/B/E/S tags (for words that are part of an entity).
+  - **Classes are balanced** – When the number of annotated entities for each entity type are comparable and each entity type is equally important, focusing on the accuracy metric is usually good enough. For entity recognition it is very unlikely that your data would fall into this category, since the O tag (used for words that are not part of an entity) usually occurs much more often than the I/B/E/S tags (for words that are part of an entity).
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the f1 scores into account. For entity recognition it is also important to consider the segment level statistics described below. By primarily optimizing for f1, your model will tend to predict no entity rather than predict one that is uncertain about. For a more detailed description read `this blog post <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_.
+  - **Classes are imbalanced** — In this case, it's important to take the f1 scores into account. For entity recognition it is also important to consider the segment level statistics described below. By primarily optimizing for f1, your model will tend to predict no entity rather than predict one that is uncertain about. See `this blog post <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_.
 
-  - **All f1 and accuracy scores are low**: Entity recognition is performing poorly across all entity types. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. Also look at segment-level statistics for a more intuitive breakdown of where the model is making errors.
+  - **All f1 and accuracy scores are low** — When entity recognition is performing poorly across all entity types, either of the following may be the problem: 1) You do not have enough training data for the model to learn, or 2) you need to tune your model hyperparameters. Look at segment-level statistics for a more intuitive breakdown of where the model is making errors.
 
-  - **F1 weighted is higher than f1 macro**: Your entity types with fewer evaluation examples are performing poorly. You may need to add more data to entity types that have fewer examples. This would involve adding more training queries with labeled entities, specifically entities of the type that are performing the worst as indicated in the tag-level statistics table.
+  - **f1 weighted is higher than f1 macro** — This means that entity types with fewer evaluation examples are performing poorly. Try adding more data to these entity types. This entails adding more training queries with labeled entities, specifically entities of the type that are performing the worst as indicated in the tag-level statistics table.
 
-  - **F1 macro is higher than f1 weighted**: Your entity types with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+  - **f1 macro is higher than f1 weighted** — This means that entity types with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than f1 macro**: Certain entity types are being misclassified more often than others. Check the tag-level statistics by class below to identify these entity types. Some entity types may be too similar to another entity type or you may need to add more training data.
+  - **f1 micro is higher than f1 macro** — This means that certain entity types are being misclassified more often than others. Identify the problematic entity types by checking the tag-level class-wise statistics below. Some entity types may be too similar to others, or you may need to add more training data.
 
-  - **Some classes are more important than others**: If some entities are more important than others for your use case, it is good to focus more on the tag-level statistics by class described below.
+  - **Some classes are more important than others** — If some entities are more important than others for your use case, it is best to focus especially on the tag-level class-wise statistics below.
 
 **Tag-level statistics by class**
   |
@@ -671,25 +686,28 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 **Segment-level statistics**
   |
 
-  While tag-level statistics are useful to analyze, they don't tell the full story for entity recognition in an intuitive way. A helpful way to think about the entity recognizer is that it is performing two tasks: 1) identifying the span of words that should be part of an entity and 2) selecting the label for the identified entity. When the recognizer makes a mistake it could misidentify the label, misidentify the span boundary, or misidentify both.
+  Although it is useful to analyze tag-level statistics, they don't tell the full story for entity recognition in an intuitive way. It helps to think of the entity recognizer as performing two tasks: 1) identifying the span of words that should be part of an entity, and 2) selecting the label for the identified entity. When the recognizer makes a mistake, it misidentifies either the label, the span boundary, or both.
 
-  The segment-level statistics capture the distribution of these error types across all the segments in a query.
+  Segment-level statistics capture the distribution of these error types across all the segments in a query.
 
   A segment is either:
 
     - A continuous span of non-entity tokens, or
     - A continuous span of tokens that represents a single entity
-    For example, consider the query "I’ll have an {eggplant parm|dish} and some {breadsticks|dish} please". This query has five segments: "I'll have an", "eggplant parm", "and some", "breadsticks", and "please".
 
-  ===========  ===
-  le           **Label error.** This is when the classifier correctly predicted the existence of an entity and the span of that entity, but chose the wrong label. For example, the classifier recognized that 'pad thai' is an entity in the query 'Order some pad thai', but thought it was a restaurant entity instead of a dish entity.
-  be           **Boundary error.** Occurs when the classifier correctly predicts the existence of an entity and its label but misclassifies its span. For example, it predicted 'some pad thai' was a dish entity instead of just 'pad thai' in the query 'Order some pad thai'
-  lbe          **Label-boundary error.** The classifier correctly predicts the existence of an entity, but gets both the label and the span wrong. For example in the query 'Order some pad thai', if the classifier thought that 'some pad thai' was an option instead of a dish it would be a label-boundary error.
-  tp           **True positive.** The classifier correctly predicts an entity, its label, and its span.
-  tn           **True negative.** The classifier correctly predicts that there is a segment where there are no entities. For example, the query 'Hi there' has no entities and this segment would be counted as a true negative.
-  fp           **False positive.** The classifier predicted the existence of an entity where there wasn't one. For example, if the classifier predicted that 'there' was a dish entity in the query 'Hi there' that would be a false positive.
-  fn           **False negative.** The classifier failed to predict an entity when there should have been one. E.g., in the query 'Order some pad thai' no entity was predicted.
-  ===========  ===
+  For example, the query "I’ll have an {eggplant parm|dish} and some {breadsticks|dish} please" has five segments: "I'll have an", "eggplant parm", "and some", "breadsticks", and "please".
+
+  ============  =========================  ===
+  Abbreviation  Statistic                  Description
+  ------------  -------------------------  ---
+  le            **Label error**            The classifier correctly predicts the existence of an entity and the span of that entity, but chooses the wrong label. For example, the classifier recognizes that 'pad thai' is an entity in the query 'Order some pad thai', but labels it as a restaurant entity instead of a dish entity.
+  be            **Boundary error**         The classifier correctly predicts the existence of an entity and its label but misclassifies its span. For example, the classifier predicts that 'some pad thai' is a dish entity instead of just 'pad thai' in the query 'Order some pad thai'.
+  lbe           **Label-boundary error**   The classifier correctly predicts the existence of an entity, but gets both the label and the span wrong. For example, the classifier labels 'some pad thai' as an option in the query 'Order some pad thai'. The option label is wrong (dish is correct), and, the boundary is misplaced (because it includes the word 'some' which does not belong in the entity).
+  tp            **True positive**          The classifier correctly predicts an entity, its label, and its span.
+  tn            **True negative**          The classifier correctly predicts that that a segment contains no entities. For example, the classifier predicts that the query 'Hi there' has no entities.
+  fp            **False positive**         The classifier predicts the existence of an entity that is not there. For example, the classifier predicts that 'there' is a dish entity in the query 'Hi there'.
+  fn            **False negative**         The classifier fails to predict an entity that *is* present. For example,  the classifier predicts no entity in the query 'Order some pad thai'.
+  ============  =========================  ===
 
   Note that the true positive, true negative, false positive, and false negative values are different when calculated at a segment level rather than a tag level. To illustrate this difference consider the following example:
 
@@ -703,7 +721,7 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 
   At the segment level, however, this would be just `2 true negatives` (one for the segment 'I'll have' and one for the segment 'please'), and `1 label-boundary error` (for the segment 'an eggplant parm').
 
-  The benefit of considering errors at a segment level is that it is often more intuitive and may even provide better metrics to optimize against, as described in more detail `here <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_.
+  Considering errors at a segment level is often more intuitive and may even provide better metrics to optimize against, as described `here <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_.
 
 
 **Sequence Statistics**

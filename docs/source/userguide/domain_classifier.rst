@@ -125,14 +125,14 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 
 .. _sklearn_domain_models:
 
-  =============== =======================================================
-  Classifier Type Description (with list of configurable hyperparameters)
-  =============== =======================================================
-  ``'logreg'``    :sk_guide:`Logistic regression <linear_model.html#logistic-regression>` (see :sk_api:`parameter list <sklearn.linear_model.LogisticRegression>`)
-  ``'svm'``       :sk_guide:`Support vector machine <svm.html#svm-classification>` (see :sk_api:`parameter list <sklearn.svm.SVC>`)
-  ``'dtree'``     :sk_guide:`Decision tree <tree.html#tree>` (see :sk_api:`parameter list <sklearn.tree.DecisionTreeClassifier>`)
-  ``'rforest'``   :sk_guide:`Random forest <ensemble.html#forest>` (see :sk_api:`parameter list <sklearn.ensemble.RandomForestClassifier>`)
-  =============== =======================================================
+  =============== ======================================================================= ==========================================
+  Value           Classifier                                                              Reference for configurable hyperparameters
+  =============== ======================================================================= ==========================================
+  ``'logreg'``    :sk_guide:`Logistic regression <linear_model.html#logistic-regression>` :sk_api:`sklearn.linear_model.LogisticRegression <sklearn.linear_model.LogisticRegression>`
+  ``'svm'``       :sk_guide:`Support vector machine <svm.html#svm-classification>`        :sk_api:`sklearn.svm.SVC <sklearn.svm.SVC>`
+  ``'dtree'``     :sk_guide:`Decision tree <tree.html#tree>`                              :sk_api:`sklearn.tree.DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>`
+  ``'rforest'``   :sk_guide:`Random forest <ensemble.html#forest>`                        :sk_api:`sklearn.ensemble.RandomForestClassifier <sklearn.ensemble.RandomForestClassifier>`
+  =============== ======================================================================= ==========================================
 
 
 2. **Feature Extraction Settings**
@@ -150,23 +150,42 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   | ``'bag-of-words'``    | Generates n-grams of the specified lengths from the query text.                                            |
   |                       |                                                                                                            |
   |                       | Settings:                                                                                                  |
+  |                       |                                                                                                            |
   |                       | A list of n-gram lengths to extract.                                                                       |
-  |                       | For instance, ``{'lengths': [1]}`` only extracts words (unigrams), whereas ``{'lengths': [1, 2, 3]}``      |
-  |                       | extracts unigrams, bigrams and trigrams.                                                                   |
+  |                       |                                                                                                            |
+  |                       | Examples:                                                                                                  |
+  |                       |                                                                                                            |
+  |                       | ``{'lengths': [1]}``                                                                                       |
+  |                       |  - only extracts words (unigrams)                                                                          |
+  |                       |                                                                                                            |
+  |                       | ``{'lengths': [1, 2, 3]}``                                                                                 |
+  |                       |  - extracts unigrams, bigrams and trigrams                                                                 |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
-  | ``'edge-ngrams'``     | Generates n-grams of the specified lengths from the edges (i.e., start and end) of the query.              |
+  | ``'edge-ngrams'``     | Generates n-grams of the specified lengths from the edges (that is, the start and the end) of the query.   |
   |                       |                                                                                                            |
   |                       | Settings:                                                                                                  |
+  |                       |                                                                                                            |
   |                       | A list of n-gram lengths to extract.                                                                       |
-  |                       | For instance, ``{'lengths': [1]}`` only extracts the first and last word,                                  |
-  |                       | whereas ``{'lengths': [1, 2, 3]}`` extracts all leading and trailing n-grams up to size 3.                 |
+  |                       |                                                                                                            |
+  |                       | Examples:                                                                                                  |
+  |                       |                                                                                                            |
+  |                       | ``{'lengths': [1]}``                                                                                       |
+  |                       |  - only extracts the first and last word                                                                   |
+  |                       |                                                                                                            |
+  |                       | ``{'lengths': [1, 2, 3]}``                                                                                 |
+  |                       |  - extracts all leading and trailing n-grams up to size 3                                                  |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'freq'``            | Generates a log-scaled count for each frequency bin, where the count represents the number of query tokens |
   |                       | whose frequency falls into that bin. Frequency is measured by number of occurrences in the training data.  |
   |                       |                                                                                                            |
   |                       | Settings:                                                                                                  |
+  |                       |                                                                                                            |
   |                       | Number of bins.                                                                                            |
-  |                       | For instance, ``{'bins': 5}`` quantizes the vocabulary frequency into 5 bins.                              |
+  |                       |                                                                                                            |
+  |                       | Example:                                                                                                   |
+  |                       |                                                                                                            |
+  |                       | ``{'bins': 5}``                                                                                            |
+  |                       |  - quantizes the vocabulary frequency into 5 bins                                                          |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'in-gaz'``          | Generates a set of features indicating the presence of query n-grams in different entity gazetteers,       |
   |                       | along with popularity information as defined in the gazetteer.                                             |
@@ -184,7 +203,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 ``'params'`` (:class:`dict`)
   |
 
-  A dictionary of values to be used for model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, ``'penalty'`` for logistic regression, ``'max_depth'`` for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the parameter list in :ref:`the model table <sklearn_domain_models>` above.
+  A dictionary of values to be used for model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, ``'penalty'`` for logistic regression, ``'max_depth'`` for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the :ref:`reference links <sklearn_domain_models>` above for parameter lists.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -198,34 +217,34 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 
   Depending on the splitting scheme selected, the :data:`param_selection` dictionary can contain other keys that define additional settings. The table below enumerates the allowable keys.
 
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | Key                   | Value                                                                                                             |
-  +=======================+===================================================================================================================+
-  | ``'grid'``            | A dictionary which maps each hyperparameter to a list of potential values to search.                              |
-  |                       | Here is an example for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:           |
-  |                       |                                                                                                                   |
-  |                       | .. code-block:: python                                                                                            |
-  |                       |                                                                                                                   |
-  |                       |    {                                                                                                              |
-  |                       |      'penalty': ['l1', 'l2'],                                                                                     |
-  |                       |      'C': [10, 100, 1000, 10000, 100000],                                                                         |
-  |                       |       'fit_intercept': [True, False]                                                                              |
-  |                       |    }                                                                                                              |
-  |                       |                                                                                                                   |
-  |                       | :ref:`The model table <sklearn_domain_models>` above lists hyperparameters available for each supported model.    |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
-  |                       |                                                                                                                   |
-  |                       | - ``'k-fold'``: :sk_api:`K-folds <sklearn.model_selection.KFold>`                                                 |
-  |                       | - ``'shuffle'``: :sk_api:`Randomized folds <sklearn.model_selection.ShuffleSplit>`                                |
-  |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`          |
-  |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`         |
-  |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                 |
-  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`|
-  |                       |                                                                                                                   |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | ``'k'``               | Number of folds (splits)                                                                                          |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
+  +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+  | Key                   | Value                                                                                                                     |
+  +=======================+===========================================================================================================================+
+  | ``'grid'``            | A dictionary which maps each hyperparameter to a list of potential values to search.                                      |
+  |                       | Here is an example for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:                   |
+  |                       |                                                                                                                           |
+  |                       | .. code-block:: python                                                                                                    |
+  |                       |                                                                                                                           |
+  |                       |    {                                                                                                                      |
+  |                       |      'penalty': ['l1', 'l2'],                                                                                             |
+  |                       |      'C': [10, 100, 1000, 10000, 100000],                                                                                 |
+  |                       |       'fit_intercept': [True, False]                                                                                      |
+  |                       |    }                                                                                                                      |
+  |                       |                                                                                                                           |
+  |                       | See the :ref:`reference links <sklearn_domain_models>` above for details on the hyperparameters available for each model. |
+  +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+  | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                           |
+  |                       |                                                                                                                           |
+  |                       | - ``'k-fold'``: :sk_api:`K-folds <sklearn.model_selection.KFold>`                                                         |
+  |                       | - ``'shuffle'``: :sk_api:`Randomized folds <sklearn.model_selection.ShuffleSplit>`                                        |
+  |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`                  |
+  |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`                 |
+  |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                         |
+  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`        |
+  |                       |                                                                                                                           |
+  +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+  | ``'k'``               | Number of folds (splits)                                                                                                  |
+  +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
 
   To identify the parameters that give the highest accuracy, the :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to :meth:`fit` can use these optimal parameters and skip the parameter selection process.
 
@@ -543,31 +562,31 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
   Aggregate stats measured across the entire test set:
 
   ===========  ===
-  accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`.
-  f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`. By weighting the f1 scores by class support this takes class imbalance into account.
+  accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`
+  f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>` — to take class imbalance into account, weights the f1 scores by class support
   tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`, which is the mean of f1 scores calculated by class.
-  f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`, which is the f1 calculated with the global precision and recall metrics.
+  f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>` — the mean of f1 scores calculated by class
+  f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>` — calculated with global precision and recall metrics
   ===========  ===
 
-  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+  When interpreting these statistics, consider whether your app and evaluation results fall into one of the cases below, and if so, apply the accompanying guideline. This list is basic, not exhaustive, but should get you started.
 
-  - **Classes are balanced**: When the number of training examples in your domains are comparable and each domain is equally important, focusing on the accuracy metric is usually good enough.
+  - **Classes are balanced** — When the number of training examples in your domains are comparable and each domain is equally important, focusing on the accuracy metric is usually good enough.
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the f1 scores into account.
+  - **Classes are imbalanced** — In this case, it's important to take the f1 scores into account.
 
-  - **All f1 and accuracy scores are low**: Domain classification is performing poorly across all domains. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your domain structure and make sure queries in different domains have distinct vocabularies. You may need to combine domains or separate them, so that the resulting classes are easier for the classifier to distinguish.
+  - **All f1 and accuracy scores are low** — When domain classification is performing poorly across all domains, any of the following may be the problem: 1) You do not have enough training data for the model to learn, 2) you need to tune your model hyperparameters, or 3) you need to reconsider your domain structure to ensure that queries in different domain have different vocabularies — this may involve either combining or separating domains so that the resulting classes are easier for the classifier to distinguish.
 
-  - **F1 weighted is higher than f1 macro**: Your domains with fewer evaluation examples are performing poorly. You may need to add more data to domains that have fewer examples. You could also try adding class weights to your hyperparameters.
+  - **f1 weighted is higher than f1 macro** — This means that domains with fewer evaluation examples are performing poorly. Try adding more data to these domains or adding class weights to your hyperparameters.
 
-  - **F1 macro is higher than f1 weighted**: Your domains with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+  - **f1 macro is higher than f1 weighted** — This means that domains with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than f1 macro**: Certain domains are being misclassified more often than others. Check the class-wise statistics below to identify these domains. Some domains may be too similar to another domain or you may need to add more training data to some domains.
+  - **f1 micro is higher than f1 macro** — This means that some domains are being misclassified more often than others. Identify the problematic domains by checking the class-wise statistics below. It is possible that some domains are too similar to others, or that you need to add more training data to some domains.
 
-  - **Some classes are more important than others**: If some domains are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
+  - **Some classes are more important than others** — If some domains are more important than others for your use case, it is best to focus especially on the class-wise statistics described below.
 
 **Class-wise Statistics**
   |
