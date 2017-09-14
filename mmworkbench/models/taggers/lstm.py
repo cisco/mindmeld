@@ -562,6 +562,7 @@ class LstmModel(Tagger):
             'gaz_features': self.gaz_features,
             'sequence_lengths': self.sequence_lengths,
             'gaz_encoder': self.gaz_encoder,
+            'label_encoder': self.label_encoder
         }
 
         joblib.dump(variables_to_dump, path + '.feature_extraction_vars')
@@ -592,3 +593,4 @@ class LstmModel(Tagger):
         self.gaz_features = variables_to_load['gaz_features']
         self.sequence_lengths = variables_to_load['sequence_lengths']
         self.gaz_encoder = variables_to_load['gaz_encoder']
+        self.label_encoder = variables_to_load['label_encoder']
