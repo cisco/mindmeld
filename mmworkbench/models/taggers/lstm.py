@@ -366,7 +366,7 @@ class LstmModel(Tagger):
         biases = tf.get_variable('output_bias', shape=[self.output_dimension],
                                  dtype='float32', initializer=initializer)
 
-        output_tensor = tf.matmul(output, weights) + biases
+        output_tensor = tf.add(tf.matmul(output, weights), biases, name='output_tensor')
         return output_tensor
 
     def _get_model_constructor(self):
@@ -549,6 +549,7 @@ class LstmModel(Tagger):
         """
         Saves the Tensorflow model
         """
+        # Save the tensorflow weights and variables
         saver = tf.train.Saver()
         saver.save(self.session, path)
         self.session.close()
@@ -572,6 +573,16 @@ class LstmModel(Tagger):
         self.session = tf.Session()
         saver = tf.train.import_meta_graph(path + '.meta')
         saver.restore(self.session, tf.train.latest_checkpoint('./'))
+
+        # Restore tensorflow graph variables
+        self.tf_dense_keep_prob = self.session.graph.get_tensor_by_name('dense_keep_prob:0')
+        self.tf_lstm_input_keep_prob = self.session.graph.get_tensor_by_name('input_keep_prob:0')
+        self.tf_lstm_output_keep_prob = self.session.graph.get_tensor_by_name('output_keep_prob:0')
+        self.tf_query_input = self.session.graph.get_tensor_by_name('tf_query_input:0')
+        self.tf_gaz_input = self.session.graph.get_tensor_by_name('tf_gaz_input:0')
+        self.tf_label = self.session.graph.get_tensor_by_name('tf_label:0')
+        self.tf_sequence_length = self.session.graph.get_tensor_by_name('tf_sequence_length:0')
+        self.tf_lstm_output = self.session.graph.get_tensor_by_name('output_tensor:0')
 
         # Load feature extraction variables
         variables_to_load = joblib.load(path + '.feature_extraction_vars')
