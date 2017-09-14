@@ -545,13 +545,13 @@ class LstmModel(Tagger):
 
         return decoded_queries
 
-    def dump(self, path='lstm-model'):
+    def dump(self, path='lstm_model'):
         """
         Saves the Tensorflow model
         """
         # Save the tensorflow weights and variables
         saver = tf.train.Saver()
-        saver.save(self.session, path)
+        saver.save(self.session, path + '/lstm_model')
         self.session.close()
 
         # Save feature extraction variables
@@ -572,8 +572,8 @@ class LstmModel(Tagger):
         Loads the Tensorflow model
         """
         self.session = tf.Session()
-        saver = tf.train.import_meta_graph(path + '.meta')
-        saver.restore(self.session, tf.train.latest_checkpoint('./'))
+        saver = tf.train.import_meta_graph(path + '/lstm_model.meta')
+        saver.restore(self.session, tf.train.latest_checkpoint(path))
 
         # Restore tensorflow graph variables
         self.tf_dense_keep_prob = self.session.graph.get_tensor_by_name('dense_keep_prob:0')

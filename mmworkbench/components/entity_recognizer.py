@@ -109,7 +109,7 @@ class EntityRecognizer(Classifier):
             er_data = {'model': self._model, 'entity_types': self.entity_types,
                        'model_name': model_name}
         else:
-            tf_model_path = model_path.split('.')[0] + 'lstm'
+            tf_model_path = model_path.split('.pkl')[0] + '_lstm'
             er_data = {'model': tf_model_path, 'entity_types': self.entity_types,
                        'model_name': model_name, 'model_config': self._model_config}
             self._model.dump(tf_model_path)
