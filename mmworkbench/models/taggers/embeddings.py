@@ -288,10 +288,9 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
 
     def __init__(self,
                  sequence_padding_length,
-                 default_word_token,
+                 default_char_token,
                  token_embedding_dimension,
-                 max_char_per_word,
-                 default_char_token):
+                 max_char_per_word):
 
         self.token_embedding_dimension = token_embedding_dimension
         self.sequence_padding_length = sequence_padding_length
@@ -301,13 +300,13 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
         self.encoding_to_token_mapping = {}
         self.token_to_gaz_entity_mapping = {}
         self.gaz_entity_to_token_mapping = {}
+        self.token_to_embedding_mapping = {}
 
         self.available_token_encoding = 0
         self.available_token_for_gaz_entity_encoding = 0
 
-        self.default_token = default_word_token
+        self.default_token = default_char_token
         self.token_encoding_to_embedding_matrix = {}
-        self.default_char_token = default_char_token
 
     def _construct_embedding_matrix(self):
         """
@@ -316,9 +315,9 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
         Returns:
             Embedding matrix ndarray
         """
-        num_chars = len(self.token_to_embedding_mapping.keys())
+        num_chars = len(self.token_to_encoding_mapping.keys())
         embedding_matrix = np.zeros((num_chars, self.token_embedding_dimension))
-        for char, i in self.token_to_embedding_mapping.items():
+        for char, i in self.token_to_encoding_mapping.items():
             embedding_vector = self.token_to_embedding_mapping.get(char)
             if embedding_vector is None:
                 random_char = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
@@ -348,7 +347,7 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
                 break
 
             encoded_word = \
-                [self.token_to_encoding_mapping[self.default_char_token]] * self.max_char_per_word
+                [self.token_to_encoding_mapping[self.default_token]] * self.max_char_per_word
 
             for idx2, char_token in enumerate(word_token):
                 if idx2 >= self.max_char_per_word:
@@ -359,6 +358,37 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
 
             encoded_query[idx] = encoded_word
         return encoded_query
+
+    def get_embeddings_from_encodings(self, encoded_sequences):
+        """Transform the encoded sequence to its respective embeddings based on the
+        embeddings matrix and get it.
+
+        Args:
+            encoded_sequences (ndarray): encoded examples
+
+        Returns:
+            (ndarray): transformed embedding matrix
+        """
+
+        import pdb; pdb.set_trace()
+        self.token_encoding_to_embedding_matrix = \
+            self._construct_embedding_matrix()
+
+        examples_shape = np.shape(encoded_sequences)
+        final_dimension = np.shape(self.token_encoding_to_embedding_matrix)[1]
+
+        transformed_examples = np.zeros((examples_shape[0],
+                                         examples_shape[1],
+                                         examples_shape[2],
+                                         final_dimension))
+
+        for query_index in range(len(transformed_examples)):
+            for word_index in range(len(transformed_examples[query_index])):
+                for char_index in range(len(transformed_examples[query_index][word_index])):
+                    transformed_examples[query_index][word_index][char_index] = \
+                        self.token_encoding_to_embedding_matrix[encoded_sequences[query_index][word_index][char_index]]
+
+        return transformed_examples
 
 
 class LabelSequenceEmbedding(SequenceEmbedding):

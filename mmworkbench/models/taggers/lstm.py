@@ -86,7 +86,7 @@ class LstmModel(Tagger):
         self.fixed_char_window_size = parameters.get('fixed_char_window_size')
         self.max_char_per_word = parameters.get('maximum_characters_per_word', 20)
         self.character_embedding_dimension = \
-            parameters.get('self.character_embedding_dimension', 10)
+            parameters.get('character_embedding_dimension', 10)
 
     def get_params(self, deep=True):
         return self.__dict__
@@ -160,10 +160,9 @@ class LstmModel(Tagger):
                                                           self.gaz_dimension)
 
             self.char_encoder = CharacterSequenceEmbedding(self.padding_length,
-                                                           DEFAULT_PADDED_TOKEN,
-                                                           self.token_embedding_dimension,
-                                                           self.max_char_per_word,
-                                                           DEFAULT_CHAR_TOKEN)
+                                                           DEFAULT_CHAR_TOKEN,
+                                                           self.character_embedding_dimension,
+                                                           self.max_char_per_word)
 
             encoded_labels = []
             for sequence in y:
