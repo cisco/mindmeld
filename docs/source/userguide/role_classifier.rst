@@ -127,7 +127,7 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
 
 Let's take a look at the allowed values for each setting in a role classifier configuration.
 
-.. _model_settings:
+  .. _model_settings:
 
 1. **Model Settings**
 
@@ -141,7 +141,7 @@ Let's take a look at the allowed values for each setting in a role classifier co
 
   Always a dictionary with the single key ``'classifier_type'``, whose value specifies the machine learning model to use. Allowed values are shown in the table below.
 
-.. _sklearn_role_models:
+  .. _sklearn_role_models:
 
   =============== ======================================================================= ==========================================
   Value           Classifier                                                              Reference for configurable hyperparameters
@@ -160,7 +160,7 @@ Let's take a look at the allowed values for each setting in a role classifier co
   A dictionary whose keys are names of feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for role classification.
 
 
-.. _role_features:
+  .. _role_features:
 
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | Group Name                | Description                                                                                                |
