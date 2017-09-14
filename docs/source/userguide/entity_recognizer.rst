@@ -171,7 +171,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   Value           Classifier                                                                                   Reference for configurable hyperparameters
   =============== ============================================================================================ ==========================================
   ``'memm'``      `Maximum Entropy Markov Model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_ :sk_api:`sklearn.linear_model.LogisticRegression <sklearn.linear_model.LogisticRegression.html>`
-  ``'crf'``       `Conditional random field <https://en.wikipedia.org/wiki/Conditional_random_field>`_         `sklearn-crfsuite API Reference <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_
+  ``'crf'``       `Conditional Random Field <https://en.wikipedia.org/wiki/Conditional_random_field>`_         `sklearn-crfsuite <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_
   =============== ============================================================================================ ==========================================
 
   Tagger models allow you to specify the additional model settings shown below.
@@ -210,7 +210,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 
   A dictionary whose keys are names of feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for entity recognition.
 
-.. _entity_features:
+  .. _entity_features:
 
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | Group Name                | Description                                                                                                |
@@ -228,11 +228,9 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                           | Examples:                                                                                                  |
   |                           |                                                                                                            |
   |                           | ``'ngram_lengths_to_start_positions': {1: [0], 2: [0]}``                                                   |
-  |                           |                                                                                                            |
   |                           |  - extracts all words (unigrams) and bigrams starting with the current token                               |
   |                           |                                                                                                            |
   |                           | ``'ngram_lengths_to_start_positions': {1: [-1, 0, 1], 2: [-1, 0, 1]}``                                     |
-  |                           |                                                                                                            |
   |                           |  - additionally includes unigrams and bigrams starting from the words before and after the current token   |
   |                           |                                                                                                            |
   |                           | Given the query "weather in {San Francisco|location} {next week|sys_time}"                                 |

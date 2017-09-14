@@ -134,7 +134,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
   Always a dictionary with the single key ``'classifier_type'`` whose value specifies the machine learning model to use. Allowed values are shown in the table below.
 
 
-.. _sklearn_intent_models:
+  .. _sklearn_intent_models:
 
   =============== ======================================================================= ==========================================
   Value           Classifier                                                              Reference for configurable hyperparameters
@@ -153,7 +153,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
 
   A dictionary whose keys are the names of the feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for intent classification.
 
-.. _intent_features:
+  .. _intent_features:
 
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | Group Name            | Description                                                                                                |

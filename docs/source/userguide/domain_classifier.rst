@@ -123,7 +123,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 
   Always a dictionary with the single key ``'classifier_type'``, whose value specifies the machine learning model to use. Allowed values are shown in the table below.
 
-.. _sklearn_domain_models:
+  .. _sklearn_domain_models:
 
   =============== ======================================================================= ==========================================
   Value           Classifier                                                              Reference for configurable hyperparameters
@@ -142,7 +142,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 
   A dictionary whose keys are names of feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for domain classification.
 
-.. _domain_features:
+  .. _domain_features:
 
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | Group Name            | Description                                                                                                |
