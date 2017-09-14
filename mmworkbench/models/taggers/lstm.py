@@ -5,9 +5,8 @@ import math
 import logging
 
 from .taggers import Tagger, extract_sequence_features
-from .embeddings import LabelSequenceEmbedding, \
-    WordSequenceEmbedding, \
-    GazetteerSequenceEmbedding
+from .embeddings import LabelSequenceEmbedding, WordSequenceEmbedding, \
+    GazetteerSequenceEmbedding, CharacterSequenceEmbedding
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
@@ -15,6 +14,7 @@ REGEX_TYPE_POSITIONAL_INDEX = 1
 DEFAULT_LABEL = 'B|UNK'
 DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_GAZ_LABEL = 'O'
+DEFAULT_CHAR_TOKEN = '`'
 RANDOM_SEED = 1
 
 logger = logging.getLogger(__name__)
@@ -84,6 +84,9 @@ class LstmModel(Tagger):
         self.multiple_window_sizes = parameters.get('multiple_window_sizes', False)
         self.char_window_sizes = parameters.get('char_window_sizes')
         self.fixed_char_window_size = parameters.get('fixed_char_window_size')
+        self.max_char_per_word = parameters.get('maximum_characters_per_word', 20)
+        self.character_embedding_dimension = \
+            parameters.get('self.character_embedding_dimension', 10)
 
     def get_params(self, deep=True):
         return self.__dict__
@@ -119,6 +122,11 @@ class LstmModel(Tagger):
 
         word_and_gaz_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
+        self.tf_char_input = tf.placeholder(tf.float32,
+                                            [None,
+                                             self.padding_length,
+                                             self.max_char_per_word,
+                                             self.character_embedding_dimension])
 
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
             self.lstm_output_tf, self.label_tf)
@@ -150,6 +158,12 @@ class LstmModel(Tagger):
             self.gaz_encoder = GazetteerSequenceEmbedding(self.padding_length,
                                                           DEFAULT_GAZ_LABEL,
                                                           self.gaz_dimension)
+
+            self.char_encoder = CharacterSequenceEmbedding(self.padding_length,
+                                                           DEFAULT_PADDED_TOKEN,
+                                                           self.token_embedding_dimension,
+                                                           self.max_char_per_word,
+                                                           DEFAULT_CHAR_TOKEN)
 
             encoded_labels = []
             for sequence in y:
@@ -488,12 +502,9 @@ class LstmModel(Tagger):
 
         x_feats_array = self.query_encoder.get_embeddings_from_encodings(x_feats_array)
         gaz_feats_array = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats_array)
+        char_feats_array = self.char_encoder.get_embeddings_from_encodings(char_feats_array)
 
-        embedding_char_matrix = self.embedding.get_char_encoding_matrix()
-        char_feats = self.embedding.transform_char_query_using_embeddings(char_feats_array,
-                                                                          embedding_char_matrix)
-
-        return x_feats_array, gaz_feats_array, char_feats
+        return x_feats_array, gaz_feats_array, char_feats_array
 
     def _extract_features(self, example):
         """Extracts feature dicts for each token in an example.
@@ -537,7 +548,7 @@ class LstmModel(Tagger):
 
         encoded_gaz = self.gaz_encoder.encode_sequence_of_tokens(extracted_gaz_tokens)
         padded_query = self.query_encoder.encode_sequence_of_tokens(example.normalized_tokens)
-        padded_char = self.embedding.transform_char_query(example.normalized_tokens)
+        padded_char = self.char_encoder.encode_sequence_of_tokens(example.normalized_tokens)
 
         return padded_query, encoded_gaz, padded_char
 

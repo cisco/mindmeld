@@ -11,11 +11,6 @@ from ...exceptions import EmbeddingDownloadError
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_LABEL = 'B|UNK'
-DEFAULT_PADDED_TOKEN = '<UNK>'
-DEFAULT_GAZ_LABEL = 'O'
-DEFAULT_CHAR_TOKEN = '`'
-
 GLOVE_DOWNLOAD_LINK = 'http://nlp.stanford.edu/data/glove.6B.zip'
 EMBEDDING_FILE_PATH_TEMPLATE = 'glove.6B.{}d.txt'
 ALLOWED_WORD_EMBEDDING_DIMENSIONS = [50, 100, 200, 300]
@@ -157,7 +152,6 @@ class SequenceEmbedding(object):
     def __init__(self,
                  sequence_padding_length,
                  default_token,
-                 max_char_per_word,
                  use_pretrained_embeddings=False,
                  token_embedding_dimension=None,
                  token_pretrained_embedding_filepath=None):
@@ -289,25 +283,83 @@ class WordSequenceEmbedding(SequenceEmbedding):
                 embedding_matrix[i] = embedding_vector
         return embedding_matrix
 
-    def get_char_encoding_matrix(self):
+
+class CharacterSequenceEmbedding(SequenceEmbedding):
+
+    def __init__(self,
+                 sequence_padding_length,
+                 default_word_token,
+                 token_embedding_dimension,
+                 max_char_per_word,
+                 default_char_token):
+
+        self.token_embedding_dimension = token_embedding_dimension
+        self.sequence_padding_length = sequence_padding_length
+        self.max_char_per_word = max_char_per_word
+
+        self.token_to_encoding_mapping = {}
+        self.encoding_to_token_mapping = {}
+        self.token_to_gaz_entity_mapping = {}
+        self.gaz_entity_to_token_mapping = {}
+
+        self.available_token_encoding = 0
+        self.available_token_for_gaz_entity_encoding = 0
+
+        self.default_token = default_word_token
+        self.token_encoding_to_embedding_matrix = {}
+        self.default_char_token = default_char_token
+
+    def _construct_embedding_matrix(self):
         """
         Constructs the encoding matrix of char encoding to char embedding
 
         Returns:
             Embedding matrix ndarray
         """
-        num_chars = len(self.char_to_encoding.keys())
-        embedding_matrix = np.zeros((num_chars, self.character_embedding_dimension))
-        for char, i in self.char_to_encoding.items():
-            embedding_vector = self.char_to_embedding.get(char)
+        num_chars = len(self.token_to_embedding_mapping.keys())
+        embedding_matrix = np.zeros((num_chars, self.token_embedding_dimension))
+        for char, i in self.token_to_embedding_mapping.items():
+            embedding_vector = self.token_to_embedding_mapping.get(char)
             if embedding_vector is None:
-                random_char = np.random.uniform(-1, 1, size=(self.character_embedding_dimension,))
+                random_char = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
                 embedding_matrix[i] = random_char
-                self.char_to_embedding[char] = random_char
+                self.token_to_embedding_mapping[char] = random_char
             else:
                 # words not found in embedding index will be all-zeros.
                 embedding_matrix[i] = embedding_vector
         return embedding_matrix
+
+    def encode_sequence_of_tokens(self, list_of_tokens):
+        """Encodes a sequence of tokens using a simple integer token based approach
+
+        Args:
+            tlist_of_tokens (list): A list of tokens
+
+        Returns:
+            (list): Encoded sequence of tokens
+        """
+        self._encode_token(self.default_token)
+
+        default_encoding = self.token_to_encoding_mapping[self.default_token]
+        encoded_query = [default_encoding] * self.sequence_padding_length
+
+        for idx, word_token in enumerate(list_of_tokens):
+            if idx >= self.sequence_padding_length:
+                break
+
+            encoded_word = \
+                [self.token_to_encoding_mapping[self.default_char_token]] * self.max_char_per_word
+
+            for idx2, char_token in enumerate(word_token):
+                if idx2 >= self.max_char_per_word:
+                    break
+
+                self._encode_token(char_token)
+                encoded_word[idx2] = self.token_to_encoding_mapping[char_token]
+
+            encoded_query[idx] = encoded_word
+        return encoded_query
+
 
 class LabelSequenceEmbedding(SequenceEmbedding):
     """This class is a container for building sequence embeddings for a sequence of labels.
@@ -379,9 +431,3 @@ class GazetteerSequenceEmbedding(SequenceEmbedding):
             self.token_to_encoding_mapping[token] = self.available_token_encoding
             self.encoding_to_token_mapping[self.available_token_encoding] = token
             self.available_token_encoding += 1
-
-    def _char_encoding_transform(self, char_token):
-        if char_token not in self.char_to_encoding:
-            self.char_to_encoding[char_token] = self.next_available_char_token
-            self.encoding_to_char[self.next_available_char_token] = char_token
-            self.next_available_char_token += 1
