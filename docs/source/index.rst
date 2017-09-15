@@ -111,6 +111,7 @@ Contents
    userguide/parser
    userguide/kb
    userguide/dm
+   userguide/versions
 
 ..
    .. toctree::
