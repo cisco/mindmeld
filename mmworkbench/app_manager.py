@@ -6,9 +6,13 @@ from __future__ import absolute_import, unicode_literals
 from builtins import object
 
 import copy
+import logging
 
 from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 from .resource_loader import ResourceLoader
+from .exceptions import WorkbenchError
+
+logger = logging.getLogger(__name__)
 
 
 class ApplicationManager(object):
@@ -47,16 +51,20 @@ class ApplicationManager(object):
             return
         self.nlp.load()
 
-    def parse(self, text, payload=None, session=None, frame=None, history=None, verbose=False):
+    def parse(self, text, payload=None, session=None, frame=None, history=None,
+              allowed_intents=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
             payload (dict, optional): Description
             session (dict, optional): Description
             history (list, optional): Description
+            allowed_intents (list, optional): A list of intents to allow
+            for model consideration
             verbose (bool, optional): Description
 
         """
+
         session = session or {}
         history = history or []
         frame = frame or {}
@@ -67,13 +75,27 @@ class ApplicationManager(object):
         if payload:
             request['payload'] = payload
 
+        nlp_hierarchy = None
+
+        if allowed_intents:
+            try:
+                nlp_hierarchy = self.nlp.validate_and_extract_allowed_intents(allowed_intents)
+            except WorkbenchError as e:
+                logger.error("Validation error {} on input allowed intents {}."
+                             " Not applying allowed intent restrictions to domain and intent"
+                             " classifiers".format(e.message, allowed_intents))
+
         # TODO: support passing in reference time from session
         query = self._query_factory.create_query(text)
 
         # TODO: support specifying target domain, etc in payload
-        processed_query = self.nlp.process_query(query)
+        processed_query = self.nlp.process_query(query, nlp_hierarchy)
 
-        context = {'request': request, 'history': history, 'frame': copy.deepcopy(frame)}
+        context = {'request': request,
+                   'history': history,
+                   'frame': copy.deepcopy(frame),
+                   'allowed_intents': []}
+
         context.update(processed_query.to_dict())
         context.pop('text')
         context.update(self.dialogue_manager.apply_handler(context))

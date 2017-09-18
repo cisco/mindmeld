@@ -17,6 +17,7 @@ from .entity_resolver import EntityResolver
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
+from ..exceptions import WorkbenchError
 
 
 class Processor(object):
@@ -88,26 +89,30 @@ class Processor(object):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
-    def process(self, query_text):
+    def process(self, query_text, allowed_nlp_components=None):
         """Processes the given input text using the trained natural language processing models
         for this processor and its children
 
         Args:
             query_text (str): The raw user text input
+            allowed_nlp_components (dict, optional): A dictionary of the NLP hierarchy as follows:
+            {domain: {intent: {}}}
 
         Returns:
             ProcessedQuery: A processed query object that contains the results from the
                 application of this processor and its children to the input text
         """
         query = self.resource_loader.query_factory.create_query(query_text)
-        return self.process_query(query).to_dict()
+        return self.process_query(query, allowed_nlp_components).to_dict()
 
-    def process_query(self, query):
+    def process_query(self, query, allowed_nlp_components=None):
         """Processes the given query using the trained natural language processing models for
         this processor and its children
 
         Args:
             query (Query): The query object to process
+            allowed_nlp_components (dict, optional): A dictionary of the NLP hierarchy as follows:
+            {domain: {intent: {}}}
 
         Returns:
             ProcessedQuery: A processed query object that contains the results from the
@@ -177,26 +182,73 @@ class NaturalLanguageProcessor(Processor):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
 
-    def process_query(self, query):
+    def process_query(self, query, allowed_nlp_components=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
         Args:
             query (Query): The query object to process
+            allowed_nlp_components (dict, optional): A dictionary of the NLP hierarchy as follows:
+            {domain: {intent: {}}}
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the full hierarchy of natural language processing models to the input query
         """
         self._check_ready()
+
         if len(self.domains) > 1:
-            domain = self.domain_classifier.predict(query)
+            if not allowed_nlp_components or allowed_nlp_components == {}:
+                domain = self.domain_classifier.predict(query)
+            else:
+                sorted_domains = self.domain_classifier.predict_proba(query)
+                for ordered_domain, _ in sorted_domains:
+                    if ordered_domain in allowed_nlp_components.keys():
+                        domain = ordered_domain
+                        break
         else:
             domain = list(self.domains.keys())[0]
 
-        processed_query = self.domains[domain].process_query(query)
+        allowed_intents = allowed_nlp_components.get(domain) if allowed_nlp_components else None
+
+        processed_query = \
+            self.domains[domain].process_query(query, allowed_intents)
         processed_query.domain = domain
         return processed_query
+
+    def validate_and_extract_allowed_intents(self, allowed_intents):
+        """This function validates a user inputted list of allowed_intents against the NLP
+        hierarchy and construct a hierarchy dictionary as follows: {domain: {intent: {}} if
+        the validation of allowed_intents has passed.
+
+        Args:
+            allowed_intents (list): A list of allowable intents in the format "domain.intent".
+            If all intents need to be included, the syntax is "domain.*".
+
+        Returns:
+            (dict): A dictionary of NLP hierarchy
+        """
+        nlp_components = {}
+
+        for allowed_intent in allowed_intents:
+            domain, intent = allowed_intent.split(".")
+
+            if domain not in self.domains.keys():
+                raise WorkbenchError("Domain: {} is not in the NLP hierarchy".format(domain))
+
+            if intent != "*" and intent not in self.domains[domain].intents.keys():
+                raise WorkbenchError("Intent: {} is not in the NLP hierarchy".format(intent))
+
+            if domain not in nlp_components:
+                nlp_components[domain] = {}
+
+            if intent == "*":
+                for intent in self.domains[domain].intents.keys():
+                    nlp_components[domain][intent] = {}
+            else:
+                nlp_components[domain][intent] = {}
+
+        return nlp_components
 
 
 class DomainProcessor(Processor):
@@ -262,24 +314,35 @@ class DomainProcessor(Processor):
         processed_query.domain = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query):
+    def process_query(self, query, allowed_nlp_components=None):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this domain
 
         Args:
             query (Query): The query object to process
+            allowed_nlp_components (dict, optional): A dictionary of the NLP hierarchy for intents
+             as follows: {intent: {}}
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
         """
         self._check_ready()
+
         if len(self.intents) > 1:
-            intent = self.intent_classifier.predict(query)
+            if not allowed_nlp_components or allowed_nlp_components == {}:
+                intent = self.intent_classifier.predict(query)
+            else:
+                sorted_intents = self.intent_classifier.predict_proba(query)
+                for ordered_intent, _ in sorted_intents:
+                    if ordered_intent in allowed_nlp_components.keys():
+                        intent = ordered_intent
+                        break
         else:
             intent = list(self.intents.keys())[0]
         processed_query = self.intents[intent].process_query(query)
         processed_query.intent = intent
+
         return processed_query
 
 

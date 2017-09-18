@@ -370,6 +370,7 @@ class Conversation(object):
         self.session = session or {}
         self.history = []
         self.frame = {}
+        self.allowed_intents = []
 
     def say(self, text):
         """Send a message in the conversation. The message will be processed by the app based on
@@ -382,11 +383,15 @@ class Conversation(object):
         Returns:
             list of str: A text representation of the dialogue responses
         """
-        response = self._app_manager.parse(text, session=self.session, frame=self.frame,
-                                           history=self.history)
+        response = self._app_manager.parse(text,
+                                           session=self.session,
+                                           frame=self.frame,
+                                           history=self.history,
+                                           allowed_intents=self.allowed_intents)
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
+        self.allowed_intents = response['allowed_intents']
 
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
@@ -402,11 +407,16 @@ class Conversation(object):
         Returns:
             (dictionary): The dictionary Response
         """
-        response = self._app_manager.parse(text, session=self.session, frame=self.frame,
-                                           history=self.history)
+        response = self._app_manager.parse(text,
+                                           session=self.session,
+                                           frame=self.frame,
+                                           history=self.history,
+                                           allowed_intents=self.allowed_intents)
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
+        self.allowed_intents = response['allowed_intents']
+
         return response
 
     def _handle_client_action(self, action):

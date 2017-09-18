@@ -78,3 +78,54 @@ def test_process(nlp):
         'intent': 'greet',
         'entities': []
     }
+
+
+test_data_1 = [
+    (['store_info.find_nearest_store'], 'store near MG Road',
+     'store_info', 'find_nearest_store'),
+    (['store_info.find_nearest_store', 'store_info.greet'], 'hello!',
+     'store_info', 'greet'),
+    (['store_info.find_nearest_store'], 'hello!',
+     'store_info', 'find_nearest_store'),
+    (['store_info.*'], 'hello!', 'store_info', 'greet')
+]
+
+
+@pytest.mark.parametrize("allowed_intents,query,expected_domain,expected_intent", test_data_1)
+def test_nlp_hierarchy_bias_for_user_bias(nlp, allowed_intents, query, expected_domain,
+                                          expected_intent):
+    """Tests user specified domain and intent biases"""
+    response = nlp.process(query, nlp.validate_and_extract_allowed_intents(allowed_intents))
+
+    assert response == {
+        'text': query,
+        'domain': expected_domain,
+        'intent': expected_intent,
+        'entities': []
+    }
+
+
+test_data_2 = [
+    (['store_info.*', 'store_info.greet'],
+     'hello!', 'store_info', 'greet'),
+    (['store_info.find_nearest_store'], 'hello!', 'store_info',
+     'find_nearest_store'),
+    (['store_info.*'], 'hello!', 'store_info', 'greet'),
+    (['store_info.*', 'store_info.find_nearest_store'], 'store near MG Road',
+     'store_info', 'find_nearest_store')
+]
+
+
+@pytest.mark.parametrize("allowed_intents,query,expected_domain,expected_intent", test_data_2)
+def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
+                                             query, expected_domain,
+                                             expected_intent):
+    """Tests user specified allowable domains and intents"""
+    response = nlp.process(query, nlp.validate_and_extract_allowed_intents(allowed_intents))
+
+    assert response == {
+        'text': query,
+        'domain': expected_domain,
+        'intent': expected_intent,
+        'entities': []
+    }
