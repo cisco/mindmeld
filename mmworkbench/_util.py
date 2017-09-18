@@ -260,15 +260,7 @@ def load_global_configuration():
         dict: An object containing configuration values.
     """
     def _filter_bad_keys(config):
-        bad_keys = set()
-        for key in config.keys():
-            if config[key] is None:
-                bad_keys.add(key)
-
-        for key in bad_keys:
-            config.pop(key)
-
-        return config
+        return {key: config[key] for key in config if key is not None}
 
     config = {
         'mindmeld_url': os.environ.get('MM_URL', None),
