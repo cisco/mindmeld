@@ -82,6 +82,8 @@ class LstmModel(Tagger):
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
 
+        print(self.padding_length)
+
     def get_params(self, deep=True):
         return self.__dict__
 
@@ -169,7 +171,10 @@ class LstmModel(Tagger):
 
         return X, embedded_labels, groups
 
-    def setup_model(self, config=None):
+    def setup_model(self, config):
+
+        self.set_params(**config.params)
+
         # We have to reset the graph on every dataset since the input, gaz and output
         # dimensions for each domain,intent training data is different. So the graph
         # cannot be reused.
