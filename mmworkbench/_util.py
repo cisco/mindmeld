@@ -270,16 +270,14 @@ def load_global_configuration():
 
         return config
 
-    try:
-        config = {
-            'mindmeld_url': os.environ.get('MM_URL', None),
-            'username': os.environ.get('MM_USERNAME', None),
-            'password': os.environ.get('MM_PASSWORD', None),
-            'token': os.environ.get('MM_TOKEN', None)
-        }
+    config = {
+        'mindmeld_url': os.environ.get('MM_URL', None),
+        'username': os.environ.get('MM_USERNAME', None),
+        'password': os.environ.get('MM_PASSWORD', None),
+        'token': os.environ.get('MM_TOKEN', None)
+    }
+    if config['username'] or config['token']:
         return _filter_bad_keys(config)
-    except KeyError:
-        pass
 
     try:
         logging.info('loading auth from mmworkbench config file.')
