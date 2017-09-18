@@ -285,6 +285,9 @@ class WordSequenceEmbedding(SequenceEmbedding):
 
 
 class CharacterSequenceEmbedding(SequenceEmbedding):
+    """This class is a container for building character embeddings for an input query. We embed
+    randomly initialized real vectors of specified length for each character embedding vector.
+    """
 
     def __init__(self,
                  sequence_padding_length,
@@ -329,13 +332,13 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
         return embedding_matrix
 
     def encode_sequence_of_tokens(self, list_of_tokens):
-        """Encodes a sequence of tokens using a simple integer token based approach
+        """Encodes a sequence of chars in a query using the integer based encoding
 
         Args:
-            tlist_of_tokens (list): A list of tokens
+            list_of_tokens (list): A list of tokens
 
         Returns:
-            (list): Encoded sequence of tokens
+            (list): Encoded sequence of character tokens
         """
         self._encode_token(self.default_token)
         default_encoding = self.token_to_encoding_mapping[self.default_token]
@@ -383,8 +386,11 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
         for query_index in range(len(transformed_examples)):
             for word_index in range(len(transformed_examples[query_index])):
                 for char_index in range(len(transformed_examples[query_index][word_index])):
+
+                    char_encoding = encoded_sequences[query_index][word_index][char_index]
+
                     transformed_examples[query_index][word_index][char_index] = \
-                        self.token_encoding_to_embedding_matrix[encoded_sequences[query_index][word_index][char_index]]
+                        self.token_encoding_to_embedding_matrix[char_encoding]
 
         return transformed_examples
 

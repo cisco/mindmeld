@@ -204,9 +204,9 @@ class LstmModel(Tagger):
 
     def construct_feed_dictionary(self,
                                   batch_examples,
+                                  batch_char,
                                   batch_gaz,
                                   batch_seq_len,
-                                  batch_char,
                                   batch_labels=list()):
         """Constructs the feed dictionary that is used to feed data into the tensors
 
@@ -289,7 +289,7 @@ class LstmModel(Tagger):
                                                           self.max_char_per_word,
                                                           embedding_dimension, 1])
 
-        # first dimension 1 because want to apply this to every word
+        # first dimension is 1 because we want to apply this to every word
         char_convolution_filter = tf.Variable(tf.random_normal(
             [1, char_window_size, embedding_dimension,
              1, self.character_embedding_dimension], dtype=tf.float32))
@@ -305,9 +305,9 @@ class LstmModel(Tagger):
             pooling_type='MAX', padding='VALID')
 
         # Transpose because shape before is batch_size BY query_padding_length BY 1 BY 1
-        # BY num_filters 1's refer to number of input channels and dimension because our
-        # window has height equal to char_embedding_dimension and encompases the entire
-        # dimension
+        # BY num_filters. This transform  rearranges the dimension of each rank such that
+        # the num_filters dimension comes after the query_padding_length, so the last index
+        # 4 is brought after the index 1.
         max_pool = tf.transpose(max_pool, [0, 1, 4, 2, 3])
         max_pool = tf.reshape(max_pool, [batch_size, self.padding_length,
                                          self.character_embedding_dimension])
@@ -614,15 +614,17 @@ class LstmModel(Tagger):
                 batch_seq_len = seq_len[batch_start_index:batch_end_index]
                 batch_char = char[batch_start_index:batch_end_index]
 
+                print("batch stuff: {}".format(batch_char.shape))
+
                 if batch % int(self.display_epoch) == 0:
                     output, loss, _ = self.session.run([self.lstm_output_tf,
                                                         self.cost_tf,
                                                         self.optimizer_tf],
                                                        feed_dict=self.construct_feed_dictionary(
                                                         batch_examples,
+                                                        batch_char,
                                                         batch_gaz,
                                                         batch_seq_len,
-                                                        batch_char,
                                                         batch_labels))
 
                     score = self._calculate_score(output, batch_labels, batch_seq_len)
@@ -635,9 +637,13 @@ class LstmModel(Tagger):
                                                                             batch_size, loss,
                                                                             accuracy))
                 else:
-                    self.session.run(self.optimizer_tf, feed_dict=self.construct_feed_dictionary(
-                        batch_examples, batch_gaz, batch_seq_len, batch_char, batch_labels))
-
+                    self.session.run(self.optimizer,
+                                     feed_dict=self.construct_feed_dictionary(
+                                         batch_examples,
+                                         batch_char,
+                                         batch_gaz,
+                                         batch_seq_len,
+                                         batch_labels))
         return self
 
     def _predict(self, X):
@@ -650,7 +656,6 @@ class LstmModel(Tagger):
             (list): A list of decoded labelled predicted by the model
         """
         seq_len_arr = np.array(self.sequence_lengths)
-        char = self.char_features_arr
 
         # During predict time, we make sure no nodes are dropped out
         self.dense_keep_probability = 1.0
@@ -659,7 +664,7 @@ class LstmModel(Tagger):
 
         output = self.session.run(
             [self.lstm_output_tf],
-            feed_dict=self.construct_feed_dictionary(X, self.gaz_features_arr, seq_len_arr, char))
+            feed_dict=self.construct_feed_dictionary(X, self.char_features_arr, self.gaz_features_arr, seq_len_arr))
 
         output = np.reshape(output, [-1, int(self.padding_length), self.output_dimension])
         output = np.argmax(output, 2)
