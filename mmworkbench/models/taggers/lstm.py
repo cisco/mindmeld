@@ -70,23 +70,25 @@ class LstmModel(Tagger):
         self.batch_size = parameters.get('batch_size', 20)
         self.token_lstm_hidden_state_dimension = \
             parameters.get('token_lstm_hidden_state_dimension', 300)
+
         self.learning_rate = parameters.get('learning_rate', 0.005)
         self.optimizer_tf = parameters.get('optimizer', 'adam')
         self.padding_length = parameters.get('padding_length', 20)
         self.display_epoch = parameters.get('display_epoch', 20)
+
         self.token_embedding_dimension = parameters.get('token_embedding_dimension', 300)
         self.token_pretrained_embedding_filepath = \
             parameters.get('token_pretrained_embedding_filepath')
+
         self.dense_keep_probability = parameters.get('dense_keep_prob', 0.5)
         self.lstm_input_keep_prob = parameters.get('lstm_input_keep_prob', 0.5)
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
-        self.multiple_window_sizes = parameters.get('multiple_window_sizes', False)
-        self.char_window_sizes = parameters.get('char_window_sizes')
-        self.fixed_char_window_size = parameters.get('fixed_char_window_size')
+
+        self.use_char_embeddings = parameters.get('use_character_embeddings', False)
+        self.char_window_sizes = parameters.get('char_window_sizes', [5])
         self.max_char_per_word = parameters.get('maximum_characters_per_word', 20)
-        self.character_embedding_dimension = \
-            parameters.get('character_embedding_dimension', 10)
+        self.character_embedding_dimension = parameters.get('character_embedding_dimension', 10)
 
     def get_params(self, deep=True):
         return self.__dict__
@@ -122,11 +124,12 @@ class LstmModel(Tagger):
 
         word_and_gaz_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
-        self.tf_char_input = tf.placeholder(tf.float32,
-                                            [None,
-                                             self.padding_length,
-                                             self.max_char_per_word,
-                                             self.character_embedding_dimension])
+        if self.use_char_embeddings:
+            self.tf_char_input = tf.placeholder(tf.float32,
+                                                [None,
+                                                 self.padding_length,
+                                                 self.max_char_per_word,
+                                                 self.character_embedding_dimension])
 
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
             self.lstm_output_tf, self.label_tf)
@@ -159,10 +162,11 @@ class LstmModel(Tagger):
                                                           DEFAULT_GAZ_LABEL,
                                                           self.gaz_dimension)
 
-            self.char_encoder = CharacterSequenceEmbedding(self.padding_length,
-                                                           DEFAULT_CHAR_TOKEN,
-                                                           self.character_embedding_dimension,
-                                                           self.max_char_per_word)
+            if self.use_char_embeddings:
+                self.char_encoder = CharacterSequenceEmbedding(self.padding_length,
+                                                               DEFAULT_CHAR_TOKEN,
+                                                               self.character_embedding_dimension,
+                                                               self.max_char_per_word)
 
             encoded_labels = []
             for sequence in y:
@@ -183,6 +187,10 @@ class LstmModel(Tagger):
         groups = None
 
         return x_sequence_embeddings_arr, embedded_labels, groups
+
+    def setup_model(self, config):
+
+        self.set_params(**config.params)
 
     def setup_model(self, config):
 
@@ -224,6 +232,9 @@ class LstmModel(Tagger):
         if len(batch_labels) > 0:
             return_dict[self.label_tf] = batch_labels
 
+        if len(batch_char) > 0:
+            return_dict[self.tf_char_input] = batch_char
+
         return return_dict
 
     def _construct_embedding_network(self):
@@ -242,23 +253,28 @@ class LstmModel(Tagger):
 
         batch_size_dim = tf.shape(self.tf_query_input)[0]
 
-        word_level_char_embeddings_list = []
-        self.multiple_window_sizes = False
-        if self.multiple_window_sizes:
+        if self.use_char_embeddings:
+
+            word_level_char_embeddings_list = []
+
             for window_size in self.char_window_sizes:
+
                 word_level_char_embeddings_list.append(
                     self.apply_convolution(self.tf_char_input, batch_size_dim,
                                            window_size, self.character_embedding_dimension))
+
             word_level_char_embedding = tf.concat(word_level_char_embeddings_list, 2)
+
+            # Combined the two embeddings
+            combined_embedding = tf.concat([self.tf_query_input, word_level_char_embedding], axis=2)
         else:
-            word_level_char_embedding = self.apply_convolution(self.tf_char_input, batch_size_dim,
-                                                               self.fixed_char_window_size,
-                                                               self.character_embedding_dimension)
+            combined_embedding = self.tf_query_input
 
         # Combined the two embeddings
         combined_embedding_tf = tf.concat([self.query_input_tf, word_level_char_embedding], axis=2)
         combined_embedding_tf = tf.concat([combined_embedding_tf, dense_gaz_embedding_tf], axis=2)
         return combined_embedding_tf
+
 
     def apply_convolution(self, input_tensor, batch_size, char_window_size, embedding_dimension):
         """
@@ -501,7 +517,11 @@ class LstmModel(Tagger):
 
         x_feats_array = self.query_encoder.get_embeddings_from_encodings(x_feats_array)
         gaz_feats_array = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats_array)
-        char_feats_array = self.char_encoder.get_embeddings_from_encodings(char_feats_array)
+
+        if self.use_char_embeddings:
+            char_feats_array = self.char_encoder.get_embeddings_from_encodings(char_feats_array)
+        else:
+            char_feats_array = []
 
         return x_feats_array, gaz_feats_array, char_feats_array
 
@@ -547,7 +567,11 @@ class LstmModel(Tagger):
 
         encoded_gaz = self.gaz_encoder.encode_sequence_of_tokens(extracted_gaz_tokens)
         padded_query = self.query_encoder.encode_sequence_of_tokens(example.normalized_tokens)
-        padded_char = self.char_encoder.encode_sequence_of_tokens(example.normalized_tokens)
+
+        if self.use_char_embeddings:
+            padded_char = self.char_encoder.encode_sequence_of_tokens(example.normalized_tokens)
+        else:
+            padded_char = None
 
         return padded_query, encoded_gaz, padded_char
 
@@ -572,7 +596,8 @@ class LstmModel(Tagger):
             np.random.shuffle(indices)
 
             gaz = self.gaz_features_arr[indices]
-            char = self.char_features_arr[indices]
+            char = self.char_features_arr[indices] if self.use_char_embeddings else []
+
             examples = X[indices]
             labels = y[indices]
             batch_size = int(self.batch_size)

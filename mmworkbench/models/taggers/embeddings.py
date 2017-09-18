@@ -338,9 +338,10 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
             (list): Encoded sequence of tokens
         """
         self._encode_token(self.default_token)
-
         default_encoding = self.token_to_encoding_mapping[self.default_token]
-        encoded_query = [default_encoding] * self.sequence_padding_length
+
+        default_char_word = [default_encoding] * self.max_char_per_word
+        encoded_query = [default_char_word] * self.sequence_padding_length
 
         for idx, word_token in enumerate(list_of_tokens):
             if idx >= self.sequence_padding_length:
@@ -369,10 +370,7 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
         Returns:
             (ndarray): transformed embedding matrix
         """
-
-        import pdb; pdb.set_trace()
-        self.token_encoding_to_embedding_matrix = \
-            self._construct_embedding_matrix()
+        self.token_encoding_to_embedding_matrix = self._construct_embedding_matrix()
 
         examples_shape = np.shape(encoded_sequences)
         final_dimension = np.shape(self.token_encoding_to_embedding_matrix)[1]
