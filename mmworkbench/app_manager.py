@@ -61,6 +61,7 @@ class ApplicationManager(object):
             history (list, optional): Description
             allowed_intents (list, optional): A list of allowed intents
             for model consideration
+            target_dialog_state (str, optional): The target dialog state
             verbose (bool, optional): Description
 
         Returns:
@@ -71,38 +72,41 @@ class ApplicationManager(object):
         history = history or []
         frame = frame or {}
         # TODO: what do we do with verbose???
-        # TODO: where is the frame stored?
 
         request = {'text': text, 'session': session}
         if payload:
             request['payload'] = payload
 
-        nlp_hierarchy = None
-
-        if allowed_intents:
-            try:
-                nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
-            except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
-                # We have to print the error object since it sometimes contains a message
-                # and sometimes it doesn't, like a ValueError.
-                logger.error(
-                    "Validation error '{}' on input allowed intents {}. "
-                    "Not applying domain/intent restrictions this "
-                    "turn".format(e, allowed_intents))
-
-        # TODO: support passing in reference time from session
-        query = self._query_factory.create_query(text)
-
-        # TODO: support specifying target domain, etc in payload
-        processed_query = self.nlp.process_query(query, nlp_hierarchy)
-
         context = {'request': request,
                    'history': history,
                    'frame': copy.deepcopy(frame)}
 
-        context.update(processed_query.to_dict())
-        context.pop('text')
+        # We bypass the NLP processing engine if the target dialog state is specified. This
+        # improves performance by decreasing round trip time between the client and wb.
+        if not target_dialog_state:
+            nlp_hierarchy = None
+            if allowed_intents:
+                try:
+                    nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
+                except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
+                    # We have to print the error object since it sometimes contains a message
+                    # and sometimes it doesn't, like a ValueError.
+                    logger.error(
+                        "Validation error '{}' on input allowed intents {}. "
+                        "Not applying domain/intent restrictions this "
+                        "turn".format(e, allowed_intents))
+
+            # TODO: support passing in reference time from session
+            query = self._query_factory.create_query(text)
+
+            # TODO: support specifying target domain, etc in payload
+            processed_query = self.nlp.process_query(query, nlp_hierarchy)
+
+            context.update(processed_query.to_dict())
+            context.pop('text')
+
         context.update(self.dialogue_manager.apply_handler(context, target_dialog_state))
+        context.pop('target_dialog_state', None)
         return context
 
     def add_dialogue_rule(self, name, handler, **kwargs):

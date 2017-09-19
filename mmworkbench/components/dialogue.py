@@ -206,6 +206,7 @@ class DialogueManager(object):
 
         Args:
             context (dict): Description
+            target_dialog_state (str, optional): The target dialog state
 
         Returns:
             dict: A dict containing the dialogue datae and client actions
