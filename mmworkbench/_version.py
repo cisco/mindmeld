@@ -44,5 +44,5 @@ def validate_workbench_version(app_path):
         error_msg = 'Current mworkbench ({version}) does not satisfy {condition}'.format(
             version=wb_version, condition=wb_req[0])
         raise WorkbenchVersionError(error_msg)
-    logger.info("mmworkbench version {version} satisfies app's requirements.txt.".format(
+    logger.debug("mmworkbench version {version} satisfies app's requirements.txt.".format(
         version=wb_version))
