@@ -260,26 +260,16 @@ def load_global_configuration():
         dict: An object containing configuration values.
     """
     def _filter_bad_keys(config):
-        bad_keys = set()
-        for key in config.keys():
-            if config[key] is None:
-                bad_keys.add(key)
+        return {key: config[key] for key in config if key is not None}
 
-        for key in bad_keys:
-            config.pop(key)
-
-        return config
-
-    try:
-        config = {
-            'mindmeld_url': os.environ.get('MM_URL', None),
-            'username': os.environ.get('MM_USERNAME', None),
-            'password': os.environ.get('MM_PASSWORD', None),
-            'token': os.environ.get('MM_TOKEN', None)
-        }
+    config = {
+        'mindmeld_url': os.environ.get('MM_URL', None),
+        'username': os.environ.get('MM_USERNAME', None),
+        'password': os.environ.get('MM_PASSWORD', None),
+        'token': os.environ.get('MM_TOKEN', None)
+    }
+    if config['username'] or config['token']:
         return _filter_bad_keys(config)
-    except KeyError:
-        pass
 
     try:
         logging.info('loading auth from mmworkbench config file.')
