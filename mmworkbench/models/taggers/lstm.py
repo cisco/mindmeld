@@ -82,8 +82,6 @@ class LstmModel(Tagger):
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
 
-        print(self.padding_length)
-
     def get_params(self, deep=True):
         return self.__dict__
 
@@ -308,8 +306,8 @@ class LstmModel(Tagger):
         """Construct a regularized lstm cell based on a dropout layer
 
         Args:
-            initializer (tf.contrib.layers.xavier_initializer): initializer used
             hidden_dimensions: num dimensions of the hidden state variable
+            initializer (tf.contrib.layers.xavier_initializer): initializer used
 
         Returns:
             (DropoutWrapper): regularized LSTM cell
@@ -477,7 +475,7 @@ class LstmModel(Tagger):
                           tf.local_variables_initializer()])
 
         for epochs in range(int(self.number_of_epochs)):
-            logger.info("Epoch : {}".format(epochs))
+            logger.info("Training epoch : {}".format(epochs))
 
             indices = [x for x in range(len(X))]
             np.random.shuffle(indices)
@@ -490,7 +488,6 @@ class LstmModel(Tagger):
             seq_len = np.array(self.sequence_lengths)[indices]
 
             for batch in range(num_batches):
-
                 batch_start_index = batch * batch_size
                 batch_end_index = (batch * batch_size) + batch_size
 
@@ -500,8 +497,8 @@ class LstmModel(Tagger):
                 batch_seq_len = seq_len[batch_start_index:batch_end_index]
 
                 if batch % int(self.display_epoch) == 0:
-                    output, loss = self.session.run([self.tf_lstm_output, self.cost],
-                                                    feed_dict=self.construct_feed_dictionary(
+                    output, loss, _ = self.session.run([self.tf_lstm_output, self.cost, self.optimizer],
+                                                       feed_dict=self.construct_feed_dictionary(
                                                         batch_examples,
                                                         batch_gaz,
                                                         batch_seq_len,
@@ -510,17 +507,15 @@ class LstmModel(Tagger):
                     score = self._calculate_score(output, batch_labels, batch_seq_len)
                     accuracy = score / (len(batch_examples) * 1.0)
 
-                    logger.info("Iteration number " + str(batch * batch_size) +
-                                ", Minibatch Loss= " + "{:.5f}".format(loss) +
-                                ", Training Accuracy= " + "{:.5f}".format(accuracy))
+                    logger.info("Trained batch from index {} to {}, "
+                                "Mini-batch loss: {:.5f}, "
+                                "Training sequence accuracy: {:.5f}".format(batch * batch_size,
+                                                                            (batch * batch_size) + batch_size,
+                                                                            loss,
+                                                                            accuracy))
                 else:
-                    self.session.run(self.optimizer,
-                                     feed_dict=self.construct_feed_dictionary(
-                                         batch_examples,
-                                         batch_gaz,
-                                         batch_seq_len,
-                                         batch_labels))
-
+                    self.session.run(self.optimizer, feed_dict=self.construct_feed_dictionary(
+                        batch_examples, batch_gaz, batch_seq_len, batch_labels))
         return self
 
     def _predict(self, X):
@@ -528,7 +523,9 @@ class LstmModel(Tagger):
 
         Args:
             X (list of list of list of str): a list of queries to train on
-            params (dict): Parameters of the classifier
+
+        Returns:
+            (list): A list of decoded labelled predicted by the model
         """
         gaz = self.gaz_features
         seq_len = np.array(self.sequence_lengths)
