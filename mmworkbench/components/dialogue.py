@@ -399,7 +399,7 @@ class Conversation(object):
         self.history.insert(0, response)
         self.frame = response['frame']
         self.allowed_intents = response.pop('allowed_intents', None)
-        self.target_dialog_state = response.get('target_dialog_state')
+        self.target_dialog_state = response.pop('target_dialog_state', None)
 
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]

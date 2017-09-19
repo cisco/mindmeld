@@ -106,7 +106,6 @@ class ApplicationManager(object):
             context.pop('text')
 
         context.update(self.dialogue_manager.apply_handler(context, target_dialog_state))
-        context.pop('target_dialog_state', None)
         return context
 
     def add_dialogue_rule(self, name, handler, **kwargs):
