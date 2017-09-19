@@ -393,8 +393,6 @@ class Conversation(object):
         self.frame = response['frame']
         self.allowed_intents = response.get('allowed_intents')
 
-        import pdb; pdb.set_trace()
-
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
         return response_texts

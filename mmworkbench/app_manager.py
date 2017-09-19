@@ -103,6 +103,7 @@ class ApplicationManager(object):
         context.update(processed_query.to_dict())
         context.pop('text')
         context.update(self.dialogue_manager.apply_handler(context))
+        context.pop('allowed_intents', None)
 
         return context
 
