@@ -370,7 +370,7 @@ class Conversation(object):
         self.session = session or {}
         self.history = []
         self.frame = {}
-        self.allowed_intents = []
+        self.allowed_intents = None
 
     def say(self, text):
         """Send a message in the conversation. The message will be processed by the app based on
@@ -391,7 +391,9 @@ class Conversation(object):
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
-        self.allowed_intents = response['allowed_intents']
+        self.allowed_intents = response.get('allowed_intents')
+
+        import pdb; pdb.set_trace()
 
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
@@ -415,7 +417,7 @@ class Conversation(object):
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
-        self.allowed_intents = response['allowed_intents']
+        self.allowed_intents = response.get('allowed_intents')
 
         return response
 

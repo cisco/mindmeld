@@ -59,10 +59,12 @@ class ApplicationManager(object):
             payload (dict, optional): Description
             session (dict, optional): Description
             history (list, optional): Description
-            allowed_intents (list, optional): A list of intents to allow
+            allowed_intents (list, optional): A list of allowed intents
             for model consideration
             verbose (bool, optional): Description
 
+        Returns:
+            (dict): Context object
         """
 
         session = session or {}
@@ -84,6 +86,9 @@ class ApplicationManager(object):
                 logger.error("Validation error {} on input allowed intents {}."
                              " Not applying allowed intent restrictions to domain and intent"
                              " classifiers".format(e.message, allowed_intents))
+            except Exception as e:
+                logger.error("Error occurred when validating input allowed intents {} "
+                             "with error {}".format(allowed_intents, e.message))
 
         # TODO: support passing in reference time from session
         query = self._query_factory.create_query(text)
@@ -93,8 +98,7 @@ class ApplicationManager(object):
 
         context = {'request': request,
                    'history': history,
-                   'frame': copy.deepcopy(frame),
-                   'allowed_intents': []}
+                   'frame': copy.deepcopy(frame)}
 
         context.update(processed_query.to_dict())
         context.pop('text')
