@@ -201,7 +201,7 @@ class DialogueManager(object):
                 raise AssertionError(msg)
             self.handler_map[name] = handler
 
-    def apply_handler(self, context):
+    def apply_handler(self, context, target_dialog_state=None):
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
@@ -211,13 +211,11 @@ class DialogueManager(object):
             dict: A dict containing the dialogue datae and client actions
         """
         dialogue_state = None
-        target_dialog_state = context.get('target_dialog_state')
 
         for rule in self.rules:
             if target_dialog_state:
                 if target_dialog_state == rule.dialogue_state:
                     dialogue_state = rule.dialogue_state
-                    context.pop('target_dialog_state')
                     break
             else:
                 if rule.apply(context):

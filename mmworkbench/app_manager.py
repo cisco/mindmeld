@@ -98,13 +98,11 @@ class ApplicationManager(object):
 
         context = {'request': request,
                    'history': history,
-                   'frame': copy.deepcopy(frame),
-                   'target_dialog_state': target_dialog_state}
+                   'frame': copy.deepcopy(frame)}
 
         context.update(processed_query.to_dict())
         context.pop('text')
-        context.update(self.dialogue_manager.apply_handler(context))
-
+        context.update(self.dialogue_manager.apply_handler(context, target_dialog_state))
         return context
 
     def add_dialogue_rule(self, name, handler, **kwargs):
