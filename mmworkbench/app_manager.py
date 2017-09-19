@@ -10,7 +10,7 @@ import logging
 
 from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 from .resource_loader import ResourceLoader
-from .exceptions import WorkbenchError
+from .exceptions import AllowedNlpClassesKeyError
 
 logger = logging.getLogger(__name__)
 
@@ -81,14 +81,12 @@ class ApplicationManager(object):
 
         if allowed_intents:
             try:
-                nlp_hierarchy = self.nlp.validate_and_extract_allowed_intents(allowed_intents)
-            except WorkbenchError as e:
-                logger.error("Validation error {} on input allowed intents {}."
-                             " Not applying allowed intent restrictions to domain and intent"
-                             " classifiers".format(e.message, allowed_intents))
-            except Exception as e:
-                logger.error("Error occurred when validating input allowed intents {} "
-                             "with error {}".format(allowed_intents, e.message))
+                nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
+            except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
+                logger.error(
+                    "Validation error {} on input allowed intents {}. "
+                    "Not applying domain/intent restrictions this "
+                    "turn".format(e.message, allowed_intents))
 
         # TODO: support passing in reference time from session
         query = self._query_factory.create_query(text)

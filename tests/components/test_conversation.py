@@ -25,4 +25,4 @@ def test_allowed_intents_is_cleared():
 
     conv.allowed_intents = ['store_info.find_nearest_store']
     conv.say("close door")
-    assert conv.allowed_intents == []
+    assert not conv.allowed_intents

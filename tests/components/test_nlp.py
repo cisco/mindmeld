@@ -14,7 +14,7 @@ import os
 
 import pytest
 
-from mmworkbench.exceptions import ProcessorError
+from mmworkbench.exceptions import ProcessorError, AllowedNlpClassesKeyError
 from mmworkbench.components import NaturalLanguageProcessor
 
 APP_NAME = 'kwik_e_mart'
@@ -95,7 +95,7 @@ test_data_1 = [
 def test_nlp_hierarchy_bias_for_user_bias(nlp, allowed_intents, query, expected_domain,
                                           expected_intent):
     """Tests user specified domain and intent biases"""
-    response = nlp.process(query, nlp.validate_and_extract_allowed_intents(allowed_intents))
+    response = nlp.process(query, nlp.extract_allowed_intents(allowed_intents))
 
     assert response == {
         'text': query,
@@ -121,7 +121,7 @@ def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
                                              query, expected_domain,
                                              expected_intent):
     """Tests user specified allowable domains and intents"""
-    response = nlp.process(query, nlp.validate_and_extract_allowed_intents(allowed_intents))
+    response = nlp.process(query, nlp.extract_allowed_intents(allowed_intents))
 
     assert response == {
         'text': query,
@@ -129,3 +129,13 @@ def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
         'intent': expected_intent,
         'entities': []
     }
+
+
+def test_validate_and_extract_allowed_intents(nlp):
+    """Tests user specified allowable domains and intents"""
+    with pytest.raises(ValueError):
+        nlp.extract_allowed_intents(['store_info'])
+    with pytest.raises(AllowedNlpClassesKeyError):
+        nlp.extract_allowed_intents(['unrelated_domain.*'])
+    with pytest.raises(AllowedNlpClassesKeyError):
+        nlp.extract_allowed_intents(['store_info.unrelated_intent'])

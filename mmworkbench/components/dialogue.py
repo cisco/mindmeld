@@ -383,9 +383,7 @@ class Conversation(object):
         Returns:
             list of str: A text representation of the dialogue responses
         """
-        response = self._app_manager.parse(text,
-                                           session=self.session,
-                                           frame=self.frame,
+        response = self._app_manager.parse(text, session=self.session, frame=self.frame,
                                            history=self.history,
                                            allowed_intents=self.allowed_intents)
         response.pop('history')
@@ -407,9 +405,7 @@ class Conversation(object):
         Returns:
             (dictionary): The dictionary Response
         """
-        response = self._app_manager.parse(text,
-                                           session=self.session,
-                                           frame=self.frame,
+        response = self._app_manager.parse(text, session=self.session, frame=self.frame,
                                            history=self.history,
                                            allowed_intents=self.allowed_intents)
         response.pop('history')
