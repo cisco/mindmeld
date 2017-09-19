@@ -52,7 +52,7 @@ class ApplicationManager(object):
         self.nlp.load()
 
     def parse(self, text, payload=None, session=None, frame=None, history=None,
-              allowed_intents=None, verbose=False):
+              allowed_intents=None, target_dialog_state=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
@@ -98,7 +98,8 @@ class ApplicationManager(object):
 
         context = {'request': request,
                    'history': history,
-                   'frame': copy.deepcopy(frame)}
+                   'frame': copy.deepcopy(frame),
+                   'target_dialog_state': target_dialog_state}
 
         context.update(processed_query.to_dict())
         context.pop('text')

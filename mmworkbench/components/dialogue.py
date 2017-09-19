@@ -211,10 +211,18 @@ class DialogueManager(object):
             dict: A dict containing the dialogue datae and client actions
         """
         dialogue_state = None
+        target_dialog_state = context.get('target_dialog_state')
+
         for rule in self.rules:
-            if rule.apply(context):
-                dialogue_state = rule.dialogue_state
-                break
+            if target_dialog_state:
+                if target_dialog_state == rule.dialogue_state:
+                    dialogue_state = rule.dialogue_state
+                    context.pop('target_dialog_state')
+                    break
+            else:
+                if rule.apply(context):
+                    dialogue_state = rule.dialogue_state
+                    break
 
         if dialogue_state is None:
             logger.info('Failed to find dialogue state', context)
@@ -371,6 +379,7 @@ class Conversation(object):
         self.history = []
         self.frame = {}
         self.allowed_intents = None
+        self.target_dialog_state = ''
 
     def say(self, text):
         """Send a message in the conversation. The message will be processed by the app based on
@@ -385,11 +394,13 @@ class Conversation(object):
         """
         response = self._app_manager.parse(text, session=self.session, frame=self.frame,
                                            history=self.history,
-                                           allowed_intents=self.allowed_intents)
+                                           allowed_intents=self.allowed_intents,
+                                           target_dialog_state=self.target_dialog_state)
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
         self.allowed_intents = response.pop('allowed_intents', None)
+        self.target_dialog_state = response.get('target_dialog_state')
 
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
@@ -412,6 +423,7 @@ class Conversation(object):
         self.history.insert(0, response)
         self.frame = response['frame']
         self.allowed_intents = response.pop('allowed_intents', None)
+        self.target_dialog_state = response.get('target_dialog_state')
         return response
 
     def _handle_client_action(self, action):
