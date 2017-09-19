@@ -684,6 +684,10 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 **Segment-level statistics**
   |
 
+  .. note::
+
+     Segment-level statistics are currently only available for the IOB tag scheme. If you are using a different tag scheme these statistics will not be generated.
+
   Although it is useful to analyze tag-level statistics, they don't tell the full story for entity recognition in an intuitive way. It helps to think of the entity recognizer as performing two tasks: 1) identifying the span of words that should be part of an entity, and 2) selecting the label for the identified entity. When the recognizer makes a mistake, it misidentifies either the label, the span boundary, or both.
 
   Segment-level statistics capture the distribution of these error types across all the segments in a query.
