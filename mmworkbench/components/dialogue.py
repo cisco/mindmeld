@@ -396,6 +396,7 @@ class Conversation(object):
         return response
 
     def _handle_client_action(self, action):
+        msg = ''
         try:
             if action['name'] in set((SHOW_REPLY, SHOW_PROMPT)):
                 msg = action['message']['text']
