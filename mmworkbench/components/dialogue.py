@@ -7,8 +7,10 @@ from functools import cmp_to_key
 import logging
 import random
 import json
+import os
 
 from .. import path
+from ..exceptions import WorkbenchImportError
 
 logger = logging.getLogger(__name__)
 
@@ -313,12 +315,24 @@ class DialogueResponder(object):
 
 
 def _get_app_module(app_path):
+    # Get the absolute path from the relative path (such as home_assistant/app.py)
+    app_path = os.path.abspath(app_path)
+    package_name = os.path.basename(app_path)
     module_path = path.get_app_module_path(app_path)
 
-    import imp
-    app_module = imp.load_source('app_module', module_path)
-    app = app_module.app
-    return app
+    if not os.path.isfile(module_path):
+        raise WorkbenchImportError('Cannot import the app at {path}.'.format(app=module_path))
+
+    try:
+        path.load_app_package(app_path)
+
+        import imp
+        app_module = imp.load_source(
+            '{package_name}.app'.format(package_name=package_name), module_path)
+        app = app_module.app
+        return app
+    except ImportError as ex:
+        raise WorkbenchImportError(ex.msg)
 
 
 class Conversation(object):
