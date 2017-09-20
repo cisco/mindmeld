@@ -71,10 +71,10 @@ The above code snippet illustrates the conventions for implementing dialogue sta
 3. Using the ``@app.handle()`` decorator, define a pattern which, when matched, invokes the associated handler function.
 4. Specify the handler function :func:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <02_script_interactions>`. For now, we are responding with a simple "Hello".
 
-The patterns and associated handlers which you enumerate using this straighforward application structure will comprise the core interaction logic for your application. The structure described above should suffice if all the functionality needed for your app's interactions will be contained within the application container file (``app.py``). However, if you intend to modularize the application logic into multiple modules, you need the additional snippet of code shown below to make package and module imports work in ``app.py``.
+The patterns and associated handlers which you enumerate using this straighforward application structure will comprise the core interaction logic for your application. The structure described above should suffice if all the functionality needed for your app's interactions will be contained within the application container file (``app.py``). However, if you intend to modularize the application logic into multiple modules, you need the additional snippet of code shown below to make relative package and module imports work in ``app.py``.
 
 .. code:: python
-   :emphasize-lines: 1,2,5-8
+   :emphasize-lines: 1,2,5-10
 
    import os
    from mmworkbench.path import load_app_package
@@ -84,6 +84,8 @@ The patterns and associated handlers which you enumerate using this straighforwa
    if __name__ == "__main__" and __package__ is None:
        load_app_package(os.path.dirname(os.path.realpath(__file__)))
       __package__ = 'kwik_e_mart'
+
+   # Add all relative imports here
 
    app = Application(__name__)
 
