@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains some helper functions for the models package"""
 from __future__ import unicode_literals
+from sklearn.metrics import make_scorer
 
 import re
 
@@ -147,6 +148,77 @@ def get_ngram(tokens, start, length):
                  else tokens[index])
         ngram_tokens.append(token)
     return ' '.join(ngram_tokens)
+
+
+def get_seq_accuracy_scorer():
+    """
+    Returns a scorer that can be used by sklearn's GridSearchCV based on the
+    sequence_accuracy_scoring method below.
+    """
+    return make_scorer(score_func=sequence_accuracy_scoring)
+
+
+def get_seq_tag_accuracy_scorer():
+    """
+    Returns a scorer that can be used by sklearn's GridSearchCV based on the
+    sequence_tag_accuracy_scoring method below.
+    """
+    return make_scorer(score_func=sequence_tag_accuracy_scoring)
+
+
+def sequence_accuracy_scoring(y_true, y_pred):
+    """
+    Accuracy score which calculates two sequences to be equal only if all of
+    their predicted tags are equal.
+    """
+    total = len(y_true)
+    if not total:
+        return 0
+
+    matches = sum(1 for yseq_true, yseq_pred in zip(y_true, y_pred)
+                  if yseq_true == yseq_pred)
+
+    return float(matches) / float(total)
+
+
+def sequence_tag_accuracy_scoring(y_true, y_pred):
+    """
+    Accuracy score which calculates the number of tags that were predicted
+    correctly.
+    """
+    y_true_flat = [tag for seq in y_true for tag in seq]
+    y_pred_flat = [tag for seq in y_pred for tag in seq]
+
+    total = len(y_true_flat)
+    if not total:
+        return 0
+
+    matches = sum(1 for (y_true_tag, y_pred_tag) in zip(y_true_flat, y_pred_flat)
+                  if y_true_tag == y_pred_tag)
+
+    return float(matches) / float(total)
+
+
+def entity_seqs_equal(expected, predicted):
+    """
+    Returns true if the expected entities and predicted entities all match, returns
+    false otherwise. Note that for entity comparison, we compare that the span, text,
+    and type of all the entities match.
+
+    Args:
+        expected (list of core.Entity): A list of the expected entities for some query
+        predicted (list of core.Entity): A list of the predicted entities for some query
+    """
+    if len(expected) != len(predicted):
+        return False
+    for expected_entity, predicted_entity in zip(expected, predicted):
+        if expected_entity.entity.type != predicted_entity.entity.type:
+            return False
+        if expected_entity.span != predicted_entity.span:
+            return False
+        if expected_entity.text != predicted_entity.text:
+            return False
+    return True
 
 
 def requires(resource):

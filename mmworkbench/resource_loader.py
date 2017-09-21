@@ -154,12 +154,15 @@ class ResourceLoader(object):
         file_path = path.get_entity_map_path(self.app_path, entity_type)
         logger.debug("Loading entity map from file '{}'".format(file_path))
         if not os.path.isfile(file_path):
-            raise WorkbenchError('Entity map file was not found at {!r}'.format(file_path))
-        try:
-            with open(file_path, 'r') as json_file:
-                json_data = json.load(json_file)
-        except json.JSONDecodeError:
-            raise WorkbenchError('Could not load entity map (Invalid JSON): {!r}'.format(file_path))
+            logger.warn("Entity map file not found at {!r}".format(file_path))
+            json_data = {}
+        else:
+            try:
+                with open(file_path, 'r') as json_file:
+                    json_data = json.load(json_file)
+            except json.JSONDecodeError:
+                raise WorkbenchError('Could not load entity map (Invalid JSON): {!r}'.
+                                     format(file_path))
 
         self._entity_files[entity_type]['mapping']['data'] = json_data
         self._entity_files[entity_type]['mapping']['loaded'] = time.time()
@@ -201,17 +204,25 @@ class ResourceLoader(object):
             file_table['entity_data']['modified'] = os.path.getmtime(entity_data_path)
         except (OSError, IOError):
             # required file doesnt exist -- notify and error out
-            logger.error('Entity data file not found at %r', entity_data_path)
-            raise WorkbenchError('Entity data file not found at {!r}'.format(entity_data_path))
+            logger.warning('Entity data file not found at %r. '
+                           'Proceeding with empty entity data.', entity_data_path)
+
+            # mark the modified time as now if the entity file does not exist
+            # so that the gazetteer gets rebuilt properly.
+            file_table['entity_data']['modified'] = time.time()
 
         # update mapping
         mapping_path = path.get_entity_map_path(self.app_path, entity_type)
         try:
             file_table['mapping']['modified'] = os.path.getmtime(mapping_path)
         except (OSError, IOError):
-            # required file doesnt exist -- notify and error out
-            logger.warning('Entity mapping file not found at %r', mapping_path)
-            raise WorkbenchError('Entity mapping file not found at {!r}'.format(mapping_path))
+            # required file doesnt exist
+            logger.warning('Entity mapping file not found at %r. '
+                           'Proceeding with empty entity data.', mapping_path)
+
+            # mark the modified time as now if the entity mapping file does not exist
+            # so that the gazetteer gets rebuilt properly.
+            file_table['mapping']['modified'] = time.time()
 
         # update gaz data
         gazetteer_path = path.get_gazetteer_data_path(self.app_path, entity_type)

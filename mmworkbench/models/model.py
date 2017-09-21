@@ -6,22 +6,20 @@ from builtins import object, super
 from collections import namedtuple
 import logging
 import math
-import random
 
 import numpy as np
-from sklearn.feature_extraction import DictVectorizer
-from sklearn.model_selection import (KFold, GridSearchCV, GroupKFold, GroupShuffleSplit,
+from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridSearchCV,
                                      ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
-from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
+
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
-from .helpers import get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE
-from .tagging import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
-                      BoundaryCounts)
+from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
+                      entity_seqs_equal)
+from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
+                              BoundaryCounts)
 logger = logging.getLogger(__name__)
 
-# model scoring types
-ACCURACY_SCORING = 'accuracy'
+# model scoring type
 LIKELIHOOD_SCORING = 'log_loss'
 
 _NEG_INF = -1e10
@@ -105,16 +103,7 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
     def is_correct(self):
         # For entities compare just the type, span and text for each entity.
         if self.label_type == ENTITIES_LABEL_TYPE:
-            if len(self.expected) != len(self.predicted):
-                return False
-            for i in range(len(self.expected)):
-                if self.expected[i].entity.type != self.predicted[i].entity.type:
-                    return False
-                if self.expected[i].span != self.predicted[i].span:
-                    return False
-                if self.expected[i].text != self.predicted[i].text:
-                    return False
-            return True
+            return entity_seqs_equal(self.expected, self.predicted)
         # For other label_types compare the full objects
         else:
             return self.expected == self.predicted
@@ -484,8 +473,10 @@ class SequenceModelEvaluation(ModelEvaluation):
         predicted_flat, expected_flat = [], []
 
         for result in self.results:
-            raw_predicted = self.label_encoder.encode([result.predicted], examples=[result.example])
-            raw_expected = self.label_encoder.encode([result.expected], examples=[result.example])
+            raw_predicted = self.label_encoder.encode([result.predicted],
+                                                      examples=[result.example])[0]
+            raw_expected = self.label_encoder.encode([result.expected],
+                                                     examples=[result.example])[0]
 
             vec = []
             for entity in raw_predicted:
@@ -497,7 +488,6 @@ class SequenceModelEvaluation(ModelEvaluation):
                 text_labels, vec = self._update_raw_result(entity, text_labels, vec)
             expected.append(vec)
             expected_flat.extend(vec)
-
         return RawResults(predicted=predicted, expected=expected,
                           text_labels=text_labels, predicted_flat=predicted_flat,
                           expected_flat=expected_flat)
@@ -613,8 +603,6 @@ class Model(object):
     Attributes:
         config (ModelConfig): The configuration for the model
     """
-    DEFAULT_CV_SCORING = ACCURACY_SCORING
-
     def __init__(self, config):
         self.config = config
         self._label_encoder = get_label_encoder(self.config)
@@ -625,6 +613,74 @@ class Model(object):
 
     def fit(self, examples, labels, params=None):
         raise NotImplementedError
+
+    def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
+        """Called by the fit method when cross validation parameters are passed in. Runs cross
+        validation and returns the best estimator and parameters.
+
+        Args:
+            examples (list): A list of examples. Should be in the format expected by the underlying
+                             estimator.
+            labels (list): The target output values.
+            groups (None, optional): Same length as examples and labels. Used to group examples when
+                                     splitting the dataset into train/test
+            selection_settings (dict, optional): A dictionary containing the cross validation
+                                                 selection settings.
+
+        """
+        selection_settings = selection_settings or self.config.param_selection
+        cv_iterator = self._get_cv_iterator(selection_settings)
+
+        if selection_settings is None:
+            return self._fit(examples, labels, self.config.params), self.config.params
+
+        cv_type = selection_settings['type']
+        num_splits = cv_iterator.get_n_splits(examples, labels, groups)
+        logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
+                    num_splits, '' if num_splits == 1 else 's')
+
+        scoring = self._get_cv_scorer(selection_settings)
+        n_jobs = selection_settings.get('n_jobs', -1)
+
+        param_grid = self._convert_params(selection_settings['grid'], labels)
+        model_class = self._get_model_constructor()
+        estimator, param_grid = self._get_cv_estimator_and_params(model_class, param_grid)
+        grid_cv = GridSearchCV(estimator=estimator, scoring=scoring, param_grid=param_grid,
+                               cv=cv_iterator, n_jobs=n_jobs)
+        model = grid_cv.fit(examples, labels, groups)
+
+        for idx, params in enumerate(model.cv_results_['params']):
+            logger.debug('Candidate parameters: {}'.format(params))
+            std_err = 2.0 * model.cv_results_['std_test_score'][idx] / math.sqrt(model.n_splits_)
+            if scoring == LIKELIHOOD_SCORING:
+                msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
+            else:
+                msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
+            logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
+
+        if scoring == LIKELIHOOD_SCORING:
+            msg = 'Best log likelihood: {:.4}, params: {}'
+            self.cv_loss_ = - model.best_score_
+        else:
+            msg = 'Best accuracy: {:.2%}, params: {}'
+            self.cv_loss_ = 1 - model.best_score_
+
+        best_params = self._process_cv_best_params(model.best_params_)
+        logger.info(msg.format(model.best_score_, best_params))
+
+        return model.best_estimator_, model.best_params_
+
+    def _get_cv_scorer(self, selection_settings):
+        """
+        Returns the scorer to use based on the selection settings and classifier type.
+        """
+        raise NotImplementedError
+
+    def _get_cv_estimator_and_params(self, model_class, param_grid):
+        return model_class(), param_grid
+
+    def _process_cv_best_params(self, best_params):
+        return best_params
 
     def select_params(self, examples, labels, selection_settings=None):
         raise NotImplementedError
@@ -764,199 +820,11 @@ class Model(object):
                 return True
         return False
 
-
-class SkLearnModel(Model):
-    def __init__(self, config):
-        super().__init__(config)
-        self._class_encoder = SKLabelEncoder()
-        self._feat_vectorizer = DictVectorizer()
-        self._feat_selector = self._get_feature_selector()
-        self._feat_scaler = self._get_feature_scaler()
-
-    def fit(self, examples, labels, params=None):
-        """Trains this model.
-
-        This method inspects instance attributes to determine the classifier
-        object and cross-validation strategy, and then fits the model to the
-        training examples passed in.
-
-        Args:
-            examples (list): A list of examples.
-            labels (list): A parallel list to examples. The gold labels
-                for each example.
-            params (dict, optional): Parameters to use when training. Parameter
-                selection will be bypassed if this is provided
-
-        Returns:
-            (SkLearnModel): Returns self to match classifier scikit-learn
-                interfaces.
-        """
-        params = params or self.config.params
-        skip_param_selection = params is not None or self.config.param_selection is None
-
-        # Shuffle to prevent order effects
-        indices = list(range(len(labels)))
-        random.shuffle(indices)
-        examples = [examples[i] for i in indices]
-        labels = [labels[i] for i in indices]
-
-        # TODO: add this code back in
-        # distinct_labels = set(labels)
-        # if len(set(distinct_labels)) <= 1:
-        #     return None
-
-        # Extract features and classes
-        y = self._label_encoder.encode(labels)
-        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
-
-        if skip_param_selection:
-            self._clf = self._fit(X, y, params)
-            self._current_params = params
-        else:
-            # run cross-validation to select params
-            best_clf, best_params = self._fit_cv(X, y, groups)
-            self._clf = best_clf
-            self._current_params = best_params
-
-        return self
-
-    def select_params(self, examples, labels, selection_settings=None):
-        y = self._label_encoder.encode(labels)
-        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
-        clf, params = self._fit_cv(X, y, groups, selection_settings)
-        self._clf = clf
-        return params
-
-    def _fit(self, X, y, params):
-        """Trains a classifier without cross-validation.
-
-        Args:
-            X (numpy.matrix): The feature matrix for a dataset.
-            y (numpy.array): The target output values.
-            params (dict): Parameters of the classifier
-
-        """
-        params = self._convert_params(params, y, is_grid=False)
-        model_class = self._get_model_constructor()
-        return model_class(**params).fit(X, y)
-
-    def _fit_cv(self, X, y, groups=None, selection_settings=None):
-        """Summary
-
-        Args:
-            X (numpy.matrix): The feature matrix for a dataset.
-            y (numpy.array): The target output values.
-            selection_settings (None, optional): Description
-
-        """
-        selection_settings = selection_settings or self.config.param_selection
-        cv_iterator = self._get_cv_iterator(selection_settings)
-
-        if selection_settings is None:
-            return self._fit(X, y, self.config.params), self.config.params
-
-        cv_type = selection_settings['type']
-        num_splits = cv_iterator.get_n_splits(X, y, groups)
-        logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
-                    num_splits, '' if num_splits == 1 else 's')
-
-        scoring = selection_settings.get('scoring', self.DEFAULT_CV_SCORING)
-        n_jobs = selection_settings.get('n_jobs', -1)
-
-        param_grid = self._convert_params(selection_settings['grid'], y)
-        model_class = self._get_model_constructor()
-
-        grid_cv = GridSearchCV(estimator=model_class(), scoring=scoring, param_grid=param_grid,
-                               cv=cv_iterator, n_jobs=n_jobs)
-        model = grid_cv.fit(X, y, groups)
-
-        for idx, params in enumerate(model.cv_results_['params']):
-            logger.debug('Candidate parameters: {}'.format(params))
-            std_err = 2.0 * model.cv_results_['std_test_score'][idx] / math.sqrt(model.n_splits_)
-            if scoring == ACCURACY_SCORING:
-                msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
-            elif scoring == LIKELIHOOD_SCORING:
-                msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
-            logger.debug(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
-
-        if scoring == ACCURACY_SCORING:
-            msg = 'Best accuracy: {:.2%}, params: {}'
-            self.cv_loss_ = 1 - model.best_score_
-        elif scoring == LIKELIHOOD_SCORING:
-            msg = 'Best log likelihood: {:.4}, params: {}'
-            self.cv_loss_ = - model.best_score_
-        logger.info(msg.format(model.best_score_, model.best_params_))
-
-        return model.best_estimator_, model.best_params_
-
-    def predict(self, examples):
-        X, _, _ = self.get_feature_matrix(examples)
-        y = self._clf.predict(X)
-        predictions = self._class_encoder.inverse_transform(y)
-        return self._label_encoder.decode(predictions)
-
-    def predict_proba(self, examples):
-        X, _, _ = self.get_feature_matrix(examples)
-        return self._predict_proba(X, self._clf.predict_proba)
-
-    def predict_log_proba(self, examples):
-        X, _, _ = self.get_feature_matrix(examples)
-        predictions = self._predict_proba(X, self._clf.predict_log_proba)
-
-        # JSON can't reliably encode infinity, so replace it with large number
-        for row in predictions:
-            _, probas = row
-            for label, proba in probas.items():
-                if proba == -np.Infinity:
-                    probas[label] = _NEG_INF
-        return predictions
-
-    def _predict_proba(self, X, predictor):
-        predictions = []
-        for row in predictor(X):
-            class_index = row.argmax()
-            probabilities = {}
-            top_class = None
-            for class_index, proba in enumerate(row):
-                raw_class = self._class_encoder.inverse_transform([class_index])[0]
-                decoded_class = self._label_encoder.decode([raw_class])[0]
-                probabilities[decoded_class] = proba
-                if proba > probabilities.get(top_class, -1.0):
-                    top_class = decoded_class
-            predictions.append((top_class, probabilities))
-
-        return predictions
-
-    def _get_model_constructor(self):
-        """Returns the Python class of the actual underlying model"""
-        raise NotImplementedError
-
-    def _get_feature_selector(self):
-        """Get a feature selector instance based on the feature_selector model
-        parameter.
-
-        Returns:
-            (Object): a feature selector which returns a reduced feature matrix,
-                given the full feature matrix (X) and the class labels (y)
-        """
-        raise NotImplementedError
-
-    def _get_feature_scaler(self):
-        """Get a feature value scaler based on the model settings"""
-        if self.config.model_settings is None:
-            scale_type = None
-        else:
-            scale_type = self.config.model_settings.get('feature_scaler')
-        scaler = {'std-dev': StandardScaler(with_mean=False),
-                  'max-abs': MaxAbsScaler()}.get(scale_type)
-        return scaler
-
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         """Load the required resources for feature extractors. Each feature extractor uses
         @requires decorator to declare required resources. Based on feature list in model config
         a list of required resources are compiled, and the passed in resource loader is then used to
         load the resources accordingly.
-
         Args:
             resource_loader (ResourceLoader): application resource loader object
             examples (list): Optional. A list of examples.
@@ -976,44 +844,6 @@ class SkLearnModel(Model):
             if rname not in self._resources:
                 self._resources[rname] = resource_loader.load_feature_resource(
                     rname, queries=examples, labels=labels)
-
-    def get_feature_matrix(self, examples, y=None, fit=False):
-        """Transforms a list of examples into a feature matrix.
-
-        Args:
-            examples (list): The examples.
-
-        Returns:
-            (numpy.matrix): The feature matrix.
-            (numpy.array): The group labels for examples.
-        """
-
-        groups = []
-        feats = []
-        for idx, example in enumerate(examples):
-            feats.append(self._extract_features(example))
-            groups.append(idx)
-
-        X, y = self._preprocess_data(feats, y, fit=fit)
-        return X, y, groups
-
-    def _preprocess_data(self, X, y=None, fit=False):
-
-        if fit:
-            y = self._class_encoder.fit_transform(y)
-            X = self._feat_vectorizer.fit_transform(X)
-            if self._feat_scaler is not None:
-                X = self._feat_scaler.fit_transform(X)
-            if self._feat_selector is not None:
-                X = self._feat_selector.fit_transform(X, y)
-        else:
-            X = self._feat_vectorizer.transform(X)
-            if self._feat_scaler is not None:
-                X = self._feat_scaler.transform(X)
-            if self._feat_selector is not None:
-                X = self._feat_selector.transform(X)
-
-        return X, y
 
 
 class LabelEncoder(object):
@@ -1064,7 +894,7 @@ class EntityLabelEncoder(LabelEncoder):
         # Here each label is a list of entities for the corresponding example
         all_tags = []
         for idx, label in enumerate(labels):
-            all_tags.extend(get_tags_from_entities(examples[idx], label, scheme))
+            all_tags.append(get_tags_from_entities(examples[idx], label, scheme))
         return all_tags
 
     def decode(self, tags_by_example, **kwargs):
