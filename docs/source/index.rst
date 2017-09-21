@@ -112,6 +112,14 @@ Contents
    userguide/kb
    userguide/dm
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Versions
+   :name: versions
+
+   versions/changes
+   versions/history
+
 ..
    .. toctree::
       :maxdepth: 2
