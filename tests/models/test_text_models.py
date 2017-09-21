@@ -16,7 +16,7 @@ import pytest
 
 from mmworkbench import markup
 from mmworkbench.models import ModelConfig, CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE
-from mmworkbench.models.standard_models import TextModel
+from mmworkbench.models.text_models import TextModel
 from mmworkbench.tokenizer import Tokenizer
 from mmworkbench.query_factory import QueryFactory
 from mmworkbench.resource_loader import ResourceLoader

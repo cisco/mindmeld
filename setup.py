@@ -23,6 +23,8 @@ requirements = [
     'scikit-learn>=0.18.1,<=0.18.2',
     'tqdm>=4.15.0,<=4.15.0',
     'urllib3<1.22,>=1.21.1',
+    'python-crfsuite==0.9.2',
+    'sklearn-crfsuite>=0.3.6',
 ]
 
 setup_requirements = [
@@ -38,7 +40,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='3.0.3',
+    version='3.1.0rc6',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",

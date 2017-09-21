@@ -2,7 +2,6 @@
 """This module contains the Kwik-E-Mart workbench demo application"""
 from __future__ import unicode_literals
 from builtins import next
-
 from mmworkbench import Application
 
 
