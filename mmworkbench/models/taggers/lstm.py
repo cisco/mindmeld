@@ -81,8 +81,7 @@ class LstmModel(Tagger):
         self.lstm_input_keep_prob = parameters.get('lstm_input_keep_prob', 0.5)
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
-
-        print(self.padding_length)
+        self.use_crf_layer = parameters.get('use_crf_layer', True)
 
     def get_params(self, deep=True):
         return self.__dict__
@@ -120,7 +119,7 @@ class LstmModel(Tagger):
         self.tf_lstm_output = self._construct_lstm_network(word_and_gaz_embedding)
 
         self.optimizer, self.cost = self._define_optimizer_and_cost(
-            self.tf_lstm_output, self.tf_label)
+            self.tf_lstm_output, self.tf_label, self.tf_sequence_length)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
         if y:
@@ -229,7 +228,7 @@ class LstmModel(Tagger):
         combined_embedding = tf.concat([self.tf_query_input, dense_gaz_embedding], axis=2)
         return combined_embedding
 
-    def _define_optimizer_and_cost(self, output_tensor, label_tensor):
+    def _define_optimizer_and_cost(self, output_tensor, label_tensor, sequence_lengths):
         """ This function defines the optimizer and cost function of the LSTM model
 
         Args:
@@ -239,10 +238,17 @@ class LstmModel(Tagger):
         Returns:
             The optimizer function to reduce loss and the loss values
         """
-        losses = tf.nn.softmax_cross_entropy_with_logits(
-            logits=output_tensor,
-            labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax')
-        cost = tf.reduce_mean(losses, name='cross_entropy_mean_loss')
+        if self.use_crf_layer:
+            flattened_labels = tf.cast(tf.argmax(label_tensor, axis=2), tf.int32)
+            log_likelihood, transition_params = tf.contrib.crf.crf_log_likelihood(output_tensor,
+                flattened_labels, sequence_lengths)
+            cost = tf.reduce_mean(-log_likelihood, name='crf_log_likelihood')
+        else:
+            losses = tf.nn.softmax_cross_entropy_with_logits(
+                logits=output_tensor,
+                labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax')
+            cost = tf.reduce_mean(losses, name='cross_entropy_mean_loss')
+
         optimizer = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate)).minimize(cost)
         return optimizer, cost
 
@@ -366,14 +372,16 @@ class LstmModel(Tagger):
 
         # Construct the output later
         output = tf.concat([output_fw, output_bw], axis=-1)
-        output = tf.reshape(output, [-1, 2 * n_hidden])
         output = tf.nn.dropout(output, self.tf_dense_keep_prob)
 
         weights = tf.get_variable('output_weights', shape=[2 * n_hidden, self.output_dimension],
-                                  dtype='float32', initializer=initializer)
+                                  dtype="float32", initializer=initializer)
+        weights = tf.tile(weights, [batch_size_dim, 1])
+        weights = tf.reshape(weights, [batch_size_dim, 2 * n_hidden, self.output_dimension])
 
-        biases = tf.get_variable('output_bias', shape=[self.output_dimension],
-                                 dtype='float32', initializer=initializer)
+        zero_initializer = tf.constant_initializer(0)
+        biases = tf.get_variable('output_bias', shape=[self.output_dimension], dtype="float32",
+                                 initializer=zero_initializer)
 
         output_tensor = tf.matmul(output, weights) + biases
         return output_tensor
