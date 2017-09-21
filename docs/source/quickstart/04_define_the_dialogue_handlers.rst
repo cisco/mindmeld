@@ -58,7 +58,7 @@ In MindMeld Workbench, the *application container* is a Python file which contai
   if __name__ == '__main__':
       app.cli()
 
-Your directory structure should now resemble the following.
+Every Workbench project is also a Python package. It hence needs to have an empty ``__init.py__`` file at the root level. If you did not base your project on a Workbench blueprint, you need to manually create an empty ``__init.py__`` file. Your directory structure should now resemble the following.
 
 .. image:: /images/directory2.png
     :width: 400px
@@ -66,12 +66,37 @@ Your directory structure should now resemble the following.
 
 The above code snippet illustrates the conventions for implementing dialogue state tracking and dialogue state handling logic in Workbench. The code is written to perform four steps:
 
-   1. Import the Application class from the MindMeld Workbench package.
-   2. Define an Application instance to serve as the parent container for the application.
-   3. Using the ``@app.handle()`` decorator, define a pattern which, when matched, invokes the associated handler function.
-   4. Specify the handler function :func:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <02_script_interactions>`. For now, we are responding with a simple "Hello".
+1. Import the ``Application`` class from the MindMeld Workbench package.
+2. Define an ``Application`` instance to serve as the parent container for the application.
+3. Using the ``@app.handle()`` decorator, define a pattern which, when matched, invokes the associated handler function.
+4. Specify the handler function :func:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <02_script_interactions>`. For now, we are responding with a simple "Hello".
 
-The patterns and associated handlers which you enumerate using this straighforward application structure will comprise the core interaction logic for your application.
+The patterns and associated handlers which you enumerate using this straighforward application structure will comprise the core interaction logic for your application. The structure described above should suffice if all the functionality needed for your app's interactions will be contained within the application container file (``app.py``). However, if you intend to modularize the application logic into multiple modules, you need the additional snippet of code shown below to make relative package and module imports work in ``app.py``.
+
+.. code:: python
+   :emphasize-lines: 1,2,5-10
+
+   import os
+   from mmworkbench.path import load_app_package
+   from mmworkbench import Application
+
+   # Load this app package dynamically
+   if __name__ == "__main__" and __package__ is None:
+       load_app_package(os.path.dirname(os.path.realpath(__file__)))
+      __package__ = 'kwik_e_mart'
+
+   # Add all relative imports here
+
+   app = Application(__name__)
+
+   @app.handle(intent='greet')
+   def welcome(context, responder):
+       responder.reply('Hello')
+
+   if __name__ == '__main__':
+       app.cli()
+
+
 
 Implement the Dialogue State Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

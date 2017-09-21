@@ -119,27 +119,38 @@ Use the :attr:`config` attribute of a trained classifier to view the :ref:`confi
        'in-gaz': {},
        'other-entities': {}
      },
-     'model_settings': None,
-     'model_type': 'maxent',
+     'model_settings': {'classifier_type': 'logreg'},
+     'model_type': 'text',
      'param_selection': None,
      'params': {'C': 100, 'penalty': 'l1'}
    }
 
 Let's take a look at the allowed values for each setting in a role classifier configuration.
 
-.. _model_settings:
+  .. _model_settings:
 
 1. **Model Settings**
 
 ``'model_type'`` (:class:`str`)
   |
 
-  Always ``'maxent'``, since `maximum entropy model (MaxEnt) <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_ is currently the only supported model for role classification in Workbench.
+  Always ``'text'``, since role classification is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model.
 
 ``'model_settings'`` (:class:`dict`)
   |
 
-  Always ``None``.
+  Always a dictionary with the single key ``'classifier_type'``, whose value specifies the machine learning model to use. Allowed values are shown in the table below.
+
+  .. _sklearn_role_models:
+
+  =============== ======================================================================= ==========================================
+  Value           Classifier                                                              Reference for configurable hyperparameters
+  =============== ======================================================================= ==========================================
+  ``'logreg'``    :sk_guide:`Logistic regression <linear_model.html#logistic-regression>` :sk_api:`sklearn.linear_model.LogisticRegression <sklearn.linear_model.LogisticRegression>`
+  ``'svm'``       :sk_guide:`Support vector machine <svm.html#svm-classification>`        :sk_api:`sklearn.svm.SVC <sklearn.svm.SVC>`
+  ``'dtree'``     :sk_guide:`Decision tree <tree.html#tree>`                              :sk_api:`sklearn.tree.DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>`
+  ``'rforest'``   :sk_guide:`Random forest <ensemble.html#forest>`                        :sk_api:`sklearn.ensemble.RandomForestClassifier <sklearn.ensemble.RandomForestClassifier>`
+  =============== ======================================================================= ==========================================
 
 2. **Feature Extraction Settings**
 
@@ -149,39 +160,52 @@ Let's take a look at the allowed values for each setting in a role classifier co
   A dictionary whose keys are names of feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for role classification.
 
 
-.. _role_features:
+  .. _role_features:
 
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | Group Name                | Description                                                                                                |
   +===========================+============================================================================================================+
   | ``'bag-of-words-after'``  | Generates n-grams of specified lengths from the query text following the current entity.                   |
   |                           |                                                                                                            |
-  |                           | Supported settings:                                                                                        |
+  |                           | Settings:                                                                                                  |
+  |                           |                                                                                                            |
   |                           | A dictionary with n-gram lengths as keys and a list of different starting positions as values.             |
   |                           | Each starting position is a token index, relative to the the start of the current entity span.             |
   |                           |                                                                                                            |
-  |                           | E.g.,``'ngram_lengths_to_start_positions': {1: [0], 2: [0]}`` will extract all words (unigrams) and bigrams|
-  |                           | starting with the first word of the current entity span. To additionally include unigrams and bigrams      |
-  |                           | starting from the word after the current entity's first token, the settings can be modified to             |
-  |                           | ``'ngram_lengths_to_start_positions': {1: [0, 1], 2: [0, 1]}``.                                            |
+  |                           | Examples:                                                                                                  |
   |                           |                                                                                                            |
-  |                           | Suppose the query is "Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}" and the        |
-  |                           | classifier is extracting features for the "6 AM" ``sys_time`` entity. Then,                                |
+  |                           | ``'ngram_lengths_to_start_positions': {1: [0], 2: [0]}``                                                   |
+  |                           |  - extracts all words (unigrams) and bigrams starting with the first word of the current entity span       |
   |                           |                                                                                                            |
-  |                           | - ``{1: [0, 1]}`` would extract "6" and "AM"                                                               |
-  |                           | - ``{2: [0, 1]}`` would extract "6 AM" and "AM alarm"                                                      |
+  |                           | ``'ngram_lengths_to_start_positions': {1: [0, 1], 2: [0, 1]}``                                             |
+  |                           |  - additionally includes unigrams and bigrams starting from the word after the current entity's first token|
+  |                           |                                                                                                            |
+  |                           | Given the query "Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}"                     |
+  |                           | and a classifier extracting features for the "6 AM" ``sys_time`` entity:                                   |
+  |                           |                                                                                                            |
+  |                           | ``{1: [0, 1]}``                                                                                            |
+  |                           |  - extracts "6" and "AM"                                                                                   |
+  |                           |                                                                                                            |
+  |                           | ``{2: [0, 1]}``                                                                                            |
+  |                           |  - extracts "6 AM" and "AM alarm"                                                                          |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | ``'bag-of-words-before'`` | Generates n-grams of specified lengths from the query text preceding the current entity.                   |
   |                           |                                                                                                            |
-  |                           | Supported settings:                                                                                        |
+  |                           | Settings:                                                                                                  |
+  |                           |                                                                                                            |
   |                           | A dictionary with n-gram lengths as keys and a list of different starting positions as values, similar     |
   |                           | to the ``'bag-of-words-after'`` feature group.                                                             |
   |                           |                                                                                                            |
-  |                           | If the query is "Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}" and the classifier  |
-  |                           | is extracting features for the "6 AM" ``sys_time`` entity,                                                 |
+  |                           | Examples:                                                                                                  |
   |                           |                                                                                                            |
-  |                           | - ``{1: [-2, -1]}`` would extract "change" and "my"                                                        |
-  |                           | - ``{2: [-2, -1]}`` would extract "change my" and "my 6"                                                   |
+  |                           | Given the query "Change my {6 AM|sys_time|old_time} alarm to {7 AM|sys_time|new_time}"                     |
+  |                           | and a classifier extracting features for the "6 AM" ``sys_time`` entity:                                   |
+  |                           |                                                                                                            |
+  |                           | ``{1: [-2, -1]}``                                                                                          |
+  |                           |  - extracts "change" and "my"                                                                              |
+  |                           |                                                                                                            |
+  |                           | ``{2: [-2, -1]}``                                                                                          |
+  |                           |  - extracts "change my" and "my 6"                                                                         |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | ``'other-entities'``      | Encodes information about the other entities present in the query.                                         |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
@@ -193,7 +217,7 @@ Let's take a look at the allowed values for each setting in a role classifier co
 ``'params'`` (:class:`dict`)
   |
 
-  A dictionary of values to be used for model hyperparameters during training. These include inverse of regularization strength as ``'C'``, the norm used in penalization as ``'penalty'``, and so on. The list of allowed hyperparameters is :sk_api:`here <sklearn.linear_model.LogisticRegression.html>`.
+  A dictionary of values to be used for model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, ``'penalty'`` for logistic regression, ``'max_depth'`` for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the :ref:`reference links <sklearn_role_models>` above for parameter lists.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -207,34 +231,34 @@ Let's take a look at the allowed values for each setting in a role classifier co
 
   Depending on the splitting scheme selected, the :data:`param_selection` dictionary can contain other keys that define additional settings. The table below enumerates all the keys allowed in the dictionary.
 
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | Key                   | Value                                                                                                             |
-  +=======================+===================================================================================================================+
-  | ``'grid'``            | A dictionary mapping each hyperparameter to a list of potential values to be searched. Here is an example grid    |
-  |                       | for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:                              |
-  |                       |                                                                                                                   |
-  |                       | .. code-block:: python                                                                                            |
-  |                       |                                                                                                                   |
-  |                       |    {                                                                                                              |
-  |                       |      'penalty': ['l1', 'l2'],                                                                                     |
-  |                       |      'C': [10, 100, 1000, 10000, 100000],                                                                         |
-  |                       |       'fit_intercept': [True, False]                                                                              |
-  |                       |    }                                                                                                              |
-  |                       |                                                                                                                   |
-  |                       | See the full list of allowed hyperparameters :sk_api:`here <sklearn.linear_model.LogisticRegression.html>`.       |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
-  |                       |                                                                                                                   |
-  |                       | - ``'k-fold'``: :sk_api:`K-folds <sklearn.model_selection.KFold>`                                                 |
-  |                       | - ``'shuffle'``: :sk_api:`Randomized folds <sklearn.model_selection.ShuffleSplit>`                                |
-  |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`          |
-  |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`         |
-  |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                 |
-  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`|
-  |                       |                                                                                                                   |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | ``'k'``               | Number of folds (splits)                                                                                          |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
+  +-----------------------+-------------------------------------------------------------------------------------------------------------------------+
+  | Key                   | Value                                                                                                                   |
+  +=======================+=========================================================================================================================+
+  | ``'grid'``            | A dictionary mapping each hyperparameter to a list of potential values to be searched. Here is an example grid          |
+  |                       | for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:                                    |
+  |                       |                                                                                                                         |
+  |                       | .. code-block:: python                                                                                                  |
+  |                       |                                                                                                                         |
+  |                       |    {                                                                                                                    |
+  |                       |      'penalty': ['l1', 'l2'],                                                                                           |
+  |                       |      'C': [10, 100, 1000, 10000, 100000],                                                                               |
+  |                       |       'fit_intercept': [True, False]                                                                                    |
+  |                       |    }                                                                                                                    |
+  |                       |                                                                                                                         |
+  |                       | See the :ref:`reference links <sklearn_role_models>` above for details on the hyperparameters available for each model. |
+  +-----------------------+-------------------------------------------------------------------------------------------------------------------------+
+  | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                         |
+  |                       |                                                                                                                         |
+  |                       | - ``'k-fold'``: :sk_api:`K-folds <sklearn.model_selection.KFold>`                                                       |
+  |                       | - ``'shuffle'``: :sk_api:`Randomized folds <sklearn.model_selection.ShuffleSplit>`                                      |
+  |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`                |
+  |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`               |
+  |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                       |
+  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`      |
+  |                       |                                                                                                                         |
+  +-----------------------+-------------------------------------------------------------------------------------------------------------------------+
+  | ``'k'``               | Number of folds (splits)                                                                                                |
+  +-----------------------+-------------------------------------------------------------------------------------------------------------------------+
 
   To identify the parameters that give the highest accuracy, the :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to :meth:`fit` can use these optimal parameters and skip the parameter selection process
 
@@ -257,7 +281,8 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
 .. code-block:: python
 
    ROLE_MODEL_CONFIG = {
-       'model_type': 'maxent',
+       'model_type': 'text',
+       'model_settings': {'classifier_type': 'logreg'}
        'params': {
            'C': 10,
            'penalty': 'l2'
@@ -327,7 +352,7 @@ Suppose w\ :sub:`i` represents the word at the *ith* index in the query, where t
 
   - Bigrams: { w\ :sub:`-3`\ w\ :sub:`-2`, w\ :sub:`-2`\ w\ :sub:`-1`, w\ :sub:`-1`\ w\ :sub:`0`,  w\ :sub:`0`\ w\ :sub:`1`, w\ :sub:`1`\ w\ :sub:`2`, w\ :sub:`2`\ w\ :sub:`3` }
 
-Retrain the classifier with the updated feature set by passing in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This applies our new feature extraction settings, while retaining the Workbench defaults for model type (MaxEnt) and hyperparameter selection.
+Retrain the classifier with the updated feature set by passing in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This applies our new feature extraction settings, while retaining the Workbench defaults for model and classifier types (logreg) and hyperparameter selection.
 
 .. code-block:: python
 
@@ -337,7 +362,7 @@ Retrain the classifier with the updated feature set by passing in the :data:`my_
 
 **Hyperparameter tuning**
 
-View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <model_settings>` for the MaxEnt model in Workbench. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
+View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <model_settings>` for logistic regression, the default model for role classification in Workbench. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
 
 .. code-block:: python
 
@@ -453,27 +478,29 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
 
    >>> eval = rc.evaluate()
    >>> eval.print_stats()
-   Overall Statistics:
+   Overall statistics:
 
-       accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
+       accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
           0.952       0.952          20          20           1           1       0.952       0.952
 
 
 
-   Statistics by Class:
+   Statistics by class:
 
-                  class      f_beta   precision      recall     support          TP          TN          FP          FN
+                  class      f_beta   precision      recall     support          tp          tn          fp          fn
                 old_time       0.957       0.917       1.000          11          11           9           1           0
                 new_time       0.947       1.000       0.900          10           9          11           0           1
 
 
 
-   Confusion Matrix:
+   Confusion matrix:
 
                           old_time        new_time
            old_time             11              0
            new_time              1              9
 
+
+The :meth:`eval.get_stats()` method returns all the above statistics in a structured dictionary without printing them to the console.
 
 Let's decipher the statists output by the :meth:`evaluate` method.
 
@@ -485,29 +512,29 @@ Let's decipher the statists output by the :meth:`evaluate` method.
   ===========  ===
   accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`
   f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
 
-  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+  When interpreting these statistics, consider whether your app and evaluation results fall into one of the cases below, and if so, apply the accompanying guideline. This list is basic, not exhaustive, but should get you started.
 
-  - **Classes are balanced**: When the number of annotations for each role are comparable and each role is equally important, focusing on the accuracy metric is usually good enough.
+  - **Classes are balanced** — When the number of annotations for each role are comparable and each role is equally important, focusing on the accuracy metric is usually good enough.
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  - **Classes are imbalanced** — In this case, it's important to take the f1 scores into account.
 
-  - **All F1 and accuracy scores are low**: Role classification is performing poorly across all roles. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters.
+  - **All f1 and accuracy scores are low** — When role classification is performing poorly across all roles, either of the following may be the problem: 1) You do not have enough training data for the model to learn, or 2) you need to tune your model hyperparameters.
 
-  - **F1 weighted is higher than F1 macro**: Your roles with fewer evaluation examples are performing poorly. You may need to add more data to roles that have fewer examples.
+  - **f1 weighted is higher than f1 macro** — This means that roles with fewer evaluation examples are performing poorly. Try adding more data to these roles.
 
-  - **F1 macro is higher than F1 weighted**: Your roles with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+  - **f1 macro is higher than f1 weighted** — This means that roles with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than F1 macro**: Certain roles are being misclassified more often than others. Check the class-wise statistics below to identify these roles. Some roles may be too similar to another roles or you may need to add more training data.
+  - **f1 micro is higher than f1 macro** — This means that some roles are being misclassified more often than others. Identify the problematic roles by checking the class-wise statistics below. Some roles may be too similar to others, or you may need to add more training data to some roles.
 
-  - **Some classes are more important than others**: If some roles are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
+  - **Some classes are more important than others** — If some roles are more important than others for your use case, it is best to focus especially on the class-wise statistics described below.
 
 **Class-wise Statistics**
   |
@@ -520,10 +547,10 @@ Let's decipher the statists output by the :meth:`evaluate` method.
   precision    `Precision <https://en.wikipedia.org/wiki/Precision_and_recall#Precision>`_
   recall       `Recall <https://en.wikipedia.org/wiki/Precision_and_recall#Recall>`_
   support      Number of test entities with this role (based on ground truth)
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   ===========  ===
 
 **Confusion Matrix**

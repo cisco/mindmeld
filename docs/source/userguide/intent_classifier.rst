@@ -134,16 +134,16 @@ Let's take a look at the allowed values for each setting in an intent classifier
   Always a dictionary with the single key ``'classifier_type'`` whose value specifies the machine learning model to use. Allowed values are shown in the table below.
 
 
-.. _sklearn_intent_models:
+  .. _sklearn_intent_models:
 
-  =============== =======================================================
-  Classifier Type Description (with list of configurable hyperparameters)
-  =============== =======================================================
-  ``'logreg'``    :sk_guide:`Logistic regression <linear_model.html#logistic-regression>` (see :sk_api:`parameter list <sklearn.linear_model.LogisticRegression>`)
-  ``'svm'``       :sk_guide:`Support vector machine <svm.html#svm-classification>` (see :sk_api:`parameter list <sklearn.svm.SVC>`)
-  ``'dtree'``     :sk_guide:`Decision tree <tree.html#tree>` (see :sk_api:`parameter list <sklearn.tree.DecisionTreeClassifier>`)
-  ``'rforest'``   :sk_guide:`Random forest <ensemble.html#forest>` (see :sk_api:`parameter list <sklearn.ensemble.RandomForestClassifier>`)
-  =============== =======================================================
+  =============== ======================================================================= ==========================================
+  Value           Classifier                                                              Reference for configurable hyperparameters
+  =============== ======================================================================= ==========================================
+  ``'logreg'``    :sk_guide:`Logistic regression <linear_model.html#logistic-regression>` :sk_api:`sklearn.linear_model.LogisticRegression <sklearn.linear_model.LogisticRegression>`
+  ``'svm'``       :sk_guide:`Support vector machine <svm.html#svm-classification>`        :sk_api:`sklearn.svm.SVC <sklearn.svm.SVC>`
+  ``'dtree'``     :sk_guide:`Decision tree <tree.html#tree>`                              :sk_api:`sklearn.tree.DecisionTreeClassifier <sklearn.tree.DecisionTreeClassifier>`
+  ``'rforest'``   :sk_guide:`Random forest <ensemble.html#forest>`                        :sk_api:`sklearn.ensemble.RandomForestClassifier <sklearn.ensemble.RandomForestClassifier>`
+  =============== ======================================================================= ==========================================
 
 
 2. **Feature Extraction Settings**
@@ -153,7 +153,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
 
   A dictionary whose keys are the names of the feature groups to extract. The corresponding values are dictionaries representing the feature extraction settings for each group. The table below enumerates the features that can be used for intent classification.
 
-.. _intent_features:
+  .. _intent_features:
 
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | Group Name            | Description                                                                                                |
@@ -161,23 +161,42 @@ Let's take a look at the allowed values for each setting in an intent classifier
   | ``'bag-of-words'``    | Generates n-grams of the specified lengths from the query text.                                            |
   |                       |                                                                                                            |
   |                       | Settings:                                                                                                  |
+  |                       |                                                                                                            |
   |                       | A list of n-gram lengths to extract.                                                                       |
-  |                       | For instance, ``{'lengths': [1]}`` only extracts words (unigrams), whereas ``{'lengths': [1, 2, 3]}``      |
-  |                       | extracts unigrams, bigrams and trigrams.                                                                   |
+  |                       |                                                                                                            |
+  |                       | Examples:                                                                                                  |
+  |                       |                                                                                                            |
+  |                       | ``{'lengths': [1]}``                                                                                       |
+  |                       |  - only extracts words (unigrams)                                                                          |
+  |                       |                                                                                                            |
+  |                       | ``{'lengths': [1, 2, 3]}``                                                                                 |
+  |                       |  - extracts unigrams, bigrams and trigrams                                                                 |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
-  | ``'edge-ngrams'``     | Generates n-grams of the specified lengths from the edges (i.e., start and end) of the query.              |
+  | ``'edge-ngrams'``     | Generates n-grams of the specified lengths from the edges (that is, the start and the end) of the query.   |
   |                       |                                                                                                            |
   |                       | Settings:                                                                                                  |
+  |                       |                                                                                                            |
   |                       | A list of n-gram lengths to extract.                                                                       |
-  |                       | For instance, ``{'lengths': [1]}`` only extracts the first and last word,                                  |
-  |                       | whereas ``{'lengths': [1, 2, 3]}`` extracts all leading and trailing n-grams up to size 3.                 |
+  |                       |                                                                                                            |
+  |                       | Examples:                                                                                                  |
+  |                       |                                                                                                            |
+  |                       | ``{'lengths': [1]}``                                                                                       |
+  |                       |  - only extracts the first and last word                                                                   |
+  |                       |                                                                                                            |
+  |                       | ``{'lengths': [1, 2, 3]}``                                                                                 |
+  |                       |  - extracts all leading and trailing n-grams up to size 3                                                  |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'freq'``            | Generates a log-scaled count for each frequency bin, where the count represents the number of query tokens |
   |                       | whose frequency falls into that bin. Frequency is measured by number of occurrences in the training data.  |
   |                       |                                                                                                            |
   |                       | Settings:                                                                                                  |
+  |                       |                                                                                                            |
   |                       | Number of bins.                                                                                            |
-  |                       | For instance, ``{'bins': 5}`` quantizes the vocabulary frequency into 5 bins.                              |
+  |                       |                                                                                                            |
+  |                       | Example:                                                                                                   |
+  |                       |                                                                                                            |
+  |                       | ``{'bins': 5}``                                                                                            |
+  |                       |  - quantizes the vocabulary frequency into 5 bins                                                          |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'in-gaz'``          | Generates a set of features indicating the presence of query n-grams in different entity gazetteers,       |
   |                       | along with popularity information as defined in the gazetteer.                                             |
@@ -195,7 +214,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
 ``'params'`` (:class:`dict`)
   |
 
-  A dictionary of values to be used for model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, the ``'penalty'`` parameter for logistic regression, ``'max_depth'`` for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the parameter list in :ref:`the model table <sklearn_intent_models>` above.
+  A dictionary of values to be used for model hyperparameters during training. Examples include the ``'kernel'`` parameter for SVM, the ``'penalty'`` parameter for logistic regression, ``'max_depth'`` for decision tree, and so on. The list of allowable hyperparameters depends on the model selected. See the :ref:`reference links <sklearn_intent_models>` above for parameter lists.
 
 ``'param_selection'`` (:class:`dict`)
   |
@@ -209,34 +228,34 @@ Let's take a look at the allowed values for each setting in an intent classifier
 
   Depending on the splitting scheme selected, the :data:`param_selection` dictionary can contain other keys that define additional settings. The table below enumerates the allowable keys.
 
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | Key                   | Value                                                                                                             |
-  +=======================+===================================================================================================================+
-  | ``'grid'``            | A dictionary which maps each hyperparameter to a list of potential values to search.                              |
-  |                       | Here is an example for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:           |
-  |                       |                                                                                                                   |
-  |                       | .. code-block:: python                                                                                            |
-  |                       |                                                                                                                   |
-  |                       |    {                                                                                                              |
-  |                       |      'penalty': ['l1', 'l2'],                                                                                     |
-  |                       |      'C': [10, 100, 1000, 10000, 100000],                                                                         |
-  |                       |       'fit_intercept': [True, False]                                                                              |
-  |                       |    }                                                                                                              |
-  |                       |                                                                                                                   |
-  |                       | :ref:`The model table <sklearn_intent_models>` above lists hyperparameters available for each supported model.    |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                   |
-  |                       |                                                                                                                   |
-  |                       | - ``'k-fold'``: :sk_api:`K-folds <sklearn.model_selection.KFold>`                                                 |
-  |                       | - ``'shuffle'``: :sk_api:`Randomized folds <sklearn.model_selection.ShuffleSplit>`                                |
-  |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`          |
-  |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`         |
-  |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                 |
-  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`|
-  |                       |                                                                                                                   |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
-  | ``'k'``               | Number of folds (splits)                                                                                          |
-  +-----------------------+-------------------------------------------------------------------------------------------------------------------+
+  +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+  | Key                   | Value                                                                                                                     |
+  +=======================+===========================================================================================================================+
+  | ``'grid'``            | A dictionary which maps each hyperparameter to a list of potential values to search.                                      |
+  |                       | Here is an example for a :sk_api:`logistic regression <sklearn.linear_model.LogisticRegression>` model:                   |
+  |                       |                                                                                                                           |
+  |                       | .. code-block:: python                                                                                                    |
+  |                       |                                                                                                                           |
+  |                       |    {                                                                                                                      |
+  |                       |      'penalty': ['l1', 'l2'],                                                                                             |
+  |                       |      'C': [10, 100, 1000, 10000, 100000],                                                                                 |
+  |                       |       'fit_intercept': [True, False]                                                                                      |
+  |                       |    }                                                                                                                      |
+  |                       |                                                                                                                           |
+  |                       | See the :ref:`reference links <sklearn_intent_models>` above for details on the hyperparameters available for each model. |
+  +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+  | ``'type'``            | The :sk_guide:`cross-validation <cross_validation>` methodology to use. One of:                                           |
+  |                       |                                                                                                                           |
+  |                       | - ``'k-fold'``: :sk_api:`K-folds <sklearn.model_selection.KFold>`                                                         |
+  |                       | - ``'shuffle'``: :sk_api:`Randomized folds <sklearn.model_selection.ShuffleSplit>`                                        |
+  |                       | - ``'group-k-fold'``: :sk_api:`K-folds with non-overlapping groups <sklearn.model_selection.GroupKFold>`                  |
+  |                       | - ``'group-shuffle'``: :sk_api:`Group-aware randomized folds <sklearn.model_selection.GroupShuffleSplit>`                 |
+  |                       | - ``'stratified-k-fold'``: :sk_api:`Stratified k-folds <sklearn.model_selection.StratifiedKFold>`                         |
+  |                       | - ``'stratified-shuffle'``: :sk_api:`Stratified randomized folds <sklearn.model_selection.StratifiedShuffleSplit>`        |
+  |                       |                                                                                                                           |
+  +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
+  | ``'k'``               | Number of folds (splits)                                                                                                  |
+  +-----------------------+---------------------------------------------------------------------------------------------------------------------------+
 
   To identify the parameters that give the highest accuracy, the :meth:`fit` method does an :sk_guide:`exhaustive grid search <grid_search.html#exhaustive-grid-search>` over the parameter space, evaluating candidate models using the specified cross-validation strategy. Subsequent calls to :meth:`fit` can use these optimal parameters and skip the parameter selection process.
 
@@ -490,7 +509,7 @@ Then, when you are ready, use the :meth:`IntentClassifier.evaluate` method, whic
  - passes the resulting unlabeled queries to the trained intent classifier for prediction, and
  - compares the classifier’s output predictions against the ground truth labels to compute the model’s prediction accuracy.
 
-In the example below, the model gets 63 out of 78 test queries correct, resulting in an accuracy of about 81%.
+In the example below, the model gets 339 out of 345 test queries correct, resulting in an accuracy of about 98.3%.
 
 .. code-block:: python
 
@@ -501,7 +520,7 @@ In the example below, the model gets 63 out of 78 test queries correct, resultin
    Loading queries from file times_and_dates/set_alarm/test.txt
    Loading queries from file times_and_dates/start_timer/test.txt
    Loading queries from file times_and_dates/stop_timer/test.txt
-   <StandardModelEvaluation score: 80.77%, 63 of 78 examples correct>
+   <StandardModelEvaluation score: 98.26%, 339 of 345 examples correct>
 
 The aggregate accuracy score we see above is only the beginning, because the :meth:`evaluate` method returns a rich object containing overall statistics, statistics by class, and a confusion matrix.
 
@@ -511,34 +530,39 @@ Print all the model performance statistics reported by the :meth:`evaluate` meth
 
    >>> eval = ic.evaluate()
    >>> eval.print_stats()
-   Overall Statistics:
+   Overall statistics:
 
-       accuracy f1_weighted          TP          TN          FP          FN    f1_macro    f1_micro
-          0.808       0.811          63         375          15          15       0.800       0.808
-
-
-
-   Statistics by Class:
-
-                  class      f_beta   precision      recall     support          TP          TN          FP          FN
-           change_alarm       0.857       1.000       0.750           8           6          70           0           2
-              set_alarm       0.667       0.500       1.000           8           8          62           8           0
-           remove_alarm       0.871       0.818       0.931          29          27          43           6           2
-            check_alarm       0.750       1.000       0.600          20          12          58           0           8
-            start_timer       0.857       0.857       0.857           7           6          70           1           1
-             stop_timer       0.800       1.000       0.667           6           4          72           0           2
+      accuracy f1_weighted          tp          tn          fp          fn    f1_macro    f1_micro
+         0.983       0.982         339        2064           6           6       0.942       0.983
 
 
 
-   Confusion Matrix:
+   Statistics by class:
 
-                     change_ala..      set_alarm   remove_ala..   check_alar..   start_time..
-      change_ala..              6              1              1              0              0
-         set_alarm              0              8              0              0              0
-      remove_ala..              0              2             27              0              0
-      check_alar..              0              4              4             12              0
-      start_time..              0              1              0              0              6
-        stop_timer              0              0              1              0              1
+                 class      f_beta   precision      recall     support          tp          tn          fp          fn
+          change_alarm       0.952       1.000       0.909          11          10         334           0           1
+          remove_alarm       0.947       0.964       0.931          29          27         315           1           2
+           check_alarm       0.974       1.000       0.950          20          19         325           0           1
+             set_alarm       0.889       0.800       1.000           8           8         335           2           0
+          specify_time       0.994       0.989       1.000         264         264          78           3           0
+           start_timer       0.833       1.000       0.714           7           5         338           0           2
+            stop_timer       1.000       1.000       1.000           6           6         339           0           0
+
+
+
+   Confusion matrix:
+
+                    change_ala..   remove_ala..   check_alar..      set_alarm   specify_ti..   start_time..     stop_timer
+     change_ala..             10              1              0              0              0              0              0
+     remove_ala..              0             27              0              0              2              0              0
+     check_alar..              0              0             19              1              0              0              0
+        set_alarm              0              0              0              8              0              0              0
+     specify_ti..              0              0              0              0            264              0              0
+     start_time..              0              0              0              1              1              5              0
+       stop_timer              0              0              0              0              0              0              6
+
+
+The :meth:`eval.get_stats()` method returns all the above statistics in a structured dictionary without printing them to the console.
 
 Let’s decipher the statistics output by the :meth:`evaluate` method.
 
@@ -550,29 +574,29 @@ Let’s decipher the statistics output by the :meth:`evaluate` method.
   ===========  ===
   accuracy     :sk_guide:`Classification accuracy score <model_evaluation.html#accuracy-score>`
   f1_weighted  :sk_api:`Class-weighted average f1 score <sklearn.metrics.f1_score.html>`
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   f1_macro     :sk_api:`Macro-averaged f1 score <sklearn.metrics.f1_score.html>`
   f1_micro     :sk_api:`Micro-averaged f1 score <sklearn.metrics.f1_score.html>`
   ===========  ===
 
-  Here are some basic guidelines on how to interpret these statistics. Note that this is not meant to be an exhaustive list, but includes some possibilities to consider if your app and evaluation results fall into one of these cases:
+  When interpreting these statistics, consider whether your app and evaluation results fall into one of the cases below, and if so, apply the accompanying guideline. This list is basic, not exhaustive, but should get you started.
 
-  - **Classes are balanced**: When the number of training examples in your intents are comparable and each intent is equally important, focusing on the accuracy metric is usually good enough.
+  - **Classes are balanced** — When the number of training examples in your intents are comparable and each intent is equally important, focusing on the accuracy metric is usually good enough.
 
-  - **Classes are imbalanced**: When classes are imbalanced it is important to take the F1 scores into account.
+  - **Classes are imbalanced** — In this case, it's important to take the f1 scores into account.
 
-  - **All F1 and accuracy scores are low**: Intent classification is performing poorly across all intents. You may not have enough training data for the model to learn or you may need to tune your model hyperparameters. You may also need to reconsider your intent structure and make sure queries in different intents have distinct natural language patterns. You may need to combine intents or separate them, so that the resulting classes are easier for the classifier to distinguish.
+  - **All f1 and accuracy scores are low** — When intent classification is performing poorly across all intents, any of the following may be the problem: 1) You do not have enough training data for the model to learn; 2) you need to tune your model hyperparameters; 3) you need to reconsider your intent structure to ensure that queries in different intents have different natural language patterns — this may involve either combining or separating intents so that the resulting classes are easier for the classifier to distinguish.
 
-  - **F1 weighted is higher than F1 macro**: Your intents with fewer evaluation examples are performing poorly. You may need to add more data to intents that have fewer examples. You could also try adding class weights to your hyperparameters.
+  - **f1 weighted is higher than f1 macro** — This means that intents with fewer evaluation examples are performing poorly. Try adding more data to these intents or adding class weights to your hyperparameters.
 
-  - **F1 macro is higher than F1 weighted**: Your intents with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
+  - **f1 macro is higher than f1 weighted** — This means that intents with more evaluation examples are performing poorly. Verify that the number of evaluation examples reflects the class distribution of your training examples.
 
-  - **F1 micro is higher than F1 macro**: Certain intents are being misclassified more often than others. Check the class-wise below statistics to identify these intents. Some intents may be too similar to another intent or you may need to add more training data to some intents.
+  - **f1 micro is higher than f1 macro** — This means that some intents are being misclassified more often than others. Identify the problematic intents by checking the class-wise statistics below. Some intents may be too similar to others, or you may need to add more training data to some intents.
 
-  - **Some classes are more important than others**: If some intents are more important than others for your use case, it is good to focus more on the class-wise statistics described below.
+  - **Some classes are more important than others** — If some intents are more important than others for your use case, it is best to focus especially on the class-wise statistics described below.
 
 **Class-wise Statistics**
   |
@@ -585,10 +609,10 @@ Let’s decipher the statistics output by the :meth:`evaluate` method.
   precision    `Precision <https://en.wikipedia.org/wiki/Precision_and_recall#Precision>`_
   recall       `Recall <https://en.wikipedia.org/wiki/Precision_and_recall#Recall>`_
   support      Number of test queries in this intent (based on ground truth)
-  TP           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  TN           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FP           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
-  FN           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tp           Number of `true positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  tn           Number of `true negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fp           Number of `false positives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
+  fn           Number of `false negatives <https://en.wikipedia.org/wiki/Precision_and_recall>`_
   ===========  ===
 
 **Confusion Matrix**
