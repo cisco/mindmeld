@@ -77,7 +77,7 @@ class ApplicationManager(object):
         if payload:
             request['payload'] = payload
 
-        nlp_hierarchy = None
+        nlp_component_hierarchy = None
 
         if allowed_intents:
             try:
@@ -94,7 +94,7 @@ class ApplicationManager(object):
         query = self._query_factory.create_query(text)
 
         # TODO: support specifying target domain, etc in payload
-        processed_query = self.nlp.process_query(query, nlp_hierarchy)
+        processed_query = self.nlp.process_query(query, nlp_component_hierarchy)
 
         context = {'request': request,
                    'history': history,
