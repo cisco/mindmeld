@@ -111,7 +111,14 @@ Contents
    userguide/parser
    userguide/kb
    userguide/dm
-   userguide/versions
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Versions
+   :name: versions
+
+   versions/changes
+   versions/history
 
 ..
    .. toctree::

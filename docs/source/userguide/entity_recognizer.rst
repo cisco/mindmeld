@@ -550,6 +550,8 @@ Run the trained entity recognizer on a test query using the :meth:`EntityRecogni
 
 The :meth:`predict` takes one query at a time. Next, we'll see how to test a trained model on a batch of labeled test queries.
 
+.. _entity_evaluation:
+
 Evaluate classifier performance
 -------------------------------
 

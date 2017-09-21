@@ -79,6 +79,7 @@ Access the :class:`RoleClassifier` for an entity type of your choice, using the 
    >>> rc
    <RoleClassifier ready: True, dirty: True>
 
+.. _train_role_model:
 
 Train a role classifier
 -----------------------
