@@ -77,7 +77,7 @@ class ApplicationManager(object):
         if payload:
             request['payload'] = payload
 
-        nlp_component_hierarchy = None
+        nlp_hierarchy = None
 
         if allowed_intents:
             try:
