@@ -16,6 +16,7 @@ DEFAULT_LABEL = 'B|UNK'
 DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_GAZ_LABEL = 'O'
 RANDOM_SEED = 1
+ZERO_INITIALIZER_VALUE = 0
 
 logger = logging.getLogger(__name__)
 
@@ -382,7 +383,7 @@ class LstmModel(Tagger):
         weights = tf.tile(weights, [batch_size_dim, 1])
         weights = tf.reshape(weights, [batch_size_dim, 2 * n_hidden, self.output_dimension])
 
-        zero_initializer = tf.constant_initializer(0)
+        zero_initializer = tf.constant_initializer(ZERO_INITIALIZER_VALUE)
         biases = tf.get_variable('output_bias', shape=[self.output_dimension], dtype="float32",
                                  initializer=zero_initializer)
 
