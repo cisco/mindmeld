@@ -60,8 +60,8 @@ In MindMeld Workbench, the *application container* is a Python file which contai
 
 Every Workbench project is also a Python package and therefore must have an empty ``__init.py__`` file at the root level.
 
- - If your project is based on a Workbench blueprint, Workbench creates the empty ``__init.py__`` file automatically
- - If your project is not based on a Workbench blueprint, you must create the empty ``__init.py__`` file manually
+ - If your project **is** based on a Workbench blueprint, Workbench creates the empty ``__init.py__`` file automatically
+ - If your project **is not** based on a Workbench blueprint, you must create the empty ``__init.py__`` file manually
 
 Your directory structure should now resemble the following.
 
