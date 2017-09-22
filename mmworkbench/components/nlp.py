@@ -209,7 +209,6 @@ class NaturalLanguageProcessor(Processor):
             }
             where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
             is None, we just use the normal model predict functionality.
-            where smart_home is the domain and close_door is the intent.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
