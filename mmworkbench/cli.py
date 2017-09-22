@@ -130,7 +130,9 @@ def build(ctx):
 
 @cli.command('evaluate', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-def evaluate(ctx):
+@click.option('-v', '--verbose/--not_verbose', default=False,
+              help='Print the full metrics instead of just accuracy.')
+def evaluate(ctx, verbose):
     """Evaluates the app with default config."""
     try:
         app = ctx.obj.get('app')
@@ -139,8 +141,13 @@ def evaluate(ctx):
 
         app.lazy_init()
         nlp = app.app_manager.nlp
-        nlp.load()
-        nlp.evaluate()
+        try:
+            nlp.load()
+        except WorkbenchError as ex:
+            logger.error("You must build the app before running evaluate. "
+                         "Try 'python app.py build'.")
+            ctx.exit(1)
+        nlp.evaluate(verbose)
     except WorkbenchError as ex:
         logger.error(ex.message)
         ctx.exit(1)
