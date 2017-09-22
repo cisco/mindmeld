@@ -84,6 +84,20 @@ class Processor(object):
     def _load(self):
         raise NotImplementedError
 
+    def evaluate(self, print_stats=False):
+        """Evaluates all the natural language processing models for this processor and its
+        children.
+
+        Args:
+            print_stats (bool): If true, prints the full stats table. Otherwise prints just
+                                the accuracy
+
+        """
+        self._evaluate(print_stats)
+
+        for child in self._children.values():
+            child.evaluate(print_stats)
+
     def _check_ready(self):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
@@ -177,6 +191,16 @@ class NaturalLanguageProcessor(Processor):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
 
+    def _evaluate(self, print_stats):
+        if len(self.domains) > 1:
+            try:
+                domain_eval = self.domain_classifier.evaluate()
+                print("Domain classification accuracy: {}".format(domain_eval.get_accuracy()))
+                if print_stats:
+                    domain_eval.print_stats()
+            except:
+                print("Skipping domain classification evaluation")
+
     def process_query(self, query):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
@@ -245,6 +269,17 @@ class DomainProcessor(Processor):
             return
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.load(model_path)
+
+    def _evaluate(self, print_stats):
+        if len(self.intents) > 1:
+            try:
+                intent_eval = self.intent_classifier.evaluate()
+                print("Intent classification accuracy for {} domain: {}".format(
+                      self.name, intent_eval.get_accuracy()))
+                if print_stats:
+                    intent_eval.print_stats()
+            except:
+                print("Skipping evaluation of {} domain".format(self.name))
 
     def process(self, query_text):
         """Processes the given input text using the hierarchy of natural language processing models
@@ -347,6 +382,18 @@ class IntentProcessor(Processor):
                                         self.resource_loader)
             self._children[entity_type] = processor
 
+    def _evaluate(self, print_stats):
+        if len(self.entity_recognizer.entity_types) > 1:
+            try:
+                entity_eval = self.entity_recognizer.evaluate()
+                print("Entity recognition accuracy for {} domain and {} "
+                      "intent: {}".format(self.domain, self.name, entity_eval.get_accuracy()))
+                if print_stats:
+                    entity_eval.print_stats()
+            except:
+                print("Skipping evaluation of {} domain and {} intent".format(self.domain,
+                                                                              self.name))
+
     def process(self, query_text):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
@@ -429,6 +476,19 @@ class EntityProcessor(Processor):
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.load(model_path)
         self.entity_resolver.load()
+
+    def _evaluate(self, print_stats):
+        if len(self.role_classifier.roles) > 1:
+            try:
+                role_eval = self.role_classifier.evaluate()
+                print("Role classification accuracy for {} domain, {} intent, "
+                      "and {} entitiy: {}".format(self.domain, self.intent, self.type,
+                                                  role_eval.get_accuracy()))
+                if print_stats:
+                    role_eval.print_stats()
+            except:
+                print("Skipping evaluation of {} domain, {} intent, and {} entity".format(
+                      self.domain, self.intent, self.type))
 
     def process(self, text):
         raise NotImplementedError('EntityProcessor objects do not support `process()`. '

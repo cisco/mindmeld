@@ -128,6 +128,27 @@ def build(ctx):
         ctx.exit(1)
 
 
+@cli.command('evaluate', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+def evaluate(ctx):
+    """Evaluates the app with default config."""
+    try:
+        app = ctx.obj.get('app')
+        if app is None:
+            raise ValueError("No app was given. Run 'python app.py evaluate' from your app folder.")
+
+        app.lazy_init()
+        nlp = app.app_manager.nlp
+        nlp.load()
+        nlp.evaluate()
+    except WorkbenchError as ex:
+        logger.error(ex.message)
+        ctx.exit(1)
+    except RuntimeError as ex:
+        logger.error(ex)
+        ctx.exit(1)
+
+
 @cli.command('clean', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def clean(ctx):
