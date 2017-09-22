@@ -246,8 +246,9 @@ class LstmModel(Tagger):
             cost = tf.reduce_mean(-log_likelihood, name='crf_log_likelihood')
         else:
             losses = tf.nn.softmax_cross_entropy_with_logits(
-                logits=output_tensor,
-                labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax')
+                logits=tf.reshape(output_tensor, [-1, self.output_dimension]),
+                labels=tf.reshape(label_tensor, [-1, self.output_dimension]),
+                name='softmax')
             cost = tf.reduce_mean(losses, name='cross_entropy_mean_loss')
 
         optimizer = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate)).minimize(cost)
