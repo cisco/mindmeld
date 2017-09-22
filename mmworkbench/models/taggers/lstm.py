@@ -497,7 +497,9 @@ class LstmModel(Tagger):
                 batch_seq_len = seq_len[batch_start_index:batch_end_index]
 
                 if batch % int(self.display_epoch) == 0:
-                    output, loss, _ = self.session.run([self.tf_lstm_output, self.cost, self.optimizer],
+                    output, loss, _ = self.session.run([self.tf_lstm_output,
+                                                        self.cost,
+                                                        self.optimizer],
                                                        feed_dict=self.construct_feed_dictionary(
                                                         batch_examples,
                                                         batch_gaz,
@@ -510,8 +512,8 @@ class LstmModel(Tagger):
                     logger.info("Trained batch from index {} to {}, "
                                 "Mini-batch loss: {:.5f}, "
                                 "Training sequence accuracy: {:.5f}".format(batch * batch_size,
-                                                                            (batch * batch_size) + batch_size,
-                                                                            loss,
+                                                                            (batch * batch_size) +
+                                                                            batch_size, loss,
                                                                             accuracy))
                 else:
                     self.session.run(self.optimizer, feed_dict=self.construct_feed_dictionary(
