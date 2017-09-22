@@ -234,6 +234,7 @@ class LstmModel(Tagger):
         Args:
             output_tensor (Tensor): Output tensor of the LSTM network
             label_tensor (Tensor): Label tensor of the true labels of the data
+            sequence_lengths (Tensor): The tensor of sequence lengths for the current batch
 
         Returns:
             The optimizer function to reduce loss and the loss values
