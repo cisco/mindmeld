@@ -235,16 +235,16 @@ class SequenceEmbedding(object):
         examples_shape = np.shape(encoded_sequences)
         final_dimension = np.shape(self._token_encoding_to_embedding_matrix)[1]
 
-        sequence_embeddings = np.zeros((examples_shape[0], examples_shape[1], final_dimension))
+        sequence_embeddings_arr = np.zeros((examples_shape[0], examples_shape[1], final_dimension))
 
         for query_index in range(len(encoded_sequences)):
-            for word_index in range(len(sequence_embeddings[query_index])):
+            for word_index in range(len(sequence_embeddings_arr[query_index])):
                 token_encoding = encoded_sequences[query_index][word_index]
 
-                sequence_embeddings[query_index][word_index] = \
+                sequence_embeddings_arr[query_index][word_index] = \
                     self._token_encoding_to_embedding_matrix[token_encoding]
 
-        return sequence_embeddings
+        return sequence_embeddings_arr
 
     def _construct_embedding_matrix(self):
         """Constructs the encoding matrix of word encoding to word embedding
