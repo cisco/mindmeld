@@ -230,8 +230,6 @@ class NaturalLanguageProcessor(Processor):
                 if not domain:
                     raise AllowedNlpClassesKeyError(
                         'Could not find user inputted domain in NLP hierarchy')
-
-
         else:
             domain = list(self.domains.keys())[0]
 
