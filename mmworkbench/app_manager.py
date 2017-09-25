@@ -79,7 +79,8 @@ class ApplicationManager(object):
 
         context = {'request': request,
                    'history': history,
-                   'frame': copy.deepcopy(frame)}
+                   'frame': copy.deepcopy(frame),
+                   'entities': []}
 
         # We bypass the NLP processing engine if the target dialog state is specified. This
         # improves performance by decreasing round trip time between the client and wb.
