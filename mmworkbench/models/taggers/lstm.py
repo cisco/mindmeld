@@ -190,11 +190,6 @@ class LstmModel(Tagger):
         return x_sequence_embeddings_arr, embedded_labels, groups
 
     def setup_model(self, config):
-
-        self.set_params(**config.params)
-
-    def setup_model(self, config):
-
         self.set_params(**config.params)
 
         # We have to reset the graph on every dataset since the input, gaz and output
@@ -213,6 +208,7 @@ class LstmModel(Tagger):
 
         Args:
             batch_examples (ndarray): A batch of examples
+            batch_char (ndarray): A batch of character features
             batch_gaz (ndarray): A batch of gazetteer features
             batch_seq_len (ndarray): A batch of sequence length of each query
             batch_labels (ndarray): A batch of labels
@@ -226,7 +222,7 @@ class LstmModel(Tagger):
             self.gaz_input_tf: batch_gaz,
             self.dense_keep_prob_tf: self.dense_keep_probability,
             self.lstm_input_keep_prob_tf: self.lstm_input_keep_prob,
-            self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob
+            self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob,
             self.char_input_tf: batch_char
         }
 
@@ -267,13 +263,15 @@ class LstmModel(Tagger):
             word_level_char_embedding = tf.concat(word_level_char_embeddings_list, 2)
 
             # Combined the two embeddings
-            combined_embedding_tf = tf.concat([self.query_input_tf, word_level_char_embedding], axis=2)
+            combined_embedding_tf = tf.concat(
+                [self.query_input_tf, word_level_char_embedding], axis=2)
         else:
             combined_embedding_tf = self.query_input_tf
 
-        combined_embedding_tf = tf.concat([combined_embedding_tf, dense_gaz_embedding_tf], axis=2)
-        return combined_embedding_tf
+        combined_embedding_tf = tf.concat(
+            [combined_embedding_tf, dense_gaz_embedding_tf], axis=2)
 
+        return combined_embedding_tf
 
     def apply_convolution(self, input_tensor, batch_size, char_window_size, embedding_dimension):
         """
@@ -663,7 +661,8 @@ class LstmModel(Tagger):
 
         output = self.session.run(
             [self.lstm_output_tf],
-            feed_dict=self.construct_feed_dictionary(X, self.char_features_arr, self.gaz_features_arr, seq_len_arr))
+            feed_dict=self.construct_feed_dictionary(
+                X, self.char_features_arr, self.gaz_features_arr, seq_len_arr))
 
         output = np.reshape(output, [-1, int(self.padding_length), self.output_dimension])
         output = np.argmax(output, 2)
