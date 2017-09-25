@@ -25,17 +25,17 @@ class LstmModel(Tagger):
     the correct interface for use by the tagger model"""
 
     def fit(self, X, y):
-        examples = np.asarray(X, dtype='float32')
-        labels = np.asarray(y, dtype='int32')
-        self._fit(examples, labels)
+        examples_arr = np.asarray(X, dtype='float32')
+        labels_arr = np.asarray(y, dtype='int32')
+        self._fit(examples_arr, labels_arr)
         return self
 
     def predict(self, X):
-        encoded_examples = np.asarray(X, dtype='float32')
-        tags_by_example = self._predict(encoded_examples)
+        encoded_examples_arr = np.asarray(X, dtype='float32')
+        tags_by_example_arr = self._predict(encoded_examples_arr)
 
         resized_predicted_tags = []
-        for query, seq_len in zip(tags_by_example, self.sequence_lengths):
+        for query, seq_len in zip(tags_by_example_arr, self.sequence_lengths):
             resized_predicted_tags.append(query[:seq_len])
 
         return resized_predicted_tags
@@ -71,7 +71,7 @@ class LstmModel(Tagger):
         self.token_lstm_hidden_state_dimension = \
             parameters.get('token_lstm_hidden_state_dimension', 300)
         self.learning_rate = parameters.get('learning_rate', 0.005)
-        self.optimizer = parameters.get('optimizer', 'adam')
+        self.optimizer_tf = parameters.get('optimizer', 'adam')
         self.padding_length = parameters.get('padding_length', 20)
         self.display_epoch = parameters.get('display_epoch', 20)
         self.token_embedding_dimension = parameters.get('token_embedding_dimension', 300)
@@ -89,36 +89,36 @@ class LstmModel(Tagger):
         """
         Constructs the variables and operations in the tensorflow session graph
         """
-        self.tf_dense_keep_prob = tf.placeholder(tf.float32, name='dense_keep_prob')
-        self.tf_lstm_input_keep_prob = tf.placeholder(tf.float32, name='input_keep_prob')
-        self.tf_lstm_output_keep_prob = tf.placeholder(tf.float32, name='output_keep_prob')
+        self.dense_keep_prob_tf = tf.placeholder(tf.float32, name='dense_keep_prob_tf')
+        self.lstm_input_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_input_keep_prob_tf')
+        self.lstm_output_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_output_keep_prob_tf')
 
-        self.tf_query_input = tf.placeholder(tf.float32,
+        self.query_input_tf = tf.placeholder(tf.float32,
                                              [None,
                                               self.padding_length,
                                               self.token_embedding_dimension],
-                                             name='tf_query_input')
+                                             name='query_input_tf')
 
-        self.tf_gaz_input = tf.placeholder(tf.float32,
+        self.gaz_input_tf = tf.placeholder(tf.float32,
                                            [None,
                                             self.padding_length,
                                             self.gaz_dimension],
-                                           name='tf_gaz_input')
+                                           name='gaz_input_tf')
 
-        self.tf_label = tf.placeholder(tf.int32,
+        self.label_tf = tf.placeholder(tf.int32,
                                        [None,
                                         int(self.padding_length),
                                         self.output_dimension],
-                                       name='tf_label')
+                                       name='label_tf')
 
-        self.tf_sequence_length = tf.placeholder(tf.int32, shape=[None],
-                                                 name='tf_sequence_length')
+        self.sequence_length_tf = tf.placeholder(tf.int32, shape=[None],
+                                                 name='sequence_length_tf')
 
-        word_and_gaz_embedding = self._construct_embedding_network()
-        self.tf_lstm_output = self._construct_lstm_network(word_and_gaz_embedding)
+        word_and_gaz_embedding_tf = self._construct_embedding_network()
+        self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
 
-        self.optimizer, self.cost = self._define_optimizer_and_cost(
-            self.tf_lstm_output, self.tf_label)
+        self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
+            self.lstm_output_tf, self.label_tf)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
         if y:
@@ -160,14 +160,14 @@ class LstmModel(Tagger):
             embedded_labels = None
 
         # Extract features and classes
-        X, gaz = self._get_features(examples)
-        self.gaz_features = np.asarray(gaz, dtype='float32')
+        x_arr, gaz_arr = self._get_features(examples)
+        self.gaz_features_arr = np.asarray(gaz_arr, dtype='float32')
         self.sequence_lengths = self._extract_seq_length(examples)
 
         # There are no groups in this model
         groups = None
 
-        return X, embedded_labels, groups
+        return x_arr, embedded_labels, groups
 
     def setup_model(self, config):
 
@@ -196,16 +196,16 @@ class LstmModel(Tagger):
             The feed dictionary
         """
         return_dict = {
-            self.tf_query_input: batch_examples,
-            self.tf_sequence_length: batch_seq_len,
-            self.tf_gaz_input: batch_gaz,
-            self.tf_dense_keep_prob: self.dense_keep_probability,
-            self.tf_lstm_input_keep_prob: self.lstm_input_keep_prob,
-            self.tf_lstm_output_keep_prob: self.lstm_output_keep_prob
+            self.query_input_tf: batch_examples,
+            self.sequence_length_tf: batch_seq_len,
+            self.gaz_input_tf: batch_gaz,
+            self.dense_keep_prob_tf: self.dense_keep_probability,
+            self.lstm_input_keep_prob_tf: self.lstm_input_keep_prob,
+            self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob
         }
 
         if len(batch_labels) > 0:
-            return_dict[self.tf_label] = batch_labels
+            return_dict[self.label_tf] = batch_labels
 
         return return_dict
 
@@ -218,14 +218,14 @@ class LstmModel(Tagger):
         """
         initializer = tf.contrib.layers.xavier_initializer(seed=RANDOM_SEED)
 
-        dense_gaz_embedding = tf.contrib.layers.fully_connected(
-            inputs=self.tf_gaz_input,
+        dense_gaz_embedding_tf = tf.contrib.layers.fully_connected(
+            inputs=self.gaz_input_tf,
             num_outputs=self.gaz_encoding_dimension,
             weights_initializer=initializer)
 
         # Combined the two embeddings
-        combined_embedding = tf.concat([self.tf_query_input, dense_gaz_embedding], axis=2)
-        return combined_embedding
+        combined_embedding_tf = tf.concat([self.query_input_tf, dense_gaz_embedding_tf], axis=2)
+        return combined_embedding_tf
 
     def _define_optimizer_and_cost(self, output_tensor, label_tensor):
         """ This function defines the optimizer and cost function of the LSTM model
@@ -237,12 +237,13 @@ class LstmModel(Tagger):
         Returns:
             The optimizer function to reduce loss and the loss values
         """
-        losses = tf.nn.softmax_cross_entropy_with_logits(
+        softmax_loss_tf = tf.nn.softmax_cross_entropy_with_logits(
             logits=output_tensor,
-            labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax')
-        cost = tf.reduce_mean(losses, name='cross_entropy_mean_loss')
-        optimizer = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate)).minimize(cost)
-        return optimizer, cost
+            labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax_loss_tf')
+        cross_entropy_mean_loss_tf = tf.reduce_mean(softmax_loss_tf, name='cross_entropy_mean_loss_tf')
+        optimizer_tf = tf.train.AdamOptimizer(
+            learning_rate=float(self.learning_rate)).minimize(cross_entropy_mean_loss_tf)
+        return optimizer_tf, cross_entropy_mean_loss_tf
 
     def _calculate_score(self, output_array, label_array, seq_lengths):
         """ This function calculates the sequence score of all the queries,
@@ -257,16 +258,16 @@ class LstmModel(Tagger):
         Returns:
             The number of queries where all the tags are correct
         """
-        reshaped_output = np.reshape(
+        reshaped_output_arr = np.reshape(
             output_array, [-1, int(self.padding_length), self.output_dimension])
-        reshaped_output = np.argmax(reshaped_output, 2)
-        reshaped_labels = np.argmax(label_array, 2)
+        reshaped_output_arr = np.argmax(reshaped_output_arr, 2)
+        reshaped_labels_arr = np.argmax(label_array, 2)
 
         score = 0
-        for idx, query in enumerate(reshaped_output):
+        for idx, query in enumerate(reshaped_output_arr):
             seq_len = seq_lengths[idx]
-            predicted_tags = reshaped_output[idx][:seq_len]
-            actual_tags = reshaped_labels[idx][:seq_len]
+            predicted_tags = reshaped_output_arr[idx][:seq_len]
+            actual_tags = reshaped_labels_arr[idx][:seq_len]
             if np.array_equal(predicted_tags, actual_tags):
                 score += 1
 
@@ -317,10 +318,8 @@ class LstmModel(Tagger):
             hidden_dimensions, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
 
         lstm_cell = tf.contrib.rnn.DropoutWrapper(
-            lstm_cell,
-            input_keep_prob=self.tf_lstm_input_keep_prob,
-            output_keep_prob=self.tf_lstm_output_keep_prob
-        )
+            lstm_cell, input_keep_prob=self.lstm_input_keep_prob_tf,
+            output_keep_prob=self.lstm_output_keep_prob_tf)
 
         return lstm_cell
 
@@ -343,38 +342,38 @@ class LstmModel(Tagger):
         initializer = tf.contrib.layers.xavier_initializer(seed=RANDOM_SEED)
 
         # Forward LSTM construction
-        lstm_cell_forward = self._construct_regularized_lstm_cell(n_hidden, initializer)
-        initial_state_forward = self._construct_lstm_state(
-            initializer, n_hidden, batch_size_dim, 'forward')
+        lstm_cell_forward_tf = self._construct_regularized_lstm_cell(n_hidden, initializer)
+        initial_state_forward_tf = self._construct_lstm_state(
+            initializer, n_hidden, batch_size_dim, 'lstm_cell_forward_tf')
 
         # Backward LSTM construction
-        lstm_cell_backward = self._construct_regularized_lstm_cell(n_hidden, initializer)
-        initial_state_backward = self._construct_lstm_state(
-            initializer, n_hidden, batch_size_dim, 'backward')
+        lstm_cell_backward_tf = self._construct_regularized_lstm_cell(n_hidden, initializer)
+        initial_state_backward_tf = self._construct_lstm_state(
+            initializer, n_hidden, batch_size_dim, 'lstm_cell_backward_tf')
 
         # Combined the forward and backward LSTM networks
         (output_fw, output_bw), _ = tf.nn.bidirectional_dynamic_rnn(
-            cell_fw=lstm_cell_forward,
-            cell_bw=lstm_cell_backward,
+            cell_fw=lstm_cell_forward_tf,
+            cell_bw=lstm_cell_backward_tf,
             inputs=input_tensor,
-            sequence_length=self.tf_sequence_length,
+            sequence_length=self.sequence_length_tf,
             dtype=tf.float32,
-            initial_state_fw=initial_state_forward,
-            initial_state_bw=initial_state_backward)
+            initial_state_fw=initial_state_forward_tf,
+            initial_state_bw=initial_state_backward_tf)
 
         # Construct the output later
-        output = tf.concat([output_fw, output_bw], axis=-1)
-        output = tf.reshape(output, [-1, 2 * n_hidden])
-        output = tf.nn.dropout(output, self.tf_dense_keep_prob)
+        output_tf = tf.concat([output_fw, output_bw], axis=-1)
+        output_tf = tf.reshape(output_tf, [-1, 2 * n_hidden])
+        output_tf = tf.nn.dropout(output_tf, self.dense_keep_prob_tf)
 
-        weights = tf.get_variable('output_weights', shape=[2 * n_hidden, self.output_dimension],
-                                  dtype='float32', initializer=initializer)
+        output_weights_tf = tf.get_variable('output_weights_tf', shape=[2 * n_hidden, self.output_dimension],
+                                            dtype='float32', initializer=initializer)
 
-        biases = tf.get_variable('output_bias', shape=[self.output_dimension],
-                                 dtype='float32', initializer=initializer)
+        output_bias_tf = tf.get_variable('output_bias_tf', shape=[self.output_dimension],
+                                         dtype='float32', initializer=initializer)
 
-        output_tensor = tf.matmul(output, weights) + biases
-        return output_tensor
+        output_tf = tf.matmul(output_tf, output_weights_tf) + output_bias_tf
+        return output_tf
 
     def _get_model_constructor(self):
         return self
@@ -404,16 +403,16 @@ class LstmModel(Tagger):
         Returns:
             (tuple): Word embeddings and Gazetteer one-hot embeddings
         """
-        x_feats = []
-        gaz_feats = []
+        x_feats_array = []
+        gaz_feats_array = []
         for idx, example in enumerate(examples):
             x_feat, gaz_feat = self._extract_features(example)
-            x_feats.append(x_feat)
-            gaz_feats.append(gaz_feat)
+            x_feats_array.append(x_feat)
+            gaz_feats_array.append(gaz_feat)
 
-        x_feats = self.query_encoder.get_embeddings_from_encodings(x_feats)
-        gaz_feats = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats)
-        return x_feats, gaz_feats
+        x_feats_array = self.query_encoder.get_embeddings_from_encodings(x_feats_array)
+        gaz_feats_array = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats_array)
+        return x_feats_array, gaz_feats_array
 
     def _extract_features(self, example):
         """Extracts feature dicts for each token in an example.
@@ -480,7 +479,7 @@ class LstmModel(Tagger):
             indices = [x for x in range(len(X))]
             np.random.shuffle(indices)
 
-            gaz = self.gaz_features[indices]
+            gaz = self.gaz_features_arr[indices]
             examples = X[indices]
             labels = y[indices]
             batch_size = int(self.batch_size)
@@ -497,9 +496,9 @@ class LstmModel(Tagger):
                 batch_seq_len = seq_len[batch_start_index:batch_end_index]
 
                 if batch % int(self.display_epoch) == 0:
-                    output, loss, _ = self.session.run([self.tf_lstm_output,
-                                                        self.cost,
-                                                        self.optimizer],
+                    output, loss, _ = self.session.run([self.lstm_output_tf,
+                                                        self.cost_tf,
+                                                        self.optimizer_tf],
                                                        feed_dict=self.construct_feed_dictionary(
                                                         batch_examples,
                                                         batch_gaz,
@@ -516,7 +515,7 @@ class LstmModel(Tagger):
                                                                             batch_size, loss,
                                                                             accuracy))
                 else:
-                    self.session.run(self.optimizer, feed_dict=self.construct_feed_dictionary(
+                    self.session.run(self.optimizer_tf, feed_dict=self.construct_feed_dictionary(
                         batch_examples, batch_gaz, batch_seq_len, batch_labels))
         return self
 
@@ -529,8 +528,7 @@ class LstmModel(Tagger):
         Returns:
             (list): A list of decoded labelled predicted by the model
         """
-        gaz = self.gaz_features
-        seq_len = np.array(self.sequence_lengths)
+        seq_len_arr = np.array(self.sequence_lengths)
 
         # During predict time, we make sure no nodes are dropped out
         self.dense_keep_probability = 1.0
@@ -538,8 +536,8 @@ class LstmModel(Tagger):
         self.lstm_output_keep_prob = 1.0
 
         output = self.session.run(
-            [self.tf_lstm_output],
-            feed_dict=self.construct_feed_dictionary(X, gaz, seq_len))
+            [self.lstm_output_tf],
+            feed_dict=self.construct_feed_dictionary(X, self.gaz_features_arr, seq_len_arr))
 
         output = np.reshape(output, [-1, int(self.padding_length), self.output_dimension])
         output = np.argmax(output, 2)
