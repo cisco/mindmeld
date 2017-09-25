@@ -58,7 +58,12 @@ In MindMeld Workbench, the *application container* is a Python file which contai
   if __name__ == '__main__':
       app.cli()
 
-Every Workbench project is also a Python package. It hence needs to have an empty ``__init.py__`` file at the root level. If you did not base your project on a Workbench blueprint, you need to manually create an empty ``__init.py__`` file. Your directory structure should now resemble the following.
+Every Workbench project is also a Python package and therefore must have an empty ``__init.py__`` file at the root level.
+
+ - If your project **is** based on a Workbench blueprint, Workbench creates the empty ``__init.py__`` file automatically
+ - If your project **is not** based on a Workbench blueprint, you must create the empty ``__init.py__`` file manually
+
+Your directory structure should now resemble the following.
 
 .. image:: /images/directory2.png
     :width: 400px
@@ -71,7 +76,7 @@ The above code snippet illustrates the conventions for implementing dialogue sta
 3. Using the ``@app.handle()`` decorator, define a pattern which, when matched, invokes the associated handler function.
 4. Specify the handler function :func:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <02_script_interactions>`. For now, we are responding with a simple "Hello".
 
-The patterns and associated handlers which you enumerate using this straighforward application structure will comprise the core interaction logic for your application. The structure described above should suffice if all the functionality needed for your app's interactions will be contained within the application container file (``app.py``). However, if you intend to modularize the application logic into multiple modules, you need the additional snippet of code shown below to make relative package and module imports work in ``app.py``.
+The patterns and associated handlers which you enumerate using this straighforward application structure constitute the core interaction logic for your application. The structure described above should suffice if you plan to contain all the functionality needed for your app's interactions within the application container file (``app.py``) . However, if you intend to modularize the application logic into multiple modules, you need to add the code highlighted below to make relative package and module imports work in ``app.py``.
 
 .. code:: python
    :emphasize-lines: 1,2,5-10

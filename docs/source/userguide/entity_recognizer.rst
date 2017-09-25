@@ -688,7 +688,7 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 
   .. note::
 
-     Segment-level statistics are currently only available for the IOB tag scheme. If you are using a different tag scheme these statistics will not be generated.
+     Currently, segment-level statistics cannot be generated for the IOBES tag scheme. They are only available for IOB.
 
   Although it is useful to analyze tag-level statistics, they don't tell the full story for entity recognition in an intuitive way. It helps to think of the entity recognizer as performing two tasks: 1) identifying the span of words that should be part of an entity, and 2) selecting the label for the identified entity. When the recognizer makes a mistake, it misidentifies either the label, the span boundary, or both.
 
@@ -700,6 +700,8 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
     - A continuous span of tokens that represents a single entity
 
   For example, the query "I’ll have an {eggplant parm|dish} and some {breadsticks|dish} please" has five segments: "I'll have an", "eggplant parm", "and some", "breadsticks", and "please".
+
+  The table below describes the segment-level statistics available in Workbench.
 
   ============  =========================  ===
   Abbreviation  Statistic                  Description
@@ -728,10 +730,10 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
   Considering errors at a segment level is often more intuitive and may even provide better metrics to optimize against, as described `here <https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html>`_.
 
 
-**Sequence Statistics**
+**Sequence-level Statistics**
   |
 
-  Sequence-level accuracy that tracks the fraction of queries for which the entity recognizer successfully identified **all** the expected entities.
+  In Workbench, we define *sequence-level accuracy* as the fraction of queries for which the entity recognizer successfully identified **all** the expected entities.
 
 Now we have a wealth of information about the performance of our classifier. Let's go further and inspect the classifier's predictions at the level of individual queries, to better understand error patterns.
 
