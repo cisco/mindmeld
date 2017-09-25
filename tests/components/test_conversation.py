@@ -17,7 +17,7 @@ def setup_class():
     return nlp, Conversation(nlp=nlp, app_path=APP_PATH)
 
 
-def test_allowed_intents_and_target_dialog_state_is_cleared():
+def test_allowed_intents_and_target_dialog_state_are_cleared():
     """Tests that the allowed intents and target dialog state are
     cleared in one trip from app to wb.
     """
