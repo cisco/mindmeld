@@ -124,8 +124,9 @@ class LstmModel(Tagger):
 
         word_and_gaz_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
+
         if self.use_char_embeddings:
-            self.tf_char_input = tf.placeholder(tf.float32,
+            self.char_input_tf = tf.placeholder(tf.float32,
                                                 [None,
                                                  self.padding_length,
                                                  self.max_char_per_word,
@@ -226,14 +227,14 @@ class LstmModel(Tagger):
             self.dense_keep_prob_tf: self.dense_keep_probability,
             self.lstm_input_keep_prob_tf: self.lstm_input_keep_prob,
             self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob
-            self.tf_char_input: batch_char
+            self.char_input_tf: batch_char
         }
 
         if len(batch_labels) > 0:
             return_dict[self.label_tf] = batch_labels
 
         if len(batch_char) > 0:
-            return_dict[self.tf_char_input] = batch_char
+            return_dict[self.char_input_tf] = batch_char
 
         return return_dict
 
@@ -251,7 +252,7 @@ class LstmModel(Tagger):
             num_outputs=self.gaz_encoding_dimension,
             weights_initializer=initializer)
 
-        batch_size_dim = tf.shape(self.tf_query_input)[0]
+        batch_size_dim = tf.shape(self.query_input_tf)[0]
 
         if self.use_char_embeddings:
 
@@ -260,18 +261,16 @@ class LstmModel(Tagger):
             for window_size in self.char_window_sizes:
 
                 word_level_char_embeddings_list.append(
-                    self.apply_convolution(self.tf_char_input, batch_size_dim,
+                    self.apply_convolution(self.char_input_tf, batch_size_dim,
                                            window_size, self.character_embedding_dimension))
 
             word_level_char_embedding = tf.concat(word_level_char_embeddings_list, 2)
 
             # Combined the two embeddings
-            combined_embedding = tf.concat([self.tf_query_input, word_level_char_embedding], axis=2)
+            combined_embedding_tf = tf.concat([self.query_input_tf, word_level_char_embedding], axis=2)
         else:
-            combined_embedding = self.tf_query_input
+            combined_embedding_tf = self.query_input_tf
 
-        # Combined the two embeddings
-        combined_embedding_tf = tf.concat([self.query_input_tf, word_level_char_embedding], axis=2)
         combined_embedding_tf = tf.concat([combined_embedding_tf, dense_gaz_embedding_tf], axis=2)
         return combined_embedding_tf
 
