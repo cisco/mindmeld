@@ -267,7 +267,6 @@ class NaturalLanguageProcessor(Processor):
                 raise AllowedNlpClassesKeyError(
                     "Intent: {} is not in the NLP component hierarchy".format(intent))
 
-
             if domain not in nlp_components:
                 nlp_components[domain] = {}
 
