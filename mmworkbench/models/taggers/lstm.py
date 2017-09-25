@@ -240,7 +240,8 @@ class LstmModel(Tagger):
         softmax_loss_tf = tf.nn.softmax_cross_entropy_with_logits(
             logits=output_tensor,
             labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax_loss_tf')
-        cross_entropy_mean_loss_tf = tf.reduce_mean(softmax_loss_tf, name='cross_entropy_mean_loss_tf')
+        cross_entropy_mean_loss_tf = tf.reduce_mean(softmax_loss_tf,
+                                                    name='cross_entropy_mean_loss_tf')
         optimizer_tf = tf.train.AdamOptimizer(
             learning_rate=float(self.learning_rate)).minimize(cross_entropy_mean_loss_tf)
         return optimizer_tf, cross_entropy_mean_loss_tf
@@ -366,7 +367,8 @@ class LstmModel(Tagger):
         output_tf = tf.reshape(output_tf, [-1, 2 * n_hidden])
         output_tf = tf.nn.dropout(output_tf, self.dense_keep_prob_tf)
 
-        output_weights_tf = tf.get_variable('output_weights_tf', shape=[2 * n_hidden, self.output_dimension],
+        output_weights_tf = tf.get_variable('output_weights_tf',
+                                            shape=[2 * n_hidden, self.output_dimension],
                                             dtype='float32', initializer=initializer)
 
         output_bias_tf = tf.get_variable('output_bias_tf', shape=[self.output_dimension],
