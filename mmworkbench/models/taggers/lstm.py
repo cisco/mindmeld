@@ -122,16 +122,16 @@ class LstmModel(Tagger):
         self.batch_sequence_lengths_tf = tf.placeholder(tf.int32, shape=[None],
                                                         name='sequence_length_tf')
 
-        word_and_gaz_embedding_tf = self._construct_embedding_network()
-        self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
-
         if self.use_char_embeddings:
             self.char_input_tf = tf.placeholder(tf.float32,
                                                 [None,
                                                  self.padding_length,
                                                  self.max_char_per_word,
-                                                 self.character_embedding_dimension])
+                                                 self.character_embedding_dimension],
+                                                name='char_input_tf')
 
+        combined_embedding_tf = self._construct_embedding_network()
+        self.lstm_output_tf = self._construct_lstm_network(combined_embedding_tf)
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
             self.lstm_output_tf, self.label_tf)
 
@@ -223,7 +223,6 @@ class LstmModel(Tagger):
             self.dense_keep_prob_tf: self.dense_keep_probability,
             self.lstm_input_keep_prob_tf: self.lstm_input_keep_prob,
             self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob,
-            self.char_input_tf: batch_char
         }
 
         if len(batch_labels) > 0:
@@ -255,7 +254,6 @@ class LstmModel(Tagger):
             word_level_char_embeddings_list = []
 
             for window_size in self.char_window_sizes:
-
                 word_level_char_embeddings_list.append(
                     self.apply_convolution(self.char_input_tf, batch_size_dim,
                                            window_size, self.character_embedding_dimension))
@@ -611,8 +609,6 @@ class LstmModel(Tagger):
                 batch_seq_len = seq_len[batch_start_index:batch_end_index]
                 batch_char = char[batch_start_index:batch_end_index]
 
-                print("batch stuff: {}".format(batch_char.shape))
-
                 if batch % int(self.display_epoch) == 0:
                     output, loss, _ = self.session.run([self.lstm_output_tf,
                                                         self.cost_tf,
@@ -634,7 +630,7 @@ class LstmModel(Tagger):
                                                                             batch_size, loss,
                                                                             accuracy))
                 else:
-                    self.session.run(self.optimizer,
+                    self.session.run(self.optimizer_tf,
                                      feed_dict=self.construct_feed_dictionary(
                                          batch_examples,
                                          batch_char,
