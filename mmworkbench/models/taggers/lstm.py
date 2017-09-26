@@ -70,26 +70,38 @@ class LstmModel(Tagger):
         self.batch_size = parameters.get('batch_size', 20)
         self.token_lstm_hidden_state_dimension = \
             parameters.get('token_lstm_hidden_state_dimension', 300)
+<<<<<<< HEAD
 
+=======
+>>>>>>> tf_model_opt
         self.learning_rate = parameters.get('learning_rate', 0.005)
         self.optimizer_tf = parameters.get('optimizer', 'adam')
         self.padding_length = parameters.get('padding_length', 20)
         self.display_epoch = parameters.get('display_epoch', 20)
+<<<<<<< HEAD
 
         self.token_embedding_dimension = parameters.get('token_embedding_dimension', 300)
         self.token_pretrained_embedding_filepath = \
             parameters.get('token_pretrained_embedding_filepath')
 
+=======
+        self.token_embedding_dimension = parameters.get('token_embedding_dimension', 300)
+        self.token_pretrained_embedding_filepath = \
+            parameters.get('token_pretrained_embedding_filepath')
+>>>>>>> tf_model_opt
         self.dense_keep_probability = parameters.get('dense_keep_prob', 0.5)
         self.lstm_input_keep_prob = parameters.get('lstm_input_keep_prob', 0.5)
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
 
+<<<<<<< HEAD
         self.use_char_embeddings = parameters.get('use_character_embeddings', False)
         self.char_window_sizes = parameters.get('char_window_sizes', [5])
         self.max_char_per_word = parameters.get('maximum_characters_per_word', 20)
         self.character_embedding_dimension = parameters.get('character_embedding_dimension', 10)
 
+=======
+>>>>>>> tf_model_opt
     def get_params(self, deep=True):
         return self.__dict__
 
@@ -122,6 +134,7 @@ class LstmModel(Tagger):
         self.batch_sequence_lengths_tf = tf.placeholder(tf.int32, shape=[None],
                                                         name='sequence_length_tf')
 
+<<<<<<< HEAD
         if self.use_char_embeddings:
             self.char_input_tf = tf.placeholder(tf.float32,
                                                 [None,
@@ -132,6 +145,11 @@ class LstmModel(Tagger):
 
         combined_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(combined_embedding_tf)
+=======
+        word_and_gaz_embedding_tf = self._construct_embedding_network()
+        self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
+
+>>>>>>> tf_model_opt
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
             self.lstm_output_tf, self.label_tf)
 
@@ -163,12 +181,15 @@ class LstmModel(Tagger):
                                                           DEFAULT_GAZ_LABEL,
                                                           self.gaz_dimension)
 
+<<<<<<< HEAD
             if self.use_char_embeddings:
                 self.char_encoder = CharacterSequenceEmbedding(self.padding_length,
                                                                DEFAULT_CHAR_TOKEN,
                                                                self.character_embedding_dimension,
                                                                self.max_char_per_word)
 
+=======
+>>>>>>> tf_model_opt
             encoded_labels = []
             for sequence in y:
                 encoded_labels.append(self.label_encoder.encode_sequence_of_tokens(sequence))
@@ -181,8 +202,12 @@ class LstmModel(Tagger):
             embedded_labels = None
 
         # Extract features and classes
+<<<<<<< HEAD
         x_sequence_embeddings_arr, self.gaz_features_arr, self.char_features_arr = \
             self._get_features(examples)
+=======
+        x_sequence_embeddings_arr, self.gaz_features_arr = self._get_features(examples)
+>>>>>>> tf_model_opt
         self.sequence_lengths = self._extract_seq_length(examples)
 
         # There are no groups in this model
@@ -191,6 +216,10 @@ class LstmModel(Tagger):
         return x_sequence_embeddings_arr, embedded_labels, groups
 
     def setup_model(self, config):
+<<<<<<< HEAD
+=======
+
+>>>>>>> tf_model_opt
         self.set_params(**config.params)
 
         # We have to reset the graph on every dataset since the input, gaz and output
@@ -201,7 +230,10 @@ class LstmModel(Tagger):
 
     def construct_feed_dictionary(self,
                                   batch_examples,
+<<<<<<< HEAD
                                   batch_char,
+=======
+>>>>>>> tf_model_opt
                                   batch_gaz,
                                   batch_seq_len,
                                   batch_labels=list()):
@@ -209,7 +241,10 @@ class LstmModel(Tagger):
 
         Args:
             batch_examples (ndarray): A batch of examples
+<<<<<<< HEAD
             batch_char (ndarray): A batch of character features
+=======
+>>>>>>> tf_model_opt
             batch_gaz (ndarray): A batch of gazetteer features
             batch_seq_len (ndarray): A batch of sequence length of each query
             batch_labels (ndarray): A batch of labels
@@ -223,15 +258,22 @@ class LstmModel(Tagger):
             self.gaz_input_tf: batch_gaz,
             self.dense_keep_prob_tf: self.dense_keep_probability,
             self.lstm_input_keep_prob_tf: self.lstm_input_keep_prob,
+<<<<<<< HEAD
             self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob,
+=======
+            self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob
+>>>>>>> tf_model_opt
         }
 
         if len(batch_labels) > 0:
             return_dict[self.label_tf] = batch_labels
 
+<<<<<<< HEAD
         if len(batch_char) > 0:
             return_dict[self.char_input_tf] = batch_char
 
+=======
+>>>>>>> tf_model_opt
         return return_dict
 
     def _construct_embedding_network(self):
@@ -248,6 +290,7 @@ class LstmModel(Tagger):
             num_outputs=self.gaz_encoding_dimension,
             weights_initializer=initializer)
 
+<<<<<<< HEAD
         batch_size_dim = tf.shape(self.query_input_tf)[0]
 
         if self.use_char_embeddings:
@@ -324,6 +367,12 @@ class LstmModel(Tagger):
         word_level_char_embedding = tf.nn.relu(max_pool + char_convolution_bias)
         return word_level_char_embedding
 
+=======
+        # Combined the two embeddings
+        combined_embedding_tf = tf.concat([self.query_input_tf, dense_gaz_embedding_tf], axis=2)
+        return combined_embedding_tf
+
+>>>>>>> tf_model_opt
     def _define_optimizer_and_cost(self, output_tensor, label_tensor):
         """ This function defines the optimizer and cost function of the LSTM model
 

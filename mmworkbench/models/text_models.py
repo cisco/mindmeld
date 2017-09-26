@@ -33,9 +33,8 @@ SVM_TYPE = "svm"
 SUPER_LEARNER_TYPE = "super-learner"
 BASE_MODEL_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
 
-# model scoring types
+# default model scoring type
 ACCURACY_SCORING = "accuracy"
-LIKELIHOOD_SCORING = "log_loss"
 
 
 logger = logging.getLogger(__name__)
@@ -77,6 +76,13 @@ class TextModel(Model):
         except KeyError:
             msg = '{}: Classifier type {!r} not recognized'
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
+
+    def _get_cv_scorer(self, selection_settings):
+        """
+        Returns the scorer to use based on the selection settings and classifier type,
+        defaulting to accuracy.
+        """
+        return selection_settings.get('scoring', ACCURACY_SCORING)
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels

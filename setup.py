@@ -8,28 +8,28 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=6.0',
-    'click-log==0.1.8',
-    'elasticsearch>=5.1.0',
-    'Flask>=0.12',
-    'Flask-Cors>=3.0.2',
-    'future>=0.16.0',
-    'nltk==3.2.2',
-    'numpy>=1.10.1',
-    'py>=1.4.34',
-    'python-dateutil>=2.6.0',
-    'requests>=2.13.0',
-    'scipy>=0.9',
-    'scikit-learn>=0.18.1',
-    'tqdm>=4.15.0',
+    'Click>=6.0,<=6.8',
+    'click-log==0.1.8',  # check WB3-191
+    'elasticsearch>=5.1.0,<=5.4.0',
+    'Flask>=0.12,<=0.12.2',
+    'Flask-Cors>=3.0.2,<=3.0.3',
+    'future>=0.16.0,<=0.16.0',
+    'nltk>=3.2.2,<=3.2.4',
+    'numpy>=1.10.1,<=1.13.1',
+    'py>=1.4.34,<=1.4.34',
+    'python-dateutil>=2.6.0,<=2.6.1',
+    'requests>=2.13.0,<=2.18.4',
+    'scipy>=0.9,<=0.19.1',
+    'scikit-learn>=0.18.1,<=0.18.2',
+    'tqdm>=4.15.0,<=4.15.0',
     'urllib3<1.22,>=1.21.1',
-    'python-crfsuite>=0.9.2',
+    'python-crfsuite==0.9.2',
     'sklearn-crfsuite>=0.3.6',
     'tensorflow>=1.2.1'
 ]
 
 setup_requirements = [
-    'pytest-runner'
+    'pytest-runner>=2.11.1,<=2.11.1'
 ]
 
 test_requirements = [
@@ -41,7 +41,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='3.0.0',
+    version='3.1.0rc6',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",

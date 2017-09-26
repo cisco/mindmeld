@@ -397,12 +397,20 @@ DEFAULT_RANKING_CONFIG = {
 def get_app_namespace(app_path):
     """Returns the namespace of the application at app_path"""
     try:
-        return _get_config_module(app_path).APP_NAMESPACE
+        _app_namespace = _get_config_module(app_path).APP_NAMESPACE
+        if 'JUPYTER_USER' in os.environ:
+            _app_namespace = '{}_{}'.format(os.environ['JUPYTER_USER'], _app_namespace)
+        return _app_namespace
     except (OSError, IOError):
         logger.debug('No app configuration file found')
     except AttributeError:
         logger.debug('App namespace not set in app configuration')
-    return os.path.split(app_path)[1]
+
+    _app_namespace = os.path.split(app_path)[1]
+    if 'JUPYTER_USER' in os.environ:
+        _app_namespace = '{jupyter_user}_{app_namespace}'.format(
+            jupyter_user=os.environ['JUPYTER_USER'], app_namespace=_app_namespace)
+    return _app_namespace
 
 
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):

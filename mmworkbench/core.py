@@ -346,7 +346,7 @@ class NestedEntity(object):
 
     @classmethod
     def from_query(cls, query, span=None, normalized_span=None, entity_type=None, role=None,
-                   entity=None, parent_offset=0, children=None):
+                   entity=None, parent_offset=None, children=None):
         """Creates an entity node using a parent entity node
 
         Args:
@@ -367,24 +367,28 @@ class NestedEntity(object):
 
         """
         def _get_form_details(query_span, offset, form_in, form_out):
-            offset_out = query.transform_index(offset, form_in, form_out)
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
-            tok_offset = len(full_text[:offset_out].split())
-            tok_start = len(full_text[:span_out.start].split()) - tok_offset
+            tok_start = len(full_text[:span_out.start].split())
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
 
             # convert span from query's indexing to parent's indexing
-            span_out = span_out.shift(-offset_out)
+            if offset is not None:
+                offset_out = query.transform_index(offset, form_in, form_out)
+                span_out = span_out.shift(-offset_out)
+                tok_offset = len(full_text[:offset_out].split())
+                tok_span.shift(-tok_offset)
 
             return text, span_out, tok_span
 
         if span:
-            query_span = span.shift(parent_offset)
+            query_span = span.shift(parent_offset) \
+                if parent_offset is not None else span
             form_in = TEXT_FORM_RAW
         elif normalized_span:
-            query_span = normalized_span.shift(parent_offset)
+            query_span = normalized_span.shift(parent_offset) \
+                if parent_offset is not None else normalized_span
             form_in = TEXT_FORM_NORMALIZED
 
         texts, spans, tok_spans = list(zip(*[_get_form_details(query_span, parent_offset,

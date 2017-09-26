@@ -9,6 +9,7 @@ from .. import path
 from ..core import ProcessedQuery, Bunch
 from ..exceptions import FileNotFoundError, ProcessorError
 from ..resource_loader import ResourceLoader
+from .._version import validate_workbench_version
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
@@ -148,6 +149,7 @@ class NaturalLanguageProcessor(Processor):
         """
         super().__init__(app_path, resource_loader)
         self._app_path = app_path
+        validate_workbench_version(self._app_path)
         self.name = app_path
         self.domain_classifier = DomainClassifier(self.resource_loader)
 
