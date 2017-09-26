@@ -181,7 +181,8 @@ class LstmModel(Tagger):
             embedded_labels = None
 
         # Extract features and classes
-        x_sequence_embeddings_arr, self.gaz_features_arr, self.char_features_arr = self._get_features(examples)
+        x_sequence_embeddings_arr, self.gaz_features_arr, self.char_features_arr = \
+            self._get_features(examples)
         self.sequence_lengths = self._extract_seq_length(examples)
 
         # There are no groups in this model
