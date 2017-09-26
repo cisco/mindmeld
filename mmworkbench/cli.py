@@ -130,7 +130,7 @@ def build(ctx):
 
 @cli.command('evaluate', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-@click.option('-v', '--verbose/--not_verbose', default=False,
+@click.option('-v', '--verbose', is_flag=True,
               help='Print the full metrics instead of just accuracy.')
 def evaluate(ctx, verbose):
     """Evaluates the app with default config."""
