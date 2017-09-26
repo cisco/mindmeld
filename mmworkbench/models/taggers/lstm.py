@@ -253,7 +253,8 @@ class LstmModel(Tagger):
                 name='softmax_loss_tf')
             cost_tf = tf.reduce_mean(softmax_loss_tf, name='cost_tf')
 
-        optimizer_tf = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate)).minimize(cost_tf)
+        optimizer_tf = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate))\
+            .minimize(cost_tf)
         return optimizer_tf, cost_tf
 
     def _calculate_score(self, output_array, label_array, seq_lengths):
