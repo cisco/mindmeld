@@ -169,7 +169,6 @@ class LstmModel(Tagger):
                                                                self.character_embedding_dimension,
                                                                self.max_char_per_word)
 
-
             encoded_labels = []
             for sequence in y:
                 encoded_labels.append(self.label_encoder.encode_sequence_of_tokens(sequence))
