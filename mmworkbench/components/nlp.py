@@ -350,15 +350,14 @@ class DomainProcessor(Processor):
 
         Args:
             query (Query): The query object to process
-            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-            selected for NLP analysis. An example:
+            allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
+             NLP hierarchy that is selected for NLP analysis. An example:
             {
-                smart_home: {
-                    close_door: {}
-                }
+                close_door: {}
             }
-            where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
-            is None, we use the normal model predict functionality.
+
+            where close_door is the intent. The intent belongs to the smart_home domain.
+            If allowed_nlp_classes is None, we use the normal model predict functionality.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from

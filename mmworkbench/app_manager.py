@@ -83,10 +83,12 @@ class ApplicationManager(object):
             try:
                 nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
             except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
+                # We have to print the error object since it sometimes contains a message
+                # and sometimes it doesn't, like a ValueError.
                 logger.error(
-                    "Validation error {} on input allowed intents {}. "
+                    "Validation error '{}' on input allowed intents {}. "
                     "Not applying domain/intent restrictions this "
-                    "turn".format(e.message, allowed_intents))
+                    "turn".format(e, allowed_intents))
 
         # TODO: support passing in reference time from session
         query = self._query_factory.create_query(text)
