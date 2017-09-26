@@ -142,7 +142,7 @@ class EntityResolver(object):
         entity_map = self._resource_loader.get_entity_map(self.type)
 
         # list of canonical entities and their synonyms
-        entities = entity_map.get('entities')
+        entities = entity_map.get('entities', [])
 
         # create synonym index and import synonyms
         logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
@@ -189,7 +189,7 @@ class EntityResolver(object):
         item_map = {}
         syn_map = {}
         seen_ids = []
-        for item in entity_map:
+        for item in entity_map.get('entities'):
             cname = item['cname']
             item_id = item.get('id')
             if cname in item_map:
