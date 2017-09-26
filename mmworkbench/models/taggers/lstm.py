@@ -111,8 +111,8 @@ class LstmModel(Tagger):
                                         self.output_dimension],
                                        name='label_tf')
 
-        self.sequence_length_tf = tf.placeholder(tf.int32, shape=[None],
-                                                 name='sequence_length_tf')
+        self.batch_sequence_lengths_tf = tf.placeholder(tf.int32, shape=[None],
+                                                        name='sequence_length_tf')
 
         word_and_gaz_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
@@ -160,14 +160,13 @@ class LstmModel(Tagger):
             embedded_labels = None
 
         # Extract features and classes
-        x_arr, gaz_arr = self._get_features(examples)
-        self.gaz_features_arr = np.asarray(gaz_arr, dtype='float32')
+        x_sequence_embeddings_arr, self.gaz_features_arr = self._get_features(examples)
         self.sequence_lengths = self._extract_seq_length(examples)
 
         # There are no groups in this model
         groups = None
 
-        return x_arr, embedded_labels, groups
+        return x_sequence_embeddings_arr, embedded_labels, groups
 
     def setup_model(self, config):
 
@@ -197,7 +196,7 @@ class LstmModel(Tagger):
         """
         return_dict = {
             self.query_input_tf: batch_examples,
-            self.sequence_length_tf: batch_seq_len,
+            self.batch_sequence_lengths_tf: batch_seq_len,
             self.gaz_input_tf: batch_gaz,
             self.dense_keep_prob_tf: self.dense_keep_probability,
             self.lstm_input_keep_prob_tf: self.lstm_input_keep_prob,
@@ -246,27 +245,27 @@ class LstmModel(Tagger):
             learning_rate=float(self.learning_rate)).minimize(cross_entropy_mean_loss_tf)
         return optimizer_tf, cross_entropy_mean_loss_tf
 
-    def _calculate_score(self, output_array, label_array, seq_lengths):
+    def _calculate_score(self, output_arr, label_arr, seq_lengths_arr):
         """ This function calculates the sequence score of all the queries,
         that is, the total number of queries where all the tags are predicted
         correctly.
 
         Args:
-            output_array (ndarray): Output array of the LSTM network
-            label_array (ndarray): Label array of the true labels of the data
-            seq_lengths (ndarray): A real sequence lengths of each example
+            output_arr (ndarray): Output array of the LSTM network
+            label_arr (ndarray): Label array of the true labels of the data
+            seq_lengths_arr (ndarray): A real sequence lengths of each example
 
         Returns:
             The number of queries where all the tags are correct
         """
         reshaped_output_arr = np.reshape(
-            output_array, [-1, int(self.padding_length), self.output_dimension])
+            output_arr, [-1, int(self.padding_length), self.output_dimension])
         reshaped_output_arr = np.argmax(reshaped_output_arr, 2)
-        reshaped_labels_arr = np.argmax(label_array, 2)
+        reshaped_labels_arr = np.argmax(label_arr, 2)
 
         score = 0
         for idx, query in enumerate(reshaped_output_arr):
-            seq_len = seq_lengths[idx]
+            seq_len = seq_lengths_arr[idx]
             predicted_tags = reshaped_output_arr[idx][:seq_len]
             actual_tags = reshaped_labels_arr[idx][:seq_len]
             if np.array_equal(predicted_tags, actual_tags):
@@ -357,7 +356,7 @@ class LstmModel(Tagger):
             cell_fw=lstm_cell_forward_tf,
             cell_bw=lstm_cell_backward_tf,
             inputs=input_tensor,
-            sequence_length=self.sequence_length_tf,
+            sequence_length=self.batch_sequence_lengths_tf,
             dtype=tf.float32,
             initial_state_fw=initial_state_forward_tf,
             initial_state_bw=initial_state_backward_tf)
