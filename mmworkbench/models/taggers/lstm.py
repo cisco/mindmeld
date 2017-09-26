@@ -120,7 +120,7 @@ class LstmModel(Tagger):
         self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
 
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
-            self.lstm_output_tf, self.label_tf, self.sequence_length_tf)
+            self.lstm_output_tf, self.label_tf, self.batch_sequence_lengths_tf)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
         if y:
