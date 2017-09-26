@@ -82,6 +82,13 @@ class ApplicationManager(object):
                    'frame': copy.deepcopy(frame),
                    'entities': []}
 
+        # Validate target dialog state
+        if target_dialog_state not in self.dialogue_manager.handler_map.keys():
+            logger.error("Target dialog state {} does not match any dialog state names "
+                         "in for the application. Not applying the target dialog state "
+                         "this turn.".format(target_dialog_state))
+            target_dialog_state = None
+
         # We bypass the NLP processing engine if the target dialog state is specified. This
         # improves performance by decreasing round trip time between the client and wb.
         if not target_dialog_state:

@@ -398,8 +398,20 @@ class Conversation(object):
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
+
         self.allowed_intents = response.pop('allowed_intents', None)
+        if self.allowed_intents and not isinstance(self.allowed_intents, list):
+            logger.error("allowed_intents {} is supposed to be a list but it is not. "
+                         "Therefore this invalid structure is not stored for further "
+                         "processing.".format(self.allowed_intents))
+            self.allowed_intents = None
+
         self.target_dialog_state = response.pop('target_dialog_state', None)
+        if self.target_dialog_state and not isinstance(self.target_dialog_state, str):
+            logger.error("target_dialog_state {} is supposed to be a string but it is not. "
+                         "Therefore this invalid structure is not stored for further "
+                         "processing.".format(self.target_dialog_state))
+            self.target_dialog_state = None
 
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
@@ -421,8 +433,21 @@ class Conversation(object):
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
+
         self.allowed_intents = response.pop('allowed_intents', None)
+        if self.allowed_intents and not isinstance(self.allowed_intents, list):
+            logger.error("allowed_intents {} is supposed to be a list but it is not. "
+                         "Therefore this invalid structure is not stored for further "
+                         "processing.".format(self.allowed_intents))
+            self.allowed_intents = None
+
         self.target_dialog_state = response.pop('target_dialog_state', None)
+        if self.target_dialog_state and not isinstance(self.target_dialog_state, str):
+            logger.error("target_dialog_state {} is supposed to be a string but it is not. "
+                         "Therefore this invalid structure is not stored for further "
+                         "processing.".format(self.target_dialog_state))
+            self.target_dialog_state = None
+
         return response
 
     def _handle_client_action(self, action):
