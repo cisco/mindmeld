@@ -120,10 +120,19 @@ class GloVeEmbeddingsContainer:
             logger.info("Extracting embeddings from default folder "
                         "location {}".format(EMBEDDINGS_FILE_PATH))
 
-            zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
-
-            with zip_file_object.open(file_name) as embedding_file:
-                self._extract_and_map(embedding_file)
+            try:
+                zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
+                with zip_file_object.open(file_name) as embedding_file:
+                    self._extract_and_map(embedding_file)
+            except zipfile.BadZipFile:
+                logger.warning("{} is corrupt. Deleting the zip file and attempting to"
+                               " download the embedding file again".format(EMBEDDINGS_FILE_PATH))
+                os.remove(EMBEDDINGS_FILE_PATH)
+                self._extract_embeddings()
+            except:
+                logger.error("An error occurred when reading {} zip file. The file might"
+                             " be corrupt, so try deleting the file and running the program "
+                             "again".format(EMBEDDINGS_FILE_PATH))
             return
 
         logger.info("Default folder location {} does not exist".format(EMBEDDINGS_FILE_PATH))
@@ -149,6 +158,18 @@ class SequenceEmbedding(object):
                  use_pretrained_embeddings=False,
                  token_embedding_dimension=None,
                  token_pretrained_embedding_filepath=None):
+        """Initializes the SequenceEmbedding class
+
+        Args:
+            sequence_padding_length (int): padding length of the sequence after which
+            the sequence is cut off
+            default_token (str): The default token if the sequence is too short for
+            the fixed padding length
+            use_pretrained_embeddings (bool): If true, extract pretrained embeddings
+            token_embedding_dimension (int): The embedding dimension of the token
+            token_pretrained_embedding_filepath (str): The embedding filepath to extract
+            the embeddings from
+        """
 
         self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
         self.token_embedding_dimension = token_embedding_dimension
@@ -172,7 +193,7 @@ class SequenceEmbedding(object):
         # corresponding embedding vector (one hot or word vector). For example, word token
         # "cat" is mapped to integer 1, which is mapped to the word vector [0.1, -0.5, ..]
         # This matrix will have the row vector [0.1, -0.5, ..] mapped to index 1.
-        self.token_encoding_to_embedding_matrix = {}
+        self._token_encoding_to_embedding_matrix = {}
 
     def encode_sequence_of_tokens(self, token_sequence):
         """Encodes a sequence of tokens using a simple integer token based approach
@@ -207,24 +228,24 @@ class SequenceEmbedding(object):
         Returns:
             (ndarray): transformed embedding matrix
         """
-        self.token_encoding_to_embedding_matrix = \
-            self._construct_embedding_matrix_from_token_encoding()
+        self._token_encoding_to_embedding_matrix = \
+            self._construct_embedding_matrix()
 
         examples_shape = np.shape(encoded_sequences)
-        final_dimension = np.shape(self.token_encoding_to_embedding_matrix)[1]
+        final_dimension = np.shape(self._token_encoding_to_embedding_matrix)[1]
 
-        sequence_embeddings = np.zeros((examples_shape[0], examples_shape[1], final_dimension))
+        sequence_embeddings_arr = np.zeros((examples_shape[0], examples_shape[1], final_dimension))
 
         for query_index in range(len(encoded_sequences)):
-            for word_index in range(len(sequence_embeddings[query_index])):
+            for word_index in range(len(sequence_embeddings_arr[query_index])):
                 token_encoding = encoded_sequences[query_index][word_index]
 
-                sequence_embeddings[query_index][word_index] = \
-                    self.token_encoding_to_embedding_matrix[token_encoding]
+                sequence_embeddings_arr[query_index][word_index] = \
+                    self._token_encoding_to_embedding_matrix[token_encoding]
 
-        return sequence_embeddings
+        return sequence_embeddings_arr
 
-    def _construct_embedding_matrix_from_token_encoding(self):
+    def _construct_embedding_matrix(self):
         """Constructs the encoding matrix of word encoding to word embedding
 
         Returns:
@@ -247,8 +268,11 @@ class SequenceEmbedding(object):
 
 
 class WordSequenceEmbedding(SequenceEmbedding):
+    """This class is a container for building sequence embeddings for a typical query, for example:
+    'I would like to order a coffee'. We use pretrained word vector embeddings for this class.
+    """
 
-    def _construct_embedding_matrix_from_token_encoding(self):
+    def _construct_embedding_matrix(self):
         num_words = len(self.token_to_encoding_mapping.keys())
         embedding_matrix = np.zeros((num_words, self.token_embedding_dimension))
         for word, i in self.token_to_encoding_mapping.items():
@@ -263,8 +287,11 @@ class WordSequenceEmbedding(SequenceEmbedding):
 
 
 class LabelSequenceEmbedding(SequenceEmbedding):
+    """This class is a container for building sequence embeddings for a sequence of labels.
+    We use a one-hot encoding based embedding representation for this class.
+    """
 
-    def _construct_embedding_matrix_from_token_encoding(self):
+    def _construct_embedding_matrix(self):
         num_words = len(self.token_to_encoding_mapping.keys())
         embedding_matrix = np.zeros((num_words, num_words))
 
@@ -276,6 +303,12 @@ class LabelSequenceEmbedding(SequenceEmbedding):
 
 
 class GazetteerSequenceEmbedding(SequenceEmbedding):
+    """This class is a container for building sequence embeddings for a sequence of gazetteer
+    labels. This container's embedding representation is a binarized encoding (not 1-hot)
+    since many gazetteers can map to the same token. For example: for the token 'cat', the gaz
+    'animals' and 'felines' can map to it, so it's representation would be 11, where the '1'
+    in index 0 represents 'animals' and '1' in index 1 represents 'felines'.
+    """
 
     def __init__(self,
                  sequence_padding_length,
@@ -294,9 +327,9 @@ class GazetteerSequenceEmbedding(SequenceEmbedding):
         self.available_token_for_gaz_entity_encoding = 0
 
         self.default_token = default_token
-        self.token_encoding_to_embedding_matrix = {}
+        self._token_encoding_to_embedding_matrix = {}
 
-    def _construct_embedding_matrix_from_token_encoding(self):
+    def _construct_embedding_matrix(self):
         gaz_dim = self.token_embedding_dimension
         num_entites = len(self.token_to_encoding_mapping.keys())
         embedding_matrix_gaz = np.zeros((num_entites, gaz_dim))

@@ -76,6 +76,21 @@ def test_normalize_5(tokenizer):
     assert normalized == 'is s o b gonna be on at 8 p m'
 
 
+def test_normalize_apos(tokenizer):
+
+    # verify that apostrophe at the end of a possessive form is removed
+    raw = "join Dennis' pmr"
+    normalized = tokenizer.normalize(raw, True)
+
+    assert normalized == "join dennis pmr"
+
+    # verify that apostrophe in the middle of an entity is not removed
+    raw = "join O'reilly's pmr"
+    normalized = tokenizer.normalize(raw, True)
+
+    assert normalized == "join o'reilly 's pmr"
+
+
 def test_mapping(tokenizer):
     raw = 'Test: 1. 2. 3.'
     normalized = tokenizer.normalize(raw)

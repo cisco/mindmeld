@@ -321,7 +321,7 @@ The ``INFO`` logging level can be useful to see what's going on:
 .. code-block:: python
   
   import logging
-  logging.getLogger('mmworkbench’).setLevel(logging.INFO)
+  logging.getLogger('mmworkbench').setLevel(logging.INFO)
 
 There is a handy ``configure_logs()`` function available that wraps this and accepts 2 parameters: 
 

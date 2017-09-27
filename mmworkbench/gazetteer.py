@@ -128,33 +128,37 @@ class Gazetteer(object):
         line_count = 0
         entities_added = 0
         num_cols = None
-        with codecs.open(filename, encoding='utf8') as data_file:
-            for i, row in enumerate(data_file.readlines()):
-                if not row:
-                    continue
-                split_row = row.strip('\n').split('\t')
-                if num_cols is None:
-                    num_cols = len(split_row)
 
-                if len(split_row) != num_cols:
-                    msg = "Row {} of .tsv file '{}' malformed, expected {} columns"
-                    raise ValueError(msg.format(i+1, filename, num_cols))
+        if not os.path.isfile(filename):
+            logger.warn("Entity data file was not found at {!r}".format(filename))
+        else:
+            with codecs.open(filename, encoding='utf8') as data_file:
+                for i, row in enumerate(data_file.readlines()):
+                    if not row:
+                        continue
+                    split_row = row.strip('\n').split('\t')
+                    if num_cols is None:
+                        num_cols = len(split_row)
 
-                if num_cols == 2:
-                    pop, entity = split_row
-                else:
-                    pop = 1.0
-                    entity = split_row[0]
+                    if len(split_row) != num_cols:
+                        msg = "Row {} of .tsv file '{}' malformed, expected {} columns"
+                        raise ValueError(msg.format(i+1, filename, num_cols))
 
-                pop = 0 if pop == 'null' else float(pop)
-                line_count += 1
-                entity = normalizer(entity)
-                if pop > popularity_cutoff:
-                    self._update_entity(entity, float(pop))
-                    entities_added += 1
+                    if num_cols == 2:
+                        pop, entity = split_row
+                    else:
+                        pop = 1.0
+                        entity = split_row[0]
 
-        logger.info('{}/{} entities in entity data file exceeded popularity '
-                    "cutoff and were added to the gazetteer".format(entities_added, line_count))
+                    pop = 0 if pop == 'null' else float(pop)
+                    line_count += 1
+                    entity = normalizer(entity)
+                    if pop > popularity_cutoff:
+                        self._update_entity(entity, float(pop))
+                        entities_added += 1
+
+            logger.info('{}/{} entities in entity data file exceeded popularity '
+                        "cutoff and were added to the gazetteer".format(entities_added, line_count))
 
     def update_with_sys_types(self, numeric_types):
         self.sys_types.update(numeric_types)

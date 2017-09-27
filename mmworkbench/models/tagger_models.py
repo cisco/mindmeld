@@ -7,7 +7,8 @@ import logging
 import random
 from sklearn.externals import joblib
 
-from .helpers import register_model, get_label_encoder
+from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
+                      get_seq_tag_accuracy_scorer)
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
@@ -20,6 +21,11 @@ logger = logging.getLogger(__name__)
 CRF_TYPE = 'crf'
 MEMM_TYPE = 'memm'
 LSTM_TYPE = 'lstm'
+
+# for default model scoring types
+ACCURACY_SCORING = 'accuracy'
+SEQ_ACCURACY_SCORING = 'seq_accuracy'
+SEQUENCE_MODELS = ['crf']
 
 DEFAULT_FEATURES = {
     'bag-of-words-seq': {
@@ -86,10 +92,12 @@ class TaggerModel(Model):
         we save the resources that are memory intensive
         """
         attributes = self.__dict__.copy()
+        attributes['_resources'] = {}
+
         resources_to_persist = set(['sys_types'])
-        for key in list(attributes['_resources'].keys()):
-            if key not in resources_to_persist:
-                del attributes['_resources'][key]
+        for key in resources_to_persist:
+            attributes['_resources'][key] = self.__dict__['_resources'][key]
+
         return attributes
 
     def fit(self, examples, labels, params=None):
@@ -192,6 +200,33 @@ class TaggerModel(Model):
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
                   for example_predicted_tags, example in zip(predicted_tags, examples)]
         return labels
+
+    def _get_cv_scorer(self, selection_settings):
+        """
+        Returns the scorer to use based on the selection settings and classifier type,
+        defaulting to tag accuracy.
+        """
+        classifier_type = self.config.model_settings['classifier_type']
+
+        # Sets the default scorer based on the classifier type
+        if classifier_type in SEQUENCE_MODELS:
+            default_scorer = get_seq_tag_accuracy_scorer()
+        else:
+            default_scorer = ACCURACY_SCORING
+
+        # Gets the scorer based on what is passed in to the selection settings (reverts to
+        # default if nothing is passed in)
+        scorer = selection_settings.get('scoring', default_scorer)
+        if scorer == SEQ_ACCURACY_SCORING:
+            if classifier_type not in SEQUENCE_MODELS:
+                logger.error("Sequence accuracy is only available for the following models: "
+                             "{}. Using tag level accuracy instead...".format(str(SEQUENCE_MODELS)))
+                return ACCURACY_SCORING
+            return get_seq_accuracy_scorer()
+        elif scorer == ACCURACY_SCORING and classifier_type in SEQUENCE_MODELS:
+            return get_seq_tag_accuracy_scorer()
+        else:
+            return scorer
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
