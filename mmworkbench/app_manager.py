@@ -83,7 +83,7 @@ class ApplicationManager(object):
                    'entities': []}
 
         # Validate target dialog state
-        if target_dialog_state not in self.dialogue_manager.handler_map.keys():
+        if target_dialog_state not in self.dialogue_manager.handler_map:
             logger.error("Target dialog state {} does not match any dialog state names "
                          "in for the application. Not applying the target dialog state "
                          "this turn.".format(target_dialog_state))
