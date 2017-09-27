@@ -24,7 +24,7 @@ def test_allowed_intents_and_target_dialog_state_are_cleared():
     nlp, conv = setup_class()
 
     conv.allowed_intents = ['store_info.find_nearest_store']
-    conv.target_dialog_state = ['greeting']
+    conv.target_dialog_state = 'greeting'
     conv.say('close door')
 
     assert not conv.allowed_intents
