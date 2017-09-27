@@ -170,7 +170,7 @@ class LstmModel(Tagger):
         self.padding_length = config.params.get('padding_length')
         self.label_encoder = LabelSequenceEmbedding(self.padding_length, DEFAULT_LABEL)
         self.query_encoder = WordSequenceEmbedding(
-            self.padding_length, DEFAULT_PADDED_TOKEN, False, self.token_embedding_dimension,
+            self.padding_length, DEFAULT_PADDED_TOKEN, True, self.token_embedding_dimension,
             self.token_pretrained_embedding_filepath)
 
     def construct_feed_dictionary(self,
