@@ -130,21 +130,6 @@ class LstmModel(Tagger):
             # the 'other' gaz entity, which is the entity for all non-gazetteer tokens
             self.gaz_dimension = len(self.resources['gazetteers'].keys()) + 1
 
-            self.example_type = config.example_type
-            self.features = config.features
-
-            self.token_pretrained_embedding_filepath = \
-                config.params.get('token_pretrained_embedding_filepath')
-
-            self.padding_length = config.params.get('padding_length')
-
-            self.label_encoder = LabelSequenceEmbedding(self.padding_length,
-                                                        DEFAULT_LABEL)
-
-            self.query_encoder = WordSequenceEmbedding(
-                self.padding_length, DEFAULT_PADDED_TOKEN, True,
-                self.token_embedding_dimension, self.token_pretrained_embedding_filepath)
-
             self.gaz_encoder = GazetteerSequenceEmbedding(self.padding_length,
                                                           DEFAULT_GAZ_LABEL,
                                                           self.gaz_dimension)
@@ -183,11 +168,10 @@ class LstmModel(Tagger):
         self.token_pretrained_embedding_filepath = \
             config.params.get('token_pretrained_embedding_filepath')
         self.padding_length = config.params.get('padding_length')
-        self.label_encoder = LabelSequenceEmbedding(self.padding_length,
-                                                    DEFAULT_LABEL)
+        self.label_encoder = LabelSequenceEmbedding(self.padding_length, DEFAULT_LABEL)
         self.query_encoder = WordSequenceEmbedding(
-            self.padding_length, DEFAULT_PADDED_TOKEN, True,
-            self.token_embedding_dimension, self.token_pretrained_embedding_filepath)
+            self.padding_length, DEFAULT_PADDED_TOKEN, False, self.token_embedding_dimension,
+            self.token_pretrained_embedding_filepath)
 
     def construct_feed_dictionary(self,
                                   batch_examples,
@@ -384,7 +368,7 @@ class LstmModel(Tagger):
         output_bias_tf = tf.get_variable('output_bias_tf', shape=[self.output_dimension],
                                          dtype='float32', initializer=initializer)
 
-        output_tf = tf.matmul(output_tf, output_weights_tf) + output_bias_tf
+        output_tf = tf.add(tf.matmul(output_tf, output_weights_tf), output_bias_tf, name='output_tensor')
         return output_tf
 
     def _get_model_constructor(self):
@@ -570,6 +554,7 @@ class LstmModel(Tagger):
         # Save the tensorflow weights and variables
         saver = tf.train.Saver()
         saver.save(self.session, path + '/lstm_model')
+        print(path + '/lstm_model')
         self.session.close()
 
         # Save feature extraction variables
@@ -577,34 +562,34 @@ class LstmModel(Tagger):
             'resources': self.resources,
             'gaz_dimension': self.gaz_dimension,
             'output_dimension': self.output_dimension,
-            'gaz_features': self.gaz_features,
+            'gaz_features': self.gaz_features_arr,
             'sequence_lengths': self.sequence_lengths,
             'gaz_encoder': self.gaz_encoder,
             'label_encoder': self.label_encoder
         }
 
-        joblib.dump(variables_to_dump, path + '.feature_extraction_vars')
+        joblib.dump(variables_to_dump, path + '/.feature_extraction_vars')
 
     def load(self, path='lstm-model'):
         """
         Loads the Tensorflow model
         """
-        self.session = tf.Session()
         saver = tf.train.import_meta_graph(path + '/lstm_model.meta')
-        saver.restore(self.session, tf.train.latest_checkpoint(path))
+        saver.restore(self.session, path + '/lstm_model')
+        print(path + '/lstm_model')
 
         # Restore tensorflow graph variables
-        self.tf_dense_keep_prob = self.session.graph.get_tensor_by_name('dense_keep_prob:0')
-        self.tf_lstm_input_keep_prob = self.session.graph.get_tensor_by_name('input_keep_prob:0')
-        self.tf_lstm_output_keep_prob = self.session.graph.get_tensor_by_name('output_keep_prob:0')
-        self.tf_query_input = self.session.graph.get_tensor_by_name('tf_query_input:0')
-        self.tf_gaz_input = self.session.graph.get_tensor_by_name('tf_gaz_input:0')
-        self.tf_label = self.session.graph.get_tensor_by_name('tf_label:0')
-        self.tf_sequence_length = self.session.graph.get_tensor_by_name('tf_sequence_length:0')
-        self.tf_lstm_output = self.session.graph.get_tensor_by_name('output_tensor:0')
+        self.dense_keep_prob_tf = self.session.graph.get_tensor_by_name('dense_keep_prob_tf:0')
+        self.lstm_input_keep_prob_tf = self.session.graph.get_tensor_by_name('lstm_input_keep_prob_tf:0')
+        self.lstm_output_keep_prob_tf = self.session.graph.get_tensor_by_name('lstm_output_keep_prob_tf:0')
+        self.query_input_tf = self.session.graph.get_tensor_by_name('query_input_tf:0')
+        self.gaz_input_tf = self.session.graph.get_tensor_by_name('gaz_input_tf:0')
+        self.label_tf = self.session.graph.get_tensor_by_name('label_tf:0')
+        self.batch_sequence_lengths_tf = self.session.graph.get_tensor_by_name('sequence_length_tf:0')
+        self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
 
         # Load feature extraction variables
-        variables_to_load = joblib.load(path + '.feature_extraction_vars')
+        variables_to_load = joblib.load(path + '/.feature_extraction_vars')
         self.resources = variables_to_load['resources']
         self.gaz_dimension = variables_to_load['gaz_dimension']
         self.output_dimension = variables_to_load['output_dimension']
