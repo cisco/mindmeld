@@ -12,12 +12,37 @@ import os
 from .. import path
 from ..exceptions import WorkbenchImportError
 
-logger = logging.getLogger(__name__)
+mod_logger = logging.getLogger(__name__)
 
-SHOW_REPLY = 'show-reply'
-SHOW_PROMPT = 'show-prompt'
-SHOW_SUGGESTIONS = 'show-suggestions'
-SHOW_COLLECTION = 'show-collection'
+
+class DirectiveNames(object):
+    """A constants object for directive names.
+
+    Attributes:
+        COLLECTION (str): An directive to display a list.
+        LISTEN (str): An directive to listen (start speech recognition).
+        REPLY (str): An directive to display a text view.
+        SPEAK (str): An directive to speak text out loud.
+        SUGGESTIONS (str): A view for a list of suggestions.
+    """
+
+    COLLECTION = 'collection'
+    LISTEN = 'listen'
+    REPLY = 'reply'
+    SPEAK = 'speak'
+    SUGGESTIONS = 'suggestions'
+
+
+class DirectiveTypes(object):
+    """A constants object for directive types.
+
+    Attributes:
+        ACTION (str): An action directive
+        VIEW (str): A view directive.
+    """
+
+    VIEW = 'view'
+    ACTION = 'action'
 
 
 class DialogueStateRule(object):
@@ -30,6 +55,9 @@ class DialogueStateRule(object):
         entity_types (set): The set of entity types to match against
         intent (str): The name of the intent to match against
     """
+
+    logger = mod_logger.getChild('DialogueStateRule')
+
     def __init__(self, dialogue_state, **kwargs):
         """Initializes a dialogue state rule.
 
@@ -175,6 +203,8 @@ class DialogueStateRule(object):
 
 class DialogueManager(object):
 
+    logger = mod_logger.getChild('DialogueManager')
+
     def __init__(self, responder_class=None):
         self.handler_map = {}
         self.rules = []
@@ -210,7 +240,7 @@ class DialogueManager(object):
             target_dialog_state (str, optional): The target dialog state
 
         Returns:
-            dict: A dict containing the dialogue datae and client actions
+            dict: A dict containing the dialogue state and directives
         """
         dialogue_state = None
 
@@ -225,7 +255,7 @@ class DialogueManager(object):
                     break
 
         if dialogue_state is None:
-            logger.info('Failed to find dialogue state', context)
+            self.logger.info('Failed to find dialogue state', context)
             handler = self._default_handler
         else:
             handler = self.handler_map[dialogue_state]
@@ -233,7 +263,7 @@ class DialogueManager(object):
         slots = {}
         responder = self.responder_class(slots)
         handler(context, responder)
-        return {'dialogue_state': dialogue_state, 'client_actions': responder.client_actions}
+        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
     @staticmethod
     def _default_handler(context, responder):
@@ -242,14 +272,18 @@ class DialogueManager(object):
 
 
 class DialogueResponder(object):
-    """The dialogue responder helps generate client actions and fill slots in the
+    """The dialogue responder helps generate directives and fill slots in the
     system-generated natural language responses.
 
     Attributes:
-        client_actions (list): A list of client actions that the responder has added
+        directives (list): A list of directives that the responder has added
         slots (dict): Values to populate the placeholder slots in the natural language
             response
     """
+    logger = mod_logger.getChild('DialogueResponder')
+    DirectiveNames = DirectiveNames
+    DirectiveTypes = DirectiveTypes
+
     def __init__(self, slots):
         """Initializes a dialogue responder
 
@@ -258,68 +292,110 @@ class DialogueResponder(object):
                 response
         """
         self.slots = slots
-        self.client_actions = []
+        self.directives = []
 
     def reply(self, text):
-        """Sends a 'show-reply' client action
+        """Adds a 'reply' directive
 
         Args:
             text (str): The text of the reply
         """
-        self._reply(text)
+        text = self._process_template(text)
+        self.display(DirectiveNames.REPLY, payload={'text': text})
 
     def prompt(self, text):
-        """Sends a 'show-prompt' client action
+        """Alias for `reply()`. Deprecated.
 
         Args:
-            text (str): The text of the prompt
+            text (str): The text of the reply
         """
-        self._reply(text, action=SHOW_PROMPT)
+        self.logger.warning('Responder.prompt is deprecated. Please use Responder.reply and Responder.listen')
+        self.reply(text)
 
-    def _reply(self, text, action=SHOW_REPLY):
-        """Convenience method as reply and prompt are basically the same."""
-        text = self._choose(text)
-        self.respond({
-            'name': action,
-            'message': {'text': text.format(**self.slots)}
-        })
-
-    def show(self, things):
-        """Sends a 'show-collection' client action
+    def speak(self, text):
+        """Adds a 'speak' directive
 
         Args:
-            things (list): The list of dictionary objects
+            text (str): The text to speak aloud
+        """
+        text = self._process_template(text)
+        self.act(DirectiveNames.SPEAK, payload={'text': text})
+
+    def listen(self):
+        """Adds a 'listen' directive."""
+        self.act(DirectiveNames.LISTEN)
+
+    def show_collection(self, things):
+        """Adds a 'collection' directive
+
+        Args:
+            collection (list): The list of dictionary objects
         """
         collection = things or []
-        self.respond({
-            'name': SHOW_COLLECTION,
-            'message': collection
-        })
+        self.display(DirectiveNames.COLLECTION, payload=collection)
 
-    def suggest(self, suggestions=None):
-        suggestions = suggestions or []
-        self.respond({
-            'name': SHOW_SUGGESTIONS,
-            'message': suggestions
-        })
-
-    def respond(self, action):
-        """Sends an arbitrary client action.
+    def suggest(self, suggestions):
+        """Adds a 'suggestions' directive
 
         Args:
-            action (dict): A client action
-
+            suggestions (list): A list of suggestions
         """
-        self.client_actions.append(action)
+        suggestions = suggestions or []
+        self.display(DirectiveNames.SUGGESTIONS, payload=suggestions)
+
+    def display(self, name, payload=None):
+        """Adds an arbitrary directive of type 'view'.
+
+        Args:
+            name (str): The name of the directive
+            payload (dict, optional): The payload for the view
+        """
+        self.direct(name, DirectiveTypes.VIEW, payload=payload)
+
+    def act(self, name, payload=None):
+        """Adds an arbitrary directive of type 'action'.
+
+        Args:
+            name (str): The name of the directive
+            payload (dict, optional): The payload for the action
+        """
+        self.direct(name, DirectiveTypes.ACTION, payload=payload)
+
+    def direct(self, name, dtype, payload=None):
+        """Adds an arbitrary directive
+
+        Args:
+            name (str): The name of the directive
+            dtype (str): The type of the directive
+            payload (dict, optional): The payload for the view
+        """
+
+        directive = {'name': name, 'type': dtype}
+        if payload:
+            directive['payload'] = payload
+
+        self.directives.append(directive)
+
+    def respond(self, directive):
+        """Adds an arbitrary directive.
+
+        Args:
+            directive (dict): An directive.
+        """
+        self.logger.warning('respond() is deprecated. Instead use direct().')
+        self.directives.append(directive)
 
     @staticmethod
     def _choose(items):
         """Chooses a random item from items"""
-        if isinstance(items, tuple) or isinstance(items, list):
+        if isinstance(items, (tuple, list)):
             return random.choice(items)
         elif isinstance(items, set):
-            items = random.choice(tuple(items))
+            return random.choice(tuple(items))
         return items
+
+    def _process_template(self, text):
+        return self._choose(text).format(**self.slots)
 
 
 def _get_app_module(app_path):
@@ -359,6 +435,9 @@ class Conversation(object):
         history (list): The history of the conversation. Most recent messages
         session (dict): Description
     """
+
+    logger = mod_logger.getChild('Conversation')
+
     def __init__(self, app=None, app_path=None, nlp=None, session=None):
         """
         Args:
@@ -382,9 +461,9 @@ class Conversation(object):
         self.target_dialog_state = ''
 
     def say(self, text):
-        """Send a message in the conversation. The message will be processed by the app based on
-        the current state of the conversation and returns the extracted messages from the client
-        actions.
+        """Send a message in the conversation. The message will be
+        processed by the app based on the current state of the conversation and
+        returns the extracted messages from the directives.
 
         Args:
             text (str): The text of a message
@@ -392,35 +471,16 @@ class Conversation(object):
         Returns:
             list of str: A text representation of the dialogue responses
         """
-        response = self._app_manager.parse(text, session=self.session, frame=self.frame,
-                                           history=self.history,
-                                           allowed_intents=self.allowed_intents,
-                                           target_dialog_state=self.target_dialog_state)
-        response.pop('history')
-        self.history.insert(0, response)
-        self.frame = response['frame']
+        response = self.process(text)
 
-        self.allowed_intents = response.pop('allowed_intents', None)
-        if self.allowed_intents and not isinstance(self.allowed_intents, list):
-            logger.error("allowed_intents {} is supposed to be a list but it is not. "
-                         "Therefore this invalid structure is not stored for further "
-                         "processing.".format(self.allowed_intents))
-            self.allowed_intents = None
-
-        self.target_dialog_state = response.pop('target_dialog_state', None)
-        if self.target_dialog_state and not isinstance(self.target_dialog_state, str):
-            logger.error("target_dialog_state {} is supposed to be a string but it is not. "
-                         "Therefore this invalid structure is not stored for further "
-                         "processing.".format(self.target_dialog_state))
-            self.target_dialog_state = None
-
-        # handle client actions
-        response_texts = [self._handle_client_action(a) for a in response['client_actions']]
+        # handle directives
+        response_texts = [self._follow_directive(a) for a in response['directives']]
         return response_texts
 
     def process(self, text):
-        """Send a message in the conversation. The message will be processed by the app based on
-        the current state of the conversation and returns the response.
+        """Send a message in the conversation. The message will be processed by
+        the app based on the current state of the conversation and returns
+        the response.
 
         Args:
             text (str): The text of a message
@@ -437,28 +497,28 @@ class Conversation(object):
 
         self.allowed_intents = response.pop('allowed_intents', None)
         if self.allowed_intents and not isinstance(self.allowed_intents, list):
-            logger.error("allowed_intents {} is supposed to be a list but it is not. "
-                         "Therefore this invalid structure is not stored for further "
-                         "processing.".format(self.allowed_intents))
+            self.logger.error("allowed_intents {} is supposed to be a list but it is not. "
+                              "Therefore this invalid structure is not stored for further "
+                              "processing.".format(self.allowed_intents))
             self.allowed_intents = None
 
         self.target_dialog_state = response.pop('target_dialog_state', None)
         if self.target_dialog_state and not isinstance(self.target_dialog_state, str):
-            logger.error("target_dialog_state {} is supposed to be a string but it is not. "
-                         "Therefore this invalid structure is not stored for further "
-                         "processing.".format(self.target_dialog_state))
+            self.logger.error("target_dialog_state {} is supposed to be a string but it is not. "
+                              "Therefore this invalid structure is not stored for further "
+                              "processing.".format(self.target_dialog_state))
             self.target_dialog_state = None
 
         return response
 
-    def _handle_client_action(self, action):
+    def _follow_directive(self, directive):
         msg = ''
         try:
-            if action['name'] in set((SHOW_REPLY, SHOW_PROMPT)):
-                msg = action['message']['text']
-            elif action['name'] == SHOW_SUGGESTIONS:
-                suggestions = action['message']
-                if not len(suggestions):
+            if directive['name'] == DirectiveNames.REPLY:
+                msg = directive['payload']['text']
+            elif directive['name'] == DirectiveNames.SUGGESTIONS:
+                suggestions = directive['payload']
+                if not suggestions:
                     raise ValueError
                 msg = 'Suggestion{}:'.format('' if len(suggestions) == 1 else 's')
                 texts = []
@@ -470,11 +530,11 @@ class Conversation(object):
 
                     texts.append(self._generate_suggestion_text(suggestion))
                 msg = msg.format(*texts)
-            elif action['name'] == SHOW_COLLECTION:
+            elif directive['name'] == DirectiveNames.COLLECTION:
                 msg = '\n'.join(
-                    [json.dumps(item, indent=4, sort_keys=True) for item in action['message']])
+                    [json.dumps(item, indent=4, sort_keys=True) for item in directive['payload']])
         except (KeyError, ValueError, AttributeError):
-            msg = "Unsupported response: {!r}".format(action)
+            msg = "Unsupported response: {!r}".format(directive)
 
         return msg
 
