@@ -59,8 +59,8 @@ class ApplicationManager(object):
             payload (dict, optional): Description
             session (dict, optional): Description
             history (list, optional): Description
-            allowed_intents (list, optional): A list of allowed intents
-            for model consideration
+            allowed_intents (list, optional): A list of allowed intents for
+            model consideration
             verbose (bool, optional): Description
 
         Returns:
