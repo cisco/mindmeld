@@ -8,6 +8,7 @@ from builtins import object
 import copy
 
 from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
+from .components.dialogue import DialogueResponder
 from .resource_loader import ResourceLoader
 
 
@@ -17,7 +18,8 @@ class ApplicationManager(object):
     necessary components of Workbench. Once processing is complete, the application manager
     returns the final response back to the gateway.
     """
-    def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None):
+    def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None,
+                 context_class=None, responder_class=None):
         self._app_path = app_path
         # If NLP or QA were passed in, use the resource loader from there
         if nlp:
@@ -32,9 +34,11 @@ class ApplicationManager(object):
         self._query_factory = resource_loader.query_factory
 
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
-        self.dialogue_manager = DialogueManager()
         self.question_answerer = question_answerer or QuestionAnswerer(app_path, resource_loader,
                                                                        es_host)
+        self.context_class = context_class or dict
+        self.responder_class = responder_class or DialogueResponder
+        self.dialogue_manager = DialogueManager(self.responder_class)
 
     @property
     def ready(self):
@@ -73,7 +77,8 @@ class ApplicationManager(object):
         # TODO: support specifying target domain, etc in payload
         processed_query = self.nlp.process_query(query)
 
-        context = {'request': request, 'history': history, 'frame': copy.deepcopy(frame)}
+        context = self.context_class(
+            {'request': request, 'history': history, 'frame': copy.deepcopy(frame)})
         context.update(processed_query.to_dict())
         context.pop('text')
         context.update(self.dialogue_manager.apply_handler(context))
