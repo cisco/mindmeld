@@ -175,9 +175,10 @@ class DialogueStateRule(object):
 
 class DialogueManager(object):
 
-    def __init__(self):
+    def __init__(self, responder_class=None):
         self.handler_map = {}
         self.rules = []
+        self.responder_class = responder_class or DialogueResponder
 
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue state rule for the dialogue manager.
@@ -230,7 +231,7 @@ class DialogueManager(object):
             handler = self.handler_map[dialogue_state]
         # TODO: prepopulate slots
         slots = {}
-        responder = DialogueResponder(slots)
+        responder = self.responder_class(slots)
         handler(context, responder)
         return {'dialogue_state': dialogue_state, 'client_actions': responder.client_actions}
 
