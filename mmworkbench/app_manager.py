@@ -85,7 +85,7 @@ class ApplicationManager(object):
             {'request': request, 'history': history, 'frame': copy.deepcopy(frame)})
 
         # Validate target dialog state
-        if target_dialog_state not in self.dialogue_manager.handler_map:
+        if target_dialog_state and target_dialog_state not in self.dialogue_manager.handler_map:
             logger.error("Target dialog state {} does not match any dialog state names "
                          "in for the application. Not applying the target dialog state "
                          "this turn.".format(target_dialog_state))
