@@ -4,20 +4,22 @@ About This Playbook
 
 This playbook represents a first step toward defining the governing principles and best practices which will enable developers to build great conversational applications. It is the result of several years of practical experience building and deploying dozens of the most advanced conversational applications achievable. Cutting-edge research and state-of-the-art algorithms are not surveyed here; there are many other resources available for that purpose. Instead, this playbook focuses on helping developers and data scientists build real production applications. The detailed instructions, practical advice, and real-world examples provided here should empower developers to improve the quality and variety of conversational experiences of the coming months and years.
 
-The :ref:`intro` provides an overview of the state of the art in building conversational applications and discusses tradeoffs associated with different implementation approaches. 
+The :ref:`intro` provides an overview of the state of the art in building conversational applications and discusses tradeoffs associated with different implementation approaches.
 
 The :ref:`quickstart` illustrates how to build an end-to-end conversational application using Workbench, the MindMeld Conversational AI toolkit. You can apply it directly while building a conversational application, or just read it to learn the essentials of Workbench.
 
-The :ref:`blueprints` section explains how to use Workbench to quickly build and test a fully working conversational application without writing code or collecting training data. You can bootstrap a Blueprint app into a more specialized and powerful conversational application, or just use the Blueprint app as a demo or research tool. 
+The :ref:`blueprints` section explains how to use Workbench to quickly build and test a fully working conversational application without writing code or collecting training data. You can bootstrap a Blueprint app into a more specialized and powerful conversational application, or just use the Blueprint app as a demo or research tool.
 
-The :ref:`userguide` covers each component of the MindMeld platform in depth and explains how to use Workbench to build and configure each component for optimal performance. It functions as a technical supplement that details how to improve an application built following either the :ref:`quickstart` or the :ref:`blueprints`. The :ref:`userguide` highlights many common techniques and best practices that contribute to successful conversational experiences today. 
+The :ref:`userguide` covers each component of the MindMeld platform in depth and explains how to use Workbench to build and configure each component for optimal performance. It functions as a technical supplement that details how to improve an application built following either the :ref:`quickstart` or the :ref:`blueprints`. The :ref:`userguide` highlights many common techniques and best practices that contribute to successful conversational experiences today.
+
+The :ref:`versions` section contains a Recent Changes section which you should always consult before installing or upgrading Workbench.
 
 Readers should be familiar with `Machine Learning <https://www.coursera.org/learn/machine-learning>`_ and the `Python <https://www.python.org/>`_ programming language, including functional knowledge of the `scikit-learn <http://scikit-learn.org/>`_ python package.
 
 How to Use these Docs
 ---------------------
 
-The questions and answers below explain how to use this Conversational AI Playbook to support your individual needs as a developer and learner. 
+The questions and answers below explain how to use this Conversational AI Playbook to support your individual needs as a developer and learner.
 
 ----
 
@@ -109,6 +111,14 @@ Contents
    userguide/parser
    userguide/kb
    userguide/dm
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Versions
+   :name: versions
+
+   versions/changes
+   versions/history
 
 ..
    .. toctree::

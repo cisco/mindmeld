@@ -11,12 +11,15 @@ from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
+from .taggers.lstm import LstmModel
+from ..exceptions import WorkbenchError
 
 logger = logging.getLogger(__name__)
 
 # classifier types
 CRF_TYPE = 'crf'
 MEMM_TYPE = 'memm'
+LSTM_TYPE = 'lstm'
 
 # for default model scoring types
 ACCURACY_SCORING = 'accuracy'
@@ -133,7 +136,7 @@ class TaggerModel(Model):
         y = self._label_encoder.encode(labels, examples=examples)
 
         # Extract features
-        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y=y,
+        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y,
                                                   fit=True)
 
         # Fit the model
@@ -142,6 +145,9 @@ class TaggerModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
+            if self._clf.__class__ == LstmModel:
+                raise WorkbenchError("The LSTM model does not support cross-validation")
+
             _, best_params = self._fit_cv(X, y, groups)
             self._clf = self._fit(X, y, best_params)
             self._current_params = best_params
@@ -185,6 +191,7 @@ class TaggerModel(Model):
             return [()]
         # Process the data to generate features and predict the tags
         predicted_tags = self._clf.extract_and_predict(examples, self.config, self._resources)
+
         # Decode the tags to labels
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
                   for example_predicted_tags, example in zip(predicted_tags, examples)]
@@ -250,6 +257,7 @@ class TaggerModel(Model):
             return {
                 MEMM_TYPE: MemmModel,
                 CRF_TYPE: ConditionalRandomFields,
+                LSTM_TYPE: LstmModel,
             }[classifier_type]
         except KeyError:
             msg = '{}: Classifier type {!r} not recognized'

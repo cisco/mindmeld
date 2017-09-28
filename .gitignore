@@ -67,3 +67,6 @@ target/
 
 # Workbench Models
 .generated/
+
+# Workbench Data
+data/

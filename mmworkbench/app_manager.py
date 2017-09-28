@@ -6,9 +6,14 @@ from __future__ import absolute_import, unicode_literals
 from builtins import object
 
 import copy
+import logging
 
 from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
+from .components.dialogue import DialogueResponder
 from .resource_loader import ResourceLoader
+from .exceptions import AllowedNlpClassesKeyError
+
+logger = logging.getLogger(__name__)
 
 
 class ApplicationManager(object):
@@ -17,7 +22,8 @@ class ApplicationManager(object):
     necessary components of Workbench. Once processing is complete, the application manager
     returns the final response back to the gateway.
     """
-    def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None):
+    def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None,
+                 context_class=None, responder_class=None):
         self._app_path = app_path
         # If NLP or QA were passed in, use the resource loader from there
         if nlp:
@@ -32,9 +38,11 @@ class ApplicationManager(object):
         self._query_factory = resource_loader.query_factory
 
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
-        self.dialogue_manager = DialogueManager()
         self.question_answerer = question_answerer or QuestionAnswerer(app_path, resource_loader,
                                                                        es_host)
+        self.context_class = context_class or dict
+        self.responder_class = responder_class or DialogueResponder
+        self.dialogue_manager = DialogueManager(self.responder_class)
 
     @property
     def ready(self):
@@ -47,37 +55,67 @@ class ApplicationManager(object):
             return
         self.nlp.load()
 
-    def parse(self, text, payload=None, session=None, frame=None, history=None, verbose=False):
+    def parse(self, text, payload=None, session=None, frame=None, history=None,
+              allowed_intents=None, target_dialog_state=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
             payload (dict, optional): Description
             session (dict, optional): Description
             history (list, optional): Description
+            allowed_intents (list, optional): A list of allowed intents
+            for model consideration
+            target_dialog_state (str, optional): The target dialog state
             verbose (bool, optional): Description
 
+        Returns:
+            (dict): Context object
         """
+
         session = session or {}
         history = history or []
         frame = frame or {}
         # TODO: what do we do with verbose???
-        # TODO: where is the frame stored?
 
         request = {'text': text, 'session': session}
         if payload:
             request['payload'] = payload
 
-        # TODO: support passing in reference time from session
-        query = self._query_factory.create_query(text)
+        context = self.context_class(
+            {'request': request, 'history': history, 'frame': copy.deepcopy(frame)})
 
-        # TODO: support specifying target domain, etc in payload
-        processed_query = self.nlp.process_query(query)
+        # Validate target dialog state
+        if target_dialog_state and target_dialog_state not in self.dialogue_manager.handler_map:
+            logger.error("Target dialog state {} does not match any dialog state names "
+                         "in for the application. Not applying the target dialog state "
+                         "this turn.".format(target_dialog_state))
+            target_dialog_state = None
 
-        context = {'request': request, 'history': history, 'frame': copy.deepcopy(frame)}
-        context.update(processed_query.to_dict())
-        context.pop('text')
-        context.update(self.dialogue_manager.apply_handler(context))
+        # We bypass the NLP processing engine if the target dialog state is specified. This
+        # improves performance by decreasing round trip time between the client and wb.
+        if not target_dialog_state:
+            nlp_hierarchy = None
+            if allowed_intents:
+                try:
+                    nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
+                except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
+                    # We have to print the error object since it sometimes contains a message
+                    # and sometimes it doesn't, like a ValueError.
+                    logger.error(
+                        "Validation error '{}' on input allowed intents {}. "
+                        "Not applying domain/intent restrictions this "
+                        "turn".format(e, allowed_intents))
 
+            # TODO: support passing in reference time from session
+            query = self._query_factory.create_query(text)
+
+            # TODO: support specifying target domain, etc in payload
+            processed_query = self.nlp.process_query(query, nlp_hierarchy)
+
+            context.update(processed_query.to_dict())
+            context.pop('text')
+
+        context.update(self.dialogue_manager.apply_handler(context, target_dialog_state))
         return context
 
     def add_dialogue_rule(self, name, handler, **kwargs):
