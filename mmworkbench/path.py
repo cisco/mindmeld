@@ -197,7 +197,7 @@ def load_app_package(app_path):
     package_name = os.path.basename(app_path)
     package_path = os.path.dirname(app_path)
 
-    fp, pathname, description = imp.find_module(package_name, path=[package_path])
+    fp, pathname, description = imp.find_module(package_name, [package_path])
     imp.load_module(package_name, fp, pathname, description)
 
 
