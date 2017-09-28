@@ -4,6 +4,7 @@ This module contains the natural language processor.
 """
 from __future__ import absolute_import, unicode_literals
 from builtins import object, super
+import logging
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
@@ -18,6 +19,8 @@ from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
 from ..exceptions import AllowedNlpClassesKeyError
+
+logger = logging.getLogger(__name__)
 
 
 class Processor(object):
@@ -83,6 +86,23 @@ class Processor(object):
         self.dirty = False
 
     def _load(self):
+        raise NotImplementedError
+
+    def evaluate(self, print_stats=False):
+        """Evaluates all the natural language processing models for this processor and its
+        children.
+
+        Args:
+            print_stats (bool): If true, prints the full stats table. Otherwise prints just
+                                the accuracy
+
+        """
+        self._evaluate(print_stats)
+
+        for child in self._children.values():
+            child.evaluate(print_stats)
+
+    def _evaluate(self):
         raise NotImplementedError
 
     def _check_ready(self):
@@ -193,6 +213,16 @@ class NaturalLanguageProcessor(Processor):
             return
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
+
+    def _evaluate(self, print_stats):
+        if len(self.domains) > 1:
+            domain_eval = self.domain_classifier.evaluate()
+            if domain_eval:
+                print("Domain classification accuracy: '{}'".format(domain_eval.get_accuracy()))
+                if print_stats:
+                    domain_eval.print_stats()
+            else:
+                logger.info("Skipping domain classifier evaluation")
 
     def process_query(self, query, allowed_nlp_classes=None):
         """Processes the given query using the full hierarchy of natural language processing models
@@ -326,6 +356,18 @@ class DomainProcessor(Processor):
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.load(model_path)
 
+    def _evaluate(self, print_stats):
+        if len(self.intents) > 1:
+            intent_eval = self.intent_classifier.evaluate()
+            if intent_eval:
+                print("Intent classification accuracy for the '{}' domain: {}".format(
+                      self.name, intent_eval.get_accuracy()))
+                if print_stats:
+                    intent_eval.print_stats()
+            else:
+                logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
+                            self.name))
+
     def process(self, query_text):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
@@ -451,6 +493,18 @@ class IntentProcessor(Processor):
                                         self.resource_loader)
             self._children[entity_type] = processor
 
+    def _evaluate(self, print_stats):
+        if len(self.entity_recognizer.entity_types) > 1:
+            entity_eval = self.entity_recognizer.evaluate()
+            if entity_eval:
+                print("Entity recognition accuracy for the '{}.{}' intent"
+                      ": {}".format(self.domain, self.name, entity_eval.get_accuracy()))
+                if print_stats:
+                    entity_eval.print_stats()
+            else:
+                logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
+                            self.domain, self.name))
+
     def process(self, query_text):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
@@ -533,6 +587,18 @@ class EntityProcessor(Processor):
         model_path = path.get_role_model_path(self._app_path, self.domain, self.intent, self.type)
         self.role_classifier.load(model_path)
         self.entity_resolver.load()
+
+    def _evaluate(self, print_stats):
+        if len(self.role_classifier.roles) > 1:
+            role_eval = self.role_classifier.evaluate()
+            if role_eval:
+                print("Role classification accuracy for the {}.{}.{}' entity type: {}".format(
+                      self.domain, self.intent, self.type, role_eval.get_accuracy()))
+                if print_stats:
+                    role_eval.print_stats()
+            else:
+                logger.info("Skipping role classifier evaluation for the '{}.{}.{}' "
+                            "entity type".format(self.domain, self.intent, self.type))
 
     def process(self, text):
         raise NotImplementedError('EntityProcessor objects do not support `process()`. '
