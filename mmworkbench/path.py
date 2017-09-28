@@ -56,6 +56,8 @@ ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, 'ascii_folding_dict.txt
 MALLARD_JAR_PATH = os.path.join(RESOURCES_FOLDER, 'mindmeld-mallard.jar')
 EMBEDDINGS_FOLDER_PATH = os.path.join(WORKBENCH_ROOT, 'data')
 EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, 'glove.6B.zip')
+PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = \
+    os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_char_embeddings.pkl')
 
 # User specific directories
 USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mmworkbench')
@@ -197,7 +199,7 @@ def load_app_package(app_path):
     package_name = os.path.basename(app_path)
     package_path = os.path.dirname(app_path)
 
-    fp, pathname, description = imp.find_module(package_name, path=[package_path])
+    fp, pathname, description = imp.find_module(package_name, [package_path])
     imp.load_module(package_name, fp, pathname, description)
 
 

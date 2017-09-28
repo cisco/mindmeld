@@ -175,9 +175,10 @@ class DialogueStateRule(object):
 
 class DialogueManager(object):
 
-    def __init__(self):
+    def __init__(self, responder_class=None):
         self.handler_map = {}
         self.rules = []
+        self.responder_class = responder_class or DialogueResponder
 
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue state rule for the dialogue manager.
@@ -201,20 +202,27 @@ class DialogueManager(object):
                 raise AssertionError(msg)
             self.handler_map[name] = handler
 
-    def apply_handler(self, context):
+    def apply_handler(self, context, target_dialog_state=None):
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
             context (dict): Description
+            target_dialog_state (str, optional): The target dialog state
 
         Returns:
             dict: A dict containing the dialogue datae and client actions
         """
         dialogue_state = None
+
         for rule in self.rules:
-            if rule.apply(context):
-                dialogue_state = rule.dialogue_state
-                break
+            if target_dialog_state:
+                if target_dialog_state == rule.dialogue_state:
+                    dialogue_state = rule.dialogue_state
+                    break
+            else:
+                if rule.apply(context):
+                    dialogue_state = rule.dialogue_state
+                    break
 
         if dialogue_state is None:
             logger.info('Failed to find dialogue state', context)
@@ -223,7 +231,7 @@ class DialogueManager(object):
             handler = self.handler_map[dialogue_state]
         # TODO: prepopulate slots
         slots = {}
-        responder = DialogueResponder(slots)
+        responder = self.responder_class(slots)
         handler(context, responder)
         return {'dialogue_state': dialogue_state, 'client_actions': responder.client_actions}
 
@@ -370,6 +378,8 @@ class Conversation(object):
         self.session = session or {}
         self.history = []
         self.frame = {}
+        self.allowed_intents = None
+        self.target_dialog_state = ''
 
     def say(self, text):
         """Send a message in the conversation. The message will be processed by the app based on
@@ -383,10 +393,26 @@ class Conversation(object):
             list of str: A text representation of the dialogue responses
         """
         response = self._app_manager.parse(text, session=self.session, frame=self.frame,
-                                           history=self.history)
+                                           history=self.history,
+                                           allowed_intents=self.allowed_intents,
+                                           target_dialog_state=self.target_dialog_state)
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
+
+        self.allowed_intents = response.pop('allowed_intents', None)
+        if self.allowed_intents and not isinstance(self.allowed_intents, list):
+            logger.error("allowed_intents {} is supposed to be a list but it is not. "
+                         "Therefore this invalid structure is not stored for further "
+                         "processing.".format(self.allowed_intents))
+            self.allowed_intents = None
+
+        self.target_dialog_state = response.pop('target_dialog_state', None)
+        if self.target_dialog_state and not isinstance(self.target_dialog_state, str):
+            logger.error("target_dialog_state {} is supposed to be a string but it is not. "
+                         "Therefore this invalid structure is not stored for further "
+                         "processing.".format(self.target_dialog_state))
+            self.target_dialog_state = None
 
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
@@ -403,10 +429,26 @@ class Conversation(object):
             (dictionary): The dictionary Response
         """
         response = self._app_manager.parse(text, session=self.session, frame=self.frame,
-                                           history=self.history)
+                                           history=self.history,
+                                           allowed_intents=self.allowed_intents)
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
+
+        self.allowed_intents = response.pop('allowed_intents', None)
+        if self.allowed_intents and not isinstance(self.allowed_intents, list):
+            logger.error("allowed_intents {} is supposed to be a list but it is not. "
+                         "Therefore this invalid structure is not stored for further "
+                         "processing.".format(self.allowed_intents))
+            self.allowed_intents = None
+
+        self.target_dialog_state = response.pop('target_dialog_state', None)
+        if self.target_dialog_state and not isinstance(self.target_dialog_state, str):
+            logger.error("target_dialog_state {} is supposed to be a string but it is not. "
+                         "Therefore this invalid structure is not stored for further "
+                         "processing.".format(self.target_dialog_state))
+            self.target_dialog_state = None
+
         return response
 
     def _handle_client_action(self, action):

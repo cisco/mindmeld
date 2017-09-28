@@ -17,6 +17,7 @@ from .entity_resolver import EntityResolver
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
+from ..exceptions import AllowedNlpClassesKeyError
 
 
 class Processor(object):
@@ -88,30 +89,46 @@ class Processor(object):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
-    def process(self, query_text):
-        """Processes the given input text using the trained natural language processing models
-        for this processor and its children
+    def process(self, query_text, allowed_nlp_classes=None):
+        """Processes the given query using the full hierarchy of natural language processing models
+        trained for this application
 
         Args:
             query_text (str): The raw user text input
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
+            selected for NLP analysis. An example:
+            {
+                smart_home: {
+                    close_door: {}
+                }
+            }
+            where smart_home is the domain and close_door is the intent.
 
         Returns:
-            ProcessedQuery: A processed query object that contains the results from the
-                application of this processor and its children to the input text
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the full hierarchy of natural language processing models to the input query
         """
         query = self.resource_loader.query_factory.create_query(query_text)
-        return self.process_query(query).to_dict()
+        return self.process_query(query, allowed_nlp_classes).to_dict()
 
-    def process_query(self, query):
-        """Processes the given query using the trained natural language processing models for
-        this processor and its children
+    def process_query(self, query, allowed_nlp_classes=None):
+        """Processes the given query using the full hierarchy of natural language processing models
+        trained for this application
 
         Args:
-            query (Query): The query object to process
+            query_text (str): The raw user text input
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
+            selected for NLP analysis. An example:
+            {
+                smart_home: {
+                    close_door: {}
+                }
+            }
+            where smart_home is the domain and close_door is the intent.
 
         Returns:
-            ProcessedQuery: A processed query object that contains the results from the
-                application of this processor and its children to the input query
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the full hierarchy of natural language processing models to the input query
         """
         raise NotImplementedError
 
@@ -177,26 +194,89 @@ class NaturalLanguageProcessor(Processor):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
 
-    def process_query(self, query):
+    def process_query(self, query, allowed_nlp_classes=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
         Args:
             query (Query): The query object to process
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
+            selected for NLP analysis. An example:
+            {
+                smart_home: {
+                    close_door: {}
+                }
+            }
+            where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
+            is None, we just use the normal model predict functionality.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the full hierarchy of natural language processing models to the input query
         """
         self._check_ready()
+
         if len(self.domains) > 1:
-            domain = self.domain_classifier.predict(query)
+            if not allowed_nlp_classes:
+                domain = self.domain_classifier.predict(query)
+            else:
+                sorted_domains = self.domain_classifier.predict_proba(query)
+                domain = None
+                for ordered_domain, _ in sorted_domains:
+                    if ordered_domain in allowed_nlp_classes.keys():
+                        domain = ordered_domain
+                        break
+
+                if not domain:
+                    raise AllowedNlpClassesKeyError(
+                        'Could not find user inputted domain in NLP hierarchy')
         else:
             domain = list(self.domains.keys())[0]
 
-        processed_query = self.domains[domain].process_query(query)
+        allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
+
+        processed_query = \
+            self.domains[domain].process_query(query, allowed_intents)
         processed_query.domain = domain
         return processed_query
+
+    def extract_allowed_intents(self, allowed_intents):
+        """This function validates a user inputted list of allowed_intents against the NLP
+        hierarchy and construct a hierarchy dictionary as follows: {domain: {intent: {}} if
+        the validation of allowed_intents has passed.
+
+        Args:
+            allowed_intents (list): A list of allowable intents in the format "domain.intent".
+            If all intents need to be included, the syntax is "domain.*".
+
+        Returns:
+            (dict): A dictionary of NLP hierarchy
+        """
+        nlp_components = {}
+
+        for allowed_intent in allowed_intents:
+            domain, intent = allowed_intent.split(".")
+
+            if domain not in self.domains.keys():
+                raise AllowedNlpClassesKeyError(
+                    "Domain: {} is not in the NLP component hierarchy".format(domain))
+
+            if intent != "*" and intent not in self.domains[domain].intents.keys():
+                raise AllowedNlpClassesKeyError(
+                    "Intent: {} is not in the NLP component hierarchy".format(intent))
+
+            if domain not in nlp_components:
+                nlp_components[domain] = {}
+
+            if intent == "*":
+                for intent in self.domains[domain].intents.keys():
+                    # We initialize to an empty dictionary to extend capability for
+                    # entity rules in the future
+                    nlp_components[domain][intent] = {}
+            else:
+                nlp_components[domain][intent] = {}
+
+        return nlp_components
 
 
 class DomainProcessor(Processor):
@@ -262,24 +342,48 @@ class DomainProcessor(Processor):
         processed_query.domain = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query):
-        """Processes the given query using the hierarchy of natural language processing models
-        trained for this domain
+    def process_query(self, query, allowed_nlp_classes=None):
+        """Processes the given query using the full hierarchy of natural language processing models
+        trained for this application
 
         Args:
             query (Query): The query object to process
+            allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
+             NLP hierarchy that is selected for NLP analysis. An example:
+            {
+                close_door: {}
+            }
+
+            where close_door is the intent. The intent belongs to the smart_home domain.
+            If allowed_nlp_classes is None, we use the normal model predict functionality.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
-                applying the hierarchy of natural language processing models to the input query
+                applying the full hierarchy of natural language processing models to the input query
         """
         self._check_ready()
+
         if len(self.intents) > 1:
-            intent = self.intent_classifier.predict(query)
+            # Check if the user has specified allowed intents
+            if not allowed_nlp_classes:
+                intent = self.intent_classifier.predict(query)
+            else:
+                sorted_intents = self.intent_classifier.predict_proba(query)
+                intent = None
+
+                for ordered_intent, _ in sorted_intents:
+                    if ordered_intent in allowed_nlp_classes.keys():
+                        intent = ordered_intent
+                        break
+
+                if not intent:
+                    raise AllowedNlpClassesKeyError(
+                        'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
         processed_query = self.intents[intent].process_query(query)
         processed_query.intent = intent
+
         return processed_query
 
 
