@@ -37,6 +37,10 @@ class EmbeddingDownloadError(WorkbenchError):
     pass
 
 
+class AllowedNlpClassesKeyError(WorkbenchError):
+    pass
+
+
 class ClassifierLoadError(WorkbenchError):
     pass
 

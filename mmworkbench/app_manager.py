@@ -6,10 +6,14 @@ from __future__ import absolute_import, unicode_literals
 from builtins import object
 
 import copy
+import logging
 
 from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 from .components.dialogue import DialogueResponder
 from .resource_loader import ResourceLoader
+from .exceptions import AllowedNlpClassesKeyError
+
+logger = logging.getLogger(__name__)
 
 
 class ApplicationManager(object):
@@ -51,16 +55,22 @@ class ApplicationManager(object):
             return
         self.nlp.load()
 
-    def parse(self, text, payload=None, session=None, frame=None, history=None, verbose=False):
+    def parse(self, text, payload=None, session=None, frame=None, history=None,
+              allowed_intents=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
             payload (dict, optional): Description
             session (dict, optional): Description
             history (list, optional): Description
+            allowed_intents (list, optional): A list of allowed intents for
+            model consideration
             verbose (bool, optional): Description
 
+        Returns:
+            (dict): Context object
         """
+
         session = session or {}
         history = history or []
         frame = frame or {}
@@ -71,12 +81,24 @@ class ApplicationManager(object):
         if payload:
             request['payload'] = payload
 
+        nlp_hierarchy = None
+
+        if allowed_intents:
+            try:
+                nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
+            except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
+                # We have to print the error object since it sometimes contains a message
+                # and sometimes it doesn't, like a ValueError.
+                logger.error(
+                    "Validation error '{}' on input allowed intents {}. "
+                    "Not applying domain/intent restrictions this "
+                    "turn".format(e, allowed_intents))
+
         # TODO: support passing in reference time from session
         query = self._query_factory.create_query(text)
 
         # TODO: support specifying target domain, etc in payload
-        processed_query = self.nlp.process_query(query)
-
+        processed_query = self.nlp.process_query(query, nlp_hierarchy)
         context = self.context_class(
             {'request': request, 'history': history, 'frame': copy.deepcopy(frame)})
         context.update(processed_query.to_dict())

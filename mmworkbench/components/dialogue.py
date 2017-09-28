@@ -371,6 +371,7 @@ class Conversation(object):
         self.session = session or {}
         self.history = []
         self.frame = {}
+        self.allowed_intents = None
 
     def say(self, text):
         """Send a message in the conversation. The message will be processed by the app based on
@@ -384,10 +385,12 @@ class Conversation(object):
             list of str: A text representation of the dialogue responses
         """
         response = self._app_manager.parse(text, session=self.session, frame=self.frame,
-                                           history=self.history)
+                                           history=self.history,
+                                           allowed_intents=self.allowed_intents)
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
+        self.allowed_intents = response.pop('allowed_intents', None)
 
         # handle client actions
         response_texts = [self._handle_client_action(a) for a in response['client_actions']]
@@ -404,10 +407,12 @@ class Conversation(object):
             (dictionary): The dictionary Response
         """
         response = self._app_manager.parse(text, session=self.session, frame=self.frame,
-                                           history=self.history)
+                                           history=self.history,
+                                           allowed_intents=self.allowed_intents)
         response.pop('history')
         self.history.insert(0, response)
         self.frame = response['frame']
+        self.allowed_intents = response.pop('allowed_intents', None)
         return response
 
     def _handle_client_action(self, action):
