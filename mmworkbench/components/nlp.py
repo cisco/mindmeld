@@ -94,7 +94,7 @@ class Processor(object):
         trained for this application
 
         Args:
-            query (Query): The query object to process
+            query_text (str): The raw user text input
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
             selected for NLP analysis. An example:
             {
@@ -116,7 +116,7 @@ class Processor(object):
         trained for this application
 
         Args:
-            query (Query): The query object to process
+            query_text (str): The raw user text input
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
             selected for NLP analysis. An example:
             {
@@ -222,7 +222,6 @@ class NaturalLanguageProcessor(Processor):
             else:
                 sorted_domains = self.domain_classifier.predict_proba(query)
                 domain = None
-
                 for ordered_domain, _ in sorted_domains:
                     if ordered_domain in allowed_nlp_classes.keys():
                         domain = ordered_domain
@@ -231,7 +230,6 @@ class NaturalLanguageProcessor(Processor):
                 if not domain:
                     raise AllowedNlpClassesKeyError(
                         'Could not find user inputted domain in NLP hierarchy')
-
         else:
             domain = list(self.domains.keys())[0]
 
