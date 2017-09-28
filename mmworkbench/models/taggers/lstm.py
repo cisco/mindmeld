@@ -16,6 +16,7 @@ DEFAULT_LABEL = 'B|UNK'
 DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_GAZ_LABEL = 'O'
 RANDOM_SEED = 1
+ZERO_INITIALIZER_VALUE = 0
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +82,7 @@ class LstmModel(Tagger):
         self.lstm_input_keep_prob = parameters.get('lstm_input_keep_prob', 0.5)
         self.lstm_output_keep_prob = parameters.get('lstm_output_keep_prob', 0.5)
         self.gaz_encoding_dimension = parameters.get('gaz_encoding_dimension', 100)
+        self.use_crf_layer = parameters.get('use_crf_layer', True)
 
     def get_params(self, deep=True):
         return self.__dict__
@@ -112,13 +114,13 @@ class LstmModel(Tagger):
                                        name='label_tf')
 
         self.batch_sequence_lengths_tf = tf.placeholder(tf.int32, shape=[None],
-                                                        name='sequence_length_tf')
+                                                        name='batch_sequence_lengths_tf')
 
         word_and_gaz_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(word_and_gaz_embedding_tf)
 
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
-            self.lstm_output_tf, self.label_tf)
+            self.lstm_output_tf, self.label_tf, self.batch_sequence_lengths_tf)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
         if y:
@@ -226,24 +228,33 @@ class LstmModel(Tagger):
         combined_embedding_tf = tf.concat([self.query_input_tf, dense_gaz_embedding_tf], axis=2)
         return combined_embedding_tf
 
-    def _define_optimizer_and_cost(self, output_tensor, label_tensor):
+    def _define_optimizer_and_cost(self, output_tensor, label_tensor, sequence_lengths):
         """ This function defines the optimizer and cost function of the LSTM model
 
         Args:
             output_tensor (Tensor): Output tensor of the LSTM network
             label_tensor (Tensor): Label tensor of the true labels of the data
+            sequence_lengths (Tensor): The tensor of sequence lengths for the current batch
 
         Returns:
             The optimizer function to reduce loss and the loss values
         """
-        softmax_loss_tf = tf.nn.softmax_cross_entropy_with_logits(
-            logits=output_tensor,
-            labels=tf.reshape(label_tensor, [-1, self.output_dimension]), name='softmax_loss_tf')
-        cross_entropy_mean_loss_tf = tf.reduce_mean(softmax_loss_tf,
-                                                    name='cross_entropy_mean_loss_tf')
-        optimizer_tf = tf.train.AdamOptimizer(
-            learning_rate=float(self.learning_rate)).minimize(cross_entropy_mean_loss_tf)
-        return optimizer_tf, cross_entropy_mean_loss_tf
+        if self.use_crf_layer:
+            flattened_labels = tf.cast(tf.argmax(label_tensor, axis=2), tf.int32)
+            log_likelihood, transition_params = tf.contrib.crf.crf_log_likelihood(output_tensor,
+                                                                                  flattened_labels,
+                                                                                  sequence_lengths)
+            cost_tf = tf.reduce_mean(-log_likelihood, name='cost_tf')
+        else:
+            softmax_loss_tf = tf.nn.softmax_cross_entropy_with_logits(
+                logits=tf.reshape(output_tensor, [-1, self.output_dimension]),
+                labels=tf.reshape(label_tensor, [-1, self.output_dimension]),
+                name='softmax_loss_tf')
+            cost_tf = tf.reduce_mean(softmax_loss_tf, name='cost_tf')
+
+        optimizer_tf = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate))\
+            .minimize(cost_tf)
+        return optimizer_tf, cost_tf
 
     def _calculate_score(self, output_arr, label_arr, seq_lengths_arr):
         """ This function calculates the sequence score of all the queries,
@@ -363,15 +374,18 @@ class LstmModel(Tagger):
 
         # Construct the output later
         output_tf = tf.concat([output_fw, output_bw], axis=-1)
-        output_tf = tf.reshape(output_tf, [-1, 2 * n_hidden])
         output_tf = tf.nn.dropout(output_tf, self.dense_keep_prob_tf)
 
         output_weights_tf = tf.get_variable('output_weights_tf',
                                             shape=[2 * n_hidden, self.output_dimension],
-                                            dtype='float32', initializer=initializer)
+                                            dtype="float32", initializer=initializer)
+        output_weights_tf = tf.tile(output_weights_tf, [batch_size_dim, 1])
+        output_weights_tf = tf.reshape(output_weights_tf, [batch_size_dim, 2 * n_hidden,
+                                       self.output_dimension])
 
+        zero_initializer = tf.constant_initializer(ZERO_INITIALIZER_VALUE)
         output_bias_tf = tf.get_variable('output_bias_tf', shape=[self.output_dimension],
-                                         dtype='float32', initializer=initializer)
+                                         dtype="float32", initializer=zero_initializer)
 
         output_tf = tf.matmul(output_tf, output_weights_tf) + output_bias_tf
         return output_tf
