@@ -368,7 +368,8 @@ class LstmModel(Tagger):
         output_bias_tf = tf.get_variable('output_bias_tf', shape=[self.output_dimension],
                                          dtype='float32', initializer=initializer)
 
-        output_tf = tf.add(tf.matmul(output_tf, output_weights_tf), output_bias_tf, name='output_tensor')
+        output_tf = tf.add(tf.matmul(output_tf, output_weights_tf), output_bias_tf,
+                           name='output_tensor')
         return output_tf
 
     def _get_model_constructor(self):
@@ -579,13 +580,25 @@ class LstmModel(Tagger):
         print(path + '/lstm_model')
 
         # Restore tensorflow graph variables
-        self.dense_keep_prob_tf = self.session.graph.get_tensor_by_name('dense_keep_prob_tf:0')
-        self.lstm_input_keep_prob_tf = self.session.graph.get_tensor_by_name('lstm_input_keep_prob_tf:0')
-        self.lstm_output_keep_prob_tf = self.session.graph.get_tensor_by_name('lstm_output_keep_prob_tf:0')
+
+        self.dense_keep_prob_tf = \
+            self.session.graph.get_tensor_by_name('dense_keep_prob_tf:0')
+
+        self.lstm_input_keep_prob_tf = \
+            self.session.graph.get_tensor_by_name('lstm_input_keep_prob_tf:0')
+
+        self.lstm_output_keep_prob_tf = \
+            self.session.graph.get_tensor_by_name('lstm_output_keep_prob_tf:0')
+
         self.query_input_tf = self.session.graph.get_tensor_by_name('query_input_tf:0')
+
         self.gaz_input_tf = self.session.graph.get_tensor_by_name('gaz_input_tf:0')
+
         self.label_tf = self.session.graph.get_tensor_by_name('label_tf:0')
-        self.batch_sequence_lengths_tf = self.session.graph.get_tensor_by_name('sequence_length_tf:0')
+
+        self.batch_sequence_lengths_tf = \
+            self.session.graph.get_tensor_by_name('sequence_length_tf:0')
+
         self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
 
         # Load feature extraction variables

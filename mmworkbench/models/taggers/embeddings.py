@@ -1,12 +1,14 @@
 import os
 import zipfile
 import logging
+import pickle
 
 from tqdm import tqdm
 import numpy as np
 from six.moves.urllib.request import urlretrieve
 
-from ...path import EMBEDDINGS_FILE_PATH, EMBEDDINGS_FOLDER_PATH
+from ...path import EMBEDDINGS_FILE_PATH, \
+    EMBEDDINGS_FOLDER_PATH, PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH
 from ...exceptions import EmbeddingDownloadError
 
 logger = logging.getLogger(__name__)
@@ -269,20 +271,42 @@ class SequenceEmbedding(object):
 
 class WordSequenceEmbedding(SequenceEmbedding):
     """This class is a container for building sequence embeddings for a typical query, for example:
-    'I would like to order a coffee'. We use pretrained word vector embeddings for this class.
+    'I would like to order a coffee'. We use pretrained word vector embeddings for this class. For
+    words not found in the pretrained file, we randomly initialize them and cache them for later
+    use.
     """
 
     def _construct_embedding_matrix(self):
         num_words = len(self.token_to_encoding_mapping.keys())
         embedding_matrix = np.zeros((num_words, self.token_embedding_dimension))
+
+        word_embeddings_not_in_pretrained_file = {}
+
+        # load historic word embeddings
+        if os.path.exists(PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH):
+            pkl_file = open(PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH, 'rb')
+            word_embeddings_not_in_pretrained_file = pickle.load(pkl_file)
+            pkl_file.close()
+
         for word, i in self.token_to_encoding_mapping.items():
             embedding_vector = self.token_to_embedding_mapping.get(word)
+
             if embedding_vector is None:
-                random_word = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
-                embedding_matrix[i] = random_word
-                self.token_to_embedding_mapping[word] = random_word
+                embedding_vector = word_embeddings_not_in_pretrained_file.get(word)
+
+            if embedding_vector is None:
+                random_vector = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
+                embedding_matrix[i] = random_vector
+                self.token_to_embedding_mapping[word] = random_vector
+                word_embeddings_not_in_pretrained_file[word] = random_vector
             else:
                 embedding_matrix[i] = embedding_vector
+
+        # save extracted embeddings to historic pickle file
+        output = open(PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH, 'wb')
+        pickle.dump(word_embeddings_not_in_pretrained_file, output)
+        output.close()
+
         return embedding_matrix
 
 
