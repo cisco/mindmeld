@@ -205,7 +205,7 @@ class NaturalLanguageProcessor(Processor):
                 if print_stats:
                     domain_eval.print_stats()
             else:
-                logger.info("Skipping evaluation of domain classification")
+                logger.info("Skipping domain classifier evaluation")
 
     def process_query(self, query):
         """Processes the given query using the full hierarchy of natural language processing models
@@ -280,12 +280,13 @@ class DomainProcessor(Processor):
         if len(self.intents) > 1:
             intent_eval = self.intent_classifier.evaluate()
             if intent_eval:
-                print("Intent classification accuracy for '{}': {}".format(
+                print("Intent classification accuracy for the '{}' domain: {}".format(
                       self.name, intent_eval.get_accuracy()))
                 if print_stats:
                     intent_eval.print_stats()
             else:
-                logger.info("Skipping evaluation of '{}' intent classification".format(self.name))
+                logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
+                            self.name))
 
     def process(self, query_text):
         """Processes the given input text using the hierarchy of natural language processing models
@@ -392,13 +393,13 @@ class IntentProcessor(Processor):
         if len(self.entity_recognizer.entity_types) > 1:
             entity_eval = self.entity_recognizer.evaluate()
             if entity_eval:
-                print("Entity recognition accuracy for '{}.{}'"
+                print("Entity recognition accuracy for the '{}.{}' intent"
                       ": {}".format(self.domain, self.name, entity_eval.get_accuracy()))
                 if print_stats:
                     entity_eval.print_stats()
             else:
-                logger.info("Skipping evaluation of '{}.{}' entity recognition".format(self.domain,
-                                                                                       self.name))
+                logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
+                            self.domain, self.name))
 
     def process(self, query_text):
         """Processes the given input text using the hierarchy of natural language processing models
@@ -487,13 +488,13 @@ class EntityProcessor(Processor):
         if len(self.role_classifier.roles) > 1:
             role_eval = self.role_classifier.evaluate()
             if role_eval:
-                print("Role classification accuracy for ;{}.{}.{}': {}".format(self.domain,
-                      self.intent, self.type, role_eval.get_accuracy()))
+                print("Role classification accuracy for the {}.{}.{}' entity type: {}".format(
+                      self.domain, self.intent, self.type, role_eval.get_accuracy()))
                 if print_stats:
                     role_eval.print_stats()
             else:
-                logger.info("Skipping evaluation of '{}.{}.{}' role classification".format(
-                            self.domain, self.intent, self.type))
+                logger.info("Skipping role classifier evaluation for the '{}.{}.{}' "
+                            "entity type".format(self.domain, self.intent, self.type))
 
     def process(self, text):
         raise NotImplementedError('EntityProcessor objects do not support `process()`. '
