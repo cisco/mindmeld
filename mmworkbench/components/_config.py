@@ -63,27 +63,30 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
     'model_type': 'tagger',
     'label_type': 'entities',
     'model_settings': {
-        'classifier_type': 'lstm',
+        'classifier_type': 'memm',
         'tag_scheme': 'IOB',
         'feature_scaler': 'max-abs'
     },
-    'params': {
-        'padding_length': 19,
-        'batch_size': 20,
-        'display_epoch': 20,
-        'number_of_epochs': 3,
-        'optimizer': 'adam',
-        'learning_rate': 0.005,
-        'dense_keep_prob': 0.5,
-        'lstm_input_keep_prob': 0.5,
-        'lstm_output_keep_prob': 0.5,
-        'token_lstm_hidden_state_dimension': 300,
-        'token_embedding_dimension': 300,
-        'token_pretrained_embedding_filepath': 'glove.6B.300d.txt',
-        'gaz_encoding_dimension': 100
+    'param_selection': {
+        'type': 'k-fold',
+        'k': 5,
+        'scoring': 'accuracy',
+        'grid': {
+            'penalty': ['l1', 'l2'],
+            'C': [0.01, 1, 100, 10000, 1000000, 100000000]
+        },
     },
     'features': {
+        'bag-of-words-seq': {
+            'ngram_lengths_to_start_positions': {
+                1: [-2, -1, 0, 1, 2],
+                2: [-2, -1, 0, 1]
+            }
+        },
         'in-gaz-span-seq': {},
+        'sys-candidates-seq': {
+            'start_positions': [-1, 0, 1]
+        }
     }
 }
 
