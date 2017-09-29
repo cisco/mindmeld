@@ -127,20 +127,27 @@ The ``context`` object is a dictionary containing the contextual information nee
 
 Use the ``responder`` object to send responses to the user. You can use templated natural language responses, as well as metadata needed to fulfill the request on the client endpoint. The ``responder`` has methods which accept template strings, and a ``slots`` attribute to store values with which to fill in the templates.
 
-+------------------------------+-----------------------------------------------------------------+
-| Method                       | Description                                                     |
-+------------------------------+-----------------------------------------------------------------+
-| :py:meth:`responder.reply`   | Used to send a text or voice response and end the dialogue      |
-+------------------------------+-----------------------------------------------------------------+
-| :py:meth:`responder.prompt`  | Used to send a text or voice response and wait for a            |
-|                              | user response                                                   |
-+------------------------------+-----------------------------------------------------------------+
-| :py:meth:`responder.respond` | Used to send an arbitrary client action object                  |
-+------------------------------+-----------------------------------------------------------------+
++------------------------------------+------------------------------------------------------------+
+| Method                             | Description                                                |
++------------------------------------+------------------------------------------------------------+
+| :py:meth:`responder.reply`         | Used to send a text view directive                         |
++------------------------------------+------------------------------------------------------------+
+| :py:meth:`responder.speak`         | Used to send a voice action directive                      |
++------------------------------------+------------------------------------------------------------+
+| :py:meth:`responder.listen`        | Used to send a directive to listen for user voice response |
++------------------------------------+------------------------------------------------------------+
+| :py:meth:`responder.suggest`       | Used to send a directive to listen for user voice response |
++------------------------------------+------------------------------------------------------------+
+| :py:meth:`responder.display`       | Used to send a custom view directive                       |
++------------------------------------+------------------------------------------------------------+
+| :py:meth:`responder.act`           | Used to send a custom action directive                     |
++------------------------------------+------------------------------------------------------------+
+| :py:meth:`responder.direct`        | Used to send an arbitrary directive object                 |
++------------------------------------+------------------------------------------------------------+
 
 .. note::
 
-   :py:meth:`responder.reply` and :py:meth:`responder.prompt` accept a single template, or a list of templates. If a list is provided, the DM selects one item at random. This makes your conversational agent a little more varied and life-like.
+   :py:meth:`responder.reply` and :py:meth:`responder.speak` accept a single template, or a list of templates. If a list is provided, the DM selects one item at random. This makes your conversational agent a little more varied and life-like.
 
 Consider a basic dialogue state handler that greets a user by name, retrieving the user's name from the request session.
 
@@ -154,7 +161,8 @@ Consider a basic dialogue state handler that greets a user by name, retrieving t
       except KeyError:
           # name was not included in request
           templates = ['Hello', 'Hey!', 'How are you?']
-      responder.prompt(templates)
+      responder.reply(templates)
+      responder.listen()
 
 
 Next Steps
