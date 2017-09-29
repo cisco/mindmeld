@@ -15,8 +15,9 @@ def welcome(context, responder):
         prefix = 'Hello, {name}. '
     except KeyError:
         prefix = 'Hello. '
-    responder.prompt(prefix + 'I can help you find store hours '
-                              'for your local Kwik-E-Mart. How can I help?')
+    responder.reply(prefix + 'I can help you find store hours '
+                             'for your local Kwik-E-Mart. How can I help?')
+    responder.listen()
 
 
 @app.handle(intent='exit')
@@ -28,7 +29,8 @@ def say_goodbye(context, responder):
 def provide_help(context, responder):
     prompts = ["I can help you find store hours for your local Kwik-E-Mart. For example, you can "
                "say 'Where's the nearest store?' or 'When does the Elm Street store open?'"]
-    responder.prompt(prompts)
+    responder.reply(prompts)
+    responder.listen()
 
 
 @app.handle(intent='get_store_hours')
@@ -58,7 +60,9 @@ def send_store_hours(context, responder):
                         'closes at {close_time}.')
         return
 
-    responder.prompt('Which store would you like to know about?')
+    responder.reply('Which store would you like to know about?')
+    responder.listen()
+
 
 
 @app.handle(intent='find_nearest_store')
@@ -84,7 +88,8 @@ def send_nearest_store(context, responder):
 def default(context, responder):
     prompts = ["Sorry, not sure what you meant there. I can help you find store hours "
                "for your local Kwik-E-Mart."]
-    responder.prompt(prompts)
+    responder.reply(prompts)
+    responder.listen()
 
 
 if __name__ == '__main__':
