@@ -555,8 +555,6 @@ class LstmModel(Tagger):
         # Save the tensorflow weights and variables
         saver = tf.train.Saver()
         saver.save(self.session, path + '/lstm_model')
-        print(path + '/lstm_model')
-        self.session.close()
 
         # Save feature extraction variables
         variables_to_dump = {

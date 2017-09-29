@@ -18,6 +18,8 @@ from ._config import get_classifier_config
 
 logger = logging.getLogger(__name__)
 
+TENSORFLOW_MODELS = ['LstmModel']
+
 
 class EntityRecognizer(Classifier):
     """An entity recognizer which is used to identify the entities for a given query. It is
@@ -105,11 +107,11 @@ class EntityRecognizer(Classifier):
 
         model_name = type(self._model._clf).__name__
 
-        if not model_name == 'LstmModel':
+        if model_name not in TENSORFLOW_MODELS:
             er_data = {'model': self._model, 'entity_types': self.entity_types,
                        'model_name': model_name}
         else:
-            tf_model_path = model_path.split('.pkl')[0] + '_lstm'
+            tf_model_path = model_path.split('.pkl')[0] + '_tf'
             er_data = {'model': tf_model_path, 'entity_types': self.entity_types,
                        'model_name': model_name, 'model_config': self._model_config}
             self._model.dump(tf_model_path)
@@ -130,7 +132,7 @@ class EntityRecognizer(Classifier):
             model_name = er_data['model_name']
             self.entity_types = er_data['entity_types']
 
-            if not model_name == 'LstmModel':
+            if model_name not in TENSORFLOW_MODELS:
                 self._model = er_data['model']
             else:
                 tf_model_path = er_data['model']

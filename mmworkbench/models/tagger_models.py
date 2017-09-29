@@ -79,6 +79,7 @@ class TaggerModel(Model):
 
         super().__init__(config)
 
+        # Get model classifier and initialize
         self._clf = self._get_model_constructor()()
         self._clf.setup_model(self.config)
 
@@ -130,10 +131,6 @@ class TaggerModel(Model):
         # distinct_labels = set(labels)
         # if len(set(distinct_labels)) <= 1:
         #     return None
-
-        # Get model classifier and initialize
-        # self._clf = self._get_model_constructor()()
-        # self._clf.setup_model(self.config)
 
         # Extract labels - label encoders are the same accross all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
