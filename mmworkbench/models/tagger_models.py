@@ -6,6 +6,7 @@ from builtins import range, super
 import logging
 import random
 from sklearn.externals import joblib
+import os
 
 from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
                       get_seq_tag_accuracy_scorer)
@@ -270,11 +271,11 @@ class TaggerModel(Model):
             'current_params': self._current_params,
             'label_encoder': self._label_encoder
         }
-        joblib.dump(variables_to_dump, path + '.tagger_vars')
+        joblib.dump(variables_to_dump, os.path.join(path, '.tagger_vars'))
 
     def load(self, path):
         self._clf.load(path)
-        variables_to_load = joblib.load(path + '.tagger_vars')
+        variables_to_load = joblib.load(os.path.join(path, '.tagger_vars'))
         self._current_params = variables_to_load['current_params']
         self._label_encoder = variables_to_load['label_encoder']
 

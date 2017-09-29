@@ -3,6 +3,7 @@ import tensorflow as tf
 import re
 import math
 import logging
+import os
 
 from sklearn.externals import joblib
 from .taggers import Tagger, extract_sequence_features
@@ -554,7 +555,7 @@ class LstmModel(Tagger):
         """
         # Save the tensorflow weights and variables
         saver = tf.train.Saver()
-        saver.save(self.session, path + '/lstm_model')
+        saver.save(self.session, os.path.join(path, 'lstm_model'))
 
         # Save feature extraction variables
         variables_to_dump = {
@@ -567,15 +568,14 @@ class LstmModel(Tagger):
             'label_encoder': self.label_encoder
         }
 
-        joblib.dump(variables_to_dump, path + '/.feature_extraction_vars')
+        joblib.dump(variables_to_dump, os.path.join(path, '.feature_extraction_vars'))
 
     def load(self, path='lstm-model'):
         """
         Loads the Tensorflow model
         """
-        saver = tf.train.import_meta_graph(path + '/lstm_model.meta')
-        saver.restore(self.session, path + '/lstm_model')
-        print(path + '/lstm_model')
+        saver = tf.train.import_meta_graph(os.path.join(path, 'lstm_model.meta'))
+        saver.restore(self.session, os.path.join(path, 'lstm_model'))
 
         # Restore tensorflow graph variables
 
@@ -600,7 +600,7 @@ class LstmModel(Tagger):
         self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
 
         # Load feature extraction variables
-        variables_to_load = joblib.load(path + '/.feature_extraction_vars')
+        variables_to_load = joblib.load(os.path.join(path, '.feature_extraction_vars'))
         self.resources = variables_to_load['resources']
         self.gaz_dimension = variables_to_load['gaz_dimension']
         self.output_dimension = variables_to_load['output_dimension']
