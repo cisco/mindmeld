@@ -127,23 +127,24 @@ The ``context`` object is a dictionary containing the contextual information nee
 
 Use the ``responder`` object to send responses to the user. You can use templated natural language responses, as well as metadata needed to fulfill the request on the client endpoint. The ``responder`` has methods which accept template strings, and a ``slots`` attribute to store values with which to fill in the templates.
 
-+------------------------------------+------------------------------------------------------------+
-| Method                             | Description                                                |
-+------------------------------------+------------------------------------------------------------+
-| :py:meth:`responder.reply`         | Used to send a text view directive                         |
-+------------------------------------+------------------------------------------------------------+
-| :py:meth:`responder.speak`         | Used to send a voice action directive                      |
-+------------------------------------+------------------------------------------------------------+
-| :py:meth:`responder.listen`        | Used to send a directive to listen for user voice response |
-+------------------------------------+------------------------------------------------------------+
-| :py:meth:`responder.suggest`       | Used to send a directive to listen for user voice response |
-+------------------------------------+------------------------------------------------------------+
-| :py:meth:`responder.display`       | Used to send a custom view directive                       |
-+------------------------------------+------------------------------------------------------------+
-| :py:meth:`responder.act`           | Used to send a custom action directive                     |
-+------------------------------------+------------------------------------------------------------+
-| :py:meth:`responder.direct`        | Used to send an arbitrary directive object                 |
-+------------------------------------+------------------------------------------------------------+
++-------------------------------+----------------------------------------------------------------+
+| Method                        | Description                                                    |
++===============================+================================================================+
+| :py:meth:`responder.reply`    | Used to send a text view directive                             |
++-------------------------------+----------------------------------------------------------------+
+| :py:meth:`responder.speak`    | Used to send a voice action directive                          |
++-------------------------------+----------------------------------------------------------------+
+| :py:meth:`responder.listen`   | Used to send a directive to listen for user voice response     |
++-------------------------------+----------------------------------------------------------------+
+| :py:meth:`responder.reset`    | Used to send a reset action directive, explicitly ending the   |
+|                               | conversation                                                   |
++-------------------------------+----------------------------------------------------------------+
+| :py:meth:`responder.display`  | Used to send a custom view directive                           |
++-------------------------------+----------------------------------------------------------------+
+| :py:meth:`responder.act`      | Used to send a custom action directive                         |
++-------------------------------+----------------------------------------------------------------+
+| :py:meth:`responder.direct`   | Used to send an arbitrary directive object                     |
++-------------------------------+----------------------------------------------------------------+
 
 .. note::
 

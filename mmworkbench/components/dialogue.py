@@ -19,16 +19,18 @@ class DirectiveNames(object):
     """A constants object for directive names.
 
     Attributes:
-        COLLECTION (str): An directive to display a list.
-        LISTEN (str): An directive to listen (start speech recognition).
-        REPLY (str): An directive to display a text view.
-        SPEAK (str): An directive to speak text out loud.
+        COLLECTION (str): A directive to display a list.
+        LISTEN (str): A directive to listen (start speech recognition).
+        REPLY (str): A directive to display a text view.
+        RESET (str): Description
+        SPEAK (str): A directive to speak text out loud.
         SUGGESTIONS (str): A view for a list of suggestions.
     """
 
     COLLECTION = 'collection'
     LISTEN = 'listen'
     REPLY = 'reply'
+    RESET = 'reset'
     SPEAK = 'speak'
     SUGGESTIONS = 'suggestions'
 
@@ -309,7 +311,8 @@ class DialogueResponder(object):
         Args:
             text (str): The text of the reply
         """
-        self.logger.warning('Responder.prompt is deprecated. Please use Responder.reply and Responder.listen')
+        self.logger.warning('prompt() is deprecated. '
+                            'Please use reply() and listen() instead')
         self.reply(text)
 
     def speak(self, text):
@@ -324,6 +327,10 @@ class DialogueResponder(object):
     def listen(self):
         """Adds a 'listen' directive."""
         self.act(DirectiveNames.LISTEN)
+
+    def reset(self):
+        """Adds a 'reset' directive."""
+        self.act(DirectiveNames.RESET)
 
     def show_collection(self, things):
         """Adds a 'collection' directive
@@ -380,7 +387,7 @@ class DialogueResponder(object):
         """Adds an arbitrary directive.
 
         Args:
-            directive (dict): An directive.
+            directive (dict): A directive.
         """
         self.logger.warning('respond() is deprecated. Instead use direct().')
         self.directives.append(directive)

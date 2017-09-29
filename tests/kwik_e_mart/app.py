@@ -64,7 +64,6 @@ def send_store_hours(context, responder):
     responder.listen()
 
 
-
 @app.handle(intent='find_nearest_store')
 def send_nearest_store(context, responder):
     try:
