@@ -91,6 +91,8 @@ class LstmModel(Tagger):
         self.char_window_sizes = parameters.get('char_window_sizes', [5])
         self.max_char_per_word = parameters.get('maximum_characters_per_word', 20)
         self.character_embedding_dimension = parameters.get('character_embedding_dimension', 10)
+        self.word_level_character_embedding_size = \
+            parameters.get('word_level_character_embedding_size', 40)
 
     def get_params(self, deep=True):
         return self.__dict__
@@ -254,13 +256,11 @@ class LstmModel(Tagger):
         batch_size_dim = tf.shape(self.query_input_tf)[0]
 
         if self.use_char_embeddings:
-
             word_level_char_embeddings_list = []
 
             for window_size in self.char_window_sizes:
-                word_level_char_embeddings_list.append(
-                    self.apply_convolution(self.char_input_tf, batch_size_dim,
-                                           window_size, self.character_embedding_dimension))
+                word_level_char_embeddings_list.append(self.apply_convolution(
+                    self.char_input_tf, batch_size_dim, window_size))
 
             word_level_char_embedding = tf.concat(word_level_char_embeddings_list, 2)
 
@@ -275,23 +275,29 @@ class LstmModel(Tagger):
 
         return combined_embedding_tf
 
-    def apply_convolution(self, input_tensor, batch_size, char_window_size, embedding_dimension):
-        """
-        :param input_tensor:
-        :param batch_size:
-        :param char_window_size:
-        :param embedding_dimension:
-        :return:
+    def apply_convolution(self, input_tensor, batch_size, char_window_size):
+        """ Constructs a convolution network of a specific window size
+
+        Args:
+            input_tensor (tensor): The input tensor to the network
+            batch_size (int): The batch size of the training data
+            char_window_size (int): The character window size of each stride
+
+        Returns:
+            Convolved output tensor
         """
         convolution_reshaped_char_embedding = tf.reshape(input_tensor,
                                                          [-1, self.padding_length,
                                                           self.max_char_per_word,
-                                                          embedding_dimension, 1])
+                                                          self.character_embedding_dimension, 1])
 
-        # first dimension is 1 because we want to apply this to every word
+        # Index 0 dimension is 1 because we want to apply this to every word. Index 1 dimension is
+        # char_window_size since this is the convolution window size. Index 3 dimension is
+        # 1 since the input channel is 1 dimensional (the sequence string). Index 4 dimension is
+        # the output dimension which is a hyper-parameter.
         char_convolution_filter = tf.Variable(tf.random_normal(
-            [1, char_window_size, embedding_dimension,
-             1, self.character_embedding_dimension], dtype=tf.float32))
+            [1, char_window_size, self.character_embedding_dimension,
+             1, self.word_level_character_embedding_size], dtype=tf.float32))
 
         # Strides is None because we want to advance one character at a time and one word at a time
         conv_output = tf.nn.convolution(convolution_reshaped_char_embedding,
@@ -300,7 +306,8 @@ class LstmModel(Tagger):
         # Max pool over each word, captured by the size of the filter corresponding to an entire
         # single word
         max_pool = tf.nn.pool(
-            conv_output, window_shape=[1, self.max_char_per_word, embedding_dimension],
+            conv_output,
+            window_shape=[1, self.max_char_per_word, self.character_embedding_dimension],
             pooling_type='MAX', padding='VALID')
 
         # Transpose because shape before is batch_size BY query_padding_length BY 1 BY 1
@@ -309,20 +316,20 @@ class LstmModel(Tagger):
         # 4 is brought after the index 1.
         max_pool = tf.transpose(max_pool, [0, 1, 4, 2, 3])
         max_pool = tf.reshape(max_pool, [batch_size, self.padding_length,
-                                         self.character_embedding_dimension])
+                                         self.word_level_character_embedding_size])
 
         char_convolution_bias = tf.Variable(
-            tf.random_normal([self.character_embedding_dimension, ]))
+            tf.random_normal([self.word_level_character_embedding_size, ]))
 
         char_convolution_bias = tf.tile(char_convolution_bias, [self.padding_length])
         char_convolution_bias = tf.reshape(char_convolution_bias,
                                            [self.padding_length,
-                                            self.character_embedding_dimension])
+                                            self.word_level_character_embedding_size])
 
         char_convolution_bias = tf.tile(char_convolution_bias, [batch_size, 1])
         char_convolution_bias = tf.reshape(char_convolution_bias,
                                            [batch_size, self.padding_length,
-                                            self.character_embedding_dimension])
+                                            self.word_level_character_embedding_size])
 
         word_level_char_embedding = tf.nn.relu(max_pool + char_convolution_bias)
         return word_level_char_embedding
