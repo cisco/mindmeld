@@ -5,6 +5,8 @@ from builtins import range, super
 
 import logging
 import random
+from sklearn.externals import joblib
+import os
 
 from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
                       get_seq_tag_accuracy_scorer)
@@ -78,6 +80,10 @@ class TaggerModel(Model):
 
         super().__init__(config)
 
+        # Get model classifier and initialize
+        self._clf = self._get_model_constructor()()
+        self._clf.setup_model(self.config)
+
         self._no_entities = False
 
     def __getstate__(self):
@@ -126,10 +132,6 @@ class TaggerModel(Model):
         # distinct_labels = set(labels)
         # if len(set(distinct_labels)) <= 1:
         #     return None
-
-        # Get model classifier and initialize
-        self._clf = self._get_model_constructor()()
-        self._clf.setup_model(self.config)
 
         # Extract labels - label encoders are the same accross all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
@@ -262,6 +264,20 @@ class TaggerModel(Model):
         except KeyError:
             msg = '{}: Classifier type {!r} not recognized'
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
+
+    def dump(self, path):
+        self._clf.dump(path)
+        variables_to_dump = {
+            'current_params': self._current_params,
+            'label_encoder': self._label_encoder
+        }
+        joblib.dump(variables_to_dump, os.path.join(path, '.tagger_vars'))
+
+    def load(self, path):
+        self._clf.load(path)
+        variables_to_load = joblib.load(os.path.join(path, '.tagger_vars'))
+        self._current_params = variables_to_load['current_params']
+        self._label_encoder = variables_to_load['label_encoder']
 
 
 register_model('tagger', TaggerModel)
