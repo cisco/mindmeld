@@ -19,7 +19,7 @@ class DirectiveNames(object):
     """A constants object for directive names.
 
     Attributes:
-        COLLECTION (str): A directive to display a list.
+        LIST (str): A directive to display a list.
         LISTEN (str): A directive to listen (start speech recognition).
         REPLY (str): A directive to display a text view.
         RESET (str): Description
@@ -27,7 +27,7 @@ class DirectiveNames(object):
         SUGGESTIONS (str): A view for a list of suggestions.
     """
 
-    COLLECTION = 'collection'
+    LIST = 'list'
     LISTEN = 'listen'
     REPLY = 'reply'
     RESET = 'reset'
@@ -305,16 +305,6 @@ class DialogueResponder(object):
         text = self._process_template(text)
         self.display(DirectiveNames.REPLY, payload={'text': text})
 
-    def prompt(self, text):
-        """Alias for `reply()`. Deprecated.
-
-        Args:
-            text (str): The text of the reply
-        """
-        self.logger.warning('prompt() is deprecated. '
-                            'Please use reply() and listen() instead')
-        self.reply(text)
-
     def speak(self, text):
         """Adds a 'speak' directive
 
@@ -324,22 +314,14 @@ class DialogueResponder(object):
         text = self._process_template(text)
         self.act(DirectiveNames.SPEAK, payload={'text': text})
 
-    def listen(self):
-        """Adds a 'listen' directive."""
-        self.act(DirectiveNames.LISTEN)
-
-    def reset(self):
-        """Adds a 'reset' directive."""
-        self.act(DirectiveNames.RESET)
-
-    def show_collection(self, things):
-        """Adds a 'collection' directive
+    def list(self, items):
+        """Adds a 'list' view directive
 
         Args:
-            collection (list): The list of dictionary objects
+            items (list): The list of dictionary objects
         """
-        collection = things or []
-        self.display(DirectiveNames.COLLECTION, payload=collection)
+        items = items or []
+        self.display(DirectiveNames.LIST, payload=items)
 
     def suggest(self, suggestions):
         """Adds a 'suggestions' directive
@@ -349,6 +331,14 @@ class DialogueResponder(object):
         """
         suggestions = suggestions or []
         self.display(DirectiveNames.SUGGESTIONS, payload=suggestions)
+
+    def listen(self):
+        """Adds a 'listen' directive."""
+        self.act(DirectiveNames.LISTEN)
+
+    def reset(self):
+        """Adds a 'reset' directive."""
+        self.act(DirectiveNames.RESET)
 
     def display(self, name, payload=None):
         """Adds an arbitrary directive of type 'view'.
@@ -391,6 +381,16 @@ class DialogueResponder(object):
         """
         self.logger.warning('respond() is deprecated. Instead use direct().')
         self.directives.append(directive)
+
+    def prompt(self, text):
+        """Alias for `reply()`. Deprecated.
+
+        Args:
+            text (str): The text of the reply
+        """
+        self.logger.warning('prompt() is deprecated. '
+                            'Please use reply() and listen() instead')
+        self.reply(text)
 
     @staticmethod
     def _choose(items):

@@ -134,6 +134,10 @@ Use the ``responder`` object to send responses to the user. You can use template
 +-------------------------------+----------------------------------------------------------------+
 | :py:meth:`responder.speak`    | Used to send a voice action directive                          |
 +-------------------------------+----------------------------------------------------------------+
+| :py:meth:`responder.suggest`  | Used to send a suggestions view directive                      |
++-------------------------------+----------------------------------------------------------------+
+| :py:meth:`responder.list`     | Used to send a list view directive                             |
++-------------------------------+----------------------------------------------------------------+
 | :py:meth:`responder.listen`   | Used to send a directive to listen for user voice response     |
 +-------------------------------+----------------------------------------------------------------+
 | :py:meth:`responder.reset`    | Used to send a reset action directive, explicitly ending the   |
