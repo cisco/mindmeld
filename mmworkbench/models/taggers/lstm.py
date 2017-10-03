@@ -5,8 +5,7 @@ import math
 import logging
 
 from .taggers import Tagger, extract_sequence_features
-from .embeddings import WordSequenceEmbedding, \
-    GazetteerSequenceEmbedding, CharacterSequenceEmbedding
+from .embeddings import WordSequenceEmbedding, CharacterSequenceEmbedding
 from sklearn.preprocessing import LabelBinarizer
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
@@ -157,7 +156,7 @@ class LstmModel(Tagger):
 
             padded_y = self.pad_sequence(y, DEFAULT_LABEL)
             y_flat = [item for sublist in padded_y for item in sublist]
-            encoded_labels_flat = self.class_encoder.fit_transform(y_flat)
+            encoded_labels_flat = self.label_encoder.fit_transform(y_flat)
             encoded_labels = []
 
             start_index = 0
@@ -165,9 +164,13 @@ class LstmModel(Tagger):
                 encoded_labels.append(encoded_labels_flat[start_index: start_index + len(label_sequence)])
                 start_index += len(label_sequence)
 
+            gaz_entities = [k for k in self.resources['gazetteers'].keys()]
+            gaz_entities.append(DEFAULT_GAZ_LABEL)
+            self.gaz_encoder.fit(gaz_entities)
+
             # The gaz dimension are the sum total of the gazetteer entities and
             # the 'other' gaz entity, which is the entity for all non-gazetteer tokens
-            self.gaz_dimension = len(self.resources['gazetteers'].keys()) + 1
+            self.gaz_dimension = len(gaz_entities)
 
             self.example_type = config.example_type
             self.features = config.features
@@ -181,17 +184,13 @@ class LstmModel(Tagger):
                 self.padding_length, DEFAULT_PADDED_TOKEN, True,
                 self.token_embedding_dimension, self.token_pretrained_embedding_filepath)
 
-            self.gaz_encoder = GazetteerSequenceEmbedding(self.padding_length,
-                                                          DEFAULT_GAZ_LABEL,
-                                                          self.gaz_dimension)
-
             if self.use_char_embeddings:
                 self.char_encoder = CharacterSequenceEmbedding(self.padding_length,
                                                                DEFAULT_CHAR_TOKEN,
                                                                self.character_embedding_dimension,
                                                                self.max_char_per_word)
 
-            self.output_dimension = len(self.class_encoder.classes_)
+            self.output_dimension = len(self.label_encoder.classes_)
         else:
             # Predict time
             encoded_labels = None
@@ -209,7 +208,8 @@ class LstmModel(Tagger):
 
     def setup_model(self, config):
         self.set_params(**config.params)
-        self.class_encoder = LabelBinarizer()
+        self.label_encoder = LabelBinarizer()
+        self.gaz_encoder = LabelBinarizer()
 
         # We have to reset the graph on every dataset since the input, gaz and output
         # dimensions for each domain,intent training data is different. So the graph
@@ -547,7 +547,7 @@ class LstmModel(Tagger):
             char_feats_array.append(char_feat)
 
         x_feats_array = self.query_encoder.get_embeddings_from_encodings(x_feats_array)
-        gaz_feats_array = self.gaz_encoder.get_embeddings_from_encodings(gaz_feats_array)
+        gaz_feats_array = np.asarray(gaz_feats_array)
 
         if self.use_char_embeddings:
             char_feats_array = self.char_encoder.get_embeddings_from_encodings(char_feats_array)
@@ -564,13 +564,17 @@ class LstmModel(Tagger):
         Returns:
             (list dict): features
         """
-        extracted_gaz_tokens = []
+        default_gaz_one_hot = self.gaz_encoder.transform([DEFAULT_GAZ_LABEL]).tolist()[0]
+        extracted_gaz_tokens = [default_gaz_one_hot] * self.padding_length
         extracted_sequence_features = extract_sequence_features(
             example, self.example_type, self.features, self.resources)
 
         for index, extracted_gaz in enumerate(extracted_sequence_features):
+            if index >= self.padding_length:
+                break
+
             if extracted_gaz == {}:
-                extracted_gaz_tokens.append(DEFAULT_GAZ_LABEL)
+                extracted_gaz_tokens[index] = default_gaz_one_hot
                 continue
 
             combined_gaz_features = set()
@@ -589,14 +593,14 @@ class LstmModel(Tagger):
                         regex_match.group(REGEX_TYPE_POSITIONAL_INDEX))
 
             if len(combined_gaz_features) == 0:
-                extracted_gaz_tokens.append(DEFAULT_GAZ_LABEL)
+                extracted_gaz_tokens[index] = default_gaz_one_hot
             else:
-                extracted_gaz_tokens.append(",".join(list(combined_gaz_features)))
+                total_encoding = np.zeros(self.gaz_dimension, dtype=np.int)
+                import pdb; pdb.set_trace()
+                for encoding in self.gaz_encoder.transform(list(combined_gaz_features)):
+                    total_encoding = np.add(total_encoding, encoding)
+                extracted_gaz_tokens[index] = total_encoding.tolist()
 
-        assert len(extracted_gaz_tokens) == len(example.normalized_tokens), \
-            "The length of the gaz and example query have to be the same"
-
-        encoded_gaz = self.gaz_encoder.encode_sequence_of_tokens(extracted_gaz_tokens)
         padded_query = self.query_encoder.encode_sequence_of_tokens(example.normalized_tokens)
 
         if self.use_char_embeddings:
@@ -604,7 +608,7 @@ class LstmModel(Tagger):
         else:
             padded_char = None
 
-        return padded_query, encoded_gaz, padded_char
+        return padded_query, extracted_gaz_tokens, padded_char
 
     def _fit(self, X, y):
         """Trains a classifier without cross-validation. It iterates through
@@ -703,7 +707,7 @@ class LstmModel(Tagger):
         for idx, encoded_predict in enumerate(output):
             decoded_query = []
             for tag in encoded_predict[:self.sequence_lengths[idx]]:
-                decoded_query.append(self.class_encoder.classes_[tag])
+                decoded_query.append(self.label_encoder.classes_[tag])
             decoded_queries.append(decoded_query)
 
         return decoded_queries
