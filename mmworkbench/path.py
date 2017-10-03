@@ -58,6 +58,8 @@ EMBEDDINGS_FOLDER_PATH = os.path.join(WORKBENCH_ROOT, 'data')
 EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, 'glove.6B.zip')
 PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = \
     os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_char_embeddings.pkl')
+PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH = \
+    os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_word_embeddings.pkl')
 
 # User specific directories
 USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mmworkbench')
