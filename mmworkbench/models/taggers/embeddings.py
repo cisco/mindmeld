@@ -253,7 +253,7 @@ class CharacterSequenceEmbedding(object):
         self._add_historic_embeddings()
 
     def encode_sequence_of_tokens(self, token_sequence):
-        """Encodes a sequence of tokens using a simple integer token based approach
+        """Encodes a sequence of tokens
 
         Args:
             token_sequence (list): A sequence of tokens
@@ -284,12 +284,13 @@ class CharacterSequenceEmbedding(object):
         return encoded_query
 
     def _encode_token(self, token):
-        """Encodes a token to a basic integer based encoding ie we map the
-        word to the next available integer value. Example: "cat" is mapped to 0,
-        the next word "dog" will be mapped to 1 etc.
+        """Encodes a token to it's corresponding embedding
 
         Args:
             token (str): Individual token
+
+        Returns:
+            corresponding embedding
         """
         if token not in self.token_to_embedding_mapping:
             random_vector = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
