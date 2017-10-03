@@ -163,7 +163,8 @@ class LstmModel(Tagger):
 
             start_index = 0
             for label_sequence in padded_y:
-                encoded_labels.append(encoded_labels_flat[start_index: start_index + len(label_sequence)])
+                encoded_labels.append(
+                    encoded_labels_flat[start_index: start_index + len(label_sequence)])
                 start_index += len(label_sequence)
 
             gaz_entities = [k for k in self.resources['gazetteers'].keys()]
@@ -173,25 +174,6 @@ class LstmModel(Tagger):
             # The gaz dimension are the sum total of the gazetteer entities and
             # the 'other' gaz entity, which is the entity for all non-gazetteer tokens
             self.gaz_dimension = len(gaz_entities)
-
-            self.example_type = config.example_type
-            self.features = config.features
-
-            self.token_pretrained_embedding_filepath = \
-                config.params.get('token_pretrained_embedding_filepath')
-
-            self.padding_length = config.params.get('padding_length')
-
-            self.query_encoder = WordSequenceEmbedding(
-                self.padding_length, DEFAULT_PADDED_TOKEN, True,
-                self.token_embedding_dimension, self.token_pretrained_embedding_filepath)
-
-            if self.use_char_embeddings:
-                self.char_encoder = CharacterSequenceEmbedding(self.padding_length,
-                                                               DEFAULT_CHAR_TOKEN,
-                                                               self.character_embedding_dimension,
-                                                               self.max_char_per_word)
-
             self.output_dimension = len(self.label_encoder.classes_)
         else:
             # Predict time
@@ -218,14 +200,24 @@ class LstmModel(Tagger):
         # cannot be reused.
         tf.reset_default_graph()
         self.session = tf.Session()
+
         self.example_type = config.example_type
         self.features = config.features
         self.token_pretrained_embedding_filepath = \
             config.params.get('token_pretrained_embedding_filepath')
+
         self.padding_length = config.params.get('padding_length')
+
         self.query_encoder = WordSequenceEmbedding(
-            self.padding_length, DEFAULT_PADDED_TOKEN, True, self.token_embedding_dimension,
+            self.padding_length, DEFAULT_PADDED_TOKEN,
+            self.token_embedding_dimension,
             self.token_pretrained_embedding_filepath)
+
+        if self.use_char_embeddings:
+            self.char_encoder = CharacterSequenceEmbedding(
+                self.padding_length, DEFAULT_CHAR_TOKEN,
+                self.character_embedding_dimension,
+                self.max_char_per_word)
 
     def construct_feed_dictionary(self,
                                   batch_examples,
@@ -557,11 +549,11 @@ class LstmModel(Tagger):
             gaz_feats_array.append(gaz_feat)
             char_feats_array.append(char_feat)
 
-        x_feats_array = self.query_encoder.get_embeddings_from_encodings(x_feats_array)
+        x_feats_array = np.asarray(x_feats_array)
         gaz_feats_array = np.asarray(gaz_feats_array)
 
         if self.use_char_embeddings:
-            char_feats_array = self.char_encoder.get_embeddings_from_encodings(char_feats_array)
+            char_feats_array = np.asarray(char_feats_array)
         else:
             char_feats_array = []
 
