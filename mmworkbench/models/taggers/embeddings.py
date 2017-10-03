@@ -419,22 +419,6 @@ class CharacterSequenceEmbedding(SequenceEmbedding):
         return transformed_examples
 
 
-class LabelSequenceEmbedding(SequenceEmbedding):
-    """This class is a container for building sequence embeddings for a sequence of labels.
-    We use a one-hot encoding based embedding representation for this class.
-    """
-
-    def _construct_embedding_matrix(self):
-        num_words = len(self.token_to_encoding_mapping.keys())
-        embedding_matrix = np.zeros((num_words, num_words))
-
-        for word, i in self.token_to_encoding_mapping.items():
-            in_vec = np.zeros(num_words)
-            in_vec[self.token_to_encoding_mapping[word]] = 1
-            embedding_matrix[i] = in_vec
-        return embedding_matrix
-
-
 class GazetteerSequenceEmbedding(SequenceEmbedding):
     """This class is a container for building sequence embeddings for a sequence of gazetteer
     labels. This container's embedding representation is a binarized encoding (not 1-hot)
