@@ -596,7 +596,6 @@ class LstmModel(Tagger):
                 extracted_gaz_tokens[index] = default_gaz_one_hot
             else:
                 total_encoding = np.zeros(self.gaz_dimension, dtype=np.int)
-                import pdb; pdb.set_trace()
                 for encoding in self.gaz_encoder.transform(list(combined_gaz_features)):
                     total_encoding = np.add(total_encoding, encoding)
                 extracted_gaz_tokens[index] = total_encoding.tolist()

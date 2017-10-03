@@ -169,7 +169,6 @@ class SequenceEmbedding(object):
             token_pretrained_embedding_filepath (str): The embedding filepath to extract
             the embeddings from
         """
-
         np.random.seed(seed=1)
         self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
         self.token_embedding_dimension = token_embedding_dimension
