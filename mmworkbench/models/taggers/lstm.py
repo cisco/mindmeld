@@ -141,22 +141,12 @@ class LstmModel(Tagger):
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
             self.lstm_output_tf, self.label_tf, self.batch_sequence_lengths_tf)
 
-    def pad_sequence(self, list_of_sequences, default_token):
-        padded_output = []
-        for sequence in list_of_sequences:
-            padded_seq = [default_token] * self.padding_length
-            for idx, token in enumerate(sequence):
-                if idx < self.padding_length:
-                    padded_seq[idx] = sequence[idx]
-            padded_output.append(padded_seq)
-        return padded_output
-
     def extract_features(self, examples, config, resources, y=None, fit=True):
         if y:
             # Train time
             self.resources = resources
 
-            padded_y = self.pad_sequence(y, DEFAULT_LABEL)
+            padded_y = self._pad_labels(y, DEFAULT_LABEL)
             y_flat = [item for sublist in padded_y for item in sublist]
             encoded_labels_flat = self.label_encoder.fit_transform(y_flat)
             encoded_labels = []
@@ -404,6 +394,26 @@ class LstmModel(Tagger):
                 score += 1
 
         return score
+
+    def _pad_labels(self, list_of_sequences, default_token):
+        """
+        Pads the label sequence
+
+        Args:
+            list_of_sequences: A list of label sequences
+            default_token: The default label token for padding purposes
+
+        Returns:
+            padded output
+        """
+        padded_output = []
+        for sequence in list_of_sequences:
+            padded_seq = [default_token] * self.padding_length
+            for idx, token in enumerate(sequence):
+                if idx < self.padding_length:
+                    padded_seq[idx] = sequence[idx]
+            padded_output.append(padded_seq)
+        return padded_output
 
     def _construct_lstm_state(self, initializer, hidden_dimension, batch_size, name):
         """Construct the LSTM initial state
