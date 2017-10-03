@@ -164,7 +164,6 @@ class WordSequenceEmbedding(object):
             token_pretrained_embedding_filepath (str): The embedding filepath to
             extract the embeddings from.
         """
-        np.random.seed(seed=1)
         self.token_embedding_dimension = token_embedding_dimension
         self.sequence_padding_length = sequence_padding_length
 
@@ -246,7 +245,6 @@ class CharacterSequenceEmbedding(object):
             token_embedding_dimension (int): The embedding dimension of the token
             max_char_per_word (int): The maximum number of characters per word
         """
-        np.random.seed(seed=1)
         self.token_embedding_dimension = token_embedding_dimension
         self.sequence_padding_length = sequence_padding_length
         self.max_char_per_word = max_char_per_word
