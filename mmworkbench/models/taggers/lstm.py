@@ -561,11 +561,7 @@ class LstmModel(Tagger):
 
         x_feats_array = np.asarray(x_feats_array)
         gaz_feats_array = np.asarray(gaz_feats_array)
-
-        if self.use_char_embeddings:
-            char_feats_array = np.asarray(char_feats_array)
-        else:
-            char_feats_array = []
+        char_feats_array = np.asarray(char_feats_array) if self.use_char_embeddings else []
 
         return x_feats_array, gaz_feats_array, char_feats_array
 
