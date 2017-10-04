@@ -50,12 +50,17 @@ To test using any REST client (such as Postman or Advanced Rest Client), send `P
 
   $ curl -X POST -d '{"text": "hello world"}' "http://localhost:7150/parse" | jq .
   {
-    "client_actions": [
+    "directives": [
       {
-        "message": {
+        "payload": {
           "text": "Hello. I can help you find store hours for your local Kwik-E-Mart. How can I help?"
         },
-        "name": "show-prompt"
+        "type": "view",
+        "name": "reply"
+      },
+      {
+        "type": "action",
+        "name": "listen"
       }
     ],
     "dialogue_state": "welcome",

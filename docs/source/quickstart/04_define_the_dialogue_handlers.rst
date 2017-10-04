@@ -121,8 +121,9 @@ First, consider the handler for the ``welcome`` dialogue state.
   @app.handle(intent='greet')
   def welcome(context, responder):
       responder.slots['name'] = context['request']['session']['name']
-      responder.prompt('Hello, {name}. I can help you find store hours '
-                       'for your local Kwik-E-Mart. How can I help?')
+      responder.reply('Hello, {name}. I can help you find store hours '
+                      'for your local Kwik-E-Mart. How can I help?')
+      responder.listen()
 
   if __name__ == '__main__':
       app.cli()
@@ -146,8 +147,9 @@ Let's follow this same approach to define handlers for the dialogue states ``sen
   @app.handle(intent='greet')
   def welcome(context, responder):
       responder.slots['name'] = context['request']['session']['name']
-      responder.prompt('Hello, {name}. I can help you find store hours '
-                       'for your local Kwik-E-Mart. How can I help?')
+      responder.reply('Hello, {name}. I can help you find store hours '
+                      'for your local Kwik-E-Mart. How can I help?')
+      responder.listen()
 
   @app.handle(intent='get_store_hours')
   def send_store_hours(context, responder):
@@ -165,7 +167,8 @@ Let's follow this same approach to define handlers for the dialogue states ``sen
           responder.reply('The {store_name} Kwik-E-Mart opens at {open_time} and '
                           'closes at {close_time}.')
       else:
-          responder.prompt('Which store would you like to know about?')
+          responder.reply('Which store would you like to know about?')
+          responder.listen()
 
   @app.handle(intent='find_nearest_store')
   def send_nearest_store(context, responder):
@@ -184,8 +187,9 @@ Let's follow this same approach to define handlers for the dialogue states ``sen
 
   @app.handle()
   def default(context, responder):
-      responder.prompt('Sorry, not sure what you meant there. I can help you find '
-                       'store hours for your local Kwik-E-Mart.')
+      responder.reply('Sorry, not sure what you meant there. I can help you find '
+                      'store hours for your local Kwik-E-Mart.')
+      responder.listen()
 
   if __name__ == '__main__':
       app.cli()
