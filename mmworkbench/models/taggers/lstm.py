@@ -608,7 +608,7 @@ class LstmModel(Tagger):
         self.label_tf = self.session.graph.get_tensor_by_name('label_tf:0')
 
         self.batch_sequence_lengths_tf = \
-            self.session.graph.get_tensor_by_name('batch_sequence_lengths_tf:0')
+            self.session.graph.get_tensor_by_name('sequence_length_tf:0')
 
         self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
 

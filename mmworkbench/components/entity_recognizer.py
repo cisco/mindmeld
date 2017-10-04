@@ -12,7 +12,6 @@ from sklearn.externals import joblib
 
 from ..core import Entity
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
-from ..path import GEN_FOLDER
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
@@ -100,12 +99,14 @@ class EntityRecognizer(Classifier):
             model_path (str): The location on disk where the model should be stored
 
         """
-        if os.path.splitext(model_path)[1]:
+        _, ext = os.path.splitext(model_path)
+        if ext:
             logger.error("Expected directory for entity recognition model path but received "
-                         "file with extension: {}".format(os.path.splitext(model_path)[1]))
+                         "file with extension: {}".format(ext))
             return
 
         logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
+
         # make directory if necessary
         folder = os.path.dirname(model_path)
         if not os.path.isdir(folder):
