@@ -144,12 +144,11 @@ class EntityRecognizer(Classifier):
             # paths that previously just used to be files
             model_path = model_path if os.path.isfile(model_path) \
                 else os.path.join(model_path, 'config')
-
             er_data = joblib.load(model_path)
-            model_name = er_data['model_name']
+            model_name = er_data.get('model_name')
             self.entity_types = er_data['entity_types']
 
-            if model_name not in TENSORFLOW_MODELS:
+            if not model_name or (model_name not in TENSORFLOW_MODELS):
                 self._model = er_data['model']
             else:
                 tf_model_path = er_data['model']
