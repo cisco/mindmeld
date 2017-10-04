@@ -12,6 +12,7 @@ from sklearn.externals import joblib
 
 from ..core import Entity
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
+from ..path import GEN_FOLDER
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
@@ -99,6 +100,11 @@ class EntityRecognizer(Classifier):
             model_path (str): The location on disk where the model should be stored
 
         """
+        if os.path.splitext(model_path)[1]:
+            logger.error("Expected directory for entity recognition model path but received "
+                         "file with extension: {}".format(os.path.splitext(model_path)[1]))
+            return
+
         logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         # make directory if necessary
         folder = os.path.dirname(model_path)
@@ -111,11 +117,16 @@ class EntityRecognizer(Classifier):
             er_data = {'model': self._model, 'entity_types': self.entity_types,
                        'model_name': model_name}
         else:
-            tf_model_path = model_path.split('.pkl')[0] + '_tf'
+            tf_model_path = os.path.join(model_path, 'tf_model')
+            if not os.path.isdir(tf_model_path):
+                os.makedirs(tf_model_path)
+
             er_data = {'model': tf_model_path, 'entity_types': self.entity_types,
                        'model_name': model_name, 'model_config': self._model_config}
             self._model.dump(tf_model_path)
-        joblib.dump(er_data, model_path)
+
+        joblib_path = os.path.join(model_path, 'config')
+        joblib.dump(er_data, joblib_path)
 
         self.dirty = False
 
@@ -128,6 +139,9 @@ class EntityRecognizer(Classifier):
         """
         logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
+            # The below construct is to ensure backwards compatibility of model paths that previously
+            # just used to be files
+            model_path = model_path if os.path.isfile(model_path) else os.path.join(model_path, 'config')
             er_data = joblib.load(model_path)
             model_name = er_data['model_name']
             self.entity_types = er_data['entity_types']

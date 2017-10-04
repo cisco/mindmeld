@@ -563,7 +563,7 @@ class LstmModel(Tagger):
 
         return decoded_queries
 
-    def dump(self, path='lstm_model'):
+    def dump(self, path):
         """
         Saves the Tensorflow model
         """
@@ -584,7 +584,7 @@ class LstmModel(Tagger):
 
         joblib.dump(variables_to_dump, os.path.join(path, '.feature_extraction_vars'))
 
-    def load(self, path='lstm-model'):
+    def load(self, path):
         """
         Loads the Tensorflow model
         """
@@ -592,7 +592,6 @@ class LstmModel(Tagger):
         saver.restore(self.session, os.path.join(path, 'lstm_model'))
 
         # Restore tensorflow graph variables
-
         self.dense_keep_prob_tf = \
             self.session.graph.get_tensor_by_name('dense_keep_prob_tf:0')
 
@@ -609,7 +608,7 @@ class LstmModel(Tagger):
         self.label_tf = self.session.graph.get_tensor_by_name('label_tf:0')
 
         self.batch_sequence_lengths_tf = \
-            self.session.graph.get_tensor_by_name('sequence_length_tf:0')
+            self.session.graph.get_tensor_by_name('batch_sequence_lengths_tf:0')
 
         self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
 
