@@ -234,12 +234,12 @@ class DialogueManager(object):
                 raise AssertionError(msg)
             self.handler_map[name] = handler
 
-    def apply_handler(self, context, target_dialog_state=None):
+    def apply_handler(self, context, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
             context (dict): Description
-            target_dialog_state (str, optional): The target dialog state
+            target_dialogue_state (str, optional): The target dialogue state
 
         Returns:
             dict: A dict containing the dialogue state and directives
@@ -247,8 +247,8 @@ class DialogueManager(object):
         dialogue_state = None
 
         for rule in self.rules:
-            if target_dialog_state:
-                if target_dialog_state == rule.dialogue_state:
+            if target_dialogue_state:
+                if target_dialogue_state == rule.dialogue_state:
                     dialogue_state = rule.dialogue_state
                     break
             else:
@@ -465,7 +465,7 @@ class Conversation(object):
         self.history = []
         self.frame = {}
         self.allowed_intents = None
-        self.target_dialog_state = ''
+        self.target_dialogue_state = ''
 
     def say(self, text):
         """Send a message in the conversation. The message will be
@@ -509,12 +509,12 @@ class Conversation(object):
                               "processing.".format(self.allowed_intents))
             self.allowed_intents = None
 
-        self.target_dialog_state = response.pop('target_dialog_state', None)
-        if self.target_dialog_state and not isinstance(self.target_dialog_state, str):
-            self.logger.error("target_dialog_state {} is supposed to be a string but it is not. "
+        self.target_dialogue_state = response.pop('target_dialogue_state', None)
+        if self.target_dialogue_state and not isinstance(self.target_dialogue_state, str):
+            self.logger.error("target_dialogue_state {} is supposed to be a string but it is not. "
                               "Therefore this invalid structure is not stored for further "
-                              "processing.".format(self.target_dialog_state))
-            self.target_dialog_state = None
+                              "processing.".format(self.target_dialogue_state))
+            self.target_dialogue_state = None
 
         return response
 
