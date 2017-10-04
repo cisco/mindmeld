@@ -150,7 +150,6 @@ class WordSequenceEmbedding(object):
 
     def __init__(self,
                  sequence_padding_length,
-                 default_token,
                  token_embedding_dimension=None,
                  token_pretrained_embedding_filepath=None):
         """Initializes the WordSequenceEmbedding class
@@ -158,8 +157,6 @@ class WordSequenceEmbedding(object):
         Args:
             sequence_padding_length (int): padding length of the sequence after which
             the sequence is cut off
-            default_token (str): The default token if the sequence is too short for
-            the fixed padding length
             token_embedding_dimension (int): The embedding dimension of the token
             token_pretrained_embedding_filepath (str): The embedding filepath to
             extract the embeddings from.
@@ -173,7 +170,6 @@ class WordSequenceEmbedding(object):
             token_embedding_dimension,
             token_pretrained_embedding_filepath).get_pretrained_word_to_embeddings_dict()
 
-        self.default_token = default_token
         self._add_historic_embeddings()
 
     def encode_sequence_of_tokens(self, token_sequence):
@@ -186,7 +182,6 @@ class WordSequenceEmbedding(object):
             (list): Encoded sequence of tokens
         """
         default_encoding = np.zeros(self.token_embedding_dimension)
-        self.token_to_embedding_mapping[self.default_token] = default_encoding
         encoded_query = [default_encoding] * self.sequence_padding_length
 
         for idx, token in enumerate(token_sequence):
@@ -222,7 +217,9 @@ class WordSequenceEmbedding(object):
         for word in historic_word_embeddings:
             self.token_to_embedding_mapping[word] = historic_word_embeddings.get(word)
 
-        # save extracted embeddings to historic pickle file
+    def save_embeddings(self):
+        """Save extracted embeddings to historic pickle file
+        """
         output = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, 'wb')
         pickle.dump(self.token_to_embedding_mapping, output)
         output.close()
@@ -232,7 +229,6 @@ class CharacterSequenceEmbedding(object):
 
     def __init__(self,
                  sequence_padding_length,
-                 default_token,
                  token_embedding_dimension=None,
                  max_char_per_word=None):
         """Initializes the CharacterSequenceEmbedding class
@@ -240,8 +236,6 @@ class CharacterSequenceEmbedding(object):
         Args:
             sequence_padding_length (int): padding length of the sequence after which
             the sequence is cut off
-            default_token (str): The default token if the sequence is too short for
-            the fixed padding length
             token_embedding_dimension (int): The embedding dimension of the token
             max_char_per_word (int): The maximum number of characters per word
         """
@@ -249,7 +243,6 @@ class CharacterSequenceEmbedding(object):
         self.sequence_padding_length = sequence_padding_length
         self.max_char_per_word = max_char_per_word
         self.token_to_embedding_mapping = {}
-        self.default_token = default_token
         self._add_historic_embeddings()
 
     def encode_sequence_of_tokens(self, token_sequence):
@@ -262,7 +255,6 @@ class CharacterSequenceEmbedding(object):
             (list): Encoded sequence of tokens
         """
         default_encoding = np.zeros(self.token_embedding_dimension)
-        self.token_to_embedding_mapping[self.default_token] = default_encoding
         default_char_word = [default_encoding] * self.max_char_per_word
         encoded_query = [default_char_word] * self.sequence_padding_length
 
@@ -270,9 +262,7 @@ class CharacterSequenceEmbedding(object):
             if idx >= self.sequence_padding_length:
                 break
 
-            encoded_word = \
-                [self.token_to_embedding_mapping[self.default_token]] * self.max_char_per_word
-
+            encoded_word = [default_encoding] * self.max_char_per_word
             for idx2, char_token in enumerate(word_token):
                 if idx2 >= self.max_char_per_word:
                     break
@@ -309,7 +299,9 @@ class CharacterSequenceEmbedding(object):
         for char in historic_char_embeddings:
             self.token_to_embedding_mapping[char] = historic_char_embeddings.get(char)
 
-        # save extracted embeddings to historic pickle file
+    def save_embeddings(self):
+        """Save extracted embeddings to historic pickle file
+        """
         output = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, 'wb')
         pickle.dump(self.token_to_embedding_mapping, output)
         output.close()

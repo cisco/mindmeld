@@ -199,13 +199,13 @@ class LstmModel(Tagger):
         self.padding_length = config.params.get('padding_length')
 
         self.query_encoder = WordSequenceEmbedding(
-            self.padding_length, DEFAULT_PADDED_TOKEN,
+            self.padding_length,
             self.token_embedding_dimension,
             self.token_pretrained_embedding_filepath)
 
         if self.use_char_embeddings:
             self.char_encoder = CharacterSequenceEmbedding(
-                self.padding_length, DEFAULT_CHAR_TOKEN,
+                self.padding_length,
                 self.character_embedding_dimension,
                 self.max_char_per_word)
 
@@ -559,6 +559,11 @@ class LstmModel(Tagger):
             gaz_feats_array.append(gaz_feat)
             char_feats_array.append(char_feat)
 
+        # save all the embeddings used for model saving purposes
+        self.query_encoder.save_embeddings()
+        if self.use_char_embeddings:
+            self.char_encoder.save_embeddings()
+
         x_feats_array = np.asarray(x_feats_array)
         gaz_feats_array = np.asarray(gaz_feats_array)
         char_feats_array = np.asarray(char_feats_array) if self.use_char_embeddings else []
@@ -715,6 +720,8 @@ class LstmModel(Tagger):
         for idx, encoded_predict in enumerate(output):
             decoded_query = []
             for tag in encoded_predict[:self.sequence_lengths[idx]]:
+                if tag == DEFAULT_LABEL:
+                    break
                 decoded_query.append(self.label_encoder.classes_[tag])
             decoded_queries.append(decoded_query)
 
@@ -766,9 +773,12 @@ class LstmModel(Tagger):
         self.label_tf = self.session.graph.get_tensor_by_name('label_tf:0')
 
         self.batch_sequence_lengths_tf = \
-            self.session.graph.get_tensor_by_name('sequence_length_tf:0')
+            self.session.graph.get_tensor_by_name('batch_sequence_lengths_tf:0')
 
         self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
+
+        if self.use_char_embeddings:
+            self.char_input_tf = self.session.graph.get_tensor_by_name('char_input_tf:0')
 
         # Load feature extraction variables
         variables_to_load = joblib.load(os.path.join(path, '.feature_extraction_vars'))
