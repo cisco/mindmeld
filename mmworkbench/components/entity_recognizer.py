@@ -15,6 +15,7 @@ from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
+from ..exceptions import WorkbenchError
 
 logger = logging.getLogger(__name__)
 
@@ -101,9 +102,10 @@ class EntityRecognizer(Classifier):
         """
         _, ext = os.path.splitext(model_path)
         if ext:
-            logger.error("Expected directory for entity recognition model path but received "
-                         "file with extension: {}".format(ext))
-            return
+            logger.warn("Expected directory for entity recognition model path but received "
+                         "file: {}, so this is a model build previous to WB 3.2.0 which "
+                        "did not have TensorFlow enabled. Hence, we will treat it as "
+                        "a non-TensorFlow model".format(model_path))
 
         logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
@@ -118,6 +120,10 @@ class EntityRecognizer(Classifier):
             er_data = {'model': self._model, 'entity_types': self.entity_types,
                        'model_name': model_name}
         else:
+            if ext:
+                raise WorkbenchError("Expected a folder to contain TensorFlow model but got "
+                                     "file instead")
+
             tf_model_path = os.path.join(model_path, 'tf_model')
             if not os.path.isdir(tf_model_path):
                 os.makedirs(tf_model_path)
