@@ -110,9 +110,8 @@ class EntityRecognizer(Classifier):
         logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
         # make directory if necessary
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
+        if not os.path.isdir(model_path):
+            os.makedirs(model_path)
 
         model_name = type(self._model._clf).__name__
 
@@ -132,10 +131,7 @@ class EntityRecognizer(Classifier):
                        'model_name': model_name, 'model_config': self._model_config}
             self._model.dump(tf_model_path)
 
-        joblib_path = os.path.join(model_path, 'config')
-        if not os.path.isdir(joblib_path):
-            os.makedirs(joblib_path)
-
+        joblib_path = os.path.join(model_path, 'config.pkl')
         joblib.dump(er_data, joblib_path)
 
         self.dirty = False
@@ -152,7 +148,7 @@ class EntityRecognizer(Classifier):
             # The below construct is to ensure backwards compatibility of model
             # paths that previously just used to be files
             model_path = model_path if os.path.isfile(model_path) \
-                else os.path.join(model_path, 'config')
+                else os.path.join(model_path, 'config.pkl')
             er_data = joblib.load(model_path)
             model_name = er_data.get('model_name')
             self.entity_types = er_data['entity_types']
