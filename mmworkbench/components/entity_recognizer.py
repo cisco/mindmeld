@@ -103,7 +103,7 @@ class EntityRecognizer(Classifier):
         _, ext = os.path.splitext(model_path)
         if ext:
             logger.warn("Expected directory for entity recognition model path but received "
-                         "file: {}, so this is a model build previous to WB 3.2.0 which "
+                        "file: {}, so this is a model build previous to WB 3.2.0 which "
                         "did not have TensorFlow enabled. Hence, we will treat it as "
                         "a non-TensorFlow model".format(model_path))
 
