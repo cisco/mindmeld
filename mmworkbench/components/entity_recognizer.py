@@ -127,6 +127,9 @@ class EntityRecognizer(Classifier):
             self._model.dump(tf_model_path)
 
         joblib_path = os.path.join(model_path, 'config')
+        if not os.path.isdir(joblib_path):
+            os.makedirs(joblib_path)
+
         joblib.dump(er_data, joblib_path)
 
         self.dirty = False
