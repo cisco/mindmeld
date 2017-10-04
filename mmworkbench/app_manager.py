@@ -56,7 +56,7 @@ class ApplicationManager(object):
         self.nlp.load()
 
     def parse(self, text, payload=None, session=None, frame=None, history=None,
-              allowed_intents=None, target_dialog_state=None, verbose=False):
+              allowed_intents=None, target_dialogue_state=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
@@ -65,7 +65,7 @@ class ApplicationManager(object):
             history (list, optional): Description
             allowed_intents (list, optional): A list of allowed intents
             for model consideration
-            target_dialog_state (str, optional): The target dialog state
+            target_dialogue_state (str, optional): The target dialogue state
             verbose (bool, optional): Description
 
         Returns:
@@ -84,16 +84,16 @@ class ApplicationManager(object):
         context = self.context_class(
             {'request': request, 'history': history, 'frame': copy.deepcopy(frame)})
 
-        # Validate target dialog state
-        if target_dialog_state and target_dialog_state not in self.dialogue_manager.handler_map:
-            logger.error("Target dialog state {} does not match any dialog state names "
-                         "in for the application. Not applying the target dialog state "
-                         "this turn.".format(target_dialog_state))
-            target_dialog_state = None
+        # Validate target dialogue state
+        if target_dialogue_state and target_dialogue_state not in self.dialogue_manager.handler_map:
+            logger.error("Target dialogue state {} does not match any dialogue state names "
+                         "in for the application. Not applying the target dialogue state "
+                         "this turn.".format(target_dialogue_state))
+            target_dialogue_state = None
 
-        # We bypass the NLP processing engine if the target dialog state is specified. This
+        # We bypass the NLP processing engine if the target dialogue state is specified. This
         # improves performance by decreasing round trip time between the client and wb.
-        if not target_dialog_state:
+        if not target_dialogue_state:
             nlp_hierarchy = None
             if allowed_intents:
                 try:
@@ -115,7 +115,7 @@ class ApplicationManager(object):
             context.update(processed_query.to_dict())
             context.pop('text')
 
-        context.update(self.dialogue_manager.apply_handler(context, target_dialog_state))
+        context.update(self.dialogue_manager.apply_handler(context, target_dialogue_state))
         return context
 
     def add_dialogue_rule(self, name, handler, **kwargs):
