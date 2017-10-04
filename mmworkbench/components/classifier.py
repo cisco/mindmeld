@@ -211,13 +211,13 @@ class Classifier(object):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
-    def evaluate(self, queries=None, use_blind=False):
+    def evaluate(self, queries=None, label_set='test'):
         """Evaluates the trained classification model on the given test data
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as test data. If none
                 are provided, the test label set will be used.
-            use_blind (bool): Description
+            label_set (str): The label set to use for evaluation.
 
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
@@ -226,7 +226,7 @@ class Classifier(object):
             logger.error('You must fit or load the model before running evaluate.')
             return
 
-        queries, labels = self._get_queries_and_labels(queries, label_set='test')
+        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
 
         if not queries:
             logger.info('Could not evaluate model since no relevant examples were found. Make sure '
