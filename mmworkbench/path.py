@@ -190,13 +190,15 @@ def get_indexes(app_path):
     return next(os.walk(indexes_dir))[1]
 
 
-def load_app_package(app_path):
+def load_app_package(app_path, package_name=None):
     """
     Args:
-        path (str): The path to the app data (for example: /user/joe/home_assistant)
+        path (str): The path to the app data (for example: /user/joe/home_assistant).
+        package_name (str): The name of the imported package. If none, use folder name.
     """
     import imp
-    package_name = os.path.basename(app_path)
+    if not package_name:
+        package_name = os.path.basename(app_path)
     package_path = os.path.dirname(app_path)
 
     fp, pathname, description = imp.find_module(package_name, [package_path])
