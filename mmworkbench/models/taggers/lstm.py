@@ -566,6 +566,9 @@ class LstmModel(Tagger):
     def dump(self, path):
         """
         Saves the Tensorflow model
+
+        Args:
+            path (str): the folder path for the entity model folder
         """
         # Save the tensorflow weights and variables
         saver = tf.train.Saver()
@@ -587,6 +590,9 @@ class LstmModel(Tagger):
     def load(self, path):
         """
         Loads the Tensorflow model
+
+        Args:
+            path (str): the folder path for the entity model folder
         """
         saver = tf.train.import_meta_graph(os.path.join(path, 'lstm_model.meta'))
         saver.restore(self.session, os.path.join(path, 'lstm_model'))

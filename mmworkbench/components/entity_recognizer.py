@@ -11,6 +11,7 @@ import logging
 from sklearn.externals import joblib
 
 from ..core import Entity
+from .. import path
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
@@ -103,8 +104,7 @@ class EntityRecognizer(Classifier):
         _, ext = os.path.splitext(model_path)
         if ext:
             logger.warn("Expected directory for entity recognition model path but received "
-                        "file: {}, so this is a model build previous to WB 3.2.0 which "
-                        "did not have TensorFlow enabled. Hence, we will treat it as "
+                        "file: {}, so this is a pre-WB 3.2.0 model. Hence, we will treat it as "
                         "a non-TensorFlow model".format(model_path))
 
         logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
@@ -123,7 +123,7 @@ class EntityRecognizer(Classifier):
                 raise WorkbenchError("Expected a folder to contain TensorFlow model but got "
                                      "file instead")
 
-            tf_model_path = os.path.join(model_path, 'tf_model')
+            tf_model_path = path.get_tensorflow_entity_model_path_name(model_path)
             if not os.path.isdir(tf_model_path):
                 os.makedirs(tf_model_path)
 
@@ -131,7 +131,7 @@ class EntityRecognizer(Classifier):
                        'model_name': model_name, 'model_config': self._model_config}
             self._model.dump(tf_model_path)
 
-        joblib_path = os.path.join(model_path, 'config.pkl')
+        joblib_path = path.get_config_entity_model_path_name(model_path)
         joblib.dump(er_data, joblib_path)
 
         self.dirty = False
@@ -147,8 +147,7 @@ class EntityRecognizer(Classifier):
         try:
             # The below construct is to ensure backwards compatibility of model
             # paths that previously just used to be files
-            model_path = model_path if os.path.isfile(model_path) \
-                else os.path.join(model_path, 'config.pkl')
+            model_path = path.get_entity_model_path_name(model_path)
             er_data = joblib.load(model_path)
             model_name = er_data.get('model_name')
             self.entity_types = er_data['entity_types']

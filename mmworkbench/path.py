@@ -270,35 +270,24 @@ def get_intent_model_path(app_path, domain, model_name=None):
 
 
 @safe_path
-def get_entity_model_path(app_path, domain, intent, model_name=None):
+def get_entity_model_path(app_path, domain, intent, model_name=None, old_version=False):
     """
     Args:
         app_path (str): The path to the app data.
         domain (str): A domain under the application.
         intent (str): A intent under the domain.
-        model_name (str): The name of the model. Allows multiple models to be stored.
+        model_name (str, optional): The name of the model. Allows multiple models to be stored.
+        old_version (boolean, Optional): Load the entity file with the format pre-WB 3.2.0
 
     Returns:
         (str) The path for this intent's named entity recognizer.
 
     """
-    path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
-    return _resolve_model_name(path, model_name)
+    if old_version:
+        path = ENTITY_MODEL_PATH_OLD.format(app_path=app_path, domain=domain, intent=intent)
+    else:
+        path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
 
-@safe_path
-def get_old_entity_model_path(app_path, domain, intent, model_name=None):
-    """
-    Args:
-        app_path (str): The path to the app data.
-        domain (str): A domain under the application.
-        intent (str): A intent under the domain.
-        model_name (str): The name of the model. Allows multiple models to be stored.
-
-    Returns:
-        (str) The path for this intent's named entity recognizer.
-
-    """
-    path = ENTITY_MODEL_PATH_OLD.format(app_path=app_path, domain=domain, intent=intent)
     return _resolve_model_name(path, model_name)
 
 
@@ -447,3 +436,41 @@ def get_user_config_path():
         str: The path to the current user's workbench configuration file.
     """
     return USER_CONFIG_PATH
+
+
+def get_tensorflow_entity_model_path_name(model_path):
+    """
+    Args:
+        model_path (str): The base path where the entity model is
+
+    Returns:
+        str: The path to tensorflow entity model state
+    """
+    return os.path.join(model_path, 'tf_model')
+
+
+def get_config_entity_model_path_name(model_path):
+    """
+    Args:
+        model_path (str): The base path where the entity model is
+
+    Returns:
+        str: The path to config entity model state
+    """
+    return os.path.join(model_path, 'config.pkl')
+
+
+def get_entity_model_path_name(model_path):
+    """
+    Args:
+        model_path (str): The base path where the entity model is
+
+    Returns:
+        str: The path to config entity model state
+    """
+    if os.path.isfile(model_path):
+        # This conditional handles the case where the user passes in
+        # a pre-3.2.0 WB3 entity model file path
+        return model_path
+    else:
+        return os.path.join(model_path, 'config.pkl')

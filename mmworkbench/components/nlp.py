@@ -487,10 +487,13 @@ class IntentProcessor(Processor):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
 
         if not os.path.isdir(model_path):
-            old_model_path = path.get_old_entity_model_path(self._app_path, self.domain, self.name)
-
+            # This conditional handles backwards compatibility to entity model file
+            # pre WB 3.2.0, where the model was saved in a file called entity.pkl
+            # instead of a folder called entity_model.
+            old_model_path = \
+                path.get_entity_model_path(self._app_path, self.domain, self.name, None, True)
             if not os.path.isfile(old_model_path):
-                raise WorkbenchError("Model not found")
+                raise WorkbenchError("Entity model with path {} not found".format(model_path))
 
             model_path = old_model_path
 
