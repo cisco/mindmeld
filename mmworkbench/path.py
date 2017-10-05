@@ -60,8 +60,10 @@ ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, 'ascii_folding_dict.txt
 MALLARD_JAR_PATH = os.path.join(RESOURCES_FOLDER, 'mindmeld-mallard.jar')
 EMBEDDINGS_FOLDER_PATH = os.path.join(WORKBENCH_ROOT, 'data')
 EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, 'glove.6B.zip')
-PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH = \
-    os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_embeddings.pkl')
+PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = \
+    os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_char_embeddings.pkl')
+PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH = \
+    os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_word_embeddings.pkl')
 
 # User specific directories
 USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mmworkbench')
@@ -194,13 +196,15 @@ def get_indexes(app_path):
     return next(os.walk(indexes_dir))[1]
 
 
-def load_app_package(app_path):
+def load_app_package(app_path, package_name=None):
     """
     Args:
-        path (str): The path to the app data (for example: /user/joe/home_assistant)
+        path (str): The path to the app data (for example: /user/joe/home_assistant).
+        package_name (str): The name of the imported package. If none, use folder name.
     """
     import imp
-    package_name = os.path.basename(app_path)
+    if not package_name:
+        package_name = os.path.basename(app_path)
     package_path = os.path.dirname(app_path)
 
     fp, pathname, description = imp.find_module(package_name, [package_path])
