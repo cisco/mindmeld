@@ -139,6 +139,7 @@ class LstmModel(Tagger):
 
         combined_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(combined_embedding_tf)
+        self.lstm_output_softmax_tf = tf.nn.softmax(self.lstm_output_tf, name='output_softmax_tensor')
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost()
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
@@ -356,13 +357,9 @@ class LstmModel(Tagger):
                 tf.reshape(self.lstm_output_tf, [-1, self.output_dimension]),
                 self.batch_sequence_mask_tf)
 
-            masked_logits = tf.reshape(self.lstm_output_tf, [-1, self.output_dimension])
-
             masked_labels = tf.boolean_mask(
                 tf.reshape(self.label_tf, [-1, self.output_dimension]),
                 self.batch_sequence_mask_tf)
-
-            masked_labels = tf.reshape(self.label_tf, [-1, self.output_dimension])
 
             softmax_loss_tf = tf.nn.softmax_cross_entropy_with_logits(
                 logits=masked_logits, labels=masked_labels, name='softmax_loss_tf')
@@ -724,7 +721,7 @@ class LstmModel(Tagger):
         self.lstm_output_keep_prob = 1.0
 
         output = self.session.run(
-            [self.lstm_output_tf],
+            [self.lstm_output_softmax_tf],
             feed_dict=self.construct_feed_dictionary(
                 X, self.char_features_arr, self.gaz_features_arr, seq_len_arr))
 
@@ -792,6 +789,8 @@ class LstmModel(Tagger):
             self.session.graph.get_tensor_by_name('batch_sequence_mask_tf:0')
 
         self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
+
+        self.lstm_output_softmax_tf = self.session.graph.get_tensor_by_name('output_softmax_tensor:0')
 
         if self.use_char_embeddings:
             self.char_input_tf = self.session.graph.get_tensor_by_name('char_input_tf:0')
