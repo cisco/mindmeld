@@ -21,6 +21,10 @@ GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, '{domain}')
 INTENT_MODEL_PATH = os.path.join(GEN_DOMAIN_FOLDER, 'intent.pkl')
 GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, '{intent}')
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity_model')
+
+# The old entity model path is for WB < 3.2.0
+ENTITY_MODEL_PATH_OLD = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
+
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, '{entity}-role.pkl')
 GAZETTEER_PATH = os.path.join(GEN_FOLDER, 'gaz-{entity}.pkl')
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, 'indexes')
@@ -279,6 +283,22 @@ def get_entity_model_path(app_path, domain, intent, model_name=None):
 
     """
     path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
+    return _resolve_model_name(path, model_name)
+
+@safe_path
+def get_old_entity_model_path(app_path, domain, intent, model_name=None):
+    """
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+        intent (str): A intent under the domain.
+        model_name (str): The name of the model. Allows multiple models to be stored.
+
+    Returns:
+        (str) The path for this intent's named entity recognizer.
+
+    """
+    path = ENTITY_MODEL_PATH_OLD.format(app_path=app_path, domain=domain, intent=intent)
     return _resolve_model_name(path, model_name)
 
 

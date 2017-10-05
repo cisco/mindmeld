@@ -5,6 +5,7 @@ This module contains the natural language processor.
 from __future__ import absolute_import, unicode_literals
 from builtins import object, super
 import logging
+import os
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
@@ -18,7 +19,7 @@ from .entity_resolver import EntityResolver
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
-from ..exceptions import AllowedNlpClassesKeyError
+from ..exceptions import AllowedNlpClassesKeyError, WorkbenchError
 
 logger = logging.getLogger(__name__)
 
@@ -484,6 +485,15 @@ class IntentProcessor(Processor):
 
     def _load(self):
         model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
+
+        if not os.path.isdir(model_path):
+            old_model_path = path.get_old_entity_model_path(self._app_path, self.domain, self.name)
+
+            if not os.path.isfile(old_model_path):
+                raise WorkbenchError("Model not found")
+
+            model_path = old_model_path
+
         self.entity_recognizer.load(model_path)
 
         # Create the entity processors
