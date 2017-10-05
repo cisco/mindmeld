@@ -147,6 +147,9 @@ class GloVeEmbeddingsContainer:
 
 
 class WordSequenceEmbedding(object):
+    """WordSequenceEmbedding encodes a sequence of words into a sequence of fixed
+    dimension real-numbered vectors by mapping each word as a vector.
+    """
 
     def __init__(self,
                  sequence_padding_length,
@@ -171,7 +174,7 @@ class WordSequenceEmbedding(object):
         self._add_historic_embeddings()
 
     def encode_sequence_of_tokens(self, token_sequence):
-        """Encodes a sequence of tokens
+        """Encodes a sequence of tokens into real value vectors
 
         Args:
             token_sequence (list): A sequence of tokens
@@ -190,7 +193,7 @@ class WordSequenceEmbedding(object):
         return encoded_query
 
     def _encode_token(self, token):
-        """Encodes a token to it's corresponding embedding
+        """Encodes a token to its corresponding embedding
 
         Args:
             token (str): Individual token
@@ -224,6 +227,9 @@ class WordSequenceEmbedding(object):
 
 
 class CharacterSequenceEmbedding(object):
+    """CharacterSequenceEmbedding encodes a sequence of words into a sequence of fixed
+    dimension real-numbered vectors by mapping each character in the words as vectors.
+    """
 
     def __init__(self,
                  sequence_padding_length,
@@ -244,7 +250,7 @@ class CharacterSequenceEmbedding(object):
         self._add_historic_embeddings()
 
     def encode_sequence_of_tokens(self, token_sequence):
-        """Encodes a sequence of tokens
+        """Encodes a sequence of tokens into real value vectors
 
         Args:
             token_sequence (list): A sequence of tokens
@@ -272,7 +278,7 @@ class CharacterSequenceEmbedding(object):
         return encoded_query
 
     def _encode_token(self, token):
-        """Encodes a token to it's corresponding embedding
+        """Encodes a token to its corresponding embedding
 
         Args:
             token (str): Individual token

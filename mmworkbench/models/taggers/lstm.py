@@ -99,7 +99,7 @@ class LstmModel(Tagger):
 
     def construct_tf_variables(self):
         """
-        Constructs the variables and operations in the tensorflow session graph
+        Constructs the variables and operations in the TensorFlow session graph
         """
         self.dense_keep_prob_tf = tf.placeholder(tf.float32, name='dense_keep_prob_tf')
         self.lstm_input_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_input_keep_prob_tf')
@@ -144,6 +144,19 @@ class LstmModel(Tagger):
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost()
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
+        """Transforms a list of examples into features that are then used by the
+        deep learning model.
+
+        Args:
+            examples (list of mmworkbench.core.Query): a list of queries
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+            y (list): A list of label sequences
+
+        Returns:
+            (sequence_embeddings, encoded_labels, groups): features for the LSTM network
+        """
         if y:
             # Train time
             self.resources = resources
@@ -421,6 +434,15 @@ class LstmModel(Tagger):
         return padded_output
 
     def _generate_boolean_mask(self, seq_lengths):
+        """
+        Generates boolean masks for each query in a query list
+
+        Args:
+            seq_lengths: A list of sequence lengths
+
+        Return:
+            A list of boolean masking values
+        """
         mask = [False] * (len(seq_lengths) * self.padding_length)
         for idx, seq_len in enumerate(seq_lengths):
             start_index = idx * self.padding_length
@@ -740,7 +762,11 @@ class LstmModel(Tagger):
 
     def dump(self, path='lstm_model'):
         """
-        Saves the Tensorflow model
+        Saves the TensorFlow model
+
+        Args:
+            path (str): The path to save the TF model
+
         """
         # Save the tensorflow weights and variables
         saver = tf.train.Saver()
@@ -761,7 +787,10 @@ class LstmModel(Tagger):
 
     def load(self, path='lstm-model'):
         """
-        Loads the Tensorflow model
+        Loads the TensorFlow model
+
+        Args:
+            path (str): The path to load the model from
         """
         saver = tf.train.import_meta_graph(os.path.join(path, 'lstm_model.meta'))
         saver.restore(self.session, os.path.join(path, 'lstm_model'))
