@@ -2,20 +2,17 @@ import os
 import zipfile
 import logging
 import pickle
+import numpy as np
 
 from tqdm import tqdm
-import numpy as np
 from six.moves.urllib.request import urlretrieve
 
 from ...path import EMBEDDINGS_FILE_PATH, \
-    EMBEDDINGS_FOLDER_PATH, PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH
+    EMBEDDINGS_FOLDER_PATH, PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, \
+    PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH
 from ...exceptions import EmbeddingDownloadError
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_LABEL = 'B|UNK'
-DEFAULT_PADDED_TOKEN = '<UNK>'
-DEFAULT_GAZ_LABEL = 'O'
 
 GLOVE_DOWNLOAD_LINK = 'http://nlp.stanford.edu/data/glove.6B.zip'
 EMBEDDING_FILE_PATH_TEMPLATE = 'glove.6B.{}d.txt'
@@ -149,56 +146,35 @@ class GloVeEmbeddingsContainer:
         return
 
 
-class SequenceEmbedding(object):
-    """Base class for encoding a sequence of tokens and transforming the encodings
-    into one-hot or word vector based embeddings
+class WordSequenceEmbedding(object):
+    """WordSequenceEmbedding encodes a sequence of words into a sequence of fixed
+    dimension real-numbered vectors by mapping each word as a vector.
     """
 
     def __init__(self,
                  sequence_padding_length,
-                 default_token,
-                 use_pretrained_embeddings=False,
                  token_embedding_dimension=None,
                  token_pretrained_embedding_filepath=None):
-        """Initializes the SequenceEmbedding class
+        """Initializes the WordSequenceEmbedding class
 
         Args:
             sequence_padding_length (int): padding length of the sequence after which
             the sequence is cut off
-            default_token (str): The default token if the sequence is too short for
-            the fixed padding length
-            use_pretrained_embeddings (bool): If true, extract pretrained embeddings
             token_embedding_dimension (int): The embedding dimension of the token
-            token_pretrained_embedding_filepath (str): The embedding filepath to extract
-            the embeddings from
+            token_pretrained_embedding_filepath (str): The embedding filepath to
+            extract the embeddings from.
         """
-
-        self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
         self.token_embedding_dimension = token_embedding_dimension
         self.sequence_padding_length = sequence_padding_length
 
-        if use_pretrained_embeddings:
-            self.token_to_embedding_mapping = \
-                GloVeEmbeddingsContainer(
-                    token_embedding_dimension,
-                    token_pretrained_embedding_filepath).get_pretrained_word_to_embeddings_dict()
-        else:
-            self.token_to_embedding_mapping = {}
+        self.token_to_embedding_mapping = GloVeEmbeddingsContainer(
+            token_embedding_dimension,
+            token_pretrained_embedding_filepath).get_pretrained_word_to_embeddings_dict()
 
-        self.token_to_encoding_mapping = {}
-        self.encoding_to_token_mapping = {}
-
-        self.available_token_encoding = 0
-        self.default_token = default_token
-
-        # This matrix represents the mapping from the integer encoding of the token to its
-        # corresponding embedding vector (one hot or word vector). For example, word token
-        # "cat" is mapped to integer 1, which is mapped to the word vector [0.1, -0.5, ..]
-        # This matrix will have the row vector [0.1, -0.5, ..] mapped to index 1.
-        self._token_encoding_to_embedding_matrix = {}
+        self._add_historic_embeddings()
 
     def encode_sequence_of_tokens(self, token_sequence):
-        """Encodes a sequence of tokens using a simple integer token based approach
+        """Encodes a sequence of tokens into real value vectors
 
         Args:
             token_sequence (list): A sequence of tokens
@@ -206,177 +182,130 @@ class SequenceEmbedding(object):
         Returns:
             (list): Encoded sequence of tokens
         """
-        self._encode_token(self.default_token)
-
-        default_encoding = self.token_to_encoding_mapping[self.default_token]
+        default_encoding = np.zeros(self.token_embedding_dimension)
         encoded_query = [default_encoding] * self.sequence_padding_length
 
         for idx, token in enumerate(token_sequence):
             if idx >= self.sequence_padding_length:
                 break
-
-            self._encode_token(token)
-            encoded_query[idx] = self.token_to_encoding_mapping[token]
+            encoded_query[idx] = self._encode_token(token)
 
         return encoded_query
 
-    def get_embeddings_from_encodings(self, encoded_sequences):
-        """Transform the encoded sequence to its respective embeddings based on the
-        embeddings matrix and get it.
-
-        Args:
-            encoded_sequences (ndarray): encoded examples
-
-        Returns:
-            (ndarray): transformed embedding matrix
-        """
-        self._token_encoding_to_embedding_matrix = \
-            self._construct_embedding_matrix()
-
-        examples_shape = np.shape(encoded_sequences)
-        final_dimension = np.shape(self._token_encoding_to_embedding_matrix)[1]
-
-        sequence_embeddings_arr = np.zeros((examples_shape[0], examples_shape[1], final_dimension))
-
-        for query_index in range(len(encoded_sequences)):
-            for word_index in range(len(sequence_embeddings_arr[query_index])):
-                token_encoding = encoded_sequences[query_index][word_index]
-
-                sequence_embeddings_arr[query_index][word_index] = \
-                    self._token_encoding_to_embedding_matrix[token_encoding]
-
-        return sequence_embeddings_arr
-
-    def _construct_embedding_matrix(self):
-        """Constructs the encoding matrix of word encoding to word embedding
-
-        Returns:
-            (ndarray): Embedding matrix ndarray
-        """
-        raise NotImplementedError
-
     def _encode_token(self, token):
-        """Encodes a token to a basic integer based encoding ie we map the
-        word to the next available integer value. Example: "cat" is mapped to 0,
-        the next word "dog" will be mapped to 1 etc.
+        """Encodes a token to its corresponding embedding
 
         Args:
             token (str): Individual token
+
+        Returns:
+            corresponding embedding
         """
-        if token not in self.token_to_encoding_mapping:
-            self.token_to_encoding_mapping[token] = self.available_token_encoding
-            self.encoding_to_token_mapping[self.available_token_encoding] = token
-            self.available_token_encoding += 1
+        if token not in self.token_to_embedding_mapping:
+            random_vector = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
+            self.token_to_embedding_mapping[token] = random_vector
+        return self.token_to_embedding_mapping[token]
 
-
-class WordSequenceEmbedding(SequenceEmbedding):
-    """This class is a container for building sequence embeddings for a typical query, for example:
-    'I would like to order a coffee'. We use pretrained word vector embeddings for this class. For
-    words not found in the pretrained file, we randomly initialize them and cache them for later
-    use.
-    """
-
-    def _construct_embedding_matrix(self):
-        num_words = len(self.token_to_encoding_mapping.keys())
-        embedding_matrix = np.zeros((num_words, self.token_embedding_dimension))
-
-        word_embeddings_not_in_pretrained_file = {}
+    def _add_historic_embeddings(self):
+        historic_word_embeddings = {}
 
         # load historic word embeddings
-        if os.path.exists(PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH):
-            pkl_file = open(PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH, 'rb')
-            word_embeddings_not_in_pretrained_file = pickle.load(pkl_file)
+        if os.path.exists(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH):
+            pkl_file = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, 'rb')
+            historic_word_embeddings = pickle.load(pkl_file)
             pkl_file.close()
 
-        for word, i in self.token_to_encoding_mapping.items():
-            embedding_vector = self.token_to_embedding_mapping.get(word)
+        for word in historic_word_embeddings:
+            self.token_to_embedding_mapping[word] = historic_word_embeddings.get(word)
 
-            if embedding_vector is None:
-                embedding_vector = word_embeddings_not_in_pretrained_file.get(word)
-
-            if embedding_vector is None:
-                random_vector = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
-                embedding_matrix[i] = random_vector
-                self.token_to_embedding_mapping[word] = random_vector
-                word_embeddings_not_in_pretrained_file[word] = random_vector
-            else:
-                embedding_matrix[i] = embedding_vector
-
-        # save extracted embeddings to historic pickle file
-        output = open(PREVIOUSLY_USED_EMBEDDINGS_FILE_PATH, 'wb')
-        pickle.dump(word_embeddings_not_in_pretrained_file, output)
+    def save_embeddings(self):
+        """Save extracted embeddings to historic pickle file
+        """
+        output = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, 'wb')
+        pickle.dump(self.token_to_embedding_mapping, output)
         output.close()
 
-        return embedding_matrix
 
-
-class LabelSequenceEmbedding(SequenceEmbedding):
-    """This class is a container for building sequence embeddings for a sequence of labels.
-    We use a one-hot encoding based embedding representation for this class.
-    """
-
-    def _construct_embedding_matrix(self):
-        num_words = len(self.token_to_encoding_mapping.keys())
-        embedding_matrix = np.zeros((num_words, num_words))
-
-        for word, i in self.token_to_encoding_mapping.items():
-            in_vec = np.zeros(num_words)
-            in_vec[self.token_to_encoding_mapping[word]] = 1
-            embedding_matrix[i] = in_vec
-        return embedding_matrix
-
-
-class GazetteerSequenceEmbedding(SequenceEmbedding):
-    """This class is a container for building sequence embeddings for a sequence of gazetteer
-    labels. This container's embedding representation is a binarized encoding (not 1-hot)
-    since many gazetteers can map to the same token. For example: for the token 'cat', the gaz
-    'animals' and 'felines' can map to it, so it's representation would be 11, where the '1'
-    in index 0 represents 'animals' and '1' in index 1 represents 'felines'.
+class CharacterSequenceEmbedding(object):
+    """CharacterSequenceEmbedding encodes a sequence of words into a sequence of fixed
+    dimension real-numbered vectors by mapping each character in the words as vectors.
     """
 
     def __init__(self,
                  sequence_padding_length,
-                 default_token,
-                 token_embedding_dimension):
+                 token_embedding_dimension=None,
+                 max_char_per_word=None):
+        """Initializes the CharacterSequenceEmbedding class
 
+        Args:
+            sequence_padding_length (int): padding length of the sequence after which
+            the sequence is cut off
+            token_embedding_dimension (int): The embedding dimension of the token
+            max_char_per_word (int): The maximum number of characters per word
+        """
         self.token_embedding_dimension = token_embedding_dimension
         self.sequence_padding_length = sequence_padding_length
+        self.max_char_per_word = max_char_per_word
+        self.token_to_embedding_mapping = {}
+        self._add_historic_embeddings()
 
-        self.token_to_encoding_mapping = {}
-        self.encoding_to_token_mapping = {}
-        self.token_to_gaz_entity_mapping = {}
-        self.gaz_entity_to_token_mapping = {}
+    def encode_sequence_of_tokens(self, token_sequence):
+        """Encodes a sequence of tokens into real value vectors
 
-        self.available_token_encoding = 0
-        self.available_token_for_gaz_entity_encoding = 0
+        Args:
+            token_sequence (list): A sequence of tokens
 
-        self.default_token = default_token
-        self._token_encoding_to_embedding_matrix = {}
+        Returns:
+            (list): Encoded sequence of tokens
+        """
+        default_encoding = np.zeros(self.token_embedding_dimension)
+        default_char_word = [default_encoding] * self.max_char_per_word
+        encoded_query = [default_char_word] * self.sequence_padding_length
 
-    def _construct_embedding_matrix(self):
-        gaz_dim = self.token_embedding_dimension
-        num_entites = len(self.token_to_encoding_mapping.keys())
-        embedding_matrix_gaz = np.zeros((num_entites, gaz_dim))
+        for idx, word_token in enumerate(token_sequence):
+            if idx >= self.sequence_padding_length:
+                break
 
-        for word, i in self.token_to_encoding_mapping.items():
-            in_vec = np.zeros(gaz_dim)
-            for entity in word.split(","):
-                in_vec[self.token_to_gaz_entity_mapping[entity]] = 1
-            embedding_matrix_gaz[i] = in_vec
+            encoded_word = [default_encoding] * self.max_char_per_word
+            for idx2, char_token in enumerate(word_token):
+                if idx2 >= self.max_char_per_word:
+                    break
 
-        return embedding_matrix_gaz
+                self._encode_token(char_token)
+                encoded_word[idx2] = self.token_to_embedding_mapping[char_token]
+
+            encoded_query[idx] = encoded_word
+        return encoded_query
 
     def _encode_token(self, token):
-        if token not in self.token_to_encoding_mapping:
-            individual_gaz_entities = set(token.split(","))
-            for gaz_entity in individual_gaz_entities:
-                if gaz_entity not in self.token_to_gaz_entity_mapping:
-                    self.token_to_gaz_entity_mapping[gaz_entity] = \
-                        self.available_token_for_gaz_entity_encoding
-                    self.gaz_entity_to_token_mapping[
-                        self.available_token_for_gaz_entity_encoding] = gaz_entity
-                    self.available_token_for_gaz_entity_encoding += 1
+        """Encodes a token to its corresponding embedding
 
-            self.token_to_encoding_mapping[token] = self.available_token_encoding
-            self.encoding_to_token_mapping[self.available_token_encoding] = token
-            self.available_token_encoding += 1
+        Args:
+            token (str): Individual token
+
+        Returns:
+            corresponding embedding
+        """
+        if token not in self.token_to_embedding_mapping:
+            random_vector = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
+            self.token_to_embedding_mapping[token] = random_vector
+        return self.token_to_embedding_mapping[token]
+
+    def _add_historic_embeddings(self):
+        historic_char_embeddings = {}
+
+        # load historic word embeddings
+        if os.path.exists(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH):
+            pkl_file = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, 'rb')
+            historic_char_embeddings = pickle.load(pkl_file)
+            pkl_file.close()
+
+        for char in historic_char_embeddings:
+            self.token_to_embedding_mapping[char] = historic_char_embeddings.get(char)
+
+    def save_embeddings(self):
+        """Save extracted embeddings to historic pickle file
+        """
+        output = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, 'wb')
+        pickle.dump(self.token_to_embedding_mapping, output)
+        output.close()
