@@ -245,6 +245,7 @@ class TaggerModel(Model):
             return
 
         predictions = self.predict(examples)
+
         evaluations = [EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
                        for i, e in enumerate(examples)]
 

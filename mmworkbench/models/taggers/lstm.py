@@ -14,9 +14,7 @@ DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
 REGEX_TYPE_POSITIONAL_INDEX = 1
 DEFAULT_LABEL = 'B|UNK'
-DEFAULT_PADDED_TOKEN = '<UNK>'
 DEFAULT_GAZ_LABEL = 'O'
-DEFAULT_CHAR_TOKEN = '`'
 RANDOM_SEED = 1
 ZERO_INITIALIZER_VALUE = 0
 
@@ -128,6 +126,9 @@ class LstmModel(Tagger):
         self.batch_sequence_lengths_tf = tf.placeholder(tf.int32, shape=[None],
                                                         name='batch_sequence_lengths_tf')
 
+        self.batch_sequence_mask_tf = tf.placeholder(
+            tf.bool, shape=[None], name='batch_sequence_mask_tf')
+
         if self.use_char_embeddings:
             self.char_input_tf = tf.placeholder(tf.float32,
                                                 [None,
@@ -138,8 +139,7 @@ class LstmModel(Tagger):
 
         combined_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(combined_embedding_tf)
-        self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost(
-            self.lstm_output_tf, self.label_tf, self.batch_sequence_lengths_tf)
+        self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost()
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
         if y:
@@ -233,7 +233,8 @@ class LstmModel(Tagger):
             self.gaz_input_tf: batch_gaz,
             self.dense_keep_prob_tf: self.dense_keep_probability,
             self.lstm_input_keep_prob_tf: self.lstm_input_keep_prob,
-            self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob
+            self.lstm_output_keep_prob_tf: self.lstm_output_keep_prob,
+            self.batch_sequence_mask_tf: self._generate_boolean_mask(batch_seq_len)
         }
 
         if len(batch_labels) > 0:
@@ -339,32 +340,38 @@ class LstmModel(Tagger):
         word_level_char_embedding = tf.nn.relu(max_pool + char_convolution_bias)
         return word_level_char_embedding
 
-    def _define_optimizer_and_cost(self, output_tensor, label_tensor, sequence_lengths):
+    def _define_optimizer_and_cost(self):
         """ This function defines the optimizer and cost function of the LSTM model
-
-        Args:
-            output_tensor (Tensor): Output tensor of the LSTM network
-            label_tensor (Tensor): Label tensor of the true labels of the data
-            sequence_lengths (Tensor): The tensor of sequence lengths for the current batch
 
         Returns:
             The optimizer function to reduce loss and the loss values
         """
         if self.use_crf_layer:
-            flattened_labels = tf.cast(tf.argmax(label_tensor, axis=2), tf.int32)
-            log_likelihood, transition_params = tf.contrib.crf.crf_log_likelihood(output_tensor,
-                                                                                  flattened_labels,
-                                                                                  sequence_lengths)
+            flattened_labels = tf.cast(tf.argmax(self.label_tf, axis=2), tf.int32)
+            log_likelihood, transition_params = tf.contrib.crf.crf_log_likelihood(
+                self.lstm_output_tf, flattened_labels, self.batch_sequence_lengths_tf)
             cost_tf = tf.reduce_mean(-log_likelihood, name='cost_tf')
         else:
+            masked_logits = tf.boolean_mask(
+                tf.reshape(self.lstm_output_tf, [-1, self.output_dimension]),
+                self.batch_sequence_mask_tf)
+
+            masked_logits = tf.reshape(self.lstm_output_tf, [-1, self.output_dimension])
+
+            masked_labels = tf.boolean_mask(
+                tf.reshape(self.label_tf, [-1, self.output_dimension]),
+                self.batch_sequence_mask_tf)
+
+            masked_labels = tf.reshape(self.label_tf, [-1, self.output_dimension])
+
             softmax_loss_tf = tf.nn.softmax_cross_entropy_with_logits(
-                logits=tf.reshape(output_tensor, [-1, self.output_dimension]),
-                labels=tf.reshape(label_tensor, [-1, self.output_dimension]),
-                name='softmax_loss_tf')
+                logits=masked_logits, labels=masked_labels, name='softmax_loss_tf')
+
             cost_tf = tf.reduce_mean(softmax_loss_tf, name='cost_tf')
 
-        optimizer_tf = tf.train.AdamOptimizer(learning_rate=float(self.learning_rate))\
-            .minimize(cost_tf)
+        optimizer_tf = tf.train.AdamOptimizer(
+            learning_rate=float(self.learning_rate)).minimize(cost_tf)
+
         return optimizer_tf, cost_tf
 
     def _calculate_score(self, output_arr, label_arr, seq_lengths_arr):
@@ -414,6 +421,14 @@ class LstmModel(Tagger):
                     padded_seq[idx] = sequence[idx]
             padded_output.append(padded_seq)
         return padded_output
+
+    def _generate_boolean_mask(self, seq_lengths):
+        mask = [False] * (len(seq_lengths) * self.padding_length)
+        for idx, seq_len in enumerate(seq_lengths):
+            start_index = idx * self.padding_length
+            for i in range(start_index, start_index + seq_len):
+                mask[i] = True
+        return mask
 
     def _construct_lstm_state(self, initializer, hidden_dimension, batch_size, name):
         """Construct the LSTM initial state
@@ -720,8 +735,6 @@ class LstmModel(Tagger):
         for idx, encoded_predict in enumerate(output):
             decoded_query = []
             for tag in encoded_predict[:self.sequence_lengths[idx]]:
-                if tag == DEFAULT_LABEL:
-                    break
                 decoded_query.append(self.label_encoder.classes_[tag])
             decoded_queries.append(decoded_query)
 
@@ -774,6 +787,9 @@ class LstmModel(Tagger):
 
         self.batch_sequence_lengths_tf = \
             self.session.graph.get_tensor_by_name('batch_sequence_lengths_tf:0')
+
+        self.batch_sequence_mask_tf = \
+            self.session.graph.get_tensor_by_name('batch_sequence_mask_tf:0')
 
         self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
 

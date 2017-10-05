@@ -164,8 +164,6 @@ class WordSequenceEmbedding(object):
         self.token_embedding_dimension = token_embedding_dimension
         self.sequence_padding_length = sequence_padding_length
 
-        self.token_to_embedding_mapping = {}
-
         self.token_to_embedding_mapping = GloVeEmbeddingsContainer(
             token_embedding_dimension,
             token_pretrained_embedding_filepath).get_pretrained_word_to_embeddings_dict()
