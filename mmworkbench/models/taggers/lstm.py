@@ -139,7 +139,8 @@ class LstmModel(Tagger):
 
         combined_embedding_tf = self._construct_embedding_network()
         self.lstm_output_tf = self._construct_lstm_network(combined_embedding_tf)
-        self.lstm_output_softmax_tf = tf.nn.softmax(self.lstm_output_tf, name='output_softmax_tensor')
+        self.lstm_output_softmax_tf = tf.nn.softmax(self.lstm_output_tf,
+                                                    name='output_softmax_tensor')
         self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost()
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
@@ -790,7 +791,8 @@ class LstmModel(Tagger):
 
         self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
 
-        self.lstm_output_softmax_tf = self.session.graph.get_tensor_by_name('output_softmax_tensor:0')
+        self.lstm_output_softmax_tf = \
+            self.session.graph.get_tensor_by_name('output_softmax_tensor:0')
 
         if self.use_char_embeddings:
             self.char_input_tf = self.session.graph.get_tensor_by_name('char_input_tf:0')
