@@ -277,8 +277,7 @@ def get_entity_model_path(app_path, domain, intent, model_name=None):
         app_path (str): The path to the app data.
         domain (str): A domain under the application.
         intent (str): A intent under the domain.
-        model_name (str, optional): The name of the model. Allows multiple models to be stored.
-        old_version (boolean, Optional): Load the entity file with the format pre-WB 3.2.0
+        model_name (str): The name of the model. Allows multiple models to be stored.
 
     Returns:
         (str) The path for this intent's named entity recognizer.

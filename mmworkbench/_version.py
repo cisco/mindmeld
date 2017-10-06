@@ -38,11 +38,11 @@ def validate_workbench_version(app_path):
         return
     wb_version = _get_wb_version()
     wb_req = [wb_req.name + str(wb_req.req.specifier)]
-    # try:
-    #     pkg_resources.require(wb_req)
-    # except (DistributionNotFound, VersionConflict):
-    #     error_msg = 'Current mworkbench ({version}) does not satisfy {condition}'.format(
-    #         version=wb_version, condition=wb_req[0])
-    #     raise WorkbenchVersionError(error_msg)
+    try:
+        pkg_resources.require(wb_req)
+    except (DistributionNotFound, VersionConflict):
+        error_msg = 'Current mworkbench ({version}) does not satisfy {condition}'.format(
+            version=wb_version, condition=wb_req[0])
+        raise WorkbenchVersionError(error_msg)
     logger.debug("mmworkbench version {version} satisfies app's requirements.txt.".format(
         version=wb_version))

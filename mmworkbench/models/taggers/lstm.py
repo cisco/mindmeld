@@ -768,7 +768,8 @@ class LstmModel(Tagger):
             path (str): the folder path for the entity model folder
         """
         # Save the tensorflow weights and variables
-        path = path.split('.pkl')[0] + '_model_files'
+        if not os.path.isdir(path):
+            os.makedirs(path)
 
         saver = tf.train.Saver()
         saver.save(self.session, path)

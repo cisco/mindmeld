@@ -138,9 +138,6 @@ class EntityRecognizer(Classifier):
             else:
                 self._model = er_data['model']
 
-
-            import pdb; pdb.set_trace()
-
             self._model.load(model_path)
         except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
