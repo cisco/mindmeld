@@ -498,8 +498,7 @@ class Conversation(object):
         response = self._app_manager.parse(text, session=self.session, frame=self.frame,
                                            history=self.history,
                                            allowed_intents=self.allowed_intents)
-        response.pop('history')
-        self.history.insert(0, response)
+        self.history = response['history']
         self.frame = response['frame']
 
         self.allowed_intents = response.pop('allowed_intents', None)
