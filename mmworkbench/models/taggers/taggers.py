@@ -147,8 +147,9 @@ class Tagger(object):
         y = self.predict(X)
         return y
 
-    def dump(self, model_path):
-        return
+    def dump(self, model_path, context):
+        context.pop('model_config')
+        return context
 
     def load(self, model_path):
         return

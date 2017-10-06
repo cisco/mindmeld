@@ -5,7 +5,6 @@ This module contains the natural language processor.
 from __future__ import absolute_import, unicode_literals
 from builtins import object, super
 import logging
-import os
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
@@ -19,7 +18,7 @@ from .entity_resolver import EntityResolver
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
-from ..exceptions import AllowedNlpClassesKeyError, WorkbenchError
+from ..exceptions import AllowedNlpClassesKeyError
 
 logger = logging.getLogger(__name__)
 

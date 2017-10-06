@@ -266,25 +266,22 @@ class TaggerModel(Model):
             msg = '{}: Classifier type {!r} not recognized'
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
 
-    def dump(self, path):
-        path = path.split('.pkl')[0] + '_model_files'
+    def dump(self, path, context):
+        context = self._clf.dump(path, context)
+        if 'model' not in context:
+            context['model'] = self
+        else:
+            variables_to_dump = {
+                'current_params': self._current_params,
+                'label_encoder': self._label_encoder
+            }
+            joblib.dump(variables_to_dump, os.path.join(context['model'], '.tagger_vars'))
 
-        if not os.path.isdir(path):
-            os.makedirs(path)
+        joblib.dump(context, path)
 
-        self._clf.dump(path)
-
-        variables_to_dump = {
-            'current_params': self._current_params,
-            'label_encoder': self._label_encoder
-        }
-        joblib.dump(variables_to_dump, os.path.join(path, '.tagger_vars'))
-
-    def load(self, path):
-        path = path.split('.pkl')[0] + '_model_files'
+    def load(self, path, context):
         self._clf.load(path)
-
-        variables_to_load = joblib.load(os.path.join(path, '.tagger_vars'))
+        variables_to_load = joblib.load(os.path.join(context['model'], '.tagger_vars'))
         self._current_params = variables_to_load['current_params']
         self._label_encoder = variables_to_load['label_encoder']
 

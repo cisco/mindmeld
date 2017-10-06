@@ -92,6 +92,7 @@ class ConditionalRandomFields(Tagger):
 
 # Feature extraction for CRF
 
+
 class FeatureMapper(object):
     """
     Mapper for one feature to map numerical values to corresponding bins which are generated

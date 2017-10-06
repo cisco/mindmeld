@@ -760,19 +760,20 @@ class LstmModel(Tagger):
 
         return decoded_queries
 
-    def dump(self, path):
+    def dump(self, path, context):
         """
         Saves the Tensorflow model
 
         Args:
             path (str): the folder path for the entity model folder
         """
-        # Save the tensorflow weights and variables
+        path = path.split('.pkl')[0] + '_model_files'
+
         if not os.path.isdir(path):
             os.makedirs(path)
 
         saver = tf.train.Saver()
-        saver.save(self.session, path)
+        saver.save(self.session, os.path.join(path, 'lstm_model'))
 
         # Save feature extraction variables
         variables_to_dump = {
@@ -786,6 +787,9 @@ class LstmModel(Tagger):
         }
 
         joblib.dump(variables_to_dump, os.path.join(path, '.feature_extraction_vars'))
+
+        context['model'] = path
+        return context
 
     def load(self, path):
         """

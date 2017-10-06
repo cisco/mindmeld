@@ -11,12 +11,10 @@ import logging
 from sklearn.externals import joblib
 
 from ..core import Entity
-from .. import path
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
-from ..exceptions import WorkbenchError
 
 logger = logging.getLogger(__name__)
 
@@ -108,12 +106,9 @@ class EntityRecognizer(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        er_data = {'model': self._model, 'entity_types': self.entity_types,
-                   'model_config': self._model_config}
+        er_data = {'entity_types': self.entity_types, 'model_config': self._model_config}
 
-        self._model.dump(model_path)
-
-        joblib.dump(er_data, model_path)
+        self._model.dump(model_path, er_data)
         self.dirty = False
 
     def load(self, model_path):
@@ -127,7 +122,6 @@ class EntityRecognizer(Classifier):
         try:
             # The below construct is to ensure backwards compatibility of model
             # paths that previously just used to be files
-            #model_path = path.get_entity_model_path_name(model_path)
             er_data = joblib.load(model_path)
 
             self.entity_types = er_data['entity_types']
@@ -135,10 +129,9 @@ class EntityRecognizer(Classifier):
 
             if self._model_config:
                 self._model = create_model(self._model_config)
+                self._model.load(model_path, er_data)
             else:
                 self._model = er_data['model']
-
-            self._model.load(model_path)
         except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
