@@ -267,6 +267,11 @@ class TaggerModel(Model):
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
 
     def dump(self, path):
+        path = path.split('.pkl')[0] + '_model_files'
+
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
         self._clf.dump(path)
 
         variables_to_dump = {
@@ -276,6 +281,7 @@ class TaggerModel(Model):
         joblib.dump(variables_to_dump, os.path.join(path, '.tagger_vars'))
 
     def load(self, path):
+        path = path.split('.pkl')[0] + '_model_files'
         self._clf.load(path)
 
         variables_to_load = joblib.load(os.path.join(path, '.tagger_vars'))

@@ -101,39 +101,19 @@ class EntityRecognizer(Classifier):
             model_path (str): The location on disk where the model should be stored
 
         """
-        _, ext = os.path.splitext(model_path)
-        if ext:
-            logger.warn("Expected directory for entity recognition model path but received "
-                        "file: {}, so this is a pre-WB 3.2.0 model. Hence, we will treat it as "
-                        "a non-TensorFlow model".format(model_path))
-
         logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
         # make directory if necessary
-        if not os.path.isdir(model_path):
-            os.makedirs(model_path)
+        folder = os.path.dirname(model_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
 
-        model_name = type(self._model._clf).__name__
+        er_data = {'model': self._model, 'entity_types': self.entity_types,
+                   'model_config': self._model_config}
 
-        if model_name not in TENSORFLOW_MODELS:
-            er_data = {'model': self._model, 'entity_types': self.entity_types,
-                       'model_name': model_name}
-        else:
-            if ext:
-                raise WorkbenchError("Expected a folder to contain TensorFlow model but got "
-                                     "file instead")
+        self._model.dump(model_path)
 
-            tf_model_path = path.get_tensorflow_entity_model_path_name(model_path)
-            if not os.path.isdir(tf_model_path):
-                os.makedirs(tf_model_path)
-
-            er_data = {'model': tf_model_path, 'entity_types': self.entity_types,
-                       'model_name': model_name, 'model_config': self._model_config}
-            self._model.dump(tf_model_path)
-
-        joblib_path = path.get_config_entity_model_path_name(model_path)
-        joblib.dump(er_data, joblib_path)
-
+        joblib.dump(er_data, model_path)
         self.dirty = False
 
     def load(self, model_path):
@@ -145,20 +125,27 @@ class EntityRecognizer(Classifier):
         """
         logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
+            # The below construct is to ensure backwards compatibility of model
+            # paths that previously just used to be files
+            #model_path = path.get_entity_model_path_name(model_path)
             er_data = joblib.load(model_path)
-            model_name = er_data.get('model_name')
-            self.entity_types = er_data['entity_types']
 
-            if not model_name or (model_name not in TENSORFLOW_MODELS):
-                self._model = er_data['model']
-            else:
-                tf_model_path = er_data['model']
-                self._model_config = er_data['model_config']
+            self.entity_types = er_data['entity_types']
+            self._model_config = er_data.get('model_config')
+
+            if self._model_config:
                 self._model = create_model(self._model_config)
-                self._model.load(tf_model_path)
+            else:
+                self._model = er_data['model']
+
+
+            import pdb; pdb.set_trace()
+
+            self._model.load(model_path)
         except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))

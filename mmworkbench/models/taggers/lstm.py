@@ -768,8 +768,10 @@ class LstmModel(Tagger):
             path (str): the folder path for the entity model folder
         """
         # Save the tensorflow weights and variables
+        path = path.split('.pkl')[0] + '_model_files'
+
         saver = tf.train.Saver()
-        saver.save(self.session, os.path.join(path, 'lstm_model'))
+        saver.save(self.session, path)
 
         # Save feature extraction variables
         variables_to_dump = {
@@ -791,6 +793,8 @@ class LstmModel(Tagger):
         Args:
             path (str): the folder path for the entity model folder
         """
+        path = path.split('.pkl')[0] + '_model_files'
+
         saver = tf.train.import_meta_graph(os.path.join(path, 'lstm_model.meta'))
         saver.restore(self.session, os.path.join(path, 'lstm_model'))
 

@@ -147,6 +147,12 @@ class Tagger(object):
         y = self.predict(X)
         return y
 
+    def dump(self, model_path):
+        return
+
+    def load(self, model_path):
+        return
+
 
 """
 Helpers for taggers

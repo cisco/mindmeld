@@ -90,7 +90,6 @@ class ConditionalRandomFields(Tagger):
     def setup_model(self, config):
         self._feat_binner = FeatureBinner()
 
-
 # Feature extraction for CRF
 
 class FeatureMapper(object):

@@ -20,10 +20,7 @@ GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, 'domains')
 GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, '{domain}')
 INTENT_MODEL_PATH = os.path.join(GEN_DOMAIN_FOLDER, 'intent.pkl')
 GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, '{intent}')
-ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity_model')
-
-# The old entity model path is for WB < 3.2.0
-ENTITY_MODEL_PATH_OLD = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
+ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
 
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, '{entity}-role.pkl')
 GAZETTEER_PATH = os.path.join(GEN_FOLDER, 'gaz-{entity}.pkl')
@@ -287,11 +284,7 @@ def get_entity_model_path(app_path, domain, intent, model_name=None, old_version
         (str) The path for this intent's named entity recognizer.
 
     """
-    if old_version:
-        path = ENTITY_MODEL_PATH_OLD.format(app_path=app_path, domain=domain, intent=intent)
-    else:
-        path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
-
+    path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
     return _resolve_model_name(path, model_name)
 
 
@@ -441,24 +434,3 @@ def get_user_config_path():
     """
     return USER_CONFIG_PATH
 
-
-def get_tensorflow_entity_model_path_name(model_path):
-    """
-    Args:
-        model_path (str): The base path where the entity model is
-
-    Returns:
-        str: The path to tensorflow entity model state
-    """
-    return os.path.join(model_path, 'tf_model')
-
-
-def get_config_entity_model_path_name(model_path):
-    """
-    Args:
-        model_path (str): The base path where the entity model is
-
-    Returns:
-        str: The path to config entity model state
-    """
-    return os.path.join(model_path, 'config.pkl')
