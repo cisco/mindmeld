@@ -21,7 +21,6 @@ GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, '{domain}')
 INTENT_MODEL_PATH = os.path.join(GEN_DOMAIN_FOLDER, 'intent.pkl')
 GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, '{intent}')
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
-
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, '{entity}-role.pkl')
 GAZETTEER_PATH = os.path.join(GEN_FOLDER, 'gaz-{entity}.pkl')
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, 'indexes')

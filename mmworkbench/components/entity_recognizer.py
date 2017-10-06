@@ -18,8 +18,6 @@ from ._config import get_classifier_config
 
 logger = logging.getLogger(__name__)
 
-TENSORFLOW_MODELS = ['LstmModel']
-
 
 class EntityRecognizer(Classifier):
     """An entity recognizer which is used to identify the entities for a given query. It is
@@ -120,14 +118,15 @@ class EntityRecognizer(Classifier):
         """
         logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
-            # The below construct is to ensure backwards compatibility of model
-            # paths that previously just used to be files
             er_data = joblib.load(model_path)
 
             self.entity_types = er_data['entity_types']
             self._model_config = er_data.get('model_config')
 
             if self._model_config:
+                # If model config is given, this means it is a non-SKLearn model,
+                # which is easily serialized using joblib, but tensorflow models
+                # are not, so we have to create and load them in.
                 self._model = create_model(self._model_config)
                 self._model.load(model_path, er_data)
             else:

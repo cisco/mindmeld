@@ -760,12 +760,13 @@ class LstmModel(Tagger):
 
         return decoded_queries
 
-    def dump(self, path, context):
+    def dump(self, path, config):
         """
         Saves the Tensorflow model
 
         Args:
             path (str): the folder path for the entity model folder
+            config (dict): The model config
         """
         path = path.split('.pkl')[0] + '_model_files'
 
@@ -788,8 +789,8 @@ class LstmModel(Tagger):
 
         joblib.dump(variables_to_dump, os.path.join(path, '.feature_extraction_vars'))
 
-        context['model'] = path
-        return context
+        config['model'] = path
+        return config
 
     def load(self, path):
         """

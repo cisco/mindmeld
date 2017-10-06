@@ -266,22 +266,40 @@ class TaggerModel(Model):
             msg = '{}: Classifier type {!r} not recognized'
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
 
-    def dump(self, path, context):
-        context = self._clf.dump(path, context)
-        if 'model' not in context:
-            context['model'] = self
+    def dump(self, path, config):
+        """
+        Dumps the model using joblib for the config and call's the underlying model
+        to dump its state.
+
+        Args:
+            path (str): The path to dump the model to
+            config (str): The config containing the model configuration
+        """
+        config = self._clf.dump(path, config)
+        if 'model' not in config:
+            # If the model path is not population, the model is serializable, so
+            # we just pass the entire model to the dictionary
+            config['model'] = self
         else:
             variables_to_dump = {
                 'current_params': self._current_params,
                 'label_encoder': self._label_encoder
             }
-            joblib.dump(variables_to_dump, os.path.join(context['model'], '.tagger_vars'))
+            joblib.dump(variables_to_dump, os.path.join(config['model'], '.tagger_vars'))
 
-        joblib.dump(context, path)
+        joblib.dump(config, path)
 
-    def load(self, path, context):
+    def load(self, path, config):
+        """
+        Load the model state to memory. This method is strictly for non-serializable models
+        like tensorflow models
+
+        Args:
+            path (str): The path to dump the model to
+            config (str): The config containing the model configuration
+        """
         self._clf.load(path)
-        variables_to_load = joblib.load(os.path.join(context['model'], '.tagger_vars'))
+        variables_to_load = joblib.load(os.path.join(config['model'], '.tagger_vars'))
         self._current_params = variables_to_load['current_params']
         self._label_encoder = variables_to_load['label_encoder']
 
