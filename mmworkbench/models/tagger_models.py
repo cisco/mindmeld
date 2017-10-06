@@ -268,6 +268,7 @@ class TaggerModel(Model):
 
     def dump(self, path):
         self._clf.dump(path)
+
         variables_to_dump = {
             'current_params': self._current_params,
             'label_encoder': self._label_encoder
@@ -276,6 +277,7 @@ class TaggerModel(Model):
 
     def load(self, path):
         self._clf.load(path)
+
         variables_to_load = joblib.load(os.path.join(path, '.tagger_vars'))
         self._current_params = variables_to_load['current_params']
         self._label_encoder = variables_to_load['label_encoder']

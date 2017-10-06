@@ -462,19 +462,3 @@ def get_config_entity_model_path_name(model_path):
         str: The path to config entity model state
     """
     return os.path.join(model_path, 'config.pkl')
-
-
-def get_entity_model_path_name(model_path):
-    """
-    Args:
-        model_path (str): The base path where the entity model is
-
-    Returns:
-        str: The path to config entity model state
-    """
-    if os.path.isfile(model_path):
-        # This conditional handles the case where the user passes in
-        # a pre-3.2.0 WB3 entity model file path
-        return model_path
-    else:
-        return os.path.join(model_path, 'config.pkl')

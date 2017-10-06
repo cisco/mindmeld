@@ -1,0 +1,1043 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.13.1: http://docutils.sourceforge.net/" />
+<title>Home Assistant</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="home-assistant">
+<h1 class="title">Home Assistant</h1>
+
+<p>This page documents the Workbench blueprint for a conversational application for a smart home that allows users to control different devices and appliances.</p>
+<p>This blueprint is great for:</p>
+<blockquote>
+<ul class="simple">
+<li>Learning how to handle a large number of domains and intents.</li>
+<li>Learning how to use system entities such as dates and times.</li>
+<li>Learning how to use roles in the entity hierarchy.</li>
+</ul>
+</blockquote>
+<div class="section" id="quick-start">
+<h1>Quick Start</h1>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="section" id="download">
+<h2>1. Download</h2>
+<p>Open a python shell and type the following commands to download and set up the home assistant blueprint application.</p>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="keyword namespace">import</span> <span class="name namespace">mmworkbench</span> <span class="keyword namespace">as</span> <span class="name namespace">wb</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">wb</span><span class="operator">.</span><span class="name">configure_logs</span><span class="punctuation">()</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">wb</span><span class="operator">.</span><span class="name">blueprint</span><span class="punctuation">(</span><span class="literal string single">'home_assistant'</span><span class="punctuation">)</span>
+</pre>
+</div>
+<div class="section" id="build">
+<h2>2. Build</h2>
+<p>Build the Natural Language Processing models that power the app.</p>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="keyword namespace">from</span> <span class="name namespace">mmworkbench.components</span> <span class="keyword namespace">import</span> <span class="name">NaturalLanguageProcessor</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">nlp</span> <span class="operator">=</span> <span class="name">NaturalLanguageProcessor</span><span class="punctuation">(</span><span class="literal string single">'home_assistant'</span><span class="punctuation">)</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">nlp</span><span class="operator">.</span><span class="name">build</span><span class="punctuation">()</span>
+</pre>
+<p>You can also build and save the model directly from commandline.</p>
+<pre class="code bash literal-block">
+python app.py build
+</pre>
+</div>
+<div class="section" id="run">
+<h2>3. Run</h2>
+<p>Interact with the app in the python shell using the commands below. Try out the examples shown here as well as some queries of your own.</p>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="keyword namespace">from</span> <span class="name namespace">mmworkbench.components.dialogue</span> <span class="keyword namespace">import</span> <span class="name">Conversation</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span> <span class="operator">=</span> <span class="name">Conversation</span><span class="punctuation">(</span><span class="name">nlp</span><span class="operator">=</span><span class="name">nlp</span><span class="punctuation">,</span> <span class="name">app_path</span><span class="operator">=</span><span class="literal string single">'home_asssitant'</span><span class="punctuation">)</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string single">'Hi'</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.'</span><span class="punctuation">]</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string single">'What is the weather today?'</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'The weather forecast in San Francisco is haze with a min of 66.2 F and a max of 89.6 F'</span><span class="punctuation">]</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string single">'Set the temperature to 72'</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'The thermostat temperature in the home is now 72 degrees F.'</span><span class="punctuation">]</span>
+</pre>
+<p>Home Assistant uses Open Weather Map for retrieving weather forecast. You will need to register for a key online and set the environment variable:</p>
+<pre class="code bash literal-block">
+<span class="name builtin">export</span> <span class="name variable">OPEN_WEATHER_KEY</span><span class="operator">=[</span>YOUR-KEY<span class="operator">]</span>
+</pre>
+</div>
+</div>
+<div class="section" id="deep-dive">
+<h1>Deep Dive</h1>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="section" id="the-use-case">
+<h2>1. The Use Case</h2>
+<p>This application provides a conversational interface for home automation systems. It allows users to interact with various appliances and home-related functions using natural language. With this application, users will be able to check the weather, set alarms, set timers, and control the lights, the doors, the thermostat and different appliances in the house.</p>
+</div>
+<div class="section" id="example-dialogue-interactions">
+<h2>2. Example Dialogue Interactions</h2>
+<p>The conversational user flows for a home assistant application can get complex depending on the envisioned functionality and the amount of user guidance required at each step. This design exercise usually requires multiple iterations to finalize and enumerate all the possible user interactions. Below are examples of scripted dialogue interactions for a couple of possible user flows.</p>
+<pre class="code bash literal-block">
+App: Hi, I am your home assistant. I can <span class="name builtin">help</span> you to check weather, <span class="name builtin">set</span> temperature and control the lights and other appliances.
+
+You: I want to turn on the lights in the kitchen
+
+App: Ok. The kitchen lights have been turned on.
+
+You: Turn the kitchen lights off
+
+App: Ok. The kitchen lights have been turned off.
+
+You: Turn on the thermostat
+
+App: Ok. The thermostat in the home has been turned on.
+
+You: Turn up the thermostat
+
+App: The thermostat temperature in the home is now <span class="literal number">73</span> degrees F.
+
+You: Set the thermostat to <span class="literal number">70</span>
+
+App: The thermostat temperature in the home is now <span class="literal number">70</span> degrees F.
+
+You: Lock all the doors
+
+App: Ok. All doors have been locked.
+
+You: What<span class="error">'</span>s the weather today?
+
+App: The weather forecast in San Francisco is clouds with a min of <span class="literal number">66</span>.2 F and a max of <span class="literal number">87</span>.8 F.
+
+You: Set a timer <span class="keyword">for</span> <span class="literal number">30</span> minutes
+
+App: Ok. A timer <span class="keyword">for</span> <span class="literal number">30</span> minutes has been set.
+
+You: Set alarm <span class="keyword">for</span> 9am
+
+App: Ok, I have <span class="name builtin">set</span> your alarm <span class="keyword">for</span> <span class="literal number">09</span>:00:00.
+</pre>
+<p>In this blueprint, the application provides a conversational interface for users to check weather, set alarms and timers, and control the lights, doors, thermostat and different appliances in the house.</p>
+</div>
+<div class="section" id="domain-intent-entity-hierarchy">
+<h2>3. Domain-Intent-Entity Hierarchy</h2>
+<p>The home assistant blueprint is organized into five domains: Greeting, Smart Home, Time &amp; Dates, Weather and Unknown. In contrast with the Kwik-E-Mart example, the home assistant blueprint requires more domains and intents as the application supports more activities. For example, turning on and off the lights require two intents, one for turning on and one for turning off. Similar logic applies for turning on/off appliance, closing/opening doors, locking/unlocking doors, etc, ...</p>
+<p>Below is the full list of intents for every domain:</p>
+<blockquote>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Greeting</dt>
+<dd><ul class="first last">
+<li>greet</li>
+<li>exit</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Smart Home</dt>
+<dd><ul class="first last">
+<li>check_thermostat</li>
+<li>close_door</li>
+<li>lock_door</li>
+<li>open_door</li>
+<li>set_thermostat</li>
+<li>specify_location</li>
+<li>turn_appliance_on</li>
+<li>turn_appliance_off</li>
+<li>turn_down_thermostat</li>
+<li>turn_lights_off</li>
+<li>turn_lights_on</li>
+<li>turn_off_thermostat</li>
+<li>turn_on_thermostat</li>
+<li>turn_up_thermostat</li>
+<li>unlock_door</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Time and dates</dt>
+<dd><ul class="first last">
+<li>change_alarm</li>
+<li>check_alarm</li>
+<li>set_alarm</li>
+<li>start_timer</li>
+<li>stop_timer</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Weather</dt>
+<dd><ul class="first last">
+<li>check_weather</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Unknown</dt>
+<dd><ul class="first last">
+<li>unknown</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</blockquote>
+<p>There are two types of entities: <a href="#id1"><span class="problematic" id="id2">:doc:`Custom Entities &lt;../userguide/entity_recognizer&gt;`</span></a> and <a href="#id3"><span class="problematic" id="id4">:doc:`System Entities &lt;../userguide/system_entities&gt;`</span></a>. Custom entities are defined and used by application; the full list of values for each entity is defined in the file <tt class="docutils literal">gazetteer.txt</tt> under each entity folder. System entities are defined by Workbench, and there is no need to define them. Some examples of system entities are <tt class="docutils literal">sys_temperature</tt>, <tt class="docutils literal">sys_time</tt>, <tt class="docutils literal">sys_interval</tt>, etc.</p>
+<div class="system-message" id="id1">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 164); <em><a href="#id2">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<div class="system-message" id="id3">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 164); <em><a href="#id4">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<p>Home assistant defines and uses the following custom entities, which are grouped by intents below:</p>
+<blockquote>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Smart Home</dt>
+<dd><ul class="first last">
+<li><tt class="docutils literal">location</tt>: detects household location, for example: &quot;lock {back|location} door&quot;</li>
+<li><tt class="docutils literal">appliance</tt>: detects household appliances, for example: &quot;can you turn on the {tv|appliance}?&quot;</li>
+<li><tt class="docutils literal">all</tt>: detects whether the user is referring to all household locations, instead of a specific location, for example: &quot;turn on the lights in {all|all} room&quot; and &quot;lock the doors {everywhere|all}&quot;.</li>
+<li><tt class="docutils literal">color</tt>: detects color of the lights, for example: &quot;turn the lights to {soft white|color}&quot;</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Time and dates</dt>
+<dd><ul class="first last">
+<li><tt class="docutils literal">duration</tt>: detects time duration, for example: &quot;{15 minute|duration} alarm&quot;</li>
+<li><tt class="docutils literal">interval</tt>: detects time interval, for example: &quot;cancel {tomorrow night|interval} s alarms&quot;</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Weather</dt>
+<dd><ul class="first last">
+<li><tt class="docutils literal">city</tt>: detects cities, for example: &quot;what is the weather in {shanghai|city}&quot;</li>
+<li><tt class="docutils literal">unit</tt>: detects weather unit, for example: &quot;what is the forecast for {london|city} in {celsius|unit}&quot;</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</blockquote>
+<p>Home assistant uses three system entities: <tt class="docutils literal">sys_time</tt> (time), <tt class="docutils literal">sys_interval</tt> (interval) and <tt class="docutils literal">sys_temperature</tt> (temperature). Some examples for annotation with system entities: <tt class="docutils literal">set my thermostat to turn on at {6 am|sys_time}</tt> and <tt class="docutils literal">turn the heat off at {76 degrees|sys_temperature}</tt>.</p>
+<p>In many queries, there might be more than one entity of the same type. For example, <tt class="docutils literal">change my alarm from 7 am to 6 am</tt>, both <tt class="docutils literal">7 am</tt> and <tt class="docutils literal">6 am</tt> are both system entities. Therefore, in order to distinguish between the two entities, we can use roles to annotate <tt class="docutils literal">old_time</tt> for <tt class="docutils literal">7 am</tt> and <tt class="docutils literal">new_time</tt> for <tt class="docutils literal">6 am</tt>. We annotate the example as <tt class="docutils literal">change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}</tt> with <tt class="docutils literal">old_time</tt> and <tt class="docutils literal">new_time</tt> as roles. This way, we can distinguish each entity based on their roles. For more information on the usage of role, check <a href="#id5"><span class="problematic" id="id6">:doc:`Role Classifier &lt;../userguide/role_classifier&gt;`</span></a>.</p>
+<div class="system-message" id="id5">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 184); <em><a href="#id6">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<p>To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)</p>
+<pre class="code console literal-block">
+<span class="generic prompt">$</span> python -c <span class="literal string double">&quot;import mmworkbench as wb; wb.blueprint('home_assistant');&quot;</span>
+</pre>
+<p>This should create a Workbench project folder called <tt class="docutils literal">home_assistant</tt> in your current directory with the following structure:</p>
+<img alt="/images/home_assistant_directory.png" class="align-center" src="/images/home_assistant_directory.png" style="width: 250px;" />
+</div>
+<div class="section" id="dialogue-states">
+<h2>4. Dialogue States</h2>
+<p>Dialogue state logic can get arbitrarily complex. Simple handlers can just return a canned text response while sophisticated handlers can make 3rd party calls, calculate state transitions and return complex responses. For handling intents in the Dialogue Manager, Workbench provides a helpful programming construct for consolidating duplicated dialogue state logic. In Kwik-E-Mart example, we can define a dialogue state for every intent. Workbench3 also supports defining a single dialogue state for multiple intents. In this section we will explore both options in detail.</p>
+<p>Let's take a closer look at these intents for controlling doors: <tt class="docutils literal">close_door</tt>, <tt class="docutils literal">open_door</tt>, <tt class="docutils literal">lock_door</tt>, and <tt class="docutils literal">unlock_door</tt>. Now we can define a dialogue state for each of these intents.</p>
+<pre class="code python literal-block">
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'close_door'</span><span class="punctuation">)</span>
+<span class="keyword">def</span> <span class="name function">close_door</span><span class="punctuation">(</span><span class="name">context</span><span class="punctuation">,</span> <span class="name">slots</span><span class="punctuation">,</span> <span class="name">responder</span><span class="punctuation">):</span>
+
+    <span class="operator">...</span>
+
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'open_door'</span><span class="punctuation">)</span>
+<span class="keyword">def</span> <span class="name function">open_door</span><span class="punctuation">(</span><span class="name">context</span><span class="punctuation">,</span> <span class="name">slots</span><span class="punctuation">,</span> <span class="name">responder</span><span class="punctuation">):</span>
+
+    <span class="operator">...</span>
+
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'lock_door'</span><span class="punctuation">)</span>
+<span class="keyword">def</span> <span class="name function">lock_door</span><span class="punctuation">(</span><span class="name">context</span><span class="punctuation">,</span> <span class="name">slots</span><span class="punctuation">,</span> <span class="name">responder</span><span class="punctuation">):</span>
+
+    <span class="operator">...</span>
+
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'unlock_door'</span><span class="punctuation">)</span>
+<span class="keyword">def</span> <span class="name function">unlock_door</span><span class="punctuation">(</span><span class="name">context</span><span class="punctuation">,</span> <span class="name">slots</span><span class="punctuation">,</span> <span class="name">responder</span><span class="punctuation">):</span>
+
+    <span class="operator">...</span>
+</pre>
+<p>However, since close/open/lock/unlock door are very similar to each other in the controller logic (for example, setting the state variable for the door), we can handle all of these intents in the one state <tt class="docutils literal">handle_door</tt>.</p>
+<pre class="code python literal-block">
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'close_door'</span><span class="punctuation">)</span>
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'open_door'</span><span class="punctuation">)</span>
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'lock_door'</span><span class="punctuation">)</span>
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'unlock_door'</span><span class="punctuation">)</span>
+<span class="keyword">def</span> <span class="name function">handle_door</span><span class="punctuation">(</span><span class="name">context</span><span class="punctuation">,</span> <span class="name">slots</span><span class="punctuation">,</span> <span class="name">responder</span><span class="punctuation">):</span>
+
+    <span class="operator">...</span>
+</pre>
+<p>Which approach to take depends on the exact application and it takes some trial and error to figure this out. The home assistant blueprint uses both patterns - check it out!</p>
+<p>Another conversational pattern that would be useful to the reader is the follow-up request pattern. Take a look at the following interaction:</p>
+<pre class="code bash literal-block">
+User: Turn on the lights.
+App: Sure. Which lights?
+User: In the kitchen
+</pre>
+<p>In this pattern, the first request does not specify the required information, in this case the location of the light. Therefore, the application has to prompt the user for the missing information in the second request. To implement this, we define the <tt class="docutils literal">specify_location</tt> intent and define the <tt class="docutils literal">specify_location</tt> state. Since a number of states (<tt class="docutils literal">close/open door</tt>, <tt class="docutils literal">lock/unlock door</tt>, <tt class="docutils literal">turn on/off lights</tt>, <tt class="docutils literal">turn on/off appliance</tt>, <tt class="docutils literal">check door/light</tt>) can lead to the <tt class="docutils literal">specify location</tt> state, we need to pass in the previous state/action information in the request context as <tt class="docutils literal"><span class="pre">context['frame']['desired_action']</span></tt>.</p>
+<p>We include a code snippet for <tt class="docutils literal">specify_location</tt> for your reference.</p>
+<pre class="code python literal-block">
+<span class="name decorator">&#64;app.handle</span><span class="punctuation">(</span><span class="name">intent</span><span class="operator">=</span><span class="literal string single">'specify_location'</span><span class="punctuation">)</span>
+<span class="keyword">def</span> <span class="name function">specify_location</span><span class="punctuation">(</span><span class="name">context</span><span class="punctuation">,</span> <span class="name">slots</span><span class="punctuation">,</span> <span class="name">responder</span><span class="punctuation">):</span>
+<span class="name">selected_all</span> <span class="operator">=</span> <span class="name builtin pseudo">False</span>
+<span class="name">selected_location</span> <span class="operator">=</span> <span class="name">_get_location</span><span class="punctuation">(</span><span class="name">context</span><span class="punctuation">)</span>
+
+<span class="keyword">if</span> <span class="name">selected_location</span><span class="punctuation">:</span>
+    <span class="keyword">try</span><span class="punctuation">:</span>
+        <span class="keyword">if</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Close Door'</span><span class="punctuation">:</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_door_open_close_reply</span><span class="punctuation">(</span>
+                <span class="name">selected_all</span><span class="punctuation">,</span> <span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">context</span><span class="punctuation">,</span> <span class="name">desired_state</span><span class="operator">=</span><span class="literal string double">&quot;closed&quot;</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Open Door'</span><span class="punctuation">:</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_door_open_close_reply</span><span class="punctuation">(</span>
+                <span class="name">selected_all</span><span class="punctuation">,</span> <span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">context</span><span class="punctuation">,</span> <span class="name">desired_state</span><span class="operator">=</span><span class="literal string double">&quot;opened&quot;</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Lock Door'</span><span class="punctuation">:</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_door_lock_unlock_reply</span><span class="punctuation">(</span>
+                <span class="name">selected_all</span><span class="punctuation">,</span> <span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">context</span><span class="punctuation">,</span> <span class="name">desired_state</span><span class="operator">=</span><span class="literal string double">&quot;locked&quot;</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Unlock Door'</span><span class="punctuation">:</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_door_lock_unlock_reply</span><span class="punctuation">(</span>
+                <span class="name">selected_all</span><span class="punctuation">,</span> <span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">context</span><span class="punctuation">,</span> <span class="name">desired_state</span><span class="operator">=</span><span class="literal string double">&quot;unlocked&quot;</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Check Door'</span><span class="punctuation">:</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_check_door_reply</span><span class="punctuation">(</span><span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">context</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Turn On Lights'</span><span class="punctuation">:</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_lights_reply</span><span class="punctuation">(</span>
+                <span class="name">selected_all</span><span class="punctuation">,</span> <span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">context</span><span class="punctuation">,</span> <span class="name">desired_state</span><span class="operator">=</span><span class="literal string double">&quot;on&quot;</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Turn Off Lights'</span><span class="punctuation">:</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_lights_reply</span><span class="punctuation">(</span>
+                <span class="name">selected_all</span><span class="punctuation">,</span> <span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">context</span><span class="punctuation">,</span> <span class="name">desired_state</span><span class="operator">=</span><span class="literal string double">&quot;off&quot;</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Check Lights'</span><span class="punctuation">:</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_check_lights_reply</span><span class="punctuation">(</span><span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">context</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Turn On Appliance'</span><span class="punctuation">:</span>
+            <span class="name">selected_appliance</span> <span class="operator">=</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'appliance'</span><span class="punctuation">]</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_appliance_reply</span><span class="punctuation">(</span>
+                <span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">selected_appliance</span><span class="punctuation">,</span> <span class="name">desired_state</span><span class="operator">=</span><span class="literal string double">&quot;on&quot;</span><span class="punctuation">)</span>
+        <span class="keyword">elif</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="literal string single">'Turn Off Appliance'</span><span class="punctuation">:</span>
+            <span class="name">selected_appliance</span> <span class="operator">=</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'appliance'</span><span class="punctuation">]</span>
+            <span class="name">reply</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">_handle_appliance_reply</span><span class="punctuation">(</span>
+                <span class="name">selected_location</span><span class="punctuation">,</span> <span class="name">selected_appliance</span><span class="punctuation">,</span> <span class="name">desired_state</span><span class="operator">=</span><span class="literal string double">&quot;off&quot;</span><span class="punctuation">)</span>
+
+        <span class="keyword">del</span> <span class="name">context</span><span class="punctuation">[</span><span class="literal string single">'frame'</span><span class="punctuation">][</span><span class="literal string single">'desired_action'</span><span class="punctuation">]</span>
+
+    <span class="keyword">except</span> <span class="name exception">KeyError</span><span class="punctuation">:</span>
+        <span class="name">reply</span> <span class="operator">=</span> <span class="literal string double">&quot;Please specify an action to go along with that location.&quot;</span>
+
+    <span class="name">responder</span><span class="operator">.</span><span class="name">reply</span><span class="punctuation">(</span><span class="name">reply</span><span class="punctuation">)</span>
+<span class="keyword">else</span><span class="punctuation">:</span>
+    <span class="name">prompt</span> <span class="operator">=</span> <span class="literal string double">&quot;I'm sorry, I wasn't able to recognize that location, could you try again?&quot;</span>
+    <span class="name">responder</span><span class="operator">.</span><span class="name">prompt</span><span class="punctuation">(</span><span class="name">prompt</span><span class="punctuation">)</span>
+</pre>
+<p>Here is the full list of states in the home assistant blueprint:</p>
+<blockquote>
+<ul class="simple">
+<li>greet</li>
+<li>exit</li>
+<li>check_weather</li>
+<li>specify_location</li>
+<li>specify_time</li>
+<li>check_door</li>
+<li>close_door</li>
+<li>open_door</li>
+<li>lock_door</li>
+<li>unlock_door</li>
+<li>turn_appliance_on</li>
+<li>turn_appliance_off</li>
+<li>check_lights</li>
+<li>turn_lights_on</li>
+<li>turn_lights_off</li>
+<li>check_thermostat</li>
+<li>set_thermostat</li>
+<li>change_thermostat</li>
+<li>turn_thermostat</li>
+<li>change_alarm</li>
+<li>check_alarm</li>
+<li>remove_alarm</li>
+<li>set_alarm</li>
+<li>start_timer</li>
+<li>stop_timer</li>
+<li>unknown</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="knowledge-base">
+<h2>5. Knowledge Base</h2>
+<p>The home assistant is a straight forward command-and-control house application, and therefore it does not have a catalog of items and does not use a knowledge base.</p>
+</div>
+<div class="section" id="training-data">
+<h2>6. Training Data</h2>
+<p>The labeled data for training our NLP pipeline was created using a combination of in-house data generation and crowdsourcing techniques. This is a highly important multi-step process that is described in more detail in <a href="#id7"><span class="problematic" id="id8">:doc:`Step 6 &lt;../quickstart/06_generate_representative_training_data&gt;`</span></a> of the Step-By-Step Guide. But briefly, it requires at least the following data generation tasks:</p>
+<div class="system-message" id="id7">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 343); <em><a href="#id8">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="66%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Purpose</th>
+<th class="head">Question posed to data annotators</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Exploratory data generation for guiding the app design</td>
+<td>&quot;How would you talk to a conversational app to control your smart home appliances?&quot;</td>
+</tr>
+<tr><td>Divide your application use case into separate domains</td>
+<td>If your application has to control appliances in a smart home, check the weather and control a smart alarm, divide these
+use cases into separate domains: smart_home, times_and_dates, weather. One way to break an application into smaller
+domains is by clustering the queries by similar use case and then naming each cluster as a domain</td>
+</tr>
+<tr><td>Targeted query generation for training Domain and Intent
+Classifiers.</td>
+<td>For domain <tt class="docutils literal">times_and_dates</tt>, the following intents are constructed:
+<tt class="docutils literal">change_alarm</tt>: &quot;What would you say to the app to change your alarm time from a previous set time to a new set time?&quot;
+<tt class="docutils literal">set_alarm</tt>: &quot;What would you say to the app to set a new alarm time?&quot;</td>
+</tr>
+<tr><td>Targeted query annotation for training the Entity Recognizer</td>
+<td><tt class="docutils literal">set_alarm</tt>: &quot;Annotate all occurrences of sys_time and sys_interval system entities in the given query.&quot;</td>
+</tr>
+<tr><td>Targeted query annotation for training the Role Classifier</td>
+<td><tt class="docutils literal">set_alarm</tt>: &quot;Annotate all entities with their corresponding roles, when needed. For eg: old_time, new_time&quot;</td>
+</tr>
+<tr><td>Targeted synonym generation for gazetteer generation to
+improve entity recognition accuracies</td>
+<td><p class="first"><tt class="docutils literal">city</tt> entity: &quot;Enumerate a list of names of cities&quot;</p>
+<p class="last"><tt class="docutils literal">location</tt> entity: &quot;What are some names of locations in your home&quot;</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The training data for intent classification and entity recognition can be found in the <tt class="docutils literal">domains</tt> directory, whereas the data for entity resolution is in the <tt class="docutils literal">entities</tt> directory, both located at the root level of the blueprint folder.</p>
+<div class="admonition admonition-exercise">
+<p class="first admonition-title">Exercise</p>
+<ul class="last">
+<li><p class="first">Read <a href="#id9"><span class="problematic" id="id10">:doc:`Step 6 &lt;../quickstart/06_generate_representative_training_data&gt;`</span></a> of the Step-By-Step Guide for best practices around training data generation and annotation for conversational apps. Following those principles, create additional labeled data for all the intents in this blueprint and use them as held-out validation data for evaluating your app. You can read more about <a href="#id11"><span class="problematic" id="id12">:doc:`NLP model evaluation and error analysis &lt;../userguide/nlp&gt;`</span></a> in the user guide.</p>
+<div class="system-message" id="id9">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 371); <em><a href="#id10">backlink</a></em></p>
+<p>Unknown interpreted text role &quot;doc&quot;.</p>
+</div>
+<div class="system-message" id="id11">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 371); <em><a href="#id12">backlink</a></em></p>
+<p>Unknown interpreted text role &quot;doc&quot;.</p>
+</div>
+</li>
+<li><p class="first">To train NLP models for your own home assistant application, you can start by reusing the blueprint data for generic intents like <tt class="docutils literal">greet</tt> and <tt class="docutils literal">exit</tt>. However, for core intents like <tt class="docutils literal">check_weather</tt> in the <tt class="docutils literal">weather</tt> domain, it's recommended that you collect new training data that is tailored towards the entities (<tt class="docutils literal">city</tt>, <tt class="docutils literal">duration</tt>) that your application needs to support. Follow the same approach to gather new training data for the <tt class="docutils literal">check_weather</tt> intent or any additional intents and entities needed for your application.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="training-the-nlp-classifiers">
+<h2>7. Training the NLP Classifiers</h2>
+<p>To put the training data to use and train a baseline NLP system for your applicatio using Workbench's default machine learning settings, use the <a href="#id13"><span class="problematic" id="id14">:meth:`build`</span></a> method of the <a href="#id15"><span class="problematic" id="id16">:class:`NaturalLanguageProcessor`</span></a> class:</p>
+<div class="system-message" id="id13">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 379); <em><a href="#id14">backlink</a></em></p>
+Unknown interpreted text role &quot;meth&quot;.</div>
+<div class="system-message" id="id15">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 379); <em><a href="#id16">backlink</a></em></p>
+Unknown interpreted text role &quot;class&quot;.</div>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="keyword namespace">from</span> <span class="name namespace">mmworkbench.components.nlp</span> <span class="keyword namespace">import</span> <span class="name">NaturalLanguageProcessor</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="keyword namespace">import</span> <span class="name namespace">mmworkbench</span> <span class="keyword namespace">as</span> <span class="name namespace">wb</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">wb</span><span class="operator">.</span><span class="name">configure_logs</span><span class="punctuation">()</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">nlp</span> <span class="operator">=</span> <span class="name">NaturalLanguageProcessor</span><span class="punctuation">(</span><span class="name">app_path</span><span class="operator">=</span><span class="literal string single">'home_assistant'</span><span class="punctuation">)</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">nlp</span><span class="operator">.</span><span class="name">build</span><span class="punctuation">()</span>
+<span class="name">Fitting</span> <span class="name">domain</span> <span class="name">classifier</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">weather</span><span class="operator">/</span><span class="name">check_weather</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">times_and_dates</span><span class="operator">/</span><span class="name">remove_alarm</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">times_and_dates</span><span class="operator">/</span><span class="name">start_timer</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">times_and_dates</span><span class="operator">/</span><span class="name">change_alarm</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="operator">.</span>
+<span class="operator">.</span>
+<span class="operator">.</span>
+<span class="name">Fitting</span> <span class="name">intent</span> <span class="name">classifier</span><span class="punctuation">:</span> <span class="name">domain</span><span class="operator">=</span><span class="literal string single">'greeting'</span>
+<span class="name">Selecting</span> <span class="name">hyperparameters</span> <span class="name">using</span> <span class="name">k</span><span class="operator">-</span><span class="name">fold</span> <span class="name">cross</span> <span class="name">validation</span> <span class="keyword">with</span> <span class="literal number integer">5</span> <span class="name">splits</span>
+<span class="name">Best</span> <span class="name">accuracy</span><span class="punctuation">:</span> <span class="literal number float">99.31</span><span class="operator">%</span><span class="punctuation">,</span> <span class="name">params</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'fit_intercept'</span><span class="punctuation">:</span> <span class="name builtin pseudo">False</span><span class="punctuation">,</span> <span class="literal string single">'C'</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'class_weight'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal number integer">0</span><span class="punctuation">:</span> <span class="literal number float">1.5304182509505702</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">:</span> <span class="literal number float">0.88306789606035196</span><span class="punctuation">}}</span>
+<span class="name">Fitting</span> <span class="name">entity</span> <span class="name">recognizer</span><span class="punctuation">:</span> <span class="name">domain</span><span class="operator">=</span><span class="literal string single">'greeting'</span><span class="punctuation">,</span> <span class="name">intent</span><span class="operator">=</span><span class="literal string single">'exit'</span>
+<span class="name">No</span> <span class="name">entity</span> <span class="name">model</span> <span class="name">configuration</span> <span class="name builtin">set</span><span class="operator">.</span> <span class="name">Using</span> <span class="name">default</span><span class="operator">.</span>
+<span class="name">Fitting</span> <span class="name">entity</span> <span class="name">recognizer</span><span class="punctuation">:</span> <span class="name">domain</span><span class="operator">=</span><span class="literal string single">'greeting'</span><span class="punctuation">,</span> <span class="name">intent</span><span class="operator">=</span><span class="literal string single">'greet'</span>
+<span class="name">No</span> <span class="name">entity</span> <span class="name">model</span> <span class="name">configuration</span> <span class="name builtin">set</span><span class="operator">.</span> <span class="name">Using</span> <span class="name">default</span><span class="operator">.</span>
+<span class="name">Fitting</span> <span class="name">entity</span> <span class="name">recognizer</span><span class="punctuation">:</span> <span class="name">domain</span><span class="operator">=</span><span class="literal string single">'unknown'</span><span class="punctuation">,</span> <span class="name">intent</span><span class="operator">=</span><span class="literal string single">'unknown'</span>
+<span class="name">No</span> <span class="name">entity</span> <span class="name">model</span> <span class="name">configuration</span> <span class="name builtin">set</span><span class="operator">.</span> <span class="name">Using</span> <span class="name">default</span><span class="operator">.</span>
+<span class="name">Fitting</span> <span class="name">intent</span> <span class="name">classifier</span><span class="punctuation">:</span> <span class="name">domain</span><span class="operator">=</span><span class="literal string single">'smart_home'</span>
+<span class="name">Selecting</span> <span class="name">hyperparameters</span> <span class="name">using</span> <span class="name">k</span><span class="operator">-</span><span class="name">fold</span> <span class="name">cross</span> <span class="name">validation</span> <span class="keyword">with</span> <span class="literal number integer">5</span> <span class="name">splits</span>
+<span class="name">Best</span> <span class="name">accuracy</span><span class="punctuation">:</span> <span class="literal number float">98.43</span><span class="operator">%</span><span class="punctuation">,</span> <span class="name">params</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'fit_intercept'</span><span class="punctuation">:</span> <span class="name builtin pseudo">True</span><span class="punctuation">,</span> <span class="literal string single">'C'</span><span class="punctuation">:</span> <span class="literal number integer">100</span><span class="punctuation">,</span> <span class="literal string single">'class_weight'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal number integer">0</span><span class="punctuation">:</span> <span class="literal number float">0.99365079365079367</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">:</span> <span class="literal number float">1.5915662650602409</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">:</span> <span class="literal number float">1.3434782608695652</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">:</span> <span class="literal number float">1.5222222222222221</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">:</span> <span class="literal number float">0.91637426900584784</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">:</span> <span class="literal number float">0.74743589743589745</span><span class="punctuation">,</span> <span class="literal number integer">6</span><span class="punctuation">:</span> <span class="literal number float">1.9758620689655173</span><span class="punctuation">,</span> <span class="literal number integer">7</span><span class="punctuation">:</span> <span class="literal number float">1.4254901960784312</span><span class="punctuation">,</span> <span class="literal number integer">8</span><span class="punctuation">:</span> <span class="literal number float">1.0794871794871794</span><span class="punctuation">,</span> <span class="literal number integer">9</span><span class="punctuation">:</span> <span class="literal number float">1.0645320197044335</span><span class="punctuation">,</span> <span class="literal number integer">10</span><span class="punctuation">:</span> <span class="literal number float">1.1043715846994535</span><span class="punctuation">,</span> <span class="literal number integer">11</span><span class="punctuation">:</span> <span class="literal number float">1.2563909774436088</span><span class="punctuation">,</span> <span class="literal number integer">12</span><span class="punctuation">:</span> <span class="literal number float">1.3016260162601625</span><span class="punctuation">,</span> <span class="literal number integer">13</span><span class="punctuation">:</span> <span class="literal number float">1.0775510204081633</span><span class="punctuation">,</span> <span class="literal number integer">14</span><span class="punctuation">:</span> <span class="literal number float">1.8384615384615384</span><span class="punctuation">}}</span>
+</pre>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>During active development, it is helpful to increase the <a href="#id17"><span class="problematic" id="id18">:doc:`Workbench logging level &lt;../userguide/getting_started&gt;`</span></a> to better understand what is happening behind the scenes. All code snippets here assume that logging level has been set to verbose.</p>
+<div class="last system-message" id="id17">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 410); <em><a href="#id18">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+</div>
+<p>You should see a cross validation accuracy of around 98% for the <a href="#id19"><span class="problematic" id="id20">:doc:`Intent Classifier &lt;../userguide/intent_classifier&gt;`</span></a> for the domain <tt class="docutils literal">smart_home</tt> and about 99% for the <a href="#id21"><span class="problematic" id="id22">:doc:`Entity Recognizer &lt;../userguide/entity_recognizer&gt;`</span></a> for the domain <tt class="docutils literal">smart_home</tt> and intent <tt class="docutils literal">turn_on_thermostat</tt>. To see how the trained NLP pipeline performs on a test query, use the <a href="#id23"><span class="problematic" id="id24">:meth:`process`</span></a> method.</p>
+<div class="system-message" id="id19">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 412); <em><a href="#id20">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<div class="system-message" id="id21">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 412); <em><a href="#id22">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<div class="system-message" id="id23">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 412); <em><a href="#id24">backlink</a></em></p>
+Unknown interpreted text role &quot;meth&quot;.</div>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">nlp</span><span class="operator">.</span><span class="name">process</span><span class="punctuation">(</span><span class="literal string double">&quot;please set my alarm to 8am for tomorrow&quot;</span><span class="punctuation">)</span>
+<span class="punctuation">{</span><span class="literal string single">'domain'</span><span class="punctuation">:</span> <span class="literal string single">'times_and_dates'</span><span class="punctuation">,</span>
+ <span class="literal string single">'entities'</span><span class="punctuation">:</span> <span class="punctuation">[{</span><span class="literal string single">'confidence'</span><span class="punctuation">:</span> <span class="operator">-</span><span class="literal number float">0.0</span><span class="punctuation">,</span>
+   <span class="literal string single">'role'</span><span class="punctuation">:</span> <span class="name builtin pseudo">None</span><span class="punctuation">,</span>
+   <span class="literal string single">'span'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'end'</span><span class="punctuation">:</span> <span class="literal number integer">38</span><span class="punctuation">,</span> <span class="literal string single">'start'</span><span class="punctuation">:</span> <span class="literal number integer">31</span><span class="punctuation">},</span>
+   <span class="literal string single">'text'</span><span class="punctuation">:</span> <span class="literal string single">'tomorrow'</span><span class="punctuation">,</span>
+   <span class="literal string single">'type'</span><span class="punctuation">:</span> <span class="literal string single">'sys_time'</span><span class="punctuation">,</span>
+   <span class="literal string single">'value'</span><span class="punctuation">:</span> <span class="punctuation">[{</span><span class="literal string single">'grain'</span><span class="punctuation">:</span> <span class="literal string single">'day'</span><span class="punctuation">,</span> <span class="literal string single">'value'</span><span class="punctuation">:</span> <span class="literal string single">'2017-07-08T00:00:00.000-07:00'</span><span class="punctuation">}]}],</span>
+ <span class="literal string single">'intent'</span><span class="punctuation">:</span> <span class="literal string single">'set_alarm'</span><span class="punctuation">,</span>
+ <span class="literal string single">'text'</span><span class="punctuation">:</span> <span class="literal string single">'please set my alarm to 8am for tomorrow'</span>
+ <span class="punctuation">}</span>
+</pre>
+<p>For the data distributed with this blueprint, the baseline performance is already high. However, when extending the blueprint with your own custom home assistant data, you may find that the default settings may not be optimal and you can get better accuracy by individually optimizing each of the NLP components.</p>
+<p>Home assistant application consists of five domains and more than twenty intents so we need to do a fair bit of fine tuning of the classifiers.</p>
+<p>A good place to start is by inspecting the baseline configuration used by the different classifiers. The user guide lists and describes all of the available configuration options in detail. As an example, the code below shows how to access the model and feature extraction settings for the Intent Classifier.</p>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">ic</span> <span class="operator">=</span> <span class="name">nlp</span><span class="operator">.</span><span class="name">domains</span><span class="punctuation">[</span><span class="literal string single">'smart_home'</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">intent_classifier</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">ic</span><span class="operator">.</span><span class="name">config</span><span class="operator">.</span><span class="name">model_settings</span><span class="punctuation">[</span><span class="literal string single">'classifier_type'</span><span class="punctuation">]</span>
+<span class="literal string single">'logreg'</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">ic</span><span class="operator">.</span><span class="name">config</span><span class="operator">.</span><span class="name">features</span>
+<span class="punctuation">{</span><span class="literal string single">'bag-of-words'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'lengths'</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">]},</span>
+ <span class="literal string single">'edge-ngrams'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'lengths'</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">]},</span>
+ <span class="literal string single">'exact'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'scaling'</span><span class="punctuation">:</span> <span class="literal number integer">10</span><span class="punctuation">},</span>
+ <span class="literal string single">'freq'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'bins'</span><span class="punctuation">:</span> <span class="literal number integer">5</span><span class="punctuation">},</span>
+ <span class="literal string single">'gaz-freq'</span><span class="punctuation">:</span> <span class="punctuation">{},</span>
+ <span class="literal string single">'in-gaz'</span><span class="punctuation">:</span> <span class="punctuation">{}</span>
+<span class="punctuation">}</span>
+</pre>
+<p>You can experiment with different learning algorithms (model types), features, hyperparameters, and cross-validation settings, by passing the appropriate parameters to the classifier's <a href="#id25"><span class="problematic" id="id26">:meth:`fit`</span></a> method. Here are a couple of examples.</p>
+<div class="system-message" id="id25">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 448); <em><a href="#id26">backlink</a></em></p>
+Unknown interpreted text role &quot;meth&quot;.</div>
+<p>For example, we can change the feature extraction settings to use bag of bigrams in addition to the default bag of words:</p>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">features</span> <span class="operator">=</span> <span class="punctuation">{</span>
+<span class="operator">...</span>             <span class="literal string single">'bag-of-words'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'lengths'</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">]},</span>
+<span class="operator">...</span>             <span class="literal string single">'freq'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'bins'</span><span class="punctuation">:</span> <span class="literal number integer">5</span><span class="punctuation">},</span>
+<span class="operator">...</span>             <span class="literal string single">'in-gaz'</span><span class="punctuation">:</span> <span class="punctuation">{},</span>
+<span class="operator">...</span>             <span class="literal string single">'length'</span><span class="punctuation">:</span> <span class="punctuation">{}</span>
+<span class="operator">...</span>            <span class="punctuation">}</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">ic</span><span class="operator">.</span><span class="name">fit</span><span class="punctuation">(</span><span class="name">features</span><span class="operator">=</span><span class="name">features</span><span class="punctuation">)</span>
+<span class="name">Fitting</span> <span class="name">intent</span> <span class="name">classifier</span><span class="punctuation">:</span> <span class="name">domain</span><span class="operator">=</span><span class="literal string single">'smart_home'</span>
+<span class="name">Selecting</span> <span class="name">hyperparameters</span> <span class="name">using</span> <span class="name">k</span><span class="operator">-</span><span class="name">fold</span> <span class="name">cross</span> <span class="name">validation</span> <span class="keyword">with</span> <span class="literal number integer">5</span> <span class="name">splits</span>
+<span class="name">Best</span> <span class="name">accuracy</span><span class="punctuation">:</span> <span class="literal number float">98.46</span><span class="operator">%</span><span class="punctuation">,</span> <span class="name">params</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'fit_intercept'</span><span class="punctuation">:</span> <span class="name builtin pseudo">False</span><span class="punctuation">,</span> <span class="literal string single">'C'</span><span class="punctuation">:</span> <span class="literal number integer">10</span><span class="punctuation">,</span> <span class="literal string single">'class_weight'</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal number integer">0</span><span class="punctuation">:</span> <span class="literal number float">0.98518518518518516</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">:</span> <span class="literal number float">2.3803212851405622</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">:</span> <span class="literal number float">1.801449275362319</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">:</span> <span class="literal number float">2.2185185185185183</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">:</span> <span class="literal number float">0.80487329434697852</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">:</span> <span class="literal number float">0.41068376068376072</span><span class="punctuation">,</span> <span class="literal number integer">6</span><span class="punctuation">:</span> <span class="literal number float">3.2770114942528741</span><span class="punctuation">,</span> <span class="literal number integer">7</span><span class="punctuation">:</span> <span class="literal number float">1.9928104575163397</span><span class="punctuation">,</span> <span class="literal number integer">8</span><span class="punctuation">:</span> <span class="literal number float">1.1854700854700853</span><span class="punctuation">,</span> <span class="literal number integer">9</span><span class="punctuation">:</span> <span class="literal number float">1.1505747126436781</span><span class="punctuation">,</span> <span class="literal number integer">10</span><span class="punctuation">:</span> <span class="literal number float">1.2435336976320581</span><span class="punctuation">,</span> <span class="literal number integer">11</span><span class="punctuation">:</span> <span class="literal number float">1.5982456140350876</span><span class="punctuation">,</span> <span class="literal number integer">12</span><span class="punctuation">:</span> <span class="literal number float">1.7037940379403793</span><span class="punctuation">,</span> <span class="literal number integer">13</span><span class="punctuation">:</span> <span class="literal number float">1.180952380952381</span><span class="punctuation">,</span> <span class="literal number integer">14</span><span class="punctuation">:</span> <span class="literal number float">2.9564102564102566</span><span class="punctuation">}}</span>
+</pre>
+<p>In another example, we can change the model for the intent classifier to Support Vector Machine (SVM) classifier, which can work well in some dataset:</p>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">search_grid</span> <span class="operator">=</span> <span class="punctuation">{</span>
+<span class="operator">...</span>    <span class="literal string single">'C'</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal number float">0.1</span><span class="punctuation">,</span> <span class="literal number float">0.5</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">,</span> <span class="literal number integer">10</span><span class="punctuation">,</span> <span class="literal number integer">50</span><span class="punctuation">,</span> <span class="literal number integer">100</span><span class="punctuation">,</span> <span class="literal number integer">1000</span><span class="punctuation">,</span> <span class="literal number integer">5000</span><span class="punctuation">],</span>
+<span class="operator">...</span>    <span class="literal string single">'kernel'</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal string single">'linear'</span><span class="punctuation">,</span> <span class="literal string single">'rbf'</span><span class="punctuation">,</span> <span class="literal string single">'poly'</span><span class="punctuation">],</span>
+<span class="operator">...</span> <span class="punctuation">}</span>
+<span class="operator">...</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">param_selection_settings</span> <span class="operator">=</span> <span class="punctuation">{</span>
+<span class="operator">...</span>      <span class="literal string single">'grid'</span><span class="punctuation">:</span> <span class="name">search_grid</span><span class="punctuation">,</span>
+<span class="operator">...</span>      <span class="literal string single">'type'</span><span class="punctuation">:</span> <span class="literal string single">'k-fold'</span><span class="punctuation">,</span>
+<span class="operator">...</span>      <span class="literal string single">'k'</span><span class="punctuation">:</span> <span class="literal number integer">10</span>
+<span class="operator">...</span> <span class="punctuation">}</span>
+<span class="operator">...</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">ic</span> <span class="operator">=</span> <span class="name">nlp</span><span class="operator">.</span><span class="name">domains</span><span class="punctuation">[</span><span class="literal string single">'smart_home'</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">intent_classifier</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">ic</span><span class="operator">.</span><span class="name">fit</span><span class="punctuation">(</span><span class="name">model_settings</span><span class="operator">=</span><span class="punctuation">{</span><span class="literal string single">'classifier_type'</span><span class="punctuation">:</span> <span class="literal string single">'svm'</span><span class="punctuation">},</span> <span class="name">param_selection</span><span class="operator">=</span><span class="name">param_selection_settings</span><span class="punctuation">)</span>
+<span class="name">Fitting</span> <span class="name">intent</span> <span class="name">classifier</span><span class="punctuation">:</span> <span class="name">domain</span><span class="operator">=</span><span class="literal string single">'smart_home'</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">check_lights</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">specify_location</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">turn_appliance_off</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">check_thermostat</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">set_thermostat</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">turn_up_thermostat</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">turn_lights_on</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">unlock_door</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">turn_on_thermostat</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">lock_door</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">turn_down_thermostat</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Unable</span> <span class="name">to</span> <span class="name">load</span> <span class="name">query</span><span class="punctuation">:</span> <span class="name">Unable</span> <span class="name">to</span> <span class="name">resolve</span> <span class="name">system</span> <span class="name">entity</span> <span class="name">of</span> <span class="name builtin">type</span> <span class="literal string single">'sys_time'</span> <span class="keyword">for</span> <span class="literal string single">'12pm'</span><span class="operator">.</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">close_door</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">turn_lights_off</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">open_door</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">turn_off_thermostat</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Loading</span> <span class="name">queries</span> <span class="keyword namespace">from</span> <span class="name namespace">file</span> <span class="name namespace">smart_home</span><span class="operator">/</span><span class="name">turn_appliance_on</span><span class="operator">/</span><span class="name">train</span><span class="operator">.</span><span class="name">txt</span>
+<span class="name">Selecting</span> <span class="name">hyperparameters</span> <span class="name">using</span> <span class="name">k</span><span class="operator">-</span><span class="name">fold</span> <span class="name">cross</span><span class="operator">-</span><span class="name">validation</span> <span class="keyword">with</span> <span class="literal number integer">10</span> <span class="name">splits</span>
+<span class="name">Best</span> <span class="name">accuracy</span><span class="punctuation">:</span> <span class="literal number float">98.27</span><span class="operator">%</span><span class="punctuation">,</span> <span class="name">params</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string single">'C'</span><span class="punctuation">:</span> <span class="literal number integer">5000</span><span class="punctuation">,</span> <span class="literal string single">'kernel'</span><span class="punctuation">:</span> <span class="literal string single">'rbf'</span><span class="punctuation">}</span>
+</pre>
+<p>Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the <a href="#id27"><span class="problematic" id="id28">:doc:`NaturalLanguageProcessor &lt;../userguide/nlp&gt;`</span></a> in the user guide for a detailed discussion on training, tuning, and evaluating the various Workbench classifiers.</p>
+<div class="system-message" id="id27">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 503); <em><a href="#id28">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<p>The home assistant application also has role classifiers to distinguish between different role labels. For example, the annotated data in the <tt class="docutils literal">times_and_dates</tt> domain and <tt class="docutils literal">check_alarm</tt> intent have two types of roles: <tt class="docutils literal">old_time</tt> and <tt class="docutils literal">new_time</tt>. We use the role classifier to correctly classify these roles for the <tt class="docutils literal">sys_time</tt> entity:</p>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">nlp</span><span class="operator">.</span><span class="name">domains</span><span class="punctuation">[</span><span class="literal string double">&quot;times_and_dates&quot;</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">intents</span><span class="punctuation">[</span><span class="literal string double">&quot;change_alarm&quot;</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">load</span><span class="punctuation">()</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">nlp</span><span class="operator">.</span><span class="name">domains</span><span class="punctuation">[</span><span class="literal string double">&quot;times_and_dates&quot;</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">intents</span><span class="punctuation">[</span><span class="literal string double">&quot;change_alarm&quot;</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">entities</span><span class="punctuation">[</span><span class="literal string double">&quot;sys_time&quot;</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">role_classifier</span><span class="operator">.</span><span class="name">fit</span><span class="punctuation">()</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">nlp</span><span class="operator">.</span><span class="name">domains</span><span class="punctuation">[</span><span class="literal string double">&quot;times_and_dates&quot;</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">intents</span><span class="punctuation">[</span><span class="literal string double">&quot;change_alarm&quot;</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">entities</span><span class="punctuation">[</span><span class="literal string double">&quot;sys_time&quot;</span><span class="punctuation">]</span><span class="operator">.</span><span class="name">role_classifier</span><span class="operator">.</span><span class="name">evaluate</span><span class="punctuation">()</span>
+<span class="operator">&lt;</span><span class="name">StandardModelEvaluation</span> <span class="name">score</span><span class="punctuation">:</span> <span class="literal number float">100.00</span><span class="operator">%</span><span class="punctuation">,</span> <span class="literal number integer">15</span> <span class="name">of</span> <span class="literal number integer">15</span> <span class="name">examples</span> <span class="name">correct</span><span class="operator">&gt;</span>
+</pre>
+<p>In the above case, the role classifier was able to correctly distinguish between <tt class="docutils literal">new_time</tt> and <tt class="docutils literal">old_time</tt> for all test cases.</p>
+<p>The application configuration file, <tt class="docutils literal">config.py</tt>, at the top level of home assistant folder contains custom intent and domain classifier model configurations, defined as dictionaries named <tt class="docutils literal">DOMAIN_MODEL_CONFIG</tt> and <tt class="docutils literal">INTENT_MODEL_CONFIG</tt> respectively; other dictionaries include <tt class="docutils literal">ENTITY_MODEL_CONFIG</tt> and <tt class="docutils literal">ROLE_MODEL_CONFIG</tt>. If no custom model configuration is added to <tt class="docutils literal">config.py</tt> file, Workbench will use its default classifier configurations for training and evaluation. Here is an example of an intent configuration:</p>
+<pre class="code python literal-block">
+<span class="name">INTENT_MODEL_CONFIG</span> <span class="operator">=</span> <span class="punctuation">{</span>
+    <span class="literal string single">'model_type'</span><span class="punctuation">:</span> <span class="literal string single">'text'</span><span class="punctuation">,</span>
+    <span class="literal string single">'model_settings'</span><span class="punctuation">:</span> <span class="punctuation">{</span>
+        <span class="literal string single">'classifier_type'</span><span class="punctuation">:</span> <span class="literal string single">'logreg'</span>
+    <span class="punctuation">},</span>
+    <span class="literal string single">'param_selection'</span><span class="punctuation">:</span> <span class="punctuation">{</span>
+        <span class="literal string single">'type'</span><span class="punctuation">:</span> <span class="literal string single">'k-fold'</span><span class="punctuation">,</span>
+        <span class="literal string single">'k'</span><span class="punctuation">:</span> <span class="literal number integer">5</span><span class="punctuation">,</span>
+        <span class="literal string single">'grid'</span><span class="punctuation">:</span> <span class="punctuation">{</span>
+            <span class="literal string single">'fit_intercept'</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="name builtin pseudo">True</span><span class="punctuation">,</span> <span class="name builtin pseudo">False</span><span class="punctuation">],</span>
+            <span class="literal string single">'C'</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal number float">0.01</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">10</span><span class="punctuation">,</span> <span class="literal number integer">100</span><span class="punctuation">],</span>
+            <span class="literal string single">'class_bias'</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal number float">0.7</span><span class="punctuation">,</span> <span class="literal number float">0.3</span><span class="punctuation">,</span> <span class="literal number integer">0</span><span class="punctuation">]</span>
+        <span class="punctuation">}</span>
+    <span class="punctuation">},</span>
+    <span class="literal string single">'features'</span><span class="punctuation">:</span> <span class="punctuation">{</span>
+        <span class="literal string double">&quot;bag-of-words&quot;</span><span class="punctuation">:</span> <span class="punctuation">{</span>
+            <span class="literal string double">&quot;lengths&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="literal string double">&quot;edge-ngrams&quot;</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string double">&quot;lengths&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">]},</span>
+        <span class="literal string double">&quot;in-gaz&quot;</span><span class="punctuation">:</span> <span class="punctuation">{},</span>
+        <span class="literal string double">&quot;exact&quot;</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string double">&quot;scaling&quot;</span><span class="punctuation">:</span> <span class="literal number integer">10</span><span class="punctuation">},</span>
+        <span class="literal string double">&quot;gaz-freq&quot;</span><span class="punctuation">:</span> <span class="punctuation">{},</span>
+        <span class="literal string double">&quot;freq&quot;</span><span class="punctuation">:</span> <span class="punctuation">{</span><span class="literal string double">&quot;bins&quot;</span><span class="punctuation">:</span> <span class="literal number integer">5</span><span class="punctuation">}</span>
+    <span class="punctuation">}</span>
+<span class="punctuation">}</span>
+</pre>
+<div class="admonition admonition-exercise">
+<p class="first admonition-title">Exercise</p>
+<p>Experiment with different models, features, and hyperparameter selection settings to see how they affect the classifier performance. It is helpful to have a held-out validation set to evaluate your trained NLP models and analyze the misclassified test instances. You could then use observations from the error analysis to inform your machine learning experimentation. For more examples and discussion on this topic, refer to the <a href="#id29"><span class="problematic" id="id30">:doc:`user guide &lt;../userguide/nlp&gt;`</span></a>.</p>
+<div class="last system-message" id="id29">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 548); <em><a href="#id30">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+</div>
+</div>
+<div class="section" id="parser-configuration">
+<h2>8. Parser Configuration</h2>
+<p>The queries in the home assistant do not have complex relationships between entities. For example, for the annotated query <tt class="docutils literal">is the {back|location} door closed or open</tt>, there is no entity that describes the <tt class="docutils literal">location</tt> entity. As queries become more complex, for example, <tt class="docutils literal">is the {green|color} {back|location} door closed or open</tt>, we would need to relate the <tt class="docutils literal">color</tt> entity with the <tt class="docutils literal">location</tt> entity. When this happens, we call these two related entities <tt class="docutils literal">entity groups</tt>.
+Since we do not have entity groups in the home assistant application, we therefore do not need a parser configuration, which is a component that helps group entities together. As the applications evolves, such entity relationships will form. Please refer to <a href="#id31"><span class="problematic" id="id32">:doc:`Entity Groups &lt;../userguide/language_parsing.html?highlight=entity%20groups&gt;`</span></a> and <a href="#id33"><span class="problematic" id="id34">:doc:`Language Parser &lt;../userguide/parser&gt;`</span></a> to read more about entity groups and parser configurations.</p>
+<div class="system-message" id="id31">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 554); <em><a href="#id32">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<div class="system-message" id="id33">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 554); <em><a href="#id34">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+</div>
+<div class="section" id="using-the-question-answerer">
+<h2>9. Using the Question Answerer</h2>
+<p>The <a href="#id35"><span class="problematic" id="id36">:doc:`Question Answerer &lt;../userguide/kb&gt;`</span></a> component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. Since the home assistant application does not use a knowledge base, a question answerer component is not needed.</p>
+<div class="system-message" id="id35">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 561); <em><a href="#id36">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+</div>
+<div class="section" id="testing-and-deployment">
+<h2>10. Testing and Deployment</h2>
+<p>Once all the individual pieces (NLP, Dialogue State Handlers) have been trained, configured or implemented, you can do an end-to-end test of your conversational application using the <a href="#id37"><span class="problematic" id="id38">:class:`Conversation`</span></a> class in Workbench.</p>
+<div class="system-message" id="id37">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 567); <em><a href="#id38">backlink</a></em></p>
+Unknown interpreted text role &quot;class&quot;.</div>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="keyword namespace">from</span> <span class="name namespace">mmworkbench.components.dialogue</span> <span class="keyword namespace">import</span> <span class="name">Conversation</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span> <span class="operator">=</span> <span class="name">Conversation</span><span class="punctuation">(</span><span class="name">nlp</span><span class="operator">=</span><span class="name">nlp</span><span class="punctuation">,</span> <span class="name">app_path</span><span class="operator">=</span><span class="literal string single">'home_asssitant'</span><span class="punctuation">)</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string single">'set alarm for 6am'</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'Ok, I have set your alarm for 06:00:00.'</span><span class="punctuation">]</span>
+</pre>
+<p>The <a href="#id39"><span class="problematic" id="id40">:meth:`say`</span></a> method packages the input text in a <a href="#id41"><span class="problematic" id="id42">:doc:`user request &lt;../userguide/interface&gt;`</span></a> object and passes it to the Workbench <a href="#id43"><span class="problematic" id="id44">:doc:`Application Manager &lt;../userguide/application_manager&gt;`</span></a> to a simulate an external user interaction with the application. It then outputs the textual part of the response sent by the application's dialogue manager. In the above example, we requested to set an alarm for 6am and the app responded, as expected, with a confirmation prompt of setting the alarm.</p>
+<div class="system-message" id="id39">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 576); <em><a href="#id40">backlink</a></em></p>
+Unknown interpreted text role &quot;meth&quot;.</div>
+<div class="system-message" id="id41">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 576); <em><a href="#id42">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<div class="system-message" id="id43">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">docs/source/blueprints/home_assistant.rst</tt>, line 576); <em><a href="#id44">backlink</a></em></p>
+Unknown interpreted text role &quot;doc&quot;.</div>
+<p>You can also try out multi-turn dialogues:</p>
+<pre class="code python literal-block">
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string single">'Hi there!'</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.]</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string double">&quot;close the front door&quot;</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'Ok. The front door has been closed.'</span><span class="punctuation">]</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string double">&quot;set the thermostat for 60 degrees&quot;</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'The thermostat temperature in the home is now 60 degrees F.'</span><span class="punctuation">]</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string double">&quot;decrease the thermostat by 5 degrees&quot;</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'The thermostat temperature in the home is now 55 degrees F.'</span><span class="punctuation">]</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string double">&quot;open the front door&quot;</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'Ok. The front door has been opened.'</span><span class="punctuation">]</span>
+<span class="operator">&gt;&gt;&gt;</span> <span class="name">conv</span><span class="operator">.</span><span class="name">say</span><span class="punctuation">(</span><span class="literal string double">&quot;Thank you!&quot;</span><span class="punctuation">)</span>
+<span class="punctuation">[</span><span class="literal string single">'Bye!'</span><span class="punctuation">]</span>
+</pre>
+<p>We can also enter the conversation mode directly from the command-line.</p>
+<pre class="code bash literal-block">
+&gt;&gt;&gt; python app.py converse
+
+App: Hi, I am your home assistant. I can <span class="name builtin">help</span> you to check weather, <span class="name builtin">set</span> temperature and control the lights and other appliances.
+You: What<span class="error">'</span>s the weather today in San Francisco?
+App: The weather forecast in San Francisco is clouds with a min of <span class="literal number">62</span>.6 F and a max of <span class="literal number">89</span>.6 F
+</pre>
+<div class="admonition admonition-exercise">
+<p class="first admonition-title">Exercise</p>
+<ul class="last simple">
+<li>Test the app and play around with different language patterns to figure out the edge cases that our classifiers are not able to handle. The more language patterns we can collect in our training data, the better our classifiers can handle in live usage with real users. Good luck and have fun - now you have your very own Jarvis!</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

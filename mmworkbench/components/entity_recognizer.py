@@ -145,9 +145,6 @@ class EntityRecognizer(Classifier):
         """
         logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
-            # The below construct is to ensure backwards compatibility of model
-            # paths that previously just used to be files
-            model_path = path.get_entity_model_path_name(model_path)
             er_data = joblib.load(model_path)
             model_name = er_data.get('model_name')
             self.entity_types = er_data['entity_types']
