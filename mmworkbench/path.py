@@ -271,7 +271,7 @@ def get_intent_model_path(app_path, domain, model_name=None):
 
 
 @safe_path
-def get_entity_model_path(app_path, domain, intent, model_name=None, old_version=False):
+def get_entity_model_path(app_path, domain, intent, model_name=None):
     """
     Args:
         app_path (str): The path to the app data.
@@ -433,4 +433,3 @@ def get_user_config_path():
         str: The path to the current user's workbench configuration file.
     """
     return USER_CONFIG_PATH
-
