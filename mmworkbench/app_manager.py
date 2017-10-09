@@ -82,7 +82,7 @@ class ApplicationManager(object):
             request['payload'] = payload
 
         context = self.context_class(
-            {'request': request, 'history': history, 'frame': copy.deepcopy(frame)})
+            {'request': request, 'history': history, 'frame': copy.deepcopy(frame), 'entities': []})
 
         # Validate target dialogue state
         if target_dialogue_state and target_dialogue_state not in self.dialogue_manager.handler_map:
@@ -91,29 +91,26 @@ class ApplicationManager(object):
                          "this turn.".format(target_dialogue_state))
             target_dialogue_state = None
 
-        # We bypass the NLP processing engine if the target dialogue state is specified. This
-        # improves performance by decreasing round trip time between the client and wb.
-        if not target_dialogue_state:
-            nlp_hierarchy = None
-            if allowed_intents:
-                try:
-                    nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
-                except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
-                    # We have to print the error object since it sometimes contains a message
-                    # and sometimes it doesn't, like a ValueError.
-                    logger.error(
-                        "Validation error '{}' on input allowed intents {}. "
-                        "Not applying domain/intent restrictions this "
-                        "turn".format(e, allowed_intents))
+        nlp_hierarchy = None
+        if allowed_intents:
+            try:
+                nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
+            except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
+                # We have to print the error object since it sometimes contains a message
+                # and sometimes it doesn't, like a ValueError.
+                logger.error(
+                    "Validation error '{}' on input allowed intents {}. "
+                    "Not applying domain/intent restrictions this "
+                    "turn".format(e, allowed_intents))
 
-            # TODO: support passing in reference time from session
-            query = self._query_factory.create_query(text)
+        # TODO: support passing in reference time from session
+        query = self._query_factory.create_query(text)
 
-            # TODO: support specifying target domain, etc in payload
-            processed_query = self.nlp.process_query(query, nlp_hierarchy)
+        # TODO: support specifying target domain, etc in payload
+        processed_query = self.nlp.process_query(query, nlp_hierarchy)
 
-            context.update(processed_query.to_dict())
-            context.pop('text')
+        context.update(processed_query.to_dict())
+        context.pop('text')
 
         context.update(self.dialogue_manager.apply_handler(context, target_dialogue_state))
 

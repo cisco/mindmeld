@@ -265,6 +265,7 @@ class DialogueManager(object):
         slots = {}
         responder = self.responder_class(slots)
         handler(context, responder)
+
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
     @staticmethod
@@ -497,7 +498,9 @@ class Conversation(object):
         """
         response = self._app_manager.parse(text, session=self.session, frame=self.frame,
                                            history=self.history,
-                                           allowed_intents=self.allowed_intents)
+                                           allowed_intents=self.allowed_intents,
+                                           target_dialogue_state=self.target_dialogue_state)
+
         self.history = response['history']
         self.frame = response['frame']
 
