@@ -103,8 +103,10 @@ class LstmModel(Tagger):
         """
         with self.graph.as_default():
             self.dense_keep_prob_tf = tf.placeholder(tf.float32, name='dense_keep_prob_tf')
-            self.lstm_input_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_input_keep_prob_tf')
-            self.lstm_output_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_output_keep_prob_tf')
+            self.lstm_input_keep_prob_tf = \
+                tf.placeholder(tf.float32, name='lstm_input_keep_prob_tf')
+            self.lstm_output_keep_prob_tf = \
+                tf.placeholder(tf.float32, name='lstm_output_keep_prob_tf')
 
             self.query_input_tf = tf.placeholder(tf.float32,
                                                  [None,
