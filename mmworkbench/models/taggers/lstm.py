@@ -206,10 +206,6 @@ class LstmModel(Tagger):
         self.label_encoder = LabelBinarizer()
         self.gaz_encoder = LabelBinarizer()
 
-        # We have to reset the graph on every dataset since the input, gaz and output
-        # dimensions for each domain,intent training data is different. So the graph
-        # cannot be reused.
-        # tf.reset_default_graph()
         self.graph = tf.Graph()
         self.saver = None
 
@@ -732,7 +728,7 @@ class LstmModel(Tagger):
                                          batch_gaz,
                                          batch_seq_len,
                                          batch_labels))
-            return self
+        return self
 
     def _predict(self, X):
         """Trains a classifier without cross-validation.
@@ -814,8 +810,6 @@ class LstmModel(Tagger):
 
         if not os.listdir(path):
             return
-
-        tf.reset_default_graph()
 
         self.graph = tf.Graph()
         self.session = tf.Session(graph=self.graph)
