@@ -101,47 +101,53 @@ class LstmModel(Tagger):
         """
         Constructs the variables and operations in the TensorFlow session graph
         """
-        self.dense_keep_prob_tf = tf.placeholder(tf.float32, name='dense_keep_prob_tf')
-        self.lstm_input_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_input_keep_prob_tf')
-        self.lstm_output_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_output_keep_prob_tf')
+        with self.graph.as_default():
+            self.dense_keep_prob_tf = tf.placeholder(tf.float32, name='dense_keep_prob_tf')
+            self.lstm_input_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_input_keep_prob_tf')
+            self.lstm_output_keep_prob_tf = tf.placeholder(tf.float32, name='lstm_output_keep_prob_tf')
 
-        self.query_input_tf = tf.placeholder(tf.float32,
-                                             [None,
-                                              self.padding_length,
-                                              self.token_embedding_dimension],
-                                             name='query_input_tf')
+            self.query_input_tf = tf.placeholder(tf.float32,
+                                                 [None,
+                                                  self.padding_length,
+                                                  self.token_embedding_dimension],
+                                                 name='query_input_tf')
 
-        self.gaz_input_tf = tf.placeholder(tf.float32,
+            self.gaz_input_tf = tf.placeholder(tf.float32,
+                                               [None,
+                                                self.padding_length,
+                                                self.gaz_dimension],
+                                               name='gaz_input_tf')
+
+            self.label_tf = tf.placeholder(tf.int32,
                                            [None,
-                                            self.padding_length,
-                                            self.gaz_dimension],
-                                           name='gaz_input_tf')
+                                            int(self.padding_length),
+                                            self.output_dimension],
+                                           name='label_tf')
 
-        self.label_tf = tf.placeholder(tf.int32,
-                                       [None,
-                                        int(self.padding_length),
-                                        self.output_dimension],
-                                       name='label_tf')
+            self.batch_sequence_lengths_tf = tf.placeholder(tf.int32, shape=[None],
+                                                            name='batch_sequence_lengths_tf')
 
-        self.batch_sequence_lengths_tf = tf.placeholder(tf.int32, shape=[None],
-                                                        name='batch_sequence_lengths_tf')
+            self.batch_sequence_mask_tf = tf.placeholder(
+                tf.bool, shape=[None], name='batch_sequence_mask_tf')
 
-        self.batch_sequence_mask_tf = tf.placeholder(
-            tf.bool, shape=[None], name='batch_sequence_mask_tf')
+            if self.use_char_embeddings:
+                self.char_input_tf = tf.placeholder(tf.float32,
+                                                    [None,
+                                                     self.padding_length,
+                                                     self.max_char_per_word,
+                                                     self.character_embedding_dimension],
+                                                    name='char_input_tf')
 
-        if self.use_char_embeddings:
-            self.char_input_tf = tf.placeholder(tf.float32,
-                                                [None,
-                                                 self.padding_length,
-                                                 self.max_char_per_word,
-                                                 self.character_embedding_dimension],
-                                                name='char_input_tf')
+            combined_embedding_tf = self._construct_embedding_network()
+            self.lstm_output_tf = self._construct_lstm_network(combined_embedding_tf)
+            self.lstm_output_softmax_tf = tf.nn.softmax(self.lstm_output_tf,
+                                                        name='output_softmax_tensor')
+            self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost()
 
-        combined_embedding_tf = self._construct_embedding_network()
-        self.lstm_output_tf = self._construct_lstm_network(combined_embedding_tf)
-        self.lstm_output_softmax_tf = tf.nn.softmax(self.lstm_output_tf,
-                                                    name='output_softmax_tensor')
-        self.optimizer_tf, self.cost_tf = self._define_optimizer_and_cost()
+            self.global_init = tf.global_variables_initializer()
+            self.local_init = tf.local_variables_initializer()
+
+            self.saver = tf.train.Saver()
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
         """Transforms a list of examples into features that are then used by the
@@ -203,8 +209,9 @@ class LstmModel(Tagger):
         # We have to reset the graph on every dataset since the input, gaz and output
         # dimensions for each domain,intent training data is different. So the graph
         # cannot be reused.
-        tf.reset_default_graph()
-        self.session = tf.Session()
+        # tf.reset_default_graph()
+        self.graph = tf.Graph()
+        self.saver = None
 
         self.example_type = config.example_type
         self.features = config.features
@@ -542,7 +549,7 @@ class LstmModel(Tagger):
         output_tf = tf.concat([output_fw, output_bw], axis=-1)
         output_tf = tf.nn.dropout(output_tf, self.dense_keep_prob_tf)
 
-        output_weights_tf = tf.get_variable('output_weights_tf',
+        output_weights_tf = tf.get_variable(name='output_weights_tf',
                                             shape=[2 * n_hidden, self.output_dimension],
                                             dtype="float32", initializer=initializer)
         output_weights_tf = tf.tile(output_weights_tf, [batch_size_dim, 1])
@@ -550,7 +557,7 @@ class LstmModel(Tagger):
                                        self.output_dimension])
 
         zero_initializer = tf.constant_initializer(ZERO_INITIALIZER_VALUE)
-        output_bias_tf = tf.get_variable('output_bias_tf', shape=[self.output_dimension],
+        output_bias_tf = tf.get_variable(name='output_bias_tf', shape=[self.output_dimension],
                                          dtype="float32", initializer=zero_initializer)
 
         output_tf = tf.add(tf.matmul(output_tf, output_weights_tf), output_bias_tf,
@@ -668,9 +675,9 @@ class LstmModel(Tagger):
             y (list of list of str): a list of expected labels
         """
         self.construct_tf_variables()
+        self.session = tf.Session(graph=self.graph)
 
-        self.session.run([tf.global_variables_initializer(),
-                          tf.local_variables_initializer()])
+        self.session.run([self.global_init, self.local_init])
 
         for epochs in range(int(self.number_of_epochs)):
             logger.info("Training epoch : {}".format(epochs))
@@ -725,7 +732,7 @@ class LstmModel(Tagger):
                                          batch_gaz,
                                          batch_seq_len,
                                          batch_labels))
-        return self
+            return self
 
     def _predict(self, X):
         """Trains a classifier without cross-validation.
@@ -768,13 +775,17 @@ class LstmModel(Tagger):
             path (str): the folder path for the entity model folder
             config (dict): The model config
         """
+        if not self.saver:
+            # This conditional happens when there are not entities for the associated
+            # model
+            return
+
         path = path.split('.pkl')[0] + '_model_files'
 
         if not os.path.isdir(path):
             os.makedirs(path)
 
-        saver = tf.train.Saver()
-        saver.save(self.session, os.path.join(path, 'lstm_model'))
+        self.saver.save(self.session, os.path.join(path, 'lstm_model'))
 
         # Save feature extraction variables
         variables_to_dump = {
@@ -801,38 +812,47 @@ class LstmModel(Tagger):
         """
         path = path.split('.pkl')[0] + '_model_files'
 
-        saver = tf.train.import_meta_graph(os.path.join(path, 'lstm_model.meta'))
-        saver.restore(self.session, os.path.join(path, 'lstm_model'))
+        if not os.listdir(path):
+            return
 
-        # Restore tensorflow graph variables
-        self.dense_keep_prob_tf = \
-            self.session.graph.get_tensor_by_name('dense_keep_prob_tf:0')
+        tf.reset_default_graph()
 
-        self.lstm_input_keep_prob_tf = \
-            self.session.graph.get_tensor_by_name('lstm_input_keep_prob_tf:0')
+        self.graph = tf.Graph()
+        self.session = tf.Session(graph=self.graph)
 
-        self.lstm_output_keep_prob_tf = \
-            self.session.graph.get_tensor_by_name('lstm_output_keep_prob_tf:0')
+        with self.graph.as_default():
+            saver = tf.train.import_meta_graph(os.path.join(path, 'lstm_model.meta'))
+            saver.restore(self.session, os.path.join(path, 'lstm_model'))
 
-        self.query_input_tf = self.session.graph.get_tensor_by_name('query_input_tf:0')
+            # Restore tensorflow graph variables
+            self.dense_keep_prob_tf = \
+                self.session.graph.get_tensor_by_name('dense_keep_prob_tf:0')
 
-        self.gaz_input_tf = self.session.graph.get_tensor_by_name('gaz_input_tf:0')
+            self.lstm_input_keep_prob_tf = \
+                self.session.graph.get_tensor_by_name('lstm_input_keep_prob_tf:0')
 
-        self.label_tf = self.session.graph.get_tensor_by_name('label_tf:0')
+            self.lstm_output_keep_prob_tf = \
+                self.session.graph.get_tensor_by_name('lstm_output_keep_prob_tf:0')
 
-        self.batch_sequence_lengths_tf = \
-            self.session.graph.get_tensor_by_name('batch_sequence_lengths_tf:0')
+            self.query_input_tf = self.session.graph.get_tensor_by_name('query_input_tf:0')
 
-        self.batch_sequence_mask_tf = \
-            self.session.graph.get_tensor_by_name('batch_sequence_mask_tf:0')
+            self.gaz_input_tf = self.session.graph.get_tensor_by_name('gaz_input_tf:0')
 
-        self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
+            self.label_tf = self.session.graph.get_tensor_by_name('label_tf:0')
 
-        self.lstm_output_softmax_tf = \
-            self.session.graph.get_tensor_by_name('output_softmax_tensor:0')
+            self.batch_sequence_lengths_tf = \
+                self.session.graph.get_tensor_by_name('batch_sequence_lengths_tf:0')
 
-        if self.use_char_embeddings:
-            self.char_input_tf = self.session.graph.get_tensor_by_name('char_input_tf:0')
+            self.batch_sequence_mask_tf = \
+                self.session.graph.get_tensor_by_name('batch_sequence_mask_tf:0')
+
+            self.lstm_output_tf = self.session.graph.get_tensor_by_name('output_tensor:0')
+
+            self.lstm_output_softmax_tf = \
+                self.session.graph.get_tensor_by_name('output_softmax_tensor:0')
+
+            if self.use_char_embeddings:
+                self.char_input_tf = self.session.graph.get_tensor_by_name('char_input_tf:0')
 
         # Load feature extraction variables
         variables_to_load = joblib.load(os.path.join(path, '.feature_extraction_vars'))

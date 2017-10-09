@@ -276,7 +276,8 @@ class TaggerModel(Model):
             config (str): The config containing the model configuration
         """
         config = self._clf.dump(path, config)
-        if 'model' not in config:
+
+        if not config or ('model' not in config):
             # If the model path is not population, the model is serializable, so
             # we just pass the entire model to the dictionary
             config['model'] = self
