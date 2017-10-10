@@ -97,8 +97,7 @@ class TaggerModel(Model):
         attributes['_resources'] = {}
         resources_to_persist = set(['sys_types'])
         for key in resources_to_persist:
-            if key in self.__dict__['_resources']:
-                attributes['_resources'][key] = self.__dict__['_resources'][key]
+            attributes['_resources'][key] = self.__dict__['_resources'][key]
 
         return attributes
 
