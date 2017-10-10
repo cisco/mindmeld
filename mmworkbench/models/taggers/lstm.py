@@ -809,6 +809,8 @@ class LstmModel(Tagger):
         path = path.split('.pkl')[0] + '_model_files'
 
         if not os.path.exists(os.path.join(path, 'lstm_model.meta')):
+            # This conditional is for models with no labels where no TF graph was built
+            # for this.
             return
 
         self.graph = tf.Graph()
