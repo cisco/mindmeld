@@ -98,7 +98,6 @@ class EntityRecognizer(Classifier):
 
         """
         logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
-
         # make directory if necessary
         folder = os.path.dirname(model_path)
         if not os.path.isdir(folder):

@@ -773,15 +773,16 @@ class LstmModel(Tagger):
             path (str): the folder path for the entity model folder
             config (dict): The model config
         """
+        path = path.split('.pkl')[0] + '_model_files'
+        config['model'] = path
+
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
         if not self.saver:
             # This conditional happens when there are not entities for the associated
             # model
             return
-
-        path = path.split('.pkl')[0] + '_model_files'
-
-        if not os.path.isdir(path):
-            os.makedirs(path)
 
         self.saver.save(self.session, os.path.join(path, 'lstm_model'))
 
@@ -798,9 +799,6 @@ class LstmModel(Tagger):
 
         joblib.dump(variables_to_dump, os.path.join(path, '.feature_extraction_vars'))
 
-        config['model'] = path
-        return config
-
     def load(self, path):
         """
         Loads the Tensorflow model
@@ -810,7 +808,7 @@ class LstmModel(Tagger):
         """
         path = path.split('.pkl')[0] + '_model_files'
 
-        if not os.listdir(path):
+        if not os.path.exists(os.path.join(path, 'lstm_model.meta')):
             return
 
         self.graph = tf.Graph()

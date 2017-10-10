@@ -95,10 +95,10 @@ class TaggerModel(Model):
         """
         attributes = self.__dict__.copy()
         attributes['_resources'] = {}
-
         resources_to_persist = set(['sys_types'])
         for key in resources_to_persist:
-            attributes['_resources'][key] = self.__dict__['_resources'][key]
+            if key in self.__dict__['_resources']:
+                attributes['_resources'][key] = self.__dict__['_resources'][key]
 
         return attributes
 
@@ -273,12 +273,12 @@ class TaggerModel(Model):
 
         Args:
             path (str): The path to dump the model to
-            config (str): The config containing the model configuration
+            config (dict): The config containing the model configuration
         """
-        config = self._clf.dump(path, config)
+        self._clf.dump(path, config)
 
-        if not config or ('model' not in config):
-            # If the model path is not population, the model is serializable, so
+        if 'model' not in config:
+            # If the model path is not populated, the model is serializable, so
             # we just pass the entire model to the dictionary
             config['model'] = self
         else:
