@@ -121,8 +121,9 @@ class EntityRecognizer(Classifier):
 
             self.entity_types = er_data['entity_types']
             self._model_config = er_data.get('model_config')
+            self._is_not_serializable = er_data.get('is_not_serializable')
 
-            if self._model_config:
+            if self._is_not_serializable:
                 # If model config is given, this means it is a non-SKLearn model,
                 # which is easily serialized using joblib, but tensorflow models
                 # are not, so we have to create and load them in.
