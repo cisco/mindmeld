@@ -147,6 +147,33 @@ class Tagger(object):
         y = self.predict(X)
         return y
 
+    def dump(self, model_path, config):
+        """
+        Alters the context state to remove the model_config key since
+        tagger models are serializable by default, so we do not need
+        to store any config information to deserialize these models into
+        memory.
+
+        Args:
+            model_path (str): The path to dump the model to
+
+        Returns:
+            config (dict): The altered config object
+        """
+        config.pop('model_config')
+        return config
+
+    def load(self, model_path):
+        """
+        Load the model state to memory. This is a no-op since we do not
+        have to do anything special to load default serializable models
+        for SKLearn.
+
+        Args:
+            model_path (str): The path to dump the model to
+        """
+        return
+
 
 """
 Helpers for taggers

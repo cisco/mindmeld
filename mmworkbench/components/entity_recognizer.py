@@ -18,8 +18,6 @@ from ._config import get_classifier_config
 
 logger = logging.getLogger(__name__)
 
-TENSORFLOW_MODELS = ['LstmModel']
-
 
 class EntityRecognizer(Classifier):
     """An entity recognizer which is used to identify the entities for a given query. It is
@@ -105,18 +103,9 @@ class EntityRecognizer(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        model_name = type(self._model._clf).__name__
+        er_data = {'entity_types': self.entity_types, 'model_config': self._model_config}
 
-        if model_name not in TENSORFLOW_MODELS:
-            er_data = {'model': self._model, 'entity_types': self.entity_types,
-                       'model_name': model_name}
-        else:
-            tf_model_path = model_path.split('.pkl')[0] + '_tf'
-            er_data = {'model': tf_model_path, 'entity_types': self.entity_types,
-                       'model_name': model_name, 'model_config': self._model_config}
-            self._model.dump(tf_model_path)
-        joblib.dump(er_data, model_path)
-
+        self._model.dump(model_path, er_data)
         self.dirty = False
 
     def load(self, model_path):
@@ -129,19 +118,22 @@ class EntityRecognizer(Classifier):
         logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
             er_data = joblib.load(model_path)
-            model_name = er_data['model_name']
-            self.entity_types = er_data['entity_types']
 
-            if model_name not in TENSORFLOW_MODELS:
-                self._model = er_data['model']
-            else:
-                tf_model_path = er_data['model']
-                self._model_config = er_data['model_config']
+            self.entity_types = er_data['entity_types']
+            self._model_config = er_data.get('model_config')
+
+            if self._model_config:
+                # If model config is given, this means it is a non-SKLearn model,
+                # which is easily serialized using joblib, but tensorflow models
+                # are not, so we have to create and load them in.
                 self._model = create_model(self._model_config)
-                self._model.load(tf_model_path)
+                self._model.load(model_path, er_data)
+            else:
+                self._model = er_data['model']
         except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
