@@ -296,7 +296,7 @@ class TaggerModel(Model):
 
         Args:
             path (str): The path to dump the model to
-            config (str): The config containing the model configuration
+            config (dict): The config containing the model configuration
         """
         self._clf.load(path)
         variables_to_load = joblib.load(os.path.join(config['model'], '.tagger_vars'))
