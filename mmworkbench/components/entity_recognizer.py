@@ -122,14 +122,15 @@ class EntityRecognizer(Classifier):
             self.entity_types = er_data['entity_types']
             self._model_config = er_data.get('model_config')
 
-            if self._model_config:
-                # If model config is given, this means it is a non-SKLearn model,
-                # which is easily serialized using joblib, but tensorflow models
-                # are not, so we have to create and load them in.
+            # The default is True since < WB 3.2.0 models are serializable by default
+            is_serializable = er_data.get('serializable', True)
+
+            if is_serializable:
+                # Load the model in directly from the dictionary since its serializable
+                self._model = er_data['model']
+            else:
                 self._model = create_model(self._model_config)
                 self._model.load(model_path, er_data)
-            else:
-                self._model = er_data['model']
         except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))

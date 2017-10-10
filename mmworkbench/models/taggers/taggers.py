@@ -149,10 +149,9 @@ class Tagger(object):
 
     def dump(self, model_path, config):
         """
-        Alters the context state to remove the model_config key since
-        tagger models are serializable by default, so we do not need
-        to store any config information to deserialize these models into
-        memory.
+        Since traditional SKLearn models are easily serializable, we can
+        use JobLib to serialize them. So we alter the context object to make
+        this explicit.
 
         Args:
             model_path (str): The path to dump the model to
@@ -160,7 +159,7 @@ class Tagger(object):
         Returns:
             config (dict): The altered config object
         """
-        config.pop('model_config')
+        config['serializable'] = True
         return config
 
     def load(self, model_path):

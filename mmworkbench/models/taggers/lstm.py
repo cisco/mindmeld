@@ -775,6 +775,7 @@ class LstmModel(Tagger):
         """
         path = path.split('.pkl')[0] + '_model_files'
         config['model'] = path
+        config['serializable'] = False
 
         if not os.path.isdir(path):
             os.makedirs(path)
