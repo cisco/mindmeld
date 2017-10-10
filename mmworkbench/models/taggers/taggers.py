@@ -159,7 +159,7 @@ class Tagger(object):
         Returns:
             config (dict): The altered config object
         """
-        config['is_not_serializable'] = False
+        config['serializable'] = True
         return config
 
     def load(self, model_path):
