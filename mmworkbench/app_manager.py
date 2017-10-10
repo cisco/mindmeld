@@ -113,7 +113,14 @@ class ApplicationManager(object):
         context.pop('text')
 
         context.update(self.dialogue_manager.apply_handler(context, target_dialogue_state))
-        return context
+
+        # Append this item to the history, but don't recursively store history
+        history = context.pop('history')
+        history.insert(0, context)
+        response = copy.deepcopy(context)
+        response['history'] = history
+
+        return response
 
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue rule for the dialogue manager.

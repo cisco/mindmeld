@@ -500,8 +500,8 @@ class Conversation(object):
                                            history=self.history,
                                            allowed_intents=self.allowed_intents,
                                            target_dialogue_state=self.target_dialogue_state)
-        response.pop('history')
-        self.history.insert(0, response)
+
+        self.history = response['history']
         self.frame = response['frame']
 
         self.allowed_intents = response.pop('allowed_intents', None)
