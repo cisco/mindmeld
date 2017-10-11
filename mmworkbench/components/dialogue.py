@@ -258,7 +258,7 @@ class DialogueManager(object):
 
         if dialogue_state is None:
             msg = 'Failed to find dialogue state for {domain}.{intent}'.format(
-                domain=context['domain'], intent=context['intent'])
+                domain=context.get('domain'), intent=context.get('intent'))
             self.logger.info(msg, context)
             handler = self._default_handler
         else:
