@@ -22,6 +22,9 @@ class ApplicationManager(object):
     necessary components of Workbench. Once processing is complete, the application manager
     returns the final response back to the gateway.
     """
+
+    MAX_HISTORY_LEN = 100
+
     def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None,
                  context_class=None, responder_class=None):
         self._app_path = app_path
@@ -95,13 +98,13 @@ class ApplicationManager(object):
         if allowed_intents:
             try:
                 nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
-            except (AllowedNlpClassesKeyError, ValueError, KeyError) as e:
+            except (AllowedNlpClassesKeyError, ValueError, KeyError) as ex:
                 # We have to print the error object since it sometimes contains a message
                 # and sometimes it doesn't, like a ValueError.
                 logger.error(
                     "Validation error '{}' on input allowed intents {}. "
                     "Not applying domain/intent restrictions this "
-                    "turn".format(e, allowed_intents))
+                    "turn".format(ex, allowed_intents))
 
         # TODO: support passing in reference time from session
         query = self._query_factory.create_query(text)
@@ -117,6 +120,9 @@ class ApplicationManager(object):
         # Append this item to the history, but don't recursively store history
         history = context.pop('history')
         history.insert(0, context)
+
+        # limit length of history
+        history = history[:self.MAX_HISTORY_LEN]
         response = copy.deepcopy(context)
         response['history'] = history
 
