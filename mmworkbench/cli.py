@@ -74,7 +74,9 @@ def run_server(ctx, port, no_debug, reloader):
     if app is None:
         raise ValueError("No app was given. Run 'python app.py run' from your app folder.")
 
+    # make sure num parser is running
     ctx.invoke(num_parser, start=True)
+
     app.run(port=port, debug=not no_debug, host='0.0.0.0', threaded=True, use_reloader=reloader)
 
 
@@ -83,6 +85,7 @@ def run_server(ctx, port, no_debug, reloader):
 @click.option('--session', help='JSON object to be used as the session')
 def converse(ctx, session):
     """Starts a conversation with the app."""
+
     try:
         app = ctx.obj.get('app')
         if isinstance(session, str):
@@ -91,6 +94,7 @@ def converse(ctx, session):
             raise ValueError("No app was given. Run 'python app.py converse' from your app"
                              " folder.")
 
+        # make sure num parser is running
         ctx.invoke(num_parser, start=True)
 
         convo = Conversation(app=app, session=session)
@@ -116,6 +120,9 @@ def build(ctx):
         if app is None:
             raise ValueError("No app was given. Run 'python app.py build' from your app folder.")
 
+        # make sure num parser is running
+        ctx.invoke(num_parser, start=True)
+
         app.lazy_init()
         nlp = app.app_manager.nlp
         nlp.build()
@@ -138,6 +145,9 @@ def evaluate(ctx, verbose):
         app = ctx.obj.get('app')
         if app is None:
             raise ValueError("No app was given. Run 'python app.py evaluate' from your app folder.")
+
+        # make sure num parser is running
+        ctx.invoke(num_parser, start=True)
 
         app.lazy_init()
         nlp = app.app_manager.nlp
