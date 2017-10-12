@@ -213,10 +213,6 @@ class LstmModel(Tagger):
 
         self.example_type = config.example_type
         self.features = config.features
-        self.token_pretrained_embedding_filepath = \
-            config.params.get('token_pretrained_embedding_filepath')
-
-        self.padding_length = config.params.get('padding_length')
 
         self.query_encoder = WordSequenceEmbedding(
             self.padding_length,
