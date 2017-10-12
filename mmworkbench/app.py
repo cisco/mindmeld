@@ -10,7 +10,7 @@ import os
 import sys
 
 from .app_manager import ApplicationManager
-from .cli import cli
+from .cli import app_cli
 from .server import WorkbenchServer
 from .components.dialogue import DialogueResponder
 
@@ -85,4 +85,4 @@ class Application(object):
 
     def cli(self):
         # pylint:
-        cli(obj={'app': self})
+        app_cli(obj={'app': self})
