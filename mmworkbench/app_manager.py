@@ -58,34 +58,49 @@ class ApplicationManager(object):
             return
         self.nlp.load()
 
-    def parse(self, text, payload=None, session=None, frame=None, history=None,
-              allowed_intents=None, target_dialogue_state=None, verbose=False):
+    def parse(self, text, params=None, session=None, frame=None, history=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
-            payload (dict, optional): Description
+            params (dict, optional): Contains parameters which modify how text is parsed
+            params['allowed_intents'] (list, optional): A list of allowed intents
+                for model consideration
+            params['target_dialogue_state'] (str, optional): The target dialogue state
             session (dict, optional): Description
             history (list, optional): Description
-            allowed_intents (list, optional): A list of allowed intents
-            for model consideration
-            target_dialogue_state (str, optional): The target dialogue state
             verbose (bool, optional): Description
 
         Returns:
             (dict): Context object
         """
 
+        params = params or {}
         session = session or {}
         history = history or []
         frame = frame or {}
         # TODO: what do we do with verbose???
 
-        request = {'text': text, 'session': session}
-        if payload:
-            request['payload'] = payload
+        request = {'text': text, 'params': params, 'session': session}
 
-        context = self.context_class(
-            {'request': request, 'history': history, 'frame': copy.deepcopy(frame), 'entities': []})
+        allowed_intents = params.get('allowed_intents')
+        if allowed_intents and not isinstance(allowed_intents, list):
+            logger.warning("Invalid 'allowed_intents' param: {} is not of type "
+                           "'list'.".format(allowed_intents))
+            allowed_intents = None
+
+        target_dialogue_state = params.get('target_dialogue_state')
+        if target_dialogue_state and not isinstance(target_dialogue_state, str):
+            logger.warning("Invalid 'target_dialogue_state' param: {} is not of type "
+                           "'str'.".format(target_dialogue_state))
+            target_dialogue_state = None
+
+        context = self.context_class({
+            'request': request,
+            'history': history,
+            'params': {},
+            'frame': copy.deepcopy(frame),
+            'entities': []
+        })
 
         # Validate target dialogue state
         if target_dialogue_state and target_dialogue_state not in self.dialogue_manager.handler_map:

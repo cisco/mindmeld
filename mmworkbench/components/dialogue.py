@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 from builtins import object, str
 
+import copy
 from functools import cmp_to_key
 import logging
 import random
@@ -467,58 +468,49 @@ class Conversation(object):
         self.session = session or {}
         self.history = []
         self.frame = {}
-        self.allowed_intents = None
-        self.target_dialogue_state = ''
+        self.default_params = {}
+        self.params = {}
 
-    def say(self, text):
+    def say(self, text, params=None):
         """Send a message in the conversation. The message will be
         processed by the app based on the current state of the conversation and
         returns the extracted messages from the directives.
 
         Args:
             text (str): The text of a message
+            params (dict): The params to use with this message
 
         Returns:
             list of str: A text representation of the dialogue responses
         """
-        response = self.process(text)
+        response = self.process(text, params=params)
 
         # handle directives
         response_texts = [self._follow_directive(a) for a in response['directives']]
         return response_texts
 
-    def process(self, text):
+    def process(self, text, params=None):
         """Send a message in the conversation. The message will be processed by
         the app based on the current state of the conversation and returns
         the response.
 
         Args:
             text (str): The text of a message
+            params (dict): The params to use with this message
 
         Returns:
             (dictionary): The dictionary Response
         """
-        response = self._app_manager.parse(text, session=self.session, frame=self.frame,
-                                           history=self.history,
-                                           allowed_intents=self.allowed_intents,
-                                           target_dialogue_state=self.target_dialogue_state)
+        external_params = params or copy.deepcopy(self.default_params)
+        params = copy.deepcopy(self.params)
+        params.update(external_params)
+
+        response = self._app_manager.parse(text, params=params, session=self.session,
+                                           frame=self.frame, history=self.history)
 
         self.history = response['history']
         self.frame = response['frame']
-
-        self.allowed_intents = response.pop('allowed_intents', None)
-        if self.allowed_intents and not isinstance(self.allowed_intents, list):
-            self.logger.error("allowed_intents {} is supposed to be a list but it is not. "
-                              "Therefore this invalid structure is not stored for further "
-                              "processing.".format(self.allowed_intents))
-            self.allowed_intents = None
-
-        self.target_dialogue_state = response.pop('target_dialogue_state', None)
-        if self.target_dialogue_state and not isinstance(self.target_dialogue_state, str):
-            self.logger.error("target_dialogue_state {} is supposed to be a string but it is not. "
-                              "Therefore this invalid structure is not stored for further "
-                              "processing.".format(self.target_dialogue_state))
-            self.target_dialogue_state = None
+        self.params = response['params']
 
         return response
 
@@ -562,3 +554,4 @@ class Conversation(object):
     def reset(self):
         self.history = []
         self.frame = {}
+        self.params = {}

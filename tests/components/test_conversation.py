@@ -17,15 +17,14 @@ def setup_class():
     return nlp, Conversation(nlp=nlp, app_path=APP_PATH)
 
 
-def test_allowed_intents_and_target_dialogue_state_are_cleared():
-    """Tests that the allowed intents and target dialogue state are
-    cleared in one trip from app to wb.
-    """
-    nlp, conv = setup_class()
+def test_params_are_cleared():
+    """Tests that the params are cleared in one trip from app to wb."""
+    _, conv = setup_class()
 
-    conv.allowed_intents = ['store_info.find_nearest_store']
-    conv.target_dialogue_state = 'greeting'
+    conv.params = {
+        'allowed_intents': ['store_info.find_nearest_store'],
+        'target_dialogue_state': 'greeting'
+    }
     conv.say('close door')
 
-    assert not conv.allowed_intents
-    assert not conv.target_dialogue_state
+    assert conv.params == {}
