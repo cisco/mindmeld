@@ -12,13 +12,14 @@ import sys
 from .app_manager import ApplicationManager
 from .cli import cli
 from .server import WorkbenchServer
+from .components.dialogue import DialogueResponder
 
 logger = logging.getLogger(__name__)
 
 
 class Application(object):
 
-    def __init__(self, import_name):
+    def __init__(self, import_name, context_class=None, responder_class=None):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], '__file__', None)
         if filename is None:
@@ -28,6 +29,8 @@ class Application(object):
         self.app_manager = None
         self._server = None
         self._dialogue_rules = []
+        self.context_class = context_class or dict
+        self.responder_class = responder_class or DialogueResponder
 
     @property
     def question_answerer(self):
@@ -36,7 +39,9 @@ class Application(object):
     def lazy_init(self, nlp=None):
         if self.app_manager:
             return
-        self.app_manager = ApplicationManager(self.app_path, nlp)
+        self.app_manager = ApplicationManager(
+            self.app_path, nlp, responder_class=self.responder_class,
+            context_class=self.context_class)
         self._server = WorkbenchServer(self.app_manager)
 
         # Add any pending dialogue rules

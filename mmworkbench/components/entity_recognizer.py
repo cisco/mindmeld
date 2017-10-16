@@ -68,8 +68,8 @@ class EntityRecognizer(Classifier):
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
         # create model with given params
-        model_config = self._get_model_config(**kwargs)
-        model = create_model(model_config)
+        self._model_config = self._get_model_config(**kwargs)
+        model = create_model(self._model_config)
 
         # Load labeled data
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
@@ -103,9 +103,9 @@ class EntityRecognizer(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        er_data = {'model': self._model, 'entity_types': self.entity_types}
-        joblib.dump(er_data, model_path)
+        er_data = {'entity_types': self.entity_types, 'model_config': self._model_config}
 
+        self._model.dump(model_path, er_data)
         self.dirty = False
 
     def load(self, model_path):
@@ -118,11 +118,23 @@ class EntityRecognizer(Classifier):
         logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
             er_data = joblib.load(model_path)
-            self._model = er_data['model']
+
             self.entity_types = er_data['entity_types']
+            self._model_config = er_data.get('model_config')
+
+            # The default is True since < WB 3.2.0 models are serializable by default
+            is_serializable = er_data.get('serializable', True)
+
+            if is_serializable:
+                # Load the model in directly from the dictionary since its serializable
+                self._model = er_data['model']
+            else:
+                self._model = create_model(self._model_config)
+                self._model.load(model_path, er_data)
         except (OSError, IOError):
             msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))

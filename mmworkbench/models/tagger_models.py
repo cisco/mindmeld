@@ -5,18 +5,23 @@ from builtins import range, super
 
 import logging
 import random
+from sklearn.externals import joblib
+import os
 
 from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
                       get_seq_tag_accuracy_scorer)
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
+from .taggers.lstm import LstmModel
+from ..exceptions import WorkbenchError
 
 logger = logging.getLogger(__name__)
 
 # classifier types
 CRF_TYPE = 'crf'
 MEMM_TYPE = 'memm'
+LSTM_TYPE = 'lstm'
 
 # for default model scoring types
 ACCURACY_SCORING = 'accuracy'
@@ -75,6 +80,10 @@ class TaggerModel(Model):
 
         super().__init__(config)
 
+        # Get model classifier and initialize
+        self._clf = self._get_model_constructor()()
+        self._clf.setup_model(self.config)
+
         self._no_entities = False
 
     def __getstate__(self):
@@ -86,7 +95,6 @@ class TaggerModel(Model):
         """
         attributes = self.__dict__.copy()
         attributes['_resources'] = {}
-
         resources_to_persist = set(['sys_types'])
         for key in resources_to_persist:
             attributes['_resources'][key] = self.__dict__['_resources'][key]
@@ -124,16 +132,12 @@ class TaggerModel(Model):
         # if len(set(distinct_labels)) <= 1:
         #     return None
 
-        # Get model classifier and initialize
-        self._clf = self._get_model_constructor()()
-        self._clf.setup_model(self.config)
-
         # Extract labels - label encoders are the same accross all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
 
         # Extract features
-        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y=y,
+        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y,
                                                   fit=True)
 
         # Fit the model
@@ -142,6 +146,9 @@ class TaggerModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
+            if self._clf.__class__ == LstmModel:
+                raise WorkbenchError("The LSTM model does not support cross-validation")
+
             _, best_params = self._fit_cv(X, y, groups)
             self._clf = self._fit(X, y, best_params)
             self._current_params = best_params
@@ -185,6 +192,7 @@ class TaggerModel(Model):
             return [()]
         # Process the data to generate features and predict the tags
         predicted_tags = self._clf.extract_and_predict(examples, self.config, self._resources)
+
         # Decode the tags to labels
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
                   for example_predicted_tags, example in zip(predicted_tags, examples)]
@@ -236,6 +244,7 @@ class TaggerModel(Model):
             return
 
         predictions = self.predict(examples)
+
         evaluations = [EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
                        for i, e in enumerate(examples)]
 
@@ -250,10 +259,49 @@ class TaggerModel(Model):
             return {
                 MEMM_TYPE: MemmModel,
                 CRF_TYPE: ConditionalRandomFields,
+                LSTM_TYPE: LstmModel,
             }[classifier_type]
         except KeyError:
             msg = '{}: Classifier type {!r} not recognized'
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
+
+    def dump(self, path, config):
+        """
+        Dumps the model using joblib for the config and call's the underlying model
+        to dump its state.
+
+        Args:
+            path (str): The path to dump the model to
+            config (dict): The config containing the model configuration
+        """
+        self._clf.dump(path, config)
+
+        if 'model' not in config:
+            # If the model path is not populated, the model is serializable, so
+            # we just pass the entire model to the dictionary
+            config['model'] = self
+        else:
+            variables_to_dump = {
+                'current_params': self._current_params,
+                'label_encoder': self._label_encoder
+            }
+            joblib.dump(variables_to_dump, os.path.join(config['model'], '.tagger_vars'))
+
+        joblib.dump(config, path)
+
+    def load(self, path, config):
+        """
+        Load the model state to memory. This method is strictly for non-serializable models
+        like tensorflow models
+
+        Args:
+            path (str): The path to dump the model to
+            config (dict): The config containing the model configuration
+        """
+        self._clf.load(path)
+        variables_to_load = joblib.load(os.path.join(config['model'], '.tagger_vars'))
+        self._current_params = variables_to_load['current_params']
+        self._label_encoder = variables_to_load['label_encoder']
 
 
 register_model('tagger', TaggerModel)

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-test_parser
+test_dialogue
 ----------------------------------
 
-Tests for parser module.
+Tests for dialogue module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 from __future__ import unicode_literals
@@ -76,3 +76,9 @@ class TestDialogueManager:
                                                       {'type': 'entity_3'}])
         result = self.dm.apply_handler(context)
         assert result['dialogue_state'] == 'intent_entities'
+
+    def test_target_dialogue_state_management(self):
+        """Correctly sets the dialogue state based on the target_dialogue_state"""
+        context = create_context('domain', 'intent')
+        result = self.dm.apply_handler(context, target_dialogue_state='intent_entity_2')
+        assert result['dialogue_state'] == 'intent_entity_2'

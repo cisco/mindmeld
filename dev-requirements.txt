@@ -10,6 +10,7 @@ watchdog==0.8.3
 tox==2.6.0
 
 future==0.16.0
+bleach==1.5.0
 jupyter>=1.0.0
 jupyter_core>=4.2.1
 jupyter_client>=4.4.0
