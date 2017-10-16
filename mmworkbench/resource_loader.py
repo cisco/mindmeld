@@ -24,10 +24,6 @@ from .core import Entity
 
 logger = logging.getLogger(__name__)
 
-LABEL_SETS = {
-    'train': 'train*.txt',
-    'test': 'test*.txt'
-}
 DEFAULT_LABEL_SET = 'train'
 
 
@@ -270,12 +266,9 @@ class ResourceLoader(object):
     def _traverse_labeled_queries_files(self, domain=None, intent=None, label_set='train',
                                         force_reload=False):
         provided_intent = intent
-        try:
-            file_pattern = LABEL_SETS[label_set]
-        except KeyError:
-            raise WorkbenchError("Unknown label set '{}'".format(label_set))
-        self._update_query_file_dates(file_pattern)
+        file_pattern = '{}*.txt'.format(label_set)
 
+        self._update_query_file_dates(file_pattern)
         domains = [domain] if domain else self.labeled_query_files.keys()
 
         for domain in domains:
