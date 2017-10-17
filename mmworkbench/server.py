@@ -77,8 +77,10 @@ class WorkbenchServer(object):
                 if key in request_json:
                     safe_request[key] = request_json[key]
             response = self._app_manager.parse(**safe_request)
-            # add query id to response
-            response['query_id'] = str(uuid.uuid4())
+            # add request id to response
+            # use the passed in id if any
+            request_id = request_json.get('request_id', str(uuid.uuid4()))
+            response['request_id'] = request_id
             return jsonify(response)
 
         @server.before_request
