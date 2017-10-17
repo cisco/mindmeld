@@ -15,6 +15,12 @@ from .exceptions import AllowedNlpClassesKeyError
 
 logger = logging.getLogger(__name__)
 
+PARAM_TYPES = {
+    'allowed_intents': list,
+    'target_dialogue_state': str,  # TODO: use a better validator for this
+    'timezone': str  # TODO: use a better validator for timezones
+}
+
 
 class ApplicationManager(object):
     """The Application Manager is the core orchestrator of the MindMeld platform. It receives
@@ -58,34 +64,40 @@ class ApplicationManager(object):
             return
         self.nlp.load()
 
-    def parse(self, text, payload=None, session=None, frame=None, history=None,
-              allowed_intents=None, target_dialogue_state=None, verbose=False):
+    def parse(self, text, params=None, session=None, frame=None, history=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
-            payload (dict, optional): Description
+            params (dict, optional): Contains parameters which modify how text is parsed
+            params['allowed_intents'] (list, optional): A list of allowed intents
+                for model consideration
+            params['target_dialogue_state'] (str, optional): The target dialogue state
             session (dict, optional): Description
             history (list, optional): Description
-            allowed_intents (list, optional): A list of allowed intents
-            for model consideration
-            target_dialogue_state (str, optional): The target dialogue state
             verbose (bool, optional): Description
 
         Returns:
             (dict): Context object
         """
 
+        params = params or {}
         session = session or {}
         history = history or []
         frame = frame or {}
         # TODO: what do we do with verbose???
 
-        request = {'text': text, 'session': session}
-        if payload:
-            request['payload'] = payload
+        request = {'text': text, 'params': params, 'session': session}
 
-        context = self.context_class(
-            {'request': request, 'history': history, 'frame': copy.deepcopy(frame), 'entities': []})
+        allowed_intents = self._validate_param(params, 'allowed_intents')
+        target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
+
+        context = self.context_class({
+            'request': request,
+            'history': history,
+            'params': {},  # params for next turn
+            'frame': copy.deepcopy(frame),
+            'entities': []
+        })
 
         # Validate target dialogue state
         if target_dialogue_state and target_dialogue_state not in self.dialogue_manager.handler_map:
@@ -121,6 +133,10 @@ class ApplicationManager(object):
         history = context.pop('history')
         history.insert(0, context)
 
+        # validate outgoing params
+        self._validate_param(params, 'allowed_intents', mode='outgoing')
+        self._validate_param(params, 'target_dialogue_state', mode='outgoing')
+
         # limit length of history
         history = history[:self.MAX_HISTORY_LEN]
         response = copy.deepcopy(context)
@@ -137,3 +153,12 @@ class ApplicationManager(object):
             **kwargs (dict): A list of options which specify the dialogue rule
         """
         self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)
+
+    @staticmethod
+    def _validate_param(params, name, mode='incoming'):
+        ptype = PARAM_TYPES.get(name)
+        param = params.get(name)
+        if param and not isinstance(param, ptype):
+            logger.warning("Invalid %s %r param: %s is not of type %s.", name, param, ptype)
+            param = None
+        return param
