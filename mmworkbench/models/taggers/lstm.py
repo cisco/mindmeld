@@ -615,14 +615,14 @@ class LstmModel(Tagger):
         We want to encode 2 class systems as [0,1] and [1,0]. This function does that.
 
         Args:
-            list_of_tokens_to_transform (array): A sequence of class labels
+            list_of_tokens_to_transform (list): A sequence of class labels
 
         Returns:
             (array): corrected encoding from the binarizer
         """
         output = self.gaz_encoder.transform(list_of_tokens_to_transform)
         if len(self.gaz_encoder.classes_) == 2:
-            output = np.hstack((output, 1 - output))
+            output = np.hstack((1 - output, output))
         return output
 
     def _extract_features(self, example):
