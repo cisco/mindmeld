@@ -15,6 +15,12 @@ from .exceptions import AllowedNlpClassesKeyError
 
 logger = logging.getLogger(__name__)
 
+PARAM_TYPES = {
+    'allowed_intents': list,
+    'target_dialogue_state': str,  # TODO: use a better validator for this
+    'timezone': str  # TODO: use a better validator for timezones
+}
+
 
 class ApplicationManager(object):
     """The Application Manager is the core orchestrator of the MindMeld platform. It receives
@@ -82,22 +88,13 @@ class ApplicationManager(object):
 
         request = {'text': text, 'params': params, 'session': session}
 
-        allowed_intents = params.get('allowed_intents')
-        if allowed_intents and not isinstance(allowed_intents, list):
-            logger.warning("Invalid 'allowed_intents' param: {} is not of type "
-                           "'list'.".format(allowed_intents))
-            allowed_intents = None
-
-        target_dialogue_state = params.get('target_dialogue_state')
-        if target_dialogue_state and not isinstance(target_dialogue_state, str):
-            logger.warning("Invalid 'target_dialogue_state' param: {} is not of type "
-                           "'str'.".format(target_dialogue_state))
-            target_dialogue_state = None
+        allowed_intents = self._validate_param(params, 'allowed_intents')
+        target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
 
         context = self.context_class({
             'request': request,
             'history': history,
-            'params': {},
+            'params': {},  # params for next turn
             'frame': copy.deepcopy(frame),
             'entities': []
         })
@@ -136,6 +133,10 @@ class ApplicationManager(object):
         history = context.pop('history')
         history.insert(0, context)
 
+        # validate outgoing params
+        self._validate_param(params, 'allowed_intents', mode='outgoing')
+        self._validate_param(params, 'target_dialogue_state', mode='outgoing')
+
         # limit length of history
         history = history[:self.MAX_HISTORY_LEN]
         response = copy.deepcopy(context)
@@ -152,3 +153,12 @@ class ApplicationManager(object):
             **kwargs (dict): A list of options which specify the dialogue rule
         """
         self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)
+
+    @staticmethod
+    def _validate_param(params, name, mode='incoming'):
+        ptype = PARAM_TYPES.get(name)
+        param = params.get(name)
+        if param and not isinstance(param, ptype):
+            logger.warning("Invalid %s %r param: %s is not of type %s.", name, param, ptype)
+            param = None
+        return param
