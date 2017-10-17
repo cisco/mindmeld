@@ -621,7 +621,7 @@ class LstmModel(Tagger):
             (array): corrected encoding from the binarizer
         """
         output = self.gaz_encoder.transform(list_of_tokens_to_transform)
-        if self.gaz_dimension == 2:
+        if len(self.gaz_encoder.classes_) == 2:
             output = np.hstack((output, 1 - output))
         return output
 
