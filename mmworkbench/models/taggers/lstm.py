@@ -606,6 +606,25 @@ class LstmModel(Tagger):
 
         return x_feats_array, gaz_feats_array, char_feats_array
 
+    def _gaz_transform(self, list_of_tokens_to_transform):
+        """This function is used to handle special logic around SKLearn's LabelBinarizer
+        class which behaves in a non-standard way for 2 classes. In a 2 class system,
+        it encodes the classes as [0] and [1]. However, in a 3 class system, it encodes
+        the classes as [0,0,1], [0,1,0], [1,0,0] and sustains this behavior for num_class > 2.
+
+        We want to encode 2 class systems as [0,1] and [1,0]. This function does that.
+
+        Args:
+            list_of_tokens_to_transform (array): A sequence of class labels
+
+        Returns:
+            (array): corrected encoding from the binarizer
+        """
+        output = self.gaz_encoder.transform(list_of_tokens_to_transform)
+        if self.gaz_dimension == 2:
+            output = np.hstack((output, 1 - output))
+        return output
+
     def _extract_features(self, example):
         """Extracts feature dicts for each token in an example.
 
@@ -614,7 +633,7 @@ class LstmModel(Tagger):
         Returns:
             (list dict): features
         """
-        default_gaz_one_hot = self.gaz_encoder.transform([DEFAULT_GAZ_LABEL]).tolist()[0]
+        default_gaz_one_hot = self._gaz_transform([DEFAULT_GAZ_LABEL]).tolist()[0]
         extracted_gaz_tokens = [default_gaz_one_hot] * self.padding_length
         extracted_sequence_features = extract_sequence_features(
             example, self.example_type, self.features, self.resources)
@@ -624,7 +643,6 @@ class LstmModel(Tagger):
                 break
 
             if extracted_gaz == {}:
-                extracted_gaz_tokens[index] = default_gaz_one_hot
                 continue
 
             combined_gaz_features = set()
@@ -642,11 +660,9 @@ class LstmModel(Tagger):
                     combined_gaz_features.add(
                         regex_match.group(REGEX_TYPE_POSITIONAL_INDEX))
 
-            if len(combined_gaz_features) == 0:
-                extracted_gaz_tokens[index] = default_gaz_one_hot
-            else:
+            if len(combined_gaz_features) != 0:
                 total_encoding = np.zeros(self.gaz_dimension, dtype=np.int)
-                for encoding in self.gaz_encoder.transform(list(combined_gaz_features)):
+                for encoding in self._gaz_transform(list(combined_gaz_features)):
                     total_encoding = np.add(total_encoding, encoding)
                 extracted_gaz_tokens[index] = total_encoding.tolist()
 
