@@ -34,16 +34,6 @@ Set that virtualenv to be automatically activated for the repo.
 Install the development dependencies.
 `pip install -r dev-requirements.txt`
 
-## Building Docs
-
-`make docs`
-
-(You might see a warning about mallard.rst. Safe to ignore that for now.)
-
-## Viewing Docs
-
-`open docs/build/html/index.html`
-
 ## Releasing a Version to MindMeld's PyPI
 
 **Beware! Make sure you read this guide and know what you are doing!**

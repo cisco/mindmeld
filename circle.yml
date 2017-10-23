@@ -31,8 +31,6 @@ test:
   override:
     - tox -i https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi
     - mmworkbench blueprint home_assistant
-  post:
-    - MM_BRANCH=$CIRCLE_BRANCH make docs
 deployment:
   s3:
     branch: /(develop)|(staging)|(master)/
