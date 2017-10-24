@@ -1,4 +1,3 @@
-.PHONY: clean clean-test clean-pyc clean-build docs help
 .DEFAULT_GOAL := help
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
@@ -66,27 +65,6 @@ coverage: ## check code coverage quickly with the default Python
 		coverage report -m
 		coverage html
 		$(BROWSER) htmlcov/index.html
-
-apidoc: ## generate Sphinx HTML documentation, including API docs
-	rm -rf docs/source/apidoc/
-	sphinx-apidoc -o docs/source/apidoc mmworkbench
-	$(MAKE) docs
-
-docs: ## generate Sphinx HTML documentation
-ifeq "$(MM_BRANCH)" "master"
-	SPHINXOPTS="-t public" $(MAKE) -C docs clean text html
-else
-	SPHINXOPTS="-t private" $(MAKE) -C docs clean text html
-endif
-	docs/scripts/process_source_files.sh
-	$(BROWSER) docs/build/html/index.html
-
-servedocs: ## compile the docs watching for changes
-ifeq "$(MM_BRANCH)" "master"
-	SPHINXOPTS="-t public" $(MAKE) -C docs auto-html
-else
-	SPHINXOPTS="-t private" $(MAKE) -C docs auto-html
-endif
 
 # release: clean ## package and upload a release
 	# python setup.py sdist upload
