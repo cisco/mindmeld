@@ -136,7 +136,7 @@ def get_labeled_query_tree(app_path, patterns=None):
     domains_dir = DOMAINS_FOLDER.format(app_path=app_path)
     walker = os.walk(domains_dir)
     tree = {}
-    found_pattern = False
+    found_pattern = {pattern: False for pattern in patterns} if patterns else {}
 
     for parent, _, files in walker:
         components = []
@@ -156,14 +156,16 @@ def get_labeled_query_tree(app_path, patterns=None):
                         _, filename = os.path.split(file_path)
                         mod_time = os.path.getmtime(file_path)
                         tree[domain][intent][filename] = mod_time
-                        found_pattern = True
+                        found_pattern[pattern] = True
             else:
                 for filename in files:
                     mod_time = os.path.getmtime(os.path.join(parent, domain, intent, filename))
                     tree[domain][intent][filename] = mod_time
 
-    if patterns and not found_pattern:
-        logger.error("Couldn't find {} pattern files in {} directory".format(patterns, domains_dir))
+    for pattern in found_pattern:
+        if not found_pattern[pattern]:
+            logger.error("Couldn't find {} pattern files in {} directory".format(
+                patterns, domains_dir))
 
     return tree
 
