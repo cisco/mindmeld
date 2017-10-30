@@ -5,6 +5,10 @@ This module contains the base class for all the machine-learned classifiers in W
 from __future__ import absolute_import, unicode_literals
 from builtins import object
 
+from abc import ABCMeta, abstractmethod
+import copy
+import hashlib
+import json
 import logging
 import os
 
@@ -79,6 +83,27 @@ class ClassifierConfig(object):
         config.pop('label_type')
         return cls(**config)
 
+    def to_json(self):
+        return json.dumps(self.to_dict(), sort_keys=True)
+
+    @classmethod
+    def _make_hash(cls, obj):
+        """Makes a hash from a dictionary, list, tuple or set to any level,
+        that contains only other hashable types (including any lists, tuples,
+        sets, and dictionaries).
+        """
+
+        if isinstance(obj, (set, tuple, list)):
+            return tuple([cls._make_hash(e) for e in obj])
+        elif not isinstance(obj, dict):
+            return hash(obj)
+
+        new_o = copy.deepcopy(obj)
+        for key, value in new_o.items():
+            new_o[key] = cls._make_hash(value)
+
+        return hash(tuple(frozenset(sorted(new_o.items()))))
+
 
 class Classifier(object):
     """The base class for all the machine-learned classifiers in Workbench. A classifier is a
@@ -86,6 +111,9 @@ class Classifier(object):
     labels. Among other functionality, each classifier provides means by which to fit a statistical
     model on a given training dataset and then use the trained model to make predictions on new
     unseen data."""
+
+    __metaclass__ = ABCMeta
+
     CLF_TYPE = None
 
     def __init__(self, resource_loader):
@@ -99,8 +127,9 @@ class Classifier(object):
         self.ready = False
         self.dirty = False
         self.config = None
+        self.hash = ''
 
-    def fit(self, queries=None, label_set='train', **kwargs):
+    def fit(self, queries=None, label_set='train', previous_model_path=None, **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
@@ -108,6 +137,10 @@ class Classifier(object):
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                  training set will be loaded.
+            previous_model_path (str, optional): The path of a previous version of the model for
+                this classifier. If the previous model is equivalent to the new one, it will be
+                loaded instead. Equivalence here is determined by the model's training data and
+                configuration.
             model_type (str, optional): The type of machine learning model to use. If omitted, the
                  default model type will be used.
             model_settings (dict): Settings specific to the model type specified
@@ -160,6 +193,15 @@ class Classifier(object):
         # create model with given params
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
+        new_hash = self._get_model_hash(model_config, queries, label_set)
+
+        if previous_model_path:
+            old_hash = self._load_hash(previous_model_path)
+            if old_hash == new_hash:
+                logger.info('No need to fit. Loading previous model.')
+                self.load(previous_model_path)
+                return
+
         queries, classes = self._get_queries_and_labels(queries, label_set)
         if len(set(classes)) <= 1:
             logger.warning('Not doing anything for fit since there is only one class')
@@ -169,6 +211,7 @@ class Classifier(object):
         model.fit(queries, classes)
         self._model = model
         self.config = ClassifierConfig.from_model_config(self._model.config)
+        self.hash = new_hash
 
         self.ready = True
         self.dirty = True
@@ -252,6 +295,7 @@ class Classifier(object):
             # Use application specified or default config, customizing with provided kwargs
             model_config = loaded_config
             model_config.update(kwargs)
+
             # If a parameter selection grid was passed in at runtime, override params set in the
             # application specified or default config
             if kwargs.get('param_selection') and not kwargs.get('params'):
@@ -271,6 +315,10 @@ class Classifier(object):
 
         joblib.dump(self._model, model_path)
 
+        hash_path = model_path + '.hash'
+        with open(hash_path, 'w') as hash_file:
+            hash_file.write(self.hash)
+
         self.dirty = False
 
     def load(self, model_path):
@@ -287,10 +335,37 @@ class Classifier(object):
         if self._model is not None:
             self._model.initialize_resources(self._resource_loader)
             self.config = ClassifierConfig.from_model_config(self._model.config)
+            self.hash = self._load_hash(model_path)
 
         self.ready = True
         self.dirty = False
 
+    @staticmethod
+    def _load_hash(model_path):
+        hash_path = model_path + '.hash'
+        if not os.path.isfile(hash_path):
+            return ''
+        with open(hash_path, 'r') as hash_file:
+            model_hash = hash_file.read()
+        return model_hash
+
+    @abstractmethod
+    def _get_queries(self, queries=None, label_set='train', raw=False):
+        """Returns the set of queries to train on
+
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+            raw (bool, optional): When True, raw query strings will be returned
+
+        Returns:
+            List: list of queries
+        """
+        raise NotImplementedError('Subclasses must implement this method')
+
+    @abstractmethod
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns the set of queries and their labels to train on
 
@@ -301,6 +376,42 @@ class Classifier(object):
                 the default training set will be loaded.
         """
         raise NotImplementedError('Subclasses must implement this method')
+
+    def _get_model_hash(self, model_config, queries=None, label_set='train'):
+        """Returns a hash representing the inputs into the model
+
+        Args:
+            model_config (ModelConfig): The model configuration
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+
+        Returns:
+            str: The hash
+        """
+        hash_obj = hashlib.new('sha1')
+
+        # Hash queries
+        if not queries:
+            queries = self._get_queries(queries, raw=True)
+        else:
+            # Note: don't modify list passed in
+            queries = sorted(queries)
+        queries_hash = self._resource_loader.hash_queries(sorted(queries))
+
+        hash_obj.update(queries_hash.encode('utf8'))
+
+        # Hash config
+        hash_obj.update(model_config.to_json().encode('utf8'))
+
+        # Hash resources
+        rsc_hash = hashlib.new('sha1')
+        for resource in sorted(model_config.required_resources()):
+            rsc_hash.update(self._resource_loader.hash_feature_resource(resource).encode('utf8'))
+        hash_obj.update(rsc_hash.hexdigest().encode('utf8'))
+
+        return hash_obj.hexdigest()
 
     def __repr__(self):
         msg = '<{} ready: {!r}, dirty: {!r}>'

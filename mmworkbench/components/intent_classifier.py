@@ -85,6 +85,25 @@ class IntentClassifier(Classifier):
         logger.info('Loading intent classifier: domain=%r', self.domain)
         super().load(*args, **kwargs)
 
+    def _get_queries(self, queries=None, label_set='train', raw=False):
+        """Returns the set of queries to train on
+
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+            raw (bool, optional): When True, raw query strings will be returned
+
+        Returns:
+            List: list of queries
+        """
+        if not queries:
+            query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
+                                                                   label_set=label_set, raw=raw)
+            queries = self._resource_loader.flatten_query_tree(query_tree)
+        return queries
+
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
@@ -94,10 +113,7 @@ class IntentClassifier(Classifier):
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
-        if not queries:
-            query_tree = self._resource_loader.get_labeled_queries(
-                label_set=label_set, domain=self.domain)
-            queries = self._resource_loader.flatten_query_tree(query_tree)
+        queries = self._get_queries(queries, label_set=label_set)
         if len(queries) < 1:
             return [None, None]
         return list(zip(*[(q.query, q.intent) for q in queries]))
