@@ -157,7 +157,8 @@ class EntityRecognizer(Classifier):
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
             self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types)
             self.config = ClassifierConfig.from_model_config(self._model.config)
-            self.hash = self._load_hash(model_path)
+
+        self.hash = self._load_hash(model_path)
 
         self.ready = True
         self.dirty = False

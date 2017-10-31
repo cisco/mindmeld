@@ -336,7 +336,8 @@ class Classifier(object):
         if self._model is not None:
             self._model.initialize_resources(self._resource_loader)
             self.config = ClassifierConfig.from_model_config(self._model.config)
-            self.hash = self._load_hash(model_path)
+
+        self.hash = self._load_hash(model_path)
 
         self.ready = True
         self.dirty = False

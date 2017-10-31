@@ -101,6 +101,7 @@ class RoleClassifier(Classifier):
             model.fit(examples, labels)
             self._model = model
             self.config = ClassifierConfig.from_model_config(self._model.config)
+
         self.hash = new_hash
 
         self.ready = True
@@ -150,7 +151,8 @@ class RoleClassifier(Classifier):
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
             self.config = ClassifierConfig.from_model_config(self._model.config)
-            self.hash = self._load_hash(model_path)
+
+        self.hash = self._load_hash(model_path)
 
         self.ready = True
         self.dirty = False
