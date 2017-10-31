@@ -12,6 +12,7 @@ import json
 import logging
 import os
 
+from future.utils import with_metaclass
 from sklearn.externals import joblib
 
 from .. import markup
@@ -106,14 +107,12 @@ class ClassifierConfig(object):
         return hash(tuple(frozenset(sorted(new_o.items()))))
 
 
-class Classifier(object):
+class Classifier(with_metaclass(ABCMeta, object)):
     """The base class for all the machine-learned classifiers in Workbench. A classifier is a
     machine-learned model that categorizes input examples into one of the pre-determined class
     labels. Among other functionality, each classifier provides means by which to fit a statistical
     model on a given training dataset and then use the trained model to make predictions on new
     unseen data."""
-
-    __metaclass__ = ABCMeta
 
     CLF_TYPE = None
 

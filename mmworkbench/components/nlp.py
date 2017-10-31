@@ -8,6 +8,8 @@ from builtins import object, super
 from abc import ABCMeta, abstractmethod
 import logging
 
+from future.utils import with_metaclass
+
 from .. import path
 from ..core import ProcessedQuery, Bunch
 from ..exceptions import FileNotFoundError, ProcessorError
@@ -25,7 +27,7 @@ from ..exceptions import AllowedNlpClassesKeyError
 logger = logging.getLogger(__name__)
 
 
-class Processor(object):
+class Processor(with_metaclass(ABCMeta, object)):
     """A generic base class for processing queries through the workbench NLP
     components
 
@@ -35,8 +37,6 @@ class Processor(object):
         ready (bool): Indicates whether the processor is ready to process
             messages
     """
-
-    __metaclass__ = ABCMeta
 
     def __init__(self, app_path, resource_loader=None):
         """Initializes a processor
