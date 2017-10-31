@@ -12,11 +12,6 @@ dependencies:
     - pip install -r dev-requirements.txt --extra-index-url=https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi
     - tox --notest -i https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi
   post:
-    - sudo apt-get install libzmq-dev
-    - python3 -m pip install --upgrade ipykernel
-    - python3 -m ipykernel install --user
-    - wget https://github.com/jgm/pandoc/releases/download/1.19/pandoc-1.19-1-amd64.deb
-    - sudo dpkg -i pandoc-1.19-1-amd64.deb
     - wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.1.2.tar.gz
     - tar -xvf elasticsearch-5.1.2.tar.gz
     - elasticsearch-5.1.2/bin/elasticsearch: {background: true}
