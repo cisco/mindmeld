@@ -14,6 +14,7 @@ import os
 
 from sklearn.externals import joblib
 
+from .. import markup
 from ..exceptions import ClassifierLoadError
 from ..core import Query
 
@@ -349,8 +350,30 @@ class Classifier(object):
             model_hash = hash_file.read()
         return model_hash
 
+    @staticmethod
+    def _build_query_tree(queries, raw=False):
+        """Build a query tree from a list of ProcessedQueries. The tree is
+        organized by domain then by intent.
+
+        Args:
+            queries (List): list of ProcessedQuery
+        """
+        query_tree = {}
+        for query in queries:
+            if query.domain not in query_tree:
+                query_tree[query.domain] = {}
+            if query.intent not in query_tree[query.domain]:
+                query_tree[query.domain][query.intent] = []
+
+            if raw:
+                query_tree[query.domain][query.intent].append(markup.dump_query(query))
+            else:
+                query_tree[query.domain][query.intent].append(query)
+
+        return query_tree
+
     @abstractmethod
-    def _get_queries(self, queries=None, label_set='train', raw=False):
+    def _get_query_tree(self, queries=None, label_set='train', raw=False):
         """Returns the set of queries to train on
 
         Args:
@@ -377,6 +400,18 @@ class Classifier(object):
         """
         raise NotImplementedError('Subclasses must implement this method')
 
+    @abstractmethod
+    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+        """Returns a hashed string representing the labeled queries
+
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+        """
+        raise NotImplementedError('Subclasses must implement this method')
+
     def _get_model_hash(self, model_config, queries=None, label_set='train'):
         """Returns a hash representing the inputs into the model
 
@@ -393,12 +428,7 @@ class Classifier(object):
         hash_obj = hashlib.new('sha1')
 
         # Hash queries
-        if not queries:
-            queries = self._get_queries(queries, raw=True)
-        else:
-            # Note: don't modify list passed in
-            queries = sorted(queries)
-        queries_hash = self._resource_loader.hash_queries(sorted(queries))
+        queries_hash = self._get_queries_and_labels_hash(queries=queries, label_set=label_set)
 
         hash_obj.update(queries_hash.encode('utf8'))
 

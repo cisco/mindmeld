@@ -73,7 +73,7 @@ class DomainClassifier(Classifier):
         logger.info('Loading domain classifier')
         super().load(*args, **kwargs)
 
-    def _get_queries(self, queries=None, label_set='train', raw=False):
+    def _get_query_tree(self, queries=None, label_set='train', raw=False):
         """Returns the set of queries to train on
 
         Args:
@@ -86,10 +86,10 @@ class DomainClassifier(Classifier):
         Returns:
             List: list of queries
         """
-        if not queries:
-            query_tree = self._resource_loader.get_labeled_queries(label_set=label_set, raw=raw)
-            queries = self._resource_loader.flatten_query_tree(query_tree)
-        return queries
+        if queries:
+            return self._build_query_tree(queries, raw=raw)
+
+        return self._resource_loader.get_labeled_queries(label_set=label_set, raw=raw)
 
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
@@ -100,7 +100,20 @@ class DomainClassifier(Classifier):
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
-        queries = self._get_queries(queries, label_set=label_set)
+        query_tree = self._get_query_tree(queries, label_set=label_set)
+        queries = self._resource_loader.flatten_query_tree(query_tree)
+
         if len(queries) < 1:
             return [None, None]
         return list(zip(*[(q.query, q.domain) for q in queries]))
+
+    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
+        queries = []
+        for domain in query_tree:
+            for intent in query_tree[domain]:
+                for query_text in query_tree[domain][intent]:
+                    queries.append("{}###{}".format(domain, query_text))
+
+        queries.sort()
+        return self._resource_loader.hash_queries(queries)
