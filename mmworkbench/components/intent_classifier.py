@@ -6,6 +6,7 @@ from builtins import super
 
 import logging
 
+from ..markup import mark_down
 from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 
 from .classifier import Classifier
@@ -125,7 +126,7 @@ class IntentClassifier(Classifier):
         queries = []
         for intent in query_tree[self.domain]:
             for query_text in query_tree[self.domain][intent]:
-                queries.append("{}###{}".format(intent, query_text))
+                queries.append("{}###{}".format(intent, mark_down(query_text)))
 
         queries.sort()
         return self._resource_loader.hash_list(queries)

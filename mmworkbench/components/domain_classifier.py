@@ -7,6 +7,7 @@ from builtins import super
 
 import logging
 
+from ..markup import mark_down
 from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 
 from .classifier import Classifier
@@ -113,7 +114,7 @@ class DomainClassifier(Classifier):
         for domain in query_tree:
             for intent in query_tree[domain]:
                 for query_text in query_tree[domain][intent]:
-                    queries.append("{}###{}".format(domain, query_text))
+                    queries.append("{}###{}".format(domain, mark_down(query_text)))
 
         queries.sort()
         return self._resource_loader.hash_list(queries)
