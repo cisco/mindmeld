@@ -32,7 +32,7 @@ class ApplicationManager(object):
     MAX_HISTORY_LEN = 100
 
     def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None,
-                 context_class=None, responder_class=None):
+                 context_class=None, responder_class=None, preprocessor=None):
         self._app_path = app_path
         # If NLP or QA were passed in, use the resource loader from there
         if nlp:
@@ -42,7 +42,8 @@ class ApplicationManager(object):
         elif question_answerer:
             resource_loader = question_answerer.resource_loader
         else:
-            resource_loader = ResourceLoader.create_resource_loader(app_path)
+            resource_loader = ResourceLoader.create_resource_loader(
+                app_path, preprocessor=preprocessor)
 
         self._query_factory = resource_loader.query_factory
 
