@@ -248,4 +248,4 @@ class RoleClassifier(Classifier):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = self._resource_loader.flatten_query_tree(query_tree)
         queries.sort()
-        return self._resource_loader.hash_queries(queries)
+        return self._resource_loader.hash_list(queries)

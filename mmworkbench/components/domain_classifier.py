@@ -116,4 +116,4 @@ class DomainClassifier(Classifier):
                     queries.append("{}###{}".format(domain, query_text))
 
         queries.sort()
-        return self._resource_loader.hash_queries(queries)
+        return self._resource_loader.hash_list(queries)

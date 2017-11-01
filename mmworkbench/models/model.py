@@ -88,9 +88,19 @@ class ModelConfig(object):
         return "{}({})".format(self.__class__.__name__, args_str)
 
     def to_json(self):
+        """Converts the model config object to JSON
+
+        Returns:
+            str: JSON representation of the classifier
+        """
         return json.dumps(self.to_dict(), sort_keys=True)
 
     def required_resources(self):
+        """Returns the resources this model requires
+
+        Returns:
+            set: set of required resources for this model
+        """
         # get list of resources required by feature extractors
         required_resources = set()
         for name in self.features:

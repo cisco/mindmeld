@@ -8,6 +8,7 @@ from builtins import object
 
 import datetime
 from email.utils import parsedate
+import hashlib
 import logging
 import os
 import shutil
@@ -326,3 +327,92 @@ def _find_config_file():
         current_dir = os.path.abspath(os.path.join(current_dir, '..'))
 
     return None
+
+
+class Hasher(object):
+    """An thin wrapper around hashlib. Uses cache for commonly hashed
+
+    Attributes:
+        algorithm (str): The hashing algorithm to use. Defaults to
+            'sha1'. See `hashlib.algorithms_available` for a list of
+            options.
+
+    """
+
+    def __init__(self, algorithm='sha1'):
+        # TODO consider alternative data structure so cache doesnt get too big
+        self._cache = {}
+        # intentionally using the setter to check value
+        self._algorithm = None
+        self._set_algorithm(algorithm)
+
+    def _get_algorithm(self):
+        """Getter for algorithm property.
+
+        Returns:
+            str: the hashing algorithm
+        """
+        return self._algorithm
+
+    def _set_algorithm(self, value):
+        """Setter for algorithm property
+
+        Args:
+            value (str): The hashing algorithm to use. Defaults
+                to sha1. See `hashlib.algorithms_available` for a list of
+                options.
+            value (str): The hashing algorithm to use.
+        """
+        if value not in hashlib.algorithms_available:
+            raise ValueError('Invalid hashing algorithm: {!r}'.format(value))
+
+        if value != self._algorithm:
+            # reset cache when changing algorithm
+            self._cache = {}
+            self._algorithm = value
+
+    algorithm = property(_get_algorithm, _set_algorithm)
+
+    def hash(self, string):
+        """Summary
+
+        Args:
+            string (TYPE): Description
+
+        Returns:
+            TYPE: Description
+        """
+        if string in self._cache:
+            return self._cache[string]
+
+        hash_obj = hashlib.new(self.algorithm)
+        hash_obj.update(string.encode('utf8'))
+        result = hash_obj.hexdigest()
+        self._cache[string] = result
+        return result
+
+    def hash_list(self, strings):
+        hash_obj = hashlib.new(self.algorithm)
+        for string in strings:
+            hash_obj.update(self.hash(string).encode('utf8'))
+        return hash_obj.hexdigest()
+
+    def hash_file(self, filename):
+        """Creates a hash of the file
+
+        Args:
+            filename (str): The path of a file to hash.
+
+        Returns:
+            str: A hex digest of the files hash
+        """
+        hash_obj = hashlib.new(self.algorithm)
+        with open(filename, 'rb') as file_p:
+            while True:
+                buf = file_p.read(4096)
+                if not buf:
+                    break
+                buf_hash = hashlib.new(self.algorithm)
+                buf_hash.update(buf)
+                hash_obj.update(buf_hash.hexdigest().encode('utf-8'))
+        return hash_obj.hexdigest()

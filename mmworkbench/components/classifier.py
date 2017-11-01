@@ -6,8 +6,6 @@ from __future__ import absolute_import, unicode_literals
 from builtins import object
 
 from abc import ABCMeta, abstractmethod
-import copy
-import hashlib
 import json
 import logging
 import os
@@ -86,25 +84,12 @@ class ClassifierConfig(object):
         return cls(**config)
 
     def to_json(self):
-        return json.dumps(self.to_dict(), sort_keys=True)
+        """Converts the model config object to JSON
 
-    @classmethod
-    def _make_hash(cls, obj):
-        """Makes a hash from a dictionary, list, tuple or set to any level,
-        that contains only other hashable types (including any lists, tuples,
-        sets, and dictionaries).
+        Returns:
+            str: JSON representation of the classifier
         """
-
-        if isinstance(obj, (set, tuple, list)):
-            return tuple([cls._make_hash(e) for e in obj])
-        elif not isinstance(obj, dict):
-            return hash(obj)
-
-        new_o = copy.deepcopy(obj)
-        for key, value in new_o.items():
-            new_o[key] = cls._make_hash(value)
-
-        return hash(tuple(frozenset(sorted(new_o.items()))))
+        return json.dumps(self.to_dict(), sort_keys=True)
 
 
 class Classifier(with_metaclass(ABCMeta, object)):
@@ -425,23 +410,26 @@ class Classifier(with_metaclass(ABCMeta, object)):
         Returns:
             str: The hash
         """
-        hash_obj = hashlib.new('sha1')
 
         # Hash queries
         queries_hash = self._get_queries_and_labels_hash(queries=queries, label_set=label_set)
 
-        hash_obj.update(queries_hash.encode('utf8'))
-
         # Hash config
-        hash_obj.update(model_config.to_json().encode('utf8'))
+        config_hash = self._resource_loader.hash_list([
+            model_config.to_json().encode('utf8')
+        ])
 
         # Hash resources
-        rsc_hash = hashlib.new('sha1')
+        rsc_strings = []
         for resource in sorted(model_config.required_resources()):
-            rsc_hash.update(self._resource_loader.hash_feature_resource(resource).encode('utf8'))
-        hash_obj.update(rsc_hash.hexdigest().encode('utf8'))
+            rsc_strings.append(self._resource_loader.hash_feature_resource(resource))
+        rsc_hash = self._resource_loader.hash_list(rsc_strings)
 
-        return hash_obj.hexdigest()
+        return self._resource_loader.hash_list([
+            queries_hash,
+            config_hash,
+            rsc_hash
+        ])
 
     def __repr__(self):
         msg = '<{} ready: {!r}, dirty: {!r}>'

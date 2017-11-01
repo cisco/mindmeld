@@ -128,4 +128,4 @@ class IntentClassifier(Classifier):
                 queries.append("{}###{}".format(intent, query_text))
 
         queries.sort()
-        return self._resource_loader.hash_queries(queries)
+        return self._resource_loader.hash_list(queries)

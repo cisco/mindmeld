@@ -9,7 +9,6 @@ from copy import deepcopy
 from collections import Counter
 
 import fnmatch
-import hashlib
 import json
 import logging
 import os
@@ -22,6 +21,7 @@ from .query_factory import QueryFactory
 from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
                              mask_numerics)
 from .core import Entity
+from ._util import Hasher
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class ResourceLoader(object):
         # }
         self.labeled_query_files = {}
 
-        self._hasher = _StringHasher()
+        self._hasher = Hasher()
 
     def get_gazetteers(self, force_reload=False, **kwargs):
         """Gets all gazetteers
@@ -103,28 +103,21 @@ class ResourceLoader(object):
 
         return self._entity_files[gaz_name]['gazetteer']['data']
 
-    def get_gazetteers_hash(self, algorithm='sha1'):
+    def get_gazetteers_hash(self):
         entity_types = path.get_entity_types(self.app_path)
-        gaz_hash = hashlib.new(algorithm)
-        for entity_type in sorted(entity_types):
-            gaz_hash.update(self.get_gazetteer_hash(entity_type,
-                                                    algorithm=algorithm).encode('utf8'))
 
-        return gaz_hash.hexdigest()
+        return self._hasher.hash_list((self.get_gazetteer_hash(entity_type)
+                                      for entity_type in sorted(entity_types)))
 
-    def get_gazetteer_hash(self, gaz_name, algorithm='sha1'):
+    def get_gazetteer_hash(self, gaz_name):
         self._update_entity_file_dates(gaz_name)
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
-        entity_data_hash = self._hash_file(entity_data_path, algorithm=algorithm)
+        entity_data_hash = self._hasher.hash_file(entity_data_path)
 
         mapping_path = path.get_entity_map_path(self.app_path, gaz_name)
-        mapping_hash = self._hash_file(mapping_path, algorithm=algorithm)
+        mapping_hash = self._hasher.hash_file(mapping_path)
 
-        hash_obj = hashlib.new(algorithm)
-        hash_obj.update(entity_data_hash.encode('utf8'))
-        hash_obj.update(mapping_hash.encode('utf8'))
-
-        return hash_obj.hexdigest()
+        return self._hasher.hash_list([entity_data_hash, mapping_hash])
 
     def build_gazetteer(self, gaz_name, exclude_ngrams=False, force_reload=False):
         """Builds the specified gazetteer using the entity data and mapping files
@@ -257,13 +250,6 @@ class ResourceLoader(object):
         except (OSError, IOError):
             # gaz not yet built so set to a time impossibly long ago
             file_table['gazetteer']['modified'] = 0.0
-
-    def hash_queries(self, queries, algorithm='sha1'):
-        hasher = self._hasher or _StringHasher(algorithm=algorithm)
-        hash_obj = hashlib.new(hasher.algorithm)
-        for query in sorted(queries):
-            hash_obj.update(hasher.hash(query).encode('utf8'))
-        return hash_obj.hexdigest()
 
     def get_labeled_queries(self, domain=None, intent=None, label_set=None,
                             force_reload=False, raw=False):
@@ -488,10 +474,33 @@ class ResourceLoader(object):
         if resource_loader:
             return resource_loader(self, **kwargs)
         else:
-            raise ValueError('Invalid resource name \'{}\'.'.format(name))
+            raise ValueError('Invalid resource name {!r}.'.format(name))
 
     def hash_feature_resource(self, name):
-        return self.RSC_HASH_MAP.get(name)(self)
+        """Hashes the named resource
+
+        Args:
+            name (str): The name of the resource to hash
+
+        Returns:
+            str: The hash result
+        """
+        hash_func = self.RSC_HASH_MAP.get(name)
+        if hash_func:
+            return hash_func(self)
+        else:
+            raise ValueError('Invalid resource name {!r}.'.format(name))
+
+    def hash_list(self, items):
+        """Hashes the list of items
+
+        Args:
+            items (list[str]): A list of strings to hash
+
+        Returns:
+            str: The hash result
+        """
+        return self._hasher.hash_list(items)
 
     @staticmethod
     def create_resource_loader(app_path, query_factory=None):
@@ -506,30 +515,6 @@ class ResourceLoader(object):
         """
         query_factory = query_factory or QueryFactory.create_query_factory(app_path)
         return ResourceLoader(app_path, query_factory)
-
-    @staticmethod
-    def _hash_file(filename, algorithm='sha1'):
-        """Creates a hash of the file
-
-        Args:
-            filename (str): The path of a file to hash.
-            algorithm (str, optional): The hashing algorithm to use. Defaults
-                to sha1. See `hashlib.algorithms_available` for a list of
-                options.
-
-        Returns:
-            str: A hex digest of the files hash
-        """
-        hash_obj = hashlib.new(algorithm)
-        with open(filename, 'rb') as file_p:
-            while True:
-                buf = file_p.read(4096)
-                if not buf:
-                    break
-                buf_hash = hashlib.new(algorithm)
-                buf_hash.update(buf)
-                hash_obj.update(buf_hash.hexdigest().encode('utf-8'))
-        return hash_obj.hexdigest()
 
     # resource loader map
     FEATURE_RSC_MAP = {
@@ -546,32 +531,3 @@ class ResourceLoader(object):
         QUERY_FREQ_RSC: lambda _: 'constant',
         SYS_TYPES_RSC: lambda _: 'constant'
     }
-
-
-class _StringHasher(object):
-
-    def __init__(self, algorithm='sha1'):
-        self._algorithm = algorithm
-        # TODO consider alternative data structure so cache doesnt get too big
-        self._cache = {}
-
-    @property
-    def algorithm(self):
-        return self._algorithm
-
-    @algorithm.setter
-    def algorithm(self, value):
-        if value != self._algorithm:
-            # reset cache when changing algorithm
-            self._cache = {}
-            self._algorithm = value
-
-    def hash(self, string):
-        if string in self._cache:
-            return self._cache[string]
-
-        hash_obj = hashlib.new(self.algorithm)
-        hash_obj.update(string.encode('utf8'))
-        result = hash_obj.hexdigest()
-        self._cache[string] = result
-        return result
