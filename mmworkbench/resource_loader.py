@@ -438,17 +438,20 @@ class ResourceLoader(object):
             raise ValueError('Invalid resource name \'{}\'.'.format(name))
 
     @staticmethod
-    def create_resource_loader(app_path, query_factory=None):
+    def create_resource_loader(app_path, query_factory=None, preprocessor=None):
         """Creates the resource loader for the app at app path
 
         Args:
             app_path (str): The path to the directory containing the app's data
             query_factory (QueryFactory): The app's query factory
+            preprocessor (Preprocessor): The app's preprocessor
 
         Returns:
             ResourceLoader: a resource loader
         """
-        query_factory = query_factory or QueryFactory.create_query_factory(app_path)
+        query_factory = query_factory or QueryFactory.create_query_factory(
+            app_path, preprocessor=preprocessor)
+
         return ResourceLoader(app_path, query_factory)
 
     # resource loader map
