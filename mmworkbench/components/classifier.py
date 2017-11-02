@@ -415,9 +415,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         queries_hash = self._get_queries_and_labels_hash(queries=queries, label_set=label_set)
 
         # Hash config
-        config_hash = self._resource_loader.hash_list([
-            model_config.to_json().encode('utf8')
-        ])
+        config_hash = self._resource_loader.hash_string(model_config.to_json())
 
         # Hash resources
         rsc_strings = []

@@ -491,6 +491,17 @@ class ResourceLoader(object):
         else:
             raise ValueError('Invalid resource name {!r}.'.format(name))
 
+    def hash_string(self, string):
+        """Hashes a string
+
+        Args:
+            string (str): The string to hash
+
+        Returns:
+            str: The hash result
+        """
+        return self._hasher.hash(string)
+
     def hash_list(self, items):
         """Hashes the list of items
 
@@ -578,13 +589,13 @@ class Hasher(object):
     algorithm = property(_get_algorithm, _set_algorithm)
 
     def hash(self, string):
-        """Summary
+        """Hashes a string
 
         Args:
-            string (TYPE): Description
+            string (str): The string to hash
 
         Returns:
-            TYPE: Description
+            str: The hash result
         """
         if string in self._cache:
             return self._cache[string]
@@ -596,6 +607,14 @@ class Hasher(object):
         return result
 
     def hash_list(self, strings):
+        """Hashes a list of strings
+
+        Args:
+            strings (list[str]): The strings to hash
+
+        Returns:
+            str: The hash result
+        """
         hash_obj = hashlib.new(self.algorithm)
         for string in strings:
             hash_obj.update(self.hash(string).encode('utf8'))
@@ -608,7 +627,7 @@ class Hasher(object):
             filename (str): The path of a file to hash.
 
         Returns:
-            str: A hex digest of the files hash
+            str: A hex digest of the file hash
         """
         hash_obj = hashlib.new(self.algorithm)
         with open(filename, 'rb') as file_p:
