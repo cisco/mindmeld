@@ -7,6 +7,7 @@ from __future__ import absolute_import, unicode_literals
 
 import glob
 import os
+import logging
 
 WORKBENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_ROOT = os.path.join(WORKBENCH_ROOT, 'mmworkbench')
@@ -66,6 +67,8 @@ USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mmworkbench')
 USER_CONFIG_PATH = os.path.join(USER_CONFIG_DIR, 'config')
 BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, 'blueprints')
 BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, '{name}')
+
+logger = logging.getLogger(__name__)
 
 
 # Helpers
@@ -133,6 +136,8 @@ def get_labeled_query_tree(app_path, patterns=None):
     domains_dir = DOMAINS_FOLDER.format(app_path=app_path)
     walker = os.walk(domains_dir)
     tree = {}
+    found_pattern = {pattern: False for pattern in patterns} if patterns else {}
+
     for parent, _, files in walker:
         components = []
         while parent != domains_dir:
@@ -151,10 +156,16 @@ def get_labeled_query_tree(app_path, patterns=None):
                         _, filename = os.path.split(file_path)
                         mod_time = os.path.getmtime(file_path)
                         tree[domain][intent][filename] = mod_time
+                        found_pattern[pattern] = True
             else:
                 for filename in files:
                     mod_time = os.path.getmtime(os.path.join(parent, domain, intent, filename))
                     tree[domain][intent][filename] = mod_time
+
+    for pattern in found_pattern:
+        if not found_pattern[pattern]:
+            logger.error("Couldn't find {} pattern files in {} directory".format(
+                patterns, domains_dir))
 
     return tree
 
