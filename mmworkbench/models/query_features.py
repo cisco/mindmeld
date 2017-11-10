@@ -10,7 +10,7 @@ import re
 
 from ..core import resolve_entity_conflicts
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                      register_features, mask_numerics, get_ngram, requires)
+                      register_features, mask_numerics, get_ngram, requires )
 
 # TODO: clean this up a LOT
 
@@ -364,6 +364,23 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions):
     return _extractor
 
 
+def char_ngrams(n, word):
+    char_gram = [''.join(ngram) for ngram in zip(*[word[i:] for i in range(n)])]
+    return ' '.join(char_gram)
+
+
+def extract_char_ngrams_features(ngram_lengths):
+    def _extractor(query, resources):
+        tokens = query.normalized_tokens
+        feat_seq = [{} for _ in tokens]
+        for i in range(len(tokens)):
+            for length in ngram_lengths:
+                feat_name = 'char_ngram|length:{}'.format(length)
+                feat_seq[i][feat_name] = char_ngrams(length, tokens[i])
+        return feat_seq
+    return _extractor
+
+
 @requires(SYS_TYPES_RSC)
 def extract_sys_candidate_features(start_positions=(0,)):
     """Return an extractor for features based on a heuristic guess of numeric
@@ -628,5 +645,6 @@ register_features('query', {
     'bag-of-words-seq': extract_bag_of_words_features,
     'in-gaz-span-seq': extract_in_gaz_span_features,
     'in-gaz-ngram-seq': extract_in_gaz_ngram_features,
-    'sys-candidates-seq': extract_sys_candidate_features
+    'sys-candidates-seq': extract_sys_candidate_features,
+    'char_ngrams': extract_char_ngrams_features
 })
