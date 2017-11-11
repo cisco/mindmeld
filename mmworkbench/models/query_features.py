@@ -10,7 +10,7 @@ import re
 
 from ..core import resolve_entity_conflicts
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                      register_features, mask_numerics, get_ngram, requires )
+                      register_features, mask_numerics, get_ngram, requires)
 
 # TODO: clean this up a LOT
 
