@@ -130,6 +130,7 @@ def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
         'entities': []
     }
 
+
 test_data_3 = [
     "what mythical scottish town appears for one day every 100 years",
     "lets run 818m",
