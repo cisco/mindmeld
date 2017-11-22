@@ -35,100 +35,100 @@ def nlp():
     return nlp
 
 
-# def test_instantiate():
-#     """Tests creating an NLP instance"""
-#     nlp = NaturalLanguageProcessor(APP_PATH)
-#     assert nlp
-#
-#
-# def test_build(empty_nlp):
-#     """Tests building a processor with default config.
-#
-#     This is a basic sanity check to make sure there are no exceptions.
-#     """
-#     nlp = empty_nlp
-#     nlp.build()
-#
-#
-# def test_dump(nlp):
-#     """Test dump method of nlp"""
-#     nlp.dump()
-#
-#
-# def test_early_process(empty_nlp):
-#     """Tests that attempting to process a message without first loading or
-#     building models will raise an exception"""
-#     with pytest.raises(ProcessorError):
-#         empty_nlp.process('Hello')
-#
-#
-# @pytest.mark.skip
-# def test_load(nlp):
-#     """Tests loading a processor from disk"""
-#     nlp.load()
-#
-#
-# def test_process(nlp):
-#     """Tests a basic call to process"""
-#     response = nlp.process('Hello')
-#
-#     assert response == {
-#         'text': 'Hello',
-#         'domain': 'store_info',
-#         'intent': 'greet',
-#         'entities': []
-#     }
-#
-#
-# test_data_1 = [
-#     (['store_info.find_nearest_store'], 'store near MG Road',
-#      'store_info', 'find_nearest_store'),
-#     (['store_info.find_nearest_store', 'store_info.greet'], 'hello!',
-#      'store_info', 'greet'),
-#     (['store_info.find_nearest_store'], 'hello!',
-#      'store_info', 'find_nearest_store'),
-#     (['store_info.*'], 'hello!', 'store_info', 'greet')
-# ]
-#
-#
-# @pytest.mark.parametrize("allowed_intents,query,expected_domain,expected_intent", test_data_1)
-# def test_nlp_hierarchy_bias_for_user_bias(nlp, allowed_intents, query, expected_domain,
-#                                           expected_intent):
-#     """Tests user specified domain and intent biases"""
-#     response = nlp.process(query, nlp.extract_allowed_intents(allowed_intents))
-#
-#     assert response == {
-#         'text': query,
-#         'domain': expected_domain,
-#         'intent': expected_intent,
-#         'entities': []
-#     }
-#
-#
-# test_data_2 = [
-#     (['store_info.*', 'store_info.greet'],
-#      'hello!', 'store_info', 'greet'),
-#     (['store_info.find_nearest_store'], 'hello!', 'store_info',
-#      'find_nearest_store'),
-#     (['store_info.*'], 'hello!', 'store_info', 'greet'),
-#     (['store_info.*', 'store_info.find_nearest_store'], 'store near MG Road',
-#      'store_info', 'find_nearest_store')
-# ]
-#
-#
-# @pytest.mark.parametrize("allowed_intents,query,expected_domain,expected_intent", test_data_2)
-# def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
-#                                              query, expected_domain,
-#                                              expected_intent):
-#     """Tests user specified allowable domains and intents"""
-#     response = nlp.process(query, nlp.extract_allowed_intents(allowed_intents))
-#
-#     assert response == {
-#         'text': query,
-#         'domain': expected_domain,
-#         'intent': expected_intent,
-#         'entities': []
-#     }
+def test_instantiate():
+    """Tests creating an NLP instance"""
+    nlp = NaturalLanguageProcessor(APP_PATH)
+    assert nlp
+
+
+def test_build(empty_nlp):
+    """Tests building a processor with default config.
+
+    This is a basic sanity check to make sure there are no exceptions.
+    """
+    nlp = empty_nlp
+    nlp.build()
+
+
+def test_dump(nlp):
+    """Test dump method of nlp"""
+    nlp.dump()
+
+
+def test_early_process(empty_nlp):
+    """Tests that attempting to process a message without first loading or
+    building models will raise an exception"""
+    with pytest.raises(ProcessorError):
+        empty_nlp.process('Hello')
+
+
+@pytest.mark.skip
+def test_load(nlp):
+    """Tests loading a processor from disk"""
+    nlp.load()
+
+
+def test_process(nlp):
+    """Tests a basic call to process"""
+    response = nlp.process('Hello')
+
+    assert response == {
+        'text': 'Hello',
+        'domain': 'store_info',
+        'intent': 'greet',
+        'entities': []
+    }
+
+
+test_data_1 = [
+    (['store_info.find_nearest_store'], 'store near MG Road',
+     'store_info', 'find_nearest_store'),
+    (['store_info.find_nearest_store', 'store_info.greet'], 'hello!',
+     'store_info', 'greet'),
+    (['store_info.find_nearest_store'], 'hello!',
+     'store_info', 'find_nearest_store'),
+    (['store_info.*'], 'hello!', 'store_info', 'greet')
+]
+
+
+@pytest.mark.parametrize("allowed_intents,query,expected_domain,expected_intent", test_data_1)
+def test_nlp_hierarchy_bias_for_user_bias(nlp, allowed_intents, query, expected_domain,
+                                          expected_intent):
+    """Tests user specified domain and intent biases"""
+    response = nlp.process(query, nlp.extract_allowed_intents(allowed_intents))
+
+    assert response == {
+        'text': query,
+        'domain': expected_domain,
+        'intent': expected_intent,
+        'entities': []
+    }
+
+
+test_data_2 = [
+    (['store_info.*', 'store_info.greet'],
+     'hello!', 'store_info', 'greet'),
+    (['store_info.find_nearest_store'], 'hello!', 'store_info',
+     'find_nearest_store'),
+    (['store_info.*'], 'hello!', 'store_info', 'greet'),
+    (['store_info.*', 'store_info.find_nearest_store'], 'store near MG Road',
+     'store_info', 'find_nearest_store')
+]
+
+
+@pytest.mark.parametrize("allowed_intents,query,expected_domain,expected_intent", test_data_2)
+def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
+                                             query, expected_domain,
+                                             expected_intent):
+    """Tests user specified allowable domains and intents"""
+    response = nlp.process(query, nlp.extract_allowed_intents(allowed_intents))
+
+    assert response == {
+        'text': query,
+        'domain': expected_domain,
+        'intent': expected_intent,
+        'entities': []
+    }
 
 test_data_3 = [
     "what mythical scottish town appears for one day every 100 years",
