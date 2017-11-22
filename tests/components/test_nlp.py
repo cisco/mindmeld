@@ -139,7 +139,7 @@ test_data_3 = [
 
 
 @pytest.mark.parametrize("query", test_data_3)
-def test_nlp_hierarchy_for_bad_queries(nlp, query):
+def test_nlp_hierarchy_for_queries_mallard_fails_on(nlp, query):
     """Tests user specified allowable domains and intents"""
     response = nlp.process(query)
     assert response['text'] == query

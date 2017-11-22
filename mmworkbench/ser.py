@@ -36,6 +36,8 @@ def get_candidates(query, entity_types=None, span=None):
         return [e for e in [_mallard_item_to_query_entity(query, item) for item in response['data']]
                 if entity_types is None or e.entity.type in entity_types]
     else:
+        logger.error("Mallard did not process query: {} with dims: {} correctly and "
+                     "returned response: {}".format(query.text, str(dims), str(response)))
         return []
 
 
