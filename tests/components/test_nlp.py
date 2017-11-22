@@ -131,6 +131,20 @@ def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
     }
 
 
+test_data_3 = [
+    "what mythical scottish town appears for one day every 100 years",
+    "lets run 818m",
+    "Get me the product id ws-c2950t-24-24 tomorrow"
+]
+
+
+@pytest.mark.parametrize("query", test_data_3)
+def test_nlp_hierarchy_for_queries_mallard_fails_on(nlp, query):
+    """Tests user specified allowable domains and intents"""
+    response = nlp.process(query)
+    assert response['text'] == query
+
+
 def test_validate_and_extract_allowed_intents(nlp):
     """Tests user specified allowable domains and intents"""
     with pytest.raises(ValueError):
