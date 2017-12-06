@@ -637,9 +637,7 @@ class Hasher(object):
                     buf = file_p.read(4096)
                     if not buf:
                         break
-                    buf_hash = hashlib.new(self.algorithm)
-                    buf_hash.update(buf)
-                    hash_obj.update(buf_hash.hexdigest().encode('utf-8'))
+                    hash_obj.update(buf)
         except IOError:
             hash_obj.update(''.encode('utf-8'))
         return hash_obj.hexdigest()
