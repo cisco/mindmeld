@@ -640,7 +640,7 @@ class Hasher(object):
                     buf_hash = hashlib.new(self.algorithm)
                     buf_hash.update(buf)
                     hash_obj.update(buf_hash.hexdigest().encode('utf-8'))
-        except FileNotFoundError:
+        except IOError:
             hash_obj.update('')
         return hash_obj.hexdigest()
 
