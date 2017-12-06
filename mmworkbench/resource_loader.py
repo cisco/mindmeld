@@ -641,5 +641,5 @@ class Hasher(object):
                     buf_hash.update(buf)
                     hash_obj.update(buf_hash.hexdigest().encode('utf-8'))
         except IOError:
-            hash_obj.update('')
+            hash_obj.update(''.encode('utf-8'))
         return hash_obj.hexdigest()
