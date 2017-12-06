@@ -32,12 +32,7 @@ def get_candidates(query, entity_types=None, span=None):
     dims = _dimensions_from_entity_types(entity_types)
     response = parse_numerics(query.text, dimensions=dims)
 
-    if ('status' not in response.keys()) or ('data' not in response.keys()):
-        logger.debug("Mallard did not return a response with status "
-                     "and data to query: {} with dims: {}".format(query.text, str(dims)))
-        return []
-
-    if int(response['status']) == 200:
+    if (int(response.get('status', -1)) == 200) and ('data' in response):
         return [e for e in [_mallard_item_to_query_entity(query, item) for item in response['data']]
                 if entity_types is None or e.entity.type in entity_types]
     else:
