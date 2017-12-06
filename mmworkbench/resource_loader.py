@@ -643,4 +643,3 @@ class Hasher(object):
         except IOError:
             hash_obj.update('')
         return hash_obj.hexdigest()
-
