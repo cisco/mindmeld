@@ -621,7 +621,8 @@ class Hasher(object):
         return hash_obj.hexdigest()
 
     def hash_file(self, filename):
-        """Creates a hash of the file. If the file does not exist, return None
+        """Creates a hash of the file. If the file does not exist, use the empty string instead
+        and return the resulting hash digest
 
         Args:
             filename (str): The path of a file to hash.
@@ -629,8 +630,8 @@ class Hasher(object):
         Returns:
             str: A hex digest of the file hash
         """
+        hash_obj = hashlib.new(self.algorithm)
         try:
-            hash_obj = hashlib.new(self.algorithm)
             with open(filename, 'rb') as file_p:
                 while True:
                     buf = file_p.read(4096)
@@ -639,6 +640,7 @@ class Hasher(object):
                     buf_hash = hashlib.new(self.algorithm)
                     buf_hash.update(buf)
                     hash_obj.update(buf_hash.hexdigest().encode('utf-8'))
-            return hash_obj.hexdigest()
         except FileNotFoundError:
-            return None
+            hash_obj.update('')
+        return hash_obj.hexdigest()
+
