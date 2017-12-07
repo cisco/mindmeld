@@ -134,7 +134,8 @@ def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
 test_data_3 = [
     "what mythical scottish town appears for one day every 100 years",
     "lets run 818m",
-    "Get me the product id ws-c2950t-24-24 tomorrow"
+    "Get me the product id ws-c2950t-24-24 tomorrow",
+    ""
 ]
 
 
