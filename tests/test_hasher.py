@@ -22,3 +22,11 @@ def test_hashfile(hasher, file_content):
         hash_obj = hashlib.sha1()
         hash_obj.update(file_content)
         assert hasher.hash_file('some file name') == hash_obj.hexdigest()
+
+
+def test_hashfile_with_large_file(hasher):
+    with open('aeneid.txt', mode='r') as f:
+        file_content = f.read()
+        hash_obj = hashlib.sha1()
+        hash_obj.update(file_content.encode('utf-8'))
+        assert hasher.hash_file('aeneid.txt') == hash_obj.hexdigest()
