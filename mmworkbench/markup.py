@@ -78,7 +78,7 @@ def load_query_file(file_path, query_factory=None, domain=None, intent=None, is_
     query_factory = query_factory or QueryFactory.create_query_factory()
 
     queries = []
-    for query_text in _read_query_file(file_path):
+    for query_text in read_query_file(file_path):
         if query_text[0] == '-':
             continue
         query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
@@ -92,11 +92,11 @@ def mark_down_file(file_path):
     Args:
         file_path (str): The path of the file to load
     """
-    for markup in _read_query_file(file_path):
+    for markup in read_query_file(file_path):
         yield mark_down(markup)
 
 
-def _read_query_file(file_path):
+def read_query_file(file_path):
     """Summary
 
     Args:

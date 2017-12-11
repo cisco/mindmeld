@@ -113,7 +113,9 @@ def converse(ctx, session):
 
 @_app_cli.command('build', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-def build(ctx):
+@click.option('-i', '--incremental', is_flag=True, default=False,
+              help='only build models with changed training data or configuration')
+def build(ctx, incremental):
     """Builds the app with default config."""
     try:
         app = ctx.obj.get('app')
@@ -125,7 +127,7 @@ def build(ctx):
 
         app.lazy_init()
         nlp = app.app_manager.nlp
-        nlp.build()
+        nlp.build(incremental=incremental)
         nlp.dump()
     except WorkbenchError as ex:
         logger.error(ex.message)

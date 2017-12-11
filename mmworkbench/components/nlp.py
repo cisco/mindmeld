@@ -4,7 +4,11 @@ This module contains the natural language processor.
 """
 from __future__ import absolute_import, unicode_literals
 from builtins import object, super
+
+from abc import ABCMeta, abstractmethod
 import logging
+
+from future.utils import with_metaclass
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
@@ -23,7 +27,7 @@ from ..exceptions import AllowedNlpClassesKeyError
 logger = logging.getLogger(__name__)
 
 
-class Processor(object):
+class Processor(with_metaclass(ABCMeta, object)):
     """A generic base class for processing queries through the workbench NLP
     components
 
@@ -33,6 +37,7 @@ class Processor(object):
         ready (bool): Indicates whether the processor is ready to process
             messages
     """
+
     def __init__(self, app_path, resource_loader=None):
         """Initializes a processor
 
@@ -48,17 +53,23 @@ class Processor(object):
         self.dirty = False
         self.name = None
 
-    def build(self):
-        """Builds all the natural language processing models for this processor and its children."""
-        self._build()
+    def build(self, incremental=False):
+        """Builds all the natural language processing models for this processor and its children.
+
+        Args:
+            incremental (bool, optional): When True, only build models whose training data or
+                configuration has changed since the last build. Defaults to False
+        """
+        self._build(incremental=incremental)
 
         for child in self._children.values():
-            child.build()
+            child.build(incremental=incremental)
 
         self.ready = True
         self.dirty = True
 
-    def _build(self):
+    @abstractmethod
+    def _build(self, incremental=False):
         raise NotImplementedError
 
     def dump(self):
@@ -71,6 +82,7 @@ class Processor(object):
 
         self.dirty = False
 
+    @abstractmethod
     def _dump(self):
         raise NotImplementedError
 
@@ -85,6 +97,7 @@ class Processor(object):
         self.ready = True
         self.dirty = False
 
+    @abstractmethod
     def _load(self):
         raise NotImplementedError
 
@@ -102,6 +115,7 @@ class Processor(object):
         for child in self._children.values():
             child.evaluate(print_stats)
 
+    @abstractmethod
     def _evaluate(self):
         raise NotImplementedError
 
@@ -198,8 +212,13 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application"""
         return self._children
 
-    def _build(self):
-        if len(self.domains) > 1:
+    def _build(self, incremental=False):
+        if len(self.domains) == 1:
+            return
+        if incremental:
+            model_path = path.get_domain_model_path(self._app_path)
+            self.domain_classifier.fit(previous_model_path=model_path)
+        else:
             self.domain_classifier.fit()
 
     def _dump(self):
@@ -339,9 +358,14 @@ class DomainProcessor(Processor):
             self._children[intent] = IntentProcessor(app_path, domain, intent,
                                                      self.resource_loader)
 
-    def _build(self):
+    def _build(self, incremental=False):
+        if len(self.intents) == 1:
+            return
         # train intent model
-        if len(self.intents) > 1:
+        if incremental:
+            model_path = path.get_intent_model_path(self._app_path, self.name)
+            self.intent_classifier.fit(previous_model_path=model_path)
+        else:
             self.intent_classifier.fit()
 
     def _dump(self):
@@ -465,11 +489,15 @@ class IntentProcessor(Processor):
         """The entity types associated with this intent"""
         return self._children
 
-    def _build(self):
+    def _build(self, incremental=False):
         """Builds the models for this intent"""
 
         # train entity recognizer
-        self.entity_recognizer.fit()
+        if incremental:
+            model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
+            self.entity_recognizer.fit(previous_model_path=model_path)
+        else:
+            self.entity_recognizer.fit()
 
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
@@ -574,9 +602,15 @@ class EntityProcessor(Processor):
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
         self.entity_resolver = EntityResolver(app_path, self.resource_loader, entity_type)
 
-    def _build(self):
+    def _build(self, incremental=False):
         """Builds the models for this entity type"""
-        self.role_classifier.fit()
+        if incremental:
+            model_path = path.get_role_model_path(self._app_path, self.domain,
+                                                  self.intent, self.type)
+            self.role_classifier.fit(previous_model_path=model_path)
+        else:
+            self.role_classifier.fit()
+
         self.entity_resolver.fit()
 
     def _dump(self):

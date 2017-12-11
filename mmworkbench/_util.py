@@ -20,9 +20,8 @@ from requests.auth import HTTPBasicAuth
 
 from . import path
 from .components import QuestionAnswerer
-from .exceptions import KnowledgeBaseConnectionError
+from .exceptions import AuthNotFoundError, KnowledgeBaseConnectionError
 from .components._config import get_app_namespace
-from .exceptions import AuthNotFoundError
 
 
 logger = logging.getLogger(__name__)

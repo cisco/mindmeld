@@ -5,6 +5,7 @@ from builtins import object, super
 
 from collections import namedtuple
 import logging
+import json
 import math
 
 import numpy as np
@@ -85,6 +86,27 @@ class ModelConfig(object):
     def __repr__(self):
         args_str = ', '.join("{}={!r}".format(key, getattr(self, key)) for key in self.__slots__)
         return "{}({})".format(self.__class__.__name__, args_str)
+
+    def to_json(self):
+        """Converts the model config object to JSON
+
+        Returns:
+            str: JSON representation of the classifier
+        """
+        return json.dumps(self.to_dict(), sort_keys=True)
+
+    def required_resources(self):
+        """Returns the resources this model requires
+
+        Returns:
+            set: set of required resources for this model
+        """
+        # get list of resources required by feature extractors
+        required_resources = set()
+        for name in self.features:
+            feature = get_feature_extractor(self.example_type, name)
+            required_resources.update(feature.__dict__.get('requirements', []))
+        return required_resources
 
 
 class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
@@ -833,11 +855,7 @@ class Model(object):
         """
 
         # get list of resources required by feature extractors
-        required_resources = set()
-        for name, kwargs in self.config.features.items():
-            required_resources.update(
-                get_feature_extractor(self.config.example_type, name).__dict__.get(
-                    'requirements', []))
+        required_resources = self.config.required_resources()
 
         # load required resources if not present in model resources
         for rname in required_resources:

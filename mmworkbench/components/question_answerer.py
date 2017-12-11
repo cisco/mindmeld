@@ -10,6 +10,8 @@ import json
 import logging
 import copy
 
+from future.utils import with_metaclass
+
 from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      does_index_exist)
@@ -585,10 +587,8 @@ class Search:
         except ElasticsearchException:
             raise KnowledgeBaseError
 
-    class Clause:
+    class Clause(with_metaclass(ABCMeta, object)):
         """This class models an abstract knowledge base clause."""
-
-        __metaclass__ = ABCMeta
 
         def __init__(self):
             """Initialize a knowledge base clause"""
