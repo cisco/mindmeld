@@ -32,6 +32,6 @@ class Preprocessor(with_metaclass(ABCMeta, object)):
             processed_text (str)
 
         Returns:
-            (dict)
+            (dict, dict): A tuple consisting of two maps, forward and backward
         """
         pass

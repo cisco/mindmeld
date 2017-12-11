@@ -451,7 +451,6 @@ class ResourceLoader(object):
         """
         query_factory = query_factory or QueryFactory.create_query_factory(
             app_path, preprocessor=preprocessor)
-
         return ResourceLoader(app_path, query_factory)
 
     # resource loader map
