@@ -11,7 +11,8 @@ from __future__ import unicode_literals
 
 import os
 
-import pytest, codecs
+import pytest
+import codecs
 
 from mmworkbench.tokenizer import Tokenizer
 from mmworkbench.query_factory import QueryFactory
@@ -21,6 +22,33 @@ APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
 AENEID_FILE = 'aeneid.txt'
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
+
+
+@pytest.fixture
+def lstm_entity_config():
+    return {
+        'model_type': 'tagger',
+        'label_type': 'entities',
+
+        'model_settings': {
+            'classifier_type': 'lstm',
+
+            'tag_scheme': 'IOB',
+            'feature_scaler': 'max-abs'
+
+        },
+        'params': {
+            'number_of_epochs': 1
+        },
+        'features': {
+            'in-gaz-span-seq': {},
+        }
+    }
+
+
+@pytest.fixture
+def kwik_e_mart_app_path():
+    return APP_PATH
 
 
 @pytest.fixture
