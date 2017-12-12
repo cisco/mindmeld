@@ -524,9 +524,10 @@ class Conversation(object):
     def _follow_directive(self, directive):
         msg = ''
         try:
-            if directive['name'] == DirectiveNames.REPLY:
+            directive_name = directive['name']
+            if directive_name in [DirectiveNames.REPLY, DirectiveNames.SPEAK]:
                 msg = directive['payload']['text']
-            elif directive['name'] == DirectiveNames.SUGGESTIONS:
+            elif directive_name == DirectiveNames.SUGGESTIONS:
                 suggestions = directive['payload']
                 if not suggestions:
                     raise ValueError
@@ -540,9 +541,13 @@ class Conversation(object):
 
                     texts.append(self._generate_suggestion_text(suggestion))
                 msg = msg.format(*texts)
-            elif directive['name'] == DirectiveNames.COLLECTION:
+            elif directive_name in DirectiveNames.LIST:
                 msg = '\n'.join(
                     [json.dumps(item, indent=4, sort_keys=True) for item in directive['payload']])
+            elif directive_name == DirectiveNames.LISTEN:
+                msg = 'Listening...'
+            elif directive_name == DirectiveNames.RESET:
+                msg = 'Resetting...'
         except (KeyError, ValueError, AttributeError):
             msg = "Unsupported response: {!r}".format(directive)
 
