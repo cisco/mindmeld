@@ -121,3 +121,7 @@ class WorkbenchVersionError(WorkbenchError):
 
 class WorkbenchImportError(WorkbenchError):
     pass
+
+
+class WorkbenchConfigError(WorkbenchError):
+    pass
