@@ -414,7 +414,19 @@ def get_app_namespace(app_path):
 
 
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):
-    """Returns the application config if it exists, otherwise returns the default config.
+    """Returns the config for the specified classifier, with the
+    following  order of precedence.
+
+    If the application contains a config.py file:
+    - Return the response from the get_*_model_config function in
+      config.py for the specified classifier type. E.g.
+      `get_intent_model_config`.
+    - If the function does not exist, or raise an exception, return the
+      config specified by *_MODEL_CONFIG in config.py, e.g.
+      INTENT_MODEL_CONFIG.
+
+    Otherwise, use the workbench default config for the classifier type
+
 
     Args:
         clf_type (str): The type of the classifier. One of 'domain',
