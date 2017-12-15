@@ -41,7 +41,6 @@ def test_instantiate():
     assert nlp
 
 
-@pytest.mark.focus
 def test_build(empty_nlp):
     """Tests building a processor with default config.
 
