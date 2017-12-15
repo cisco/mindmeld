@@ -479,7 +479,7 @@ class IntentProcessor(Processor):
 
         self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
         try:
-            self.parser = Parser(self.resource_loader)
+            self.parser = Parser(self.resource_loader, domain=domain, intent=intent)
         except FileNotFoundError:
             # Unable to load parser config -> no parser
             self.parser = None

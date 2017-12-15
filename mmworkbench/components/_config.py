@@ -9,7 +9,7 @@ import logging
 import os
 
 from .. import path
-
+from ..exceptions import WorkbenchConfigError
 
 logger = logging.getLogger(__name__)
 
@@ -414,24 +414,82 @@ def get_app_namespace(app_path):
 
 
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):
-    """Returns the application config if it exists, otherwise returns the default config."""
+    """Returns the config for the specified classifier, with the
+    following  order of precedence.
+
+    If the application contains a config.py file:
+    - Return the response from the get_*_model_config function in
+      config.py for the specified classifier type. E.g.
+      `get_intent_model_config`.
+    - If the function does not exist, or raise an exception, return the
+      config specified by *_MODEL_CONFIG in config.py, e.g.
+      INTENT_MODEL_CONFIG.
+
+    Otherwise, use the workbench default config for the classifier type
+
+
+    Args:
+        clf_type (str): The type of the classifier. One of 'domain',
+            'intent', 'entity', 'entity_resolution', or 'role'.
+        app_path (str, optional): The location of the app
+        domain (str, optional): The domain of the classifier
+        intent (str, optional): The intent of the classifier
+        entity (str, optional): The entity type of the classifier
+
+    Returns:
+        dict: A classifier config
+    """
     try:
         module_conf = _get_config_module(app_path)
 
-        attribute = {
-            'domain': 'DOMAIN_MODEL_CONFIG',
-            'intent': 'INTENT_MODEL_CONFIG',
-            'entity': 'ENTITY_MODEL_CONFIG',
-            'entity_resolution': 'ENTITY_RESOLUTION_CONFIG',
-            'role': 'ROLE_MODEL_CONFIG',
-        }[clf_type]
-        return copy.deepcopy(getattr(module_conf, attribute))
     except (OSError, IOError):
         logger.info('No app configuration file found. Using default %s model configuration',
                     clf_type)
+        return _get_default_classifier_config(clf_type)
+
+    func_name = {
+        'intent': 'get_intent_model_config',
+        'entity': 'get_entity_model_config',
+        'entity_resolution': 'get_entity_resolution_model_config',
+        'role': 'get_role_model_config',
+    }.get(clf_type)
+    func_args = {
+        'intent': ('domain',),
+        'entity': ('domain', 'intent'),
+        'entity_resolution': ('domain', 'intent', 'entity'),
+        'role': ('domain', 'intent', 'entity'),
+    }.get(clf_type)
+
+    if func_name:
+        func = None
+        try:
+            func = getattr(module_conf, func_name)
+        except AttributeError:
+            pass
+        if func:
+            try:
+                raw_args = {'domain': domain, 'intent': intent, 'entity': entity}
+                args = {k: raw_args[k] for k in func_args}
+                return copy.deepcopy(func(**args))
+            except Exception as exc:
+                # Note: this is intentionally broad -- provider could raise any exception
+                logger.warning('%r configuration provider raised exception: %s', clf_type, exc)
+
+    attr_name = {
+        'domain': 'DOMAIN_MODEL_CONFIG',
+        'intent': 'INTENT_MODEL_CONFIG',
+        'entity': 'ENTITY_MODEL_CONFIG',
+        'entity_resolution': 'ENTITY_RESOLUTION_CONFIG',
+        'role': 'ROLE_MODEL_CONFIG',
+    }[clf_type]
+    try:
+        return copy.deepcopy(getattr(module_conf, attr_name))
     except AttributeError:
         logger.info('No %s model configuration set. Using default.', clf_type)
+    return _get_default_classifier_config(clf_type)
 
+
+def _get_default_classifier_config(clf_type):
     return copy.deepcopy({
         'domain': DEFAULT_DOMAIN_MODEL_CONFIG,
         'intent': DEFAULT_INTENT_MODEL_CONFIG,
@@ -441,12 +499,56 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
     }[clf_type])
 
 
-def get_parser_config(app_path=None, config=None):
+def get_parser_config(app_path=None, config=None, domain=None, intent=None):
+    """Gets the fully specified parser configuration for the app at the
+    given path.
+
+    Args:
+        app_path (str, optional): The location of the workbench app
+        config (dict, optional): A config object to use. This will
+            override the config specified by the app's config.py file.
+            If necessary, this object will be expanded to a fully
+            specified config object.
+        domain (str, optional): The domain of the parser
+        intent (str, optional): The intent of the parser
+
+    Returns:
+        dict: A fully parser configuration
+    """
+    if config:
+        return _expand_parser_config(config)
     try:
-        config = config or _get_config_module(app_path).PARSER_CONFIG
+        module_conf = _get_config_module(app_path)
+    except (OSError, IOError):
+        logger.info('No app configuration file found. Not configuring parser.')
+        return _get_default_parser_config()
+
+    # Try provider first
+    config_provider = None
+    try:
+        config_provider = module_conf.get_parser_config
     except AttributeError:
-        return None
-    return _expand_parser_config(config)
+        pass
+    if config_provider:
+        try:
+            config = config or config_provider(domain, intent)
+            return _expand_parser_config(config)
+        except Exception as exc:
+            # Note: this is intentionally broad -- provider could raise any exception
+            logger.warning('Parser configuration provider raised exception: %s', exc)
+
+    # Try object second
+    try:
+        config = config or module_conf.PARSER_CONFIG
+        return _expand_parser_config(config)
+    except AttributeError:
+        pass
+
+    return _get_default_parser_config()
+
+
+def _get_default_parser_config():
+    return None
 
 
 def _expand_parser_config(config):
@@ -538,7 +640,7 @@ def _expand_group_config(group_config):
             except (AttributeError, ValueError):
                 # simple style config -- dependent is a str
                 dep_type = dependent
-                pass
+
             expanded[dep_type] = config
     else:
         for dep_type, dep_config in group_config.items():
