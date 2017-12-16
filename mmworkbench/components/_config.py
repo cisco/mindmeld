@@ -9,7 +9,6 @@ import logging
 import os
 
 from .. import path
-from ..exceptions import WorkbenchConfigError
 
 logger = logging.getLogger(__name__)
 
