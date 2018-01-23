@@ -123,26 +123,32 @@ class Processor(with_metaclass(ABCMeta, object)):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
-    def process(self, query_text, allowed_nlp_classes=None):
+    def process(self, query_text, allowed_nlp_classes=None, time_zone=None, timestamp=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
         Args:
             query_text (str): The raw user text input
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-            selected for NLP analysis. An example:
-            {
-                smart_home: {
-                    close_door: {}
-                }
-            }
-            where smart_home is the domain and close_door is the intent.
+                selected for NLP analysis. An example:
+
+                    {
+                        smart_home: {
+                            close_door: {}
+                        }
+                    }
+
+                where smart_home is the domain and close_door is the intent.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the full hierarchy of natural language processing models to the input query
         """
-        query = self.resource_loader.query_factory.create_query(query_text)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
         return self.process_query(query, allowed_nlp_classes).to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None):
@@ -152,13 +158,19 @@ class Processor(with_metaclass(ABCMeta, object)):
         Args:
             query_text (str): The raw user text input
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-            selected for NLP analysis. An example:
-            {
-                smart_home: {
-                    close_door: {}
-                }
-            }
-            where smart_home is the domain and close_door is the intent.
+                selected for NLP analysis. An example:
+
+                    {
+                        smart_home: {
+                            close_door: {}
+                        }
+                    }
+
+                where smart_home is the domain and close_door is the intent.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -166,16 +178,21 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         raise NotImplementedError
 
-    def create_query(self, query_text):
+    def create_query(self, query_text, time_zone=None, timestamp=None):
         """Creates a query with the given text
 
         Args:
-            text (str): Text to create a query object for
+            query_text (str): Text to create a query object for
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             Query: A newly constructed query
         """
-        return self.resource_loader.query_factory.create_query(query_text)
+        return self.resource_loader.query_factory.create_query(query_text, time_zone=time_zone,
+                                                               timestamp=timestamp)
 
     def __repr__(self):
         msg = '<{} {!r} ready: {!r}, dirty: {!r}>'
@@ -392,19 +409,32 @@ class DomainProcessor(Processor):
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
 
-    def process(self, query_text):
+    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
         Args:
             query_text (str): The raw user text input
+            allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
+                NLP hierarchy that is selected for NLP analysis. An example:
+
+                    {
+                        close_door: {}
+                    }
+
+                where close_door is the intent. The intent belongs to the smart_home domain.
+                If allowed_nlp_classes is None, we use the normal model predict functionality.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self.resource_loader.query_factory.create_query(query_text)
-        processed_query = self.process_query(query)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
+        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes)
         processed_query.domain = self.name
         return processed_query.to_dict()
 
@@ -415,13 +445,14 @@ class DomainProcessor(Processor):
         Args:
             query (Query): The query object to process
             allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
-             NLP hierarchy that is selected for NLP analysis. An example:
-            {
-                close_door: {}
-            }
+                NLP hierarchy that is selected for NLP analysis. An example:
 
-            where close_door is the intent. The intent belongs to the smart_home domain.
-            If allowed_nlp_classes is None, we use the normal model predict functionality.
+                    {
+                        close_door: {}
+                    }
+
+                where close_door is the intent. The intent belongs to the smart_home domain.
+                If allowed_nlp_classes is None, we use the normal model predict functionality.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -533,18 +564,22 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
                             self.domain, self.name))
 
-    def process(self, query_text):
+    def process(self, query_text, time_zone=None, timestamp=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
 
         Args:
             query_text (str): The raw user text input
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self.resource_loader.query_factory.create_query(query_text)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name

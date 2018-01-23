@@ -22,11 +22,15 @@ class QueryFactory(object):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
 
-    def create_query(self, text):
+    def create_query(self, text, time_zone=None, timestamp=None):
         """Creates a query with the given text
 
         Args:
             text (str): Text to create a query object for
+            time_zone (str, optional): An IANA time zone id to
+                create the query relative to.
+            timestamp (int, optional): A reference unix timestamp to
+                create the query relative to, in seconds.
 
         Returns:
             Query: A newly constructed query
@@ -56,7 +60,8 @@ class QueryFactory(object):
         char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
 
         query = Query(raw_text, processed_text, normalized_tokens, char_maps)
-        query.system_entity_candidates = sys_ent_rec.get_candidates(query)
+        query.system_entity_candidates = sys_ent_rec.get_candidates(query, time_zone=time_zone,
+                                                                    timestamp=timestamp)
         return query
 
     def normalize(self, text):

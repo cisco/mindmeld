@@ -18,27 +18,32 @@ MALLARD_URL = "http://localhost:2626"
 MALLARD_ENDPOINT = "parse"
 
 
-def get_candidates(query, entity_types=None, span=None):
+def get_candidates(query, entity_types=None, time_zone=None, timestamp=None):
     """Identifies candidate system entities in the given query
 
     Args:
         query (Query): The query to examine
         entity_types (list of str): The entity types to consider
+        time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
+            If not specified, the system time zone is used.
+        timestamp (None, optional): A unix timestamp used as the reference time.
+            If not specified, the current system time is used. If `time_zone`
+            is not also specified, this parameter is ignored.
 
     Returns:
         list of QueryEntity: The system entities found in the query
     """
 
     dims = _dimensions_from_entity_types(entity_types)
-    response = parse_numerics(query.text, dimensions=dims)
+    response = parse_numerics(query.text, dimensions=dims, time_zone=time_zone, timestamp=timestamp)
 
     if (int(response.get('status', -1)) == 200) and ('data' in response.keys()):
         return [e for e in [_mallard_item_to_query_entity(query, item) for item in response['data']]
                 if entity_types is None or e.entity.type in entity_types]
-    else:
-        logger.debug("Mallard did not process query: {} with dims: {} correctly and "
-                     "returned response: {}".format(query.text, str(dims), str(response)))
-        return []
+
+    logger.debug("Mallard did not process query: {} with dims: {} correctly and "
+                 "returned response: {}".format(query.text, str(dims), str(response)))
+    return []
 
 
 def get_candidates_for_text(text, entity_types=None, span=None):
@@ -63,15 +68,23 @@ def get_candidates_for_text(text, entity_types=None, span=None):
     return items
 
 
-def parse_numerics(sentence, dimensions=None, language='eng', reference_time=''):
+def parse_numerics(sentence, dimensions=None, language='eng', time_zone=None, timestamp=None):
     """Calls Mallard API to extract numerical entities from a sentence.
 
     Args:
         sentence (str): A raw sentence.
         dimensions (None or list of str): The list of types (e.g. volume,
             temperature) to restrict the output to. If None, include all types
+        language (str, optional): The language being used to parse numeric entities
+        time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
+            If not specified, the system time zone is used.
+        timestamp (None, optional): A unix timestamp used as the reference time.
+            If not specified, the current system time is used. If `time_zone`
+            is not also specified, this parameter is ignored.
+
     Returns:
         (dict) The JSON result from Mallard for the given query.
+
     """
     if sentence == '':
         return {'data': []}
@@ -82,8 +95,10 @@ def parse_numerics(sentence, dimensions=None, language='eng', reference_time='')
     }
     if dimensions is not None:
         data['dimensions'] = dimensions
-    if reference_time:
-        data['reference_time'] = reference_time
+    if time_zone:
+        data['timeZone'] = time_zone
+    if timestamp:
+        data['timestamp'] = timestamp
 
     try:
         response = requests.request('POST', url, json=data)

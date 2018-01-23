@@ -19,6 +19,7 @@ requirements = [
     'pip>=9.0.1',
     'py~=1.4',
     'python-dateutil~=2.6',
+    'pytz>=2017.2',
     'requests>=2.13.0,<=2.18.4',
     'scipy>=0.9,<=0.19.1',
     'scikit-learn>=0.18.1,<=0.18.2',
