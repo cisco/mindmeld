@@ -198,6 +198,14 @@ def test_query_equality(query_factory):
     assert query_a == query_b
 
 
+def test_query_equality_2(query_factory):
+    """Tests query equality"""
+    query_a = query_factory.create_query('Hello. There.', time_zone='America/Los_Angeles')
+    query_b = query_factory.create_query('Hello. There.', time_zone='America/Bahia')
+
+    assert query_a != query_b
+
+
 def test_query_entity_equality():
     """Tests query entity equality"""
     entity_a = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
@@ -243,3 +251,39 @@ def test_create_entity_from_query(query_factory):
 
     assert entity.span.start == 18
     assert entity.span.end == 21
+
+
+def test_query_time_zone(query_factory):
+    """Tests that a query created with a time uses the correct time zone for system entities"""
+    query = query_factory.create_query('Today at noon', time_zone='America/Bahia')
+
+    assert len(query.system_entity_candidates) == 1
+
+    entity = query.system_entity_candidates[0]
+
+    # time in 'America/Bahia' is always -3 (no daylight savings time)
+    assert entity.entity.value['value'][10:] == 'T12:00:00.000-03:00'
+
+
+def test_query_time_zone_2(query_factory):
+    """Tests that a query created with a time uses the correct time zone for system entities"""
+    query = query_factory.create_query('Today at noon', time_zone='UTC')
+
+    assert len(query.system_entity_candidates) == 1
+
+    entity = query.system_entity_candidates[0]
+
+    assert entity.entity.value['value'][10:] == 'T12:00:00.000Z'
+
+
+def test_query_timestamp(query_factory):
+    """Tests that a query created with a time uses the correct time zone for system entities"""
+    query = query_factory.create_query('Today at noon', time_zone='America/Bahia',
+                                       timestamp=1516748906)
+
+    assert len(query.system_entity_candidates) == 1
+
+    entity = query.system_entity_candidates[0]
+
+    # time in 'America/Bahia' is always -3 (no daylight savings time)
+    assert entity.entity.value['value'] == '2018-01-23T12:00:00.000-03:00'

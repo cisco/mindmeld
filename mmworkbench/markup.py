@@ -30,7 +30,8 @@ BRAT_FORMAT = 'brat'
 MARKUP_FORMATS = frozenset({MINDMELD_FORMAT, BRAT_FORMAT})
 
 
-def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=False):
+def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=False,
+               query_options=None):
     """Creates a processed query object from marked up query text.
 
     Args:
@@ -41,14 +42,17 @@ def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=Fal
         intent (str, optional): The name of the intent annotated for the query.
         is_gold (bool, optional): True if the markup passed in is a reference,
             human-labeled example. Defaults to False.
+        query_options (dict, optional): A dict containing options for creating
+            a Query, such as `language`, `time_zone` and `timestamp`
 
     Returns:
         ProcessedQuery: a processed query
     """
     query_factory = query_factory or QueryFactory.create_query_factory()
+    query_options = query_options or {}
     try:
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
-        query = query_factory.create_query(raw_text)
+        query = query_factory.create_query(raw_text, **query_options)
         entities = _process_annotations(query, annotations)
     except MarkupError as exc:
         msg = 'Invalid markup in query {!r}: {}'

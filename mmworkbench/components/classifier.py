@@ -201,11 +201,15 @@ class Classifier(with_metaclass(ABCMeta, object)):
         self.ready = True
         self.dirty = True
 
-    def predict(self, query):
+    def predict(self, query, time_zone=None, timestamp=None):
         """Predicts a class label for the given query using the trained classification model
 
         Args:
             query (Query or str): The input query
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             str: The predicted class label
@@ -214,16 +218,21 @@ class Classifier(with_metaclass(ABCMeta, object)):
             logger.error('You must fit or load the model before running predict')
             return
         if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query)
+            query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
+                                                                     timestamp=timestamp)
 
         return self._model.predict([query])[0]
 
-    def predict_proba(self, query):
+    def predict_proba(self, query, time_zone=None, timestamp=None):
         """Runs prediction on a given query and generates multiple hypotheses with their
         associated probabilities using the trained classification model
 
         Args:
             query (Query): The input query
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             list: a list of tuples of the form (str, float) grouping predicted class labels and
@@ -233,7 +242,8 @@ class Classifier(with_metaclass(ABCMeta, object)):
             logger.error('You must fit or load the model before running predict_proba')
             return
         if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query)
+            query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
+                                                                     timestamp=timestamp)
 
         predict_proba_result = self._model.predict_proba([query])
         class_proba_tuples = list(predict_proba_result[0][1].items())

@@ -1,4 +1,5 @@
 -e .
+bleach==1.5.0
 bumpversion==0.5.3
 coverage==4.2
 flake8==3.2.1
