@@ -123,7 +123,8 @@ class Processor(with_metaclass(ABCMeta, object)):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
-    def process(self, query_text, allowed_nlp_classes=None, time_zone=None, timestamp=None):
+    def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
+                timestamp=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -139,6 +140,8 @@ class Processor(with_metaclass(ABCMeta, object)):
                     }
 
                 where smart_home is the domain and close_door is the intent.
+            language (str, optional): Language as specified using a 639-2 code;
+                if omitted, English is assumed.
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -148,7 +151,8 @@ class Processor(with_metaclass(ABCMeta, object)):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the full hierarchy of natural language processing models to the input query
         """
-        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
+        query = self.create_query(query_text, language=language,
+                                  time_zone=time_zone, timestamp=timestamp)
         return self.process_query(query, allowed_nlp_classes).to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None):
@@ -156,7 +160,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         trained for this application
 
         Args:
-            query_text (str): The raw user text input
+            query (Query): The user input query
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
                 selected for NLP analysis. An example:
 
@@ -167,10 +171,6 @@ class Processor(with_metaclass(ABCMeta, object)):
                     }
 
                 where smart_home is the domain and close_door is the intent.
-            time_zone (str, optional): The name of an IANA time zone, such as
-                'America/Los_Angeles', or 'Asia/Kolkata'
-                See the [tz database](https://www.iana.org/time-zones) for more information.
-            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -178,11 +178,13 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         raise NotImplementedError
 
-    def create_query(self, query_text, time_zone=None, timestamp=None):
+    def create_query(self, query_text, language=None, time_zone=None, timestamp=None):
         """Creates a query with the given text
 
         Args:
             query_text (str): Text to create a query object for
+            language (str, optional): Language as specified using a 639-2 code such as 'eng' or
+                'spa'; if omitted, English is assumed.
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -191,8 +193,9 @@ class Processor(with_metaclass(ABCMeta, object)):
         Returns:
             Query: A newly constructed query
         """
-        return self.resource_loader.query_factory.create_query(query_text, time_zone=time_zone,
-                                                               timestamp=timestamp)
+        return self.resource_loader.query_factory.create_query(
+            query_text, language=language, time_zone=time_zone, timestamp=timestamp
+        )
 
     def __repr__(self):
         msg = '<{} {!r} ready: {!r}, dirty: {!r}>'

@@ -18,24 +18,29 @@ MALLARD_URL = "http://localhost:2626"
 MALLARD_ENDPOINT = "parse"
 
 
-def get_candidates(query, entity_types=None, time_zone=None, timestamp=None):
+def get_candidates(query, entity_types=None, language=None, time_zone=None, timestamp=None):
     """Identifies candidate system entities in the given query
 
     Args:
         query (Query): The query to examine
         entity_types (list of str): The entity types to consider
+        language (str, optional): Language as specified using a 639-2 code.
+            If omitted, English is assumed.
         time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
             If not specified, the system time zone is used.
-        timestamp (None, optional): A unix timestamp used as the reference time.
+        timestamp (long, optional): A unix timestamp used as the reference time.
             If not specified, the current system time is used. If `time_zone`
             is not also specified, this parameter is ignored.
 
     Returns:
         list of QueryEntity: The system entities found in the query
     """
-
     dims = _dimensions_from_entity_types(entity_types)
-    response = parse_numerics(query.text, dimensions=dims, time_zone=time_zone, timestamp=timestamp)
+    language = language or query.language
+    time_zone = time_zone or query.time_zone
+    timestamp = timestamp or query.timestamp
+    response = parse_numerics(query.text, dimensions=dims, language=language,
+                              time_zone=time_zone, timestamp=timestamp)
 
     if (int(response.get('status', -1)) == 200) and ('data' in response.keys()):
         return [e for e in [_mallard_item_to_query_entity(query, item) for item in response['data']]
@@ -46,12 +51,20 @@ def get_candidates(query, entity_types=None, time_zone=None, timestamp=None):
     return []
 
 
-def get_candidates_for_text(text, entity_types=None, span=None):
+def get_candidates_for_text(text, entity_types=None, span=None, language=None,
+                            time_zone=None, timestamp=None):
     """Identifies candidate system entities in the given text
 
     Args:
         text (str): The text to examine
         entity_types (list of str): The entity types to consider
+        language (str, optional): Language as specified using a 639-2 code.
+            If omitted, English is assumed.
+        time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
+            If not specified, the system time zone is used.
+        timestamp (long, optional): A unix timestamp used as the reference time.
+            If not specified, the current system time is used. If `time_zone`
+            is not also specified, this parameter is ignored.
 
     Returns:
         list of dict: The system entities found in the text
@@ -75,10 +88,11 @@ def parse_numerics(sentence, dimensions=None, language='eng', time_zone=None, ti
         sentence (str): A raw sentence.
         dimensions (None or list of str): The list of types (e.g. volume,
             temperature) to restrict the output to. If None, include all types
-        language (str, optional): The language being used to parse numeric entities
+        language (str, optional): Language of the sentence specified using a 639-2 code.
+            If omitted, English is assumed.
         time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
             If not specified, the system time zone is used.
-        timestamp (None, optional): A unix timestamp used as the reference time.
+        timestamp (long, optional): A unix timestamp used as the reference time.
             If not specified, the current system time is used. If `time_zone`
             is not also specified, this parameter is ignored.
 
@@ -138,7 +152,12 @@ def resolve_system_entity(query, entity_type, span):
             else:
                 alternates.append(candidate)
 
-    mallard_candidates = parse_numerics(span.slice(query.text))['data']
+    language = query.language
+    time_zone = query.time_zone
+    timestamp = query.timestamp
+
+    mallard_candidates = parse_numerics(span.slice(query.text), language=language,
+                                        time_zone=time_zone, timestamp=timestamp)['data']
     mallard_text_val_to_candidate = {}
 
     # If no matching candidate was found, try parsing only this entity
