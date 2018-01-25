@@ -8,6 +8,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
+    'bleach==1.5.0',  # tensorflow -> tensorboard -> bleach, prevents conflicts with jupyter
     'Click~=6.0',
     'click-log==0.1.8',  # check WB3-191
     'elasticsearch>=5.1.0,<=5.4.0',
