@@ -11,7 +11,7 @@ app = Application(__name__)
 @app.handle(intent='greet')
 def welcome(context, responder):
     try:
-        responder.slots['name'] = context['request']['session']['name']
+        responder.slots['name'] = context['request']['context']['name']
         prefix = 'Hello, {name}. '
     except KeyError:
         prefix = 'Hello. '
@@ -67,9 +67,9 @@ def send_store_hours(context, responder):
 @app.handle(intent='find_nearest_store')
 def send_nearest_store(context, responder):
     try:
-        user_location = context['request']['session']['location']
+        user_location = context['request']['context']['location']
     except KeyError:
-        # request and session should always be here so assume location is the problem
+        # request and context should always be here so assume location is the problem
         responder.reply("I'm not sure. You haven't told me where you are!")
         responder.suggest([{'type': 'location', 'text': 'Share your location'}])
         return

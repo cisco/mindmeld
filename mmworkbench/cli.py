@@ -83,14 +83,14 @@ def run_server(ctx, port, no_debug, reloader):
 
 @_app_cli.command('converse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-@click.option('--session', help='JSON object to be used as the session')
-def converse(ctx, session):
+@click.option('--context', help='JSON object to be used as the context')
+def converse(ctx, context):
     """Starts a conversation with the app."""
 
     try:
         app = ctx.obj.get('app')
-        if isinstance(session, str):
-            session = json.loads(session)
+        if isinstance(context, str):
+            context = json.loads(context)
         if app is None:
             raise ValueError("No app was given. Run 'python app.py converse' from your app"
                              " folder.")
@@ -98,7 +98,7 @@ def converse(ctx, session):
         # make sure num parser is running
         ctx.invoke(num_parser, start=True)
 
-        convo = Conversation(app=app, session=session)
+        convo = Conversation(app=app, context=context)
 
         while True:
             message = click.prompt('You')

@@ -105,7 +105,8 @@ class ApplicationManager(object):
             return
         self.nlp.load()
 
-    def parse(self, text, params=None, session=None, frame=None, history=None, verbose=False):
+    def parse(self, text, params=None, context=None, frame=None, history=None, verbose=False,
+              session=None):
         """
         Args:
             text (str): The text of the message sent by the user
@@ -117,9 +118,10 @@ class ApplicationManager(object):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             params['timestamp'] (long, optional): A unix time stamp for the request (in seconds).
-            session (dict, optional): Description
+            context (dict, optional): Description
             history (list, optional): Description
             verbose (bool, optional): Description
+            session (dict, optional): Deprecated since 3.3.0 in favor of context
 
         Returns:
             (dict): Context object
@@ -133,12 +135,14 @@ class ApplicationManager(object):
         """
 
         params = params or {}
-        session = session or {}
+        context = context or session or {}
+        if session:
+            logger.warning("The 'session' parameter is deprecated. Please use 'context' instead.")
         history = history or []
         frame = frame or {}
         # TODO: what do we do with verbose???
 
-        request = {'text': text, 'params': params, 'session': session}
+        request = {'text': text, 'params': params, 'context': context}
 
         allowed_intents = self._validate_param(params, 'allowed_intents')
         target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
