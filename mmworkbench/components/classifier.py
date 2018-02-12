@@ -275,6 +275,9 @@ class Classifier(with_metaclass(ABCMeta, object)):
         evaluation = self._model.evaluate(queries, labels)
         return evaluation
 
+    def inspect(self, query, gold_label=None):
+        raise NotImplemented
+
     def _get_model_config(self, loaded_config, **kwargs):
         """Updates the loaded configuration with runtime specified options, and creates a model
         configuration object with the final configuration dictionary. If an application config

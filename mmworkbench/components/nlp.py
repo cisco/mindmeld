@@ -23,6 +23,9 @@ from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
 from ..exceptions import AllowedNlpClassesKeyError
+from ..markup import process_markup
+from ..query_factory import QueryFactory
+
 
 logger = logging.getLogger(__name__)
 
@@ -347,6 +350,20 @@ class NaturalLanguageProcessor(Processor):
 
         return nlp_components
 
+    def inspect(self, markup, domain=None, intent=None ):
+        """ Inspect the marked up query and print the table of features and weights
+        Args:
+            markup (str): The marked up query string
+            domain (str): The gold value for domain classification
+            intent (str): The gold value for intent classification
+        """
+        query_factory = QueryFactory.create_query_factory()
+        raw_query, query, entities = process_markup(markup, query_factory, query_options={})
+
+        if domain:
+            print('Domain classifier inspection')
+            domain_inspection = self.domain_classifier.inspect(query, domain=domain)
+            print(domain_inspection)
 
 class DomainProcessor(Processor):
     """The domain processor houses the hierarchy of domain-specific natural language processing

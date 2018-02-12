@@ -118,3 +118,6 @@ class DomainClassifier(Classifier):
 
         queries.sort()
         return self._resource_loader.hash_list(queries)
+
+    def inspect(self, query, domain=None):
+        return self._model.inspect(example=query, gold_label=domain)

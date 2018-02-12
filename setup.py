@@ -17,6 +17,7 @@ requirements = [
     'future~=0.16.0',
     'nltk~=3.2',
     'numpy>=1.10.1,<=1.13.1',
+    'pandas>=0.22',
     'pip>=9.0.1',
     'py~=1.4',
     'python-dateutil~=2.6',
