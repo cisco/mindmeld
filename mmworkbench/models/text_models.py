@@ -224,9 +224,10 @@ class TextModel(Model):
         logging.info("Predicted: " + pred_label)
 
         if gold_class is None:
-            columns = ['Feature', 'Value', 'Pred_W', 'Pred_P']
+            columns = ['Feature', 'Value', 'Pred_W({0})'.format(pred_label), 'Pred_P']
         else:
-            columns = ['Feature', 'Value', 'Pred_W', 'Pred_P', 'Gold_W', 'Gold_P', 'Diff']
+            columns = ['Feature', 'Value', 'Pred_W({0})'.format(pred_label), 'Pred_P',
+                       'Gold_W({0})'.format(gold_label), 'Gold_P', 'Diff']
             logging.info("Gold: " + gold_label)
 
         df = pd.DataFrame(data=None, columns=columns)

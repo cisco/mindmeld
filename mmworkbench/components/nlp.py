@@ -266,6 +266,21 @@ class NaturalLanguageProcessor(Processor):
             else:
                 logger.info("Skipping domain classifier evaluation")
 
+    def _process_domain(self, query, allowed_nlp_classes=None):
+        if len(self.domains) > 1:
+            if not allowed_nlp_classes:
+                return self.domain_classifier.predict(query)
+            else:
+                sorted_domains = self.domain_classifier.predict_proba(query)
+                for ordered_domain, _ in sorted_domains:
+                    if ordered_domain in allowed_nlp_classes.keys():
+                        return ordered_domain
+
+                raise AllowedNlpClassesKeyError(
+                    'Could not find user inputted domain in NLP hierarchy')
+        else:
+            return list(self.domains.keys())[0]
+
     def process_query(self, query, allowed_nlp_classes=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
@@ -287,23 +302,7 @@ class NaturalLanguageProcessor(Processor):
                 applying the full hierarchy of natural language processing models to the input query
         """
         self._check_ready()
-
-        if len(self.domains) > 1:
-            if not allowed_nlp_classes:
-                domain = self.domain_classifier.predict(query)
-            else:
-                sorted_domains = self.domain_classifier.predict_proba(query)
-                domain = None
-                for ordered_domain, _ in sorted_domains:
-                    if ordered_domain in allowed_nlp_classes.keys():
-                        domain = ordered_domain
-                        break
-
-                if not domain:
-                    raise AllowedNlpClassesKeyError(
-                        'Could not find user inputted domain in NLP hierarchy')
-        else:
-            domain = list(self.domains.keys())[0]
+        domain = self._process_domain(query, allowed_nlp_classes=allowed_nlp_classes)
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
@@ -361,9 +360,17 @@ class NaturalLanguageProcessor(Processor):
         raw_query, query, entities = process_markup(markup, query_factory, query_options={})
 
         if domain:
-            print('Domain classifier inspection')
+            print('Inspecting domain classification')
             domain_inspection = self.domain_classifier.inspect(query, domain=domain)
             print(domain_inspection)
+            print('')
+
+        if intent:
+            print('Inspecting intent classification')
+            domain = self._process_domain(query)
+            intent_inspection = self.domains[domain].inspect(query, intent=intent)
+            print(intent_inspection)
+            print('')
 
 class DomainProcessor(Processor):
     """The domain processor houses the hierarchy of domain-specific natural language processing
@@ -502,6 +509,9 @@ class DomainProcessor(Processor):
         processed_query.intent = intent
 
         return processed_query
+
+    def inspect(self, query, intent=None):
+        return self.intent_classifier.inspect(query, intent=intent)
 
 
 class IntentProcessor(Processor):
