@@ -216,7 +216,12 @@ class TextModel(Model):
         Returns:
             (DataFrame): The DataFrame that includes every feature, their value, weight and probability
         """
-        gold_class = self._class_encoder.transform([gold_label])
+        try:
+            gold_class = self._class_encoder.transform([gold_label])
+        except ValueError:
+            logger.warning('Unable to decode label `{0}`'.format(gold_label))
+            gold_class = None
+
         pred_label = self.predict([example])[0]
         pred_class = self._class_encoder.transform([pred_label])
         features = self._extract_features(example)
