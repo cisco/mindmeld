@@ -198,7 +198,18 @@ class TextModel(Model):
         return predictions
 
     def _get_feature_weight(self, feat_name, label_class):
-        if len(self._class_encoder.classes_) == 2 and label_class == 1:
+        """ Retrieves the feature weight from the coefficient matrix. If there are only two
+         classes, the feature vector is actually collapsed into one so we need some logic to
+         handle that case.
+
+        Args:
+            feat_name (str) : The feature name
+            label_class (int): The index of the label
+
+        Returns:
+            (float): The feature weight
+        """
+        if len(self._class_encoder.classes_) == 2 and label_class >= 1:
             return 0
         else:
             return self._clf.coef_[label_class, self._feat_vectorizer.vocabulary_[feat_name]]
@@ -216,6 +227,10 @@ class TextModel(Model):
         Returns:
             (DataFrame): The DataFrame that includes every feature, their value, weight and probability
         """
+        if not isinstance(self._clf, LogisticRegression):
+            logging.warning('Currently inspection is only available for Logistic Regression Model')
+            return pd.DataFrame()
+
         try:
             gold_class = self._class_encoder.transform([gold_label])
         except ValueError:
