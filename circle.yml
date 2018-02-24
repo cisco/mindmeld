@@ -25,7 +25,6 @@ test:
     - while ! nc -z localhost 2626; do sleep 5; done;:
         timeout: 150
   override:
-    - pip install -r dev-requirements.txt --extra-index-url=https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi -U
     - PIP_EXTRA_INDEX_URL=https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi tox
     - mmworkbench blueprint home_assistant
 deployment:
