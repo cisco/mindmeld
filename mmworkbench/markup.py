@@ -50,16 +50,8 @@ def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=Fal
     """
     query_factory = query_factory or QueryFactory.create_query_factory()
     query_options = query_options or {}
-    try:
-        raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
-        query = query_factory.create_query(raw_text, **query_options)
-        entities = _process_annotations(query, annotations)
-    except MarkupError as exc:
-        msg = 'Invalid markup in query {!r}: {}'
-        raise_from(MarkupError(msg.format(markup, exc)), exc)
-    except SystemEntityResolutionError as exc:
-        msg = "Unable to load query {!r}: {}"
-        raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
+    raw_text, query, entities = process_markup(
+        markup, query_factory=query_factory, query_options=query_options)
 
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
@@ -117,6 +109,20 @@ def read_query_file(file_path):
             query_text = line.split('\t')[0].strip()
             if query_text:
                 yield query_text
+
+
+def process_markup(markup, query_factory, query_options):
+    try:
+        raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
+        query = query_factory.create_query(raw_text, **query_options)
+        entities = _process_annotations(query, annotations)
+    except MarkupError as exc:
+        msg = 'Invalid markup in query {!r}: {}'
+        raise_from(MarkupError(msg.format(markup, exc)), exc)
+    except SystemEntityResolutionError as exc:
+        msg = "Unable to load query {!r}: {}"
+        raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
+    return raw_text, query, entities
 
 
 def _process_annotations(query, annotations):
