@@ -216,19 +216,21 @@ class TextModel(Model):
 
     def inspect(self, example, gold_label=None):
         """ This class takes an example and returns a DataFrame for every feature with feature
-          name, feature value, feature weight and their product for the predicted label. If gold label
-          is passed in, we will also include the feature value and weight for the gold label and returns
-          the log probability of the difference.
+          name, feature value, feature weight and their product for the predicted label. If gold
+          label is passed in, we will also include the feature value and weight for the gold
+          label and returns the log probability of the difference.
 
         Args:
             example (Query): The query to be predicted
             gold_label (str): The gold label for this string
 
         Returns:
-            (DataFrame): The DataFrame that includes every feature, their value, weight and probability
+            (DataFrame): The DataFrame that includes every feature, their value, weight and
+             probability
         """
         if not isinstance(self._clf, LogisticRegression):
-            logging.warning('Currently inspection is only available for Logistic Regression Model')
+            logging.warning(
+                'Currently inspection is only available for Logistic Regression Model')
             return pd.DataFrame()
 
         try:

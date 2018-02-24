@@ -349,7 +349,7 @@ class NaturalLanguageProcessor(Processor):
 
         return nlp_components
 
-    def inspect(self, markup, domain=None, intent=None ):
+    def inspect(self, markup, domain=None, intent=None):
         """ Inspect the marked up query and print the table of features and weights
         Args:
             markup (str): The marked up query string
@@ -371,6 +371,7 @@ class NaturalLanguageProcessor(Processor):
             intent_inspection = self.domains[domain].inspect(query, intent=intent)
             print(intent_inspection)
             print('')
+
 
 class DomainProcessor(Processor):
     """The domain processor houses the hierarchy of domain-specific natural language processing
