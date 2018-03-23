@@ -369,14 +369,18 @@ def char_ngrams(n, word):
     return ' '.join(char_gram)
 
 
-def extract_char_ngrams_features(ngram_lengths):
+def extract_char_ngrams_features(ngram_lengths_to_start_positions):
     def _extractor(query, resources):
         tokens = query.normalized_tokens
+        tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
         for i in range(len(tokens)):
-            for length in ngram_lengths:
-                feat_name = 'char_ngram|length:{}'.format(length)
-                feat_seq[i][feat_name] = char_ngrams(length, tokens[i])
+            for length, starts in ngram_lengths_to_start_positions.items():
+                for start in starts:
+                    feat_name = 'char-ngrams|length:{}|pos:{}'.format(
+                        length, start)
+                    if i+int(start) < len(tokens):
+                        feat_seq[i][feat_name] = char_ngrams(int(length), tokens[i+int(start)])
         return feat_seq
     return _extractor
 
@@ -419,6 +423,21 @@ def update_features_sequence(feat_seq, update_feat_seq):
     """
     for i in range(len(feat_seq)):
         feat_seq[i].update(update_feat_seq[i])
+
+
+def extract_char_ngrams(lengths=(1,)):
+    def _extractor(query, resources):
+        query_text = query.normalized_text
+        query_text = query_text.replace(' ','_')
+        ngram_counter = Counter()
+        for length in lengths:
+            for i in range(len(query_text) - length + 1):
+                char_ngram = []
+                for token in query_text[i:i + length]:
+                    char_ngram.append(token)
+                ngram_counter.update(['char_ngram:' + '|'.join(char_ngram)])
+        return ngram_counter
+    return _extractor
 
 
 @requires(WORD_FREQ_RSC)
@@ -637,6 +656,7 @@ def find_ngrams(input_list, n):
 register_features('query', {
     'bag-of-words': extract_ngrams,
     'edge-ngrams': extract_edge_ngrams,
+    'char-ngrams': extract_char_ngrams,
     'freq': extract_freq,
     'in-gaz': extract_in_gaz_feature,
     'gaz-freq': extract_gaz_freq,
@@ -646,5 +666,5 @@ register_features('query', {
     'in-gaz-span-seq': extract_in_gaz_span_features,
     'in-gaz-ngram-seq': extract_in_gaz_ngram_features,
     'sys-candidates-seq': extract_sys_candidate_features,
-    'char_ngrams': extract_char_ngrams_features
+    'char-ngrams-seq': extract_char_ngrams_features
 })
