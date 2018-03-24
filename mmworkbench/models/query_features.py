@@ -379,9 +379,9 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions):
                 for start in starts:
                     if i+int(start) < len(tokens):
                         ngrams = char_ngrams(int(length), tokens[i+int(start)])
-                        for j,c_gram in enumerate(ngrams):
+                        for j, c_gram in enumerate(ngrams):
                             feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(
-                                length, start,j)
+                                length, start, j)
                             feat_seq[i][feat_name] = c_gram
         return feat_seq
     return _extractor
@@ -430,7 +430,7 @@ def update_features_sequence(feat_seq, update_feat_seq):
 def extract_char_ngrams(lengths=(1,)):
     def _extractor(query, resources):
         query_text = query.normalized_text
-        query_text = query_text.replace(' ','_')
+        query_text = query_text.replace(' ', '_')
         ngram_counter = Counter()
         for length in lengths:
             for i in range(len(query_text) - length + 1):
