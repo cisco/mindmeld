@@ -366,7 +366,7 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions):
 
 def char_ngrams(n, word):
     char_gram = [''.join(ngram) for ngram in zip(*[word[i:] for i in range(n)])]
-    return ' '.join(char_gram)
+    return char_gram
 
 
 def extract_char_ngrams_features(ngram_lengths_to_start_positions):
@@ -377,10 +377,12 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions):
         for i in range(len(tokens)):
             for length, starts in ngram_lengths_to_start_positions.items():
                 for start in starts:
-                    feat_name = 'char-ngrams|length:{}|pos:{}'.format(
-                        length, start)
                     if i+int(start) < len(tokens):
-                        feat_seq[i][feat_name] = char_ngrams(int(length), tokens[i+int(start)])
+                        ngrams = char_ngrams(int(length), tokens[i+int(start)])
+                        for j,c_gram in enumerate(ngrams):
+                            feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(
+                                length, start,j)
+                            feat_seq[i][feat_name] = c_gram
         return feat_seq
     return _extractor
 
