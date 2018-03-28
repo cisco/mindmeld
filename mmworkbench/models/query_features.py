@@ -370,8 +370,17 @@ def char_ngrams(n, word):
 
 
 def extract_char_ngrams_features(ngram_lengths_to_start_positions):
+    """Returns a character n-gram feature extractor.
+        Args:
+            ngram_lengths_to_start_positions (dict):
+            The window of tokens to be considered relative to the
+            current token while extracting char n-grams
+        Returns:
+            (function) The feature extractor.
+        """
     def _extractor(query, resources):
         tokens = query.normalized_tokens
+        # normalize digits
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
         for i in range(len(tokens)):
@@ -428,9 +437,18 @@ def update_features_sequence(feat_seq, update_feat_seq):
 
 
 def extract_char_ngrams(lengths=(1,)):
+    """
+        Extract character ngrams of specified lengths.
+
+        Args:
+            lengths (list of int): The ngram length.
+
+        Returns:
+            (function) An feature extraction function that takes a query and
+                returns character ngrams of specified lengths.
+        """
     def _extractor(query, resources):
         query_text = query.normalized_text
-        query_text = query_text.replace(' ', '_')
         ngram_counter = Counter()
         for length in lengths:
             for i in range(len(query_text) - length + 1):
