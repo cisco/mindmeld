@@ -112,6 +112,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         Args:
             print_stats (bool): If true, prints the full stats table. Otherwise prints just
                                 the accuracy
+            label_set (string, optional): The custom label set from which to evaluate all classifiers
 
         """
         self._evaluate(print_stats, label_set=label_set)
