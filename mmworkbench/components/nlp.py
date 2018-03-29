@@ -62,7 +62,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         Args:
             incremental (bool, optional): When True, only build models whose training data or
                 configuration has changed since the last build. Defaults to False
-            label_set (string, optional): The custom label set from which to train all classifiers
+            label_set (string, optional): The label set from which to train all classifiers
         """
         self._build(incremental=incremental, label_set=label_set)
 
@@ -112,7 +112,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         Args:
             print_stats (bool): If true, prints the full stats table. Otherwise prints just
                                 the accuracy
-            label_set (string, optional): The custom label set from which to evaluate
+            label_set (string, optional): The label set from which to evaluate
                                 all classifiers
 
         """
