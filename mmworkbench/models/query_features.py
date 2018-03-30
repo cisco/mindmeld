@@ -368,9 +368,9 @@ def char_ngrams(n, word):
     char_grams = []
     for i in range(len(word)):
         """
-        if char ngram of length n doesn't exist, 
-        if no ngrams have been extracted for the token, 
-        add token to the list and return. No need to compute 
+        if char ngram of length n doesn't exist,
+        if no ngrams have been extracted for the token,
+        add token to the list and return. No need to compute
         for other windows.
         Ex: token is "you", n=4, return ["you"]
             token is "doing", n=4 return ["doin","oing"]
@@ -404,10 +404,11 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions):
                     if 0 <= token_index < len(tokens):
                         ngrams = char_ngrams(length, tokens[token_index])
                     else:
-                        #if token index out of bounds, return OUT_OF_BOUNDS token
+                        # if token index out of bounds, return OUT_OF_BOUNDS token
                         ngrams = [OUT_OF_BOUNDS_TOKEN]
                     for j, c_gram in enumerate(ngrams):
-                        feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(length, start, j)
+                        feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(
+                            length, start, j)
                         feat_seq[i][feat_name] = c_gram
         return feat_seq
     return _extractor
