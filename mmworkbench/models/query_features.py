@@ -10,7 +10,7 @@ import re
 
 from ..core import resolve_entity_conflicts
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                      register_features, mask_numerics, get_ngram, requires)
+                      OUT_OF_BOUNDS_TOKEN, register_features, mask_numerics, get_ngram, requires)
 
 # TODO: clean this up a LOT
 
@@ -365,8 +365,22 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions):
 
 
 def char_ngrams(n, word):
-    char_gram = [''.join(ngram) for ngram in zip(*[word[i:] for i in range(n)])]
-    return char_gram
+    char_grams = []
+    for i in range(len(word)):
+        """
+        if char ngram of length n doesn't exist, 
+        if no ngrams have been extracted for the token, 
+        add token to the list and return. No need to compute 
+        for other windows.
+        Ex: token is "you", n=4, return ["you"]
+            token is "doing", n=4 return ["doin","oing"]
+        """
+        if len(word[i:i+n]) < n:
+            if not char_grams:
+                char_grams.append((word[i:i + n]))
+            return char_grams
+        char_grams.append((word[i:i + n]))
+    return char_grams
 
 
 def extract_char_ngrams_features(ngram_lengths_to_start_positions):
@@ -386,12 +400,15 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions):
         for i in range(len(tokens)):
             for length, starts in ngram_lengths_to_start_positions.items():
                 for start in starts:
-                    if i+int(start) < len(tokens):
-                        ngrams = char_ngrams(int(length), tokens[i+int(start)])
-                        for j, c_gram in enumerate(ngrams):
-                            feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(
-                                length, start, j)
-                            feat_seq[i][feat_name] = c_gram
+                    token_index = i+int(start)
+                    if 0 <= token_index < len(tokens):
+                        ngrams = char_ngrams(length, tokens[token_index])
+                    else:
+                        #if token index out of bounds, return OUT_OF_BOUNDS token
+                        ngrams = [OUT_OF_BOUNDS_TOKEN]
+                    for j, c_gram in enumerate(ngrams):
+                        feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(length, start, j)
+                        feat_seq[i][feat_name] = c_gram
         return feat_seq
     return _extractor
 
