@@ -309,12 +309,16 @@ class ProcessedQuery(object):
 
     # TODO: look into using __slots__
 
-    def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False):
+    def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False, nbest_queries=None,
+                 nbest_entities=None):
         self.query = query
         self.domain = domain
         self.intent = intent
         self.entities = None if entities is None else tuple(entities)
         self.is_gold = is_gold
+        self.nbest_queries = nbest_queries
+        self.nbest_entities = nbest_entities
+
 
     def to_dict(self):
         """Converts the processed query into a dictionary"""
@@ -324,6 +328,10 @@ class ProcessedQuery(object):
             'intent': self.intent,
             'entities': None if self.entities is None else [e.to_dict() for e in self.entities],
         }
+        if self.nbest_queries:
+            base['nbest_queries'] = self.nbest_queries
+        if self.nbest_entities:
+            base['nbest_entities'] = self.nbest_entities
         return base
 
     def __eq__(self, other):

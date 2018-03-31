@@ -127,7 +127,7 @@ class Processor(with_metaclass(ABCMeta, object)):
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
-                timestamp=None):
+                timestamp=None, nbest_query_text=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -149,6 +149,7 @@ class Processor(with_metaclass(ABCMeta, object)):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            nbest_query_text (list, optional): A list of the n best query transcripts from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -156,9 +157,15 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         query = self.create_query(query_text, language=language,
                                   time_zone=time_zone, timestamp=timestamp)
-        return self.process_query(query, allowed_nlp_classes).to_dict()
+        nbest_queries = None
+        if nbest_query_text:
+            nbest_queries = []
+            for query_text in nbest_query_text:
+                n_query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
+                nbest_queries.append(n_query)
+        return self.process_query(query, allowed_nlp_classes, nbest_queries).to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, nbest_queries=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -174,6 +181,8 @@ class Processor(with_metaclass(ABCMeta, object)):
                     }
 
                 where smart_home is the domain and close_door is the intent.
+            nbest_queries (list, optional): A list of Query objects, one for each of the nbest
+                                            transcript from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -281,7 +290,7 @@ class NaturalLanguageProcessor(Processor):
         else:
             return list(self.domains.keys())[0]
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, nbest_queries=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -296,6 +305,8 @@ class NaturalLanguageProcessor(Processor):
             }
             where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
             is None, we just use the normal model predict functionality.
+            nbest_queries (list, optional): A list of Query objects, one for each of the nbest
+                                            transcript from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -307,7 +318,7 @@ class NaturalLanguageProcessor(Processor):
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
         processed_query = \
-            self.domains[domain].process_query(query, allowed_intents)
+            self.domains[domain].process_query(query, allowed_intents, nbest_queries)
         processed_query.domain = domain
         return processed_query
 
@@ -437,7 +448,7 @@ class DomainProcessor(Processor):
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
 
-    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None):
+    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None, nbest_query_text=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
@@ -456,17 +467,25 @@ class DomainProcessor(Processor):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            nbest_query_text (list, optional): A list of the n best query transcripts from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
-        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes)
+        nbest_queries = None
+        if nbest_query_text:
+            nbest_queries = []
+            for query_text in nbest_query_text:
+                n_query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
+                nbest_queries.append(n_query)
+        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes,
+                                             nbest_queries=nbest_queries)
         processed_query.domain = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, nbest_queries=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -481,6 +500,8 @@ class DomainProcessor(Processor):
 
                 where close_door is the intent. The intent belongs to the smart_home domain.
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
+            nbest_queries (list, optional): A list of Query objects, one for each of the nbest
+                                            transcript from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -506,7 +527,7 @@ class DomainProcessor(Processor):
                         'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
-        processed_query = self.intents[intent].process_query(query)
+        processed_query = self.intents[intent].process_query(query, nbest_queries=nbest_queries)
         processed_query.intent = intent
 
         return processed_query
@@ -595,7 +616,7 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
                             self.domain, self.name))
 
-    def process(self, query_text, time_zone=None, timestamp=None):
+    def process(self, query_text, time_zone=None, timestamp=None, nbest_query_text=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
 
@@ -605,35 +626,59 @@ class IntentProcessor(Processor):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            nbest_query_text (list, optional): A list of the n best query transcripts from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
-        processed_query = self.process_query(query)
+        nbest_queries = None
+        if nbest_query_text:
+            nbest_queries = []
+            for query_text in nbest_query_text:
+                n_query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
+                nbest_queries.append(n_query)
+        processed_query = self.process_query(query, nbest_queries=nbest_queries)
         processed_query.domain = self.domain
         processed_query.intent = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query):
+    def process_query(self, query, nbest_queries=None):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
         Args:
             query (Query): The query object to process
+            nbest_queries (list, optional): A list of Query objects, one for each of the nbest
+                                            transcript from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
         """
+        #TODO: add nbest entity recognition logic here
         self._check_ready()
+
         entities = self.entity_recognizer.predict(query)
 
         for idx, entity in enumerate(entities):
             self.entities[entity.entity.type].process_entity(query, entities, idx)
 
         entities = self.parser.parse_entities(query, entities) if self.parser else entities
+
+        nbest_entities = None
+        if nbest_queries:
+            nbest_entities = []
+            for n_query in nbest_queries:
+                entities = self.entity_recognizer.predict(n_query)
+                for idx, entity in enumerate(entities):
+                    self.entities[entity.entity.type].process_entity(n_query, entities, idx)
+                entities = self.parser.parse_entities(n_query, entities) if self.parser else entities
+                nbest_entities.append(entities)
+
+            return ProcessedQuery(query, entities=entities, nbest_queries=nbest_queries,
+                                  nbest_entities=nbest_entities)
 
         return ProcessedQuery(query, entities=entities)
 
