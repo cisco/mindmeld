@@ -448,7 +448,8 @@ class DomainProcessor(Processor):
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
 
-    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None, nbest_query_text=None):
+    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None,
+                nbest_query_text=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
@@ -657,7 +658,6 @@ class IntentProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
         """
-        #TODO: add nbest entity recognition logic here
         self._check_ready()
 
         entities = self.entity_recognizer.predict(query)
@@ -674,7 +674,8 @@ class IntentProcessor(Processor):
                 entities = self.entity_recognizer.predict(n_query)
                 for idx, entity in enumerate(entities):
                     self.entities[entity.entity.type].process_entity(n_query, entities, idx)
-                entities = self.parser.parse_entities(n_query, entities) if self.parser else entities
+                entities = self.parser.parse_entities(n_query, entities) \
+                    if self.parser else entities
                 nbest_entities.append(entities)
 
             return ProcessedQuery(query, entities=entities, nbest_queries=nbest_queries,
