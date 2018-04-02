@@ -375,7 +375,7 @@ def char_ngrams(n, word):
         Ex: token is "you", n=4, return ["you"]
             token is "doing", n=4 return ["doin","oing"]
         """
-        if len(word[i:i+n]) < n:
+        if len(word[i:i + n]) < n:
             if not char_grams:
                 char_grams.append((word[i:i + n]))
             return char_grams
@@ -400,7 +400,7 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions):
         for i in range(len(tokens)):
             for length, starts in ngram_lengths_to_start_positions.items():
                 for start in starts:
-                    token_index = i+int(start)
+                    token_index = i + int(start)
                     if 0 <= token_index < len(tokens):
                         ngrams = char_ngrams(length, tokens[token_index])
                     else:
