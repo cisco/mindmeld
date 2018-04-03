@@ -250,8 +250,7 @@ class NaturalLanguageProcessor(Processor):
 
         for domain in nbest_nlp_classes.keys():
             for intent in nbest_nlp_classes[domain].keys():
-                self.domains[domain].intents[intent].set_nbest_flag(True)
-                print(intent)
+                self.domains[domain].intents[intent].process_nbest = True
 
     @property
     def domains(self):
@@ -582,15 +581,21 @@ class IntentProcessor(Processor):
             # Unable to load parser config -> no parser
             self.parser = None
 
-        self.process_nbest = False
+        self._process_nbest = False
 
     @property
     def entities(self):
         """The entity types associated with this intent"""
         return self._children
 
-    def set_nbest_flag(self, value):
-        self.process_nbest = value
+    @property
+    def process_nbest(self):
+        """Whether or not to run nbest processing for this intent"""
+        return self._process_nbest
+
+    @process_nbest.setter
+    def process_nbest(self, value):
+        self._process_nbest = value
 
     def _build(self, incremental=False):
         """Builds the models for this intent"""
