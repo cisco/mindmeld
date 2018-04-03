@@ -392,6 +392,10 @@ DEFAULT_RANKING_CONFIG = {
     'query_clauses_operator': 'or'
 }
 
+DEFAULT_PROCESSOR_CONFIG = {
+    'extract_nbest_entities': []
+}
+
 
 def get_app_namespace(app_path):
     """Returns the namespace of the application at app_path"""
@@ -656,3 +660,45 @@ def _get_config_module(app_path):
     import imp
     config_module = imp.load_source('config_module', module_path)
     return config_module
+
+
+def _get_default_processor_config():
+    return copy.deepcopy(DEFAULT_PROCESSOR_CONFIG)
+
+
+def get_processor_config(app_path=None, config=None):
+    """Gets the fully specified parser configuration for the app at the
+    given path.
+
+    Args:
+        app_path (str, optional): The location of the workbench app
+        config (dict, optional): A config object to use. This will
+            override the config specified by the app's config.py file.
+            If necessary, this object will be expanded to a fully
+            specified config object.
+
+    Returns:
+        dict: The nbest inference configuration
+    """
+    if config:
+        return config
+    try:
+        module_conf = _get_config_module(app_path)
+    except (OSError, IOError):
+        logger.info('No app configuration file found. Not configuring nbest inference.')
+        return _get_default_processor_config()
+
+    # Try provider first
+    try:
+        return copy.deepcopy(module_conf.get_processor_config())
+    except AttributeError:
+        pass
+
+    # Try object second
+    try:
+        config = config or module_conf.PROCESSOR_CONFIG
+        return config
+    except AttributeError:
+        pass
+
+    return _get_default_processor_config()

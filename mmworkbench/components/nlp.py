@@ -25,6 +25,7 @@ from .role_classifier import RoleClassifier
 from ..exceptions import AllowedNlpClassesKeyError
 from ..markup import process_markup
 from ..query_factory import QueryFactory
+from ._config import get_processor_config
 
 
 logger = logging.getLogger(__name__)
@@ -41,12 +42,13 @@ class Processor(with_metaclass(ABCMeta, object)):
             messages
     """
 
-    def __init__(self, app_path, resource_loader=None):
+    def __init__(self, app_path, resource_loader=None, config=None):
         """Initializes a processor
 
         Args:
             app_path (str): The path to the directory containing the app's data
             resource_loader (ResourceLoader): An object which can load resources for the processor
+            config (dict): A config object with processor settings (e.g. if to use n-best inference)
         """
         self._app_path = app_path
         self.resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
@@ -55,6 +57,8 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.ready = False
         self.dirty = False
         self.name = None
+
+        self.config = get_processor_config(app_path, config)
 
     def build(self, incremental=False):
         """Builds all the natural language processing models for this processor and its children.
@@ -223,14 +227,15 @@ class NaturalLanguageProcessor(Processor):
         domains (dict): The domains supported by this application
     """
 
-    def __init__(self, app_path, resource_loader=None):
+    def __init__(self, app_path, resource_loader=None, config=None):
         """Initializes a natural language processor object
 
         Args:
             app_path (str): The path to the directory containing the app's data
             resource_loader (ResourceLoader): An object which can load resources for the processor
+            config (dict): A config object with processor settings (e.g. if to use n-best inference)
         """
-        super().__init__(app_path, resource_loader)
+        super().__init__(app_path, resource_loader, config)
         self._app_path = app_path
         validate_workbench_version(self._app_path)
         self.name = app_path
@@ -238,6 +243,15 @@ class NaturalLanguageProcessor(Processor):
 
         for domain in path.get_domains(self._app_path):
             self._children[domain] = DomainProcessor(app_path, domain, self.resource_loader)
+
+        nbest_nlp_classes = self.config.get('extract_nbest_entities', {})
+        if len(nbest_nlp_classes) > 0:
+            nbest_nlp_classes = self.extract_allowed_intents(nbest_nlp_classes)
+
+        for domain in nbest_nlp_classes.keys():
+            for intent in nbest_nlp_classes[domain].keys():
+                self.domains[domain].intents[intent].set_nbest_flag(True)
+                print(intent)
 
     @property
     def domains(self):
@@ -568,10 +582,15 @@ class IntentProcessor(Processor):
             # Unable to load parser config -> no parser
             self.parser = None
 
+        self.process_nbest = False
+
     @property
     def entities(self):
         """The entity types associated with this intent"""
         return self._children
+
+    def set_nbest_flag(self, value):
+        self.process_nbest = value
 
     def _build(self, incremental=False):
         """Builds the models for this intent"""
@@ -667,16 +686,17 @@ class IntentProcessor(Processor):
 
         entities = self.parser.parse_entities(query, entities) if self.parser else entities
 
-        nbest_entities = None
-        if nbest_queries:
-            nbest_entities = []
-            for n_query in nbest_queries:
-                entities = self.entity_recognizer.predict(n_query)
-                for idx, entity in enumerate(entities):
-                    self.entities[entity.entity.type].process_entity(n_query, entities, idx)
-                entities = self.parser.parse_entities(n_query, entities) \
-                    if self.parser else entities
-                nbest_entities.append(entities)
+        if self.process_nbest:
+            nbest_entities = None
+            if nbest_queries:
+                nbest_entities = []
+                for n_query in nbest_queries:
+                    entities = self.entity_recognizer.predict(n_query)
+                    for idx, entity in enumerate(entities):
+                        self.entities[entity.entity.type].process_entity(n_query, entities, idx)
+                    entities = self.parser.parse_entities(n_query, entities) \
+                        if self.parser else entities
+                    nbest_entities.append(entities)
 
             return ProcessedQuery(query, entities=entities, nbest_queries=nbest_queries,
                                   nbest_entities=nbest_entities)
