@@ -57,26 +57,26 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.ready = False
         self.dirty = False
         self.name = None
-
         self.config = get_processor_config(app_path, config)
 
-    def build(self, incremental=False):
+    def build(self, incremental=False, label_set="train"):
         """Builds all the natural language processing models for this processor and its children.
 
         Args:
             incremental (bool, optional): When True, only build models whose training data or
                 configuration has changed since the last build. Defaults to False
+            label_set (string, optional): The label set from which to train all classifiers
         """
-        self._build(incremental=incremental)
+        self._build(incremental=incremental, label_set=label_set)
 
         for child in self._children.values():
-            child.build(incremental=incremental)
+            child.build(incremental=incremental, label_set=label_set)
 
         self.ready = True
         self.dirty = True
 
     @abstractmethod
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         raise NotImplementedError
 
     def dump(self):
@@ -108,22 +108,24 @@ class Processor(with_metaclass(ABCMeta, object)):
     def _load(self):
         raise NotImplementedError
 
-    def evaluate(self, print_stats=False):
+    def evaluate(self, print_stats=False, label_set="test"):
         """Evaluates all the natural language processing models for this processor and its
         children.
 
         Args:
             print_stats (bool): If true, prints the full stats table. Otherwise prints just
                                 the accuracy
+            label_set (string, optional): The label set from which to evaluate
+                                all classifiers
 
         """
-        self._evaluate(print_stats)
+        self._evaluate(print_stats, label_set=label_set)
 
         for child in self._children.values():
-            child.evaluate(print_stats)
+            child.evaluate(print_stats, label_set=label_set)
 
     @abstractmethod
-    def _evaluate(self):
+    def _evaluate(self, label_set="test"):
         raise NotImplementedError
 
     def _check_ready(self):
@@ -257,14 +259,14 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application"""
         return self._children
 
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         if len(self.domains) == 1:
             return
         if incremental:
             model_path = path.get_domain_model_path(self._app_path)
-            self.domain_classifier.fit(previous_model_path=model_path)
+            self.domain_classifier.fit(previous_model_path=model_path, label_set=label_set)
         else:
-            self.domain_classifier.fit()
+            self.domain_classifier.fit(label_set=label_set)
 
     def _dump(self):
         if len(self.domains) == 1:
@@ -278,9 +280,9 @@ class NaturalLanguageProcessor(Processor):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
 
-    def _evaluate(self, print_stats):
+    def _evaluate(self, print_stats, label_set="test"):
         if len(self.domains) > 1:
-            domain_eval = self.domain_classifier.evaluate()
+            domain_eval = self.domain_classifier.evaluate(label_set=label_set)
             if domain_eval:
                 print("Domain classification accuracy: '{}'".format(domain_eval.get_accuracy()))
                 if print_stats:
@@ -427,15 +429,15 @@ class DomainProcessor(Processor):
             self._children[intent] = IntentProcessor(app_path, domain, intent,
                                                      self.resource_loader)
 
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         if len(self.intents) == 1:
             return
         # train intent model
         if incremental:
             model_path = path.get_intent_model_path(self._app_path, self.name)
-            self.intent_classifier.fit(previous_model_path=model_path)
+            self.intent_classifier.fit(previous_model_path=model_path, label_set=label_set)
         else:
-            self.intent_classifier.fit()
+            self.intent_classifier.fit(label_set=label_set)
 
     def _dump(self):
         if len(self.intents) == 1:
@@ -449,9 +451,9 @@ class DomainProcessor(Processor):
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.load(model_path)
 
-    def _evaluate(self, print_stats):
+    def _evaluate(self, print_stats, label_set="test"):
         if len(self.intents) > 1:
-            intent_eval = self.intent_classifier.evaluate()
+            intent_eval = self.intent_classifier.evaluate(label_set=label_set)
             if intent_eval:
                 print("Intent classification accuracy for the '{}' domain: {}".format(
                       self.name, intent_eval.get_accuracy()))
@@ -597,15 +599,15 @@ class IntentProcessor(Processor):
     def process_nbest(self, value):
         self._process_nbest = value
 
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         """Builds the models for this intent"""
 
         # train entity recognizer
         if incremental:
             model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
-            self.entity_recognizer.fit(previous_model_path=model_path)
+            self.entity_recognizer.fit(previous_model_path=model_path, label_set=label_set)
         else:
-            self.entity_recognizer.fit()
+            self.entity_recognizer.fit(label_set=label_set)
 
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
@@ -629,9 +631,9 @@ class IntentProcessor(Processor):
                                         self.resource_loader)
             self._children[entity_type] = processor
 
-    def _evaluate(self, print_stats):
+    def _evaluate(self, print_stats, label_set="test"):
         if len(self.entity_recognizer.entity_types) > 1:
-            entity_eval = self.entity_recognizer.evaluate()
+            entity_eval = self.entity_recognizer.evaluate(label_set=label_set)
             if entity_eval:
                 print("Entity recognition accuracy for the '{}.{}' intent"
                       ": {}".format(self.domain, self.name, entity_eval.get_accuracy()))
@@ -739,14 +741,14 @@ class EntityProcessor(Processor):
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
         self.entity_resolver = EntityResolver(app_path, self.resource_loader, entity_type)
 
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         """Builds the models for this entity type"""
         if incremental:
             model_path = path.get_role_model_path(self._app_path, self.domain,
                                                   self.intent, self.type)
-            self.role_classifier.fit(previous_model_path=model_path)
+            self.role_classifier.fit(previous_model_path=model_path, label_set=label_set)
         else:
-            self.role_classifier.fit()
+            self.role_classifier.fit(label_set=label_set)
 
         self.entity_resolver.fit()
 
@@ -759,9 +761,9 @@ class EntityProcessor(Processor):
         self.role_classifier.load(model_path)
         self.entity_resolver.load()
 
-    def _evaluate(self, print_stats):
+    def _evaluate(self, print_stats, label_set="test"):
         if len(self.role_classifier.roles) > 1:
-            role_eval = self.role_classifier.evaluate()
+            role_eval = self.role_classifier.evaluate(label_set=label_set)
             if role_eval:
                 print("Role classification accuracy for the {}.{}.{}' entity type: {}".format(
                       self.domain, self.intent, self.type, role_eval.get_accuracy()))
