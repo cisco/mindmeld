@@ -248,9 +248,9 @@ class NaturalLanguageProcessor(Processor):
         if len(nbest_nlp_classes) > 0:
             nbest_nlp_classes = self.extract_allowed_intents(nbest_nlp_classes)
 
-        for domain in nbest_nlp_classes.keys():
-            for intent in nbest_nlp_classes[domain].keys():
-                self.domains[domain].intents[intent].process_nbest = True
+            for domain in nbest_nlp_classes.keys():
+                for intent in nbest_nlp_classes[domain].keys():
+                    self.domains[domain].intents[intent].process_nbest = True
 
     @property
     def domains(self):
