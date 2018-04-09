@@ -154,3 +154,59 @@ def test_validate_and_extract_allowed_intents(nlp):
         nlp.extract_allowed_intents(['unrelated_domain.*'])
     with pytest.raises(AllowedNlpClassesKeyError):
         nlp.extract_allowed_intents(['store_info.unrelated_intent'])
+
+
+test_data_4 = [
+    (
+        ['when is the 23rd helm street quickie mart open?',
+         'when is the 23rd elm st kwik-e-mart open?',
+         'when is the twenty third elm street quicky mart open?'],
+        'store_info',
+        'get_store_hours',
+        [['23rd helm street'], ['23rd elm st'], ['twenty third elm street']]
+     )
+]
+
+
+@pytest.mark.parametrize("queries,expected_domain,expected_intent,expected_nbest_entities",
+                         test_data_4)
+def test_process_nbest(nlp, queries, expected_domain, expected_intent, expected_nbest_entities):
+    """Tests a call to process with n-best transcripts passed in."""
+    response = nlp.process(queries)
+    response['entities_text'] = [e['text'] for e in response['entities']]
+    response.pop('entities')
+    response['nbest_entities_text'] = [[e['text'] for e in n_entities]
+                                       for n_entities in response['nbest_entities']]
+    response.pop('nbest_entities')
+
+    assert response == {
+        'text': queries[0],
+        'domain': expected_domain,
+        'intent': expected_intent,
+        'entities_text': expected_nbest_entities[0],
+        'nbest_text': queries,
+        'nbest_entities_text': expected_nbest_entities
+    }
+
+
+test_data_5 = [
+    (
+        ['hi there', 'hi bear', 'high chair'],
+        'store_info',
+        'greet'
+     )
+]
+
+
+@pytest.mark.parametrize("queries,expected_domain,expected_intent", test_data_5)
+def test_process_nbest_unspecified_intent(nlp, queries, expected_domain, expected_intent):
+    """Tests a basic call to process with n-best transcripts passed in for an intent where
+        n-best processing is unavailable."""
+    response = nlp.process(queries)
+
+    assert response == {
+        'text': queries[0],
+        'domain': expected_domain,
+        'intent': expected_intent,
+        'entities': []
+    }
