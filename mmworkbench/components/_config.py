@@ -667,7 +667,7 @@ def _get_default_processor_config():
 
 
 def get_processor_config(app_path=None, config=None):
-    """Gets the fully specified parser configuration for the app at the
+    """Gets the fully specified processor configuration for the app at the
     given path.
 
     Args:
