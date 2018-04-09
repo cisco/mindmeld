@@ -272,7 +272,7 @@ class NaturalLanguageProcessor(Processor):
 
             for domain in nbest_nlp_classes.keys():
                 for intent in nbest_nlp_classes[domain].keys():
-                    self.domains[domain].intents[intent].process_nbest = True
+                    self.domains[domain].intents[intent].nbest_text_enabled = True
 
     @property
     def domains(self):
@@ -602,7 +602,7 @@ class IntentProcessor(Processor):
             # Unable to load parser config -> no parser
             self.parser = None
 
-        self._process_nbest = False
+        self._nbest_text_enabled = False
 
     @property
     def entities(self):
@@ -610,13 +610,13 @@ class IntentProcessor(Processor):
         return self._children
 
     @property
-    def process_nbest(self):
+    def nbest_text_enabled(self):
         """Whether or not to run nbest processing for this intent"""
-        return self._process_nbest
+        return self._nbest_text_enabled
 
-    @process_nbest.setter
-    def process_nbest(self, value):
-        self._process_nbest = value
+    @nbest_text_enabled.setter
+    def nbest_text_enabled(self, value):
+        self._nbest_text_enabled = value
 
     def _build(self, incremental=False, label_set="train"):
         """Builds the models for this intent"""
@@ -700,7 +700,7 @@ class IntentProcessor(Processor):
         self._check_ready()
 
         if isinstance(query, (list, tuple)):
-            if self.process_nbest:
+            if self.nbest_text_enabled:
                 nbest_entities = []
                 for n_query in query:
                     entities = self.entity_recognizer.predict(n_query)
