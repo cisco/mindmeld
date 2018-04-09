@@ -392,7 +392,7 @@ DEFAULT_RANKING_CONFIG = {
     'query_clauses_operator': 'or'
 }
 
-DEFAULT_PROCESSOR_CONFIG = {
+DEFAULT_NLP_CONFIG = {
     'extract_nbest_entities': []
 }
 
@@ -662,11 +662,11 @@ def _get_config_module(app_path):
     return config_module
 
 
-def _get_default_processor_config():
-    return copy.deepcopy(DEFAULT_PROCESSOR_CONFIG)
+def _get_default_nlp_config():
+    return copy.deepcopy(DEFAULT_NLP_CONFIG)
 
 
-def get_processor_config(app_path=None, config=None):
+def get_nlp_config(app_path=None, config=None):
     """Gets the fully specified processor configuration for the app at the
     given path.
 
@@ -686,19 +686,19 @@ def get_processor_config(app_path=None, config=None):
         module_conf = _get_config_module(app_path)
     except (OSError, IOError):
         logger.info('No app configuration file found. Not configuring nbest inference.')
-        return _get_default_processor_config()
+        return _get_default_nlp_config()
 
     # Try provider first
     try:
-        return copy.deepcopy(module_conf.get_processor_config())
+        return copy.deepcopy(module_conf.get_nlp_config())
     except AttributeError:
         pass
 
     # Try object second
     try:
-        config = config or module_conf.PROCESSOR_CONFIG
+        config = config or module_conf.NLP_CONFIG
         return config
     except AttributeError:
         pass
 
-    return _get_default_processor_config()
+    return _get_default_nlp_config()

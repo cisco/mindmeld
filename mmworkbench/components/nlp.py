@@ -25,7 +25,7 @@ from .role_classifier import RoleClassifier
 from ..exceptions import AllowedNlpClassesKeyError
 from ..markup import process_markup
 from ..query_factory import QueryFactory
-from ._config import get_processor_config
+from ._config import get_nlp_config
 
 
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.ready = False
         self.dirty = False
         self.name = None
-        self.config = get_processor_config(app_path, config)
+        self.config = get_nlp_config(app_path, config)
 
     def build(self, incremental=False, label_set="train"):
         """Builds all the natural language processing models for this processor and its children.
