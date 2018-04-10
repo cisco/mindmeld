@@ -160,10 +160,10 @@ test_data_4 = [
     (
         ['when is the 23rd helm street quickie mart open?',
          'when is the 23rd elm st kwik-e-mart open?',
-         'when is the twenty third elm street quicky mart open?'],
+         'when is the 23 elm street quicky mart open?'],
         'store_info',
         'get_store_hours',
-        [['23rd helm street'], ['23rd elm st'], ['twenty third elm street']]
+        [['23rd helm street'], ['23rd elm st'], ['23 elm street']]
      )
 ]
 
