@@ -95,6 +95,28 @@ class ModelConfig(object):
         """
         return json.dumps(self.to_dict(), sort_keys=True)
 
+    def get_ngram_lengths_and_thresholds(self, rname):
+        if rname == 'c_ngram_freq':
+            feature_name = 'char-ngrams'
+        else:
+            feature_name = 'bag-of-words'
+        if self.model_type == 'text':
+            if feature_name in self.features:
+                lengths = self.features[feature_name]['lengths']
+                if 'thresholds' in self.features[feature_name]:
+                    thresholds = self.features[feature_name]['thresholds']
+                else:
+                    thresholds = [0 for i in range(len(lengths))]
+        elif self.model_type == 'tagger':
+            feature_name = feature_name + '-seq'
+            if feature_name in self.features:
+                lengths = self.features[feature_name]['ngram_lengths_to_start_positions'].keys()
+                if 'thresholds' in self.features[feature_name]:
+                    thresholds = self.features[feature_name]['thresholds']
+                else:
+                    thresholds = [0 for i in range(len(lengths))]
+        return lengths, thresholds
+
     def required_resources(self):
         """Returns the resources this model requires
 
@@ -831,6 +853,12 @@ class Model(object):
         test_size = 1.0 / k
         return StratifiedShuffleSplit(n_splits=n, test_size=test_size)
 
+    def get_resource(self, name):
+        if name in self._resources:
+            return self._resources[name]
+        else:
+            return None
+
     def requires_resource(self, resource):
         example_type = self.config.example_type
         for name, kwargs in self.config.features.items():
@@ -862,8 +890,9 @@ class Model(object):
         # load required resources if not present in model resources
         for rname in required_resources:
             if rname not in self._resources:
+                lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(rname)
                 self._resources[rname] = resource_loader.load_feature_resource(
-                    rname, queries=examples, labels=labels)
+                    rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds)
 
 
 class LabelEncoder(object):
