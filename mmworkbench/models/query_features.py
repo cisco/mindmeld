@@ -9,8 +9,10 @@ import math
 import re
 
 from ..core import resolve_entity_conflicts
-from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                      OUT_OF_BOUNDS_TOKEN, register_features, mask_numerics, get_ngram, requires)
+from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC, OUT_OF_BOUNDS_TOKEN,
+                      WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC, register_features, mask_numerics,
+                      get_ngram, requires)
+
 
 # TODO: clean this up a LOT
 
@@ -19,6 +21,7 @@ from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RS
 def extract_in_gaz_span_features():
     """Returns a feature extractor for properties of spans in gazetteers
     """
+
     def _extractor(query, resources):
         def _get_span_features(query, gazes, start, end, entity_type, entity):
             tokens = [re.sub(r'\d', '0', t) for t in query.normalized_tokens]
@@ -40,7 +43,7 @@ def extract_in_gaz_span_features():
                 feat_seq[i][feat_prefix] = 1
                 # Features for ngram before the span
                 feat_name = feat_prefix + '|ngram-before|length:{}'.format(1)
-                feat_seq[i][feat_name] = get_ngram(tokens, start-1, 1)
+                feat_seq[i][feat_name] = get_ngram(tokens, start - 1, 1)
                 # Features for ngram after the span
                 feat_name = feat_prefix + '|ngram-after|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, end, 1)
@@ -49,7 +52,7 @@ def extract_in_gaz_span_features():
                 feat_seq[i][feat_name] = get_ngram(tokens, start, 1)
                 # Features for ngram at end of span
                 feat_name = feat_prefix + '|ngram-last|length:{}'.format(1)
-                feat_seq[i][feat_name] = get_ngram(tokens, end-1, 1)
+                feat_seq[i][feat_name] = get_ngram(tokens, end - 1, 1)
 
                 # Popularity features
                 feat_name = feat_prefix + '|pop'
@@ -73,7 +76,7 @@ def extract_in_gaz_span_features():
                 # Used to distinguish among B/I/E/S tags
                 if i == start:
                     pos_attr = 'start'
-                elif i == end-1:
+                elif i == end - 1:
                     pos_attr = 'end'
                 else:
                     pos_attr = 'cont'
@@ -84,7 +87,7 @@ def extract_in_gaz_span_features():
                 feat_seq[i][feat_prefix] = 1
                 # Features for ngram before the span
                 feat_name = feat_prefix + '|ngram-before|length:{}'.format(1)
-                feat_seq[i][feat_name] = get_ngram(tokens, start-1, 1)
+                feat_seq[i][feat_name] = get_ngram(tokens, start - 1, 1)
                 # Features for ngram after the span
                 feat_name = feat_prefix + '|ngram-after|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, end, 1)
@@ -93,7 +96,7 @@ def extract_in_gaz_span_features():
                 feat_seq[i][feat_name] = get_ngram(tokens, start, 1)
                 # Features for ngram at end of span
                 feat_name = feat_prefix + '|ngram-last|length:{}'.format(1)
-                feat_seq[i][feat_name] = get_ngram(tokens, end-1, 1)
+                feat_seq[i][feat_name] = get_ngram(tokens, end - 1, 1)
 
                 # Popularity features
                 feat_name = feat_prefix + '|pop'
@@ -103,7 +106,7 @@ def extract_in_gaz_span_features():
                 feat_seq[i][feat_name] = math.log(len(entity))
                 feat_name = feat_prefix + '|pct-char-len'
                 feat_seq[i][feat_name] = (old_div(float(len(entity)),
-                                          len(' '.join(tokens))))
+                                                  len(' '.join(tokens))))
 
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_entity
@@ -134,10 +137,9 @@ def extract_in_gaz_span_features():
                                              entity_text):
             feat_seq = [{} for _ in query.normalized_tokens]
             for i in range(start, end):
-
                 feat_prefix = (
                     'in-gaz|conflict|exact|type1:{}|type2:{}'
-                    .format(ent_type_1, ent_type_2))
+                        .format(ent_type_1, ent_type_2))
 
                 p_ent_type_1 = math.log(gazes[ent_type_1]['total_entities'] + 1)
                 p_ent_type_2 = math.log(gazes[ent_type_2]['total_entities'] + 1)
@@ -169,7 +171,7 @@ def extract_in_gaz_span_features():
 
             # Collect ngrams of plain normalized ngrams
             for start in range(len(tokens)):
-                for end in range(start+1, len(tokens)+1):
+                for end in range(start + 1, len(tokens) + 1):
                     for gaz_name, gaz in gazetteers.items():
                         ngram = ' '.join(tokens[start:end])
                         if ngram in gaz['pop_dict']:
@@ -192,15 +194,15 @@ def extract_in_gaz_span_features():
                     #                       gaz_name, list(gaz['sys_types'])))
 
                     # Collect ngrams that include all of num_entity_i
-                    for start in range(num_entity_i['start']+1):
-                        for end in range(num_entity_i['end']+1, len(tokens)+1):
+                    for start in range(num_entity_i['start'] + 1):
+                        for end in range(num_entity_i['end'] + 1, len(tokens) + 1):
                             ngram, ntoks = get_flattened_ngram(tokens, start, end, num_entity_i, 0)
                             if ngram in gaz['pop_dict']:
                                 in_gaz_spans.append((start, end, gaz_name, ngram))
 
                             # Check if we can fit any other num_entity_j between
                             # num_entity_i and the edge of the ngram
-                            for j, num_entity_j in enumerate(system_entities[i+1:]):
+                            for j, num_entity_j in enumerate(system_entities[i + 1:]):
                                 if (num_entity_j['type'] in gaz['sys_types']
                                     and (start <= num_entity_j['start'])
                                     and (num_entity_j['end'] < end)
@@ -215,10 +217,10 @@ def extract_in_gaz_span_features():
 
         def get_flattened_ngram(tokens, start, end, num_entity, offset):
             flattened_token = '@' + num_entity['type'] + '@'
-            ntoks = (tokens[start-offset:num_entity['start']-offset] +
+            ntoks = (tokens[start - offset:num_entity['start'] - offset] +
                      [flattened_token] +
-                     [None]*(num_entity['end']-num_entity['start']) +
-                     tokens[num_entity['end']+1-offset:end-offset])
+                     [None] * (num_entity['end'] - num_entity['start']) +
+                     tokens[num_entity['end'] + 1 - offset:end - offset])
             ngram = ' '.join([t for t in ntoks if t is not None])
             return ngram, ntoks
 
@@ -262,6 +264,7 @@ def extract_in_gaz_span_features():
 def extract_in_gaz_ngram_features():
     """Returns a feature extractor for surrounding ngrams in gazetteers
     """
+
     def _extractor(query, resources):
 
         def get_ngram_gaz_features(query, gazes, entity_type):
@@ -294,7 +297,7 @@ def extract_in_gaz_ngram_features():
                 feat_name = feat_prefix + '|p_ef_1'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
-                p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i-1, 2)])
+                p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i - 1, 2)])
                                         for g in gazes.values()]) + 1)
                 p_joint = math.log(len(gazes[entity_type]['index']
                                        [get_ngram(tokens, i - 1, 2)]) + 1)
@@ -315,7 +318,7 @@ def extract_in_gaz_ngram_features():
                 feat_name = feat_prefix + '|p_ef+2'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
-                p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i-1, 3)])
+                p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i - 1, 3)])
                                         for g in gazes.values()]) + 1)
                 p_joint = math.log(len(gazes[entity_type]['index']
                                        [get_ngram(tokens, i - 1, 3)]) + 1)
@@ -341,24 +344,38 @@ def extract_in_gaz_ngram_features():
     return _extractor
 
 
-def extract_bag_of_words_features(ngram_lengths_to_start_positions):
+@requires(WORD_NGRAM_FREQ_RSC)
+def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(0,)):
     """Returns a bag-of-words feature extractor.
     Args:
         ngram_lengths_to_start_positions (dict):
+        threshold (int): Cut off value to include word in n-gram vocab
     Returns:
         (function) The feature extractor.
     """
+
     # pylint: disable=locally-disabled,unused-argument
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
+        word_thresholds = list(thresholds) + [0 for i in range(len(ngram_lengths_to_start_positions.keys())
+                                              - len(list(thresholds)))]
+
         for i in range(len(tokens)):
+            threshold_index = 0
             for length, starts in ngram_lengths_to_start_positions.items():
+                threshold = word_thresholds[threshold_index]
                 for start in starts:
+                    n_gram = get_ngram(tokens, i + int(start), int(length))
                     feat_name = 'bag-of-words|length:{}|pos:{}'.format(
                         length, start)
-                    feat_seq[i][feat_name] = get_ngram(tokens, i+int(start), int(length))
+                    if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 1) > threshold:
+                        feat_seq[i][feat_name] = n_gram
+                    else:
+                        feat_seq[i][feat_name] = 'OOV'
+
+                threshold_index += 1
         return feat_seq
 
     return _extractor
@@ -383,7 +400,8 @@ def char_ngrams(n, word):
     return char_grams
 
 
-def extract_char_ngrams_features(ngram_lengths_to_start_positions):
+@requires(CHAR_NGRAM_FREQ_RSC)
+def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0,)):
     """Returns a character n-gram feature extractor.
         Args:
             ngram_lengths_to_start_positions (dict):
@@ -392,13 +410,18 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions):
         Returns:
             (function) The feature extractor.
         """
+
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         # normalize digits
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
+        char_thresholds = list(thresholds) + [0 for i in range(len(ngram_lengths_to_start_positions.keys())
+                                              - len(list(thresholds)))]
         for i in range(len(tokens)):
+            threshold_index = 0
             for length, starts in ngram_lengths_to_start_positions.items():
+                threshold = char_thresholds[threshold_index]
                 for start in starts:
                     token_index = i + int(start)
                     if 0 <= token_index < len(tokens):
@@ -407,10 +430,13 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions):
                         # if token index out of bounds, return OUT_OF_BOUNDS token
                         ngrams = [OUT_OF_BOUNDS_TOKEN]
                     for j, c_gram in enumerate(ngrams):
-                        feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(
-                            length, start, j)
-                        feat_seq[i][feat_name] = c_gram
+                        if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 1) > threshold:
+                            feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(
+                                length, start, j)
+                            feat_seq[i][feat_name] = c_gram
+                threshold_index += 1
         return feat_seq
+
     return _extractor
 
 
@@ -423,6 +449,7 @@ def extract_sys_candidate_features(start_positions=(0,)):
     Returns:
         (function) The feature extractor.
     """
+
     def _extractor(query, resources):
         feat_seq = [{} for _ in query.normalized_tokens]
         system_entities = query.get_system_entity_candidates(resources[SYS_TYPES_RSC])
@@ -430,13 +457,13 @@ def extract_sys_candidate_features(start_positions=(0,)):
         for entity in system_entities:
             for i in entity.token_span:
                 for j in start_positions:
-                    if 0 < i-j < len(feat_seq):
+                    if 0 < i - j < len(feat_seq):
                         feat_name = 'sys-candidate|type:{}:{}|pos:{}'.format(
                             entity.entity.type, entity.entity.value.get('grain'), j)
-                        feat_seq[i-j][feat_name] = 1
+                        feat_seq[i - j][feat_name] = 1
                         feat_name = 'sys-candidate|type:{}:{}|pos:{}|log-len'.format(
                             entity.entity.type, entity.entity.value.get('grain'), j)
-                        feat_seq[i-j][feat_name] = math.log(len(entity.normalized_text))
+                        feat_seq[i - j][feat_name] = math.log(len(entity.normalized_text))
         return feat_seq
 
     return _extractor
@@ -454,56 +481,65 @@ def update_features_sequence(feat_seq, update_feat_seq):
         feat_seq[i].update(update_feat_seq[i])
 
 
-def extract_char_ngrams(lengths=(1,)):
+@requires(CHAR_NGRAM_FREQ_RSC)
+def extract_char_ngrams(lengths=(1,), thresholds=(0,)):
     """
         Extract character ngrams of specified lengths.
 
         Args:
             lengths (list of int): The ngram length.
-
+            thresholds (list of int): frequency cut off value to include ngram in vocab
         Returns:
             (function) An feature extraction function that takes a query and
                 returns character ngrams of specified lengths.
         """
+
     def _extractor(query, resources):
         query_text = query.normalized_text
         ngram_counter = Counter()
-        for length in lengths:
+        char_thresholds = list(thresholds) + [0 for i in range(len(lengths) - len(list(thresholds)))]
+        for length, threshold in zip(lengths, char_thresholds):
             for i in range(len(query_text) - length + 1):
                 char_ngram = []
                 for token in query_text[i:i + length]:
                     char_ngram.append(token)
-                ngram_counter.update(['char_ngram:' + '|'.join(char_ngram)])
+                if resources[CHAR_NGRAM_FREQ_RSC].get(''.join(char_ngram), 1) > threshold:
+                    ngram_counter.update(['char_ngram:' + '|'.join(char_ngram)])
         return ngram_counter
+
     return _extractor
 
 
-@requires(WORD_FREQ_RSC)
-def extract_ngrams(lengths=(1,)):
+@requires(WORD_NGRAM_FREQ_RSC)
+def extract_ngrams(lengths=(1,), thresholds=(0,)):
     """
     Extract ngrams of some specified lengths.
 
     Args:
         lengths (list of int): The ngram length.
-
+        thresholds (list of int): frequency cut off value to include ngram in vocab
     Returns:
         (function) An feature extraction function that takes a query and
             returns ngrams of the specified lengths.
     """
+
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         ngram_counter = Counter()
-        for length in lengths:
+        word_thresholds = list(thresholds) + [0 for i in range(len(lengths) - len(list(thresholds)))]
+        for length, threshold in zip(lengths, word_thresholds):
             for i in range(len(tokens) - length + 1):
                 ngram = []
                 for token in tokens[i:i + length]:
                     # We never want to differentiate between number tokens.
                     # We may need to convert number words too, like "eighty".
                     tok = mask_numerics(token)
-                    if tok not in resources[WORD_FREQ_RSC]:
-                        tok = 'OOV'
                     ngram.append(tok)
-                ngram_counter.update(['ngram:' + '|'.join(ngram)])
+                freq = resources[WORD_NGRAM_FREQ_RSC].get(' '.join(ngram), 1)
+                if freq > threshold:
+                    ngram_counter.update(['ngram:' + '|'.join(ngram)])
+                else:
+                    ngram_counter.update(['ngram: OOV'])
         return ngram_counter
 
     return _extractor
@@ -521,6 +557,7 @@ def extract_edge_ngrams(lengths=(1,)):
         (function) An feature extraction function that takes a query and
             returns ngrams of the specified lengths at start and end of query.
     """
+
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         feats = {}
@@ -553,6 +590,7 @@ def extract_freq(bins=5):
             count of query tokens within each frequency bin.
 
     """
+
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         freq_dict = resources[WORD_FREQ_RSC]
@@ -593,6 +631,7 @@ def extract_gaz_freq():
         (function): A feature extraction function that returns the log of the
             count of query tokens within each gazetteer's frequency bins.
     """
+
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         freq_features = defaultdict(int)
@@ -651,6 +690,7 @@ def extract_length():
         (function) A feature extraction function that takes a query and
             returns number of tokens and characters on linear and log scales
     """
+
     # pylint: disable=locally-disabled,unused-argument
     def _extractor(query, resources):
         tokens = len(query.normalized_tokens)
