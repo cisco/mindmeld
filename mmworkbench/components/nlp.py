@@ -132,12 +132,14 @@ class Processor(with_metaclass(ABCMeta, object)):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
-    def _create_queries(self, query_text, time_zone=None, timestamp=None):
+    def _create_queries(self, query_text, language=None, time_zone=None, timestamp=None):
         """Creates the query object(s).
 
         Args:
             query_text (str, or tuple): The raw user text input, or a list of the n best query
                 transcripts from ASR
+            language (str, optional): Language as specified using a 639-2 code;
+                if omitted, English is assumed.
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -151,11 +153,13 @@ class Processor(with_metaclass(ABCMeta, object)):
             query_text = tuple(query_text)
             query = []
             for q_text in query_text:
-                n_query = self.create_query(q_text, time_zone=time_zone, timestamp=timestamp)
+                n_query = self.create_query(q_text, language=language, time_zone=time_zone,
+                                            timestamp=timestamp)
                 query.append(n_query)
             query = tuple(query)
         else:
-            query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
+            query = self.create_query(query_text, language=language, time_zone=time_zone,
+                                      timestamp=timestamp)
 
         return query
 
@@ -188,7 +192,8 @@ class Processor(with_metaclass(ABCMeta, object)):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the full hierarchy of natural language processing models to the input query
         """
-        query = self._create_queries(query_text, time_zone, timestamp)
+        query = self._create_queries(query_text, language=language, time_zone=time_zone,
+                                     timestamp=timestamp)
         return self.process_query(query, allowed_nlp_classes).to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None):
@@ -510,7 +515,7 @@ class DomainProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self._create_queries(query_text, time_zone, timestamp)
+        query = self._create_queries(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes)
         processed_query.domain = self.name
         return processed_query.to_dict()
@@ -678,7 +683,7 @@ class IntentProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self._create_queries(query_text, time_zone, timestamp)
+        query = self._create_queries(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name
