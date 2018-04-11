@@ -8,6 +8,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
+    'bleach==1.5.0',  # tensorflow -> tensorboard -> bleach, prevents conflicts with jupyter
     'Click~=6.0',
     'click-log==0.1.8',  # check WB3-191
     'elasticsearch>=5.1.0,<=5.4.0',
@@ -15,10 +16,12 @@ requirements = [
     'Flask-Cors~=3.0',
     'future~=0.16.0',
     'nltk~=3.2',
-    'numpy>=1.10.1,<=1.13.1',
+    'numpy~=1.14',
+    'pandas~=0.22',
     'pip>=9.0.1',
     'py~=1.4',
     'python-dateutil~=2.6',
+    'pytz>=2017.2',
     'requests>=2.13.0,<=2.18.4',
     'scipy>=0.9,<=0.19.1',
     'scikit-learn>=0.18.1,<=0.18.2',
@@ -42,7 +45,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='3.3.0dev',
+    version='3.3.0rc4',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",

@@ -23,6 +23,9 @@ from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
 from ..exceptions import AllowedNlpClassesKeyError
+from ..markup import process_markup
+from ..query_factory import QueryFactory
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,23 +56,24 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.dirty = False
         self.name = None
 
-    def build(self, incremental=False):
+    def build(self, incremental=False, label_set="train"):
         """Builds all the natural language processing models for this processor and its children.
 
         Args:
             incremental (bool, optional): When True, only build models whose training data or
                 configuration has changed since the last build. Defaults to False
+            label_set (string, optional): The label set from which to train all classifiers
         """
-        self._build(incremental=incremental)
+        self._build(incremental=incremental, label_set=label_set)
 
         for child in self._children.values():
-            child.build(incremental=incremental)
+            child.build(incremental=incremental, label_set=label_set)
 
         self.ready = True
         self.dirty = True
 
     @abstractmethod
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         raise NotImplementedError
 
     def dump(self):
@@ -101,48 +105,60 @@ class Processor(with_metaclass(ABCMeta, object)):
     def _load(self):
         raise NotImplementedError
 
-    def evaluate(self, print_stats=False):
+    def evaluate(self, print_stats=False, label_set="test"):
         """Evaluates all the natural language processing models for this processor and its
         children.
 
         Args:
             print_stats (bool): If true, prints the full stats table. Otherwise prints just
                                 the accuracy
+            label_set (string, optional): The label set from which to evaluate
+                                all classifiers
 
         """
-        self._evaluate(print_stats)
+        self._evaluate(print_stats, label_set=label_set)
 
         for child in self._children.values():
-            child.evaluate(print_stats)
+            child.evaluate(print_stats, label_set=label_set)
 
     @abstractmethod
-    def _evaluate(self):
+    def _evaluate(self, label_set="test"):
         raise NotImplementedError
 
     def _check_ready(self):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
-    def process(self, query_text, allowed_nlp_classes=None):
+    def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
+                timestamp=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
         Args:
             query_text (str): The raw user text input
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-            selected for NLP analysis. An example:
-            {
-                smart_home: {
-                    close_door: {}
-                }
-            }
-            where smart_home is the domain and close_door is the intent.
+                selected for NLP analysis. An example:
+
+                    {
+                        smart_home: {
+                            close_door: {}
+                        }
+                    }
+
+                where smart_home is the domain and close_door is the intent.
+            language (str, optional): Language as specified using a 639-2 code;
+                if omitted, English is assumed.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the full hierarchy of natural language processing models to the input query
         """
-        query = self.resource_loader.query_factory.create_query(query_text)
+        query = self.create_query(query_text, language=language,
+                                  time_zone=time_zone, timestamp=timestamp)
         return self.process_query(query, allowed_nlp_classes).to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None):
@@ -150,15 +166,17 @@ class Processor(with_metaclass(ABCMeta, object)):
         trained for this application
 
         Args:
-            query_text (str): The raw user text input
+            query (Query): The user input query
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-            selected for NLP analysis. An example:
-            {
-                smart_home: {
-                    close_door: {}
-                }
-            }
-            where smart_home is the domain and close_door is the intent.
+                selected for NLP analysis. An example:
+
+                    {
+                        smart_home: {
+                            close_door: {}
+                        }
+                    }
+
+                where smart_home is the domain and close_door is the intent.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -166,16 +184,24 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         raise NotImplementedError
 
-    def create_query(self, query_text):
+    def create_query(self, query_text, language=None, time_zone=None, timestamp=None):
         """Creates a query with the given text
 
         Args:
-            text (str): Text to create a query object for
+            query_text (str): Text to create a query object for
+            language (str, optional): Language as specified using a 639-2 code such as 'eng' or
+                'spa'; if omitted, English is assumed.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             Query: A newly constructed query
         """
-        return self.resource_loader.query_factory.create_query(query_text)
+        return self.resource_loader.query_factory.create_query(
+            query_text, language=language, time_zone=time_zone, timestamp=timestamp
+        )
 
     def __repr__(self):
         msg = '<{} {!r} ready: {!r}, dirty: {!r}>'
@@ -212,14 +238,14 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application"""
         return self._children
 
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         if len(self.domains) == 1:
             return
         if incremental:
             model_path = path.get_domain_model_path(self._app_path)
-            self.domain_classifier.fit(previous_model_path=model_path)
+            self.domain_classifier.fit(previous_model_path=model_path, label_set=label_set)
         else:
-            self.domain_classifier.fit()
+            self.domain_classifier.fit(label_set=label_set)
 
     def _dump(self):
         if len(self.domains) == 1:
@@ -233,15 +259,30 @@ class NaturalLanguageProcessor(Processor):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
 
-    def _evaluate(self, print_stats):
+    def _evaluate(self, print_stats, label_set="test"):
         if len(self.domains) > 1:
-            domain_eval = self.domain_classifier.evaluate()
+            domain_eval = self.domain_classifier.evaluate(label_set=label_set)
             if domain_eval:
                 print("Domain classification accuracy: '{}'".format(domain_eval.get_accuracy()))
                 if print_stats:
                     domain_eval.print_stats()
             else:
                 logger.info("Skipping domain classifier evaluation")
+
+    def _process_domain(self, query, allowed_nlp_classes=None):
+        if len(self.domains) > 1:
+            if not allowed_nlp_classes:
+                return self.domain_classifier.predict(query)
+            else:
+                sorted_domains = self.domain_classifier.predict_proba(query)
+                for ordered_domain, _ in sorted_domains:
+                    if ordered_domain in allowed_nlp_classes.keys():
+                        return ordered_domain
+
+                raise AllowedNlpClassesKeyError(
+                    'Could not find user inputted domain in NLP hierarchy')
+        else:
+            return list(self.domains.keys())[0]
 
     def process_query(self, query, allowed_nlp_classes=None):
         """Processes the given query using the full hierarchy of natural language processing models
@@ -264,23 +305,7 @@ class NaturalLanguageProcessor(Processor):
                 applying the full hierarchy of natural language processing models to the input query
         """
         self._check_ready()
-
-        if len(self.domains) > 1:
-            if not allowed_nlp_classes:
-                domain = self.domain_classifier.predict(query)
-            else:
-                sorted_domains = self.domain_classifier.predict_proba(query)
-                domain = None
-                for ordered_domain, _ in sorted_domains:
-                    if ordered_domain in allowed_nlp_classes.keys():
-                        domain = ordered_domain
-                        break
-
-                if not domain:
-                    raise AllowedNlpClassesKeyError(
-                        'Could not find user inputted domain in NLP hierarchy')
-        else:
-            domain = list(self.domains.keys())[0]
+        domain = self._process_domain(query, allowed_nlp_classes=allowed_nlp_classes)
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
@@ -327,6 +352,29 @@ class NaturalLanguageProcessor(Processor):
 
         return nlp_components
 
+    def inspect(self, markup, domain=None, intent=None):
+        """ Inspect the marked up query and print the table of features and weights
+        Args:
+            markup (str): The marked up query string
+            domain (str): The gold value for domain classification
+            intent (str): The gold value for intent classification
+        """
+        query_factory = QueryFactory.create_query_factory()
+        raw_query, query, entities = process_markup(markup, query_factory, query_options={})
+
+        if domain:
+            print('Inspecting domain classification')
+            domain_inspection = self.domain_classifier.inspect(query, domain=domain)
+            print(domain_inspection)
+            print('')
+
+        if intent:
+            print('Inspecting intent classification')
+            domain = self._process_domain(query)
+            intent_inspection = self.domains[domain].inspect(query, intent=intent)
+            print(intent_inspection)
+            print('')
+
 
 class DomainProcessor(Processor):
     """The domain processor houses the hierarchy of domain-specific natural language processing
@@ -358,15 +406,15 @@ class DomainProcessor(Processor):
             self._children[intent] = IntentProcessor(app_path, domain, intent,
                                                      self.resource_loader)
 
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         if len(self.intents) == 1:
             return
         # train intent model
         if incremental:
             model_path = path.get_intent_model_path(self._app_path, self.name)
-            self.intent_classifier.fit(previous_model_path=model_path)
+            self.intent_classifier.fit(previous_model_path=model_path, label_set=label_set)
         else:
-            self.intent_classifier.fit()
+            self.intent_classifier.fit(label_set=label_set)
 
     def _dump(self):
         if len(self.intents) == 1:
@@ -380,9 +428,9 @@ class DomainProcessor(Processor):
         model_path = path.get_intent_model_path(self._app_path, self.name)
         self.intent_classifier.load(model_path)
 
-    def _evaluate(self, print_stats):
+    def _evaluate(self, print_stats, label_set="test"):
         if len(self.intents) > 1:
-            intent_eval = self.intent_classifier.evaluate()
+            intent_eval = self.intent_classifier.evaluate(label_set=label_set)
             if intent_eval:
                 print("Intent classification accuracy for the '{}' domain: {}".format(
                       self.name, intent_eval.get_accuracy()))
@@ -392,19 +440,32 @@ class DomainProcessor(Processor):
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
 
-    def process(self, query_text):
+    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
         Args:
             query_text (str): The raw user text input
+            allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
+                NLP hierarchy that is selected for NLP analysis. An example:
+
+                    {
+                        close_door: {}
+                    }
+
+                where close_door is the intent. The intent belongs to the smart_home domain.
+                If allowed_nlp_classes is None, we use the normal model predict functionality.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self.resource_loader.query_factory.create_query(query_text)
-        processed_query = self.process_query(query)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
+        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes)
         processed_query.domain = self.name
         return processed_query.to_dict()
 
@@ -415,13 +476,14 @@ class DomainProcessor(Processor):
         Args:
             query (Query): The query object to process
             allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
-             NLP hierarchy that is selected for NLP analysis. An example:
-            {
-                close_door: {}
-            }
+                NLP hierarchy that is selected for NLP analysis. An example:
 
-            where close_door is the intent. The intent belongs to the smart_home domain.
-            If allowed_nlp_classes is None, we use the normal model predict functionality.
+                    {
+                        close_door: {}
+                    }
+
+                where close_door is the intent. The intent belongs to the smart_home domain.
+                If allowed_nlp_classes is None, we use the normal model predict functionality.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -452,6 +514,9 @@ class DomainProcessor(Processor):
 
         return processed_query
 
+    def inspect(self, query, intent=None):
+        return self.intent_classifier.inspect(query, intent=intent)
+
 
 class IntentProcessor(Processor):
     """The intent processor houses the hierarchy of intent-specific natural language processing
@@ -479,7 +544,7 @@ class IntentProcessor(Processor):
 
         self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
         try:
-            self.parser = Parser(self.resource_loader)
+            self.parser = Parser(self.resource_loader, domain=domain, intent=intent)
         except FileNotFoundError:
             # Unable to load parser config -> no parser
             self.parser = None
@@ -489,15 +554,15 @@ class IntentProcessor(Processor):
         """The entity types associated with this intent"""
         return self._children
 
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         """Builds the models for this intent"""
 
         # train entity recognizer
         if incremental:
             model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
-            self.entity_recognizer.fit(previous_model_path=model_path)
+            self.entity_recognizer.fit(previous_model_path=model_path, label_set=label_set)
         else:
-            self.entity_recognizer.fit()
+            self.entity_recognizer.fit(label_set=label_set)
 
         # Create the entity processors
         entity_types = self.entity_recognizer.entity_types
@@ -521,9 +586,9 @@ class IntentProcessor(Processor):
                                         self.resource_loader)
             self._children[entity_type] = processor
 
-    def _evaluate(self, print_stats):
+    def _evaluate(self, print_stats, label_set="test"):
         if len(self.entity_recognizer.entity_types) > 1:
-            entity_eval = self.entity_recognizer.evaluate()
+            entity_eval = self.entity_recognizer.evaluate(label_set=label_set)
             if entity_eval:
                 print("Entity recognition accuracy for the '{}.{}' intent"
                       ": {}".format(self.domain, self.name, entity_eval.get_accuracy()))
@@ -533,18 +598,22 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
                             self.domain, self.name))
 
-    def process(self, query_text):
+    def process(self, query_text, time_zone=None, timestamp=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
 
         Args:
             query_text (str): The raw user text input
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self.resource_loader.query_factory.create_query(query_text)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name
@@ -602,14 +671,14 @@ class EntityProcessor(Processor):
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
         self.entity_resolver = EntityResolver(app_path, self.resource_loader, entity_type)
 
-    def _build(self, incremental=False):
+    def _build(self, incremental=False, label_set="train"):
         """Builds the models for this entity type"""
         if incremental:
             model_path = path.get_role_model_path(self._app_path, self.domain,
                                                   self.intent, self.type)
-            self.role_classifier.fit(previous_model_path=model_path)
+            self.role_classifier.fit(previous_model_path=model_path, label_set=label_set)
         else:
-            self.role_classifier.fit()
+            self.role_classifier.fit(label_set=label_set)
 
         self.entity_resolver.fit()
 
@@ -622,9 +691,9 @@ class EntityProcessor(Processor):
         self.role_classifier.load(model_path)
         self.entity_resolver.load()
 
-    def _evaluate(self, print_stats):
+    def _evaluate(self, print_stats, label_set="test"):
         if len(self.role_classifier.roles) > 1:
-            role_eval = self.role_classifier.evaluate()
+            role_eval = self.role_classifier.evaluate(label_set=label_set)
             if role_eval:
                 print("Role classification accuracy for the {}.{}.{}' entity type: {}".format(
                       self.domain, self.intent, self.type, role_eval.get_accuracy()))

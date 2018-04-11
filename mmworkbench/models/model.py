@@ -283,12 +283,14 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         class_stats = self._get_class_stats(y_true=raw_expected, y_pred=raw_predicted,
                                             labels=labels)
         counts_by_class = confusion_stats['counts_by_class']
+
         class_stats['tp'] = counts_by_class.tp
         class_stats['tn'] = counts_by_class.tn
         class_stats['fp'] = counts_by_class.fp
         class_stats['fn'] = counts_by_class.fn
 
         return {'stats_overall': stats_overall,
+                'class_labels': text_labels,
                 'class_stats': class_stats,
                 'confusion_matrix': confusion_stats['confusion_matrix']}
 
