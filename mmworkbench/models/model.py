@@ -15,7 +15,7 @@ from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridS
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal)
+                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 logger = logging.getLogger(__name__)
@@ -96,25 +96,36 @@ class ModelConfig(object):
         return json.dumps(self.to_dict(), sort_keys=True)
 
     def get_ngram_lengths_and_thresholds(self, rname):
-        if rname == 'c_ngram_freq':
+        """
+        Returns the n-gram lengths and thresholds to extract to optimize resource collection
+
+        Arguments:
+        rname (string): Name of the resource
+
+        Returns:
+            lengths (list of int): list of n-gram lengths to be extracted
+            thresholds (list of int): thresholds to be applied to corresponding n-gram lengths
+        """
+        lengths = thresholds = None
+        # if it's not the n-gram feature, we don't need length and threshold information
+        if rname == CHAR_NGRAM_FREQ_RSC:
             feature_name = 'char-ngrams'
-        else:
+        elif rname == WORD_NGRAM_FREQ_RSC:
             feature_name = 'bag-of-words'
-        if self.model_type == 'text':
+        else:
+            return lengths, thresholds
+
+        # feature name varies based on whether it's for a classifier or tagger
+        if self.model_type == 'tagger':
             if feature_name in self.features:
                 lengths = self.features[feature_name]['lengths']
-                if 'thresholds' in self.features[feature_name]:
-                    thresholds = self.features[feature_name]['thresholds']
-                else:
-                    thresholds = [0 for i in range(len(lengths))]
+                thresholds = self.features[feature_name].get('thresholds', [0] * len(lengths))
         elif self.model_type == 'tagger':
             feature_name = feature_name + '-seq'
             if feature_name in self.features:
                 lengths = self.features[feature_name]['ngram_lengths_to_start_positions'].keys()
-                if 'thresholds' in self.features[feature_name]:
-                    thresholds = self.features[feature_name]['thresholds']
-                else:
-                    thresholds = [0 for i in range(len(lengths))]
+                thresholds = self.features[feature_name].get('thresholds', [0] * len(lengths))
+
         return lengths, thresholds
 
     def required_resources(self):
@@ -854,10 +865,7 @@ class Model(object):
         return StratifiedShuffleSplit(n_splits=n, test_size=test_size)
 
     def get_resource(self, name):
-        if name in self._resources:
-            return self._resources[name]
-        else:
-            return None
+        return self._resources.get(name)
 
     def requires_resource(self, resource):
         example_type = self.config.example_type
