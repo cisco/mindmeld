@@ -99,10 +99,6 @@ class ResourceLoader(object):
 
         return self._entity_files[gaz_name]['gazetteer']['data']
 
-    def get_word_freq_dict(self):
-        queries = self.flatten_query_tree(self.get_labeled_queries())
-        return self._build_word_freq_dict(queries)
-
     def get_gazetteers_hash(self):
         entity_types = path.get_entity_types(self.app_path)
         return self._hasher.hash_list((self.get_gazetteer_hash(entity_type)

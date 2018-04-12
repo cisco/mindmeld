@@ -115,8 +115,11 @@ class EntityRecognizer(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        er_data = {'entity_types': self.entity_types, 'w_ngram_freq': self._model.get_resource('w_ngram_freq'),
-                   'c_ngram_freq': self._model.get_resource('c_ngram_freq'), 'model_config': self._model_config}
+        er_data = {'entity_types': self.entity_types,
+                   'w_ngram_freq': self._model.get_resource('w_ngram_freq'),
+                   'c_ngram_freq': self._model.get_resource('c_ngram_freq'),
+                   'model_config': self._model_config
+                   }
 
         self._model.dump(model_path, er_data)
 
@@ -156,14 +159,12 @@ class EntityRecognizer(Classifier):
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
-            try:
-                w_ngram_freq = er_data['w_ngram_freq']
-                c_ngram_freq = er_data['c_ngram_freq']
-            except KeyError:
-                w_ngram_freq = c_ngram_freq = None
 
-            self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types, w_ngram_freq=w_ngram_freq,
-                                           c_ngram_freq=c_ngram_freq)
+            w_ngram_freq = er_data.get(['w_ngram_freq'])
+            c_ngram_freq = er_data.get(['c_ngram_freq'])
+
+            self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types,
+                                           w_ngram_freq=w_ngram_freq, c_ngram_freq=c_ngram_freq)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = self._load_hash(model_path)

@@ -9,9 +9,9 @@ import math
 import re
 
 from ..core import resolve_entity_conflicts
-from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC, OUT_OF_BOUNDS_TOKEN,
-                      WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC, register_features, mask_numerics,
-                      get_ngram, requires)
+from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
+                      OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC,
+                      register_features, mask_numerics, get_ngram, requires)
 
 
 # TODO: clean this up a LOT
@@ -349,7 +349,7 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
     """Returns a bag-of-words feature extractor.
     Args:
         ngram_lengths_to_start_positions (dict):
-        threshold (int): Cut off value to include word in n-gram vocab
+        thresholds (int): Cut off value to include word in n-gram vocab
     Returns:
         (function) The feature extractor.
     """
@@ -359,8 +359,9 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
         tokens = query.normalized_tokens
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
-        word_thresholds = list(thresholds) + [0 for i in range(len(ngram_lengths_to_start_positions.keys())
-                                              - len(list(thresholds)))]
+        threshold_list = list(thresholds)
+        word_thresholds = threshold_list + [0] * (len(ngram_lengths_to_start_positions.keys())
+                                                  - len(threshold_list))
 
         for i in range(len(tokens)):
             threshold_index = 0
@@ -407,6 +408,7 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0
             ngram_lengths_to_start_positions (dict):
             The window of tokens to be considered relative to the
             current token while extracting char n-grams
+            thresholds (int): Cut off value to include word in n-gram vocab
         Returns:
             (function) The feature extractor.
         """
@@ -416,8 +418,9 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0
         # normalize digits
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
-        char_thresholds = list(thresholds) + [0 for i in range(len(ngram_lengths_to_start_positions.keys())
-                                              - len(list(thresholds)))]
+        threshold_list = list(thresholds)
+        char_thresholds = threshold_list + [0] * (len(ngram_lengths_to_start_positions.keys())
+                                                  - len(threshold_list))
         for i in range(len(tokens)):
             threshold_index = 0
             for length, starts in ngram_lengths_to_start_positions.items():
@@ -497,7 +500,8 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,)):
     def _extractor(query, resources):
         query_text = query.normalized_text
         ngram_counter = Counter()
-        char_thresholds = list(thresholds) + [0 for i in range(len(lengths) - len(list(thresholds)))]
+        threshold_list = list(thresholds)
+        char_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
         for length, threshold in zip(lengths, char_thresholds):
             for i in range(len(query_text) - length + 1):
                 char_ngram = []
@@ -526,7 +530,8 @@ def extract_ngrams(lengths=(1,), thresholds=(0,)):
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         ngram_counter = Counter()
-        word_thresholds = list(thresholds) + [0 for i in range(len(lengths) - len(list(thresholds)))]
+        threshold_list = list(thresholds)
+        word_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
         for length, threshold in zip(lengths, word_thresholds):
             for i in range(len(tokens) - length + 1):
                 ngram = []
