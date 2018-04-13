@@ -139,7 +139,7 @@ def extract_in_gaz_span_features():
             for i in range(start, end):
                 feat_prefix = (
                     'in-gaz|conflict|exact|type1:{}|type2:{}'
-                        .format(ent_type_1, ent_type_2))
+                    .format(ent_type_1, ent_type_2))
 
                 p_ent_type_1 = math.log(gazes[ent_type_1]['total_entities'] + 1)
                 p_ent_type_2 = math.log(gazes[ent_type_2]['total_entities'] + 1)

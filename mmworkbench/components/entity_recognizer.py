@@ -160,8 +160,8 @@ class EntityRecognizer(Classifier):
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
 
-            w_ngram_freq = er_data.get(['w_ngram_freq'])
-            c_ngram_freq = er_data.get(['c_ngram_freq'])
+            w_ngram_freq = er_data.get('w_ngram_freq')
+            c_ngram_freq = er_data.get('c_ngram_freq')
 
             self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types,
                                            w_ngram_freq=w_ngram_freq, c_ngram_freq=c_ngram_freq)

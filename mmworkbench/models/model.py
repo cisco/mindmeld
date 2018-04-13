@@ -116,7 +116,7 @@ class ModelConfig(object):
             return lengths, thresholds
 
         # feature name varies based on whether it's for a classifier or tagger
-        if self.model_type == 'tagger':
+        if self.model_type == 'text':
             if feature_name in self.features:
                 lengths = self.features[feature_name]['lengths']
                 thresholds = self.features[feature_name].get('thresholds', [0] * len(lengths))
