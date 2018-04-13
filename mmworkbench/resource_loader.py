@@ -3,7 +3,7 @@
 This module contains the processor resource loader.
 """
 from __future__ import absolute_import, unicode_literals
-from builtins import object
+from builtins import (object, zip)
 
 from copy import deepcopy
 from collections import Counter
@@ -436,7 +436,8 @@ class ResourceLoader(object):
         for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
             if threshold > 0:
                 for q in kwargs.get('queries'):
-                    character_tokens = [q.normalized_text[i:i+length] for i in range(len(q.normalized_text))
+                    character_tokens = [q.normalized_text[i:i+length]
+                                        for i in range(len(q.normalized_text))
                                         if len(q.normalized_text[i:i+length]) == length]
                     char_freq_dict.update(character_tokens)
         return char_freq_dict
@@ -450,7 +451,8 @@ class ResourceLoader(object):
         word_freq_dict = Counter()
         for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
             if threshold > 0:
-                ngram_tokens = [' '.join(q.normalized_tokens[i:i+length]) for q in kwargs.get('queries')
+                ngram_tokens = [' '.join(q.normalized_tokens[i:i+length])
+                                for q in kwargs.get('queries')
                                 for i in range(len(q.normalized_tokens))]
                 word_freq_dict.update(ngram_tokens)
         return word_freq_dict
