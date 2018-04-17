@@ -353,16 +353,16 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
     Returns:
         (function) The feature extractor.
     """
+    threshold_list = list(thresholds)
+    word_thresholds = threshold_list + [0] * (len(ngram_lengths_to_start_positions.keys())
+                                              - len(threshold_list))
 
     # pylint: disable=locally-disabled,unused-argument
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
-        threshold_list = list(thresholds)
-        word_thresholds = threshold_list + [0] * (len(ngram_lengths_to_start_positions.keys())
-                                                  - len(threshold_list))
-
+        
         for i in range(len(tokens)):
             threshold_index = 0
             for length, starts in ngram_lengths_to_start_positions.items():
@@ -412,15 +412,16 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0
         Returns:
             (function) The feature extractor.
         """
+    threshold_list = list(thresholds)
+    char_thresholds = threshold_list + [0] * (len(ngram_lengths_to_start_positions.keys())
+                                              - len(threshold_list))
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         # normalize digits
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
-        threshold_list = list(thresholds)
-        char_thresholds = threshold_list + [0] * (len(ngram_lengths_to_start_positions.keys())
-                                                  - len(threshold_list))
+
         for i in range(len(tokens)):
             threshold_index = 0
             for length, starts in ngram_lengths_to_start_positions.items():
@@ -496,12 +497,13 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,)):
             (function) An feature extraction function that takes a query and
                 returns character ngrams of specified lengths.
         """
+    threshold_list = list(thresholds)
+    char_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
 
     def _extractor(query, resources):
         query_text = query.normalized_text
         ngram_counter = Counter()
-        threshold_list = list(thresholds)
-        char_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
+
         for length, threshold in zip(lengths, char_thresholds):
             for i in range(len(query_text) - length + 1):
                 char_ngram = []
@@ -526,12 +528,13 @@ def extract_ngrams(lengths=(1,), thresholds=(0,)):
         (function) An feature extraction function that takes a query and
             returns ngrams of the specified lengths.
     """
+    threshold_list = list(thresholds)
+    word_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         ngram_counter = Counter()
-        threshold_list = list(thresholds)
-        word_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
+
         for length, threshold in zip(lengths, word_thresholds):
             for i in range(len(tokens) - length + 1):
                 ngram = []
