@@ -13,7 +13,7 @@ except ImportError:
 from pkg_resources import DistributionNotFound, VersionConflict
 from .exceptions import WorkbenchVersionError
 
-current = '3.2.3'
+current = '3.2.4'
 
 logger = logging.getLogger(__name__)
 
