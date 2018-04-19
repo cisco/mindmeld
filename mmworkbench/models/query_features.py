@@ -362,7 +362,6 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
         tokens = query.normalized_tokens
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
-        
         for i in range(len(tokens)):
             threshold_index = 0
             for length, starts in ngram_lengths_to_start_positions.items():
