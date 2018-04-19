@@ -2,14 +2,18 @@
 """Defines mmworkbench version information"""
 from __future__ import absolute_import, unicode_literals
 import os
-import pip
 import pkg_resources
 import logging
+
+try:
+    from pip._internal.req import parse_requirements  # for pip >= 10
+except ImportError:
+    from pip.req import parse_requirements  # for pip <= 9.0.3
 
 from pkg_resources import DistributionNotFound, VersionConflict
 from .exceptions import WorkbenchVersionError
 
-current = '3.2.3'
+current = '3.2.4'
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +31,7 @@ def validate_workbench_version(app_path):
         logger.warning('requirements.txt is missing at {app_path}.'.format(app_path=app_path))
         return
     wb_req = None
-    for item in pip.req.parse_requirements(requirements, session='wb_session'):
+    for item in parse_requirements(requirements, session='wb_session'):
         if item.name == 'mmworkbench':
             wb_req = item
     if not wb_req:
