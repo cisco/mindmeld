@@ -122,7 +122,7 @@ class TaggerModel(Model):
         self.types = types
         if len(set(types)) == 0:
             self._no_entities = True
-            logger.warning("There are no labels in this label set, "
+            logger.info("There are no labels in this label set, "
                            "so we don't fit the model.")
             return self
 
@@ -239,7 +239,7 @@ class TaggerModel(Model):
         # TODO: also expose feature weights?
 
         if self._no_entities:
-            logger.warning("There are no labels in this label set, "
+            logger.info("There are no labels in this label set, "
                            "so we don't run model evaluation.")
             return
 
