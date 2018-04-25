@@ -123,7 +123,7 @@ class TaggerModel(Model):
         if len(set(types)) == 0:
             self._no_entities = True
             logger.info("There are no labels in this label set, "
-                           "so we don't fit the model.")
+                        "so we don't fit the model.")
             return self
 
         # TODO: check if there at least more than one label
@@ -240,7 +240,7 @@ class TaggerModel(Model):
 
         if self._no_entities:
             logger.info("There are no labels in this label set, "
-                           "so we don't run model evaluation.")
+                        "so we don't run model evaluation.")
             return
 
         predictions = self.predict(examples)
