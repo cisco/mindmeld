@@ -189,7 +189,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
 
         queries, classes = self._get_queries_and_labels(queries, label_set)
         if len(set(classes)) <= 1:
-            logger.warning('Not doing anything for fit since there is only one class')
+            logger.info('Not doing anything for fit since there is only one class')
             return
 
         model.initialize_resources(self._resource_loader, queries, classes)
