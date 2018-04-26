@@ -713,7 +713,7 @@ class Model(object):
                 msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
             else:
                 msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
-            logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
+            logger.debug(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
 
         if scoring == LIKELIHOOD_SCORING:
             msg = 'Best log likelihood: {:.4}, params: {}'
