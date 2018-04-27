@@ -216,7 +216,7 @@ test_data_6 = [
     (
         [],
         'store_info',
-        'greet'
+        'exit'
      )
 ]
 
