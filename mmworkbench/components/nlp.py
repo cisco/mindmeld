@@ -150,6 +150,8 @@ class Processor(with_metaclass(ABCMeta, object)):
 
         """
         if isinstance(query_text, (list, tuple)):
+            if not query_text:
+                query_text = ['']
             query_text = tuple(query_text)
             query = []
             for q_text in query_text:
