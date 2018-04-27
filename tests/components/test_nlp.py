@@ -213,23 +213,13 @@ def test_process_nbest_unspecified_intent(nlp, queries, expected_domain, expecte
 
 
 test_data_6 = [
-    (
-        [],
-        'store_info',
-        'exit'
-     )
+    ([])
 ]
 
 
-@pytest.mark.parametrize("queries,expected_domain,expected_intent", test_data_6)
-def test_process_empty_nbest_unspecified_intent(nlp, queries, expected_domain, expected_intent):
+@pytest.mark.parametrize("queries", test_data_6)
+def test_process_empty_nbest_unspecified_intent(nlp, queries):
     """Tests a basic call to process with n-best transcripts passed in for an intent where
         n-best is an empty list"""
     response = nlp.process(queries)
-
-    assert response == {
-        'text': '',
-        'domain': expected_domain,
-        'intent': expected_intent,
-        'entities': []
-    }
+    assert response['text'] == ''
