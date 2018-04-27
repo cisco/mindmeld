@@ -163,7 +163,7 @@ test_data_4 = [
          'when is the 23 elm street quicky mart open?'],
         'store_info',
         'get_store_hours',
-        [['23rd helm street'], ['23rd elm st'], ['23 elm street']]
+        [['23rd helm street'], ['23rd elm st'], ['23 elm street']],
      )
 ]
 
@@ -206,6 +206,29 @@ def test_process_nbest_unspecified_intent(nlp, queries, expected_domain, expecte
 
     assert response == {
         'text': queries[0],
+        'domain': expected_domain,
+        'intent': expected_intent,
+        'entities': []
+    }
+
+
+test_data_6 = [
+    (
+        [],
+        'store_info',
+        'greet'
+     )
+]
+
+
+@pytest.mark.parametrize("queries,expected_domain,expected_intent", test_data_6)
+def test_process_empty_nbest_unspecified_intent(nlp, queries, expected_domain, expected_intent):
+    """Tests a basic call to process with n-best transcripts passed in for an intent where
+        n-best is an empty list"""
+    response = nlp.process(queries)
+
+    assert response == {
+        'text': '',
         'domain': expected_domain,
         'intent': expected_intent,
         'entities': []
