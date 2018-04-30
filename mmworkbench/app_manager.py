@@ -172,10 +172,10 @@ class ApplicationManager(object):
                     "Not applying domain/intent restrictions this "
                     "turn".format(ex, allowed_intents))
 
-        query = self._query_factory.create_query(text, time_zone=time_zone, timestamp=timestamp)
-        processed_query = self.nlp.process_query(query, nlp_hierarchy)
+        processed_query = self.nlp.process(text, nlp_hierarchy, time_zone=time_zone,
+                                           timestamp=timestamp)
 
-        context.update(processed_query.to_dict())
+        context.update(processed_query)
         context.pop('text')
 
         context.update(self.dialogue_manager.apply_handler(context, target_dialogue_state))

@@ -3,7 +3,7 @@
 This module contains the processor resource loader.
 """
 from __future__ import absolute_import, unicode_literals
-from builtins import object
+from builtins import (object, zip)
 
 from copy import deepcopy
 from collections import Counter
@@ -20,7 +20,7 @@ from .exceptions import WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
 from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                             mask_numerics)
+                             CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, mask_numerics)
 from .core import Entity
 
 logger = logging.getLogger(__name__)
@@ -101,7 +101,6 @@ class ResourceLoader(object):
 
     def get_gazetteers_hash(self):
         entity_types = path.get_entity_types(self.app_path)
-
         return self._hasher.hash_list((self.get_gazetteer_hash(entity_type)
                                       for entity_type in sorted(entity_types)))
 
@@ -427,6 +426,37 @@ class ResourceLoader(object):
 
         return freq_dict
 
+    def _build_char_ngram_freq_dict(self, **kwargs):
+        """Compiles n-gram character frequency dictionary of normalized query tokens
+
+           Args:
+               queries (list of Query): A list of all queries
+        """
+        char_freq_dict = Counter()
+        for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
+            if threshold > 0:
+                for q in kwargs.get('queries'):
+                    character_tokens = [q.normalized_text[i:i+length]
+                                        for i in range(len(q.normalized_text))
+                                        if len(q.normalized_text[i:i+length]) == length]
+                    char_freq_dict.update(character_tokens)
+        return char_freq_dict
+
+    def _build_word_ngram_freq_dict(self, **kwargs):
+        """Compiles n-gram  frequency dictionary of normalized query tokens
+
+           Args:
+               queries (list of Query): A list of all queries
+        """
+        word_freq_dict = Counter()
+        for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
+            if threshold > 0:
+                ngram_tokens = [' '.join(q.normalized_tokens[i:i+length])
+                                for q in kwargs.get('queries')
+                                for i in range(len(q.normalized_tokens))]
+                word_freq_dict.update(ngram_tokens)
+        return word_freq_dict
+
     def _build_query_freq_dict(self, **kwargs):
         """Compiles frequency dictionary of normalized query strings
 
@@ -526,6 +556,8 @@ class ResourceLoader(object):
     FEATURE_RSC_MAP = {
         GAZETTEER_RSC: get_gazetteers,
         WORD_FREQ_RSC: _build_word_freq_dict,
+        CHAR_NGRAM_FREQ_RSC: _build_char_ngram_freq_dict,
+        WORD_NGRAM_FREQ_RSC: _build_word_ngram_freq_dict,
         QUERY_FREQ_RSC: _build_query_freq_dict,
         SYS_TYPES_RSC: _get_sys_entity_types
     }
@@ -534,6 +566,8 @@ class ResourceLoader(object):
         GAZETTEER_RSC: get_gazetteers_hash,
         # the following resources only vary based on the queries used for training
         WORD_FREQ_RSC: lambda _: 'constant',
+        WORD_NGRAM_FREQ_RSC: lambda _: 'constant',
+        CHAR_NGRAM_FREQ_RSC: lambda _: 'constant',
         QUERY_FREQ_RSC: lambda _: 'constant',
         SYS_TYPES_RSC: lambda _: 'constant'
     }

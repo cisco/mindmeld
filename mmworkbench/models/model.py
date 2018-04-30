@@ -15,7 +15,7 @@ from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridS
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal)
+                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 logger = logging.getLogger(__name__)
@@ -94,6 +94,39 @@ class ModelConfig(object):
             str: JSON representation of the classifier
         """
         return json.dumps(self.to_dict(), sort_keys=True)
+
+    def get_ngram_lengths_and_thresholds(self, rname):
+        """
+        Returns the n-gram lengths and thresholds to extract to optimize resource collection
+
+        Arguments:
+        rname (string): Name of the resource
+
+        Returns:
+            lengths (list of int): list of n-gram lengths to be extracted
+            thresholds (list of int): thresholds to be applied to corresponding n-gram lengths
+        """
+        lengths = thresholds = None
+        # if it's not the n-gram feature, we don't need length and threshold information
+        if rname == CHAR_NGRAM_FREQ_RSC:
+            feature_name = 'char-ngrams'
+        elif rname == WORD_NGRAM_FREQ_RSC:
+            feature_name = 'bag-of-words'
+        else:
+            return lengths, thresholds
+
+        # feature name varies based on whether it's for a classifier or tagger
+        if self.model_type == 'text':
+            if feature_name in self.features:
+                lengths = self.features[feature_name]['lengths']
+                thresholds = self.features[feature_name].get('thresholds', [0] * len(lengths))
+        elif self.model_type == 'tagger':
+            feature_name = feature_name + '-seq'
+            if feature_name in self.features:
+                lengths = self.features[feature_name]['ngram_lengths_to_start_positions'].keys()
+                thresholds = self.features[feature_name].get('thresholds', [0] * len(lengths))
+
+        return lengths, thresholds
 
     def required_resources(self):
         """Returns the resources this model requires
@@ -680,7 +713,7 @@ class Model(object):
                 msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
             else:
                 msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
-            logger.info(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
+            logger.debug(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
 
         if scoring == LIKELIHOOD_SCORING:
             msg = 'Best log likelihood: {:.4}, params: {}'
@@ -831,6 +864,9 @@ class Model(object):
         test_size = 1.0 / k
         return StratifiedShuffleSplit(n_splits=n, test_size=test_size)
 
+    def get_resource(self, name):
+        return self._resources.get(name)
+
     def requires_resource(self, resource):
         example_type = self.config.example_type
         for name, kwargs in self.config.features.items():
@@ -862,8 +898,9 @@ class Model(object):
         # load required resources if not present in model resources
         for rname in required_resources:
             if rname not in self._resources:
+                lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(rname)
                 self._resources[rname] = resource_loader.load_feature_resource(
-                    rname, queries=examples, labels=labels)
+                    rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds)
 
 
 class LabelEncoder(object):

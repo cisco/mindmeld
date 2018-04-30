@@ -22,7 +22,8 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 import operator
 
-from .helpers import QUERY_FREQ_RSC, WORD_FREQ_RSC, register_model
+from .helpers import (QUERY_FREQ_RSC, WORD_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                      CHAR_NGRAM_FREQ_RSC, register_model)
 from .model import EvaluatedExample, Model, StandardModelEvaluation
 
 _NEG_INF = -1e10
@@ -62,9 +63,9 @@ class TextModel(Model):
         underscores. This overrides that behavior.
         """
         attributes = self.__dict__.copy()
-        attributes['_resources'] = {WORD_FREQ_RSC: self._resources.get(WORD_FREQ_RSC, {}),
-                                    QUERY_FREQ_RSC: self._resources.get(QUERY_FREQ_RSC, {})}
-
+        attributes['_resources'] = {rname: self._resources.get(rname, {})
+                                    for rname in [WORD_FREQ_RSC, QUERY_FREQ_RSC,
+                                                  WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC]}
         return attributes
 
     def _get_model_constructor(self):
