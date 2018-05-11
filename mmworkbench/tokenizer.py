@@ -150,7 +150,7 @@ class Tokenizer(object):
 
     def normalize(self, text, keep_special_chars=True):
         norm_tokens = self.tokenize(text, keep_special_chars)
-        normalized_text = " ".join([t['entity'] for t in norm_tokens])
+        normalized_text = " ".join(t['entity'] for t in norm_tokens)
 
         return normalized_text
 
@@ -256,6 +256,11 @@ class Tokenizer(object):
         if n == 0:
             raw_to_norm_mapping = dict([(i, 0) for i in range(m)])
             return raw_to_norm_mapping, {0: 0}
+
+        # handle case where normalized text and raw text are identical
+        if m == n and raw_text == normalized_text:
+            mapping = {i: i for i in range(n)}
+            return mapping, mapping
 
         edit_dis = []
         for i in range(0, n+1):
