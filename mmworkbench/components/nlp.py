@@ -4,6 +4,7 @@ This module contains the natural language processor.
 """
 from __future__ import absolute_import, unicode_literals
 from builtins import object, super
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from abc import ABCMeta, abstractmethod
 import logging
@@ -29,6 +30,34 @@ from ._config import get_nlp_config
 
 
 logger = logging.getLogger(__name__)
+executor = ProcessPoolExecutor(max_workers=4)
+
+def global_get_entities(instance_id, *args, **kwargs):
+    """
+    A module function used as a trampoline to call an instance function
+    from within a long running child process.
+
+    Args:
+        instance_id (number): id(inst) of the IntentProcessor instance that needs called
+
+    Returns:
+        Prediction from the intent processor's  entity_recognizer
+    """
+    return IntentProcessor.instance_map[instance_id].entity_recognizer.predict(*args, **kwargs)
+
+
+def global_create_query(instance_id, *args, **kwargs):
+    """
+    A module function used as a trampoline to call an instance function
+    from within a long running child process.
+
+    Args:
+        instance_id (number): id(inst) of the Processor instance that needs called
+
+    Returns:
+        Query from the create_query instance method.
+    """
+    return Processor.instance_map[instance_id].create_query(*args, **kwargs)
 
 
 class Processor(with_metaclass(ABCMeta, object)):
@@ -41,6 +70,8 @@ class Processor(with_metaclass(ABCMeta, object)):
         ready (bool): Indicates whether the processor is ready to process
             messages
     """
+
+    instance_map = {}
 
     def __init__(self, app_path, resource_loader=None, config=None):
         """Initializes a processor
@@ -58,6 +89,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.dirty = False
         self.name = None
         self.config = get_nlp_config(app_path, config)
+        Processor.instance_map[id(self)] = self
 
     def build(self, incremental=False, label_set="train"):
         """Builds all the natural language processing models for this processor and its children.
@@ -152,17 +184,19 @@ class Processor(with_metaclass(ABCMeta, object)):
         if isinstance(query_text, (list, tuple)):
             if not query_text:
                 query_text = ['']
-            query_text = tuple(query_text)
-            query = []
-            for q_text in query_text:
-                n_query = self.create_query(q_text, language=language, time_zone=time_zone,
-                                            timestamp=timestamp)
-                query.append(n_query)
+            query = list(query_text)
+            # map the futures to the index of the query they belong to
+            futures = {executor.submit(
+                global_create_query, id(self), q_text, language=language, \
+                time_zone=time_zone, timestamp=timestamp): idx
+		       for idx, q_text in enumerate(query_text)}
+            # set the completed queries into their appropriate index
+            for future in as_completed(futures):
+                query[futures[future]] = future.result()
             query = tuple(query)
         else:
             query = self.create_query(query_text, language=language, time_zone=time_zone,
                                       timestamp=timestamp)
-
         return query
 
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
@@ -196,7 +230,10 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         query = self._create_queries(query_text, language=language, time_zone=time_zone,
                                      timestamp=timestamp)
-        return self.process_query(query, allowed_nlp_classes).to_dict()
+        print(query)
+        tmp = self.process_query(query, allowed_nlp_classes)
+        print(tmp)
+        return tmp.to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None):
         """Processes the given query using the full hierarchy of natural language processing models
@@ -588,6 +625,7 @@ class IntentProcessor(Processor):
         entities (dict): The entity types associated with this intent
         recognizer (EntityRecognizer): The entity recognizer for this intent
     """
+    instance_map = {}
 
     def __init__(self, app_path, domain, intent, resource_loader=None):
         """Initializes an intent processor object
@@ -610,6 +648,7 @@ class IntentProcessor(Processor):
             self.parser = None
 
         self._nbest_text_enabled = False
+        IntentProcessor.instance_map[id(self)] = self
 
     @property
     def entities(self):
@@ -708,14 +747,16 @@ class IntentProcessor(Processor):
 
         if isinstance(query, (list, tuple)):
             if self.nbest_text_enabled:
-                nbest_entities = []
-                for n_query in query:
-                    entities = self.entity_recognizer.predict(n_query)
+                nbest_entities = list(query)
+                futures = {executor.submit(global_get_entities, id(self), tup[1]): tup for tup in enumerate(query)}
+                for future in as_completed(futures):
+                    entities = future.result()
+                    entity_idx, n_query = futures[future]
                     for idx, entity in enumerate(entities):
                         self.entities[entity.entity.type].process_entity(n_query, entities, idx)
                     entities = self.parser.parse_entities(n_query, entities) \
                         if self.parser else entities
-                    nbest_entities.append(entities)
+                    nbest_entities[entity_idx] = entities
                 return ProcessedQuery(query[0], entities=nbest_entities[0], nbest_queries=query,
                                       nbest_entities=nbest_entities)
             else:
