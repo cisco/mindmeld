@@ -330,7 +330,6 @@ class ProcessedQuery(object):
         if self.nbest_queries:
             base['nbest_text'] = [q.text for q in self.nbest_queries]
         if self.nbest_entities:
-            print(self.nbest_entities)
             base['nbest_entities'] = [[e.to_dict() for e in n_entities]
                                       for n_entities in self.nbest_entities]
         return base
