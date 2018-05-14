@@ -231,10 +231,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         query = self._create_queries(query_text, language=language, time_zone=time_zone,
                                      timestamp=timestamp)
-        print(query)
-        tmp = self.process_query(query, allowed_nlp_classes)
-        print(tmp)
-        return tmp.to_dict()
+        return self.process_query(query, allowed_nlp_classes).to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None):
         """Processes the given query using the full hierarchy of natural language processing models
