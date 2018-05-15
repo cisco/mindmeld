@@ -256,10 +256,11 @@ class Processor(with_metaclass(ABCMeta, object)):
                     query_idx = future_to_idx_map[future]
                     results[query_idx] = query
                 return tuple(results)
-            except BrokenProcessPool as e:
+            except BrokenProcessPool:
                 # process pool is broken, restart it and rerun the query
                 executor = ProcessPoolExecutor(max_workers=4)
-                return self.create_query(query_text, language, timezone, timestamp)
+                return self.create_query(
+                    query_text, language=language, time_zone=time_zone, timestamp=timestamp)
         return self.resource_loader.query_factory.create_query(
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
 
@@ -745,7 +746,7 @@ class IntentProcessor(Processor):
                     return ProcessedQuery(
                         query[0], entities=nbest_entities[0],
                         nbest_queries=query, nbest_entities=nbest_entities)
-                except BrokenProcessPool as e:
+                except BrokenProcessPool:
                     # process pool is broken, restart it and rerun the query
                     executor = ProcessPoolExecutor(max_workers=4)
                     return self.process_query(query)
