@@ -51,6 +51,7 @@ class EntityResolver(object):
         self._use_text_rel = er_config['model_type'] == 'text_relevance'
         self._es_host = es_host
         self.__es_client = es_client
+        self._pid = os.getpid()
         self._es_index_name = EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + entity_type
 
     @property
