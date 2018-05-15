@@ -8,6 +8,7 @@ from builtins import object
 import copy
 import logging
 import hashlib
+import os
 
 from ..core import Entity
 from ._config import get_app_namespace, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
@@ -54,8 +55,9 @@ class EntityResolver(object):
 
     @property
     def _es_client(self):
-        # Lazily connect to Elasticsearch
-        if self.__es_client is None:
+        # Lazily connect to Elasticsearch.  Make sure each subprocess gets it's own connection
+        if self.__es_client is None or self._pid != os.getpid():
+            self._pid = os.getpid()
             self.__es_client = create_es_client()
         return self.__es_client
 

@@ -4,7 +4,7 @@ This module contains the natural language processor.
 """
 from __future__ import absolute_import, unicode_literals
 from builtins import object, super
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, wait
 
 from abc import ABCMeta, abstractmethod
 import logging
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 executor = ProcessPoolExecutor(max_workers=4)
 
 
-def global_get_entities(instance_id, *args, **kwargs):
+def subproc_process_query(instance_id, *args, **kwargs):
     """
     A module function used as a trampoline to call an instance function
     from within a long running child process.
@@ -44,10 +44,10 @@ def global_get_entities(instance_id, *args, **kwargs):
     Returns:
         Prediction from the intent processor's  entity_recognizer
     """
-    return IntentProcessor.instance_map[instance_id].entity_recognizer.predict(*args, **kwargs)
+    return Processor.instance_map[instance_id].process_query(*args, **kwargs)
 
 
-def global_create_query(instance_id, *args, **kwargs):
+def subproc_create_query(instance_id, *args, **kwargs):
     """
     A module function used as a trampoline to call an instance function
     from within a long running child process.
@@ -165,41 +165,6 @@ class Processor(with_metaclass(ABCMeta, object)):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
-    def _create_queries(self, query_text, language=None, time_zone=None, timestamp=None):
-        """Creates the query object(s).
-
-        Args:
-            query_text (str, or tuple): The raw user text input, or a list of the n best query
-                transcripts from ASR
-            language (str, optional): Language as specified using a 639-2 code;
-                if omitted, English is assumed.
-            time_zone (str, optional): The name of an IANA time zone, such as
-                'America/Los_Angeles', or 'Asia/Kolkata'
-                See the [tz database](https://www.iana.org/time-zones) for more information.
-            timestamp (long, optional): A unix time stamp for the request (in seconds).
-
-        Returns:
-            Query or tuple: A newly constructed query, or tuple of queries
-
-        """
-        if isinstance(query_text, (list, tuple)):
-            if not query_text:
-                query_text = ['']
-            query = list(query_text)
-            # map the futures to the index of the query they belong to
-            futures = {executor.submit(
-                global_create_query, id(self), q_text, language=language,
-                time_zone=time_zone, timestamp=timestamp): idx
-                       for idx, q_text in enumerate(query_text)}
-            # set the completed queries into their appropriate index
-            for future in as_completed(futures):
-                query[futures[future]] = future.result()
-            query = tuple(query)
-        else:
-            query = self.create_query(query_text, language=language, time_zone=time_zone,
-                                      timestamp=timestamp)
-        return query
-
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
                 timestamp=None):
         """Processes the given query using the full hierarchy of natural language processing models
@@ -229,8 +194,8 @@ class Processor(with_metaclass(ABCMeta, object)):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the full hierarchy of natural language processing models to the input query
         """
-        query = self._create_queries(query_text, language=language, time_zone=time_zone,
-                                     timestamp=timestamp)
+        query = self.create_query(
+            query_text, language=language, time_zone=time_zone, timestamp=timestamp)
         return self.process_query(query, allowed_nlp_classes).to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None):
@@ -262,7 +227,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         """Creates a query with the given text
 
         Args:
-            query_text (str): Text to create a query object for
+            query_text (str, list(str)): Text or list of texts to create a query object for
             language (str, optional): Language as specified using a 639-2 code such as 'eng' or
                 'spa'; if omitted, English is assumed.
             time_zone (str, optional): The name of an IANA time zone, such as
@@ -271,11 +236,25 @@ class Processor(with_metaclass(ABCMeta, object)):
             timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
-            Query: A newly constructed query
+            Query: A newly constructed query or tuple of queries
         """
+        if not query_text:
+            query_text = ''
+        if isinstance(query_text, (list, tuple)):
+            results = list(query_text)
+            future_to_idx_map = {executor.submit(
+                subproc_create_query, id(self), q, language=language,
+                time_zone=time_zone, timestamp=timestamp): idx
+                    for idx, q in enumerate(query_text)}
+            # set the completed queries into their appropriate index
+            for future in wait(future_to_idx_map).done:
+                query = future.result()
+                query_idx = future_to_idx_map[future]
+                results[query_idx] = query
+            return tuple(results)
+
         return self.resource_loader.query_factory.create_query(
-            query_text, language=language, time_zone=time_zone, timestamp=timestamp
-        )
+            query_text, language=language, time_zone=time_zone, timestamp=timestamp)
 
     def __repr__(self):
         msg = '<{} {!r} ready: {!r}, dirty: {!r}>'
@@ -552,7 +531,7 @@ class DomainProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self._create_queries(query_text, time_zone=time_zone, timestamp=timestamp)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes)
         processed_query.domain = self.name
         return processed_query.to_dict()
@@ -722,21 +701,20 @@ class IntentProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self._create_queries(query_text, time_zone=time_zone, timestamp=timestamp)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query):
+    def process_query(self, query, return_processed_query=True):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
         Args:
             query (Query, or tuple): The user input query, or a list of the n best query objects
-            nbest_queries (list, optional): A list of Query objects, one for each of the nbest
-                                            transcript from ASR.
-
+            return_processed_query(boolean): Returns an instance of ProcessedQuery if True,
+                an array of entities if False (this is used to parallelize n-best entity processing)
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
@@ -746,29 +724,24 @@ class IntentProcessor(Processor):
         if isinstance(query, (list, tuple)):
             if self.nbest_text_enabled:
                 nbest_entities = list(query)
-                futures = {executor.submit(global_get_entities, id(self), tup[1]): tup
-                           for tup in enumerate(query)}
-                for future in as_completed(futures):
+                future_to_idx_map = {executor.submit(subproc_process_query, id(self), q, False): idx
+                                     for idx, q in enumerate(query)}
+                for future in wait(future_to_idx_map).done:
                     entities = future.result()
-                    entity_idx, n_query = futures[future]
-                    for idx, entity in enumerate(entities):
-                        self.entities[entity.entity.type].process_entity(n_query, entities, idx)
-                    entities = self.parser.parse_entities(n_query, entities) \
-                        if self.parser else entities
+                    entity_idx = future_to_idx_map[future]
                     nbest_entities[entity_idx] = entities
-                return ProcessedQuery(query[0], entities=nbest_entities[0], nbest_queries=query,
-                                      nbest_entities=nbest_entities)
+                return ProcessedQuery(
+                    query[0], entities=nbest_entities[0],
+                    nbest_queries=query, nbest_entities=nbest_entities)
             else:
                 query = query[0]
-
         entities = self.entity_recognizer.predict(query)
-
         for idx, entity in enumerate(entities):
             self.entities[entity.entity.type].process_entity(query, entities, idx)
-
         entities = self.parser.parse_entities(query, entities) if self.parser else entities
-
-        return ProcessedQuery(query, entities=entities)
+        if return_processed_query is True:
+            return ProcessedQuery(query, entities=entities)
+        return entities
 
 
 class EntityProcessor(Processor):
