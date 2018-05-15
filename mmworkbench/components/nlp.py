@@ -5,7 +5,7 @@ This module contains the natural language processor.
 from __future__ import absolute_import, unicode_literals
 from builtins import object, super
 from concurrent.futures import ProcessPoolExecutor, wait
-
+from concurrent.futures.process import BrokenProcessPool
 from abc import ABCMeta, abstractmethod
 import logging
 
@@ -238,21 +238,28 @@ class Processor(with_metaclass(ABCMeta, object)):
         Returns:
             Query: A newly constructed query or tuple of queries
         """
+        global executor
         if not query_text:
             query_text = ''
         if isinstance(query_text, (list, tuple)):
             results = list(query_text)
-            future_to_idx_map = {executor.submit(
-                subproc_create_query, id(self), q, language=language,
-                time_zone=time_zone, timestamp=timestamp): idx
-                    for idx, q in enumerate(query_text)}
-            # set the completed queries into their appropriate index
-            for future in wait(future_to_idx_map).done:
-                query = future.result()
-                query_idx = future_to_idx_map[future]
-                results[query_idx] = query
-            return tuple(results)
-
+            try:
+                future_to_idx_map = {}
+                for idx, q in enumerate(query_text):
+                    future = executor.submit(
+                        subproc_create_query, id(self), q, language=language,
+                        time_zone=time_zone, timestamp=timestamp)
+                    future_to_idx_map[future] = idx
+                tasks = wait(future_to_idx_map)
+                for future in tasks.done:
+                    query = future.result()
+                    query_idx = future_to_idx_map[future]
+                    results[query_idx] = query
+                return tuple(results)
+            except BrokenProcessPool as e:
+                # process pool is broken, restart it and rerun the query
+                executor = ProcessPoolExecutor(max_workers=4)
+                return self.create_query(query_text, language, timezone, timestamp)
         return self.resource_loader.query_factory.create_query(
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
 
@@ -719,20 +726,29 @@ class IntentProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
         """
+        global executor
         self._check_ready()
 
         if isinstance(query, (list, tuple)):
             if self.nbest_text_enabled:
                 nbest_entities = list(query)
-                future_to_idx_map = {executor.submit(subproc_process_query, id(self), q, False): idx
-                                     for idx, q in enumerate(query)}
-                for future in wait(future_to_idx_map).done:
-                    entities = future.result()
-                    entity_idx = future_to_idx_map[future]
-                    nbest_entities[entity_idx] = entities
-                return ProcessedQuery(
-                    query[0], entities=nbest_entities[0],
-                    nbest_queries=query, nbest_entities=nbest_entities)
+                try:
+                    future_to_idx_map = {}
+                    for idx, q in enumerate(query):
+                        future = executor.submit(subproc_process_query, id(self), q, False)
+                        future_to_idx_map[future] = idx
+                    tasks = wait(future_to_idx_map)
+                    for future in tasks.done:
+                        entities = future.result()
+                        entity_idx = future_to_idx_map[future]
+                        nbest_entities[entity_idx] = entities
+                    return ProcessedQuery(
+                        query[0], entities=nbest_entities[0],
+                        nbest_queries=query, nbest_entities=nbest_entities)
+                except BrokenProcessPool as e:
+                    # process pool is broken, restart it and rerun the query
+                    executor = ProcessPoolExecutor(max_workers=4)
+                    return self.process_query(query)
             else:
                 query = query[0]
         entities = self.entity_recognizer.predict(query)
