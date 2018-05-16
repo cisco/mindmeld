@@ -7,7 +7,10 @@ from builtins import object, super
 import sys
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor, wait
-
+if sys.version_info > (3, 0):
+    from concurrent.futures.process import BrokenProcessPool
+else:
+    from builtins import Exception as BrokenProcessPool
 from abc import ABCMeta, abstractmethod
 import logging
 
@@ -253,7 +256,7 @@ class Processor(with_metaclass(ABCMeta, object)):
                         query_idx = future_to_idx_map[future]
                         results[query_idx] = query
                     return tuple(results)
-                except Exception:
+                except BrokenProcessPool:
                     # process pool is broken, restart it and rerun the query
                     executor = ProcessPoolExecutor(max_workers=num_workers)
             # end for loop. We've failed 5 times.  let's give up on the N-best
@@ -747,7 +750,7 @@ class IntentProcessor(Processor):
                         return ProcessedQuery(
                             query[0], entities=nbest_entities[0],
                             nbest_queries=query, nbest_entities=nbest_entities)
-                    except Exception:
+                    except BrokenProcessPool:
                         # process pool is broken, restart it and rerun the query
                         executor = ProcessPoolExecutor(max_workers=num_workers)
                 # end for loop. We've failed 5 times.  let's give up on the N-best
