@@ -3,8 +3,9 @@
 This module contains the natural language processor.
 """
 from __future__ import absolute_import, unicode_literals
-from builtins import object, super
+import os
 import sys
+from builtins import object, super
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor, wait
 from abc import ABCMeta, abstractmethod
@@ -34,7 +35,7 @@ if sys.version_info > (3, 0):
 else:
     from builtins import Exception as BrokenProcessPool
 
-num_workers = cpu_count()+1
+num_workers = int(os.environ.get('MM_SUBPROCESS_COUNT', cpu_count()+1))
 logger = logging.getLogger(__name__)
 executor = ProcessPoolExecutor(max_workers=num_workers)
 
