@@ -241,27 +241,27 @@ class Processor(with_metaclass(ABCMeta, object)):
             query_text = ''
         if isinstance(query_text, (list, tuple)):
             results = list(query_text)
-            for i in range(5):
-                try:
-                    future_to_idx_map = {}
-                    for idx, q in enumerate(query_text):
-                        future = executor.submit(
-                            subproc_call_instance_function, id(self),
-                            'create_query', q, language=language,
-                            time_zone=time_zone, timestamp=timestamp)
-                        future_to_idx_map[future] = idx
-                    tasks = wait(future_to_idx_map)
-                    for future in tasks.done:
-                        query = future.result()
-                        query_idx = future_to_idx_map[future]
-                        results[query_idx] = query
-                    return tuple(results)
-                except BrokenProcessPool:
-                    # process pool is broken, restart it and rerun the query
-                    executor = ProcessPoolExecutor(max_workers=num_workers)
-            # end for loop. We've failed 5 times.  let's give up on the N-best
-            return self.create_query(
-                query_text[0], language=language, time_zone=time_zone, timestamp=timestamp)
+            try:
+                future_to_idx_map = {}
+                for idx, q in enumerate(query_text):
+                    future = executor.submit(
+                        subproc_call_instance_function, id(self),
+                        'create_query', q, language=language,
+                        time_zone=time_zone, timestamp=timestamp)
+                    future_to_idx_map[future] = idx
+                tasks = wait(future_to_idx_map, timeout=0.5)
+                if tasks.not_done:
+                    raise BrokenProcessPool
+                for future in tasks.done:
+                    query = future.result()
+                    query_idx = future_to_idx_map[future]
+                    results[query_idx] = query
+                return tuple(results)
+            except BrokenProcessPool:
+                # process pool is broken, restart it and proceed with N == 1 for this query
+                executor = ProcessPoolExecutor(max_workers=num_workers)
+                return self.create_query(
+                    query_text[0], language=language, time_zone=time_zone, timestamp=timestamp)
         # case of N == 1
         return self.resource_loader.query_factory.create_query(
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
@@ -735,26 +735,26 @@ class IntentProcessor(Processor):
         if isinstance(query, (list, tuple)):
             if self.nbest_text_enabled:
                 nbest_entities = list(query)
-                for i in range(5):
-                    try:
-                        future_to_idx_map = {}
-                        for idx, q in enumerate(query):
-                            future = executor.submit(
-                                subproc_call_instance_function, id(self), 'process_query', q, False)
-                            future_to_idx_map[future] = idx
-                        tasks = wait(future_to_idx_map)
-                        for future in tasks.done:
-                            entities = future.result()
-                            entity_idx = future_to_idx_map[future]
-                            nbest_entities[entity_idx] = entities
-                        return ProcessedQuery(
-                            query[0], entities=nbest_entities[0],
-                            nbest_queries=query, nbest_entities=nbest_entities)
-                    except BrokenProcessPool:
-                        # process pool is broken, restart it and rerun the query
-                        executor = ProcessPoolExecutor(max_workers=num_workers)
-                # end for loop. We've failed 5 times.  let's give up on the N-best
-                return self.process_query(query[0])
+                try:
+                    future_to_idx_map = {}
+                    for idx, q in enumerate(query):
+                        future = executor.submit(
+                            subproc_call_instance_function, id(self), 'process_query', q, False)
+                        future_to_idx_map[future] = idx
+                    tasks = wait(future_to_idx_map, timeout=0.5)
+                    if tasks.not_done:
+                        raise BrokenProcessPool
+                    for future in tasks.done:
+                        entities = future.result()
+                        entity_idx = future_to_idx_map[future]
+                        nbest_entities[entity_idx] = entities
+                    return ProcessedQuery(
+                        query[0], entities=nbest_entities[0],
+                        nbest_queries=query, nbest_entities=nbest_entities)
+                except BrokenProcessPool:
+                    # process pool is broken, restart it and proceed with N == 1 for this query
+                    executor = ProcessPoolExecutor(max_workers=num_workers)
+                    return self.process_query(query[0])
             else:
                 query = query[0]
         # case of N == 1 or not self.nbest_text_enabled
