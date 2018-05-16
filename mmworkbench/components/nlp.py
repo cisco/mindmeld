@@ -30,14 +30,16 @@ from ..markup import process_markup
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
 
+default_num_workers = 0
 if sys.version_info > (3, 0):
+    default_num_workers = cpu_count()+1
     from concurrent.futures.process import BrokenProcessPool
 else:
     from builtins import Exception as BrokenProcessPool
 
-num_workers = int(os.environ.get('MM_SUBPROCESS_COUNT', cpu_count()+1))
 logger = logging.getLogger(__name__)
-executor = ProcessPoolExecutor(max_workers=num_workers)
+num_workers = int(os.environ.get('MM_SUBPROCESS_COUNT', default_num_workers))
+executor = ProcessPoolExecutor(max_workers=num_workers) if num_workers > 0 else None
 
 
 def subproc_call_instance_function(instance_id, func_name, *args, **kwargs):
@@ -222,11 +224,10 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         raise NotImplementedError
 
-    def create_query(self, query_text, language=None, time_zone=None, timestamp=None):
-        """Creates a query with the given text
-
+    def _create_query_list(self, query_text, language, time_zone, timestamp):
+        """Creates a list of queries with the given texts
         Args:
-            query_text (str, list(str)): Text or list of texts to create a query object for
+            query_text (list(str)): Llist of texts to create a query object for
             language (str, optional): Language as specified using a 639-2 code such as 'eng' or
                 'spa'; if omitted, English is assumed.
             time_zone (str, optional): The name of an IANA time zone, such as
@@ -235,14 +236,12 @@ class Processor(with_metaclass(ABCMeta, object)):
             timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
-            Query: A newly constructed query or tuple of queries
+            Query: A tuple of queries
         """
         global executor
-        if not query_text:
-            query_text = ''
-        if isinstance(query_text, (list, tuple)):
-            results = list(query_text)
+        if executor:
             try:
+                results = list(query_text)
                 future_to_idx_map = {}
                 for idx, q in enumerate(query_text):
                     future = executor.submit(
@@ -259,11 +258,33 @@ class Processor(with_metaclass(ABCMeta, object)):
                     results[query_idx] = query
                 return tuple(results)
             except BrokenProcessPool:
-                # process pool is broken, restart it and proceed with N == 1 for this query
+                # process pool is broken, restart it and process current request in series
                 executor = ProcessPoolExecutor(max_workers=num_workers)
-                return self.create_query(
-                    query_text[0], language=language, time_zone=time_zone, timestamp=timestamp)
-        # case of N == 1
+        # process the list in series
+        results = []
+        for q in query_text:
+            results.append(self.create_query(q, language, time_zone, timestamp))
+        return tuple(results)
+
+    def create_query(self, query_text, language=None, time_zone=None, timestamp=None):
+        """Creates a query with the given text
+
+        Args:
+            query_text (str, list(str)): Text or list of texts to create a query object for
+            language (str, optional): Language as specified using a 639-2 code such as 'eng' or
+                'spa'; if omitted, English is assumed.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
+
+        Returns:
+            Query: A newly constructed query or tuple of queries
+        """
+        if not query_text:
+            query_text = ''
+        if isinstance(query_text, (list, tuple)):
+            return self._create_query_list(query_text, language, time_zone, timestamp)
         return self.resource_loader.query_factory.create_query(
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
 
@@ -718,6 +739,37 @@ class IntentProcessor(Processor):
         processed_query.intent = self.name
         return processed_query.to_dict()
 
+    def _process_query_list(self, query):
+        global executor
+        if executor:
+            nbest_entities = list(query)
+            try:
+                future_to_idx_map = {}
+                for idx, q in enumerate(query):
+                    future = executor.submit(
+                        subproc_call_instance_function, id(self), 'process_query', q, False)
+                    future_to_idx_map[future] = idx
+                tasks = wait(future_to_idx_map, timeout=0.5)
+                if tasks.not_done:
+                    raise BrokenProcessPool
+                for future in tasks.done:
+                    entities = future.result()
+                    entity_idx = future_to_idx_map[future]
+                    nbest_entities[entity_idx] = entities
+                return ProcessedQuery(
+                    query[0], entities=nbest_entities[0],
+                    nbest_queries=query, nbest_entities=nbest_entities)
+            except BrokenProcessPool:
+                # process pool is broken, restart it and process current request in series
+                executor = ProcessPoolExecutor(max_workers=num_workers)
+        # process the list in series
+        nbest_entities = []
+        for q in query:
+            nbest_entities.append(self.process_query(q, False))
+        return ProcessedQuery(
+            query[0], entities=nbest_entities[0],
+            nbest_queries=query, nbest_entities=nbest_entities)
+
     def process_query(self, query, return_processed_query=True):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
@@ -730,35 +782,13 @@ class IntentProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
         """
-        global executor
         self._check_ready()
 
         if isinstance(query, (list, tuple)):
             if self.nbest_text_enabled:
-                nbest_entities = list(query)
-                try:
-                    future_to_idx_map = {}
-                    for idx, q in enumerate(query):
-                        future = executor.submit(
-                            subproc_call_instance_function, id(self), 'process_query', q, False)
-                        future_to_idx_map[future] = idx
-                    tasks = wait(future_to_idx_map, timeout=0.5)
-                    if tasks.not_done:
-                        raise BrokenProcessPool
-                    for future in tasks.done:
-                        entities = future.result()
-                        entity_idx = future_to_idx_map[future]
-                        nbest_entities[entity_idx] = entities
-                    return ProcessedQuery(
-                        query[0], entities=nbest_entities[0],
-                        nbest_queries=query, nbest_entities=nbest_entities)
-                except BrokenProcessPool:
-                    # process pool is broken, restart it and proceed with N == 1 for this query
-                    executor = ProcessPoolExecutor(max_workers=num_workers)
-                    return self.process_query(query[0])
+                return self._process_query_list(query)
             else:
                 query = query[0]
-        # case of N == 1 or not self.nbest_text_enabled
         entities = self.entity_recognizer.predict(query)
         for idx, entity in enumerate(entities):
             self.entities[entity.entity.type].process_entity(query, entities, idx)
