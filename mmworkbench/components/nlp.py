@@ -7,10 +7,6 @@ from builtins import object, super
 import sys
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor, wait
-if sys.version_info > (3, 0):
-    from concurrent.futures.process import BrokenProcessPool
-else:
-    from builtins import Exception as BrokenProcessPool
 from abc import ABCMeta, abstractmethod
 import logging
 
@@ -33,6 +29,10 @@ from ..markup import process_markup
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
 
+if sys.version_info > (3, 0):
+    from concurrent.futures.process import BrokenProcessPool
+else:
+    from builtins import Exception as BrokenProcessPool
 
 num_workers = cpu_count()+1
 logger = logging.getLogger(__name__)
