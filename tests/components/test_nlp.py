@@ -224,13 +224,15 @@ def test_process_empty_nbest_unspecified_intent(nlp, queries):
     response = nlp.process(queries)
     assert response['text'] == ''
 
+
 def test_parallel_processing(nlp):
     import mmworkbench.components.nlp as nlp_module
     import os
     import time
     if nlp_module.executor:
-        l = ['A', 'B', 'C']
+        input_list = ['A', 'B', 'C']
         parent = os.getpid()
+
         # test adding a new function to an instance
         def test_function(self, item):
             item = item.lower()
@@ -241,7 +243,7 @@ def test_parallel_processing(nlp):
             return item
         prev_executor = nlp_module.executor
         nlp._test_function = test_function.__get__(nlp)
-        processed = nlp._process_list(l, '_test_function')
+        processed = nlp._process_list(input_list, '_test_function')
         # verify the process pool was restarted
         # (the function doesn't exist yet in the subprocesses)
         assert nlp_module.executor != prev_executor
@@ -249,7 +251,7 @@ def test_parallel_processing(nlp):
         assert processed == ('a-parent', 'b-parent', 'c-parent')
 
         prev_executor = nlp_module.executor
-        processed = nlp._process_list(l, '_test_function')
+        processed = nlp._process_list(input_list, '_test_function')
         # verify the process pool was not restarted
         assert prev_executor == nlp_module.executor
         # verify the list was processed by subprocesses
@@ -268,7 +270,7 @@ def test_parallel_processing(nlp):
         nlp._test_function = slow_function.__get__(nlp)
         nlp_module.restart_subprocesses()
         prev_executor = nlp_module.executor
-        processed = nlp._process_list(l, '_test_function')
+        processed = nlp._process_list(input_list, '_test_function')
         # verify the process pool was restarted due to timeout
         assert prev_executor != nlp_module.executor
         # verify the list was processed by main process
