@@ -630,7 +630,6 @@ class IntentProcessor(Processor):
         entities (dict): The entity types associated with this intent
         recognizer (EntityRecognizer): The entity recognizer for this intent
     """
-    instance_map = {}
 
     def __init__(self, app_path, domain, intent, resource_loader=None):
         """Initializes an intent processor object
@@ -653,7 +652,6 @@ class IntentProcessor(Processor):
             self.parser = None
 
         self._nbest_text_enabled = False
-        IntentProcessor.instance_map[id(self)] = self
 
     @property
     def entities(self):
