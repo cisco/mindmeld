@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 num_workers = int(os.environ.get('MM_SUBPROCESS_COUNT', default_num_workers))
 executor = ProcessPoolExecutor(max_workers=num_workers) if num_workers > 0 else None
 
+
 def restart_subprocesses():
     global executor
     executor.shutdown(wait=False)
@@ -754,7 +755,8 @@ class IntentProcessor(Processor):
 
         if isinstance(query, (list, tuple)):
             if self.nbest_text_enabled:
-                nbest_entities = self._process_list(query, 'process_query', return_processed_query=False)
+                nbest_entities = self._process_list(
+                    query, 'process_query', return_processed_query=False)
                 return ProcessedQuery(
                     query[0], entities=nbest_entities[0],
                     nbest_queries=query, nbest_entities=nbest_entities)
