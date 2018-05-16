@@ -34,13 +34,15 @@ SUBPROCESS_WAIT_TIME = 0.5
 default_num_workers = 0
 if sys.version_info > (3, 0):
     default_num_workers = cpu_count()+1
-    from concurrent.futures.process import BrokenProcessPool
-else:
-    from builtins import Exception as BrokenProcessPool
 
 logger = logging.getLogger(__name__)
 num_workers = int(os.environ.get('MM_SUBPROCESS_COUNT', default_num_workers))
 executor = ProcessPoolExecutor(max_workers=num_workers) if num_workers > 0 else None
+
+def restart_subprocesses():
+    global executor
+    executor.shutdown(wait=False)
+    executor = ProcessPoolExecutor(max_workers=num_workers)
 
 
 def subproc_call_instance_function(instance_id, func_name, *args, **kwargs):
@@ -234,7 +236,6 @@ class Processor(with_metaclass(ABCMeta, object)):
         Returns:
             tuple: Results of the processing
         """
-        global executor
         if executor:
             try:
                 results = list(items)
@@ -246,15 +247,15 @@ class Processor(with_metaclass(ABCMeta, object)):
                     future_to_idx_map[future] = idx
                 tasks = wait(future_to_idx_map, timeout=SUBPROCESS_WAIT_TIME)
                 if tasks.not_done:
-                    raise BrokenProcessPool
+                    raise Exception()
                 for future in tasks.done:
                     item = future.result()
                     item_idx = future_to_idx_map[future]
                     results[item_idx] = item
                 return tuple(results)
-            except BrokenProcessPool:
+            except (Exception, SystemExit):
                 # process pool is broken, restart it and process current request in series
-                executor = ProcessPoolExecutor(max_workers=num_workers)
+                restart_subprocesses()
         # process the list in series
         results = []
         for item in items:
