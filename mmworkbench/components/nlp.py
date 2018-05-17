@@ -258,7 +258,7 @@ class Processor(with_metaclass(ABCMeta, object)):
                 # process pool is broken, restart it and process current request in series
                 restart_subprocesses()
         # process the list in series
-        return tuple([getattr(self, func)(item, *args, **kwargs) for item in items])
+        return tuple([getattr(self, func)(itm, *args, **kwargs) for itm in items])
 
     def create_query(self, query_text, language=None, time_zone=None, timestamp=None):
         """Creates a query with the given text
