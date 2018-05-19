@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals
 from builtins import object, str
 
 import copy
-from functools import cmp_to_key
+from functools import cmp_to_key, partial
 import logging
 import random
 import json
@@ -210,8 +210,20 @@ class DialogueManager(object):
 
     def __init__(self, responder_class=None):
         self.handler_map = {}
+        self.middleware = []
         self.rules = []
         self.responder_class = responder_class or DialogueResponder
+
+    def add_middleware(self, middleware):
+        """Adds middleware for the dialogue manager. Middleware will be
+        called for each message before the dialogue state handler. Middleware
+        registered first will be called first.
+
+        Args:
+            middleware (callable): A dialogue manager middleware
+                function
+        """
+        self.middleware.append(middleware)
 
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue state rule for the dialogue manager.
@@ -245,28 +257,28 @@ class DialogueManager(object):
         Returns:
             dict: A dict containing the dialogue state and directives
         """
-        dialogue_state = None
+        dialogue_state = target_dialogue_state
 
-        for rule in self.rules:
-            if target_dialogue_state:
-                if target_dialogue_state == rule.dialogue_state:
-                    dialogue_state = rule.dialogue_state
-                    break
-            else:
+        if dialogue_state is None:
+            for rule in self.rules:
                 if rule.apply(context):
                     dialogue_state = rule.dialogue_state
                     break
 
-        if dialogue_state is None:
+        try:
+            handler = self.handler_map[dialogue_state]
+        except KeyError:
             msg = 'Failed to find dialogue state for {domain}.{intent}'.format(
                 domain=context.get('domain'), intent=context.get('intent'))
             self.logger.info(msg, context)
             handler = self._default_handler
-        else:
-            handler = self.handler_map[dialogue_state]
-        # TODO: prepopulate slots
+
         slots = {}
         responder = self.responder_class(slots)
+
+        for m in reversed(self.middleware):
+            handler = partial(m, handler=handler)
+
         handler(context, responder)
 
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}

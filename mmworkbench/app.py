@@ -29,6 +29,7 @@ class Application(object):
         self.app_manager = None
         self._server = None
         self._dialogue_rules = []
+        self._middleware = []
         self.context_class = context_class or dict
         self.responder_class = responder_class or DialogueResponder
         self.preprocessor = preprocessor
@@ -50,6 +51,9 @@ class Application(object):
             name, handler, kwargs = rule
             self.add_dialogue_rule(name, handler, **kwargs)
         self._dialogue_rules = None
+        for middleware in self._middleware:
+            self.add_middleware(middleware)
+        self._middleware = None
 
     def run(self, **kwargs):
         """Runs the application on a local development server."""
@@ -71,12 +75,40 @@ class Application(object):
             return func
         return _decorator
 
+    def middleware(self, *args):
+        """A decorator that is used to register dialogue handler middleware"""
+
+        def _decorator(func):
+            self.add_middleware(func)
+            return func
+
+        try:
+            # Support syntax: @middleware
+            func = args[0]
+            assert callable(func)
+            _decorator(func)
+            return func
+        except (IndexError, AssertionError):
+            # Support syntax: @middleware()
+            return _decorator
+
+    def add_middleware(self, middleware):
+        """Adds middleware for the dialogue manager
+
+        Args:
+            middleware (callable): A dialogue manager middleware function
+        """
+        if self.app_manager:
+            self.app_manager.add_middleware(middleware)
+        else:
+            self._middleware.append(middleware)
+
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue rule for the dialogue manager.
 
         Args:
             name (str): The name of the dialogue state
-            handler (function): The dialogue state handler function
+            handler (callable): The dialogue state handler function
             **kwargs (dict): A list of options which specify the dialogue rule
         """
         if self.app_manager:
