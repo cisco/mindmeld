@@ -85,10 +85,11 @@ class Application(object):
         try:
             # Support syntax: @middleware
             func = args[0]
-            assert callable(func)
+            if not callable(func):
+                raise TypeError
             _decorator(func)
             return func
-        except (IndexError, AssertionError):
+        except (IndexError, TypeError):
             # Support syntax: @middleware()
             return _decorator
 

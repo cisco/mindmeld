@@ -110,7 +110,7 @@ class TestDialogueManager:
             handler(ctx, responder)
 
         def _handler(ctx, responder):
-            # '_first' should ahve been called first, then '_second'
+            # '_first' should have been called first, then '_second'
             assert ctx['middles'] == ['first', 'second']
 
         dm.add_middleware(_first)
