@@ -41,6 +41,7 @@ test_requirements = [
     'pylint==1.6.5',
     'pytest==3.0.5',
     'pytest-cov==2.4.0',
+    'pytest-asyncio==0.8.0'
 ]
 
 setup(

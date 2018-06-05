@@ -24,7 +24,7 @@ def validate_workbench_version(app_path):
     try:
         with open(requirements) as f:
             lines = f.readlines()
-    except IOError:
+    except (OSError, IOError):
         logger.warning('requirements.txt is missing at {app_path}.'.format(app_path=app_path))
         return
     wb_req = None

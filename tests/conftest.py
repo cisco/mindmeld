@@ -9,19 +9,21 @@ Configurations for tests. Include shared fixtures here.
 # pylint: disable=locally-disabled,redefined-outer-name
 from __future__ import unicode_literals
 
+import asyncio
+import codecs
 import os
 import warnings
 
 import pytest
-import codecs
 
-from mmworkbench.tokenizer import Tokenizer
+from mmworkbench.components import NaturalLanguageProcessor, Preprocessor
 from mmworkbench.query_factory import QueryFactory
 from mmworkbench.resource_loader import ResourceLoader
-from mmworkbench.components import NaturalLanguageProcessor, Preprocessor
+from mmworkbench.tokenizer import Tokenizer
 
 warnings.filterwarnings("module", category=DeprecationWarning,
                         module="sklearn.preprocessing.label")
+
 
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
@@ -67,7 +69,18 @@ def kwik_e_mart_nlp(kwik_e_mart_app_path):
     """Provides a built processor instance"""
     nlp = NaturalLanguageProcessor(app_path=kwik_e_mart_app_path)
     nlp.build()
+    nlp.dump()
     return nlp
+
+
+@pytest.fixture(scope='session')
+def async_kwik_e_mart_app(kwik_e_mart_nlp):
+    from .kwik_e_mart import app_async
+    app = app_async.app
+    app.lazy_init()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(app.app_manager.load())
+    return app
 
 
 class GhostPreprocessor(Preprocessor):

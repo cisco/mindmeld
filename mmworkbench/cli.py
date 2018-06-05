@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 from builtins import str
 
+import asyncio
 import errno
 import json
 import logging
@@ -17,8 +18,7 @@ import warnings
 import click
 import click_log
 
-from . import path
-from . import markup
+from . import markup, path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
@@ -98,6 +98,11 @@ def converse(ctx, context):
         # make sure num parser is running
         ctx.invoke(num_parser, start=True)
 
+        if app.async_mode:
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(_converse_async(app, context))
+            return
+
         convo = Conversation(app=app, context=context)
 
         while True:
@@ -110,6 +115,17 @@ def converse(ctx, context):
     except WorkbenchError as ex:
         logger.error(ex.message)
         ctx.exit(1)
+
+
+async def _converse_async(app, context):
+    convo = Conversation(app=app, context=context)
+    while True:
+        message = click.prompt('You')
+        responses = await convo.say(message)
+
+        for index, response in enumerate(responses):
+            prefix = 'App: ' if index == 0 else '...  '
+            click.secho(prefix + response, fg='blue', bg='white')
 
 
 @_app_cli.command('build', context_settings=CONTEXT_SETTINGS)
