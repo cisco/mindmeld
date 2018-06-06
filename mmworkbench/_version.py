@@ -7,7 +7,7 @@ import logging
 from pkg_resources import DistributionNotFound, VersionConflict
 from .exceptions import WorkbenchVersionError
 
-current = '3.3.0rc4'
+current = '3.4.0rc0'
 
 logger = logging.getLogger(__name__)
 
