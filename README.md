@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/expectlabs/mindmeld-workbench3.svg?style=svg&circle-token=437cf905895688ac1b58b60fe79144c180893372)](https://circleci.com/gh/expectlabs/mindmeld-workbench3)
 
-This repository contains documentation for MindMeld Workbench 3.0.
+This repository contains MindMeld Workbench 3.0.
 
 ## TLDR: Quick Start
 
