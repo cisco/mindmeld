@@ -272,7 +272,17 @@ def module_cli():
 @click.argument('app_path', required=False)
 def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application."""
-    try:
+    bp_logger = logging.getLogger('blueprint')
+    bp_logger.setLevel(logging.INFO)
+
+    bp_logger.info('Automatic blueprint download functionality is currently disabled')
+    bp_logger.info('Navigate to https://devcenter.mindmeld.com/blueprints and manually download the tar')
+    bp_logger.info('Extract the blueprint in the current working directory')
+
+    # TODO: Re-implement authenticated download of blueprints by getting oauth2 token from Webex broker
+
+    """
+        try:
         blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
     except ValueError as ex:
         logger.error(ex)
@@ -280,6 +290,7 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     except (AuthNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
+    """
 
 
 #
