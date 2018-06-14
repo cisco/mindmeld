@@ -4,6 +4,11 @@ Package History
 3.4.0 (Unreleased)
 ------------------
 
+Enhancements
+^^^^^^^^^^^^
+
+- Add the ability to add dialogue middleware to dialogue managers
+
 
 3.3.0 (2018-05-10)
 ------------------
