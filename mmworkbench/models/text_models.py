@@ -278,7 +278,8 @@ class TextModel(Model):
                 gold_p = feat_value * gold_w
                 diff = gold_p - product
                 row = pd.DataFrame(
-                    data=[[feat_name, feat_value, weight, product, gold_w, gold_p, diff]],
+                    data=[[feat_name, round(feat_value, 4), weight.round(4), product.round(4),
+                           gold_w.round(4), gold_p.round(4), diff.round(4)]],
                     columns=columns, index=[feat_name])
             df = df.append(row)
         return df
