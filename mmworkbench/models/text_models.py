@@ -271,7 +271,7 @@ class TextModel(Model):
 
             if gold_class is None:
                 row = pd.DataFrame(
-                    data=[[feat_name, feat_value, weight, product]],
+                    data=[[feat_name, round(feat_value, 4), weight.round(4), product.round(4)]],
                     columns=columns, index=[feat_name])
             else:
                 gold_w = self._get_feature_weight(feat_name, gold_class)
