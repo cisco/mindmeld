@@ -34,7 +34,11 @@ def dm():
                          intent='intent', has_entity='entity_2')
     dm.add_dialogue_rule('intent_entities', lambda x, y: None,
                          intent='intent', has_entities=('entity_1', 'entity_2', 'entity_3'))
-    dm.add_dialogue_rule('default', lambda x, y: None)
+
+    dm.add_dialogue_rule('targeted_only', lambda x, y: None, targeted_only=True)
+    dm.add_dialogue_rule('dummy_ruleless', lambda x, y: None)  # Defined to test default use
+    dm.add_dialogue_rule('default', lambda x, y: None, default=True)
+
     return dm
 
 
@@ -42,9 +46,19 @@ class TestDialogueManager:
     """Tests for the dialogue manager"""
 
     def test_default(self, dm):
-        """Default dialogue state when no rules match"""
+        """Default dialogue state when no rules match
+           This will select the rule with default=True"""
         result = dm.apply_handler(create_context('other', 'other'))
         assert result['dialogue_state'] == 'default'
+
+    def test_default_uniqueness(self, dm):
+        with pytest.raises(AssertionError):
+            dm.add_dialogue_rule('default2', lambda x, y: None, default=True)
+
+    def test_default_kwarg_exclusion(self, dm):
+        with pytest.raises(ValueError):
+            dm.add_dialogue_rule('default3', lambda x, y: None,
+                                 intent='intent', default=True)
 
     def test_domain(self, dm):
         """Correct dialogue state is found for a domain"""
@@ -84,6 +98,11 @@ class TestDialogueManager:
         context = create_context('domain', 'intent')
         result = dm.apply_handler(context, target_dialogue_state='intent_entity_2')
         assert result['dialogue_state'] == 'intent_entity_2'
+
+    def test_targeted_only_kwarg_exclusion(self, dm):
+        with pytest.raises(ValueError):
+            dm.add_dialogue_rule('targeted_only2', lambda x, y: None,
+                                 intent='intent', targeted_only=True)
 
     def test_middleware_single(self, dm):
         """Adding a single middleware works"""
