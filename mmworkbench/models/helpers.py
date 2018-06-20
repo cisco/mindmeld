@@ -23,7 +23,8 @@ GAZETTEER_RSC = 'gazetteers'
 QUERY_FREQ_RSC = 'q_freq'
 SYS_TYPES_RSC = 'sys_types'
 WORD_FREQ_RSC = 'w_freq'
-
+WORD_NGRAM_FREQ_RSC = 'w_ngram_freq'
+CHAR_NGRAM_FREQ_RSC = 'c_ngram_freq'
 OUT_OF_BOUNDS_TOKEN = '<$>'
 
 

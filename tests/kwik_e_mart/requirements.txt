@@ -1,1 +1,1 @@
-mmworkbench~=3.1
+mmworkbench~=3.2

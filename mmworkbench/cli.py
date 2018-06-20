@@ -19,9 +19,8 @@ import click_log
 from . import path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
-                         KnowledgeBaseError, WorkbenchError, AuthNotFoundError)
+                         KnowledgeBaseError, WorkbenchError)
 
-from ._util import blueprint
 from ._version import current as __version__
 
 
@@ -43,13 +42,13 @@ def version_msg():
     return message.format(location, python_version)
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
-@click.version_option(__version__, '-V', '--version', message=version_msg())
-@click.pass_context
-@click_log.simple_verbosity_option()
-@click_log.init(__package__)
-def cli(ctx):
-    """Command line interface for mmworkbench."""
+#
+# App only Commands
+#
+
+@click.group()
+def _app_cli(ctx):
+    """Command line interface for mmworkbench apps."""
 
     # configure logger settings for dependent libraries
     urllib3_logger = logging.getLogger('urllib3')
@@ -61,7 +60,7 @@ def cli(ctx):
         ctx.obj = {}
 
 
-@cli.command('run', context_settings=CONTEXT_SETTINGS)
+@_app_cli.command('run', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('-P', '--port', type=int, default=7150)
 @click.option('--no-debug', is_flag=True,
@@ -74,15 +73,18 @@ def run_server(ctx, port, no_debug, reloader):
     if app is None:
         raise ValueError("No app was given. Run 'python app.py run' from your app folder.")
 
+    # make sure num parser is running
     ctx.invoke(num_parser, start=True)
+
     app.run(port=port, debug=not no_debug, host='0.0.0.0', threaded=True, use_reloader=reloader)
 
 
-@cli.command('converse', context_settings=CONTEXT_SETTINGS)
+@_app_cli.command('converse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('--session', help='JSON object to be used as the session')
 def converse(ctx, session):
     """Starts a conversation with the app."""
+
     try:
         app = ctx.obj.get('app')
         if isinstance(session, str):
@@ -91,6 +93,7 @@ def converse(ctx, session):
             raise ValueError("No app was given. Run 'python app.py converse' from your app"
                              " folder.")
 
+        # make sure num parser is running
         ctx.invoke(num_parser, start=True)
 
         convo = Conversation(app=app, session=session)
@@ -107,18 +110,23 @@ def converse(ctx, session):
         ctx.exit(1)
 
 
-@cli.command('build', context_settings=CONTEXT_SETTINGS)
+@_app_cli.command('build', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-def build(ctx):
+@click.option('-i', '--incremental', is_flag=True, default=False,
+              help='only build models with changed training data or configuration')
+def build(ctx, incremental):
     """Builds the app with default config."""
     try:
         app = ctx.obj.get('app')
         if app is None:
             raise ValueError("No app was given. Run 'python app.py build' from your app folder.")
 
+        # make sure num parser is running
+        ctx.invoke(num_parser, start=True)
+
         app.lazy_init()
         nlp = app.app_manager.nlp
-        nlp.build()
+        nlp.build(incremental=incremental)
         nlp.dump()
     except WorkbenchError as ex:
         logger.error(ex.message)
@@ -128,7 +136,7 @@ def build(ctx):
         ctx.exit(1)
 
 
-@cli.command('evaluate', context_settings=CONTEXT_SETTINGS)
+@_app_cli.command('evaluate', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('-v', '--verbose', is_flag=True,
               help='Print the full metrics instead of just accuracy.')
@@ -138,6 +146,9 @@ def evaluate(ctx, verbose):
         app = ctx.obj.get('app')
         if app is None:
             raise ValueError("No app was given. Run 'python app.py evaluate' from your app folder.")
+
+        # make sure num parser is running
+        ctx.invoke(num_parser, start=True)
 
         app.lazy_init()
         nlp = app.app_manager.nlp
@@ -156,7 +167,7 @@ def evaluate(ctx, verbose):
         ctx.exit(1)
 
 
-@cli.command('clean', context_settings=CONTEXT_SETTINGS)
+@_app_cli.command('clean', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def clean(ctx):
     """Deletes all built data, undoing `build`."""
@@ -172,7 +183,17 @@ def clean(ctx):
         logger.info('No generated data to delete')
 
 
-@cli.command('load-kb', context_settings=CONTEXT_SETTINGS)
+#
+# Shared commands
+#
+
+@click.group()
+def shared_cli():
+    """Commands for mmworkbench module and apps"""
+    pass
+
+
+@shared_cli.command('load-kb', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('-n', '--es-host', required=False)
 @click.argument('app_namespace', required=True)
@@ -188,7 +209,7 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
         ctx.exit(1)
 
 
-@cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
+@shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('--start/--stop', default=True, help='Start or stop numerical parser')
 def num_parser(ctx, start):
@@ -232,7 +253,17 @@ def _get_mallard_pid():
     return pid
 
 
-@cli.command('blueprint', context_settings=CONTEXT_SETTINGS)
+#
+# Module only Commands
+#
+
+@click.group()
+def module_cli():
+    """Commands for mmworkbench module only"""
+    pass
+
+
+@module_cli.command('blueprint', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('-n', '--es-host')
 @click.option('--skip-kb', is_flag=True, help="Skip setting up the knowledge base")
@@ -240,7 +271,18 @@ def _get_mallard_pid():
 @click.argument('app_path', required=False)
 def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application."""
-    try:
+
+    logger.info('Automatic blueprint download functionality is currently disabled')
+    msg = ('Navigate to https://devcenter.mindmeld.com/bp/{}/app.tar.gz'
+           ' and manually download the tar').format(blueprint_name)
+    logger.info(msg)
+    logger.info('Extract the blueprint in the current working directory')
+
+    # TODO: Re-implement authenticated download of blueprints by getting oauth2
+    # token from Webex broker
+
+    """
+        try:
         blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
     except ValueError as ex:
         logger.error(ex)
@@ -248,6 +290,49 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     except (AuthNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
+    """
+
+
+#
+# Command collections
+#
+
+@click.command(cls=click.CommandCollection, context_settings=CONTEXT_SETTINGS,
+               sources=[module_cli, shared_cli])
+@click.version_option(__version__, '-V', '--version', message=version_msg())
+@click.pass_context
+@click_log.simple_verbosity_option()
+@click_log.init(__package__)
+def cli(ctx):
+    """Command line interface for mmworkbench."""
+
+    # configure logger settings for dependent libraries
+    urllib3_logger = logging.getLogger('urllib3')
+    urllib3_logger.setLevel(logging.ERROR)
+    es_logger = logging.getLogger('elasticsearch')
+    es_logger.setLevel(logging.ERROR)
+
+    if ctx.obj is None:
+        ctx.obj = {}
+
+
+@click.command(cls=click.CommandCollection, context_settings=CONTEXT_SETTINGS,
+               sources=[_app_cli, shared_cli])
+@click.version_option(__version__, '-V', '--version', message=version_msg())
+@click.pass_context
+@click_log.simple_verbosity_option()
+@click_log.init(__package__)
+def app_cli(ctx):
+    """Command line interface for mmworkbench apps."""
+
+    # configure logger settings for dependent libraries
+    urllib3_logger = logging.getLogger('urllib3')
+    urllib3_logger.setLevel(logging.ERROR)
+    es_logger = logging.getLogger('elasticsearch')
+    es_logger.setLevel(logging.ERROR)
+
+    if ctx.obj is None:
+        ctx.obj = {}
 
 
 if __name__ == '__main__':

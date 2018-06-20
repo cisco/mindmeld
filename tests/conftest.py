@@ -12,13 +12,55 @@ from __future__ import unicode_literals
 import os
 
 import pytest
+import codecs
 
 from mmworkbench.tokenizer import Tokenizer
 from mmworkbench.query_factory import QueryFactory
 from mmworkbench.resource_loader import ResourceLoader
+from mmworkbench.components import Preprocessor
 
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
+AENEID_FILE = 'aeneid.txt'
+AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
+
+
+@pytest.fixture
+def lstm_entity_config():
+    return {
+        'model_type': 'tagger',
+        'label_type': 'entities',
+
+        'model_settings': {
+            'classifier_type': 'lstm',
+
+            'tag_scheme': 'IOB',
+            'feature_scaler': 'max-abs'
+
+        },
+        'params': {
+            'number_of_epochs': 1
+        },
+        'features': {
+            'in-gaz-span-seq': {},
+        }
+    }
+
+
+@pytest.fixture
+def kwik_e_mart_app_path():
+    return APP_PATH
+
+
+class GhostPreprocessor(Preprocessor):
+    """A simple preprocessor that removes all instances of the word `ghost`"""
+    def process(self, text):
+        while 'ghost' in text:
+            text = text.replace('ghost', '')
+        return text
+
+    def get_char_index_map(self, raw_text, processed_text):
+        return {}, {}
 
 
 @pytest.fixture
@@ -28,12 +70,29 @@ def tokenizer():
 
 
 @pytest.fixture
-def query_factory(tokenizer):
+def preprocessor():
+    """A simple preprocessor"""
+    return GhostPreprocessor()
+
+
+@pytest.fixture
+def query_factory(tokenizer, preprocessor):
     """For creating queries"""
-    return QueryFactory(tokenizer)
+    return QueryFactory(tokenizer=tokenizer, preprocessor=preprocessor)
 
 
 @pytest.fixture
 def resource_loader(query_factory):
     """A resource loader"""
     return ResourceLoader(APP_PATH, query_factory)
+
+
+@pytest.fixture
+def aeneid_path():
+    return AENEID_PATH
+
+
+@pytest.fixture
+def aeneid_content(aeneid_path):
+    with codecs.open(aeneid_path, mode='r', encoding='utf-8') as f:
+        return f.read()

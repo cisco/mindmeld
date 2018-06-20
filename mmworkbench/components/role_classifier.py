@@ -61,21 +61,32 @@ class RoleClassifier(Classifier):
                                               entity=self.entity_type)
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set='train', **kwargs):
+    def fit(self, queries=None, label_set='train', previous_model_path=None, **kwargs):
         """Trains a statistical model for role classification using the provided training examples
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                 training set will be loaded.
+            previous_model_path (str, optional): The path of a previous version of the model for
+                this classifier. If the previous model is equivalent to the new one, it will be
+                loaded instead. Equivalence here is determined by the model's training data and
+                configuration.
         """
-
         logger.info('Fitting role classifier: domain=%r, intent=%r, entity_type=%r',
                     self.domain, self.intent, self.entity_type)
 
         # create model with given params
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
+        new_hash = self._get_model_hash(model_config, queries, label_set)
+
+        if previous_model_path:
+            old_hash = self._load_hash(previous_model_path)
+            if old_hash == new_hash:
+                logger.info('No need to fit. Loading previous model.')
+                self.load(previous_model_path)
+                return
 
         # Load labeled data
         examples, labels = self._get_queries_and_labels(queries, label_set=label_set)
@@ -90,6 +101,8 @@ class RoleClassifier(Classifier):
             model.fit(examples, labels)
             self._model = model
             self.config = ClassifierConfig.from_model_config(self._model.config)
+
+        self.hash = new_hash
 
         self.ready = True
         self.dirty = True
@@ -109,6 +122,10 @@ class RoleClassifier(Classifier):
 
         rc_data = {'model': self._model, 'roles': self.roles}
         joblib.dump(rc_data, model_path)
+
+        hash_path = model_path + '.hash'
+        with open(hash_path, 'w') as hash_file:
+            hash_file.write(self.hash)
 
         self.dirty = False
 
@@ -134,6 +151,8 @@ class RoleClassifier(Classifier):
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
             self.config = ClassifierConfig.from_model_config(self._model.config)
+
+        self.hash = self._load_hash(model_path)
 
         self.ready = True
         self.dirty = False
@@ -172,6 +191,26 @@ class RoleClassifier(Classifier):
         """
         raise NotImplementedError
 
+    def _get_query_tree(self, queries=None, label_set='train', raw=False):
+        """Returns the set of queries to train on
+
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+            raw (bool, optional): When True, raw query strings will be returned
+
+        Returns:
+            List: list of queries
+        """
+        if queries:
+            # TODO: should we filter these by domain?
+            return self._build_query_tree(queries, raw=raw)
+
+        return self._resource_loader.get_labeled_queries(domain=self.domain, intent=self.intent,
+                                                         label_set=label_set, raw=raw)
+
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
@@ -181,11 +220,8 @@ class RoleClassifier(Classifier):
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
-        if not queries:
-            query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
-                                                                   intent=self.intent,
-                                                                   label_set=label_set)
-            queries = query_tree.get(self.domain, {}).get(self.intent, {})
+        query_tree = self._get_query_tree(queries, label_set=label_set)
+        queries = self._resource_loader.flatten_query_tree(query_tree)
 
         # build list of examples -- entities of this role classifier's type
         examples = []
@@ -207,3 +243,9 @@ class RoleClassifier(Classifier):
             raise ValueError('One or more invalid entity annotations, expecting role')
 
         return examples, labels
+
+    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
+        queries = self._resource_loader.flatten_query_tree(query_tree)
+        queries.sort()
+        return self._resource_loader.hash_list(queries)

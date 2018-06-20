@@ -102,7 +102,7 @@ def test_get_classifier_config():
 
 def test_get_classifier_config2():
     """Tests that the app specified config is returned over the default config."""
-    actual = get_classifier_config('intent', APP_PATH)['param_selection']
+    actual = get_classifier_config('intent', APP_PATH, domain='domain')['param_selection']
 
     expected = {
         'type': 'k-fold',
@@ -112,6 +112,33 @@ def test_get_classifier_config2():
             'C': [1, 20, 300],
             'class_bias': [1, 0]
         }
+    }
+
+    assert actual == expected
+
+
+def test_get_classifier_config_func():
+    """Tests that the app config provider is called."""
+    actual = get_classifier_config('entity', APP_PATH,
+                                   domain='domain', intent='intent')['params']
+
+    expected = {
+        'penalty': 'l2',
+        'C': 100
+    }
+
+    assert actual == expected
+
+
+def test_get_classifier_config_func_error():
+    """Tests robustness to exceptions raised by a config provider."""
+    actual = get_classifier_config('entity', APP_PATH,
+                                   domain='domain', intent='error')['params']
+
+    expected = {
+        'error': 'intent',
+        'penalty': 'l2',
+        'C': 100
     }
 
     assert actual == expected

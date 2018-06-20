@@ -10,7 +10,7 @@ import os
 import sys
 
 from .app_manager import ApplicationManager
-from .cli import cli
+from .cli import app_cli
 from .server import WorkbenchServer
 from .components.dialogue import DialogueResponder
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class Application(object):
 
-    def __init__(self, import_name, context_class=None, responder_class=None):
+    def __init__(self, import_name, context_class=None, responder_class=None, preprocessor=None):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], '__file__', None)
         if filename is None:
@@ -31,6 +31,7 @@ class Application(object):
         self._dialogue_rules = []
         self.context_class = context_class or dict
         self.responder_class = responder_class or DialogueResponder
+        self.preprocessor = preprocessor
 
     @property
     def question_answerer(self):
@@ -41,7 +42,7 @@ class Application(object):
             return
         self.app_manager = ApplicationManager(
             self.app_path, nlp, responder_class=self.responder_class,
-            context_class=self.context_class)
+            context_class=self.context_class, preprocessor=self.preprocessor)
         self._server = WorkbenchServer(self.app_manager)
 
         # Add any pending dialogue rules
@@ -85,4 +86,4 @@ class Application(object):
 
     def cli(self):
         # pylint:
-        cli(obj={'app': self})
+        app_cli(obj={'app': self})

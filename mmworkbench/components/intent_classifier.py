@@ -6,6 +6,7 @@ from builtins import super
 
 import logging
 
+from ..markup import mark_down
 from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 
 from .classifier import Classifier
@@ -85,6 +86,29 @@ class IntentClassifier(Classifier):
         logger.info('Loading intent classifier: domain=%r', self.domain)
         super().load(*args, **kwargs)
 
+    def inspect(self, query, intent=None):
+        return self._model.inspect(example=query, gold_label=intent)
+
+    def _get_query_tree(self, queries=None, label_set='train', raw=False):
+        """Returns the set of queries to train on
+
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+            raw (bool, optional): When True, raw query strings will be returned
+
+        Returns:
+            List: list of queries
+        """
+        if queries:
+            # TODO: should we filter these by domain?
+            return self._build_query_tree(queries, raw=raw)
+
+        return self._resource_loader.get_labeled_queries(domain=self.domain,
+                                                         label_set=label_set, raw=raw)
+
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
@@ -94,10 +118,18 @@ class IntentClassifier(Classifier):
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
-        if not queries:
-            query_tree = self._resource_loader.get_labeled_queries(
-                label_set=label_set, domain=self.domain)
-            queries = self._resource_loader.flatten_query_tree(query_tree)
+        query_tree = self._get_query_tree(queries, label_set=label_set)
+        queries = self._resource_loader.flatten_query_tree(query_tree)
         if len(queries) < 1:
             return [None, None]
         return list(zip(*[(q.query, q.intent) for q in queries]))
+
+    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
+        queries = []
+        for intent in query_tree[self.domain]:
+            for query_text in query_tree[self.domain][intent]:
+                queries.append("{}###{}".format(intent, mark_down(query_text)))
+
+        queries.sort()
+        return self._resource_loader.hash_list(queries)

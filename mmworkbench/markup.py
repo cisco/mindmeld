@@ -30,7 +30,8 @@ BRAT_FORMAT = 'brat'
 MARKUP_FORMATS = frozenset({MINDMELD_FORMAT, BRAT_FORMAT})
 
 
-def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=False):
+def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=False,
+               query_options=None):
     """Creates a processed query object from marked up query text.
 
     Args:
@@ -41,21 +42,16 @@ def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=Fal
         intent (str, optional): The name of the intent annotated for the query.
         is_gold (bool, optional): True if the markup passed in is a reference,
             human-labeled example. Defaults to False.
+        query_options (dict, optional): A dict containing options for creating
+            a Query, such as `language`, `time_zone` and `timestamp`
 
     Returns:
         ProcessedQuery: a processed query
     """
     query_factory = query_factory or QueryFactory.create_query_factory()
-    try:
-        raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
-        query = query_factory.create_query(raw_text)
-        entities = _process_annotations(query, annotations)
-    except MarkupError as exc:
-        msg = 'Invalid markup in query {!r}: {}'
-        raise_from(MarkupError(msg.format(markup, exc)), exc)
-    except SystemEntityResolutionError as exc:
-        msg = "Unable to load query {!r}: {}"
-        raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
+    query_options = query_options or {}
+    raw_text, query, entities = process_markup(
+        markup, query_factory=query_factory, query_options=query_options)
 
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
@@ -78,7 +74,7 @@ def load_query_file(file_path, query_factory=None, domain=None, intent=None, is_
     query_factory = query_factory or QueryFactory.create_query_factory()
 
     queries = []
-    for query_text in _read_query_file(file_path):
+    for query_text in read_query_file(file_path):
         if query_text[0] == '-':
             continue
         query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
@@ -92,11 +88,11 @@ def mark_down_file(file_path):
     Args:
         file_path (str): The path of the file to load
     """
-    for markup in _read_query_file(file_path):
+    for markup in read_query_file(file_path):
         yield mark_down(markup)
 
 
-def _read_query_file(file_path):
+def read_query_file(file_path):
     """Summary
 
     Args:
@@ -113,6 +109,20 @@ def _read_query_file(file_path):
             query_text = line.split('\t')[0].strip()
             if query_text:
                 yield query_text
+
+
+def process_markup(markup, query_factory, query_options):
+    try:
+        raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
+        query = query_factory.create_query(raw_text, **query_options)
+        entities = _process_annotations(query, annotations)
+    except MarkupError as exc:
+        msg = 'Invalid markup in query {!r}: {}'
+        raise_from(MarkupError(msg.format(markup, exc)), exc)
+    except SystemEntityResolutionError as exc:
+        msg = "Unable to load query {!r}: {}"
+        raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
+    return raw_text, query, entities
 
 
 def _process_annotations(query, annotations):

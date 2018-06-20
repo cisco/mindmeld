@@ -8,17 +8,57 @@ from builtins import object
 import copy
 import logging
 
+from pytz import timezone
+from pytz.exceptions import UnknownTimeZoneError
+
 from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 from .components.dialogue import DialogueResponder
 from .resource_loader import ResourceLoader
 from .exceptions import AllowedNlpClassesKeyError
 
+
 logger = logging.getLogger(__name__)
 
-PARAM_TYPES = {
-    'allowed_intents': list,
-    'target_dialogue_state': str,  # TODO: use a better validator for this
-    'timezone': str  # TODO: use a better validator for timezones
+
+def _validate_generic(name, ptype):
+    def validator(param):
+        if not isinstance(param, ptype):
+            logger.warning("Invalid %r param: %s is not of type %s.", name, param, ptype)
+            param = None
+        return param
+    return validator
+
+
+def _validate_time_zone(param=None):
+    """Validates time zone parameters
+
+    Args:
+        param (str, optional): The time zone parameter
+
+    Returns:
+        str: The passed in time zone
+    """
+    if not param:
+        return None
+    if not isinstance(param, str):
+        logger.warning("Invalid %r param: %s is not of type %s.", 'time_zone', param, str)
+        return None
+    try:
+        timezone(param)
+    except UnknownTimeZoneError:
+        logger.warning("Invalid %r param: %s is not a valid time zone.", 'time_zone', param)
+        return None
+    return param
+
+
+PARAM_VALIDATORS = {
+    'allowed_intents': _validate_generic('allowed_intents', list),
+
+    # TODO: use a better validator for this
+    'target_dialogue_state': _validate_generic('target_dialogue_state', str),
+
+    'time_zone': _validate_time_zone,
+    'timestamp': _validate_generic('timestamp', int)
 }
 
 
@@ -32,7 +72,7 @@ class ApplicationManager(object):
     MAX_HISTORY_LEN = 100
 
     def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None,
-                 context_class=None, responder_class=None):
+                 context_class=None, responder_class=None, preprocessor=None):
         self._app_path = app_path
         # If NLP or QA were passed in, use the resource loader from there
         if nlp:
@@ -42,7 +82,8 @@ class ApplicationManager(object):
         elif question_answerer:
             resource_loader = question_answerer.resource_loader
         else:
-            resource_loader = ResourceLoader.create_resource_loader(app_path)
+            resource_loader = ResourceLoader.create_resource_loader(
+                app_path, preprocessor=preprocessor)
 
         self._query_factory = resource_loader.query_factory
 
@@ -72,12 +113,23 @@ class ApplicationManager(object):
             params['allowed_intents'] (list, optional): A list of allowed intents
                 for model consideration
             params['target_dialogue_state'] (str, optional): The target dialogue state
+            params['time_zone'] (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            params['timestamp'] (long, optional): A unix time stamp for the request (in seconds).
             session (dict, optional): Description
             history (list, optional): Description
             verbose (bool, optional): Description
 
         Returns:
             (dict): Context object
+
+        .. _IANA tz database:
+           https://www.iana.org/time-zones
+
+        .. _List of tz database time zones:
+           https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
         """
 
         params = params or {}
@@ -90,6 +142,8 @@ class ApplicationManager(object):
 
         allowed_intents = self._validate_param(params, 'allowed_intents')
         target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
+        time_zone = self._validate_param(params, 'time_zone')
+        timestamp = self._validate_param(params, 'timestamp')
 
         context = self.context_class({
             'request': request,
@@ -118,13 +172,10 @@ class ApplicationManager(object):
                     "Not applying domain/intent restrictions this "
                     "turn".format(ex, allowed_intents))
 
-        # TODO: support passing in reference time from session
-        query = self._query_factory.create_query(text)
+        processed_query = self.nlp.process(text, nlp_hierarchy, time_zone=time_zone,
+                                           timestamp=timestamp)
 
-        # TODO: support specifying target domain, etc in payload
-        processed_query = self.nlp.process_query(query, nlp_hierarchy)
-
-        context.update(processed_query.to_dict())
+        context.update(processed_query)
         context.pop('text')
 
         context.update(self.dialogue_manager.apply_handler(context, target_dialogue_state))
@@ -156,9 +207,8 @@ class ApplicationManager(object):
 
     @staticmethod
     def _validate_param(params, name, mode='incoming'):
-        ptype = PARAM_TYPES.get(name)
+        validator = PARAM_VALIDATORS.get(name)
         param = params.get(name)
-        if param and not isinstance(param, ptype):
-            logger.warning("Invalid %s %r param: %s is not of type %s.", name, param, ptype)
-            param = None
+        if param:
+            return validator(param)
         return param

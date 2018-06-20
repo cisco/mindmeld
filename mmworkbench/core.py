@@ -118,12 +118,19 @@ class Query(object):
         normalized_tokens (tuple of str): a list of normalized tokens
         normalized_text (str): the normalized text. TODO: better description here
         system_entity_candidates (tuple): Description
+        language (str): Language of the query specified using a 639-2 code.
+        time_zone (str): The IANA id for the time zone in which the query originated
+            such as 'America/Los_Angeles'.
+        timestamp (long, optional): A unix timestamp used as the reference time.
+            If not specified, the current system time is used. If `time_zone`
+            is not also specified, this parameter is ignored.
     """
 
     # TODO: look into using __slots__
 
-    def __init__(self, raw_text, processed_text, normalized_tokens, char_maps):
-        """Summary
+    def __init__(self, raw_text, processed_text, normalized_tokens, char_maps,
+                 language=None, time_zone=None, timestamp=None):
+        """Creates a query object
 
         Args:
             raw_text (str): the original input text
@@ -138,6 +145,9 @@ class Query(object):
         self._texts = (raw_text, processed_text, norm_text)
         self._char_maps = char_maps
         self.system_entity_candidates = ()
+        self._language = language
+        self._time_zone = time_zone
+        self._timestamp = timestamp
 
     @property
     def text(self):
@@ -158,6 +168,25 @@ class Query(object):
     def normalized_tokens(self):
         """The tokens of the normalized input text"""
         return tuple((token['entity'] for token in self._normalized_tokens))
+
+    @property
+    def language(self):
+        """Language of the query specified using a 639-2 code."""
+        return self._language
+
+    @property
+    def time_zone(self):
+        """The IANA id for the time zone in which the query originated
+        such as 'America/Los_Angeles'.
+        """
+        return self._time_zone
+
+    @property
+    def timestamp(self):
+        """A unix timestamp for when the time query was created. If `time_zone` is None,
+        this parameter is ignored.
+        """
+        return self._timestamp
 
     def get_text_form(self, form):
         """Programmatically retrieves text by form
@@ -280,12 +309,15 @@ class ProcessedQuery(object):
 
     # TODO: look into using __slots__
 
-    def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False):
+    def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False,
+                 nbest_queries=None, nbest_entities=None):
         self.query = query
         self.domain = domain
         self.intent = intent
         self.entities = None if entities is None else tuple(entities)
         self.is_gold = is_gold
+        self.nbest_queries = nbest_queries
+        self.nbest_entities = nbest_entities
 
     def to_dict(self):
         """Converts the processed query into a dictionary"""
@@ -295,6 +327,11 @@ class ProcessedQuery(object):
             'intent': self.intent,
             'entities': None if self.entities is None else [e.to_dict() for e in self.entities],
         }
+        if self.nbest_queries:
+            base['nbest_text'] = [q.text for q in self.nbest_queries]
+        if self.nbest_entities:
+            base['nbest_entities'] = [[e.to_dict() for e in n_entities]
+                                      for n_entities in self.nbest_entities]
         return base
 
     def __eq__(self, other):

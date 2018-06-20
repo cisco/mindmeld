@@ -44,6 +44,7 @@ class EntityRecognizer(Classifier):
         self.domain = domain
         self.intent = intent
         self.entity_types = set()
+        self._model_config = None
 
     def _get_model_config(self, **kwargs):
         """Gets a machine learning model configuration
@@ -57,25 +58,34 @@ class EntityRecognizer(Classifier):
                                               domain=self.domain, intent=self.intent)
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set='train', **kwargs):
+    def fit(self, queries=None, label_set='train', previous_model_path=None, **kwargs):
         """Trains the entity recognition model using the provided training queries
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                 training set will be loaded.
+            previous_model_path (str, optional): The path of a previous version of the model for
+                this classifier. If the previous model is equivalent to the new one, it will be
+                loaded instead. Equivalence here is determined by the model's training data and
+                configuration.
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
         model = create_model(self._model_config)
+        new_hash = self._get_model_hash(self._model_config, queries, label_set)
+
+        if previous_model_path:
+            old_hash = self._load_hash(previous_model_path)
+            if old_hash == new_hash:
+                logger.info('No need to fit. Loading previous model.')
+                self.load(previous_model_path)
+                return
 
         # Load labeled data
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
-
-        # initialize resources
-        model.initialize_resources(self._resource_loader, queries, labels)
 
         # Build entity types set
         self.entity_types = set()
@@ -83,9 +93,11 @@ class EntityRecognizer(Classifier):
             for entity in label:
                 self.entity_types.add(entity.entity.type)
 
+        model.initialize_resources(self._resource_loader, queries, labels)
         model.fit(queries, labels)
         self._model = model
         self.config = ClassifierConfig.from_model_config(self._model.config)
+        self.hash = new_hash
 
         self.ready = True
         self.dirty = True
@@ -103,9 +115,18 @@ class EntityRecognizer(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        er_data = {'entity_types': self.entity_types, 'model_config': self._model_config}
+        er_data = {'entity_types': self.entity_types,
+                   'w_ngram_freq': self._model.get_resource('w_ngram_freq'),
+                   'c_ngram_freq': self._model.get_resource('c_ngram_freq'),
+                   'model_config': self._model_config
+                   }
 
         self._model.dump(model_path, er_data)
+
+        hash_path = model_path + '.hash'
+        with open(hash_path, 'w') as hash_file:
+            hash_file.write(self.hash)
+
         self.dirty = False
 
     def load(self, model_path):
@@ -138,23 +159,34 @@ class EntityRecognizer(Classifier):
         if self._model is not None:
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
-            self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types)
+
+            w_ngram_freq = er_data.get('w_ngram_freq')
+            c_ngram_freq = er_data.get('c_ngram_freq')
+
+            self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types,
+                                           w_ngram_freq=w_ngram_freq, c_ngram_freq=c_ngram_freq)
             self.config = ClassifierConfig.from_model_config(self._model.config)
+
+        self.hash = self._load_hash(model_path)
 
         self.ready = True
         self.dirty = False
 
-    def predict(self, query):
+    def predict(self, query, time_zone=None, timestamp=None):
         """Predicts entities for the given query using the trained recognition model
 
         Args:
             query (Query or str): The input query
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
             str: The predicted class label
 
         """
-        prediction = super().predict(query) or ()
+        prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp) or ()
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
     def predict_proba(self, query):
@@ -170,6 +202,26 @@ class EntityRecognizer(Classifier):
         """
         raise NotImplementedError
 
+    def _get_query_tree(self, queries=None, label_set='train', raw=False):
+        """Returns the set of queries to train on
+
+        Args:
+            queries (list, optional): A list of ProcessedQuery objects, to
+                train. If not specified, a label set will be loaded.
+            label_set (list, optional): A label set to load. If not specified,
+                the default training set will be loaded.
+            raw (bool, optional): When True, raw query strings will be returned
+
+        Returns:
+            List: list of queries
+        """
+        if queries:
+            # TODO: should we filter these by domain and intent?
+            return self._build_query_tree(queries, raw=raw)
+
+        return self._resource_loader.get_labeled_queries(domain=self.domain, intent=self.intent,
+                                                         label_set=label_set, raw=raw)
+
     def _get_queries_and_labels(self, queries=None, label_set='train'):
         """Returns a set of queries and their labels based on the label set
 
@@ -179,11 +231,14 @@ class EntityRecognizer(Classifier):
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
-        if not queries:
-            query_tree = self._resource_loader.get_labeled_queries(domain=self.domain,
-                                                                   intent=self.intent,
-                                                                   label_set=label_set)
-            queries = query_tree.get(self.domain, {}).get(self.intent, {})
+        query_tree = self._get_query_tree(queries, label_set=label_set)
+        queries = self._resource_loader.flatten_query_tree(query_tree)
         raw_queries = [q.query for q in queries]
         labels = [q.entities for q in queries]
         return raw_queries, labels
+
+    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
+        queries = self._resource_loader.flatten_query_tree(query_tree)
+        queries.sort()
+        return self._resource_loader.hash_list(queries)

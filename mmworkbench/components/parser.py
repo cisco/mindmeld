@@ -45,7 +45,8 @@ class Parser(object):
     statistical approach.
     """
 
-    def __init__(self, resource_loader=None, config=None, allow_relaxed=True):
+    def __init__(self, resource_loader=None, config=None, allow_relaxed=True,
+                 domain=None, intent=None):
         """Initializes the parser
 
         Args:
@@ -62,7 +63,7 @@ class Parser(object):
         except TypeError:
             entity_types = {'unk'}
         self._resource_loader = resource_loader
-        self.config = get_parser_config(app_path, config) or {}
+        self.config = get_parser_config(app_path, config, domain, intent) or {}
         configured_entities = set()
         for entity_type, config in self.config.items():
             configured_entities.add(entity_type)

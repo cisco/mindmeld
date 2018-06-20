@@ -10,6 +10,7 @@ import random
 from builtins import range, super, zip
 
 import numpy as np
+import pandas as pd
 from numpy import bincount
 from past.utils import old_div
 from sklearn.ensemble import RandomForestClassifier
@@ -19,8 +20,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+import operator
 
-from .helpers import QUERY_FREQ_RSC, WORD_FREQ_RSC, register_model
+from .helpers import (QUERY_FREQ_RSC, WORD_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                      CHAR_NGRAM_FREQ_RSC, register_model)
 from .model import EvaluatedExample, Model, StandardModelEvaluation
 
 _NEG_INF = -1e10
@@ -60,9 +63,9 @@ class TextModel(Model):
         underscores. This overrides that behavior.
         """
         attributes = self.__dict__.copy()
-        attributes['_resources'] = {WORD_FREQ_RSC: self._resources.get(WORD_FREQ_RSC, {}),
-                                    QUERY_FREQ_RSC: self._resources.get(QUERY_FREQ_RSC, {})}
-
+        attributes['_resources'] = {rname: self._resources.get(rname, {})
+                                    for rname in [WORD_FREQ_RSC, QUERY_FREQ_RSC,
+                                                  WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC]}
         return attributes
 
     def _get_model_constructor(self):
@@ -194,6 +197,91 @@ class TextModel(Model):
                 if proba == -np.Infinity:
                     probas[label] = _NEG_INF
         return predictions
+
+    def _get_feature_weight(self, feat_name, label_class):
+        """ Retrieves the feature weight from the coefficient matrix. If there are only two
+         classes, the feature vector is actually collapsed into one so we need some logic to
+         handle that case.
+
+        Args:
+            feat_name (str) : The feature name
+            label_class (int): The index of the label
+
+        Returns:
+            (float): The feature weight
+        """
+        if len(self._class_encoder.classes_) == 2 and label_class >= 1:
+            return 0
+        else:
+            return self._clf.coef_[label_class, self._feat_vectorizer.vocabulary_[feat_name]]
+
+    def inspect(self, example, gold_label=None):
+        """ This class takes an example and returns a DataFrame for every feature with feature
+          name, feature value, feature weight and their product for the predicted label. If gold
+          label is passed in, we will also include the feature value and weight for the gold
+          label and returns the log probability of the difference.
+
+        Args:
+            example (Query): The query to be predicted
+            gold_label (str): The gold label for this string
+
+        Returns:
+            (DataFrame): The DataFrame that includes every feature, their value, weight and
+             probability
+        """
+        if not isinstance(self._clf, LogisticRegression):
+            logging.warning(
+                'Currently inspection is only available for Logistic Regression Model')
+            return pd.DataFrame()
+
+        try:
+            gold_class = self._class_encoder.transform([gold_label])
+        except ValueError:
+            logger.warning('Unable to decode label `{0}`'.format(gold_label))
+            gold_class = None
+
+        pred_label = self.predict([example])[0]
+        pred_class = self._class_encoder.transform([pred_label])
+        features = self._extract_features(example)
+
+        logging.info("Predicted: " + pred_label)
+
+        if gold_class is None:
+            columns = ['Feature', 'Value', 'Pred_W({0})'.format(pred_label), 'Pred_P']
+        else:
+            columns = ['Feature', 'Value', 'Pred_W({0})'.format(pred_label), 'Pred_P',
+                       'Gold_W({0})'.format(gold_label), 'Gold_P', 'Diff']
+            logging.info("Gold: " + gold_label)
+
+        df = pd.DataFrame(data=None, columns=columns)
+
+        # Get all active features sorted alphabetically by name
+        features = sorted(features.items(), key=operator.itemgetter(0))
+        for feature in features:
+            feat_name = feature[0]
+            feat_value = feature[1]
+
+            # Features we haven't seen before won't be in our vectorizer
+            # e.g., an exact match feature for a query we've never seen before
+            if feat_name not in self._feat_vectorizer.vocabulary_:
+                continue
+
+            weight = self._get_feature_weight(feat_name, pred_class)
+            product = feat_value * weight
+
+            if gold_class is None:
+                row = pd.DataFrame(
+                    data=[[feat_name, feat_value, weight, product]],
+                    columns=columns, index=[feat_name])
+            else:
+                gold_w = self._get_feature_weight(feat_name, gold_class)
+                gold_p = feat_value * gold_w
+                diff = gold_p - product
+                row = pd.DataFrame(
+                    data=[[feat_name, feat_value, weight, product, gold_w, gold_p, diff]],
+                    columns=columns, index=[feat_name])
+            df = df.append(row)
+        return df
 
     def _predict_proba(self, X, predictor):
         predictions = []
