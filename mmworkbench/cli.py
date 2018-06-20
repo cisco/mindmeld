@@ -19,9 +19,8 @@ import click_log
 from . import path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
-                         KnowledgeBaseError, WorkbenchError, AuthNotFoundError)
+                         KnowledgeBaseError, WorkbenchError)
 
-from ._util import blueprint
 from ._version import current as __version__
 
 
@@ -276,10 +275,11 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     bp_logger.setLevel(logging.INFO)
 
     bp_logger.info('Automatic blueprint download functionality is currently disabled')
-    bp_logger.info('Navigate to https://devcenter.mindmeld.com/blueprints and manually download the tar')
+    bp_logger.info('Navigate to https://devcenter.mindmeld.com/bp and manually download the tar')
     bp_logger.info('Extract the blueprint in the current working directory')
 
-    # TODO: Re-implement authenticated download of blueprints by getting oauth2 token from Webex broker
+    # TODO: Re-implement authenticated download of blueprints by getting oauth2
+    # token from Webex broker
 
     """
         try:
