@@ -128,7 +128,7 @@ class GloVeEmbeddingsContainer:
                                " download the embedding file again".format(EMBEDDINGS_FILE_PATH))
                 os.remove(EMBEDDINGS_FILE_PATH)
                 self._extract_embeddings()
-            except:
+            except Exception:
                 logger.error("An error occurred when reading {} zip file. The file might"
                              " be corrupt, so try deleting the file and running the program "
                              "again".format(EMBEDDINGS_FILE_PATH))

@@ -3,8 +3,11 @@
 This module contains the natural language processor.
 """
 from __future__ import absolute_import, unicode_literals
+import os
+import sys
 from builtins import object, super
-
+from multiprocessing import cpu_count
+from concurrent.futures import ProcessPoolExecutor, wait
 from abc import ABCMeta, abstractmethod
 import logging
 
@@ -27,8 +30,40 @@ from ..markup import process_markup
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
 
+SUBPROCESS_WAIT_TIME = 0.5
+default_num_workers = 0
+if sys.version_info > (3, 0):
+    default_num_workers = cpu_count()+1
 
 logger = logging.getLogger(__name__)
+num_workers = int(os.environ.get('MM_SUBPROCESS_COUNT', default_num_workers))
+executor = ProcessPoolExecutor(max_workers=num_workers) if num_workers > 0 else None
+
+
+def restart_subprocesses():
+    global executor
+    executor.shutdown(wait=False)
+    executor = ProcessPoolExecutor(max_workers=num_workers)
+
+
+def subproc_call_instance_function(instance_id, func_name, *args, **kwargs):
+    """
+    A module function used as a trampoline to call an instance function
+    from within a long running child process.
+
+    Args:
+        instance_id (number): id(inst) of the Processor instance that needs called
+
+    Returns:
+        The result of the called function
+    """
+    try:
+        instance = Processor.instance_map[instance_id]
+        return getattr(instance, func_name)(*args, **kwargs)
+    except Exception:
+        # This subprocess does not have the requested instance.  Shut down and
+        # it will be recreated by the parent process with updated instances.
+        sys.exit(1)
 
 
 class Processor(with_metaclass(ABCMeta, object)):
@@ -41,6 +76,8 @@ class Processor(with_metaclass(ABCMeta, object)):
         ready (bool): Indicates whether the processor is ready to process
             messages
     """
+
+    instance_map = {}
 
     def __init__(self, app_path, resource_loader=None, config=None):
         """Initializes a processor
@@ -58,8 +95,9 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.dirty = False
         self.name = None
         self.config = get_nlp_config(app_path, config)
+        Processor.instance_map[id(self)] = self
 
-    def build(self, incremental=False, label_set="train"):
+    def build(self, incremental=False, label_set=None):
         """Builds all the natural language processing models for this processor and its children.
 
         Args:
@@ -76,7 +114,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.dirty = True
 
     @abstractmethod
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         raise NotImplementedError
 
     def dump(self):
@@ -108,7 +146,7 @@ class Processor(with_metaclass(ABCMeta, object)):
     def _load(self):
         raise NotImplementedError
 
-    def evaluate(self, print_stats=False, label_set="test"):
+    def evaluate(self, print_stats=False, label_set=None):
         """Evaluates all the natural language processing models for this processor and its
         children.
 
@@ -131,39 +169,6 @@ class Processor(with_metaclass(ABCMeta, object)):
     def _check_ready(self):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
-
-    def _create_queries(self, query_text, language=None, time_zone=None, timestamp=None):
-        """Creates the query object(s).
-
-        Args:
-            query_text (str, or tuple): The raw user text input, or a list of the n best query
-                transcripts from ASR
-            language (str, optional): Language as specified using a 639-2 code;
-                if omitted, English is assumed.
-            time_zone (str, optional): The name of an IANA time zone, such as
-                'America/Los_Angeles', or 'Asia/Kolkata'
-                See the [tz database](https://www.iana.org/time-zones) for more information.
-            timestamp (long, optional): A unix time stamp for the request (in seconds).
-
-        Returns:
-            Query or tuple: A newly constructed query, or tuple of queries
-
-        """
-        if isinstance(query_text, (list, tuple)):
-            if not query_text:
-                query_text = ['']
-            query_text = tuple(query_text)
-            query = []
-            for q_text in query_text:
-                n_query = self.create_query(q_text, language=language, time_zone=time_zone,
-                                            timestamp=timestamp)
-                query.append(n_query)
-            query = tuple(query)
-        else:
-            query = self.create_query(query_text, language=language, time_zone=time_zone,
-                                      timestamp=timestamp)
-
-        return query
 
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
                 timestamp=None):
@@ -194,8 +199,8 @@ class Processor(with_metaclass(ABCMeta, object)):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the full hierarchy of natural language processing models to the input query
         """
-        query = self._create_queries(query_text, language=language, time_zone=time_zone,
-                                     timestamp=timestamp)
+        query = self.create_query(
+            query_text, language=language, time_zone=time_zone, timestamp=timestamp)
         return self.process_query(query, allowed_nlp_classes).to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None):
@@ -223,11 +228,43 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         raise NotImplementedError
 
+    def _process_list(self, items, func, *args, **kwargs):
+        """Processes a list of items in parallel if possible using the executor.
+        Args:
+            items (list): Items to process
+            func (str): Function name to call for processing
+
+        Returns:
+            tuple: Results of the processing
+        """
+        if executor:
+            try:
+                results = list(items)
+                future_to_idx_map = {}
+                for idx, item in enumerate(items):
+                    future = executor.submit(
+                        subproc_call_instance_function, id(self),
+                        func, item, *args, **kwargs)
+                    future_to_idx_map[future] = idx
+                tasks = wait(future_to_idx_map, timeout=SUBPROCESS_WAIT_TIME)
+                if tasks.not_done:
+                    raise Exception()
+                for future in tasks.done:
+                    item = future.result()
+                    item_idx = future_to_idx_map[future]
+                    results[item_idx] = item
+                return tuple(results)
+            except (Exception, SystemExit):
+                # process pool is broken, restart it and process current request in series
+                restart_subprocesses()
+        # process the list in series
+        return tuple([getattr(self, func)(itm, *args, **kwargs) for itm in items])
+
     def create_query(self, query_text, language=None, time_zone=None, timestamp=None):
         """Creates a query with the given text
 
         Args:
-            query_text (str): Text to create a query object for
+            query_text (str, list(str)): Text or list of texts to create a query object for
             language (str, optional): Language as specified using a 639-2 code such as 'eng' or
                 'spa'; if omitted, English is assumed.
             time_zone (str, optional): The name of an IANA time zone, such as
@@ -236,11 +273,16 @@ class Processor(with_metaclass(ABCMeta, object)):
             timestamp (long, optional): A unix time stamp for the request (in seconds).
 
         Returns:
-            Query: A newly constructed query
+            Query: A newly constructed query or tuple of queries
         """
+        if not query_text:
+            query_text = ''
+        if isinstance(query_text, (list, tuple)):
+            return self._process_list(
+                query_text, 'create_query', language=language,
+                time_zone=time_zone, timestamp=timestamp)
         return self.resource_loader.query_factory.create_query(
-            query_text, language=language, time_zone=time_zone, timestamp=timestamp
-        )
+            query_text, language=language, time_zone=time_zone, timestamp=timestamp)
 
     def __repr__(self):
         msg = '<{} {!r} ready: {!r}, dirty: {!r}>'
@@ -268,6 +310,7 @@ class NaturalLanguageProcessor(Processor):
         self._app_path = app_path
         validate_workbench_version(self._app_path)
         self.name = app_path
+
         self.domain_classifier = DomainClassifier(self.resource_loader)
 
         for domain in path.get_domains(self._app_path):
@@ -286,7 +329,7 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application"""
         return self._children
 
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         if len(self.domains) == 1:
             return
         if incremental:
@@ -307,7 +350,7 @@ class NaturalLanguageProcessor(Processor):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
 
-    def _evaluate(self, print_stats, label_set="test"):
+    def _evaluate(self, print_stats, label_set=None):
         if len(self.domains) > 1:
             domain_eval = self.domain_classifier.evaluate(label_set=label_set)
             if domain_eval:
@@ -458,7 +501,7 @@ class DomainProcessor(Processor):
             self._children[intent] = IntentProcessor(app_path, domain, intent,
                                                      self.resource_loader)
 
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         if len(self.intents) == 1:
             return
         # train intent model
@@ -517,7 +560,7 @@ class DomainProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self._create_queries(query_text, time_zone=time_zone, timestamp=timestamp)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes)
         processed_query.domain = self.name
         return processed_query.to_dict()
@@ -625,7 +668,7 @@ class IntentProcessor(Processor):
     def nbest_text_enabled(self, value):
         self._nbest_text_enabled = value
 
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         """Builds the models for this intent"""
 
         # train entity recognizer
@@ -685,50 +728,43 @@ class IntentProcessor(Processor):
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
-        query = self._create_queries(query_text, time_zone=time_zone, timestamp=timestamp)
+        query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query)
         processed_query.domain = self.domain
         processed_query.intent = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query):
+    def process_query(self, query, return_processed_query=True):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
         Args:
             query (Query, or tuple): The user input query, or a list of the n best query objects
-            nbest_queries (list, optional): A list of Query objects, one for each of the nbest
-                                            transcript from ASR.
-
+            return_processed_query(boolean): Returns an instance of ProcessedQuery if True,
+                an array of entities if False (this is used to parallelize n-best entity processing)
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
+            list(entities): If return_procesed_query is False
         """
         self._check_ready()
 
         if isinstance(query, (list, tuple)):
             if self.nbest_text_enabled:
-                nbest_entities = []
-                for n_query in query:
-                    entities = self.entity_recognizer.predict(n_query)
-                    for idx, entity in enumerate(entities):
-                        self.entities[entity.entity.type].process_entity(n_query, entities, idx)
-                    entities = self.parser.parse_entities(n_query, entities) \
-                        if self.parser else entities
-                    nbest_entities.append(entities)
-                return ProcessedQuery(query[0], entities=nbest_entities[0], nbest_queries=query,
-                                      nbest_entities=nbest_entities)
+                nbest_entities = self._process_list(
+                    query, 'process_query', return_processed_query=False)
+                return ProcessedQuery(
+                    query[0], entities=nbest_entities[0],
+                    nbest_queries=query, nbest_entities=nbest_entities)
             else:
                 query = query[0]
-
         entities = self.entity_recognizer.predict(query)
-
         for idx, entity in enumerate(entities):
             self.entities[entity.entity.type].process_entity(query, entities, idx)
-
         entities = self.parser.parse_entities(query, entities) if self.parser else entities
-
-        return ProcessedQuery(query, entities=entities)
+        if return_processed_query is True:
+            return ProcessedQuery(query, entities=entities)
+        return entities
 
 
 class EntityProcessor(Processor):
@@ -761,7 +797,7 @@ class EntityProcessor(Processor):
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
         self.entity_resolver = EntityResolver(app_path, self.resource_loader, entity_type)
 
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         """Builds the models for this entity type"""
         if incremental:
             model_path = path.get_role_model_path(self._app_path, self.domain,

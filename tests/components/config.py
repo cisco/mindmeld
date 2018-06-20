@@ -1,4 +1,4 @@
-INTENT_MODEL_CONFIG = {
+INTENT_CLASSIFIER_CONFIG = {
     'model_type': 'text',
     'model_settings': {
         'classifier_type': 'logreg'
@@ -23,7 +23,7 @@ INTENT_MODEL_CONFIG = {
 }
 
 
-def get_entity_model_config(domain, intent):
+def get_entity_recognizer_config(domain, intent):
     if intent == 'error':
         raise ValueError('Some error because config provider is not robust')
 
@@ -54,7 +54,7 @@ def get_entity_model_config(domain, intent):
     }
 
 
-ENTITY_MODEL_CONFIG = {
+ENTITY_RECOGNIZER_CONFIG = {
     'model_type': 'tagger',
     'label_type': 'entities',
     'model_settings': {

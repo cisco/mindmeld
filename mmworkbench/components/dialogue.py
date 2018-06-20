@@ -3,8 +3,8 @@
 from __future__ import absolute_import, unicode_literals
 from builtins import object, str
 
+from functools import cmp_to_key, partial
 import copy
-from functools import cmp_to_key
 import logging
 import random
 import json
@@ -75,7 +75,8 @@ class DialogueStateRule(object):
 
         self.dialogue_state = dialogue_state
 
-        key_kwargs = (('domain',), ('intent',), ('has_entity', 'has_entities'))
+        key_kwargs = (('domain',), ('intent',), ('has_entity', 'has_entities'),
+                      ('targeted_only',), ('default',))
         valid_kwargs = set()
         for keys in key_kwargs:
             valid_kwargs.update(keys)
@@ -100,6 +101,8 @@ class DialogueStateRule(object):
 
         self.domain = resolved.get('domain', None)
         self.intent = resolved.get('intent', None)
+        self.targeted_only = resolved.get('targeted_only', False)
+        self.default = resolved.get('default', False)
         entities = resolved.get('has_entities', None)
         self.entity_types = None
         if entities is not None:
@@ -113,6 +116,14 @@ class DialogueStateRule(object):
                 msg = 'Invalid entity specification for dialogue state rule: {!r}'
                 raise ValueError(msg.format(entities))
 
+        if self.targeted_only and any([self.domain, self.intent, self.entity_types]):
+            raise ValueError('For a dialogue state rule, if targeted_only is '
+                             'True, domain, intent, and has_entity must be omitted')
+
+        if self.default and any([self.domain, self.intent, self.entity_types, self.targeted_only]):
+            raise ValueError('For a dialogue state rule, if default is True, '
+                             'domain, intent, has_entity, and targeted_only must be omitted')
+
     def apply(self, context):
         """Applies the dialogue state rule to the given context.
 
@@ -123,6 +134,10 @@ class DialogueStateRule(object):
             bool: whether or not the context matches
         """
         # Note: this will probably change as the details of "context" are worked out
+
+        # bail if this rule is only reachable via target_dialogue_state
+        if self.targeted_only:
+            return False
 
         # check domain is correct
         if self.domain is not None and self.domain != context['domain']:
@@ -149,20 +164,24 @@ class DialogueStateRule(object):
         """Returns an integer representing the complexity of this dialogue state rule.
 
         Components of a rule in order of increasing complexity are as follows:
-            domains, intents, entity types, entity mappings
+            default rule, domains, intents, entity types, entity mappings
 
         Returns:
             int: A number representing the rule complexity
         """
-        complexity = [0] * 3
-        if self.domain:
-            complexity[0] = 1
+        complexity = [0] * 4
+
+        if self.entity_types:
+            complexity[0] = len(self.entity_types)
 
         if self.intent:
             complexity[1] = 1
 
-        if self.entity_types:
-            complexity[2] = len(self.entity_types)
+        if self.domain:
+            complexity[2] = 1
+
+        if self.default:
+            complexity[3] = 1
 
         return tuple(complexity)
 
@@ -189,29 +208,37 @@ class DialogueStateRule(object):
 
         Returns:
             int: the comparison result
+                 -1: that is more complex than this
+                 0: this and that are equally complex
+                 1: this is more complex than that
         """
         if not (isinstance(this, DialogueStateRule) and isinstance(that, DialogueStateRule)):
             return NotImplemented
-        this_comp = this.complexity
-        that_comp = that.complexity
 
-        for idx in range(len(this_comp)-1, -1, -1):
-            this_val = this_comp[idx]
-            that_val = that_comp[idx]
-            if this_val == that_val:
-                continue
-            return this_val - that_val
-        return 0
+        # https://docs.python.org/3.0/whatsnew/3.0.html#ordering-comparisons
+        return (this.complexity > that.complexity) - (this.complexity < that.complexity)
 
 
 class DialogueManager(object):
-
     logger = mod_logger.getChild('DialogueManager')
 
     def __init__(self, responder_class=None):
         self.handler_map = {}
+        self.middleware = []
         self.rules = []
         self.responder_class = responder_class or DialogueResponder
+        self.default_rule = None
+
+    def add_middleware(self, middleware):
+        """Adds middleware for the dialogue manager. Middleware will be
+        called for each message before the dialogue state handler. Middleware
+        registered first will be called first.
+
+        Args:
+            middleware (callable): A dialogue manager middleware
+                function
+        """
+        self.middleware.append(middleware)
 
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue state rule for the dialogue manager.
@@ -235,6 +262,11 @@ class DialogueManager(object):
                 raise AssertionError(msg)
             self.handler_map[name] = handler
 
+            if rule.default:
+                if self.default_rule:
+                    raise AssertionError('Only one default rule may be specified')
+                self.default_rule = rule
+
     def apply_handler(self, context, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule
 
@@ -245,28 +277,28 @@ class DialogueManager(object):
         Returns:
             dict: A dict containing the dialogue state and directives
         """
-        dialogue_state = None
+        dialogue_state = target_dialogue_state
 
-        for rule in self.rules:
-            if target_dialogue_state:
-                if target_dialogue_state == rule.dialogue_state:
-                    dialogue_state = rule.dialogue_state
-                    break
-            else:
+        if dialogue_state is None:
+            for rule in self.rules:
                 if rule.apply(context):
                     dialogue_state = rule.dialogue_state
                     break
 
-        if dialogue_state is None:
+        try:
+            handler = self.handler_map[dialogue_state]
+        except KeyError:
             msg = 'Failed to find dialogue state for {domain}.{intent}'.format(
                 domain=context.get('domain'), intent=context.get('intent'))
             self.logger.info(msg, context)
             handler = self._default_handler
-        else:
-            handler = self.handler_map[dialogue_state]
-        # TODO: prepopulate slots
+
         slots = {}
         responder = self.responder_class(slots)
+
+        for m in reversed(self.middleware):
+            handler = partial(m, handler=handler)
+
         handler(context, responder)
 
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}

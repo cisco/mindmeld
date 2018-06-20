@@ -12,6 +12,7 @@ from sklearn.externals import joblib
 
 from ..core import Entity
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
+from ..constants import DEFAULT_TRAIN_SET_REGEX
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
@@ -58,7 +59,7 @@ class EntityRecognizer(Classifier):
                                               domain=self.domain, intent=self.intent)
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set='train', previous_model_path=None, **kwargs):
+    def fit(self, queries=None, label_set=None, previous_model_path=None, **kwargs):
         """Trains the entity recognition model using the provided training queries
 
         Args:
@@ -75,6 +76,11 @@ class EntityRecognizer(Classifier):
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
         model = create_model(self._model_config)
+
+        if not label_set:
+            label_set = self._model_config.train_label_set
+            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+
         new_hash = self._get_model_hash(self._model_config, queries, label_set)
 
         if previous_model_path:
@@ -202,7 +208,7 @@ class EntityRecognizer(Classifier):
         """
         raise NotImplementedError
 
-    def _get_query_tree(self, queries=None, label_set='train', raw=False):
+    def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on
 
         Args:
@@ -222,7 +228,7 @@ class EntityRecognizer(Classifier):
         return self._resource_loader.get_labeled_queries(domain=self.domain, intent=self.intent,
                                                          label_set=label_set, raw=raw)
 
-    def _get_queries_and_labels(self, queries=None, label_set='train'):
+    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a set of queries and their labels based on the label set
 
         Args:
@@ -237,7 +243,7 @@ class EntityRecognizer(Classifier):
         labels = [q.entities for q in queries]
         return raw_queries, labels
 
-    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+    def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = self._resource_loader.flatten_query_tree(query_tree)
         queries.sort()

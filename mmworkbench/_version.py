@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
 """Defines mmworkbench version information"""
 from __future__ import absolute_import, unicode_literals
-import os
 import pkg_resources
 import logging
-
-try:
-    from pip._internal.req import parse_requirements  # for pip >= 10
-except ImportError:
-    from pip.req import parse_requirements  # for pip <= 9.0.3
 
 from pkg_resources import DistributionNotFound, VersionConflict
 from .exceptions import WorkbenchVersionError
@@ -27,21 +21,24 @@ def validate_workbench_version(app_path):
     """ Validate the application's mmworkbench requirement
     """
     requirements = app_path + "/requirements.txt"
-    if not os.path.isfile(requirements):
+    try:
+        with open(requirements) as f:
+            lines = f.readlines()
+    except:
         logger.warning('requirements.txt is missing at {app_path}.'.format(app_path=app_path))
         return
     wb_req = None
-    for item in parse_requirements(requirements, session='wb_session'):
+    for item in pkg_resources.parse_requirements(lines):
         if item.name == 'mmworkbench':
             wb_req = item
     if not wb_req:
         logger.warning('mmworkbench is not in requirements.txt.')
         return
-    if not (wb_req.req and len(wb_req.req.specifier) > 0):
+    if len(wb_req.specifier) == 0:
         logger.warning('mmworkbench version is not specified in requirements.txt.')
         return
     wb_version = _get_wb_version()
-    wb_req = [wb_req.name + str(wb_req.req.specifier)]
+    wb_req = [wb_req.name + str(wb_req.specifier)]
     try:
         pkg_resources.require(wb_req)
     except (DistributionNotFound, VersionConflict) as error:

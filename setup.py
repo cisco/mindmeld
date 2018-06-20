@@ -15,6 +15,7 @@ requirements = [
     'Flask>=0.12,<=0.12.2',
     'Flask-Cors~=3.0',
     'future~=0.16.0',
+    'futures; python_version == "2.7"',
     'nltk~=3.2',
     'numpy~=1.14',
     'pandas~=0.22',

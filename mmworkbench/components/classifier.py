@@ -16,6 +16,7 @@ from sklearn.externals import joblib
 from .. import markup
 from ..exceptions import ClassifierLoadError
 from ..core import Query
+from ..constants import DEFAULT_TRAIN_SET_REGEX, DEFAULT_TEST_SET_REGEX
 
 from ..models import create_model, ModelConfig
 
@@ -81,6 +82,8 @@ class ClassifierConfig(object):
         config = model_config.to_dict()
         config.pop('example_type')
         config.pop('label_type')
+        config.pop('train_label_set')
+        config.pop('test_label_set')
         return cls(**config)
 
     def to_json(self):
@@ -114,7 +117,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         self.config = None
         self.hash = ''
 
-    def fit(self, queries=None, label_set='train', previous_model_path=None, **kwargs):
+    def fit(self, queries=None, label_set=None, previous_model_path=None, **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
@@ -178,6 +181,11 @@ class Classifier(with_metaclass(ABCMeta, object)):
         # create model with given params
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
+
+        if not label_set:
+            label_set = model_config.train_label_set
+            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+
         new_hash = self._get_model_hash(model_config, queries, label_set)
 
         if previous_model_path:
@@ -249,7 +257,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
-    def evaluate(self, queries=None, label_set='test'):
+    def evaluate(self, queries=None, label_set=None):
         """Evaluates the trained classification model on the given test data
 
         Args:
@@ -260,6 +268,12 @@ class Classifier(with_metaclass(ABCMeta, object)):
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
+        model_config = self._get_model_config()
+
+        if not label_set:
+            label_set = model_config.test_label_set
+            label_set = label_set if label_set else DEFAULT_TEST_SET_REGEX
+
         if not self._model:
             logger.error('You must fit or load the model before running evaluate.')
             return
@@ -371,7 +385,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         return query_tree
 
     @abstractmethod
-    def _get_query_tree(self, queries=None, label_set='train', raw=False):
+    def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on
 
         Args:
@@ -387,7 +401,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         raise NotImplementedError('Subclasses must implement this method')
 
     @abstractmethod
-    def _get_queries_and_labels(self, queries=None, label_set='train'):
+    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns the set of queries and their labels to train on
 
         Args:
@@ -399,7 +413,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         raise NotImplementedError('Subclasses must implement this method')
 
     @abstractmethod
-    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+    def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a hashed string representing the labeled queries
 
         Args:
@@ -410,7 +424,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         """
         raise NotImplementedError('Subclasses must implement this method')
 
-    def _get_model_hash(self, model_config, queries=None, label_set='train'):
+    def _get_model_hash(self, model_config, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a hash representing the inputs into the model
 
         Args:

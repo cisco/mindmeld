@@ -223,3 +223,64 @@ def test_process_empty_nbest_unspecified_intent(nlp, queries):
         n-best is an empty list"""
     response = nlp.process(queries)
     assert response['text'] == ''
+
+
+def test_parallel_processing(nlp):
+    import mmworkbench.components.nlp as nlp_module
+    import os
+    import time
+    if nlp_module.executor:
+        input_list = ['A', 'B', 'C']
+        parent = os.getpid()
+
+        # test adding a new function to an instance
+        def test_function(self, item):
+            item = item.lower()
+            if os.getpid() == parent:
+                item = item + '-parent'
+            else:
+                item = item + '-child'
+            return item
+        prev_executor = nlp_module.executor
+        nlp._test_function = test_function.__get__(nlp)
+        processed = nlp._process_list(input_list, '_test_function')
+        # verify the process pool was restarted
+        # (the function doesn't exist yet in the subprocesses)
+        assert nlp_module.executor != prev_executor
+        # verify the list was processed by main process
+        assert processed == ('a-parent', 'b-parent', 'c-parent')
+
+        prev_executor = nlp_module.executor
+        processed = nlp._process_list(input_list, '_test_function')
+        # verify the process pool was not restarted
+        assert prev_executor == nlp_module.executor
+        # verify the list was processed by subprocesses
+        assert processed == ('a-child', 'b-child', 'c-child')
+
+        # test that the timeout works properly
+        def slow_function(self, item):
+            item = item.lower()
+            if os.getpid() == parent:
+                item = item + '-parent'
+            else:
+                # sleep enough to trigger a timeout in the child process
+                time.sleep(nlp_module.SUBPROCESS_WAIT_TIME + 0.1)
+                item = item + '-child'
+            return item
+        nlp._test_function = slow_function.__get__(nlp)
+        nlp_module.restart_subprocesses()
+        prev_executor = nlp_module.executor
+        processed = nlp._process_list(input_list, '_test_function')
+        # verify the process pool was restarted due to timeout
+        assert prev_executor != nlp_module.executor
+        # verify the list was processed by main process
+        assert processed == ('a-parent', 'b-parent', 'c-parent')
+
+
+def test_custom_data(nlp):
+    assert nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer._model_config.train_label_set == 'testtrain.*\\.txt' # noqa E501
+    assert nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer._model_config.test_label_set == 'testtrain.*\\.txt' # noqa E501
+
+    # make sure another intent doesn't have the same custom data specs
+    assert nlp.domains['store_info'].intents['exit'].entity_recognizer._model_config.train_label_set != 'testtrain.*\\.txt' # noqa E501
+    assert nlp.domains['store_info'].intents['exit'].entity_recognizer._model_config.test_label_set != 'testtrain.*\\.txt' # noqa E501
