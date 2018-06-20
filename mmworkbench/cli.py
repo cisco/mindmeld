@@ -271,12 +271,12 @@ def module_cli():
 @click.argument('app_path', required=False)
 def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application."""
-    bp_logger = logging.getLogger('blueprint')
-    bp_logger.setLevel(logging.INFO)
 
-    bp_logger.info('Automatic blueprint download functionality is currently disabled')
-    bp_logger.info('Navigate to https://devcenter.mindmeld.com/bp and manually download the tar')
-    bp_logger.info('Extract the blueprint in the current working directory')
+    logger.info('Automatic blueprint download functionality is currently disabled')
+    msg = ('Navigate to https://devcenter.mindmeld.com/bp/{}/app.tar.gz'
+           ' and manually download the tar').format(blueprint_name)
+    logger.info(msg)
+    logger.info('Extract the blueprint in the current working directory')
 
     # TODO: Re-implement authenticated download of blueprints by getting oauth2
     # token from Webex broker
