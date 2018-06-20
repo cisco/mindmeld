@@ -26,7 +26,8 @@ test:
         timeout: 150
   override:
     - PIP_EXTRA_INDEX_URL=https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi tox
-    - mmworkbench blueprint home_assistant
+    # Disabling blueprint testing due to the changes in the dev center
+    # - mmworkbench blueprint home_assistant
 deployment:
   s3:
     branch: /(develop)|(staging)|(master)/
