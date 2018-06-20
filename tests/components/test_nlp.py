@@ -275,3 +275,12 @@ def test_parallel_processing(nlp):
         assert prev_executor != nlp_module.executor
         # verify the list was processed by main process
         assert processed == ('a-parent', 'b-parent', 'c-parent')
+
+
+def test_custom_data(nlp):
+    assert nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer._model_config.train_label_set == 'testtrain.*\\.txt' # noqa E501
+    assert nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer._model_config.test_label_set == 'testtrain.*\\.txt' # noqa E501
+
+    # make sure another intent doesn't have the same custom data specs
+    assert nlp.domains['store_info'].intents['exit'].entity_recognizer._model_config.train_label_set != 'testtrain.*\\.txt' # noqa E501
+    assert nlp.domains['store_info'].intents['exit'].entity_recognizer._model_config.test_label_set != 'testtrain.*\\.txt' # noqa E501

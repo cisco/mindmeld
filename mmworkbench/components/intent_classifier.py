@@ -8,6 +8,7 @@ import logging
 
 from ..markup import mark_down
 from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
+from ..constants import DEFAULT_TRAIN_SET_REGEX
 
 from .classifier import Classifier
 from ._config import get_classifier_config
@@ -89,7 +90,7 @@ class IntentClassifier(Classifier):
     def inspect(self, query, intent=None):
         return self._model.inspect(example=query, gold_label=intent)
 
-    def _get_query_tree(self, queries=None, label_set='train', raw=False):
+    def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on
 
         Args:
@@ -109,7 +110,7 @@ class IntentClassifier(Classifier):
         return self._resource_loader.get_labeled_queries(domain=self.domain,
                                                          label_set=label_set, raw=raw)
 
-    def _get_queries_and_labels(self, queries=None, label_set='train'):
+    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a set of queries and their labels based on the label set
 
         Args:
@@ -124,7 +125,7 @@ class IntentClassifier(Classifier):
             return [None, None]
         return list(zip(*[(q.query, q.intent) for q in queries]))
 
-    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+    def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = []
         for intent in query_tree[self.domain]:

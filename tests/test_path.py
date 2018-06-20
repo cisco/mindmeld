@@ -38,6 +38,16 @@ def test_get_labeled_query_tree():
     assert set(tree[DOMAIN_NAME].keys()) == INTENTS
 
 
+def test_get_labeled_query_tree_pattern():
+    tree = path.get_labeled_query_tree(APP_PATH, ['testtrain.*\.txt'])
+    for domain in DOMAINS:
+        for intent in tree[domain]:
+            for key in tree[domain][intent].keys():
+                assert key == 'testtrain123.txt'
+    assert set(tree.keys()) == DOMAINS
+    assert set(tree[DOMAIN_NAME].keys()) == INTENTS
+
+
 def test_get_entity_types():
     entity_types = path.get_entity_types(APP_PATH)
     assert len(entity_types) == 1

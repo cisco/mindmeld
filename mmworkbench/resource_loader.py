@@ -8,12 +8,12 @@ from builtins import (object, zip)
 from copy import deepcopy
 from collections import Counter
 
-import fnmatch
 import hashlib
 import json
 import logging
 import os
 import time
+import re
 
 from . import markup, path
 from .exceptions import WorkbenchError
@@ -22,10 +22,9 @@ from .query_factory import QueryFactory
 from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
                              CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, mask_numerics)
 from .core import Entity
+from .constants import DEFAULT_TRAIN_SET_REGEX
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_LABEL_SET = 'train'
 
 
 class ResourceLoader(object):
@@ -260,7 +259,7 @@ class ResourceLoader(object):
             dict: ProcessedQuery objects (or strings) loaded from labeled query files, organized by
                 domain and intent.
         """
-        label_set = label_set or DEFAULT_LABEL_SET
+        label_set = label_set or DEFAULT_TRAIN_SET_REGEX
         query_tree = {}
         loaded_key = 'loaded_raw' if raw else 'loaded'
         file_iter = self._traverse_labeled_queries_files(domain, intent, label_set)
@@ -288,10 +287,9 @@ class ResourceLoader(object):
                 flattened.extend(queries)
         return flattened
 
-    def _traverse_labeled_queries_files(self, domain=None, intent=None, label_set='train'):
+    def _traverse_labeled_queries_files(self, domain=None, intent=None,
+                                        file_pattern=DEFAULT_TRAIN_SET_REGEX):
         provided_intent = intent
-        file_pattern = '{}*.txt'.format(label_set)
-
         self._update_query_file_dates(file_pattern)
         domains = [domain] if domain else self.labeled_query_files.keys()
 
@@ -303,8 +301,8 @@ class ResourceLoader(object):
             for an_intent in sorted(intents):
                 files = self.labeled_query_files[a_domain][an_intent].keys()
                 # filter to files which belong to the label set
-                files = fnmatch.filter(files, file_pattern)
-                for filename in sorted(files):
+                filtered_files = [x for x in files if re.match(file_pattern, x)]
+                for filename in sorted(filtered_files):
                     yield a_domain, an_intent, filename
 
     def load_query_file(self, domain, intent, filename, raw=False):

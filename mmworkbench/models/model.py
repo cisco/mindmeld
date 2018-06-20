@@ -54,10 +54,11 @@ class ModelConfig(object):
     """
 
     __slots__ = ['model_type', 'example_type', 'label_type', 'features', 'model_settings', 'params',
-                 'param_selection']
+                 'param_selection', 'train_label_set', 'test_label_set']
 
     def __init__(self, model_type=None, example_type=None, label_type=None, features=None,
-                 model_settings=None, params=None, param_selection=None):
+                 model_settings=None, params=None, param_selection=None, train_label_set=None,
+                 test_label_set=None):
         for arg, val in {'model_type': model_type, 'example_type': example_type,
                          'label_type': label_type, 'features': features}.items():
             if val is None:
@@ -71,6 +72,8 @@ class ModelConfig(object):
         self.model_settings = model_settings
         self.params = params
         self.param_selection = param_selection
+        self.train_label_set = train_label_set
+        self.test_label_set = test_label_set
 
     def to_dict(self):
         """Converts the model config object into a dict
