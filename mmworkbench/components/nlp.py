@@ -171,7 +171,7 @@ class Processor(with_metaclass(ABCMeta, object)):
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
-                timestamp=None):
+                timestamp=None, bypass_nlp=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -201,9 +201,9 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         query = self.create_query(
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
-        return self.process_query(query, allowed_nlp_classes).to_dict()
+        return self.process_query(query, allowed_nlp_classes, bypass_nlp).to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -360,22 +360,28 @@ class NaturalLanguageProcessor(Processor):
             else:
                 logger.info("Skipping domain classifier evaluation")
 
-    def _process_domain(self, query, allowed_nlp_classes=None):
+    def _process_domain(self, query, allowed_nlp_classes=None, bypass_nlp=None):
         if len(self.domains) > 1:
             if not allowed_nlp_classes:
                 return self.domain_classifier.predict(query)
             else:
-                sorted_domains = self.domain_classifier.predict_proba(query)
-                for ordered_domain, _ in sorted_domains:
-                    if ordered_domain in allowed_nlp_classes.keys():
-                        return ordered_domain
+                if not bypass_nlp:
+                    sorted_domains = self.domain_classifier.predict_proba(query)
+                    for ordered_domain, _ in sorted_domains:
+                        if ordered_domain in allowed_nlp_classes.keys():
+                            return ordered_domain
+                else:
+                    for domain in allowed_nlp_classes:
+                        if domain in self.domains:
+                            # TODO: This is a first come first serve algorithm
+                            return domain
 
                 raise AllowedNlpClassesKeyError(
                     'Could not find user inputted domain in NLP hierarchy')
         else:
             return list(self.domains.keys())[0]
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -400,12 +406,12 @@ class NaturalLanguageProcessor(Processor):
             top_query = query[0]
         else:
             top_query = query
-        domain = self._process_domain(top_query, allowed_nlp_classes=allowed_nlp_classes)
+        domain = self._process_domain(top_query, allowed_nlp_classes=allowed_nlp_classes, bypass_nlp=bypass_nlp)
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
         processed_query = \
-            self.domains[domain].process_query(query, allowed_intents)
+            self.domains[domain].process_query(query, allowed_intents, bypass_nlp=bypass_nlp)
         processed_query.domain = domain
         return processed_query
 
@@ -535,7 +541,7 @@ class DomainProcessor(Processor):
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
 
-    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None):
+    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None, bypass_nlp=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
@@ -561,11 +567,11 @@ class DomainProcessor(Processor):
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
-        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes)
+        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes, bypass_nlp=bypass_nlp)
         processed_query.domain = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -599,20 +605,33 @@ class DomainProcessor(Processor):
             if not allowed_nlp_classes:
                 intent = self.intent_classifier.predict(top_query)
             else:
-                sorted_intents = self.intent_classifier.predict_proba(top_query)
-                intent = None
+                if not bypass_nlp:
+                    sorted_intents = self.intent_classifier.predict_proba(top_query)
+                    intent = None
 
-                for ordered_intent, _ in sorted_intents:
-                    if ordered_intent in allowed_nlp_classes.keys():
-                        intent = ordered_intent
-                        break
+                    for ordered_intent, _ in sorted_intents:
+                        if ordered_intent in allowed_nlp_classes.keys():
+                            intent = ordered_intent
+                            break
 
-                if not intent:
-                    raise AllowedNlpClassesKeyError(
-                        'Could not find user inputted intent in NLP hierarchy')
+                    if not intent:
+                        raise AllowedNlpClassesKeyError(
+                            'Could not find user inputted intent in NLP hierarchy')
+                else:
+                    intent = None
+
+                    for intent_key in allowed_nlp_classes.keys():
+                        if intent_key in self.intents:
+                            intent = intent_key
+                            break
+
+                    if not intent:
+                        raise AllowedNlpClassesKeyError(
+                            'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
-        processed_query = self.intents[intent].process_query(query)
+
+        processed_query = self.intents[intent].process_query(query, bypass_nlp=bypass_nlp)
         processed_query.intent = intent
 
         return processed_query
@@ -712,7 +731,7 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
                             self.domain, self.name))
 
-    def process(self, query_text, time_zone=None, timestamp=None):
+    def process(self, query_text, time_zone=None, timestamp=None, bypass_nlp=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
 
@@ -729,12 +748,12 @@ class IntentProcessor(Processor):
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
-        processed_query = self.process_query(query)
+        processed_query = self.process_query(query, bypass_nlp=bypass_nlp)
         processed_query.domain = self.domain
         processed_query.intent = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query, return_processed_query=True):
+    def process_query(self, query, return_processed_query=True, bypass_nlp=None):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
@@ -758,6 +777,10 @@ class IntentProcessor(Processor):
                     nbest_queries=query, nbest_entities=nbest_entities)
             else:
                 query = query[0]
+
+        if bypass_nlp:
+            return ProcessedQuery(query, entities=[])
+
         entities = self.entity_recognizer.predict(query)
         for idx, entity in enumerate(entities):
             self.entities[entity.entity.type].process_entity(query, entities, idx)
