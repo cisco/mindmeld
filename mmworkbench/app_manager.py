@@ -141,7 +141,6 @@ class ApplicationManager(object):
         request = {'text': text, 'params': params, 'session': session}
 
         allowed_intents = self._validate_param(params, 'allowed_intents')
-
         target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
         time_zone = self._validate_param(params, 'time_zone')
         timestamp = self._validate_param(params, 'timestamp')

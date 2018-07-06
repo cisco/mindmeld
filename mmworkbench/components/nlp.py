@@ -614,7 +614,6 @@ class DomainProcessor(Processor):
                         'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
-
         processed_query = self.intents[intent].process_query(query)
         processed_query.intent = intent
 
@@ -761,7 +760,6 @@ class IntentProcessor(Processor):
                     nbest_queries=query, nbest_entities=nbest_entities)
             else:
                 query = query[0]
-
         entities = self.entity_recognizer.predict(query)
         for idx, entity in enumerate(entities):
             self.entities[entity.entity.type].process_entity(query, entities, idx)
