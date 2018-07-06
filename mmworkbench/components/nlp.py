@@ -604,22 +604,21 @@ class DomainProcessor(Processor):
                 intent = self.intent_classifier.predict(top_query)
             else:
                 if len(allowed_nlp_classes) == 1:
-                    return list(allowed_nlp_classes.keys())[0]
+                    intent = list(allowed_nlp_classes.keys())[0]
                 else:
                     sorted_allowed_intents = [intent_stat[0] for intent_stat in
                                        self.intent_classifier.predict_proba(top_query)
                                        if intent_stat[0] in allowed_nlp_classes.keys()]
 
-                    if len(sorted_allowed_intents) > 0:
-                        return sorted_allowed_intents[0]
+                    if not sorted_allowed_intents:
+                        raise AllowedNlpClassesKeyError(
+                            'Could not find user inputted intent in NLP hierarchy')
 
-                    raise AllowedNlpClassesKeyError(
-                        'Could not find user inputted intent in NLP hierarchy')
+                    intent = sorted_allowed_intents[0]
         else:
             intent = list(self.intents.keys())[0]
         processed_query = self.intents[intent].process_query(query)
         processed_query.intent = intent
-
         return processed_query
 
     def inspect(self, query, intent=None):
