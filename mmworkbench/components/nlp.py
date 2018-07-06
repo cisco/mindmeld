@@ -171,7 +171,7 @@ class Processor(with_metaclass(ABCMeta, object)):
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
-                timestamp=None, bypass_nlp=None):
+                timestamp=None, bypass_nlp=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -194,7 +194,7 @@ class Processor(with_metaclass(ABCMeta, object)):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
-            bypass_nlp (Boolean, optional): A flag to bypass NLP processing if allowed_nlp_classes
+            bypass_nlp (bool, optional): A flag to bypass NLP processing if allowed_nlp_classes
                 are present
 
         Returns:
@@ -205,7 +205,7 @@ class Processor(with_metaclass(ABCMeta, object)):
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
         return self.process_query(query, allowed_nlp_classes, bypass_nlp).to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=None):
+    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -223,7 +223,7 @@ class Processor(with_metaclass(ABCMeta, object)):
                 where smart_home is the domain and close_door is the intent.
             nbest_queries (list, optional): A list of Query objects, one for each of the nbest
                                             transcript from ASR.
-            bypass_nlp (Boolean, optional): A flag to bypass NLP processing if allowed_nlp_classes
+            bypass_nlp (bool, optional): A flag to bypass NLP processing if allowed_nlp_classes
                 are present
 
         Returns:
@@ -364,7 +364,7 @@ class NaturalLanguageProcessor(Processor):
             else:
                 logger.info("Skipping domain classifier evaluation")
 
-    def _process_domain(self, query, allowed_nlp_classes=None, bypass_nlp=None):
+    def _process_domain(self, query, allowed_nlp_classes=None, bypass_nlp=False):
         if len(self.domains) > 1:
             if not allowed_nlp_classes:
                 return self.domain_classifier.predict(query)
@@ -381,7 +381,7 @@ class NaturalLanguageProcessor(Processor):
         else:
             return list(self.domains.keys())[0]
 
-    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=None):
+    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -396,7 +396,7 @@ class NaturalLanguageProcessor(Processor):
             }
             where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
             is None, we just use the normal model predict functionality.
-            bypass_nlp (Boolean, optional): A flag to bypass NLP processing if allowed_nlp_classes
+            bypass_nlp (bool, optional): A flag to bypass NLP processing if allowed_nlp_classes
                 are present
 
         Returns:
@@ -408,7 +408,8 @@ class NaturalLanguageProcessor(Processor):
             top_query = query[0]
         else:
             top_query = query
-        domain = self._process_domain(top_query, allowed_nlp_classes=allowed_nlp_classes, bypass_nlp=bypass_nlp)
+        domain = self._process_domain(top_query, allowed_nlp_classes=allowed_nlp_classes,
+                                      bypass_nlp=bypass_nlp)
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
@@ -543,7 +544,8 @@ class DomainProcessor(Processor):
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
 
-    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None, bypass_nlp=None):
+    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None,
+                bypass_nlp=False):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
@@ -563,17 +565,20 @@ class DomainProcessor(Processor):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            bypass_nlp (bool, optional): A flag to bypass NLP processing if allowed_nlp_classes
+                are present
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
-        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes, bypass_nlp=bypass_nlp)
+        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes,
+                                             bypass_nlp=bypass_nlp)
         processed_query.domain = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=None):
+    def process_query(self, query, allowed_nlp_classes=None, bypass_nlp=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -590,7 +595,7 @@ class DomainProcessor(Processor):
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
             nbest_queries (list, optional): A list of Query objects, one for each of the nbest
                                             transcript from ASR.
-            bypass_nlp (Boolean, optional): A flag to bypass NLP processing if allowed_nlp_classes
+            bypass_nlp (bool, optional): A flag to bypass NLP processing if allowed_nlp_classes
                 are present
 
         Returns:
@@ -724,7 +729,7 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
                             self.domain, self.name))
 
-    def process(self, query_text, time_zone=None, timestamp=None, bypass_nlp=None):
+    def process(self, query_text, time_zone=None, timestamp=None, bypass_nlp=False):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
 
@@ -735,6 +740,8 @@ class IntentProcessor(Processor):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            bypass_nlp (bool, optional): A flag to bypass NLP processing if allowed_nlp_classes
+                are present
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -746,7 +753,7 @@ class IntentProcessor(Processor):
         processed_query.intent = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query, return_processed_query=True, bypass_nlp=None):
+    def process_query(self, query, return_processed_query=True, bypass_nlp=False):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
@@ -754,6 +761,8 @@ class IntentProcessor(Processor):
             query (Query, or tuple): The user input query, or a list of the n best query objects
             return_processed_query(boolean): Returns an instance of ProcessedQuery if True,
                 an array of entities if False (this is used to parallelize n-best entity processing)
+            bypass_nlp (bool, optional): A flag to bypass NLP processing if allowed_nlp_classes
+                are present
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
