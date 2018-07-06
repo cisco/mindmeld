@@ -368,9 +368,10 @@ class NaturalLanguageProcessor(Processor):
                 if len(allowed_nlp_classes) == 1:
                     return list(allowed_nlp_classes.keys())[0]
                 else:
-                    sorted_allowed_domains = [domain_stat[0] for domain_stat in
-                                       self.domain_classifier.predict_proba(query)
-                                       if domain_stat[0] in allowed_nlp_classes.keys()]
+                    sorted_allowed_domains = \
+                        [domain_stat[0] for domain_stat in
+                         self.domain_classifier.predict_proba(query)
+                         if domain_stat[0] in allowed_nlp_classes.keys()]
 
                     if len(sorted_allowed_domains) > 0:
                         return sorted_allowed_domains[0]
@@ -606,9 +607,10 @@ class DomainProcessor(Processor):
                 if len(allowed_nlp_classes) == 1:
                     intent = list(allowed_nlp_classes.keys())[0]
                 else:
-                    sorted_allowed_intents = [intent_stat[0] for intent_stat in
-                                       self.intent_classifier.predict_proba(top_query)
-                                       if intent_stat[0] in allowed_nlp_classes.keys()]
+                    sorted_allowed_intents = \
+                        [intent_stat[0] for intent_stat in
+                         self.intent_classifier.predict_proba(top_query)
+                         if intent_stat[0] in allowed_nlp_classes.keys()]
 
                     if not sorted_allowed_intents:
                         raise AllowedNlpClassesKeyError(
