@@ -192,7 +192,11 @@ class EntityRecognizer(Classifier):
             str: The predicted class label
 
         """
-        prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp) or ()
+        if len(self.entity_types) > 0:
+            prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp) or ()
+        else:
+            prediction = ()
+
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
     def predict_proba(self, query):

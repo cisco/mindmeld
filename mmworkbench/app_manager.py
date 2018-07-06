@@ -53,7 +53,6 @@ def _validate_time_zone(param=None):
 
 PARAM_VALIDATORS = {
     'allowed_intents': _validate_generic('allowed_intents', list),
-    'bypass_nlp': _validate_generic('bypass_nlp', str),
 
     # TODO: use a better validator for this
     'target_dialogue_state': _validate_generic('target_dialogue_state', str),
@@ -143,11 +142,6 @@ class ApplicationManager(object):
 
         allowed_intents = self._validate_param(params, 'allowed_intents')
 
-        # bypass_nlp flag is used only when there are allowed intents
-        bypass_nlp = \
-            allowed_intents and len(allowed_intents) > 0 and \
-            self._validate_param(params, 'bypass_nlp') == 'true'
-
         target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
         time_zone = self._validate_param(params, 'time_zone')
         timestamp = self._validate_param(params, 'timestamp')
@@ -180,7 +174,7 @@ class ApplicationManager(object):
                     "turn".format(ex, allowed_intents))
 
         processed_query = self.nlp.process(text, nlp_hierarchy, time_zone=time_zone,
-                                           timestamp=timestamp, bypass_nlp=bypass_nlp)
+                                           timestamp=timestamp)
 
         context.update(processed_query)
         context.pop('text')
