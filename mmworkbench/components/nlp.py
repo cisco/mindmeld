@@ -365,15 +365,18 @@ class NaturalLanguageProcessor(Processor):
             if not allowed_nlp_classes:
                 return self.domain_classifier.predict(query)
             else:
-                allowed_domains = self.domains if len(allowed_nlp_classes) == 1 else \
-                    [res[0] for res in self.domain_classifier.predict_proba(query)]
+                if len(allowed_nlp_classes) == 1:
+                    return allowed_nlp_classes[0]
+                else:
+                    allowed_domains = [domain_stat[0] for domain_stat in
+                                       self.domain_classifier.predict_proba(query)
+                                       if domain_stat[0] in allowed_nlp_classes.keys()]
 
-                for allowed_domain in allowed_domains:
-                    if allowed_domain in allowed_nlp_classes.keys():
-                        return allowed_domain
+                    if len(allowed_domains) > 1:
+                        return allowed_domains[0]
 
-                raise AllowedNlpClassesKeyError(
-                    'Could not find user inputted domain in NLP hierarchy')
+                    raise AllowedNlpClassesKeyError(
+                        'Could not find user inputted domain in NLP hierarchy')
         else:
             return list(self.domains.keys())[0]
 
@@ -600,16 +603,16 @@ class DomainProcessor(Processor):
             if not allowed_nlp_classes:
                 intent = self.intent_classifier.predict(top_query)
             else:
-                allowed_intents = self.intents if len(allowed_nlp_classes) == 1 else \
-                    [res[0] for res in self.intent_classifier.predict_proba(top_query)]
-                intent = None
+                if len(allowed_nlp_classes) == 1:
+                    return allowed_nlp_classes[0]
+                else:
+                    allowed_intents = [intent_stat[0] for intent_stat in
+                                       self.intent_classifier.predict_proba(top_query)
+                                       if intent_stat[0] in allowed_nlp_classes.keys()]
 
-                for allowed_intent in allowed_intents:
-                    if allowed_intent in allowed_nlp_classes.keys():
-                        intent = allowed_intent
-                        break
+                    if len(allowed_intents) > 0:
+                        return allowed_intents[0]
 
-                if not intent:
                     raise AllowedNlpClassesKeyError(
                         'Could not find user inputted intent in NLP hierarchy')
         else:
