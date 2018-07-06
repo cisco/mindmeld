@@ -368,12 +368,12 @@ class NaturalLanguageProcessor(Processor):
                 if len(allowed_nlp_classes) == 1:
                     return allowed_nlp_classes[0]
                 else:
-                    allowed_domains = [domain_stat[0] for domain_stat in
+                    sorted_allowed_domains = [domain_stat[0] for domain_stat in
                                        self.domain_classifier.predict_proba(query)
                                        if domain_stat[0] in allowed_nlp_classes.keys()]
 
-                    if len(allowed_domains) > 1:
-                        return allowed_domains[0]
+                    if len(sorted_allowed_domains) > 1:
+                        return sorted_allowed_domains[0]
 
                     raise AllowedNlpClassesKeyError(
                         'Could not find user inputted domain in NLP hierarchy')
@@ -606,12 +606,12 @@ class DomainProcessor(Processor):
                 if len(allowed_nlp_classes) == 1:
                     return allowed_nlp_classes[0]
                 else:
-                    allowed_intents = [intent_stat[0] for intent_stat in
+                    sorted_allowed_intents = [intent_stat[0] for intent_stat in
                                        self.intent_classifier.predict_proba(top_query)
                                        if intent_stat[0] in allowed_nlp_classes.keys()]
 
-                    if len(allowed_intents) > 0:
-                        return allowed_intents[0]
+                    if len(sorted_allowed_intents) > 0:
+                        return sorted_allowed_intents[0]
 
                     raise AllowedNlpClassesKeyError(
                         'Could not find user inputted intent in NLP hierarchy')
