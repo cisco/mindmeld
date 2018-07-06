@@ -372,7 +372,7 @@ class NaturalLanguageProcessor(Processor):
                                        self.domain_classifier.predict_proba(query)
                                        if domain_stat[0] in allowed_nlp_classes.keys()]
 
-                    if len(sorted_allowed_domains) > 1:
+                    if len(sorted_allowed_domains) > 0:
                         return sorted_allowed_domains[0]
 
                     raise AllowedNlpClassesKeyError(
