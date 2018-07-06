@@ -53,7 +53,7 @@ def _validate_time_zone(param=None):
 
 PARAM_VALIDATORS = {
     'allowed_intents': _validate_generic('allowed_intents', list),
-    'kws': _validate_generic('kws', str),
+    'bypass_nlp': _validate_generic('bypass_nlp', str),
 
     # TODO: use a better validator for this
     'target_dialogue_state': _validate_generic('target_dialogue_state', str),
@@ -142,11 +142,11 @@ class ApplicationManager(object):
         request = {'text': text, 'params': params, 'session': session}
 
         allowed_intents = self._validate_param(params, 'allowed_intents')
-        kws = self._validate_param(params, 'kws')
 
-        bypass_nlp = None
-        if kws == 'true':
-            bypass_nlp = True
+        # bypass_nlp flag is used only when there are allowed intents
+        bypass_nlp = \
+            allowed_intents and len(allowed_intents) > 0 and \
+            self._validate_param(params, 'bypass_nlp') == 'true'
 
         target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
         time_zone = self._validate_param(params, 'time_zone')

@@ -194,6 +194,8 @@ class Processor(with_metaclass(ABCMeta, object)):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            bypass_nlp (Boolean, optional): A flag to bypass NLP processing if allowed_nlp_classes
+                are present
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -221,6 +223,8 @@ class Processor(with_metaclass(ABCMeta, object)):
                 where smart_home is the domain and close_door is the intent.
             nbest_queries (list, optional): A list of Query objects, one for each of the nbest
                                             transcript from ASR.
+            bypass_nlp (Boolean, optional): A flag to bypass NLP processing if allowed_nlp_classes
+                are present
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -365,16 +369,12 @@ class NaturalLanguageProcessor(Processor):
             if not allowed_nlp_classes:
                 return self.domain_classifier.predict(query)
             else:
-                if not bypass_nlp:
-                    sorted_domains = self.domain_classifier.predict_proba(query)
-                    for ordered_domain, _ in sorted_domains:
-                        if ordered_domain in allowed_nlp_classes.keys():
-                            return ordered_domain
-                else:
-                    for domain in allowed_nlp_classes:
-                        if domain in self.domains:
-                            # TODO: This is a first come first serve algorithm
-                            return domain
+                allowed_domains = self.domains if bypass_nlp else \
+                    [res[0] for res in self.domain_classifier.predict_proba(query)]
+
+                for ordered_domain, _ in allowed_domains:
+                    if ordered_domain in allowed_nlp_classes.keys():
+                        return ordered_domain
 
                 raise AllowedNlpClassesKeyError(
                     'Could not find user inputted domain in NLP hierarchy')
@@ -396,6 +396,8 @@ class NaturalLanguageProcessor(Processor):
             }
             where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
             is None, we just use the normal model predict functionality.
+            bypass_nlp (Boolean, optional): A flag to bypass NLP processing if allowed_nlp_classes
+                are present
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -588,6 +590,8 @@ class DomainProcessor(Processor):
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
             nbest_queries (list, optional): A list of Query objects, one for each of the nbest
                                             transcript from ASR.
+            bypass_nlp (Boolean, optional): A flag to bypass NLP processing if allowed_nlp_classes
+                are present
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -605,29 +609,18 @@ class DomainProcessor(Processor):
             if not allowed_nlp_classes:
                 intent = self.intent_classifier.predict(top_query)
             else:
-                if not bypass_nlp:
-                    sorted_intents = self.intent_classifier.predict_proba(top_query)
-                    intent = None
+                allowed_intents = self.intents if bypass_nlp else \
+                    [res[0] for res in self.intent_classifier.predict_proba(top_query)]
+                intent = None
 
-                    for ordered_intent, _ in sorted_intents:
-                        if ordered_intent in allowed_nlp_classes.keys():
-                            intent = ordered_intent
-                            break
+                for allowed_intent in allowed_intents:
+                    if allowed_intent in allowed_nlp_classes.keys():
+                        intent = allowed_intent
+                        break
 
-                    if not intent:
-                        raise AllowedNlpClassesKeyError(
-                            'Could not find user inputted intent in NLP hierarchy')
-                else:
-                    intent = None
-
-                    for intent_key in allowed_nlp_classes.keys():
-                        if intent_key in self.intents:
-                            intent = intent_key
-                            break
-
-                    if not intent:
-                        raise AllowedNlpClassesKeyError(
-                            'Could not find user inputted intent in NLP hierarchy')
+                if not intent:
+                    raise AllowedNlpClassesKeyError(
+                        'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
 
@@ -779,7 +772,10 @@ class IntentProcessor(Processor):
                 query = query[0]
 
         if bypass_nlp:
-            return ProcessedQuery(query, entities=[])
+            if return_processed_query is True:
+                return ProcessedQuery(query, entities=[])
+            else:
+                return []
 
         entities = self.entity_recognizer.predict(query)
         for idx, entity in enumerate(entities):
