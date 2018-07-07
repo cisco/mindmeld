@@ -112,6 +112,15 @@ def read_query_file(file_path):
 
 
 def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
+    """
+    Apply predicted annotations to a file of text queries
+
+    Args:
+        input_file (str): filename of queries to be processed
+        output_file (str or None): filename for processed queries
+        nlp (NaturalLanguageProcessor): an application's NLP with built models
+        **kwargs:
+    """
     import csv, sys
     with open(output_file, 'wb') if output_file else sys.stdout as csv_file:
         field_names = ["query"]
