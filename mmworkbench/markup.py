@@ -500,7 +500,7 @@ def _mark_up_entities(query_str, entities,
         if ann['ann_type'] == 'group':
             if not exclude_group:
                 tokens.append(GROUP_START)
-        elif not exclude_entity or not exclude_role:
+        elif not exclude_entity or (not exclude_role and ann.get('role') is not None):
             tokens.append(ENTITY_START)
         stack.append(ann)
         return ann['start']
@@ -511,14 +511,16 @@ def _mark_up_entities(query_str, entities,
         if ann['ann_type'] == 'group':
             if not exclude_group:
                 tokens.append(META_SPLIT)
-                tokens.append(ann['type'])
+                if not exclude_entity:
+                    tokens.append(ann['type'])
                 if not exclude_role and ann.get('role') is not None:
                     tokens.append(META_SPLIT)
                     tokens.append(ann['role'])
                 tokens.append(GROUP_END)
-        elif not exclude_entity or not exclude_role:
+        elif not exclude_entity or (not exclude_role and ann.get('role') is not None):
             tokens.append(META_SPLIT)
-            tokens.append(ann['type'])
+            if not exclude_entity:
+                tokens.append(ann['type'])
             if not exclude_role and ann.get('role') is not None:
                 tokens.append(META_SPLIT)
                 tokens.append(ann['role'])
@@ -547,8 +549,14 @@ def _annotations_for_entity(entity, depth=0, parent_offset=0):
     end = entity.span.end + parent_offset
     if entity.children:
         # This entity is the head of a group. Add an annotation for the group.
-        g_start = min(start, entity.children[0].span.start)
-        g_end = max(end, entity.children[-1].span.end)
+        left_descendent = entity
+        while left_descendent.children and left_descendent.children[0].span.start < left_descendent.span.start:
+            left_descendent = left_descendent.children[0]
+        g_start = left_descendent.span.start
+        right_descendent = entity
+        while right_descendent.children and right_descendent.children[-1].span.end > right_descendent.span.end:
+            right_descendent = right_descendent.children[-1]
+        g_end = right_descendent.span.end
         annotations.append({
             'ann_type': 'group',
             'type': entity.entity.type,
