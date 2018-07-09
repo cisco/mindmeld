@@ -365,13 +365,16 @@ class NaturalLanguageProcessor(Processor):
             if not allowed_nlp_classes:
                 return self.domain_classifier.predict(query)
             else:
-                sorted_domains = self.domain_classifier.predict_proba(query)
-                for ordered_domain, _ in sorted_domains:
-                    if ordered_domain in allowed_nlp_classes.keys():
-                        return ordered_domain
+                if len(allowed_nlp_classes) == 1:
+                    return list(allowed_nlp_classes.keys())[0]
+                else:
+                    sorted_domains = self.domain_classifier.predict_proba(query)
+                    for ordered_domain, _ in sorted_domains:
+                        if ordered_domain in allowed_nlp_classes.keys():
+                            return ordered_domain
 
-                raise AllowedNlpClassesKeyError(
-                    'Could not find user inputted domain in NLP hierarchy')
+                    raise AllowedNlpClassesKeyError(
+                        'Could not find user inputted domain in NLP hierarchy')
         else:
             return list(self.domains.keys())[0]
 
@@ -404,8 +407,7 @@ class NaturalLanguageProcessor(Processor):
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
-        processed_query = \
-            self.domains[domain].process_query(query, allowed_intents)
+        processed_query = self.domains[domain].process_query(query, allowed_intents)
         processed_query.domain = domain
         return processed_query
 
@@ -599,22 +601,24 @@ class DomainProcessor(Processor):
             if not allowed_nlp_classes:
                 intent = self.intent_classifier.predict(top_query)
             else:
-                sorted_intents = self.intent_classifier.predict_proba(top_query)
-                intent = None
+                if len(allowed_nlp_classes) == 1:
+                    intent = list(allowed_nlp_classes.keys())[0]
+                else:
+                    sorted_intents = self.intent_classifier.predict_proba(top_query)
+                    intent = None
 
-                for ordered_intent, _ in sorted_intents:
-                    if ordered_intent in allowed_nlp_classes.keys():
-                        intent = ordered_intent
-                        break
+                    for ordered_intent, _ in sorted_intents:
+                        if ordered_intent in allowed_nlp_classes.keys():
+                            intent = ordered_intent
+                            break
 
-                if not intent:
-                    raise AllowedNlpClassesKeyError(
-                        'Could not find user inputted intent in NLP hierarchy')
+                    if not intent:
+                        raise AllowedNlpClassesKeyError(
+                            'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
         processed_query = self.intents[intent].process_query(query)
         processed_query.intent = intent
-
         return processed_query
 
     def inspect(self, query, intent=None):
