@@ -29,7 +29,7 @@ from ._version import current as __version__
 logger = logging.getLogger(__name__)
 
 click.disable_unicode_literals_warning = True
-warnings.filterwarnings("ignore",category=DeprecationWarning)
+warnings.filterwarnings("module", category=DeprecationWarning, module="sklearn.preprocessing.label")
 
 CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
