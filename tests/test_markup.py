@@ -541,6 +541,7 @@ def test_dump_multi_nested(query_factory):
     assert markup.dump_query(processed_query, no_group=True) == markup_text
     assert markup.dump_query(processed_query, no_entity=True) == query_text
 
+
 @pytest.mark.dump
 @pytest.mark.group
 def test_dump_group(query_factory):
@@ -562,6 +563,7 @@ def test_dump_group(query_factory):
     assert markup.dump_query(processed_query, no_group=True) == entity_text
     assert markup.dump_query(processed_query, no_entity=True) == group_text
     assert markup.dump_query(processed_query, no_group=True, no_entity=True) == query_text
+
 
 @pytest.mark.dump
 @pytest.mark.group
@@ -590,7 +592,7 @@ def test_dump_group_nested(query_factory):
     entity_text = ('Order {one|quantity} {large|size} {Tesora|product} with {medium|size} '
                    '{cream|option} and {medium|size} {sugar|option}')
     group_text = ('Order [one large Tesora with [medium '
-                   'cream|option] and [medium sugar|option]|product]')
+                  'cream|option] and [medium sugar|option]|product]')
 
     assert markup.dump_query(processed_query) == markup_text
     assert markup.dump_query(processed_query, no_group=True) == entity_text

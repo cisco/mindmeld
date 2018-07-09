@@ -121,7 +121,8 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
         nlp (NaturalLanguageProcessor): an application's NLP with built models
         **kwargs:
     """
-    import csv, sys
+    import csv
+    import sys
     with open(output_file, 'wb') if output_file else sys.stdout as csv_file:
         field_names = ["query"]
         if not kwargs.get("no_domain"):
@@ -554,14 +555,14 @@ def _annotations_for_entity(entity, depth=0, parent_offset=0):
     end = entity.span.end + parent_offset
     if entity.children:
         # This entity is the head of a group. Add an annotation for the group.
-        left_descendent = entity
-        while left_descendent.children and left_descendent.children[0].span.start < left_descendent.span.start:
-            left_descendent = left_descendent.children[0]
-        g_start = left_descendent.span.start
-        right_descendent = entity
-        while right_descendent.children and right_descendent.children[-1].span.end > right_descendent.span.end:
-            right_descendent = right_descendent.children[-1]
-        g_end = right_descendent.span.end
+        leftmost = entity
+        while leftmost.children and leftmost.children[0].span.start < leftmost.span.start:
+            leftmost = leftmost.children[0]
+        g_start = leftmost.span.start
+        rightmost = entity
+        while rightmost.children and rightmost.children[-1].span.end > rightmost.span.end:
+            rightmost = rightmost.children[-1]
+        g_end = rightmost.span.end
         annotations.append({
             'ann_type': 'group',
             'type': entity.entity.type,
