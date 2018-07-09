@@ -622,7 +622,7 @@ def test_dump_group_nested_2(query_factory):
     entity_text = ('Can I get {one|sys_number|quantity} {curry sauce|option} '
                    'with my {rice ball with house salad|dish}')
     role_text = ('Can I get {one|quantity} curry sauce '
-                   'with my rice ball with house salad')
+                 'with my rice ball with house salad')
     group_text = ('Can I get [[one curry sauce|option] '
                   'with my rice ball with house salad|dish]')
 
