@@ -524,8 +524,8 @@ def _mark_up_entities(query_str, entities,
                 tokens.append(ann['type'])
                 tokens.append(GROUP_END)
         elif not exclude_entity or (not exclude_role and ann.get('role') is not None):
-            tokens.append(META_SPLIT)
             if not exclude_entity:
+                tokens.append(META_SPLIT)
                 tokens.append(ann['type'])
             if not exclude_role and ann.get('role') is not None:
                 tokens.append(META_SPLIT)

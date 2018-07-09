@@ -608,7 +608,7 @@ def test_dump_group_nested_2(query_factory):
 
     query = query_factory.create_query(query_text)
     entities = [
-        QueryEntity.from_query(query, Span(10, 12), entity_type='quantity'),
+        QueryEntity.from_query(query, Span(10, 12), entity_type='sys_number', role='quantity'),
         QueryEntity.from_query(query, Span(14, 24), entity_type='option'),
         QueryEntity.from_query(query, Span(34, 59), entity_type='dish')
     ]
@@ -617,17 +617,21 @@ def test_dump_group_nested_2(query_factory):
 
     processed_query = ProcessedQuery(query, entities=entities)
 
-    markup_text = ('Can I get [[{one|quantity} {curry sauce|option}|option] '
+    markup_text = ('Can I get [[{one|sys_number|quantity} {curry sauce|option}|option] '
                    'with my {rice ball with house salad|dish}|dish]')
-    entity_text = ('Can I get {one|quantity} {curry sauce|option} '
+    entity_text = ('Can I get {one|sys_number|quantity} {curry sauce|option} '
                    'with my {rice ball with house salad|dish}')
+    role_text = ('Can I get {one|quantity} curry sauce '
+                   'with my rice ball with house salad')
     group_text = ('Can I get [[one curry sauce|option] '
                   'with my rice ball with house salad|dish]')
 
     assert markup.dump_query(processed_query) == markup_text
     assert markup.dump_query(processed_query, no_group=True) == entity_text
-    assert markup.dump_query(processed_query, no_entity=True) == group_text
-    assert markup.dump_query(processed_query, no_group=True, no_entity=True) == query_text
+    assert markup.dump_query(processed_query, no_group=True, no_entity=True) == role_text
+    assert markup.dump_query(processed_query, no_entity=True, no_role=True) == group_text
+    assert markup.dump_query(processed_query,
+                             no_group=True, no_entity=True, no_role=True) == query_text
 
 
 @pytest.mark.dump
