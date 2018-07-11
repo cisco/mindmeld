@@ -373,7 +373,7 @@ def app_cli(ctx):
     es_logger.setLevel(logging.ERROR)
     warnings.filterwarnings("module", category=DeprecationWarning,
                             module="sklearn.preprocessing.label")
-    
+
     if ctx.obj is None:
         ctx.obj = {}
 
