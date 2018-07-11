@@ -29,7 +29,6 @@ from ._version import current as __version__
 logger = logging.getLogger(__name__)
 
 click.disable_unicode_literals_warning = True
-warnings.filterwarnings("module", category=DeprecationWarning, module="sklearn.preprocessing.label")
 
 CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
@@ -351,6 +350,8 @@ def cli(ctx):
     urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
+    warnings.filterwarnings("module", category=DeprecationWarning,
+                            module="sklearn.preprocessing.label")
 
     if ctx.obj is None:
         ctx.obj = {}
@@ -370,7 +371,9 @@ def app_cli(ctx):
     urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
-
+    warnings.filterwarnings("module", category=DeprecationWarning,
+                            module="sklearn.preprocessing.label")
+    
     if ctx.obj is None:
         ctx.obj = {}
 
