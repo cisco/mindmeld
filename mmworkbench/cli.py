@@ -12,11 +12,13 @@ import shutil
 import subprocess
 import sys
 import time
+import warnings
 
 import click
 import click_log
 
 from . import path
+from . import markup
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
@@ -167,6 +169,43 @@ def evaluate(ctx, verbose):
         ctx.exit(1)
 
 
+@_app_cli.command('predict', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+@click.option('-o', '--output', required=False,
+              help='Send output to file rather than standard out')
+@click.option('-D', '--no_domain', is_flag=True,
+              help='Suppress predicted domain column')
+@click.option('-I', '--no_intent', is_flag=True,
+              help='Suppress predicted intent column')
+@click.option('-E', '--no_entity', is_flag=True,
+              help='Suppress predicted entity annotations')
+@click.option('-R', '--no_role', is_flag=True,
+              help='Suppress predicted role annotations')
+@click.option('-G', '--no_group', is_flag=True,
+              help='Suppress predicted group annotations')
+@click.argument('input', required=True)
+def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_group):
+    """Runs predictions on a given query file"""
+    app = ctx.obj.get('app')
+    if app is None:
+        raise ValueError("No app was given. Run 'python app.py predict' from your app folder.")
+
+    ctx.invoke(num_parser, start=True)
+
+    app.lazy_init()
+    nlp = app.app_manager.nlp
+    try:
+        nlp.load()
+    except WorkbenchError:
+        logger.error("You must build the app before running predict. "
+                     "Try 'python app.py build'.")
+        ctx.exit(1)
+
+    markup.bootstrap_query_file(input, output, nlp,
+                                no_domain=no_domain, no_intent=no_intent,
+                                no_entity=no_entity, no_role=no_role, no_group=no_group)
+
+
 @_app_cli.command('clean', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def clean(ctx):
@@ -311,6 +350,8 @@ def cli(ctx):
     urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
+    warnings.filterwarnings("module", category=DeprecationWarning,
+                            module="sklearn.preprocessing.label")
 
     if ctx.obj is None:
         ctx.obj = {}
@@ -330,6 +371,8 @@ def app_cli(ctx):
     urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
+    warnings.filterwarnings("module", category=DeprecationWarning,
+                            module="sklearn.preprocessing.label")
 
     if ctx.obj is None:
         ctx.obj = {}

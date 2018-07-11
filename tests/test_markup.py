@@ -466,6 +466,7 @@ def test_dump_entity(query_factory):
 
     markup_text = 'When does the {Elm Street|store_name} store close?'
     assert markup.dump_query(processed_query) == markup_text
+    assert markup.dump_query(processed_query, no_entity=True) == query_text
 
 
 @pytest.mark.dump
@@ -481,7 +482,10 @@ def test_dump_role(query_factory):
 
     markup_text = ('What stores are open between {3|sys_time|open_hours} and '
                    '{5|sys_time|close_hours}')
+    entity_text = 'What stores are open between {3|sys_time} and {5|sys_time}'
     assert markup.dump_query(processed_query) == markup_text
+    assert markup.dump_query(processed_query, no_role=True) == entity_text
+    assert markup.dump_query(processed_query, no_role=True, no_entity=True) == query_text
 
 
 @pytest.mark.dump
@@ -495,6 +499,7 @@ def test_dump_entities(query_factory):
 
     markup_text = 'When does the {Elm Street|store_name} store close on {Monday|sys_time}?'
     assert markup.dump_query(processed_query) == markup_text
+    assert markup.dump_query(processed_query, no_entity=True) == query_text
 
 
 @pytest.mark.dump
@@ -511,6 +516,8 @@ def test_dump_nested(query_factory):
 
     markup_text = 'show me houses under {{600,000|sys_number} dollars|price}'
     assert markup.dump_query(processed_query) == markup_text
+    assert markup.dump_query(processed_query, no_group=True) == markup_text
+    assert markup.dump_query(processed_query, no_entity=True) == query_text
 
 
 @pytest.mark.dump
@@ -531,6 +538,8 @@ def test_dump_multi_nested(query_factory):
                    '{1,000,000|sys_number} dollars|price}')
 
     assert markup.dump_query(processed_query) == markup_text
+    assert markup.dump_query(processed_query, no_group=True) == markup_text
+    assert markup.dump_query(processed_query, no_entity=True) == query_text
 
 
 @pytest.mark.dump
@@ -547,8 +556,13 @@ def test_dump_group(query_factory):
 
     processed_query = ProcessedQuery(query, entities=[size, product, option])
     markup_text = "a [{large|size} {latte|product} with {nonfat milk|option}|product] please"
+    entity_text = "a {large|size} {latte|product} with {nonfat milk|option} please"
+    group_text = "a [large latte with nonfat milk|product] please"
 
     assert markup.dump_query(processed_query) == markup_text
+    assert markup.dump_query(processed_query, no_group=True) == entity_text
+    assert markup.dump_query(processed_query, no_entity=True) == group_text
+    assert markup.dump_query(processed_query, no_group=True, no_entity=True) == query_text
 
 
 @pytest.mark.dump
@@ -575,8 +589,49 @@ def test_dump_group_nested(query_factory):
 
     markup_text = ('Order [{one|quantity} {large|size} {Tesora|product} with [{medium|size} '
                    '{cream|option}|option] and [{medium|size} {sugar|option}|option]|product]')
+    entity_text = ('Order {one|quantity} {large|size} {Tesora|product} with {medium|size} '
+                   '{cream|option} and {medium|size} {sugar|option}')
+    group_text = ('Order [one large Tesora with [medium '
+                  'cream|option] and [medium sugar|option]|product]')
 
     assert markup.dump_query(processed_query) == markup_text
+    assert markup.dump_query(processed_query, no_group=True) == entity_text
+    assert markup.dump_query(processed_query, no_entity=True) == group_text
+    assert markup.dump_query(processed_query, no_group=True, no_entity=True) == query_text
+
+
+@pytest.mark.dump
+@pytest.mark.group
+def test_dump_group_nested_2(query_factory):
+    """Tests dumping a query with nested entity groups"""
+    query_text = 'Can I get one curry sauce with my rice ball with house salad'
+
+    query = query_factory.create_query(query_text)
+    entities = [
+        QueryEntity.from_query(query, Span(10, 12), entity_type='sys_number', role='quantity'),
+        QueryEntity.from_query(query, Span(14, 24), entity_type='option'),
+        QueryEntity.from_query(query, Span(34, 59), entity_type='dish')
+    ]
+    entities[1] = entities[1].with_children((entities[0],))
+    entities[2] = entities[2].with_children((entities[1],))
+
+    processed_query = ProcessedQuery(query, entities=entities)
+
+    markup_text = ('Can I get [[{one|sys_number|quantity} {curry sauce|option}|option] '
+                   'with my {rice ball with house salad|dish}|dish]')
+    entity_text = ('Can I get {one|sys_number|quantity} {curry sauce|option} '
+                   'with my {rice ball with house salad|dish}')
+    role_text = ('Can I get {one|quantity} curry sauce '
+                 'with my rice ball with house salad')
+    group_text = ('Can I get [[one curry sauce|option] '
+                  'with my rice ball with house salad|dish]')
+
+    assert markup.dump_query(processed_query) == markup_text
+    assert markup.dump_query(processed_query, no_group=True) == entity_text
+    assert markup.dump_query(processed_query, no_group=True, no_entity=True) == role_text
+    assert markup.dump_query(processed_query, no_entity=True, no_role=True) == group_text
+    assert markup.dump_query(processed_query,
+                             no_group=True, no_entity=True, no_role=True) == query_text
 
 
 @pytest.mark.dump
@@ -616,6 +671,21 @@ def test_load_dump_groups(query_factory):
     text = ('Order [{one|quantity} {large|size} {Tesora|product} with '
             '[{medium|size} {cream|option}|option]|product] from '
             '[{Philz|store} in {Downtown Sunnyvale|location}|store]')
+
+    processed_query = markup.load_query(text, query_factory)
+
+    markup_text = markup.dump_query(processed_query)
+
+    assert text == markup_text
+
+
+@pytest.mark.load
+@pytest.mark.dump
+@pytest.mark.group
+def test_load_dump_groups_roles(query_factory):
+    """Tests that load_query and dump_query are reversible"""
+    text = ('Order [{one|sys_number|quantity} {large|size} {Tesora|product|dish} with '
+            '[{medium|size} {cream|option|addin}|option]|product]')
 
     processed_query = markup.load_query(text, query_factory)
 
