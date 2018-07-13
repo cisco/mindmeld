@@ -37,21 +37,21 @@ def extract_in_gaz_span_features():
             for i in range(start, end):
 
                 # Generic non-positional features
-                feat_prefix = 'in-gaz|type:{}'.format(entity_type)
+                feat_prefix = 'in_gaz|type:{}'.format(entity_type)
 
                 # Basic existence features
                 feat_seq[i][feat_prefix] = 1
                 # Features for ngram before the span
-                feat_name = feat_prefix + '|ngram-before|length:{}'.format(1)
+                feat_name = feat_prefix + '|ngram_before|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, start - 1, 1)
                 # Features for ngram after the span
-                feat_name = feat_prefix + '|ngram-after|length:{}'.format(1)
+                feat_name = feat_prefix + '|ngram_after|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, end, 1)
                 # Features for ngram at start of span
-                feat_name = feat_prefix + '|ngram-first|length:{}'.format(1)
+                feat_name = feat_prefix + '|ngram_first|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, start, 1)
                 # Features for ngram at end of span
-                feat_name = feat_prefix + '|ngram-last|length:{}'.format(1)
+                feat_name = feat_prefix + '|ngram_last|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, end - 1, 1)
 
                 # Popularity features
@@ -59,9 +59,9 @@ def extract_in_gaz_span_features():
                 feat_seq[i][feat_name] = pop
 
                 # Character length features
-                feat_name = feat_prefix + '|log-char-len'
+                feat_name = feat_prefix + '|log_char_len'
                 feat_seq[i][feat_name] = math.log(len(entity))
-                feat_name = feat_prefix + '|pct-char-len'
+                feat_name = feat_prefix + '|pct_char_len'
                 feat_seq[i][feat_name] = float(len(entity)) / float(len(' '.join(tokens)))
 
                 # entity PMI and conditional prob
@@ -81,30 +81,30 @@ def extract_in_gaz_span_features():
                 else:
                     pos_attr = 'cont'
 
-                feat_prefix = 'in-gaz|type:{}|pos:{}'.format(entity_type, pos_attr)
+                feat_prefix = 'in_gaz|type:{}|segment:{}'.format(entity_type, pos_attr)
 
                 # Basic existence features
                 feat_seq[i][feat_prefix] = 1
                 # Features for ngram before the span
-                feat_name = feat_prefix + '|ngram-before|length:{}'.format(1)
+                feat_name = feat_prefix + '|ngram_before|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, start - 1, 1)
                 # Features for ngram after the span
-                feat_name = feat_prefix + '|ngram-after|length:{}'.format(1)
+                feat_name = feat_prefix + '|ngram_after|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, end, 1)
                 # Features for ngram at start of span
-                feat_name = feat_prefix + '|ngram-first|length:{}'.format(1)
+                feat_name = feat_prefix + '|ngram_first|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, start, 1)
                 # Features for ngram at end of span
-                feat_name = feat_prefix + '|ngram-last|length:{}'.format(1)
+                feat_name = feat_prefix + '|ngram_last|length:{}'.format(1)
                 feat_seq[i][feat_name] = get_ngram(tokens, end - 1, 1)
 
                 # Popularity features
                 feat_name = feat_prefix + '|pop'
                 feat_seq[i][feat_name] = pop
                 # Character length features
-                feat_name = feat_prefix + '|log-char-len'
+                feat_name = feat_prefix + '|log_char_len'
                 feat_seq[i][feat_name] = math.log(len(entity))
-                feat_name = feat_prefix + '|pct-char-len'
+                feat_name = feat_prefix + '|pct_char_len'
                 feat_seq[i][feat_name] = (old_div(float(len(entity)),
                                                   len(' '.join(tokens))))
 
@@ -117,12 +117,12 @@ def extract_in_gaz_span_features():
 
             # End of span feature
             if end < len(tokens):
-                feat_prefix = 'in-gaz|prev|type:{}'.format(entity_type)
+                feat_prefix = 'in-gaz|type:{}|signal_entity_end'.format(entity_type)
                 feat_name = feat_prefix
                 feat_seq[end][feat_name] = 1
-                feat_name = feat_prefix + '|log-char-len'
+                feat_name = feat_prefix + '|log_char_len'
                 feat_seq[end][feat_name] = math.log(len(entity))
-                feat_name = feat_prefix + '|pct-char-len'
+                feat_name = feat_prefix + '|pct_char_len'
                 feat_seq[end][feat_name] = old_div(float(len(entity)), len(' '.join(tokens)))
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[end][feat_name] = p_total + p_joint - p_entity_type - p_entity
@@ -138,7 +138,7 @@ def extract_in_gaz_span_features():
             feat_seq = [{} for _ in query.normalized_tokens]
             for i in range(start, end):
                 feat_prefix = (
-                    'in-gaz|conflict|exact|type1:{}|type2:{}'
+                    'in-gaz|conflict:exact|type1:{}|type2:{}'
                     .format(ent_type_1, ent_type_2))
 
                 p_ent_type_1 = math.log(gazes[ent_type_1]['total_entities'] + 1)
@@ -151,11 +151,11 @@ def extract_in_gaz_span_features():
 
                 # Generic non-positional features
                 feat_seq[i][feat_prefix] = 1
-                feat_name = feat_prefix + '|diff-pop'
+                feat_name = feat_prefix + '|diff_pop'
                 feat_seq[i][feat_name] = pop_1 - pop_2
-                feat_name = feat_prefix + '|diff-pmi'
+                feat_name = feat_prefix + '|diff_pmi'
                 feat_seq[i][feat_name] = p_ent_type_2 - p_ent_type_1 - p_joint_2 + p_joint_1
-                feat_name = feat_prefix + '|diff-p_fe'
+                feat_name = feat_prefix + '|diff_p_fe'
                 feat_seq[i][feat_name] = p_joint_1 - p_joint_2
 
             return feat_seq
@@ -272,14 +272,14 @@ def extract_in_gaz_ngram_features():
             feat_seq = [{} for _ in tokens]
 
             for i in range(len(feat_seq)):
-                feat_prefix = 'in-gaz-ngram|type:{}'.format(entity_type)
-                feat_name = feat_prefix + '|idf-0'
+                feat_prefix = 'in_gaz|type:{}|ngram'.format(entity_type)
+                feat_name = feat_prefix + '|length:{}|pos:{}|idf'.format(1, 0)
                 feat_seq[i][feat_name] = math.log(
                     len(gazes[entity_type]['index'][get_ngram(tokens, i, 1)]) + 1)
-                feat_name = feat_prefix + '|idf-1'
+                feat_name = feat_prefix + '|length:{}|pos:{}|idf'.format(2, -1)
                 feat_seq[i][feat_name] = math.log(
                     len(gazes[entity_type]['index'][get_ngram(tokens, i - 1, 2)]) + 1)
-                feat_name = feat_prefix + '|idf+1'
+                feat_name = feat_prefix + '|length:{}|pos:{}|idf'.format(2, 1)
                 feat_seq[i][feat_name] = math.log(
                     len(gazes[entity_type]['index'][get_ngram(tokens, i, 2)]) + 1)
 
@@ -290,43 +290,43 @@ def extract_in_gaz_ngram_features():
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i, 1)])
                                         for g in gazes.values()]) + 1)
                 p_joint = math.log(len(gazes[entity_type]['index'][get_ngram(tokens, i, 1)]) + 1)
-                feat_name = feat_prefix + '|pmi_1'
+                feat_name = feat_prefix + '|length:{}|pos:{}|pmi'.format(1, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
-                feat_name = feat_prefix + '|p_fe_1'
+                feat_name = feat_prefix + '|length:{}|pos:{}|p_fe'.format(1, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
-                feat_name = feat_prefix + '|p_ef_1'
+                feat_name = feat_prefix + '|length:{}|pos:{}|p_ef'.format(1, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i - 1, 2)])
                                         for g in gazes.values()]) + 1)
                 p_joint = math.log(len(gazes[entity_type]['index']
                                        [get_ngram(tokens, i - 1, 2)]) + 1)
-                feat_name = feat_prefix + '|pmi-2'
+                feat_name = feat_prefix + '|length:{}|pos:{}|pmi'.format(2, -1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
-                feat_name = feat_prefix + '|p_fe-2'
+                feat_name = feat_prefix + '|length:{}|pos:{}|p_fe'.format(2, -1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
-                feat_name = feat_prefix + '|p_ef-2'
+                feat_name = feat_prefix + '|length:{}|pos:{}|p_ef'.format(2, -1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i, 2)])
                                         for g in gazes.values()]) + 1)
                 p_joint = math.log(len(gazes[entity_type]['index'][get_ngram(tokens, i, 2)]) + 1)
-                feat_name = feat_prefix + '|pmi+2'
+                feat_name = feat_prefix + '|length:{}|pos:{}|pmi'.format(2, 1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
-                feat_name = feat_prefix + '|p_fe+2'
+                feat_name = feat_prefix + '|length:{}|pos:{}|p_fe'.format(2, 1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
-                feat_name = feat_prefix + '|p_ef+2'
+                feat_name = feat_prefix + '|length:{}|pos:{}|p_ef'.format(2, 1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i - 1, 3)])
                                         for g in gazes.values()]) + 1)
                 p_joint = math.log(len(gazes[entity_type]['index']
                                        [get_ngram(tokens, i - 1, 3)]) + 1)
-                feat_name = feat_prefix + '|pmi_3'
+                feat_name = feat_prefix + '|length:{}|pos:{}|pmi'.format(3, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
-                feat_name = feat_prefix + '|p_fe_3'
+                feat_name = feat_prefix + '|length:{}|pos:{}|p_fe'.format(3, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
-                feat_name = feat_prefix + '|p_ef_3'
+                feat_name = feat_prefix + '|length:{}|pos:{}|p_ef'.format(3, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
             return feat_seq
@@ -368,7 +368,7 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
                 threshold = word_thresholds[threshold_index]
                 for start in starts:
                     n_gram = get_ngram(tokens, i + int(start), int(length))
-                    feat_name = 'bag-of-words|length:{}|pos:{}'.format(
+                    feat_name = 'bag_of_words|length:{}|word_pos:{}'.format(
                         length, start)
                     if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 1) > threshold:
                         feat_seq[i][feat_name] = n_gram
@@ -434,7 +434,7 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0
                         ngrams = [OUT_OF_BOUNDS_TOKEN]
                     for j, c_gram in enumerate(ngrams):
                         if resources[CHAR_NGRAM_FREQ_RSC].get(c_gram, 1) > threshold:
-                            feat_name = 'char-ngrams|length:{}|pos:{}|sub-pos:{}'.format(
+                            feat_name = 'char_ngrams|length:{}|word_pos:{}|char_pos:{}'.format(
                                 length, start, j)
                             feat_seq[i][feat_name] = c_gram
                 threshold_index += 1
@@ -461,10 +461,10 @@ def extract_sys_candidate_features(start_positions=(0,)):
             for i in entity.token_span:
                 for j in start_positions:
                     if 0 < i - j < len(feat_seq):
-                        feat_name = 'sys-candidate|type:{}:{}|pos:{}'.format(
+                        feat_name = 'sys_candidate|type:{}|granularity:{}|pos:{}'.format(
                             entity.entity.type, entity.entity.value.get('grain'), j)
                         feat_seq[i - j][feat_name] = 1
-                        feat_name = 'sys-candidate|type:{}:{}|pos:{}|log-len'.format(
+                        feat_name = 'sys_candidate|type:{}|granularity:{}|pos:{}|log_len'.format(
                             entity.entity.type, entity.entity.value.get('grain'), j)
                         feat_seq[i - j][feat_name] = math.log(len(entity.normalized_text))
         return feat_seq
@@ -509,7 +509,9 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,)):
                 for token in query_text[i:i + length]:
                     char_ngram.append(token)
                 if resources[CHAR_NGRAM_FREQ_RSC].get(''.join(char_ngram), 1) > threshold:
-                    ngram_counter.update(['char_ngram:' + '|'.join(char_ngram)])
+                    ngram_counter.update([
+                        'char_ngram|length:{}|ngram:{}'.format(len(char_ngram), ' '.join(char_ngram)
+                                                               )])
         return ngram_counter
 
     return _extractor
@@ -544,9 +546,11 @@ def extract_ngrams(lengths=(1,), thresholds=(0,)):
                     ngram.append(tok)
                 freq = resources[WORD_NGRAM_FREQ_RSC].get(' '.join(ngram), 1)
                 if freq > threshold:
-                    ngram_counter.update(['ngram:' + '|'.join(ngram)])
+                    ngram_counter.update(['bag_of_words|length:{}|ngram:'.format(
+                        len(ngram), ' '.join(ngram))])
                 else:
-                    ngram_counter.update(['ngram: OOV'])
+                    ngram_counter.update(['bag_of_words|length:{}|ngram:'.format(
+                        len(ngram), 'OOV')])
         return ngram_counter
 
     return _extractor
@@ -576,8 +580,10 @@ def extract_edge_ngrams(lengths=(1,)):
                 right_tokens = [mask_numerics(tok) for tok in tokens[-length:]]
                 right_tokens = [tok if resources[WORD_FREQ_RSC].get(tok, 0) > 1 else 'OOV'
                                 for tok in right_tokens]
-                feats.update({'left-edge|{}:{}'.format(length, '|'.join(left_tokens)): 1})
-                feats.update({'right-edge|{}:{}'.format(length, '|'.join(right_tokens)): 1})
+                feats.update({'bag_of_words|edge:left|length:{}|ngram:{}'.format(
+                    length, ' '.join(left_tokens)): 1})
+                feats.update({'bag_of_words|edge:right|length:{}|ngram:{}'.format(
+                    length, '|'.join(right_tokens)): 1})
 
         return feats
 
@@ -607,15 +613,15 @@ def extract_freq(bins=5):
             tok = mask_numerics(tok)
             freq = freq_dict.get(tok, 0)
             if freq < 2:
-                freq_features['freq|U'] += 1
+                freq_features['in_vocab:OOV'] += 1
             else:
                 # Bin the frequency with break points at
                 # half max, a quarter max, an eighth max, etc.
                 freq_bin = int(math.log(max_freq, 2) - math.log(freq, 2))
                 if freq_bin < bins:
-                    freq_features['freq|{}'.format(freq_bin)] += 1
+                    freq_features['in_vocab:IV|freq_bin:{}'.format(freq_bin)] += 1
                 else:
-                    freq_features['freq|{}'.format(freq_bin)] += 1
+                    freq_features['in_vocab:IV|freq_bin:{}'.format(bins)] += 1
 
         q_len = float(len(tokens))
         for k in freq_features:
@@ -649,8 +655,9 @@ def extract_gaz_freq():
                 freq = len(gaz['index'].get(tok, []))
                 if freq > 0:
                     freq_bin = int(old_div(math.log(freq, 2), 2))
-                    freq_features['{}|freq|{}'.format(gaz_name, freq_bin)] += 1
-                    freq_features['{}&{}|freq|{}'.format(query_freq, gaz_name, freq_bin)] += 1
+                    freq_features['in_gaz|type:{}|gaz_freq_bin:{}'.format(gaz_name, freq_bin)] += 1
+                    freq_features['in_vocab:{}|in_gaz|type:{}|gaz_freq_bin:{}'.format(
+                        query_freq, gaz_name, freq_bin)] += 1
 
         q_len = float(len(tokens))
         for k in freq_features:
@@ -679,10 +686,10 @@ def extract_in_gaz_feature(scaling=1):
                     popularity = gaz['pop_dict'].get(ngram, 0.0)
                     ratio = (old_div(len(ngram), float(len(norm_text)))) * scaling
                     ratio_pop = ratio * popularity
-                    in_gaz_features[gaz_name + '_ratio_pop'] += ratio_pop
-                    in_gaz_features[gaz_name + '_ratio'] += ratio
-                    in_gaz_features[gaz_name + '_pop'] += popularity
-                    in_gaz_features[gaz_name + '_exists'] = 1
+                    in_gaz_features['in_gaz|type:{}|ratio_pop'.format(gaz_name)] += ratio_pop
+                    in_gaz_features['in_gaz|type:{}|ratio'.format(gaz_name)] += ratio
+                    in_gaz_features['in_gaz|type:{}|pop'.format(gaz_name)] += popularity
+                    in_gaz_features['in_gaz|type:{}'.format(gaz_name)] = 1
 
         return in_gaz_features
 
@@ -722,10 +729,11 @@ def extract_query_string(scaling=1000):
     """
 
     def _extractor(query, resources):
+        print("new version")
         query_key = '<{}>'.format(query.normalized_text)
         if query_key not in resources[QUERY_FREQ_RSC]:
             query_key = '<OOV>'
-        return {'exact={}'.format(query_key): scaling}
+        return {'exact|query:{}'.format(query_key): scaling}
 
     return _extractor
 
