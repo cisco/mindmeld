@@ -66,7 +66,6 @@ class ResourceLoader(object):
         #   }
         # }
         self.file_to_query_info = {}
-        self.nlp_component_to_file = {}
         self.query_tree = {}
 
         self._hasher = Hasher()
@@ -265,11 +264,10 @@ class ResourceLoader(object):
         query_tree = {}
         loaded_key = 'loaded_raw' if raw else 'loaded'
         file_iter = self._traverse_labeled_queries_files(domain, intent, label_set)
-
         for a_domain, an_intent, filename in file_iter:
             file_info = self.file_to_query_info[filename]
-
-            if force_reload or (not file_info[loaded_key] or file_info[loaded_key] < file_info['modified']):
+            if force_reload or (
+                    not file_info[loaded_key] or file_info[loaded_key] < file_info['modified']):
                 # file is out of date, load it
                 self.load_query_file(a_domain, an_intent, filename, raw=raw)
 
@@ -295,7 +293,6 @@ class ResourceLoader(object):
                                         file_pattern=DEFAULT_TRAIN_SET_REGEX):
         provided_intent = intent
         self._update_query_file_dates()
-
         domains = [domain] if domain else self.query_tree.keys()
 
         for a_domain in sorted(domains):
@@ -331,8 +328,7 @@ class ResourceLoader(object):
             file_data['raw_queries'] = queries
             file_data['loaded_raw'] = time.time()
         else:
-            queries = markup.load_query_file(file_path,
-                                             self.query_factory, domain, intent,
+            queries = markup.load_query_file(file_path, self.query_factory, domain, intent,
                                              is_gold=True)
             try:
                 self._check_query_entities(queries)
@@ -384,8 +380,8 @@ class ResourceLoader(object):
                 continue
 
             # file existed before and now -> update
-            self.file_to_query_info[filename]['modified'] = new_query_files[filename]['modified']
-
+            self.file_to_query_info[filename]['modified'] = \
+                new_query_files[filename]['modified']
 
     def _build_word_freq_dict(self, **kwargs):
         """Compiles unigram frequency dictionary of normalized query tokens
