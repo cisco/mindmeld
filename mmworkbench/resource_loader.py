@@ -65,7 +65,9 @@ class ResourceLoader(object):
         #     }
         #   }
         # }
-        self.labeled_query_files = {}
+        self.file_to_query_info = {}
+        self.nlp_component_to_file = {}
+        self.query_tree = {}
 
         self._hasher = Hasher()
 
@@ -263,9 +265,11 @@ class ResourceLoader(object):
         query_tree = {}
         loaded_key = 'loaded_raw' if raw else 'loaded'
         file_iter = self._traverse_labeled_queries_files(domain, intent, label_set)
+
         for a_domain, an_intent, filename in file_iter:
-            file = self.labeled_query_files[a_domain][an_intent][filename]
-            if force_reload or (not file[loaded_key] or file[loaded_key] < file['modified']):
+            file_info = self.file_to_query_info[filename]
+
+            if force_reload or (not file_info[loaded_key] or file_info[loaded_key] < file_info['modified']):
                 # file is out of date, load it
                 self.load_query_file(a_domain, an_intent, filename, raw=raw)
 
@@ -275,7 +279,7 @@ class ResourceLoader(object):
             if an_intent not in query_tree[a_domain]:
                 query_tree[a_domain][an_intent] = []
             queries = query_tree[a_domain][an_intent]
-            queries.extend(file['raw_queries' if raw else 'queries'])
+            queries.extend(file_info['raw_queries' if raw else 'queries'])
 
         return query_tree
 
@@ -290,34 +294,35 @@ class ResourceLoader(object):
     def _traverse_labeled_queries_files(self, domain=None, intent=None,
                                         file_pattern=DEFAULT_TRAIN_SET_REGEX):
         provided_intent = intent
-        self._update_query_file_dates(file_pattern)
-        domains = [domain] if domain else self.labeled_query_files.keys()
+        self._update_query_file_dates()
+
+        domains = [domain] if domain else self.query_tree.keys()
 
         for a_domain in sorted(domains):
             if provided_intent:
                 intents = [provided_intent]
             else:
-                intents = self.labeled_query_files[a_domain].keys()
+                intents = self.query_tree[a_domain].keys()
             for an_intent in sorted(intents):
-                files = self.labeled_query_files[a_domain][an_intent].keys()
+                files = self.query_tree[a_domain][an_intent].keys()
                 # filter to files which belong to the label set
-                filtered_files = [x for x in files if re.match(file_pattern, x)]
-                for filename in sorted(filtered_files):
-                    yield a_domain, an_intent, filename
+                for file in files:
+                    if re.match(file_pattern, os.path.basename(file)):
+                        yield a_domain, an_intent, file
 
-    def load_query_file(self, domain, intent, filename, raw=False):
+    def load_query_file(self, domain, intent, file_path, raw=False):
         """Loads the queries from the specified file
 
         Args:
             domain (str): The domain of the query file
             intent (str): The intent of the query file
-            filename (str): The name of the query file
+            file_path (str): The name of the query file
 
         """
         logger.info("Loading %squeries from file %s/%s/%s", "raw " if raw else "", domain,
-                    intent, filename)
-        file_path = path.get_labeled_query_file_path(self.app_path, domain, intent, filename)
-        file_data = self.labeled_query_files[domain][intent][filename]
+                    intent, file_path)
+
+        file_data = self.file_to_query_info[file_path]
         if raw:
             # Only load
             queries = []
@@ -326,7 +331,8 @@ class ResourceLoader(object):
             file_data['raw_queries'] = queries
             file_data['loaded_raw'] = time.time()
         else:
-            queries = markup.load_query_file(file_path, self.query_factory, domain, intent,
+            queries = markup.load_query_file(file_path,
+                                             self.query_factory, domain, intent,
                                              is_gold=True)
             try:
                 self._check_query_entities(queries)
@@ -344,72 +350,42 @@ class ResourceLoader(object):
                     msg = 'Unknown entity {!r} found in query {!r}'
                     raise WorkbenchError(msg.format(entity.entity.type, query.query.text))
 
-    def _update_query_file_dates(self, file_pattern):
-        query_tree = path.get_labeled_query_tree(self.app_path, [file_pattern])
+    def _update_query_file_dates(self):
+        self.query_tree = path.get_labeled_query_tree(self.app_path)
 
         # Get current query table
         # We can just use this if it this is the first check
-        new_app_table = {}
-        for domain in query_tree.keys():
-            new_app_table[domain] = {}
-            for intent in query_tree[domain].keys():
-                new_app_table[domain][intent] = {}
-
-                for file, modified in query_tree[domain][intent].items():
-                    new_app_table[domain][intent][file] = {
-                        'modified': modified,
+        new_query_files = {}
+        for domain in self.query_tree:
+            for intent in self.query_tree[domain]:
+                for filename in self.query_tree[domain][intent]:
+                    # filename needs to be full path
+                    new_query_files[filename] = {
+                        'modified': self.query_tree[domain][intent][filename],
                         'loaded': None,
                         'loaded_raw': None
                     }
 
-        all_domains = set(new_app_table.keys())
-        all_domains.update(self.labeled_query_files.keys())
-        for domain in all_domains:
+        all_filenames = set(new_query_files.keys())
+        all_filenames.update(self.file_to_query_info.keys())
+        for filename in all_filenames:
             try:
-                new_domain_table = new_app_table[domain]
+                new_file_info = new_query_files[filename]
             except KeyError:
-                # an old domain that was removed
-                del self.labeled_query_files[domain]
+                # an old file that was removed
+                del self.file_to_query_info[filename]
                 continue
 
             try:
-                domain_table = self.labeled_query_files[domain]
+                self.file_to_query_info[filename]
             except KeyError:
-                # a new domain
-                self.labeled_query_files[domain] = new_domain_table
+                # a new file
+                self.file_to_query_info[filename] = new_file_info
                 continue
 
-            # domain existed before and now, resolve differences
-            all_intents = set(new_domain_table.keys())
-            all_intents.update(domain_table.keys())
-            for intent in all_intents:
-                try:
-                    new_intent_table = new_domain_table[intent]
-                except KeyError:
-                    # an old intent that was removed
-                    del domain_table[intent]
-                    continue
+            # file existed before and now -> update
+            self.file_to_query_info[filename]['modified'] = new_query_files[filename]['modified']
 
-                try:
-                    intent_table = domain_table[intent]
-                except KeyError:
-                    # a new intent
-                    domain_table[intent] = new_intent_table
-                    continue
-
-                # intent existed before and noew, resolve differences
-                all_files = set(new_intent_table.keys())
-                all_files.update(intent_table.keys())
-                for file in all_files:
-                    if file not in new_intent_table:
-                        # an old file that was removed
-                        del intent_table[file]
-                        continue
-
-                    if file not in intent_table:
-                        intent_table[file] = new_intent_table[file]
-                    else:
-                        intent_table[file]['modified'] = new_intent_table[file]['modified']
 
     def _build_word_freq_dict(self, **kwargs):
         """Compiles unigram frequency dictionary of normalized query tokens
