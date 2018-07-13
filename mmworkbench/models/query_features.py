@@ -729,7 +729,6 @@ def extract_query_string(scaling=1000):
     """
 
     def _extractor(query, resources):
-        print("new version")
         query_key = '<{}>'.format(query.normalized_text)
         if query_key not in resources[QUERY_FREQ_RSC]:
             query_key = '<OOV>'

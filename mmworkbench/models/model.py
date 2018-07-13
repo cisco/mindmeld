@@ -18,6 +18,7 @@ from .helpers import (get_feature_extractor, get_label_encoder, register_label, 
                       entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
+from .._version import _get_wb_version
 logger = logging.getLogger(__name__)
 
 # model scoring type
@@ -665,6 +666,7 @@ class Model(object):
     """
     def __init__(self, config):
         self.config = config
+        self.mmworkbench_version = _get_wb_version()
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
         self._resources = {}
