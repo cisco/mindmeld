@@ -546,10 +546,10 @@ def extract_ngrams(lengths=(1,), thresholds=(0,)):
                     ngram.append(tok)
                 freq = resources[WORD_NGRAM_FREQ_RSC].get(' '.join(ngram), 1)
                 if freq > threshold:
-                    ngram_counter.update(['bag_of_words|length:{}|ngram:'.format(
+                    ngram_counter.update(['bag_of_words|length:{}|ngram:{}'.format(
                         len(ngram), ' '.join(ngram))])
                 else:
-                    ngram_counter.update(['bag_of_words|length:{}|ngram:'.format(
+                    ngram_counter.update(['bag_of_words|length:{}|ngram:{}'.format(
                         len(ngram), 'OOV')])
         return ngram_counter
 
