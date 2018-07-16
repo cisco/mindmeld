@@ -290,7 +290,8 @@ class ResourceLoader(object):
     def _traverse_labeled_queries_files(self, domain=None, intent=None,
                                         file_pattern=DEFAULT_TRAIN_SET_REGEX):
         provided_intent = intent
-        query_tree = self._update_query_file_dates()
+        query_tree = path.get_labeled_query_tree(self.app_path)
+        self._update_query_file_dates(query_tree)
         domains = [domain] if domain else query_tree.keys()
 
         for a_domain in sorted(domains):
@@ -344,10 +345,7 @@ class ResourceLoader(object):
                     msg = 'Unknown entity {!r} found in query {!r}'
                     raise WorkbenchError(msg.format(entity.entity.type, query.query.text))
 
-    def _update_query_file_dates(self):
-        query_tree = path.get_labeled_query_tree(self.app_path)
-
-        # Get current query table
+    def _update_query_file_dates(self, query_tree):
         # We can just use this if it this is the first check
         new_query_files = {}
         for domain in query_tree:
@@ -379,8 +377,6 @@ class ResourceLoader(object):
 
             # file existed before and now -> update
             old_file_info['modified'] = new_file_info['modified']
-
-        return query_tree
 
     def _build_word_freq_dict(self, **kwargs):
         """Compiles unigram frequency dictionary of normalized query tokens
