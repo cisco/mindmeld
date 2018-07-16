@@ -42,7 +42,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions):
 
         for length, starts in ngram_lengths_to_start_positions.items():
             for start in starts:
-                feat_name = 'bag_of_words|before_token|length:{}|pos:{}'.format(length, start)
+                feat_name = 'bag_of_words|ngram_before|length:{}|pos:{}'.format(length, start)
                 features[feat_name] = get_ngram(tokens, current_entity_token_start + start, length)
 
         return features
@@ -68,7 +68,7 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions):
 
         for length, starts in ngram_lengths_to_start_positions.items():
             for start in starts:
-                feat_name = 'bag_of_words|after_token|length:{}|pos:{}'.format(length, start)
+                feat_name = 'bag_of_words|ngram_after|length:{}|pos:{}'.format(length, start)
                 features[feat_name] = get_ngram(tokens, current_entity_token_end + start, length)
 
         return features

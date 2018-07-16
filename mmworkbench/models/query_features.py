@@ -67,9 +67,9 @@ def extract_in_gaz_span_features():
                 # entity PMI and conditional prob
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_entity
-                feat_name = feat_prefix + '|p_fe'
+                feat_name = feat_prefix + '|class_prob'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity
-                feat_name = feat_prefix + '|p_ef'
+                feat_name = feat_prefix + '|output_prob'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 # Positional features
@@ -110,9 +110,9 @@ def extract_in_gaz_span_features():
 
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_entity
-                feat_name = feat_prefix + '|p_fe'
+                feat_name = feat_prefix + '|class_prob'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity
-                feat_name = feat_prefix + '|p_ef'
+                feat_name = feat_prefix + '|output_prob'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
             # End of span feature
@@ -126,11 +126,11 @@ def extract_in_gaz_span_features():
                 feat_seq[end][feat_name] = old_div(float(len(entity)), len(' '.join(tokens)))
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[end][feat_name] = p_total + p_joint - p_entity_type - p_entity
-                feat_name = feat_prefix + '|p_fe'
+                feat_name = feat_prefix + '|class_prob'
                 feat_seq[end][feat_name] = p_total + p_joint - p_entity
-                feat_name = feat_prefix + '|p_ef'
+                feat_name = feat_prefix + '|output_prob'
                 feat_seq[end][feat_name] = p_total + p_joint - p_entity_type
-
+            print(feat_seq)
             return feat_seq
 
         def get_exact_span_conflict_features(query, gazes, start, end, ent_type_1, ent_type_2,
@@ -155,7 +155,7 @@ def extract_in_gaz_span_features():
                 feat_seq[i][feat_name] = pop_1 - pop_2
                 feat_name = feat_prefix + '|diff_pmi'
                 feat_seq[i][feat_name] = p_ent_type_2 - p_ent_type_1 - p_joint_2 + p_joint_1
-                feat_name = feat_prefix + '|diff_p_fe'
+                feat_name = feat_prefix + '|diff_class_prob'
                 feat_seq[i][feat_name] = p_joint_1 - p_joint_2
 
             return feat_seq
@@ -292,9 +292,9 @@ def extract_in_gaz_ngram_features():
                 p_joint = math.log(len(gazes[entity_type]['index'][get_ngram(tokens, i, 1)]) + 1)
                 feat_name = feat_prefix + '|length:{}|pos:{}|pmi'.format(1, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
-                feat_name = feat_prefix + '|length:{}|pos:{}|p_fe'.format(1, 0)
+                feat_name = feat_prefix + '|length:{}|pos:{}|class_prob'.format(1, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
-                feat_name = feat_prefix + '|length:{}|pos:{}|p_ef'.format(1, 0)
+                feat_name = feat_prefix + '|length:{}|pos:{}|output_prob'.format(1, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i - 1, 2)])
@@ -303,9 +303,9 @@ def extract_in_gaz_ngram_features():
                                        [get_ngram(tokens, i - 1, 2)]) + 1)
                 feat_name = feat_prefix + '|length:{}|pos:{}|pmi'.format(2, -1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
-                feat_name = feat_prefix + '|length:{}|pos:{}|p_fe'.format(2, -1)
+                feat_name = feat_prefix + '|length:{}|pos:{}|class_prob'.format(2, -1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
-                feat_name = feat_prefix + '|length:{}|pos:{}|p_ef'.format(2, -1)
+                feat_name = feat_prefix + '|length:{}|pos:{}|output_prob'.format(2, -1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i, 2)])
@@ -313,9 +313,9 @@ def extract_in_gaz_ngram_features():
                 p_joint = math.log(len(gazes[entity_type]['index'][get_ngram(tokens, i, 2)]) + 1)
                 feat_name = feat_prefix + '|length:{}|pos:{}|pmi'.format(2, 1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
-                feat_name = feat_prefix + '|length:{}|pos:{}|p_fe'.format(2, 1)
+                feat_name = feat_prefix + '|length:{}|pos:{}|class_prob'.format(2, 1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
-                feat_name = feat_prefix + '|length:{}|pos:{}|p_ef'.format(2, 1)
+                feat_name = feat_prefix + '|length:{}|pos:{}|output_prob'.format(2, 1)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i - 1, 3)])
@@ -324,9 +324,9 @@ def extract_in_gaz_ngram_features():
                                        [get_ngram(tokens, i - 1, 3)]) + 1)
                 feat_name = feat_prefix + '|length:{}|pos:{}|pmi'.format(3, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_ngram
-                feat_name = feat_prefix + '|length:{}|pos:{}|p_fe'.format(3, 0)
+                feat_name = feat_prefix + '|length:{}|pos:{}|class_prob'.format(3, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_ngram
-                feat_name = feat_prefix + '|length:{}|pos:{}|p_ef'.format(3, 0)
+                feat_name = feat_prefix + '|length:{}|pos:{}|output_prob'.format(3, 0)
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type
 
             return feat_seq

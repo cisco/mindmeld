@@ -346,7 +346,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
             if not hasattr(self._model, 'mmworkbench_version'):
-                msg = "mmworkbench has renamed it's features. " \
+                msg = "Your trained models are incompatible with this version of Workbench. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
             self._model.initialize_resources(self._resource_loader)

@@ -164,7 +164,7 @@ class EntityRecognizer(Classifier):
 
         if self._model is not None:
             if not hasattr(self._model, 'mmworkbench_version'):
-                msg = "mmworkbench has renamed it's features. " \
+                msg = "Your trained models are incompatible with this version of Workbench. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
             gazetteers = self._resource_loader.get_gazetteers()
