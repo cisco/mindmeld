@@ -66,8 +66,6 @@ class ResourceLoader(object):
         #   }
         # }
         self.file_to_query_info = {}
-        self.query_tree = {}
-
         self._hasher = Hasher()
 
     def get_gazetteers(self, force_reload=False, **kwargs):
@@ -292,20 +290,20 @@ class ResourceLoader(object):
     def _traverse_labeled_queries_files(self, domain=None, intent=None,
                                         file_pattern=DEFAULT_TRAIN_SET_REGEX):
         provided_intent = intent
-        self._update_query_file_dates()
-        domains = [domain] if domain else self.query_tree.keys()
+        query_tree = self._update_query_file_dates()
+        domains = [domain] if domain else query_tree.keys()
 
         for a_domain in sorted(domains):
             if provided_intent:
                 intents = [provided_intent]
             else:
-                intents = self.query_tree[a_domain].keys()
+                intents = query_tree[a_domain].keys()
             for an_intent in sorted(intents):
-                files = self.query_tree[a_domain][an_intent].keys()
+                files = query_tree[a_domain][an_intent].keys()
                 # filter to files which belong to the label set
-                for file in files:
-                    if re.match(file_pattern, os.path.basename(file)):
-                        yield a_domain, an_intent, file
+                for file_path in sorted(files):
+                    if re.match(file_pattern, os.path.basename(file_path)):
+                        yield a_domain, an_intent, file_path
 
     def load_query_file(self, domain, intent, file_path, raw=False):
         """Loads the queries from the specified file
@@ -347,17 +345,17 @@ class ResourceLoader(object):
                     raise WorkbenchError(msg.format(entity.entity.type, query.query.text))
 
     def _update_query_file_dates(self):
-        self.query_tree = path.get_labeled_query_tree(self.app_path)
+        query_tree = path.get_labeled_query_tree(self.app_path)
 
         # Get current query table
         # We can just use this if it this is the first check
         new_query_files = {}
-        for domain in self.query_tree:
-            for intent in self.query_tree[domain]:
-                for filename in self.query_tree[domain][intent]:
+        for domain in query_tree:
+            for intent in query_tree[domain]:
+                for filename in query_tree[domain][intent]:
                     # filename needs to be full path
                     new_query_files[filename] = {
-                        'modified': self.query_tree[domain][intent][filename],
+                        'modified': query_tree[domain][intent][filename],
                         'loaded': None,
                         'loaded_raw': None
                     }
@@ -373,15 +371,16 @@ class ResourceLoader(object):
                 continue
 
             try:
-                self.file_to_query_info[filename]
+                old_file_info = self.file_to_query_info[filename]
             except KeyError:
                 # a new file
                 self.file_to_query_info[filename] = new_file_info
                 continue
 
             # file existed before and now -> update
-            self.file_to_query_info[filename]['modified'] = \
-                new_query_files[filename]['modified']
+            old_file_info['modified'] = new_file_info['modified']
+
+        return query_tree
 
     def _build_word_freq_dict(self, **kwargs):
         """Compiles unigram frequency dictionary of normalized query tokens
