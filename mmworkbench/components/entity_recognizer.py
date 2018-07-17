@@ -163,6 +163,10 @@ class EntityRecognizer(Classifier):
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
 
         if self._model is not None:
+            if not hasattr(self._model, 'mmworkbench_version'):
+                msg = "Your trained models are incompatible with this version of Workbench. " \
+                      "Please run a clean build to retrain models"
+                raise ClassifierLoadError(msg)
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
 

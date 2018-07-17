@@ -16,7 +16,7 @@ def extract_in_gaz_features():
 
         for gaz_name, gaz in domain_gazes.items():
             if current_entity.normalized_text in gaz['pop_dict']:
-                feat_name = 'in-gaz|gaz:{}'.format(gaz_name)
+                feat_name = 'in_gaz|type:{}'.format(gaz_name)
                 features[feat_name] = 1
 
         return features
@@ -42,7 +42,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions):
 
         for length, starts in ngram_lengths_to_start_positions.items():
             for start in starts:
-                feat_name = 'bag-of-words-before|length:{}|pos:{}'.format(length, start)
+                feat_name = 'bag_of_words|ngram_before|length:{}|pos:{}'.format(length, start)
                 features[feat_name] = get_ngram(tokens, current_entity_token_start + start, length)
 
         return features
@@ -68,7 +68,7 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions):
 
         for length, starts in ngram_lengths_to_start_positions.items():
             for start in starts:
-                feat_name = 'bag-of-words-after|length:{}|pos:{}'.format(length, start)
+                feat_name = 'bag_of_words|ngram_after|length:{}|pos:{}'.format(length, start)
                 features[feat_name] = get_ngram(tokens, current_entity_token_end + start, length)
 
         return features
@@ -83,7 +83,7 @@ def extract_numeric_candidate_features():
         sys_entities = query.get_system_entity_candidates(['time', 'interval'])
         for ent in sys_entities:
             for i in ent.token_span:
-                feat_name = 'num-candidate|type:{}'.format(ent.entity.type)
+                feat_name = 'sys_candidate|type:{}'.format(ent.entity.type)
                 feat_seq[i][feat_name] = 1
         return feat_seq
 
@@ -97,7 +97,7 @@ def extract_other_entities_features():
         for idx, entity in enumerate(entities):
             if idx == entity_index:
                 continue
-            feat_name = 'other-entities|entity_type:{}'.format(entity.entity.type)
+            feat_name = 'other_entities|type:{}'.format(entity.entity.type)
             features[feat_name] = 1
 
         return features
