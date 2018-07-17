@@ -583,7 +583,7 @@ def extract_edge_ngrams(lengths=(1,)):
                 feats.update({'bag_of_words|edge:left|length:{}|ngram:{}'.format(
                     length, ' '.join(left_tokens)): 1})
                 feats.update({'bag_of_words|edge:right|length:{}|ngram:{}'.format(
-                    length, '|'.join(right_tokens)): 1})
+                    length, ' '.join(right_tokens)): 1})
 
         return feats
 
