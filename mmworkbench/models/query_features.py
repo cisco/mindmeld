@@ -130,7 +130,7 @@ def extract_in_gaz_span_features():
                 feat_seq[end][feat_name] = p_total + p_joint - p_entity
                 feat_name = feat_prefix + '|output_prob'
                 feat_seq[end][feat_name] = p_total + p_joint - p_entity_type
-            print(feat_seq)
+
             return feat_seq
 
         def get_exact_span_conflict_features(query, gazes, start, end, ent_type_1, ent_type_2,
