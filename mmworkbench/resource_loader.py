@@ -315,8 +315,7 @@ class ResourceLoader(object):
             file_path (str): The name of the query file
 
         """
-        logger.info("Loading %squeries from file %s/%s/%s", "raw " if raw else "", domain,
-                    intent, file_path)
+        logger.info("Loading %squeries from file %s", "raw " if raw else "", file_path)
 
         file_data = self.file_to_query_info[file_path]
         if raw:
