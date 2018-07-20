@@ -163,6 +163,7 @@ class EntityRecognizer(Classifier):
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
 
         if self._model is not None:
+            self._model.config = self._get_model_config()
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
 
