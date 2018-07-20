@@ -43,7 +43,7 @@ def test_get_labeled_query_tree_pattern():
     for domain in DOMAINS:
         for intent in tree[domain]:
             for key in tree[domain][intent].keys():
-                assert key == 'testtrain123.txt'
+                assert os.path.basename(key) == 'testtrain123.txt'
     assert set(tree.keys()) == DOMAINS
     assert set(tree[DOMAIN_NAME].keys()) == INTENTS
 

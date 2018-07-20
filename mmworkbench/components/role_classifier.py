@@ -154,6 +154,10 @@ class RoleClassifier(Classifier):
             # msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             # raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
+            if not hasattr(self._model, 'mmworkbench_version'):
+                msg = "Your trained models are incompatible with this version of Workbench. " \
+                      "Please run a clean build to retrain models"
+                logger.error(msg)
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
             self.config = ClassifierConfig.from_model_config(self._model.config)
