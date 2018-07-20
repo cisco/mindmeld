@@ -350,6 +350,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
 
+            # When loading a pickled model, use the latest app config
             self._model.config = self._get_model_config()
             self._model.initialize_resources(self._resource_loader)
             self.config = ClassifierConfig.from_model_config(self._model.config)

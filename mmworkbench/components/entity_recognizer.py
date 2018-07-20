@@ -168,8 +168,8 @@ class EntityRecognizer(Classifier):
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
 
+            # When loading a pickled model, use the latest app config
             self._model.config = self._get_model_config()
-
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
 
