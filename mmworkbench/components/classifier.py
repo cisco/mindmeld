@@ -13,6 +13,7 @@ import os
 from future.utils import with_metaclass
 from sklearn.externals import joblib
 
+from ._config import get_classifier_config
 from .. import markup
 from ..exceptions import ClassifierLoadError
 from ..core import Query
@@ -304,6 +305,8 @@ class Classifier(with_metaclass(ABCMeta, object)):
             # If all params required for model config were passed in, use kwargs
             return ModelConfig(**kwargs)
         except (TypeError, ValueError):
+
+            import pdb; pdb.set_trace()
             # Use application specified or default config, customizing with provided kwargs
             model_config = loaded_config
             model_config.update(kwargs)
@@ -312,6 +315,8 @@ class Classifier(with_metaclass(ABCMeta, object)):
             # application specified or default config
             if kwargs.get('param_selection') and not kwargs.get('params'):
                 model_config.pop('params', None)
+
+            import pdb; pdb.set_trace()
         return ModelConfig(**model_config)
 
     def dump(self, model_path):
@@ -350,8 +355,12 @@ class Classifier(with_metaclass(ABCMeta, object)):
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
 
-            # When loading a pickled model, use the latest app config
-            self._model.config = self._get_model_config()
+            try:
+                self._model.config.to_dict()
+            except AttributeError:
+                # Loaded model config is incompatible with app config.
+                self._model.config.resolve_config(self._get_model_config())
+
             self._model.initialize_resources(self._resource_loader)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 

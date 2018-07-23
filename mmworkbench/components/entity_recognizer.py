@@ -11,7 +11,7 @@ import logging
 from sklearn.externals import joblib
 
 from ..core import Entity
-from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
+from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE, ModelConfig
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
@@ -168,8 +168,12 @@ class EntityRecognizer(Classifier):
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
 
-            # When loading a pickled model, use the latest app config
-            self._model.config = self._get_model_config()
+            try:
+                self._model.config.to_dict()
+            except AttributeError:
+                # Loaded model config is incompatible with app config.
+                self._model.config.resolve_config(self._get_model_config())
+
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
 

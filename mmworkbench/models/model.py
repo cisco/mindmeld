@@ -99,6 +99,19 @@ class ModelConfig(object):
         """
         return json.dumps(self.to_dict(), sort_keys=True)
 
+    def resolve_config(self, new_config):
+        """This method resolves any config incompatibility issues by
+        loading the latest slots from the app config to the current config
+
+        Arguments:
+        new_config (ModelConfig): The ModelConfig representing the app's latest config
+        """
+        new_slots = ['train_label_set', 'test_label_set']
+        logger.warn('Loaded config is incompatible with app config. '
+                    'Loading properties {} from app config'.format(new_slots))
+        for slot in new_slots:
+            setattr(self, slot, getattr(new_config, slot))
+
     def get_ngram_lengths_and_thresholds(self, rname):
         """
         Returns the n-gram lengths and thresholds to extract to optimize resource collection
