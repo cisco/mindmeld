@@ -13,7 +13,6 @@ import os
 from future.utils import with_metaclass
 from sklearn.externals import joblib
 
-from ._config import get_classifier_config
 from .. import markup
 from ..exceptions import ClassifierLoadError
 from ..core import Query
@@ -313,7 +312,6 @@ class Classifier(with_metaclass(ABCMeta, object)):
             # application specified or default config
             if kwargs.get('param_selection') and not kwargs.get('params'):
                 model_config.pop('params', None)
-
         return ModelConfig(**model_config)
 
     def dump(self, model_path):

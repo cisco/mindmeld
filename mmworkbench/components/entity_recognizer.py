@@ -11,7 +11,7 @@ import logging
 from sklearn.externals import joblib
 
 from ..core import Entity
-from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE, ModelConfig
+from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
