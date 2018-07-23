@@ -305,8 +305,6 @@ class Classifier(with_metaclass(ABCMeta, object)):
             # If all params required for model config were passed in, use kwargs
             return ModelConfig(**kwargs)
         except (TypeError, ValueError):
-
-            import pdb; pdb.set_trace()
             # Use application specified or default config, customizing with provided kwargs
             model_config = loaded_config
             model_config.update(kwargs)
@@ -316,7 +314,6 @@ class Classifier(with_metaclass(ABCMeta, object)):
             if kwargs.get('param_selection') and not kwargs.get('params'):
                 model_config.pop('params', None)
 
-            import pdb; pdb.set_trace()
         return ModelConfig(**model_config)
 
     def dump(self, model_path):
