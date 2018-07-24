@@ -167,6 +167,13 @@ class EntityRecognizer(Classifier):
                 msg = "Your trained models are incompatible with this version of Workbench. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
+
+            try:
+                self._model.config.to_dict()
+            except AttributeError:
+                # Loaded model config is incompatible with app config.
+                self._model.config.resolve_config(self._get_model_config())
+
             gazetteers = self._resource_loader.get_gazetteers()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
 
