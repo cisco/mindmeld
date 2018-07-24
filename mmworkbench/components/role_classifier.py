@@ -158,6 +158,13 @@ class RoleClassifier(Classifier):
                 msg = "Your trained models are incompatible with this version of Workbench. " \
                       "Please run a clean build to retrain models"
                 logger.error(msg)
+
+            try:
+                self._model.config.to_dict()
+            except AttributeError:
+                # Loaded model config is incompatible with app config.
+                self._model.config.resolve_config(self._get_model_config())
+
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
             self.config = ClassifierConfig.from_model_config(self._model.config)

@@ -349,6 +349,13 @@ class Classifier(with_metaclass(ABCMeta, object)):
                 msg = "Your trained models are incompatible with this version of Workbench. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
+
+            try:
+                self._model.config.to_dict()
+            except AttributeError:
+                # Loaded model config is incompatible with app config.
+                self._model.config.resolve_config(self._get_model_config())
+
             self._model.initialize_resources(self._resource_loader)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
