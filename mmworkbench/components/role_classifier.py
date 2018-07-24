@@ -14,7 +14,7 @@ from ..models import create_model, ENTITY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 from ..core import Query
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 
-from .classifier import Classifier, ClassifierConfig
+from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
 
 logger = logging.getLogger(__name__)
@@ -157,7 +157,7 @@ class RoleClassifier(Classifier):
             if not hasattr(self._model, 'mmworkbench_version'):
                 msg = "Your trained models are incompatible with this version of Workbench. " \
                       "Please run a clean build to retrain models"
-                logger.error(msg)
+                raise ClassifierLoadError(msg)
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
             self.config = ClassifierConfig.from_model_config(self._model.config)
