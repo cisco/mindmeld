@@ -101,16 +101,16 @@ class ModelConfig(object):
 
     def resolve_config(self, new_config):
         """This method resolves any config incompatibility issues by
-        loading the latest slots from the app config to the current config
+        loading the latest settings from the app config to the current config
 
         Arguments:
         new_config (ModelConfig): The ModelConfig representing the app's latest config
         """
-        new_slots = ['train_label_set', 'test_label_set']
-        logger.warn('Loaded config is incompatible with app config. '
-                    'Loading properties {} from app config'.format(new_slots))
-        for slot in new_slots:
-            setattr(self, slot, getattr(new_config, slot))
+        new_settings = ['train_label_set', 'test_label_set']
+        logger.warn('Loading missing properties {} from app '
+                    'configuration file'.format(new_settings))
+        for setting in new_settings:
+            setattr(self, setting, getattr(new_config, setting))
 
     def get_ngram_lengths_and_thresholds(self, rname):
         """
