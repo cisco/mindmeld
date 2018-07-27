@@ -1,3 +1,3 @@
 NLP_CONFIG = {
-    'extract_nbest_entities': ['store_info.get_store_hours']
+    'resolve_entitites_using_nbest_alternates': ['store_info.get_store_hours']
 }

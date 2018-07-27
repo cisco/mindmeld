@@ -393,7 +393,7 @@ DEFAULT_RANKING_CONFIG = {
 }
 
 DEFAULT_NLP_CONFIG = {
-    'extract_nbest_entities': []
+    'resolve_entitites_using_nbest_alternates': []
 }
 
 

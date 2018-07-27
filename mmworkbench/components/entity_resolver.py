@@ -231,17 +231,27 @@ class EntityResolver(object):
         trained entity resolution model
 
         Args:
-            entity (Entity): An entity found in an input query
+            entity (Entity, or tuple): An entity found in an input query, or a list of n best entity
+                                       objects
 
         Returns:
             The top 20 resolved values for the provided entity
         """
+        if isinstance(entity, (list, tuple)):
+            top_entity = entity[0]
+            entity = tuple(entity)
+        else:
+            top_entity = entity
+            entity = tuple([entity])
+
         if self._is_system_entity:
             # system entities are already resolved
-            return [entity.value]
+            return [top_entity.value]
 
         if not self._use_text_rel:
-            return self._predict_exact_match(entity)
+            return self._predict_exact_match(top_entity)
+
+        # TODO: modularize query building, use n-best when available
 
         text_relevance_query = {
             "query": {
@@ -255,7 +265,7 @@ class EntityResolver(object):
                                             {
                                                 "match": {
                                                     "cname.normalized_keyword": {
-                                                        "query": entity.text,
+                                                        "query": top_entity.text,
                                                         "boost": 10
                                                     }
                                                 }
@@ -263,7 +273,7 @@ class EntityResolver(object):
                                             {
                                                 "match": {
                                                     "cname.raw": {
-                                                        "query": entity.text,
+                                                        "query": top_entity.text,
                                                         "boost": 10
                                                     }
                                                 }
@@ -281,7 +291,7 @@ class EntityResolver(object):
                                                     {
                                                         "match": {
                                                             "whitelist.name.normalized_keyword": {
-                                                                "query": entity.text,
+                                                                "query": top_entity.text,
                                                                 "boost": 10
                                                             }
                                                         }
@@ -289,14 +299,14 @@ class EntityResolver(object):
                                                     {
                                                         "match": {
                                                             "whitelist.name": {
-                                                                "query": entity.text
+                                                                "query": top_entity.text
                                                             }
                                                         }
                                                     },
                                                     {
                                                         "match": {
                                                             "whitelist.name.char_ngram": {
-                                                                "query": entity.text
+                                                                "query": top_entity.text
                                                             }
                                                         }
                                                     }

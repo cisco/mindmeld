@@ -9,6 +9,7 @@ from builtins import object, super
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor, wait
 from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 import logging
 
 from future.utils import with_metaclass
@@ -315,7 +316,7 @@ class NaturalLanguageProcessor(Processor):
         for domain in path.get_domains(self._app_path):
             self._children[domain] = DomainProcessor(app_path, domain, self.resource_loader)
 
-        nbest_nlp_classes = self.config.get('extract_nbest_entities', {})
+        nbest_nlp_classes = self.config.get('resolve_entitites_using_nbest_alternates', {})
         if len(nbest_nlp_classes) > 0:
             nbest_nlp_classes = self.extract_allowed_intents(nbest_nlp_classes)
 
@@ -733,6 +734,79 @@ class IntentProcessor(Processor):
         processed_query.intent = self.name
         return processed_query.to_dict()
 
+    def _recognize_entities(self, query):
+        """Calls the entity recognition component.
+
+        Args:
+            query (Query, or tuple): The user input query, or a list of the n best query objects
+        Returns:
+            list (of lists of QueryEntity objects): A list of lists of the entity objects for each
+                transcript
+        """
+        if isinstance(query, (list, tuple)):
+            if self.nbest_text_enabled:
+                nbest_entities = self._process_list(
+                    query, '_recognize_entities')
+                return nbest_entities
+            else:
+                entities = self.entity_recognizer.predict(query[0])
+                return [entities]
+        entities = self.entity_recognizer.predict(query)
+        return entities
+
+    def _align_entities(self, entities):
+        """If nbest is enabled, align the spans.
+
+        Args:
+            entities (list of lists of QueryEntity objects): A list of lists of entity objects,
+                where each list is the recognized entities for the nth query
+
+        Returns:
+            list (of lists of QueryEntity objects): A list of lists of entity objects, where
+                each list is a group of spans that represent the same canonical entity
+        """
+        aligned_entities = [[entity] for entity in entities[0]]
+        if len(entities) > 1 and self.nbest_text_enabled:
+            for entities_n in entities[1:]:
+                for i, entity in enumerate(entities_n):
+                    if i < len(aligned_entities):
+                        aligned_entities[i].append(entity)
+        return aligned_entities
+
+    def _process_entities(self, query, entities, aligned_entities):
+        """
+
+        Args:
+            query (Query, or tuple): The user input query, or a list of the n best query objects
+            entities (list of lists of QueryEntity objects): A list of lists of entity objects,
+                where each list is the recognized entities for the nth query
+            aligned_entities (list of lists of QueryEntity): A list of lists of entity objects,
+                where each list is a group of spans that represent the same canonical entity
+
+        Returns:
+            list (QueryEntity): Returns a list of processed entity objects
+        """
+        if isinstance(query, (list, tuple)):
+            query = query[0]
+
+        # TODO: run in parallel
+        # Run the role classification
+        processed_entities = [deepcopy(e) for e in entities[0]]
+        for idx, entity in enumerate(processed_entities):
+            processed_entities[idx] = \
+                self.entities[entity.entity.type].process_entity(query, processed_entities, idx)
+
+        # TODO: run in parallel
+        # Run the entity resolution
+        for idx, entity in enumerate(processed_entities):
+            processed_entities[idx] = \
+                self.entities[entity.entity.type].resolve_entity(entity, aligned_entities[idx])
+
+        # Run the entity parsing
+        processed_entities = self.parser.parse_entities(query, processed_entities) \
+            if self.parser else processed_entities
+        return processed_entities
+
     def process_query(self, query, return_processed_query=True):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
@@ -748,22 +822,23 @@ class IntentProcessor(Processor):
         """
         self._check_ready()
 
+        using_nbest = False
         if isinstance(query, (list, tuple)):
             if self.nbest_text_enabled:
-                nbest_entities = self._process_list(
-                    query, 'process_query', return_processed_query=False)
-                return ProcessedQuery(
-                    query[0], entities=nbest_entities[0],
-                    nbest_queries=query, nbest_entities=nbest_entities)
-            else:
-                query = query[0]
-        entities = self.entity_recognizer.predict(query)
-        for idx, entity in enumerate(entities):
-            self.entities[entity.entity.type].process_entity(query, entities, idx)
-        entities = self.parser.parse_entities(query, entities) if self.parser else entities
-        if return_processed_query is True:
-            return ProcessedQuery(query, entities=entities)
-        return entities
+                using_nbest = True
+            query = tuple(query)
+        else:
+            query = tuple([query])
+
+        entities = self._recognize_entities(query)
+        aligned_entities = self._align_entities(entities)
+        processed_entities = self._process_entities(query, entities, aligned_entities)
+
+        if using_nbest:
+            return ProcessedQuery(query[0], entities=processed_entities, nbest_queries=query,
+                                  nbest_entities=entities, nbest_aligned_entities=aligned_entities)
+
+        return ProcessedQuery(query[0], entities=processed_entities)
 
 
 class EntityProcessor(Processor):
@@ -839,7 +914,7 @@ class EntityProcessor(Processor):
         Args:
             query (Query): The query the entity originated from
             entities (list): All entities recognized in the query
-            entity (Entity): The entity to process
+            entity_index (int): The index of the entity to process
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -852,6 +927,24 @@ class EntityProcessor(Processor):
             # Only run role classifier if there are roles!
             entity.entity.role = self.role_classifier.predict(query, entities, entity_index)
 
-        # Resolve entity
-        entity.entity.value = self.entity_resolver.predict(entity.entity)
+        return entity
+
+    def resolve_entity(self, entity, entity_spans=None):
+        """Does the resolution of a single entity. If entity_spans is not None, the resolution leverages
+        the n best spans. Otherwise, does the resolution on just the text of the entity.
+
+        Args:
+            entity (QueryEntity): The entity to process
+            entity_spans (list of QueryEntity): The list of n-best entity spans to improve
+                resolution
+
+        Returns:
+            Entity: The entity populated with the resolved values
+        """
+        self._check_ready()
+        if entity_spans:
+            entity_list = [e.entity for e in entity_spans]
+        else:
+            entity_list = [entity.entity]
+        entity.entity.value = self.entity_resolver.predict(entity_list)
         return entity
