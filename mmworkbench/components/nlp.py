@@ -770,12 +770,33 @@ class IntentProcessor(Processor):
             list (of lists of QueryEntity objects): A list of lists of entity objects, where
                 each list is a group of spans that represent the same canonical entity
         """
+        # Treat entities and their spans found in the first transcript as global base/reference
+        # across all n transcripts
         aligned_entities = [[entity] for entity in entities[0]]
         if len(entities) > 1 and self.nbest_text_enabled:
             for entities_n in entities[1:]:
+                index_to_align = 0  # keep track of entities to align
                 for i, entity in enumerate(entities_n):
-                    if i < len(aligned_entities):
-                        aligned_entities[i].append(entity)
+                    n_start = entity.span.start
+                    n_end = entity.span.end
+                    # if span is just one character long, add one to enable some overlap
+                    # Eg: '2'
+                    if n_start == n_end:
+                        n_end += 1
+                    # Start from the entities we haven't found an alignment for.
+                    # If we found a match with current entity, we wont align the next one
+                    # with something before it
+                    for j, ref_entity in enumerate(entities[0][index_to_align:]):
+                        ref_start = ref_entity.span.start
+                        ref_end = ref_entity.span.end
+                        if ref_end == ref_start:
+                            ref_end += 1
+                        # if there is an overlap in spans and is of the same type, align it
+                        if len(range(max(ref_start, n_start), min(n_end, ref_end))) != 0 and \
+                                ref_entity.entity.type == entity.entity.type:
+                            index_to_align = index_to_align + j
+                            aligned_entities[index_to_align].append(entity)
+                            break
         return aligned_entities
 
     def _classify_and_resolve_entities(self, idx, query, processed_entities, aligned_entities):
