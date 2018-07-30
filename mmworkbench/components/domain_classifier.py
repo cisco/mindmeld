@@ -11,6 +11,7 @@ from ..markup import mark_down
 from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 
 from .classifier import Classifier
+from ..constants import DEFAULT_TRAIN_SET_REGEX
 
 from ._config import get_classifier_config
 
@@ -77,7 +78,7 @@ class DomainClassifier(Classifier):
     def inspect(self, query, domain=None):
         return self._model.inspect(example=query, gold_label=domain)
 
-    def _get_query_tree(self, queries=None, label_set='train', raw=False):
+    def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on
 
         Args:
@@ -95,7 +96,7 @@ class DomainClassifier(Classifier):
 
         return self._resource_loader.get_labeled_queries(label_set=label_set, raw=raw)
 
-    def _get_queries_and_labels(self, queries=None, label_set='train'):
+    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a set of queries and their labels based on the label set
 
         Args:
@@ -111,7 +112,7 @@ class DomainClassifier(Classifier):
             return [None, None]
         return list(zip(*[(q.query, q.domain) for q in queries]))
 
-    def _get_queries_and_labels_hash(self, queries=None, label_set='train'):
+    def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = []
         for domain in query_tree:

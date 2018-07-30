@@ -98,7 +98,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.config = get_nlp_config(app_path, config)
         Processor.instance_map[id(self)] = self
 
-    def build(self, incremental=False, label_set="train"):
+    def build(self, incremental=False, label_set=None):
         """Builds all the natural language processing models for this processor and its children.
 
         Args:
@@ -115,7 +115,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         self.dirty = True
 
     @abstractmethod
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         raise NotImplementedError
 
     def dump(self):
@@ -147,7 +147,7 @@ class Processor(with_metaclass(ABCMeta, object)):
     def _load(self):
         raise NotImplementedError
 
-    def evaluate(self, print_stats=False, label_set="test"):
+    def evaluate(self, print_stats=False, label_set=None):
         """Evaluates all the natural language processing models for this processor and its
         children.
 
@@ -311,6 +311,7 @@ class NaturalLanguageProcessor(Processor):
         self._app_path = app_path
         validate_workbench_version(self._app_path)
         self.name = app_path
+
         self.domain_classifier = DomainClassifier(self.resource_loader)
 
         for domain in path.get_domains(self._app_path):
@@ -329,7 +330,7 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application"""
         return self._children
 
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         if len(self.domains) == 1:
             return
         if incremental:
@@ -350,7 +351,7 @@ class NaturalLanguageProcessor(Processor):
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.load(model_path)
 
-    def _evaluate(self, print_stats, label_set="test"):
+    def _evaluate(self, print_stats, label_set=None):
         if len(self.domains) > 1:
             domain_eval = self.domain_classifier.evaluate(label_set=label_set)
             if domain_eval:
@@ -365,13 +366,16 @@ class NaturalLanguageProcessor(Processor):
             if not allowed_nlp_classes:
                 return self.domain_classifier.predict(query)
             else:
-                sorted_domains = self.domain_classifier.predict_proba(query)
-                for ordered_domain, _ in sorted_domains:
-                    if ordered_domain in allowed_nlp_classes.keys():
-                        return ordered_domain
+                if len(allowed_nlp_classes) == 1:
+                    return list(allowed_nlp_classes.keys())[0]
+                else:
+                    sorted_domains = self.domain_classifier.predict_proba(query)
+                    for ordered_domain, _ in sorted_domains:
+                        if ordered_domain in allowed_nlp_classes.keys():
+                            return ordered_domain
 
-                raise AllowedNlpClassesKeyError(
-                    'Could not find user inputted domain in NLP hierarchy')
+                    raise AllowedNlpClassesKeyError(
+                        'Could not find user inputted domain in NLP hierarchy')
         else:
             return list(self.domains.keys())[0]
 
@@ -404,8 +408,7 @@ class NaturalLanguageProcessor(Processor):
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
-        processed_query = \
-            self.domains[domain].process_query(query, allowed_intents)
+        processed_query = self.domains[domain].process_query(query, allowed_intents)
         processed_query.domain = domain
         return processed_query
 
@@ -501,7 +504,7 @@ class DomainProcessor(Processor):
             self._children[intent] = IntentProcessor(app_path, domain, intent,
                                                      self.resource_loader)
 
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         if len(self.intents) == 1:
             return
         # train intent model
@@ -599,22 +602,24 @@ class DomainProcessor(Processor):
             if not allowed_nlp_classes:
                 intent = self.intent_classifier.predict(top_query)
             else:
-                sorted_intents = self.intent_classifier.predict_proba(top_query)
-                intent = None
+                if len(allowed_nlp_classes) == 1:
+                    intent = list(allowed_nlp_classes.keys())[0]
+                else:
+                    sorted_intents = self.intent_classifier.predict_proba(top_query)
+                    intent = None
 
-                for ordered_intent, _ in sorted_intents:
-                    if ordered_intent in allowed_nlp_classes.keys():
-                        intent = ordered_intent
-                        break
+                    for ordered_intent, _ in sorted_intents:
+                        if ordered_intent in allowed_nlp_classes.keys():
+                            intent = ordered_intent
+                            break
 
-                if not intent:
-                    raise AllowedNlpClassesKeyError(
-                        'Could not find user inputted intent in NLP hierarchy')
+                    if not intent:
+                        raise AllowedNlpClassesKeyError(
+                            'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
         processed_query = self.intents[intent].process_query(query)
         processed_query.intent = intent
-
         return processed_query
 
     def inspect(self, query, intent=None):
@@ -668,7 +673,7 @@ class IntentProcessor(Processor):
     def nbest_text_enabled(self, value):
         self._nbest_text_enabled = value
 
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         """Builds the models for this intent"""
 
         # train entity recognizer
@@ -871,7 +876,7 @@ class EntityProcessor(Processor):
         self.role_classifier = RoleClassifier(self.resource_loader, domain, intent, entity_type)
         self.entity_resolver = EntityResolver(app_path, self.resource_loader, entity_type)
 
-    def _build(self, incremental=False, label_set="train"):
+    def _build(self, incremental=False, label_set=None):
         """Builds the models for this entity type"""
         if incremental:
             model_path = path.get_role_model_path(self._app_path, self.domain,

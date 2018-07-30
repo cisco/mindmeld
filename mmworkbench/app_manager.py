@@ -195,6 +195,14 @@ class ApplicationManager(object):
 
         return response
 
+    def add_middleware(self, middleware):
+        """Adds middleware for the dialogue manager.
+
+        Args:
+            middleware (callable): A dialogue manager middleware function
+        """
+        self.dialogue_manager.add_middleware(middleware)
+
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue rule for the dialogue manager.
 

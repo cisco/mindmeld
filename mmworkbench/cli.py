@@ -12,16 +12,17 @@ import shutil
 import subprocess
 import sys
 import time
+import warnings
 
 import click
 import click_log
 
 from . import path
+from . import markup
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
-                         KnowledgeBaseError, WorkbenchError, AuthNotFoundError)
+                         KnowledgeBaseError, WorkbenchError)
 
-from ._util import blueprint
 from ._version import current as __version__
 
 
@@ -168,6 +169,43 @@ def evaluate(ctx, verbose):
         ctx.exit(1)
 
 
+@_app_cli.command('predict', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+@click.option('-o', '--output', required=False,
+              help='Send output to file rather than standard out')
+@click.option('-D', '--no_domain', is_flag=True,
+              help='Suppress predicted domain column')
+@click.option('-I', '--no_intent', is_flag=True,
+              help='Suppress predicted intent column')
+@click.option('-E', '--no_entity', is_flag=True,
+              help='Suppress predicted entity annotations')
+@click.option('-R', '--no_role', is_flag=True,
+              help='Suppress predicted role annotations')
+@click.option('-G', '--no_group', is_flag=True,
+              help='Suppress predicted group annotations')
+@click.argument('input', required=True)
+def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_group):
+    """Runs predictions on a given query file"""
+    app = ctx.obj.get('app')
+    if app is None:
+        raise ValueError("No app was given. Run 'python app.py predict' from your app folder.")
+
+    ctx.invoke(num_parser, start=True)
+
+    app.lazy_init()
+    nlp = app.app_manager.nlp
+    try:
+        nlp.load()
+    except WorkbenchError:
+        logger.error("You must build the app before running predict. "
+                     "Try 'python app.py build'.")
+        ctx.exit(1)
+
+    markup.bootstrap_query_file(input, output, nlp,
+                                no_domain=no_domain, no_intent=no_intent,
+                                no_entity=no_entity, no_role=no_role, no_group=no_group)
+
+
 @_app_cli.command('clean', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def clean(ctx):
@@ -272,7 +310,18 @@ def module_cli():
 @click.argument('app_path', required=False)
 def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application."""
-    try:
+
+    logger.info('Automatic blueprint download functionality is currently disabled')
+    msg = ('Navigate to https://devcenter.mindmeld.com/bp/{}/app.tar.gz'
+           ' and manually download the tar').format(blueprint_name)
+    logger.info(msg)
+    logger.info('Extract the blueprint in the current working directory')
+
+    # TODO: Re-implement authenticated download of blueprints by getting oauth2
+    # token from Webex broker
+
+    """
+        try:
         blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
     except ValueError as ex:
         logger.error(ex)
@@ -280,6 +329,7 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     except (AuthNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
+    """
 
 
 #
@@ -300,6 +350,8 @@ def cli(ctx):
     urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
+    warnings.filterwarnings("module", category=DeprecationWarning,
+                            module="sklearn.preprocessing.label")
 
     if ctx.obj is None:
         ctx.obj = {}
@@ -319,6 +371,8 @@ def app_cli(ctx):
     urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
+    warnings.filterwarnings("module", category=DeprecationWarning,
+                            module="sklearn.preprocessing.label")
 
     if ctx.obj is None:
         ctx.obj = {}

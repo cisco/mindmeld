@@ -271,14 +271,15 @@ class TextModel(Model):
 
             if gold_class is None:
                 row = pd.DataFrame(
-                    data=[[feat_name, feat_value, weight, product]],
+                    data=[[feat_name, round(feat_value, 4), weight.round(4), product.round(4)]],
                     columns=columns, index=[feat_name])
             else:
                 gold_w = self._get_feature_weight(feat_name, gold_class)
                 gold_p = feat_value * gold_w
                 diff = gold_p - product
                 row = pd.DataFrame(
-                    data=[[feat_name, feat_value, weight, product, gold_w, gold_p, diff]],
+                    data=[[feat_name, round(feat_value, 4), weight.round(4), product.round(4),
+                           gold_w.round(4), gold_p.round(4), diff.round(4)]],
                     columns=columns, index=[feat_name])
             df = df.append(row)
         return df

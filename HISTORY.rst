@@ -4,6 +4,25 @@ Package History
 3.4.0 (Unreleased)
 ------------------
 
+Enhancements
+^^^^^^^^^^^^
+
+- Add the ability to add dialogue middleware to dialogue managers
+
+- Add ability to denote a handler as only reachable via target_dialogue_state
+
+- Add ability to explicitly denote default handler
+
+- Add CLI command to generate predicted markup for queries
+
+3.3.1 (2018-06-20)
+------------------
+
+Bug Fixes
+~~~~~~~~~
+
+- ``mmworkbench blueprint`` has been temporarily disabled. Blueprints can manually downloaded from https://devcenter.mindmeld.com/bp/{blueprint_name}/app.tar.gz.
+
 
 3.3.0 (2018-05-10)
 ------------------

@@ -5,8 +5,8 @@ This module is responsible for locating various Workbench app files.
 """
 from __future__ import absolute_import, unicode_literals
 
-import glob
 import os
+import re
 import logging
 
 WORKBENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -151,12 +151,15 @@ def get_labeled_query_tree(app_path, patterns=None):
             intent = components[0]
             tree[domain][intent] = {}
             if patterns:
-                for pattern in patterns:
-                    for file_path in glob.iglob(os.path.join(parent, domain, intent, pattern)):
-                        _, filename = os.path.split(file_path)
-                        mod_time = os.path.getmtime(file_path)
-                        tree[domain][intent][filename] = mod_time
-                        found_pattern[pattern] = True
+                domain_intent_dir = os.path.join(parent, domain, intent)
+                for app_file in os.listdir(domain_intent_dir):
+                    for pattern in patterns:
+                        if re.match(pattern, app_file):
+                            abs_filepath = os.path.join(domain_intent_dir, app_file)
+                            _, filename = os.path.split(abs_filepath)
+                            mod_time = os.path.getmtime(abs_filepath)
+                            tree[domain][intent][filename] = mod_time
+                            found_pattern[pattern] = True
             else:
                 for filename in files:
                     mod_time = os.path.getmtime(os.path.join(parent, domain, intent, filename))

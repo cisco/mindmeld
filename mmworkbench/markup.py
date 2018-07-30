@@ -111,6 +111,38 @@ def read_query_file(file_path):
                 yield query_text
 
 
+def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
+    """
+    Apply predicted annotations to a file of text queries
+
+    Args:
+        input_file (str): filename of queries to be processed
+        output_file (str or None): filename for processed queries
+        nlp (NaturalLanguageProcessor): an application's NLP with built models
+        **kwargs:
+    """
+    import csv
+    import sys
+    with open(output_file, 'wb') if output_file else sys.stdout as csv_file:
+        field_names = ["query"]
+        if not kwargs.get("no_domain"):
+            field_names.append("domain")
+        if not kwargs.get("no_intent"):
+            field_names.append("intent")
+        csv_output = csv.DictWriter(csv_file, field_names, dialect=csv.excel_tab)
+
+        for raw_query in mark_down_file(input_file):
+            processed_query = nlp.process_query(nlp.create_query(raw_query))
+            marked_up_query = dump_query(processed_query, **kwargs)
+            csv_row = {"query": marked_up_query}
+            if not kwargs.get("no_domain"):
+                csv_row["domain"] = processed_query.domain
+            if not kwargs.get("no_intent"):
+                csv_row["intent"] = processed_query.intent
+
+            csv_output.writerow(csv_row)
+
+
 def process_markup(markup, query_factory, query_options):
     try:
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
@@ -426,7 +458,10 @@ def _dump_brat(processed_query, **kwargs):
 
 def _dump_mindmeld(processed_query, **kwargs):
     raw_text = processed_query.query.text
-    markup = _mark_up_entities(raw_text, processed_query.entities)
+    markup = _mark_up_entities(raw_text, processed_query.entities,
+                               exclude_entity=kwargs.get('no_entity'),
+                               exclude_role=kwargs.get('no_role'),
+                               exclude_group=kwargs.get('no_group'))
     return markup
 
 
@@ -443,7 +478,8 @@ def validate_markup(markup, query_factory):
     return NotImplemented
 
 
-def _mark_up_entities(query_str, entities):
+def _mark_up_entities(query_str, entities,
+                      exclude_entity=False, exclude_group=False, exclude_role=False):
     annotations = []
     for entity in entities or tuple():
         annotations.extend(_annotations_for_entity(entity))
@@ -471,19 +507,30 @@ def _mark_up_entities(query_str, entities):
     def _open_ann(ann, cursor):
         if cursor < ann['start']:
             tokens.append(query_str[cursor:ann['start']])
-        tokens.append(GROUP_START if ann['ann_type'] == 'group' else ENTITY_START)
+        if ann['ann_type'] == 'group':
+            if not exclude_group:
+                tokens.append(GROUP_START)
+        elif not exclude_entity or (not exclude_role and ann.get('role') is not None):
+            tokens.append(ENTITY_START)
         stack.append(ann)
         return ann['start']
 
     def _close_ann(ann, cursor):
         if cursor < ann['end'] + 1:
             tokens.append(query_str[cursor:ann['end'] + 1])
-        tokens.append(META_SPLIT)
-        tokens.append(ann['type'])
-        if ann.get('role') is not None:
-            tokens.append(META_SPLIT)
-            tokens.append(ann['role'])
-        tokens.append(GROUP_END if ann['ann_type'] == 'group' else ENTITY_END)
+        if ann['ann_type'] == 'group':
+            if not exclude_group:
+                tokens.append(META_SPLIT)
+                tokens.append(ann['type'])
+                tokens.append(GROUP_END)
+        elif not exclude_entity or (not exclude_role and ann.get('role') is not None):
+            if not exclude_entity:
+                tokens.append(META_SPLIT)
+                tokens.append(ann['type'])
+            if not exclude_role and ann.get('role') is not None:
+                tokens.append(META_SPLIT)
+                tokens.append(ann['role'])
+            tokens.append(ENTITY_END)
         cursor = ann['end'] + 1
         return cursor
 
@@ -508,8 +555,14 @@ def _annotations_for_entity(entity, depth=0, parent_offset=0):
     end = entity.span.end + parent_offset
     if entity.children:
         # This entity is the head of a group. Add an annotation for the group.
-        g_start = min(start, entity.children[0].span.start)
-        g_end = max(end, entity.children[-1].span.end)
+        leftmost = entity
+        while leftmost.children and leftmost.children[0].span.start < leftmost.span.start:
+            leftmost = leftmost.children[0]
+        g_start = leftmost.span.start
+        rightmost = entity
+        while rightmost.children and rightmost.children[-1].span.end > rightmost.span.end:
+            rightmost = rightmost.children[-1]
+        g_end = rightmost.span.end
         annotations.append({
             'ann_type': 'group',
             'type': entity.entity.type,

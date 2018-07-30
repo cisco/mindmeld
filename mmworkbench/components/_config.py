@@ -7,12 +7,25 @@ from __future__ import absolute_import, unicode_literals
 import copy
 import logging
 import os
+import warnings
 
 from .. import path
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_DOMAIN_MODEL_CONFIG = {
+CONFIG_DEPRECATION_MAPPING = {
+    'DOMAIN_CLASSIFIER_CONFIG': 'DOMAIN_MODEL_CONFIG',
+    'INTENT_CLASSIFIER_CONFIG': 'INTENT_MODEL_CONFIG',
+    'ENTITY_RECOGNIZER_CONFIG': 'ENTITY_MODEL_CONFIG',
+    'ROLE_CLASSIFIER_CONFIG': 'ROLE_MODEL_CONFIG',
+    'ENTITY_RESOLVER_CONFIG': 'ENTITY_RESOLUTION_CONFIG',
+    'get_entity_recognizer_config': 'get_entity_model_config',
+    'get_intent_classifier_config': 'get_intent_model_config',
+    'get_entity_resolver_config': 'get_entity_resolution_model_config',
+    'get_role_classifier_config': 'get_role_model_config'
+}
+
+DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     'model_type': 'text',
     'model_settings': {
         'classifier_type': 'logreg',
@@ -34,7 +47,7 @@ DEFAULT_DOMAIN_MODEL_CONFIG = {
     }
 }
 
-DEFAULT_INTENT_MODEL_CONFIG = {
+DEFAULT_INTENT_CLASSIFIER_CONFIG = {
     'model_type': 'text',
     'model_settings': {
         'classifier_type': 'logreg'
@@ -58,7 +71,7 @@ DEFAULT_INTENT_MODEL_CONFIG = {
     }
 }
 
-DEFAULT_ENTITY_MODEL_CONFIG = {
+DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
     'model_type': 'tagger',
     'label_type': 'entities',
     'model_settings': {
@@ -89,7 +102,7 @@ DEFAULT_ENTITY_MODEL_CONFIG = {
     }
 }
 
-DEFAULT_ENTITY_RESOLUTION_CONFIG = {
+DEFAULT_ENTITY_RESOLVER_CONFIG = {
     'model_type': 'text_relevance'
 }
 
@@ -133,7 +146,7 @@ DEFAULT_ES_SYNONYM_MAPPING = {
     }
 }
 
-DEFAULT_ROLE_MODEL_CONFIG = {
+DEFAULT_ROLE_CLASSIFIER_CONFIG = {
     'model_type': 'text',
     'model_settings': {
         'classifier_type': 'logreg'
@@ -451,10 +464,10 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
         return _get_default_classifier_config(clf_type)
 
     func_name = {
-        'intent': 'get_intent_model_config',
-        'entity': 'get_entity_model_config',
-        'entity_resolution': 'get_entity_resolution_model_config',
-        'role': 'get_role_model_config',
+        'intent': 'get_intent_classifier_config',
+        'entity': 'get_entity_recognizer_config',
+        'entity_resolution': 'get_entity_resolver_config',
+        'role': 'get_role_classifier_config',
     }.get(clf_type)
     func_args = {
         'intent': ('domain',),
@@ -468,7 +481,13 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
         try:
             func = getattr(module_conf, func_name)
         except AttributeError:
-            pass
+            try:
+                func = getattr(module_conf, CONFIG_DEPRECATION_MAPPING[func_name])
+                msg = '%s config key is deprecated. Please use the equivalent %s config ' \
+                      'key' % (CONFIG_DEPRECATION_MAPPING[func_name], func_name)
+                warnings.warn(msg, DeprecationWarning)
+            except AttributeError:
+                pass
         if func:
             try:
                 raw_args = {'domain': domain, 'intent': intent, 'entity': entity}
@@ -479,26 +498,34 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
                 logger.warning('%r configuration provider raised exception: %s', clf_type, exc)
 
     attr_name = {
-        'domain': 'DOMAIN_MODEL_CONFIG',
-        'intent': 'INTENT_MODEL_CONFIG',
-        'entity': 'ENTITY_MODEL_CONFIG',
-        'entity_resolution': 'ENTITY_RESOLUTION_CONFIG',
-        'role': 'ROLE_MODEL_CONFIG',
+        'domain': 'DOMAIN_CLASSIFIER_CONFIG',
+        'intent': 'INTENT_CLASSIFIER_CONFIG',
+        'entity': 'ENTITY_RECOGNIZER_CONFIG',
+        'entity_resolution': 'ENTITY_RESOLVER_CONFIG',
+        'role': 'ROLE_CLASSIFIER_CONFIG',
     }[clf_type]
     try:
         return copy.deepcopy(getattr(module_conf, attr_name))
     except AttributeError:
-        logger.info('No %s model configuration set. Using default.', clf_type)
+        try:
+            result = copy.deepcopy(getattr(module_conf, CONFIG_DEPRECATION_MAPPING[attr_name]))
+            msg = '%s config is deprecated. Please use the equivalent %s config ' \
+                  'key' % (CONFIG_DEPRECATION_MAPPING[attr_name], attr_name)
+            warnings.warn(msg, DeprecationWarning)
+            return result
+        except AttributeError:
+            logger.info('No %s model configuration set. Using default.', clf_type)
+
     return _get_default_classifier_config(clf_type)
 
 
 def _get_default_classifier_config(clf_type):
     return copy.deepcopy({
-        'domain': DEFAULT_DOMAIN_MODEL_CONFIG,
-        'intent': DEFAULT_INTENT_MODEL_CONFIG,
-        'entity': DEFAULT_ENTITY_MODEL_CONFIG,
-        'entity_resolution': DEFAULT_ENTITY_RESOLUTION_CONFIG,
-        'role': DEFAULT_ROLE_MODEL_CONFIG
+        'domain': DEFAULT_DOMAIN_CLASSIFIER_CONFIG,
+        'intent': DEFAULT_INTENT_CLASSIFIER_CONFIG,
+        'entity': DEFAULT_ENTITY_RECOGNIZER_CONFIG,
+        'entity_resolution': DEFAULT_ENTITY_RESOLVER_CONFIG,
+        'role': DEFAULT_ROLE_CLASSIFIER_CONFIG
     }[clf_type])
 
 
