@@ -773,6 +773,14 @@ class IntentProcessor(Processor):
                         aligned_entities[i].append(entity)
         return aligned_entities
 
+    def _classify_and_resolve_entities(self, idx, query, processed_entities, aligned_entities):
+        entity = processed_entities[idx]
+        # Run the role classification
+        entity = self.entities[entity.entity.type].process_entity(query, processed_entities, idx)
+        # Run the entity resolution
+        entity = self.entities[entity.entity.type].resolve_entity(entity, aligned_entities[idx])
+        return entity
+
     def _process_entities(self, query, entities, aligned_entities):
         """
 
@@ -789,18 +797,10 @@ class IntentProcessor(Processor):
         if isinstance(query, (list, tuple)):
             query = query[0]
 
-        # TODO: run in parallel
-        # Run the role classification
         processed_entities = [deepcopy(e) for e in entities[0]]
-        for idx, entity in enumerate(processed_entities):
-            processed_entities[idx] = \
-                self.entities[entity.entity.type].process_entity(query, processed_entities, idx)
-
-        # TODO: run in parallel
-        # Run the entity resolution
-        for idx, entity in enumerate(processed_entities):
-            processed_entities[idx] = \
-                self.entities[entity.entity.type].resolve_entity(entity, aligned_entities[idx])
+        processed_entities = self._process_list([i for i in range(len(processed_entities))],
+                                                '_classify_and_resolve_entities',
+                                                *[query, processed_entities, aligned_entities])
 
         # Run the entity parsing
         processed_entities = self.parser.parse_entities(query, processed_entities) \
