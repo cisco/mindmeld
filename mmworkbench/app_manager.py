@@ -105,8 +105,7 @@ class ApplicationManager(object):
             return
         self.nlp.load()
 
-    def parse(self, text, params=None, context=None, frame=None, history=None, verbose=False,
-              session=None):
+    def parse(self, text, params=None, context=None, frame=None, history=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
@@ -121,7 +120,6 @@ class ApplicationManager(object):
             context (dict, optional): Description
             history (list, optional): Description
             verbose (bool, optional): Description
-            session (dict, optional): Deprecated since 3.3.0 in favor of context
 
         Returns:
             (dict): Context object
@@ -135,9 +133,7 @@ class ApplicationManager(object):
         """
 
         params = params or {}
-        context = context or session or {}
-        if session:
-            logger.warning("The 'session' parameter is deprecated. Please use 'context' instead.")
+        context = context or {}
         history = history or []
         frame = frame or {}
         # TODO: what do we do with verbose???

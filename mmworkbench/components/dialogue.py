@@ -480,13 +480,11 @@ class Conversation(object):
         default_params (dict): The default params to use with each turn. These
             defaults will be overridden by params passed for each turn.
         params (dict): The params returned by the most recent turn.
-        session (dict): Deprecated since 3.3 in favor of context
     """
 
     logger = mod_logger.getChild('Conversation')
 
-    def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None,
-                 session=None):
+    def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None):
         """
         Args:
             app (Application, optional): An initialized app object. Either app or app_path must
@@ -498,17 +496,13 @@ class Conversation(object):
             context (dict, optional): The context to be used in the conversation
             default_params (dict, optional): The default params to use with each turn. These
                 defaults will be overridden by params passed for each turn.
-            session (dict): Deprecated since 3.3 in favor of context
         """
         app = app or _get_app_module(app_path)
         app.lazy_init(nlp)
         self._app_manager = app.app_manager
         if not self._app_manager.ready:
             self._app_manager.load()
-        self.context = context or session or {}
-        if session:
-            self.logger.warning("The 'session' argument is deprecated. "
-                                "Please use 'context' instead.")
+        self.context = context or {}
         self.history = []
         self.frame = {}
         self.default_params = default_params or {}
