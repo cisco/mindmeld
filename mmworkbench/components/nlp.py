@@ -760,7 +760,13 @@ class IntentProcessor(Processor):
         return entities
 
     def _align_entities(self, entities):
-        """If nbest is enabled, align the spans.
+        """If nbest is enabled, align the spans. In a single query, there may be multiple entities
+        and multiple entities of the same type. Some entities may be misrecognized as another type,
+        entities may fail to be recognized at all, entities may be recognized where one doesn't
+        exist, and the span of entities in different n-best hypotheses may vary due to
+        mistranscriptions of context words. Taking these possibilities into account, we must come up
+        with a method of aligning recognized text spans across the n-best queries to group them with
+        the other text spans that are referring to the same entity.
 
         Args:
             entities (list of lists of QueryEntity objects): A list of lists of entity objects,
@@ -934,21 +940,21 @@ class EntityProcessor(Processor):
 
         return entity
 
-    def resolve_entity(self, entity, entity_spans=None):
+    def resolve_entity(self, entity, aligned_entity_spans=None):
         """Does the resolution of a single entity. If entity_spans is not None, the resolution leverages
         the n best spans. Otherwise, does the resolution on just the text of the entity.
 
         Args:
             entity (QueryEntity): The entity to process
-            entity_spans (list of QueryEntity): The list of n-best entity spans to improve
-                resolution
+            aligned_entity_spans (list of QueryEntity): The list of aligned n-best entity spans
+                to improve resolution
 
         Returns:
             Entity: The entity populated with the resolved values
         """
         self._check_ready()
-        if entity_spans:
-            entity_list = [e.entity for e in entity_spans]
+        if aligned_entity_spans:
+            entity_list = [e.entity for e in aligned_entity_spans]
         else:
             entity_list = [entity.entity]
         entity.entity.value = self.entity_resolver.predict(entity_list)
