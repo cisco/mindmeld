@@ -476,7 +476,7 @@ class Conversation(object):
 
     Attributes:
         history (list): The history of the conversation. Most recent messages are earliry
-        session (dict): The session of the conversation, containing user context
+        context (dict): The context of the conversation, containing user context
         default_params (dict): The default params to use with each turn. These
             defaults will be overridden by params passed for each turn.
         params (dict): The params returned by the most recent turn.
@@ -484,7 +484,7 @@ class Conversation(object):
 
     logger = mod_logger.getChild('Conversation')
 
-    def __init__(self, app=None, app_path=None, nlp=None, session=None, default_params=None):
+    def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None):
         """
         Args:
             app (Application, optional): An initialized app object. Either app or app_path must
@@ -493,7 +493,7 @@ class Conversation(object):
                 Either app or app_path must be given.
             nlp (NaturalLanguageProcessor, optional): A natural language processor for the app.
                 If passed, changes to this processor will affect the response from `say()`
-            session (dict, optional): The session to be used in the conversation
+            context (dict, optional): The context to be used in the conversation
             default_params (dict, optional): The default params to use with each turn. These
                 defaults will be overridden by params passed for each turn.
         """
@@ -502,7 +502,7 @@ class Conversation(object):
         self._app_manager = app.app_manager
         if not self._app_manager.ready:
             self._app_manager.load()
-        self.session = session or {}
+        self.context = context or {}
         self.history = []
         self.frame = {}
         self.default_params = default_params or {}
@@ -544,7 +544,7 @@ class Conversation(object):
         params = copy.deepcopy(self.params)
         params.update(external_params)
 
-        response = self._app_manager.parse(text, params=params, session=self.session,
+        response = self._app_manager.parse(text, params=params, context=self.context,
                                            frame=self.frame, history=self.history)
 
         self.history = response['history']
