@@ -792,7 +792,7 @@ class IntentProcessor(Processor):
                         if ref_end == ref_start:
                             ref_end += 1
                         # if there is an overlap in spans and is of the same type, align it
-                        if len(range(max(ref_start, n_start), min(n_end, ref_end))) != 0 and \
+                        if min(n_end, ref_end) - max(ref_start, n_start) != 0 and \
                                 ref_entity.entity.type == entity.entity.type:
                             index_to_align = index_to_align + j
                             aligned_entities[index_to_align].append(entity)
