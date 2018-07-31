@@ -406,7 +406,7 @@ DEFAULT_RANKING_CONFIG = {
 }
 
 DEFAULT_NLP_CONFIG = {
-    'resolve_entitites_using_nbest_alternates': []
+    'resolve_entities_using_nbest_alternates': []
 }
 
 

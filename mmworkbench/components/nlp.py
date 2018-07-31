@@ -317,7 +317,7 @@ class NaturalLanguageProcessor(Processor):
         for domain in path.get_domains(self._app_path):
             self._children[domain] = DomainProcessor(app_path, domain, self.resource_loader)
 
-        nbest_nlp_classes = self.config.get('resolve_entitites_using_nbest_alternates', {})
+        nbest_nlp_classes = self.config.get('resolve_entities_using_nbest_alternates', {})
         if len(nbest_nlp_classes) > 0:
             nbest_nlp_classes = self.extract_allowed_intents(nbest_nlp_classes)
 

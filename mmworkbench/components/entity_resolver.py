@@ -231,7 +231,7 @@ class EntityResolver(object):
         trained entity resolution model
 
         Args:
-            entity (Entity, or tuple): An entity found in an input query, or a list of n best entity
+            entity (Entity, or tuple): An entity found in an input query, or a list of n-best entity
                                        objects
 
         Returns:

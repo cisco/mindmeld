@@ -1,5 +1,5 @@
 NLP_CONFIG = {
-    'resolve_entitites_using_nbest_alternates': ['store_info.get_store_hours']
+    'resolve_entities_using_nbest_alternates': ['store_info.get_store_hours']
 }
 
 DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
