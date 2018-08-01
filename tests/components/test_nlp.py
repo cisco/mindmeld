@@ -168,13 +168,13 @@ test_data_4 = [
      ),
     (
         ['is the 104 first street store open this sunday',
-         'is the 4 first street store open this sunday',
-         'is the hundred and four street store open this sunday'],
+         'is the first street store open this sunday',
+         'is the 10 4 street store open this sunday'],
         'store_info',
         'get_store_hours',
         [['104 first street', 'this sunday'], ['first street', 'this sunday'],
-         ['this sunday']],
-        [['104 first street', 'first street'],
+         ['10 4 street', 'this sunday']],
+        [['104 first street', 'first street', '10 4 street'],
          ['this sunday', 'this sunday', 'this sunday']]
     )
 ]
