@@ -845,7 +845,7 @@ class IntentProcessor(Processor):
                 using_nbest_transcripts = True
             query = tuple(query)
         else:
-            query = tuple([query])
+            query = (query,)
 
         entities = self._recognize_entities(query)
         aligned_entities = self._align_entities(entities)
