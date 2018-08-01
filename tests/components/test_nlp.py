@@ -165,7 +165,18 @@ test_data_4 = [
         'get_store_hours',
         [['23rd helm street'], ['23rd elm st'], ['23 elm street']],
         [['23rd helm street', '23rd elm st', '23 elm street']],
-     )
+     ),
+    (
+        ['is the 104 first street store open this sunday',
+         'is the 4 first street store open this sunday',
+         'is the hundred and four street store open this sunday'],
+        'store_info',
+        'get_store_hours',
+        [['104 first street', 'this sunday'], ['first street', 'this sunday'],
+         ['this sunday']],
+        [['104 first street', 'first street'],
+         ['this sunday', 'this sunday', 'this sunday']]
+    )
 ]
 
 
