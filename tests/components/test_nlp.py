@@ -172,9 +172,9 @@ test_data_4 = [
          'is the hundred and four street store open this sunday'],
         'store_info',
         'get_store_hours',
-        [['104 first street', 'this sunday'], ['first street', 'this sunday'],
-         ['this sunday']],
-        [['104 first street', 'first street'],
+        [['104 first street', 'this sunday'], ['4 first street', 'this sunday'],
+         ['street', 'this sunday']],
+        [['104 first street', '4 first street', 'street'],
          ['this sunday', 'this sunday', 'this sunday']]
     )
 ]
