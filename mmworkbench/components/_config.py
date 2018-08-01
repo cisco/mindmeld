@@ -406,7 +406,7 @@ DEFAULT_RANKING_CONFIG = {
 }
 
 DEFAULT_NLP_CONFIG = {
-    'extract_nbest_entities': []
+    'resolve_entities_using_nbest_transcripts': []
 }
 
 

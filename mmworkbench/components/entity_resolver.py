@@ -231,82 +231,93 @@ class EntityResolver(object):
         trained entity resolution model
 
         Args:
-            entity (Entity): An entity found in an input query
+            entity (Entity, or tuple): An entity found in an input query, or a list of n-best entity
+                                       objects
 
         Returns:
             The top 20 resolved values for the provided entity
         """
+        if isinstance(entity, (list, tuple)):
+            top_entity = entity[0]
+            entity = tuple(entity)
+        else:
+            top_entity = entity
+            entity = tuple([entity])
+
         if self._is_system_entity:
             # system entities are already resolved
-            return [entity.value]
+            return [top_entity.value]
 
         if not self._use_text_rel:
-            return self._predict_exact_match(entity)
+            return self._predict_exact_match(top_entity)
+
+        weight_factors = [1 - float(i) / len(entity) for i in range(len(entity))]
+
+        def _construct_match_query(entity, weight=1):
+            return [
+                       {
+                            "match": {
+                                "cname.normalized_keyword": {
+                                    "query": entity.text,
+                                    "boost": 10 * weight
+                                }
+                            }
+                       },
+                       {
+                            "match": {
+                                "cname.raw": {
+                                    "query": entity.text,
+                                    "boost": 10 * weight
+                                }
+                            }
+                       }
+                   ]
+
+        def _construct_whitelist_query(entity, weight=1):
+            return {
+                        "nested": {
+                            "path": "whitelist",
+                            "score_mode": "max",
+                            "query": {
+                                "bool": {
+                                    "should": [
+                                        {
+                                            "match": {
+                                                "whitelist.name.normalized_keyword": {
+                                                    "query": entity.text,
+                                                    "boost": 10 * weight
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "whitelist.name": {
+                                                    "query": entity.text,
+                                                    "boost": weight
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "whitelist.name.char_ngram": {
+                                                    "query": entity.text,
+                                                    "boost": weight
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "inner_hits": {}
+                        }
+                   }
 
         text_relevance_query = {
             "query": {
                 "function_score": {
                     "query": {
                         "bool": {
-                            "should": [
-                                {
-                                    "bool": {
-                                        "should": [
-                                            {
-                                                "match": {
-                                                    "cname.normalized_keyword": {
-                                                        "query": entity.text,
-                                                        "boost": 10
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                "match": {
-                                                    "cname.raw": {
-                                                        "query": entity.text,
-                                                        "boost": 10
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    "nested": {
-                                        "path": "whitelist",
-                                        "score_mode": "max",
-                                        "query": {
-                                            "bool": {
-                                                "should": [
-                                                    {
-                                                        "match": {
-                                                            "whitelist.name.normalized_keyword": {
-                                                                "query": entity.text,
-                                                                "boost": 10
-                                                            }
-                                                        }
-                                                    },
-                                                    {
-                                                        "match": {
-                                                            "whitelist.name": {
-                                                                "query": entity.text
-                                                            }
-                                                        }
-                                                    },
-                                                    {
-                                                        "match": {
-                                                            "whitelist.name.char_ngram": {
-                                                                "query": entity.text
-                                                            }
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "inner_hits": {}
-                                    }
-                                }
-                            ]
+                            "should": []
                         }
                     },
                     "field_value_factor": {
@@ -320,6 +331,16 @@ class EntityResolver(object):
                 }
             }
         }
+
+        match_query = []
+        for e, weight in zip(entity, weight_factors):
+            match_query.extend(_construct_match_query(e, weight))
+        text_relevance_query["query"]["function_score"]["query"]["bool"]["should"].append(
+            {"bool": {"should": match_query}})
+
+        whitelist_query = _construct_whitelist_query(top_entity)
+        text_relevance_query["query"]["function_score"]["query"]["bool"]["should"].append(
+            whitelist_query)
 
         try:
             index = get_scoped_index_name(self._app_namespace, self._es_index_name)

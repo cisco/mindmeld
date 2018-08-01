@@ -163,29 +163,36 @@ test_data_4 = [
          'when is the 23 elm street quicky mart open?'],
         'store_info',
         'get_store_hours',
-        [['23rd helm street'], ['23rd elm st'], ['23 elm street']]
+        [['23rd helm street'], ['23rd elm st'], ['23 elm street']],
+        [['23rd helm street', '23rd elm st', '23 elm street']],
      )
 ]
 
 
-@pytest.mark.parametrize("queries,expected_domain,expected_intent,expected_nbest_entities",
-                         test_data_4)
-def test_process_nbest(nlp, queries, expected_domain, expected_intent, expected_nbest_entities):
+@pytest.mark.parametrize("queries,expected_domain,expected_intent,expected_nbest_entities,"
+                         "expected_aligned_entities", test_data_4)
+def test_process_nbest(nlp, queries, expected_domain, expected_intent, expected_nbest_entities,
+                       expected_aligned_entities):
     """Tests a call to process with n-best transcripts passed in."""
     response = nlp.process(queries)
     response['entities_text'] = [e['text'] for e in response['entities']]
     response.pop('entities')
-    response['nbest_entities_text'] = [[e['text'] for e in n_entities]
-                                       for n_entities in response['nbest_entities']]
-    response.pop('nbest_entities')
+    response['nbest_transcripts_entities_text'] = [[e['text'] for e in n_entities]
+                                                   for n_entities in
+                                                   response['nbest_transcripts_entities']]
+    response.pop('nbest_transcripts_entities')
+    response['nbest_aligned_entities_text'] = [[e['text'] for e in n_entities]
+                                               for n_entities in response['nbest_aligned_entities']]
+    response.pop('nbest_aligned_entities')
 
     assert response == {
         'text': queries[0],
         'domain': expected_domain,
         'intent': expected_intent,
         'entities_text': expected_nbest_entities[0],
-        'nbest_text': queries,
-        'nbest_entities_text': expected_nbest_entities
+        'nbest_transcripts_text': queries,
+        'nbest_transcripts_entities_text': expected_nbest_entities,
+        'nbest_aligned_entities_text': expected_aligned_entities
     }
 
 
