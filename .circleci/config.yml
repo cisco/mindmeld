@@ -1,0 +1,182 @@
+version: 2
+
+# Workflows
+
+workflows:
+  version: 2
+  test-and-deploy:
+    jobs:
+      - test-py3.6
+      # - test-py3.5
+      # - test-py3.4
+      # - test-py2.7
+      - deploy-blueprint:
+          requires:
+            - test-py3.6
+            # - test-py3.5
+            # - test-py3.4
+            # - test-py2.7
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+
+# Definitions (keep config D.R.Y.)
+
+definitions:
+
+  images:
+
+    es-image: &es-image
+        image: docker.elastic.co/elasticsearch/elasticsearch:5.6.10
+        environment:
+          - discovery.type=single-node
+          - http.host=0.0.0.0
+          - transport.host=127.0.0.1
+          - xpack.security.enabled=false
+          - ES_JAVA_OPTS=-Xms768m -Xmx768m
+
+  steps:
+
+    # Step Sequences
+
+    test-steps: &test-steps
+
+      - checkout
+
+      - run:
+          name: Install OpenJDK JRE
+          command: |
+            sudo apt-get update
+            sudo apt-get install openjdk-8-jre
+
+      - run:
+          name: Start numerical parser
+          background: true
+          command: |
+            java -jar mmworkbench/resources/mindmeld-mallard.jar
+
+      - restore_cache:
+          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "dev-requirements.txt" }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+
+      - run:
+          name: Install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.3.0
+
+      - run:
+          name: Activate virtualenv and install requirements
+          command: |
+            python -m venv ~/venv
+            if [ echo $0 ]; then
+              pip install virtualenv
+              python -m virtualenv ~/venv
+            fi
+            echo ". ~/venv/bin/activate" >> $BASH_ENV
+            source $BASH_ENV
+            pip install -r dev-requirements.txt
+
+      - save_cache:
+          name: Save python deps cache
+          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "dev-requirements.txt" }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+          paths:
+            - ~/venv
+
+      - run:
+          name: Run linters and static analysis
+          command: |
+            flake8 mmworkbench tests
+
+      - run:
+          name: Wait for elasticsearch & numerical parser
+          when: always
+          command: |
+            dockerize -wait tcp://localhost:9200 -timeout 1m
+            dockerize -wait tcp://localhost:2626 -timeout 1m
+
+      - run:
+          name: Run python tests
+          # run this even when linting fails
+          when: always
+          command: |
+            # run tests
+            mkdir ~/test-reports
+            pytest --junitxml=~/test-reports/junit.xml
+
+      - store_test_results:
+          path: ~/test-reports
+
+      - store_artifacts:
+          path: ~/test-reports
+
+
+# Jobs
+
+jobs:
+  test-py3.6:
+    docker:
+      - image: circleci/python:3.6
+        environment:
+          PYTHON_VERSION: "3.6"
+      - *es-image
+    steps: *test-steps
+
+  test-py3.5:
+    docker:
+      - image: circleci/python:3.5
+        environment:
+          PYTHON_VERSION: "3.5"
+      - *es-image
+    steps: *test-steps
+
+  test-py3.4:
+    docker:
+      - image: circleci/python:3.4
+        environment:
+          PYTHON_VERSION: "3.4"
+      - *es-image
+    steps: *test-steps
+
+  test-py2.7:
+    docker:
+      - image: circleci/python:2.7
+        environment:
+          PYTHON_VERSION: "2.7"
+      - *es-image
+    steps: *test-steps
+
+  deploy-blueprint:
+    docker:
+      - image: circleci/python:3.6
+        environment:
+          PYTHON_VERSION: "3.6"
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "dev-requirements.txt" }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+
+      - run:
+          name: Activate virtualenv and install requirements
+          command: |
+            python -m venv ~/venv
+            if [ echo $0 ]; then
+              pip install virtualenv
+              python -m virtualenv ~/venv
+            fi
+            echo ". ~/venv/bin/activate" >> $BASH_ENV
+            source $BASH_ENV
+            pip install -r dev-requirements.txt
+
+      - save_cache:
+          name: Save python deps cache
+          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "dev-requirements.txt" }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+          paths:
+            - ~/venv
+
+      - deploy:
+          command: |
+            MM_BRANCH=$CIRCLE_BRANCH bash scripts/upload_blueprint.sh -d `pwd`/tests/kwik_e_mart -b kwik_e_mart
