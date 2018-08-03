@@ -10,34 +10,21 @@ Tests for NaturalLanguageProcessor module.
 # pylint: disable=locally-disabled,redefined-outer-name
 from __future__ import unicode_literals
 
-import os
-
 import pytest
 
 from mmworkbench.exceptions import ProcessorError, AllowedNlpClassesKeyError
 from mmworkbench.components import NaturalLanguageProcessor
 
-APP_NAME = 'kwik_e_mart'
-APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME)
-
 
 @pytest.fixture
-def empty_nlp():
+def empty_nlp(kwik_e_mart_app_path):
     """Provides an empty, unbuilt processor instance"""
-    return NaturalLanguageProcessor(APP_PATH)
+    return NaturalLanguageProcessor(app_path=kwik_e_mart_app_path)
 
 
-@pytest.fixture(scope='module')
-def nlp():
-    """Provides an empty processor instance"""
-    nlp = NaturalLanguageProcessor(APP_PATH)
-    nlp.build()
-    return nlp
-
-
-def test_instantiate():
+def test_instantiate(kwik_e_mart_app_path):
     """Tests creating an NLP instance"""
-    nlp = NaturalLanguageProcessor(APP_PATH)
+    nlp = NaturalLanguageProcessor(kwik_e_mart_app_path)
     assert nlp
 
 
@@ -50,9 +37,9 @@ def test_build(empty_nlp):
     nlp.build()
 
 
-def test_dump(nlp):
+def test_dump(kwik_e_mart_nlp):
     """Test dump method of nlp"""
-    nlp.dump()
+    kwik_e_mart_nlp.dump()
 
 
 def test_early_process(empty_nlp):
@@ -63,14 +50,14 @@ def test_early_process(empty_nlp):
 
 
 @pytest.mark.skip
-def test_load(nlp):
+def test_load(kwik_e_mart_nlp):
     """Tests loading a processor from disk"""
-    nlp.load()
+    kwik_e_mart_nlp.load()
 
 
-def test_process(nlp):
+def test_process(kwik_e_mart_nlp):
     """Tests a basic call to process"""
-    response = nlp.process('Hello')
+    response = kwik_e_mart_nlp.process('Hello')
 
     assert response == {
         'text': 'Hello',
@@ -92,10 +79,11 @@ test_data_1 = [
 
 
 @pytest.mark.parametrize("allowed_intents,query,expected_domain,expected_intent", test_data_1)
-def test_nlp_hierarchy_bias_for_user_bias(nlp, allowed_intents, query, expected_domain,
-                                          expected_intent):
+def test_nlp_hierarchy_bias_for_user_bias(kwik_e_mart_nlp, allowed_intents, query,
+                                          expected_domain, expected_intent):
     """Tests user specified domain and intent biases"""
-    response = nlp.process(query, nlp.extract_allowed_intents(allowed_intents))
+    extracted_intents = kwik_e_mart_nlp.extract_allowed_intents(allowed_intents)
+    response = kwik_e_mart_nlp.process(query, extracted_intents)
 
     assert response == {
         'text': query,
@@ -117,11 +105,11 @@ test_data_2 = [
 
 
 @pytest.mark.parametrize("allowed_intents,query,expected_domain,expected_intent", test_data_2)
-def test_nlp_hierarchy_using_domains_intents(nlp, allowed_intents,
-                                             query, expected_domain,
-                                             expected_intent):
+def test_nlp_hierarchy_using_domains_intents(kwik_e_mart_nlp, allowed_intents,
+                                             query, expected_domain, expected_intent):
     """Tests user specified allowable domains and intents"""
-    response = nlp.process(query, nlp.extract_allowed_intents(allowed_intents))
+    extracted_intents = kwik_e_mart_nlp.extract_allowed_intents(allowed_intents)
+    response = kwik_e_mart_nlp.process(query, extracted_intents)
 
     assert response == {
         'text': query,
@@ -140,20 +128,20 @@ test_data_3 = [
 
 
 @pytest.mark.parametrize("query", test_data_3)
-def test_nlp_hierarchy_for_queries_mallard_fails_on(nlp, query):
+def test_nlp_hierarchy_for_queries_mallard_fails_on(kwik_e_mart_nlp, query):
     """Tests user specified allowable domains and intents"""
-    response = nlp.process(query)
+    response = kwik_e_mart_nlp.process(query)
     assert response['text'] == query
 
 
-def test_validate_and_extract_allowed_intents(nlp):
+def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
     """Tests user specified allowable domains and intents"""
     with pytest.raises(ValueError):
-        nlp.extract_allowed_intents(['store_info'])
+        kwik_e_mart_nlp.extract_allowed_intents(['store_info'])
     with pytest.raises(AllowedNlpClassesKeyError):
-        nlp.extract_allowed_intents(['unrelated_domain.*'])
+        kwik_e_mart_nlp.extract_allowed_intents(['unrelated_domain.*'])
     with pytest.raises(AllowedNlpClassesKeyError):
-        nlp.extract_allowed_intents(['store_info.unrelated_intent'])
+        kwik_e_mart_nlp.extract_allowed_intents(['store_info.unrelated_intent'])
 
 
 test_data_4 = [
@@ -182,10 +170,10 @@ test_data_4 = [
 
 @pytest.mark.parametrize("queries,expected_domain,expected_intent,expected_nbest_entities,"
                          "expected_aligned_entities", test_data_4)
-def test_process_nbest(nlp, queries, expected_domain, expected_intent, expected_nbest_entities,
-                       expected_aligned_entities):
+def test_process_nbest(kwik_e_mart_nlp, queries, expected_domain, expected_intent,
+                       expected_nbest_entities, expected_aligned_entities):
     """Tests a call to process with n-best transcripts passed in."""
-    response = nlp.process(queries)
+    response = kwik_e_mart_nlp.process(queries)
     response['entities_text'] = [e['text'] for e in response['entities']]
     response.pop('entities')
     response['nbest_transcripts_entities_text'] = [[e['text'] for e in n_entities]
@@ -217,10 +205,12 @@ test_data_5 = [
 
 
 @pytest.mark.parametrize("queries,expected_domain,expected_intent", test_data_5)
-def test_process_nbest_unspecified_intent(nlp, queries, expected_domain, expected_intent):
-    """Tests a basic call to process with n-best transcripts passed in for an intent where
-        n-best processing is unavailable."""
-    response = nlp.process(queries)
+def test_process_nbest_unspecified_intent(kwik_e_mart_nlp, queries,
+                                          expected_domain, expected_intent):
+    """Tests a basic call to process with n-best transcripts passed in
+    for an intent where n-best processing is unavailable.
+    """
+    response = kwik_e_mart_nlp.process(queries)
 
     assert response == {
         'text': queries[0],
@@ -236,14 +226,16 @@ test_data_6 = [
 
 
 @pytest.mark.parametrize("queries", test_data_6)
-def test_process_empty_nbest_unspecified_intent(nlp, queries):
-    """Tests a basic call to process with n-best transcripts passed in for an intent where
-        n-best is an empty list"""
-    response = nlp.process(queries)
+def test_process_empty_nbest_unspecified_intent(kwik_e_mart_nlp, queries):
+    """Tests a basic call to process with n-best transcripts passed in
+    for an intent where n-best is an empty list.
+    """
+    response = kwik_e_mart_nlp.process(queries)
     assert response['text'] == ''
 
 
-def test_parallel_processing(nlp):
+def test_parallel_processing(kwik_e_mart_nlp):
+    nlp = kwik_e_mart_nlp
     import mmworkbench.components.nlp as nlp_module
     import os
     import time
@@ -295,10 +287,14 @@ def test_parallel_processing(nlp):
         assert processed == ('a-parent', 'b-parent', 'c-parent')
 
 
-def test_custom_data(nlp):
-    assert nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer._model_config.train_label_set == 'testtrain.*\\.txt' # noqa E501
-    assert nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer._model_config.test_label_set == 'testtrain.*\\.txt' # noqa E501
+def test_custom_data(kwik_e_mart_nlp):
+    store_info_processor = kwik_e_mart_nlp.domains.store_info
+
+    store_hours_ent_rec = store_info_processor.intents.get_store_hours.entity_recognizer
+    assert store_hours_ent_rec._model_config.train_label_set == 'testtrain.*\\.txt'
+    assert store_hours_ent_rec._model_config.test_label_set == 'testtrain.*\\.txt'
 
     # make sure another intent doesn't have the same custom data specs
-    assert nlp.domains['store_info'].intents['exit'].entity_recognizer._model_config.train_label_set != 'testtrain.*\\.txt' # noqa E501
-    assert nlp.domains['store_info'].intents['exit'].entity_recognizer._model_config.test_label_set != 'testtrain.*\\.txt' # noqa E501
+    exit_ent_rec = store_info_processor.intents.exit.entity_recognizer
+    assert exit_ent_rec._model_config.train_label_set != 'testtrain.*\\.txt'
+    assert exit_ent_rec._model_config.test_label_set != 'testtrain.*\\.txt'
