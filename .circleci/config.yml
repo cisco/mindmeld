@@ -7,15 +7,15 @@ workflows:
   test-and-deploy:
     jobs:
       - test-py3.6
-      # - test-py3.5
-      # - test-py3.4
-      # - test-py2.7
+      - test-py3.5
+      - test-py3.4
+      - test-py2.7
       - deploy-blueprint:
           requires:
             - test-py3.6
-            # - test-py3.5
-            # - test-py3.4
-            # - test-py2.7
+            - test-py3.5
+            - test-py3.4
+            - test-py2.7
           filters:
             branches:
               only:
@@ -40,6 +40,45 @@ definitions:
 
   steps:
 
+    # Steps
+
+    py-deps: &py-deps
+      run:
+          name: Activate virtualenv and install requirements
+          command: |
+            set +e
+            python -m venv ~/venv
+            if [ "$?" -eq "1" ]; then
+              # python 2.7 needs virtualenv
+              set -e
+              pip install virtualenv
+              python -m virtualenv ~/venv
+            fi
+            set -e
+
+            # active venv
+            echo ". ~/venv/bin/activate" >> $BASH_ENV
+            source $BASH_ENV
+
+            # upgrade pip to latest
+            pip install -U pip
+
+            IS_PY_34=`python -c "import sys; print((3,4) <= sys.version_info < (3,5))"`
+            if [ "$IS_PY_34" == "True" ]; then
+              # pandas fails to install on Python 3.4 with build isolation
+              # it is no longer officially supported
+              pip install numpy~=1.14
+              pip install pandas~=0.22 --no-build-isolation
+            fi
+
+            # tensorflow requires an earlier version of setuptools
+            # this shouldn't need this, but builds fail intermittently without it
+            pip install "setuptools<=39.1.0"
+
+            # install mmworkbench and test requirements
+            pip install -e .
+            pip install -r test-requirements.txt
+
     # Step Sequences
 
     test-steps: &test-steps
@@ -59,7 +98,7 @@ definitions:
             java -jar mmworkbench/resources/mindmeld-mallard.jar
 
       - restore_cache:
-          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "dev-requirements.txt" }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
 
       - run:
           name: Install dockerize
@@ -67,21 +106,11 @@ definitions:
           environment:
             DOCKERIZE_VERSION: v0.3.0
 
-      - run:
-          name: Activate virtualenv and install requirements
-          command: |
-            python -m venv ~/venv
-            if [ echo $0 ]; then
-              pip install virtualenv
-              python -m virtualenv ~/venv
-            fi
-            echo ". ~/venv/bin/activate" >> $BASH_ENV
-            source $BASH_ENV
-            pip install -r dev-requirements.txt
+      -  *py-deps
 
       - save_cache:
           name: Save python deps cache
-          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "dev-requirements.txt" }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
           paths:
             - ~/venv
 
@@ -118,62 +147,56 @@ definitions:
 jobs:
   test-py3.6:
     docker:
-      - image: circleci/python:3.6
+      - image: circleci/python:3.6.6
         environment:
-          PYTHON_VERSION: "3.6"
+          PYTHON_VERSION: "3.6.6"
+          _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
       - *es-image
     steps: *test-steps
 
   test-py3.5:
     docker:
-      - image: circleci/python:3.5
+      - image: circleci/python:3.5.5
         environment:
-          PYTHON_VERSION: "3.5"
+          PYTHON_VERSION: "3.5.5"
+          _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
       - *es-image
     steps: *test-steps
 
   test-py3.4:
     docker:
-      - image: circleci/python:3.4
+      - image: circleci/python:3.4.8
         environment:
-          PYTHON_VERSION: "3.4"
+          PYTHON_VERSION: "3.4.8"
+          _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
       - *es-image
     steps: *test-steps
 
   test-py2.7:
     docker:
-      - image: circleci/python:2.7
+      - image: circleci/python:2.7.15
         environment:
-          PYTHON_VERSION: "2.7"
+          PYTHON_VERSION: "2.7.15"
+          _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
       - *es-image
     steps: *test-steps
 
   deploy-blueprint:
     docker:
-      - image: circleci/python:3.6
+      - image: circleci/python:3.6.6
         environment:
-          PYTHON_VERSION: "3.6"
+          PYTHON_VERSION: "3.6.6"
     steps:
       - checkout
 
       - restore_cache:
-          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "dev-requirements.txt" }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
 
-      - run:
-          name: Activate virtualenv and install requirements
-          command: |
-            python -m venv ~/venv
-            if [ echo $0 ]; then
-              pip install virtualenv
-              python -m virtualenv ~/venv
-            fi
-            echo ". ~/venv/bin/activate" >> $BASH_ENV
-            source $BASH_ENV
-            pip install -r dev-requirements.txt
+      - *py-deps
 
       - save_cache:
           name: Save python deps cache
-          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "dev-requirements.txt" }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+          key: py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
           paths:
             - ~/venv
 
