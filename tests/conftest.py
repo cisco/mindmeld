@@ -10,6 +10,7 @@ Configurations for tests. Include shared fixtures here.
 from __future__ import unicode_literals
 
 import os
+import warnings
 
 import pytest
 import codecs
@@ -17,10 +18,14 @@ import codecs
 from mmworkbench.tokenizer import Tokenizer
 from mmworkbench.query_factory import QueryFactory
 from mmworkbench.resource_loader import ResourceLoader
-from mmworkbench.components import Preprocessor
+from mmworkbench.components import NaturalLanguageProcessor, Preprocessor
+
+warnings.filterwarnings("module", category=DeprecationWarning,
+                        module="sklearn.preprocessing.label")
 
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
+FOOD_ORDERING_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'food_ordering')
 AENEID_FILE = 'aeneid.txt'
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
 
@@ -47,9 +52,22 @@ def lstm_entity_config():
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def kwik_e_mart_app_path():
     return APP_PATH
+
+
+@pytest.fixture(scope='session')
+def food_ordering_app_path():
+    return FOOD_ORDERING_APP_PATH
+
+
+@pytest.fixture(scope='session')
+def kwik_e_mart_nlp(kwik_e_mart_app_path):
+    """Provides a built processor instance"""
+    nlp = NaturalLanguageProcessor(app_path=kwik_e_mart_app_path)
+    nlp.build()
+    return nlp
 
 
 class GhostPreprocessor(Preprocessor):

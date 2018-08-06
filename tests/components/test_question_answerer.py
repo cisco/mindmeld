@@ -17,8 +17,6 @@ from mmworkbench.components.question_answerer import QuestionAnswerer
 from mmworkbench.components._elasticsearch_helpers import create_es_client
 
 ENTITY_TYPE = 'store_name'
-KWIK_E_MART_APP_PATH = '../kwik_e_mart'
-FOOD_ORDERING_APP_PATH = '../food_ordering'
 STORE_DATA_FILE_PATH = os.path.dirname(__file__) + "/../kwik_e_mart/data/stores.json"
 DISH_DATA_FILE_PATH = os.path.dirname(__file__) + "/../food_ordering/data/menu_items.json"
 
@@ -30,22 +28,22 @@ def es_client():
 
 
 @pytest.fixture
-def answerer(es_client):
+def answerer(kwik_e_mart_app_path, es_client):
     QuestionAnswerer.load_kb(app_namespace='kwik_e_mart', index_name='store_name',
                              data_file=STORE_DATA_FILE_PATH)
     es_client.indices.flush(index='_all')
 
-    qa = QuestionAnswerer(KWIK_E_MART_APP_PATH)
+    qa = QuestionAnswerer(kwik_e_mart_app_path)
     return qa
 
 
 @pytest.fixture
-def food_ordering_answerer(resource_loader, es_client):
+def food_ordering_answerer(food_ordering_app_path, es_client):
     QuestionAnswerer.load_kb(app_namespace='food_ordering', index_name='menu_items',
                              data_file=DISH_DATA_FILE_PATH)
     es_client.indices.flush(index='_all')
 
-    qa = QuestionAnswerer(FOOD_ORDERING_APP_PATH)
+    qa = QuestionAnswerer(food_ordering_app_path)
     return qa
 
 
