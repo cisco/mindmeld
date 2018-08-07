@@ -49,6 +49,7 @@ class EntityResolver(object):
 
         er_config = get_classifier_config('entity_resolution', app_path=app_path)
         self._use_text_rel = er_config['model_type'] == 'text_relevance'
+        self._use_double_metaphone = 'double_metaphone' in er_config.get('phonetic_match_types', [])
         self._es_host = es_host
         self.__es_client = es_client
         self._pid = os.getpid()
@@ -273,6 +274,18 @@ class EntityResolver(object):
                        }
                    ]
 
+        def _construct_phonetic_match_query(entity, weight=1):
+            return [
+                       {
+                            "match": {
+                                "cname.double_metaphone": {
+                                    "query": entity.text,
+                                    "boost": 2 * weight
+                                }
+                            }
+                       }
+                    ]
+
         def _construct_whitelist_query(entity, weight=1):
             return {
                         "nested": {
@@ -335,6 +348,8 @@ class EntityResolver(object):
         match_query = []
         for e, weight in zip(entity, weight_factors):
             match_query.extend(_construct_match_query(e, weight))
+            if self._use_double_metaphone:
+                match_query.extend(_construct_phonetic_match_query(e, weight))
         text_relevance_query["query"]["function_score"]["query"]["bool"]["should"].append(
             {"bool": {"should": match_query}})
 
@@ -360,11 +375,14 @@ class EntityResolver(object):
 
             results = []
             for hit in hits:
+                top_synonym = None
+                synonym_hits = hit['inner_hits']['whitelist']['hits']['hits']
+                if len(synonym_hits) > 0:
+                    top_synonym = synonym_hits[0]['_source']['name']
                 result = {
                     'cname': hit['_source']['cname'],
                     'score': hit['_score'],
-                    'top_synonym':
-                        hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
+                    'top_synonym': top_synonym}
 
                 if hit['_source'].get('id'):
                     result['id'] = hit['_source'].get('id')
