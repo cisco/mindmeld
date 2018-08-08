@@ -551,7 +551,8 @@ class Conversation(object):
 
     logger = mod_logger.getChild('Conversation')
 
-    def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None):
+    def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None,
+                 force_sync=False):
         """
         Args:
             app (Application, optional): An initialized app object. Either app or app_path must
@@ -563,6 +564,8 @@ class Conversation(object):
             context (dict, optional): The context to be used in the conversation
             default_params (dict, optional): The default params to use with each turn. These
                 defaults will be overridden by params passed for each turn.
+            force_sync (bool, optional): Force synchronous return for `say()` and `process()`
+                even when app is in async mode.
         """
         app = app or _get_app_module(app_path)
         app.lazy_init(nlp)
@@ -573,6 +576,7 @@ class Conversation(object):
         self.history = []
         self.frame = {}
         self.default_params = default_params or {}
+        self.force_sync = force_sync
         self.params = {}
 
     @property
@@ -583,21 +587,26 @@ class Conversation(object):
     def session(self, value):
         raise AttributeError("'session' was removed in Workbench 4.0.0. Use 'context' instead.")
 
-    def say(self, text, params=None):
+    def say(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be
         processed by the app based on the current state of the conversation and
         returns the extracted messages from the directives.
 
         Args:
             text (str): The text of a message
-            params (dict): The params to use with this message, overriding any defaults
-                which may have been set
+            params (dict): The params to use with this message,
+                overriding any defaults which may have been set
+            force_sync (bool, optional): Force synchronous response
+                even when app is in async mode.
 
         Returns:
             list of str: A text representation of the dialogue responses
         """
         if self._app_manager.async_mode:
-            return self._say_async(text, params=params)
+            res = self._say_async(text, params=params)
+            if self.force_sync or force_sync:
+                return asyncio.get_event_loop().run_until_complete(res)
+            return res
 
         response = self.process(text, params=params)
 
@@ -612,8 +621,10 @@ class Conversation(object):
 
         Args:
             text (str): The text of a message
-            params (dict): The params to use with this message, overriding any defaults
-                which may have been set
+            params (dict): The params to use with this message,
+                overriding any defaults which may have been set
+            force_sync (bool, optional): Force synchronous response
+                even when app is in async mode.
 
         Returns:
             list of str: A text representation of the dialogue responses
@@ -624,7 +635,7 @@ class Conversation(object):
         response_texts = [self._follow_directive(a) for a in response['directives']]
         return response_texts
 
-    def process(self, text, params=None):
+    def process(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be processed by
         the app based on the current state of the conversation and returns
         the response.
@@ -638,7 +649,10 @@ class Conversation(object):
             (dictionary): The dictionary Response
         """
         if self._app_manager.async_mode:
-            return self._process_async(text, params=params)
+            res = self._process_async(text, params=params)
+            if self.force_sync or force_sync:
+                return asyncio.get_event_loop().run_until_complete(res)
+            return res
 
         if not self._app_manager.ready:
             self._app_manager.load()

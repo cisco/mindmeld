@@ -243,3 +243,29 @@ async def test_convo_params_are_cleared(async_kwik_e_mart_app, kwik_e_mart_app_p
     await convo.say('close door')
 
     assert convo.params == {}
+
+
+@pytest.mark.conversation
+def test_convo_force_sync_creation(async_kwik_e_mart_app, kwik_e_mart_app_path):
+    """Tests that force sync kwarg works correctly when passed to convo
+    at creation.
+    """
+    convo = Conversation(app=async_kwik_e_mart_app,
+                         app_path=kwik_e_mart_app_path,
+                         force_sync=True)
+
+    response = convo.process('close door')
+
+    assert isinstance(response, dict)
+
+
+@pytest.mark.conversation
+def test_convo_force_sync_invocation(async_kwik_e_mart_app, kwik_e_mart_app_path):
+    """Tests that force sync kwarg works correctly when passed to convo
+    at invocation.
+    """
+    convo = Conversation(app=async_kwik_e_mart_app, app_path=kwik_e_mart_app_path)
+
+    response = convo.process('close door', force_sync=True)
+
+    assert isinstance(response, dict)
