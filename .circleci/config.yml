@@ -33,6 +33,7 @@ definitions:
           - transport.host=127.0.0.1
           - xpack.security.enabled=false
           - ES_JAVA_OPTS=-Xms768m -Xmx768m
+        command: /bin/bash -c "bin/elasticsearch-plugin install analysis-phonetic && bin/es-docker"
 
   steps:
 
