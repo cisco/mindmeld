@@ -11,7 +11,8 @@ import hashlib
 import os
 
 from ..core import Entity
-from ._config import get_app_namespace, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
+from ._config import (get_app_namespace, get_classifier_config, DOC_TYPE,
+                      DEFAULT_ES_SYNONYM_MAPPING, PHONETIC_ES_QA_MAPPING)
 
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      delete_index, does_index_exist, get_field_names,
@@ -65,7 +66,8 @@ class EntityResolver(object):
 
     @classmethod
     def ingest_synonym(cls, app_namespace, index_name, index_type=INDEX_TYPE_SYNONYM,
-                       field_name=None, data=[], es_host=None, es_client=None):
+                       field_name=None, data=[], es_host=None, es_client=None,
+                       use_double_metaphone=False):
         """Loads synonym documents from the mapping.json data into the
         specified index. If an index with the specified name doesn't exist, a
         new index with that name will be created.
@@ -86,6 +88,7 @@ class EntityResolver(object):
             data (list): A list of documents to be loaded into the index
             es_host (str): The Elasticsearch host server
             es_client (Elasticsearch): The Elasticsearch client
+            use_double_metaphone (bool): Whether to use the phonetic mapping or not
         """
         def _action_generator(docs):
 
@@ -119,8 +122,11 @@ class EntityResolver(object):
 
                 yield action
 
+        mapping = DEFAULT_ES_SYNONYM_MAPPING
+        if use_double_metaphone:
+            mapping = PHONETIC_ES_QA_MAPPING
         load_index(app_namespace, index_name, _action_generator(data), len(data),
-                   DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE, es_host, es_client)
+                   mapping, DOC_TYPE, es_host, es_client)
 
     def fit(self, clean=False):
         """Loads an entity mapping file to Elasticsearch for text relevance based entity resolution.
@@ -152,7 +158,8 @@ class EntityResolver(object):
         logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
         EntityResolver.ingest_synonym(app_namespace=self._app_namespace,
                                       index_name=self._es_index_name, data=entities,
-                                      es_host=self._es_host, es_client=self._es_client)
+                                      es_host=self._es_host, es_client=self._es_client,
+                                      use_double_metaphone=self._use_double_metaphone)
 
         # It's supported to specify the KB object type and field name that the NLP entity type
         # corresponds to in the mapping.json file. In this case the synonym whitelist is also
@@ -178,7 +185,8 @@ class EntityResolver(object):
             logger.info("Importing synonym data to knowledge base index '{}'".format(kb_index))
             EntityResolver.ingest_synonym(app_namespace=self._app_namespace, index_name=kb_index,
                                           index_type='kb', field_name=kb_field, data=entities,
-                                          es_host=self._es_host, es_client=self._es_client)
+                                          es_host=self._es_host, es_client=self._es_client,
+                                          use_double_metaphone=self._use_double_metaphone)
 
     @staticmethod
     def _process_entity_map(entity_type, entity_map, normalizer):
@@ -367,7 +375,9 @@ class EntityResolver(object):
         except TransportError as e:
             logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                          'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-            raise EntityResolverError
+            raise EntityResolverError('Unexpected error occurred when sending requests to '
+                                      'Elasticsearch: {} Status code: {} details: '
+                                      '{}'.format(e.error, e.status_code, e.info))
         except ElasticsearchException:
             raise EntityResolverError
         else:
