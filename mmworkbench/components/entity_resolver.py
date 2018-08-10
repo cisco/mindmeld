@@ -294,8 +294,8 @@ class EntityResolver(object):
                        }
                     ]
 
-        def _construct_whitelist_query(entity, weight=1):
-            return {
+        def _construct_whitelist_query(entity, weight=1, use_phons=False):
+            query = {
                         "nested": {
                             "path": "whitelist",
                             "score_mode": "max",
@@ -333,6 +333,20 @@ class EntityResolver(object):
                         }
                    }
 
+            if use_phons:
+                query["nested"]["query"]["bool"]["should"].append(
+                   {
+                        "match": {
+                            "cname.double_metaphone": {
+                                "query": entity.text,
+                                "boost": weight
+                            }
+                        }
+                   }
+                )
+
+            return query
+
         text_relevance_query = {
             "query": {
                 "function_score": {
@@ -361,7 +375,8 @@ class EntityResolver(object):
         text_relevance_query["query"]["function_score"]["query"]["bool"]["should"].append(
             {"bool": {"should": match_query}})
 
-        whitelist_query = _construct_whitelist_query(top_entity)
+        whitelist_query = _construct_whitelist_query(top_entity,
+                                                     use_phons=self._use_double_metaphone)
         text_relevance_query["query"]["function_score"]["query"]["bool"]["should"].append(
             whitelist_query)
 
