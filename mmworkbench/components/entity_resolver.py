@@ -122,9 +122,8 @@ class EntityResolver(object):
 
                 yield action
 
-        mapping = DEFAULT_ES_SYNONYM_MAPPING
-        if use_double_metaphone:
-            mapping = PHONETIC_ES_SYNONYM_MAPPING
+        mapping = PHONETIC_ES_SYNONYM_MAPPING if use_double_metaphone else \
+            DEFAULT_ES_SYNONYM_MAPPING
         load_index(app_namespace, index_name, _action_generator(data), len(data),
                    mapping, DOC_TYPE, es_host, es_client)
 
