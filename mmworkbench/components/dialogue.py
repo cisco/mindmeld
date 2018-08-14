@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 from builtins import object, str
 
+import asyncio
 from functools import cmp_to_key, partial
 import copy
 import logging
@@ -12,6 +13,7 @@ import os
 
 from .. import path
 from ..exceptions import WorkbenchImportError
+
 
 mod_logger = logging.getLogger(__name__)
 
@@ -222,12 +224,38 @@ class DialogueStateRule(object):
 class DialogueManager(object):
     logger = mod_logger.getChild('DialogueManager')
 
-    def __init__(self, responder_class=None):
+    def __init__(self, responder_class=None, async_mode=False):
+        self.async_mode = async_mode
+
         self.handler_map = {}
         self.middlewares = []
         self.rules = []
         self.responder_class = responder_class or DialogueResponder
         self.default_rule = None
+
+    def handle(self, **kwargs):
+        """A decorator that is used to register dialogue state rules"""
+
+        def _decorator(func):
+            name = kwargs.pop('name', None)
+            self.add_dialogue_rule(name, func, **kwargs)
+            return func
+        return _decorator
+
+    def middleware(self, *args):
+        """A decorator that is used to register dialogue handler middleware"""
+
+        def _decorator(func):
+            self.add_middleware(func)
+            return func
+
+        if args and callable(args[0]):
+            # Support syntax: @middleware
+            _decorator(args[0])
+            return args[0]
+        else:
+            # Support syntax: @middleware()
+            return _decorator
 
     def add_middleware(self, middleware):
         """Adds middleware for the dialogue manager. Middleware will be
@@ -238,6 +266,11 @@ class DialogueManager(object):
             middleware (callable): A dialogue manager middleware
                 function
         """
+        if self.async_mode and not asyncio.iscoroutinefunction(middleware):
+            msg = ('Cannot use middleware {!r} in async mode. '
+                   'Middleware must be coroutine function.')
+            raise TypeError(msg.format(middleware.__name__))
+
         self.middlewares.append(middleware)
 
     def add_dialogue_rule(self, name, handler, **kwargs):
@@ -250,6 +283,11 @@ class DialogueManager(object):
         """
         if name is None:
             name = handler.__name__
+
+        if self.async_mode and not asyncio.iscoroutinefunction(handler):
+            msg = ('Cannot use dialogue state handler {!r} in async mode. '
+                   'Handler must be coroutine function in async mode.')
+            raise TypeError(msg.format(name))
 
         rule = DialogueStateRule(name, **kwargs)
 
@@ -277,31 +315,60 @@ class DialogueManager(object):
         Returns:
             dict: A dict containing the dialogue state and directives
         """
-        dialogue_state = target_dialogue_state
+        if self.async_mode:
+            return self._apply_handler_async(context, target_dialogue_state=target_dialogue_state)
+        dialogue_state = self._get_dialogue_state(context, target_dialogue_state)
+        handler = self._get_dialogue_handler(dialogue_state)
+        responder = self._create_responder()
+        handler(context, responder)
+        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
-        if dialogue_state is None:
-            for rule in self.rules:
+    async def _apply_handler_async(self, context, target_dialogue_state=None):
+        """Applies the dialogue state handler for the most complex matching rule
+
+        Args:
+            context (dict): Description
+            target_dialogue_state (str, optional): The target dialogue state
+
+        Returns:
+            dict: A dict containing the dialogue state and directives
+        """
+        dialogue_state = self._get_dialogue_state(context, target_dialogue_state)
+        handler = self._get_dialogue_handler(dialogue_state)
+        responder = self._create_responder()
+
+        await handler(context, responder)
+
+        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+
+    def _get_dialogue_state(self, context, target_dialogue_state):
+        dialogue_state = None
+        for rule in self.rules:
+            if target_dialogue_state:
+                if target_dialogue_state == rule.dialogue_state:
+                    dialogue_state = rule.dialogue_state
+                    break
+            else:
                 if rule.apply(context):
                     dialogue_state = rule.dialogue_state
                     break
-
-        try:
-            handler = self.handler_map[dialogue_state]
-        except KeyError:
+        if dialogue_state is None:
             msg = 'Failed to find dialogue state for {domain}.{intent}'.format(
                 domain=context.get('domain'), intent=context.get('intent'))
             self.logger.info(msg, context)
-            handler = self._default_handler
 
-        slots = {}
-        responder = self.responder_class(slots)
+        return dialogue_state
+
+    def _get_dialogue_handler(self, dialogue_state):
+        handler = self.handler_map[dialogue_state] if dialogue_state else self._default_handler
 
         for m in reversed(self.middlewares):
             handler = partial(m, handler=handler)
 
-        handler(context, responder)
+        return handler
 
-        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+    def _create_responder(self):
+        return self.responder_class(slots={})
 
     @staticmethod
     def _default_handler(context, responder):
@@ -484,7 +551,8 @@ class Conversation(object):
 
     logger = mod_logger.getChild('Conversation')
 
-    def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None):
+    def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None,
+                 force_sync=False):
         """
         Args:
             app (Application, optional): An initialized app object. Either app or app_path must
@@ -496,6 +564,8 @@ class Conversation(object):
             context (dict, optional): The context to be used in the conversation
             default_params (dict, optional): The default params to use with each turn. These
                 defaults will be overridden by params passed for each turn.
+            force_sync (bool, optional): Force synchronous return for `say()` and `process()`
+                even when app is in async mode.
         """
         app = app or _get_app_module(app_path)
         app.lazy_init(nlp)
@@ -506,28 +576,66 @@ class Conversation(object):
         self.history = []
         self.frame = {}
         self.default_params = default_params or {}
+        self.force_sync = force_sync
         self.params = {}
 
-    def say(self, text, params=None):
+    @property
+    def session(self):
+        raise AttributeError("'session' was removed in Workbench 4.0.0. Use 'context' instead.")
+
+    @session.setter
+    def session(self, value):
+        raise AttributeError("'session' was removed in Workbench 4.0.0. Use 'context' instead.")
+
+    def say(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be
         processed by the app based on the current state of the conversation and
         returns the extracted messages from the directives.
 
         Args:
             text (str): The text of a message
-            params (dict): The params to use with this message, overriding any defaults
-                which may have been set
+            params (dict): The params to use with this message,
+                overriding any defaults which may have been set
+            force_sync (bool, optional): Force synchronous response
+                even when app is in async mode.
 
         Returns:
             list of str: A text representation of the dialogue responses
         """
+        if self._app_manager.async_mode:
+            res = self._say_async(text, params=params)
+            if self.force_sync or force_sync:
+                return asyncio.get_event_loop().run_until_complete(res)
+            return res
+
         response = self.process(text, params=params)
 
         # handle directives
         response_texts = [self._follow_directive(a) for a in response['directives']]
         return response_texts
 
-    def process(self, text, params=None):
+    async def _say_async(self, text, params=None):
+        """Send a message in the conversation. The message will be
+        processed by the app based on the current state of the conversation and
+        returns the extracted messages from the directives.
+
+        Args:
+            text (str): The text of a message
+            params (dict): The params to use with this message,
+                overriding any defaults which may have been set
+            force_sync (bool, optional): Force synchronous response
+                even when app is in async mode.
+
+        Returns:
+            list of str: A text representation of the dialogue responses
+        """
+        response = await self.process(text, params=params)
+
+        # handle directives
+        response_texts = [self._follow_directive(a) for a in response['directives']]
+        return response_texts
+
+    def process(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be processed by
         the app based on the current state of the conversation and returns
         the response.
@@ -540,12 +648,50 @@ class Conversation(object):
         Returns:
             (dictionary): The dictionary Response
         """
+        if self._app_manager.async_mode:
+            res = self._process_async(text, params=params)
+            if self.force_sync or force_sync:
+                return asyncio.get_event_loop().run_until_complete(res)
+            return res
+
+        if not self._app_manager.ready:
+            self._app_manager.load()
+
         external_params = params or copy.deepcopy(self.default_params)
         params = copy.deepcopy(self.params)
         params.update(external_params)
 
         response = self._app_manager.parse(text, params=params, context=self.context,
                                            frame=self.frame, history=self.history)
+
+        self.history = response['history']
+        self.frame = response['frame']
+        self.params = response['params']
+
+        return response
+
+    async def _process_async(self, text, params=None):
+        """Send a message in the conversation. The message will be processed by
+        the app based on the current state of the conversation and returns
+        the response.
+
+        Args:
+            text (str): The text of a message
+            params (dict): The params to use with this message, overriding any defaults
+                which may have been set
+
+        Returns:
+            (dictionary): The dictionary Response
+        """
+        if not self._app_manager.ready:
+            await self._app_manager.load()
+
+        external_params = params or copy.deepcopy(self.default_params)
+        params = copy.deepcopy(self.params)
+        params.update(external_params)
+
+        response = await self._app_manager.parse(text, params=params, context=self.context,
+                                                 frame=self.frame, history=self.history)
 
         self.history = response['history']
         self.frame = response['frame']

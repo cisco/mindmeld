@@ -6,13 +6,15 @@ test_dialogue
 ----------------------------------
 
 Tests for dialogue module.
+
+These tests apply regardless of async/await support.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 from __future__ import unicode_literals
 
 import pytest
 
-from mmworkbench.components.dialogue import DialogueManager
+from mmworkbench.components import Conversation, DialogueManager
 
 
 def create_context(domain, intent, entities=None):
@@ -137,3 +139,15 @@ class TestDialogueManager:
         dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
         result = dm.apply_handler(create_context('domain', 'middle'))
         assert result['dialogue_state'] == 'middleware_test'
+
+
+def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
+    """Tests that the params are cleared in one trip from app to wb."""
+    convo = Conversation(nlp=kwik_e_mart_nlp, app_path=kwik_e_mart_app_path)
+    convo.params = {
+        'allowed_intents': ['store_info.find_nearest_store'],
+        'target_dialogue_state': 'greeting'
+    }
+    convo.say('close door')
+
+    assert convo.params == {}

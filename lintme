@@ -1,0 +1,10 @@
+#!/bin/bash
+
+EXCLUDE_ASYNC=`python -c "import sys; print('True' if sys.version_info >= (3,5) else '')"`
+
+OPTIONS=""
+if [[ -z "$EXCLUDE_ASYNC" ]]; then
+  OPTIONS="--exclude=*_async.py"
+fi
+
+flake8 mmworkbench tests $OPTIONS

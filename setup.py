@@ -16,7 +16,7 @@ requirements = [
     'Flask-Cors~=3.0',
     'future~=0.16.0',
     'nltk~=3.2',
-    'numpy<=1.14.5,>=1.14.0',
+    'numpy>=1.14,<=1.14.5',  # tensorflow not working with latest version of numpy
     'pandas~=0.22',
     'pip>=9.0.1',
     'py~=1.4',
@@ -41,11 +41,12 @@ test_requirements = [
     'pylint==1.6.5',
     'pytest==3.0.5',
     'pytest-cov==2.4.0',
+    'pytest-asyncio==0.8.0'
 ]
 
 setup(
     name='mmworkbench',
-    version='4.0.0dev',
+    version='4.0.0alpha',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",
