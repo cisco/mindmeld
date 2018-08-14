@@ -12,7 +12,7 @@ import os
 
 from ..core import Entity
 from ._config import (get_app_namespace, get_classifier_config, DOC_TYPE,
-                      DEFAULT_ES_SYNONYM_MAPPING, PHONETIC_ES_QA_MAPPING)
+                      DEFAULT_ES_SYNONYM_MAPPING, PHONETIC_ES_SYNONYM_MAPPING)
 
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      delete_index, does_index_exist, get_field_names,
@@ -124,7 +124,7 @@ class EntityResolver(object):
 
         mapping = DEFAULT_ES_SYNONYM_MAPPING
         if use_double_metaphone:
-            mapping = PHONETIC_ES_QA_MAPPING
+            mapping = PHONETIC_ES_SYNONYM_MAPPING
         load_index(app_namespace, index_name, _action_generator(data), len(data),
                    mapping, DOC_TYPE, es_host, es_client)
 
@@ -337,7 +337,7 @@ class EntityResolver(object):
                 query["nested"]["query"]["bool"]["should"].append(
                    {
                         "match": {
-                            "cname.double_metaphone": {
+                            "whitelist.double_metaphone": {
                                 "query": entity.text,
                                 "boost": weight
                             }
