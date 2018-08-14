@@ -11,7 +11,8 @@ import hashlib
 import os
 
 from ..core import Entity
-from ._config import get_app_namespace, get_classifier_config, DOC_TYPE, DEFAULT_ES_SYNONYM_MAPPING
+from ._config import (get_app_namespace, get_classifier_config, DOC_TYPE,
+                      DEFAULT_ES_SYNONYM_MAPPING, PHONETIC_ES_SYNONYM_MAPPING)
 
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      delete_index, does_index_exist, get_field_names,
@@ -49,6 +50,7 @@ class EntityResolver(object):
 
         er_config = get_classifier_config('entity_resolution', app_path=app_path)
         self._use_text_rel = er_config['model_type'] == 'text_relevance'
+        self._use_double_metaphone = 'double_metaphone' in er_config.get('phonetic_match_types', [])
         self._es_host = es_host
         self.__es_client = es_client
         self._pid = os.getpid()
@@ -64,7 +66,8 @@ class EntityResolver(object):
 
     @classmethod
     def ingest_synonym(cls, app_namespace, index_name, index_type=INDEX_TYPE_SYNONYM,
-                       field_name=None, data=[], es_host=None, es_client=None):
+                       field_name=None, data=[], es_host=None, es_client=None,
+                       use_double_metaphone=False):
         """Loads synonym documents from the mapping.json data into the
         specified index. If an index with the specified name doesn't exist, a
         new index with that name will be created.
@@ -85,6 +88,7 @@ class EntityResolver(object):
             data (list): A list of documents to be loaded into the index
             es_host (str): The Elasticsearch host server
             es_client (Elasticsearch): The Elasticsearch client
+            use_double_metaphone (bool): Whether to use the phonetic mapping or not
         """
         def _action_generator(docs):
 
@@ -118,8 +122,10 @@ class EntityResolver(object):
 
                 yield action
 
+        mapping = PHONETIC_ES_SYNONYM_MAPPING if use_double_metaphone else \
+            DEFAULT_ES_SYNONYM_MAPPING
         load_index(app_namespace, index_name, _action_generator(data), len(data),
-                   DEFAULT_ES_SYNONYM_MAPPING, DOC_TYPE, es_host, es_client)
+                   mapping, DOC_TYPE, es_host, es_client)
 
     def fit(self, clean=False):
         """Loads an entity mapping file to Elasticsearch for text relevance based entity resolution.
@@ -151,7 +157,8 @@ class EntityResolver(object):
         logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
         EntityResolver.ingest_synonym(app_namespace=self._app_namespace,
                                       index_name=self._es_index_name, data=entities,
-                                      es_host=self._es_host, es_client=self._es_client)
+                                      es_host=self._es_host, es_client=self._es_client,
+                                      use_double_metaphone=self._use_double_metaphone)
 
         # It's supported to specify the KB object type and field name that the NLP entity type
         # corresponds to in the mapping.json file. In this case the synonym whitelist is also
@@ -177,7 +184,8 @@ class EntityResolver(object):
             logger.info("Importing synonym data to knowledge base index '{}'".format(kb_index))
             EntityResolver.ingest_synonym(app_namespace=self._app_namespace, index_name=kb_index,
                                           index_type='kb', field_name=kb_field, data=entities,
-                                          es_host=self._es_host, es_client=self._es_client)
+                                          es_host=self._es_host, es_client=self._es_client,
+                                          use_double_metaphone=self._use_double_metaphone)
 
     @staticmethod
     def _process_entity_map(entity_type, entity_map, normalizer):
@@ -273,8 +281,20 @@ class EntityResolver(object):
                        }
                    ]
 
-        def _construct_whitelist_query(entity, weight=1):
-            return {
+        def _construct_phonetic_match_query(entity, weight=1):
+            return [
+                       {
+                            "match": {
+                                "cname.double_metaphone": {
+                                    "query": entity.text,
+                                    "boost": 2 * weight
+                                }
+                            }
+                       }
+                    ]
+
+        def _construct_whitelist_query(entity, weight=1, use_phons=False):
+            query = {
                         "nested": {
                             "path": "whitelist",
                             "score_mode": "max",
@@ -312,6 +332,20 @@ class EntityResolver(object):
                         }
                    }
 
+            if use_phons:
+                query["nested"]["query"]["bool"]["should"].append(
+                   {
+                        "match": {
+                            "whitelist.double_metaphone": {
+                                "query": entity.text,
+                                "boost": weight
+                            }
+                        }
+                   }
+                )
+
+            return query
+
         text_relevance_query = {
             "query": {
                 "function_score": {
@@ -335,10 +369,13 @@ class EntityResolver(object):
         match_query = []
         for e, weight in zip(entity, weight_factors):
             match_query.extend(_construct_match_query(e, weight))
+            if self._use_double_metaphone:
+                match_query.extend(_construct_phonetic_match_query(e, weight))
         text_relevance_query["query"]["function_score"]["query"]["bool"]["should"].append(
             {"bool": {"should": match_query}})
 
-        whitelist_query = _construct_whitelist_query(top_entity)
+        whitelist_query = _construct_whitelist_query(top_entity,
+                                                     use_phons=self._use_double_metaphone)
         text_relevance_query["query"]["function_score"]["query"]["bool"]["should"].append(
             whitelist_query)
 
@@ -352,7 +389,9 @@ class EntityResolver(object):
         except TransportError as e:
             logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                          'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-            raise EntityResolverError
+            raise EntityResolverError('Unexpected error occurred when sending requests to '
+                                      'Elasticsearch: {} Status code: {} details: '
+                                      '{}'.format(e.error, e.status_code, e.info))
         except ElasticsearchException:
             raise EntityResolverError
         else:
@@ -360,11 +399,14 @@ class EntityResolver(object):
 
             results = []
             for hit in hits:
+                top_synonym = None
+                synonym_hits = hit['inner_hits']['whitelist']['hits']['hits']
+                if len(synonym_hits) > 0:
+                    top_synonym = synonym_hits[0]['_source']['name']
                 result = {
                     'cname': hit['_source']['cname'],
                     'score': hit['_score'],
-                    'top_synonym':
-                        hit['inner_hits']['whitelist']['hits']['hits'][0]['_source']['name']}
+                    'top_synonym': top_synonym}
 
                 if hit['_source'].get('id'):
                     result['id'] = hit['_source'].get('id')

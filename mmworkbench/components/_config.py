@@ -146,6 +146,103 @@ DEFAULT_ES_SYNONYM_MAPPING = {
     }
 }
 
+PHONETIC_ES_SYNONYM_MAPPING = {
+    "mappings": {
+        DOC_TYPE: {
+            "properties": {
+                "sort_factor": {
+                    "type": "double"
+                },
+                "whitelist": {
+                    "type": "nested",
+                    "properties": {
+                        "name": {
+                            "type": "text",
+                            "fields": {
+                                "raw": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                },
+                                "normalized_keyword": {
+                                    "type": "text",
+                                    "analyzer": "keyword_match_analyzer"
+                                },
+                                "char_ngram": {
+                                    "type": "text",
+                                    "analyzer": "char_ngram_analyzer"
+                                },
+                                "double_metaphone": {
+                                    "type": "text",
+                                    "analyzer": "phonetic_analyzer"
+                                }
+                            },
+                            "analyzer": "default_analyzer"
+                        }
+                    }
+                },
+                "cname": {
+                    "type": "text",
+                    "analyzer": "default_analyzer",
+                    "fields": {
+                        "raw": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        },
+                        "normalized_keyword": {
+                            "type": "text",
+                            "analyzer": "keyword_match_analyzer"
+                        },
+                        "char_ngram": {
+                            "type": "text",
+                            "analyzer": "char_ngram_analyzer"
+                        },
+                        "double_metaphone": {
+                            "type": "text",
+                            "analyzer": "phonetic_analyzer"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "settings": {
+        "analysis": {
+            "filter": {
+                "phonetic_filter": {
+                    "type": "phonetic",
+                    "encoder": "doublemetaphone",
+                    "replace": True,
+                    "max_code_len": 7
+                }
+            },
+            "analyzer": {
+                "phonetic_analyzer": {
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "token_shingle",
+                        "phonetic_filter",
+                    ],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                        "remove_dot",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "whitespace"
+                }
+            }
+        }
+    }
+}
+
 DEFAULT_ROLE_CLASSIFIER_CONFIG = {
     'model_type': 'text',
     'model_settings': {
@@ -263,7 +360,12 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                     "pattern": "™|®",
                     "type": "pattern_replace",
                     "replacement": ""
-                }
+                },
+                "remove_dot": {
+                    "pattern": "([\\p{L}]+)[.]+(?=[\\p{L}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1"
+                },
             },
             "filter": {
                 "token_shingle": {
@@ -276,7 +378,7 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                     "type": "ngram",
                     "min_gram": "3",
                     "max_gram": "3"
-                }
+                },
             },
             "analyzer": {
                 "default_analyzer": {
