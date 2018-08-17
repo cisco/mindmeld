@@ -204,7 +204,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
             return
 
         if len(set(classes)) <= 1:
-            logger.warning('Not doing anything for fit since there is only one or less class')
+            logger.info('Not doing anything for fit since there is only one or less class')
             return
 
         model.initialize_resources(self._resource_loader, queries, classes)
