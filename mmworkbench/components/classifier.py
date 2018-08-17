@@ -198,13 +198,14 @@ class Classifier(with_metaclass(ABCMeta, object)):
         queries, classes = self._get_queries_and_labels(queries, label_set)
 
         if not queries:
-            logger.warning('Could not fit model since no relevant examples were found. Make sure '
-                           'the labeled queries for evaluation are placed in "{}" files alongside '
-                           'the training data in your Workbench project.'.format(label_set))
+            logger.warning('Could not fit model since no relevant examples were found. '
+                           'Make sure the labeled queries for training are placed in "{}" '
+                           'files in your Workbench project.'.format(label_set))
             return
 
         if len(set(classes)) <= 1:
-            logger.info('Not doing anything for fit since there is only one or less class')
+            logger.info("Not doing anything for fit since there {}.".format(
+                ["are no classes", "is only one class"][len(set(classes))]))
             return
 
         model.initialize_resources(self._resource_loader, queries, classes)
