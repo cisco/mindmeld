@@ -128,7 +128,8 @@ class IntentClassifier(Classifier):
     def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = []
-        for intent in query_tree[self.domain]:
+
+        for intent in query_tree.get(self.domain, []):
             for query_text in query_tree[self.domain][intent]:
                 queries.append("{}###{}".format(intent, mark_down(query_text)))
 
