@@ -30,7 +30,7 @@ requirements = [
     'urllib3>=1.21.1,<1.22',
     'python-crfsuite==0.9.2',
     'sklearn-crfsuite>=0.3.6',
-    'tensorflow==1.2.1'
+    'tensorflow>=1.2.1,<2.0'
 ]
 
 setup_requirements = [
