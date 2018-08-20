@@ -196,8 +196,16 @@ class Classifier(with_metaclass(ABCMeta, object)):
                 return
 
         queries, classes = self._get_queries_and_labels(queries, label_set)
+
+        if not queries:
+            logger.warning('Could not fit model since no relevant examples were found. '
+                           'Make sure the labeled queries for training are placed in "{}" '
+                           'files in your Workbench project.'.format(label_set))
+            return
+
         if len(set(classes)) <= 1:
-            logger.info('Not doing anything for fit since there is only one class')
+            logger.info("Not doing anything for fit since there {}.".format(
+                ["are no classes", "is only one class"][len(set(classes))]))
             return
 
         model.initialize_resources(self._resource_loader, queries, classes)
@@ -282,8 +290,8 @@ class Classifier(with_metaclass(ABCMeta, object)):
 
         if not queries:
             logger.info('Could not evaluate model since no relevant examples were found. Make sure '
-                        'the labeled queries for evaluation are placed in "test*" files alongside '
-                        'the training data in your Workbench project.')
+                        'the labeled queries for evaluation are placed in "{}" files '
+                        'in your Workbench project.'.format(label_set))
             return
 
         evaluation = self._model.evaluate(queries, labels)
@@ -345,6 +353,17 @@ class Classifier(with_metaclass(ABCMeta, object)):
             msg = 'Unable to load {}. Pickle at {!r} cannot be read.'
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
+            if not hasattr(self._model, 'mmworkbench_version'):
+                msg = "Your trained models are incompatible with this version of Workbench. " \
+                      "Please run a clean build to retrain models"
+                raise ClassifierLoadError(msg)
+
+            try:
+                self._model.config.to_dict()
+            except AttributeError:
+                # Loaded model config is incompatible with app config.
+                self._model.config.resolve_config(self._get_model_config())
+
             self._model.initialize_resources(self._resource_loader)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 

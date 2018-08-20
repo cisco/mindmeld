@@ -18,6 +18,7 @@ from .helpers import (get_feature_extractor, get_label_encoder, register_label, 
                       entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
+from .._version import _get_wb_version
 logger = logging.getLogger(__name__)
 
 # model scoring type
@@ -97,6 +98,19 @@ class ModelConfig(object):
             str: JSON representation of the classifier
         """
         return json.dumps(self.to_dict(), sort_keys=True)
+
+    def resolve_config(self, new_config):
+        """This method resolves any config incompatibility issues by
+        loading the latest settings from the app config to the current config
+
+        Arguments:
+        new_config (ModelConfig): The ModelConfig representing the app's latest config
+        """
+        new_settings = ['train_label_set', 'test_label_set']
+        logger.warn('Loading missing properties {} from app '
+                    'configuration file'.format(new_settings))
+        for setting in new_settings:
+            setattr(self, setting, getattr(new_config, setting))
 
     def get_ngram_lengths_and_thresholds(self, rname):
         """
@@ -665,6 +679,7 @@ class Model(object):
     """
     def __init__(self, config):
         self.config = config
+        self.mmworkbench_version = _get_wb_version()
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
         self._resources = {}

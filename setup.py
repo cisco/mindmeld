@@ -30,7 +30,7 @@ requirements = [
     'urllib3>=1.21.1,<1.22',
     'python-crfsuite==0.9.2',
     'sklearn-crfsuite>=0.3.6',
-    'tensorflow>=1.2.1'
+    'tensorflow==1.2.1'
 ]
 
 setup_requirements = [
@@ -46,7 +46,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='3.4.0rc2',
+    version='3.4.0rc3',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",

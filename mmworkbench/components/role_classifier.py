@@ -14,7 +14,7 @@ from ..models import create_model, ENTITY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 from ..core import Query
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 
-from .classifier import Classifier, ClassifierConfig
+from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
 
 logger = logging.getLogger(__name__)
@@ -154,6 +154,16 @@ class RoleClassifier(Classifier):
             # msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             # raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
+            if not hasattr(self._model, 'mmworkbench_version'):
+                msg = "Your trained models are incompatible with this version of Workbench. " \
+                      "Please run a clean build to retrain models"
+                raise ClassifierLoadError(msg)
+            try:
+                self._model.config.to_dict()
+            except AttributeError:
+                # Loaded model config is incompatible with app config.
+                self._model.config.resolve_config(self._get_model_config())
+
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
             self.config = ClassifierConfig.from_model_config(self._model.config)

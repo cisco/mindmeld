@@ -224,7 +224,7 @@ class DialogueManager(object):
 
     def __init__(self, responder_class=None):
         self.handler_map = {}
-        self.middleware = []
+        self.middlewares = []
         self.rules = []
         self.responder_class = responder_class or DialogueResponder
         self.default_rule = None
@@ -238,7 +238,7 @@ class DialogueManager(object):
             middleware (callable): A dialogue manager middleware
                 function
         """
-        self.middleware.append(middleware)
+        self.middlewares.append(middleware)
 
     def add_dialogue_rule(self, name, handler, **kwargs):
         """Adds a dialogue state rule for the dialogue manager.
@@ -296,7 +296,7 @@ class DialogueManager(object):
         slots = {}
         responder = self.responder_class(slots)
 
-        for m in reversed(self.middleware):
+        for m in reversed(self.middlewares):
             handler = partial(m, handler=handler)
 
         handler(context, responder)

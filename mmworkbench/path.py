@@ -158,12 +158,13 @@ def get_labeled_query_tree(app_path, patterns=None):
                             abs_filepath = os.path.join(domain_intent_dir, app_file)
                             _, filename = os.path.split(abs_filepath)
                             mod_time = os.path.getmtime(abs_filepath)
-                            tree[domain][intent][filename] = mod_time
+                            tree[domain][intent][abs_filepath] = mod_time
                             found_pattern[pattern] = True
             else:
                 for filename in files:
-                    mod_time = os.path.getmtime(os.path.join(parent, domain, intent, filename))
-                    tree[domain][intent][filename] = mod_time
+                    abs_filepath = os.path.join(parent, domain, intent, filename)
+                    mod_time = os.path.getmtime(abs_filepath)
+                    tree[domain][intent][abs_filepath] = mod_time
 
     for pattern in found_pattern:
         if not found_pattern[pattern]:
