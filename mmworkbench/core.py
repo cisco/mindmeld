@@ -13,14 +13,16 @@ TEXT_FORMS = [TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED]
 
 logger = logging.getLogger(__name__)
 
+# The date keys are extracted from here
+# https://github.com/wit-ai/duckling_old/blob/a4bc34e3e945d403a9417df50c1fb2172d56de3e/src/duckling/time/obj.clj#L21 # noqa E722
 TIME_GRAIN_TO_ORDER = {
     'year': 0,
     'month': 1,
-    'day': 3,
-    'hour': 4,
-    'minute': 5,
-    'second': 6,
-    'milliseconds': 7
+    'day': 2,
+    'hour': 3,
+    'minute': 4,
+    'second': 5,
+    'milliseconds': 6
 }
 
 
