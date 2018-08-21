@@ -23,6 +23,7 @@ TIME_GRAIN_TO_ORDER = {
     'milliseconds': 7
 }
 
+
 def sort_by_lowest_time_grain(system_entities):
     return sorted(
         system_entities,

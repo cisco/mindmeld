@@ -5,7 +5,8 @@ This module contains all code required to perform sequence tagging.
 from __future__ import print_function, absolute_import, unicode_literals, division
 from builtins import zip
 
-from ...core import QueryEntity, Span, TEXT_FORM_RAW, TEXT_FORM_NORMALIZED, sort_by_lowest_time_grain
+from ...core import QueryEntity, Span, TEXT_FORM_RAW, \
+    TEXT_FORM_NORMALIZED, sort_by_lowest_time_grain
 from ...ser import resolve_system_entity, SystemEntityResolutionError
 from ..helpers import get_feature_extractor
 
