@@ -46,6 +46,7 @@ definitions:
       run:
           name: Activate virtualenv and install requirements
           command: |
+            rm -rf ~/venv
             set +e
             python -m venv ~/venv
             if [ "$?" -eq "1" ]; then
