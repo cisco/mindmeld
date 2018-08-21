@@ -13,6 +13,21 @@ TEXT_FORMS = [TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED]
 
 logger = logging.getLogger(__name__)
 
+TIME_GRAIN_TO_ORDER = {
+    'year': 0,
+    'month': 1,
+    'day': 3,
+    'hour': 4,
+    'minute': 5,
+    'second': 6,
+    'milliseconds': 7
+}
+
+def sort_by_lowest_time_grain(system_entities):
+    return sorted(
+        system_entities,
+        key=lambda query_entity: TIME_GRAIN_TO_ORDER[query_entity.to_dict()['value']['grain']])
+
 
 class Bunch(dict):
     """Dictionary-like object that exposes its keys as attributes.
