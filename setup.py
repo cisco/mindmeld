@@ -28,7 +28,7 @@ requirements = [
     'tqdm~=4.15',
     'urllib3~=1.21.1',
     'python-crfsuite~=0.9',
-    'sklearn-crfsuite~=0.3',
+    'sklearn-crfsuite>=0.3.6,<1.0',
     'tensorflow~=1.2'
 ]
 

@@ -123,7 +123,7 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
     """
     import csv
     import sys
-    with open(output_file, 'wb') if output_file else sys.stdout as csv_file:
+    with open(output_file, 'w') if output_file else sys.stdout as csv_file:
         field_names = ["query"]
         if not kwargs.get("no_domain"):
             field_names.append("domain")
