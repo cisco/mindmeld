@@ -149,13 +149,20 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: v1-py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+          key: v1-bp-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
 
       - *py-deps
 
+      - run:
+          name: Install AWS cli
+          command: |
+            echo ". ~/venv/bin/activate" >> $BASH_ENV
+            source $BASH_ENV
+            pip install awscli
+
       - save_cache:
           name: Save python deps cache
-          key: v1-py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
+          key: v1-bp-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
           paths:
             - ~/venv
 
