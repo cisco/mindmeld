@@ -1,5 +1,5 @@
 NLP_CONFIG = {
-    'extract_nbest_entities': ['store_info.get_store_hours']
+    'resolve_entities_using_nbest_transcripts': ['store_info.get_store_hours']
 }
 
 DEFAULT_ENTITY_RECOGNIZER_CONFIG = {

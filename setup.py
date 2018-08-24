@@ -11,26 +11,25 @@ requirements = [
     'bleach==1.5.0',  # tensorflow -> tensorboard -> bleach, prevents conflicts with jupyter
     'Click~=6.0',
     'click-log==0.1.8',  # check WB3-191
-    'elasticsearch>=5.1.0,<=5.4.0',
-    'Flask>=0.12,<=0.12.2',
+    'elasticsearch~=5.1',
+    'Flask~=0.12',
     'Flask-Cors~=3.0',
     'future~=0.16.0',
-    'futures; python_version == "2.7"',
     'nltk~=3.2',
-    'numpy~=1.14',
+    'numpy>=1.14,<=1.14.5',  # tensorflow not working with latest version of numpy
     'pandas~=0.22',
     'pip>=9.0.1',
     'py~=1.4',
     'python-dateutil~=2.6',
     'pytz>=2017.2',
-    'requests>=2.13.0,<=2.18.4',
-    'scipy>=0.9,<=0.19.1',
-    'scikit-learn>=0.18.1,<=0.18.2',
+    'requests~=2.13',
+    'scipy~=0.9',
+    'scikit-learn>=0.18.1,<0.20',
     'tqdm~=4.15',
-    'urllib3>=1.21.1,<1.22',
-    'python-crfsuite==0.9.2',
-    'sklearn-crfsuite>=0.3.6',
-    'tensorflow>=1.2.1,<1.4.0'
+    'urllib3~=1.21.1',
+    'python-crfsuite~=0.9',
+    'sklearn-crfsuite>=0.3.6,<1.0',
+    'tensorflow~=1.2'
 ]
 
 setup_requirements = [
@@ -42,11 +41,12 @@ test_requirements = [
     'pylint==1.6.5',
     'pytest==3.0.5',
     'pytest-cov==2.4.0',
+    'pytest-asyncio==0.8.0'
 ]
 
 setup(
     name='mmworkbench',
-    version='3.4.0',
+    version='4.0.0alpha',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",
@@ -67,10 +67,7 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],

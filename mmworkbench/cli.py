@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 from builtins import str
 
+import asyncio
 import errno
 import json
 import logging
@@ -17,8 +18,7 @@ import warnings
 import click
 import click_log
 
-from . import path
-from . import markup
+from . import markup, path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
@@ -83,14 +83,14 @@ def run_server(ctx, port, no_debug, reloader):
 
 @_app_cli.command('converse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-@click.option('--session', help='JSON object to be used as the session')
-def converse(ctx, session):
+@click.option('--context', help='JSON object to be used as the context')
+def converse(ctx, context):
     """Starts a conversation with the app."""
 
     try:
         app = ctx.obj.get('app')
-        if isinstance(session, str):
-            session = json.loads(session)
+        if isinstance(context, str):
+            context = json.loads(context)
         if app is None:
             raise ValueError("No app was given. Run 'python app.py converse' from your app"
                              " folder.")
@@ -98,7 +98,12 @@ def converse(ctx, session):
         # make sure num parser is running
         ctx.invoke(num_parser, start=True)
 
-        convo = Conversation(app=app, session=session)
+        if app.async_mode:
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(_converse_async(app, context))
+            return
+
+        convo = Conversation(app=app, context=context)
 
         while True:
             message = click.prompt('You')
@@ -110,6 +115,17 @@ def converse(ctx, session):
     except WorkbenchError as ex:
         logger.error(ex.message)
         ctx.exit(1)
+
+
+async def _converse_async(app, context):
+    convo = Conversation(app=app, context=context)
+    while True:
+        message = click.prompt('You')
+        responses = await convo.say(message)
+
+        for index, response in enumerate(responses):
+            prefix = 'App: ' if index == 0 else '...  '
+            click.secho(prefix + response, fg='blue', bg='white')
 
 
 @_app_cli.command('build', context_settings=CONTEXT_SETTINGS)

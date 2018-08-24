@@ -9,6 +9,7 @@ from builtins import object, super
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor, wait
 from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 import logging
 
 from future.utils import with_metaclass
@@ -176,7 +177,7 @@ class Processor(with_metaclass(ABCMeta, object)):
         trained for this application
 
         Args:
-            query_text (str, or tuple): The raw user text input, or a list of the n best query
+            query_text (str, or tuple): The raw user text input, or a list of the n-best query
                 transcripts from ASR
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
                 selected for NLP analysis. An example:
@@ -208,7 +209,8 @@ class Processor(with_metaclass(ABCMeta, object)):
         trained for this application
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n best query objects
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+                query objects
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
                 selected for NLP analysis. An example:
 
@@ -219,8 +221,6 @@ class Processor(with_metaclass(ABCMeta, object)):
                     }
 
                 where smart_home is the domain and close_door is the intent.
-            nbest_queries (list, optional): A list of Query objects, one for each of the nbest
-                                            transcript from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -304,7 +304,8 @@ class NaturalLanguageProcessor(Processor):
         Args:
             app_path (str): The path to the directory containing the app's data
             resource_loader (ResourceLoader): An object which can load resources for the processor
-            config (dict): A config object with processor settings (e.g. if to use n-best inference)
+            config (dict): A config object with processor settings (e.g. if to use n-best
+                transcripts)
         """
         super().__init__(app_path, resource_loader, config)
         self._app_path = app_path
@@ -316,13 +317,15 @@ class NaturalLanguageProcessor(Processor):
         for domain in path.get_domains(self._app_path):
             self._children[domain] = DomainProcessor(app_path, domain, self.resource_loader)
 
-        nbest_nlp_classes = self.config.get('extract_nbest_entities', {})
-        if len(nbest_nlp_classes) > 0:
-            nbest_nlp_classes = self.extract_allowed_intents(nbest_nlp_classes)
+        nbest_transcripts_nlp_classes = self.config.get(
+            'resolve_entities_using_nbest_transcripts', {})
+        if len(nbest_transcripts_nlp_classes) > 0:
+            nbest_transcripts_nlp_classes = self.extract_allowed_intents(
+                nbest_transcripts_nlp_classes)
 
-            for domain in nbest_nlp_classes.keys():
-                for intent in nbest_nlp_classes[domain].keys():
-                    self.domains[domain].intents[intent].nbest_text_enabled = True
+            for domain in nbest_transcripts_nlp_classes.keys():
+                for intent in nbest_transcripts_nlp_classes[domain].keys():
+                    self.domains[domain].intents[intent].nbest_transcripts_enabled = True
 
     @property
     def domains(self):
@@ -383,7 +386,8 @@ class NaturalLanguageProcessor(Processor):
         trained for this application
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n best query objects
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+                query objects
             allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
             selected for NLP analysis. An example:
             {
@@ -542,7 +546,7 @@ class DomainProcessor(Processor):
         trained for this domain
 
         Args:
-            query_text (str, or list/tuple): The raw user text input, or a list of the n best query
+            query_text (str, or list/tuple): The raw user text input, or a list of the n-best query
                 transcripts from ASR
             allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
                 NLP hierarchy that is selected for NLP analysis. An example:
@@ -572,7 +576,8 @@ class DomainProcessor(Processor):
         trained for this application
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n best query objects
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+                query objects
             allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
                 NLP hierarchy that is selected for NLP analysis. An example:
 
@@ -582,8 +587,6 @@ class DomainProcessor(Processor):
 
                 where close_door is the intent. The intent belongs to the smart_home domain.
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
-            nbest_queries (list, optional): A list of Query objects, one for each of the nbest
-                                            transcript from ASR.
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -656,7 +659,7 @@ class IntentProcessor(Processor):
             # Unable to load parser config -> no parser
             self.parser = None
 
-        self._nbest_text_enabled = False
+        self._nbest_transcripts_enabled = False
 
     @property
     def entities(self):
@@ -664,13 +667,13 @@ class IntentProcessor(Processor):
         return self._children
 
     @property
-    def nbest_text_enabled(self):
-        """Whether or not to run nbest processing for this intent"""
-        return self._nbest_text_enabled
+    def nbest_transcripts_enabled(self):
+        """Whether or not to run processing on the n-best transcripts for this intent"""
+        return self._nbest_transcripts_enabled
 
-    @nbest_text_enabled.setter
-    def nbest_text_enabled(self, value):
-        self._nbest_text_enabled = value
+    @nbest_transcripts_enabled.setter
+    def nbest_transcripts_enabled(self, value):
+        self._nbest_transcripts_enabled = value
 
     def _build(self, incremental=False, label_set=None):
         """Builds the models for this intent"""
@@ -721,7 +724,7 @@ class IntentProcessor(Processor):
         trained for this intent
 
         Args:
-            query_text (str, or list/tuple): The raw user text input, or a list of the n best query
+            query_text (str, or list/tuple): The raw user text input, or a list of the n-best query
                 transcripts from ASR
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
@@ -738,12 +741,116 @@ class IntentProcessor(Processor):
         processed_query.intent = self.name
         return processed_query.to_dict()
 
+    def _recognize_entities(self, query):
+        """Calls the entity recognition component.
+
+        Args:
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+                query objects
+        Returns:
+            list (of lists of QueryEntity objects): A list of lists of the entity objects for each
+                transcript
+        """
+        if isinstance(query, (list, tuple)):
+            if self.nbest_transcripts_enabled:
+                nbest_transcripts_entities = self._process_list(
+                    query, '_recognize_entities')
+                return nbest_transcripts_entities
+            else:
+                entities = self.entity_recognizer.predict(query[0])
+                return [entities]
+        entities = self.entity_recognizer.predict(query)
+        return entities
+
+    def _align_entities(self, entities):
+        """If n-best transcripts is enabled, align the spans across transcripts.
+        In a single query, there may be multiple entities and multiple entities of the same type.
+        Some entities may be misrecognized as another type, entities may fail to be recognized at
+        all, entities may be recognized where one doesn't exist, and the span of entities in
+        different n-best hypotheses may vary due to mistranscriptions of context words. Taking
+        these possibilities into account, we must come up with a method of aligning recognized
+        text spans across the n-best transcripts to group them with the other text spans that are
+        referring to the same entity.
+
+        Args:
+            entities (list of lists of QueryEntity objects): A list of lists of entity objects,
+                where each list is the recognized entities for the nth query
+
+        Returns:
+            list (of lists of QueryEntity objects): A list of lists of entity objects, where
+                each list is a group of spans that represent the same canonical entity
+        """
+        # Treat entities and their spans found in the first transcript as global base/reference
+        # across all n transcripts
+        aligned_entities = [[entity] for entity in entities[0]]
+        if len(entities) > 1 and self.nbest_transcripts_enabled:
+            for entities_n in entities[1:]:
+                index_to_align = 0  # keep track of entities to align
+                for i, entity in enumerate(entities_n):
+                    n_start = entity.span.start
+                    n_end = entity.span.end
+                    # if span is just one character long, add one to enable some overlap
+                    # Eg: '2'
+                    if n_start == n_end:
+                        n_end += 1
+                    # Start from the entities we haven't found an alignment for.
+                    # If we found a match with current entity, we wont align the next one
+                    # with something before it
+                    for j, ref_entity in enumerate(entities[0][index_to_align:]):
+                        ref_start = ref_entity.span.start
+                        ref_end = ref_entity.span.end
+                        if ref_end == ref_start:
+                            ref_end += 1
+                        # if there is an overlap in spans and is of the same type, align it
+                        if min(n_end, ref_end) - max(ref_start, n_start) > 0 and \
+                                ref_entity.entity.type == entity.entity.type:
+                            index_to_align = index_to_align + j
+                            aligned_entities[index_to_align].append(entity)
+                            break
+        return aligned_entities
+
+    def _classify_and_resolve_entities(self, idx, query, processed_entities, aligned_entities):
+        entity = processed_entities[idx]
+        # Run the role classification
+        entity = self.entities[entity.entity.type].process_entity(query, processed_entities, idx)
+        # Run the entity resolution
+        entity = self.entities[entity.entity.type].resolve_entity(entity, aligned_entities[idx])
+        return entity
+
+    def _process_entities(self, query, entities, aligned_entities):
+        """
+
+        Args:
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+                query objects
+            entities (list of lists of QueryEntity objects): A list of lists of entity objects,
+                where each list is the recognized entities for the nth query
+            aligned_entities (list of lists of QueryEntity): A list of lists of entity objects,
+                where each list is a group of spans that represent the same canonical entity
+
+        Returns:
+            list (QueryEntity): Returns a list of processed entity objects
+        """
+        if isinstance(query, (list, tuple)):
+            query = query[0]
+
+        processed_entities = [deepcopy(e) for e in entities[0]]
+        processed_entities = self._process_list([i for i in range(len(processed_entities))],
+                                                '_classify_and_resolve_entities',
+                                                *[query, processed_entities, aligned_entities])
+
+        # Run the entity parsing
+        processed_entities = self.parser.parse_entities(query, processed_entities) \
+            if self.parser else processed_entities
+        return processed_entities
+
     def process_query(self, query, return_processed_query=True):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n best query objects
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+                query objects
             return_processed_query(boolean): Returns an instance of ProcessedQuery if True,
                 an array of entities if False (this is used to parallelize n-best entity processing)
         Returns:
@@ -753,22 +860,25 @@ class IntentProcessor(Processor):
         """
         self._check_ready()
 
+        using_nbest_transcripts = False
         if isinstance(query, (list, tuple)):
-            if self.nbest_text_enabled:
-                nbest_entities = self._process_list(
-                    query, 'process_query', return_processed_query=False)
-                return ProcessedQuery(
-                    query[0], entities=nbest_entities[0],
-                    nbest_queries=query, nbest_entities=nbest_entities)
-            else:
-                query = query[0]
-        entities = self.entity_recognizer.predict(query)
-        for idx, entity in enumerate(entities):
-            self.entities[entity.entity.type].process_entity(query, entities, idx)
-        entities = self.parser.parse_entities(query, entities) if self.parser else entities
-        if return_processed_query is True:
-            return ProcessedQuery(query, entities=entities)
-        return entities
+            if self.nbest_transcripts_enabled:
+                using_nbest_transcripts = True
+            query = tuple(query)
+        else:
+            query = (query,)
+
+        entities = self._recognize_entities(query)
+        aligned_entities = self._align_entities(entities)
+        processed_entities = self._process_entities(query, entities, aligned_entities)
+
+        if using_nbest_transcripts:
+            return ProcessedQuery(query[0], entities=processed_entities,
+                                  nbest_transcripts_queries=query,
+                                  nbest_transcripts_entities=entities,
+                                  nbest_aligned_entities=aligned_entities)
+
+        return ProcessedQuery(query[0], entities=processed_entities)
 
 
 class EntityProcessor(Processor):
@@ -844,7 +954,7 @@ class EntityProcessor(Processor):
         Args:
             query (Query): The query the entity originated from
             entities (list): All entities recognized in the query
-            entity (Entity): The entity to process
+            entity_index (int): The index of the entity to process
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -857,6 +967,25 @@ class EntityProcessor(Processor):
             # Only run role classifier if there are roles!
             entity.entity.role = self.role_classifier.predict(query, entities, entity_index)
 
-        # Resolve entity
-        entity.entity.value = self.entity_resolver.predict(entity.entity)
+        return entity
+
+    def resolve_entity(self, entity, aligned_entity_spans=None):
+        """Does the resolution of a single entity. If aligned_entity_spans is not None,
+        the resolution leverages the n-best transcripts entity spans. Otherwise, it does the
+        resolution on just the text of the entity.
+
+        Args:
+            entity (QueryEntity): The entity to process
+            aligned_entity_spans (list of QueryEntity): The list of aligned n-best entity spans
+                to improve resolution
+
+        Returns:
+            Entity: The entity populated with the resolved values
+        """
+        self._check_ready()
+        if aligned_entity_spans:
+            entity_list = [e.entity for e in aligned_entity_spans]
+        else:
+            entity_list = [entity.entity]
+        entity.entity.value = self.entity_resolver.predict(entity_list)
         return entity

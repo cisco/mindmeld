@@ -123,7 +123,9 @@ def create_index(app_namespace, index_name, mapping, es_host=None, es_client=Non
     except TransportError as e:
         logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
                      'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
-        raise KnowledgeBaseError
+        raise KnowledgeBaseError('Unexpected error occurred when sending requests to '
+                                 'Elasticsearch: {} Status code: {} details: '
+                                 '{}'.format(e.error, e.status_code, e.info))
     except ElasticsearchException:
         raise KnowledgeBaseError
 

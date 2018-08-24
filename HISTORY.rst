@@ -1,6 +1,19 @@
 Package History
 ===============
 
+4.0.0 (Unreleased)
+------------------
+
+Enhancements
+^^^^^^^^^^^^
+
+- Add support for asynchronous dialogue state handlers
+
+Changes
+^^^^^^^
+
+- ``session`` parameter for ``NaturalLanguageProcessor.parse()`` and ``Conversation()`` renamed to ``context``
+
 3.4.0 (Unreleased)
 ------------------
 

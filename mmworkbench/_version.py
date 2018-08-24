@@ -7,7 +7,7 @@ import logging
 from pkg_resources import DistributionNotFound, VersionConflict
 from .exceptions import WorkbenchVersionError
 
-current = '3.4.0'
+current = '4.0.0alpha'
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def validate_workbench_version(app_path):
     try:
         with open(requirements) as f:
             lines = f.readlines()
-    except IOError:
+    except (OSError, IOError):
         logger.warning('requirements.txt is missing at {app_path}.'.format(app_path=app_path))
         return
     wb_req = None

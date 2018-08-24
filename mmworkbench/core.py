@@ -328,14 +328,16 @@ class ProcessedQuery(object):
     # TODO: look into using __slots__
 
     def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False,
-                 nbest_queries=None, nbest_entities=None):
+                 nbest_transcripts_queries=None, nbest_transcripts_entities=None,
+                 nbest_aligned_entities=None):
         self.query = query
         self.domain = domain
         self.intent = intent
         self.entities = None if entities is None else tuple(entities)
         self.is_gold = is_gold
-        self.nbest_queries = nbest_queries
-        self.nbest_entities = nbest_entities
+        self.nbest_transcripts_queries = nbest_transcripts_queries
+        self.nbest_transcripts_entities = nbest_transcripts_entities
+        self.nbest_aligned_entities = nbest_aligned_entities
 
     def to_dict(self):
         """Converts the processed query into a dictionary"""
@@ -345,11 +347,15 @@ class ProcessedQuery(object):
             'intent': self.intent,
             'entities': None if self.entities is None else [e.to_dict() for e in self.entities],
         }
-        if self.nbest_queries:
-            base['nbest_text'] = [q.text for q in self.nbest_queries]
-        if self.nbest_entities:
-            base['nbest_entities'] = [[e.to_dict() for e in n_entities]
-                                      for n_entities in self.nbest_entities]
+        if self.nbest_transcripts_queries:
+            base['nbest_transcripts_text'] = [q.text for q in self.nbest_transcripts_queries]
+        if self.nbest_transcripts_entities:
+            base['nbest_transcripts_entities'] = [[e.to_dict() for e in n_entities]
+                                                  for n_entities in self.nbest_transcripts_entities]
+        if self.nbest_aligned_entities:
+            base['nbest_aligned_entities'] = [[{'text': e.entity.text, 'type': e.entity.type}
+                                              for e in n_entities]
+                                              for n_entities in self.nbest_aligned_entities]
         return base
 
     def __eq__(self, other):
