@@ -222,6 +222,26 @@ def entity_seqs_equal(expected, predicted):
     return True
 
 
+def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
+    """Ingests dynamic gazetteers from the app and adds them to the resource
+
+    Args:
+        resource (dict): The original resource
+        dynamic_resource (dict, optional): The dynamic resource that needs to be ingested
+
+    Returns:
+        (dict): A new resource with the ingested dynamic resource
+    """
+    workspace_resource = resource
+    if dynamic_resource and GAZETTEER_RSC in dynamic_resource:
+        for entity in dynamic_resource[GAZETTEER_RSC]:
+            if entity in workspace_resource[GAZETTEER_RSC]:
+                for key in dynamic_resource[GAZETTEER_RSC][entity]:
+                    workspace_resource[GAZETTEER_RSC][entity]['pop_dict'][key] = \
+                        dynamic_resource[GAZETTEER_RSC][entity][key]
+    return workspace_resource
+
+
 def requires(resource):
     """
     Decorator to enforce the resource dependencies of the active feature extractors

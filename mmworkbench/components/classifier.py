@@ -226,6 +226,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             str: The predicted class label
@@ -236,8 +237,6 @@ class Classifier(with_metaclass(ABCMeta, object)):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
-
-        #dynamic_resource = {'gazetteers': {'person_name': {'ray wang': 1.0, 'chad oakley': 0.5}}}
         return self._model.predict([query], dynamic_resource)[0]
 
     def predict_proba(self, query, time_zone=None, timestamp=None):

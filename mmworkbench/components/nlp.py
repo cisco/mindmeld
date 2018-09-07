@@ -195,6 +195,7 @@ class Processor(with_metaclass(ABCMeta, object)):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -221,6 +222,7 @@ class Processor(with_metaclass(ABCMeta, object)):
                     }
 
                 where smart_home is the domain and close_door is the intent.
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -397,6 +399,7 @@ class NaturalLanguageProcessor(Processor):
             }
             where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
             is None, we just use the normal model predict functionality.
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -562,6 +565,7 @@ class DomainProcessor(Processor):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -589,6 +593,7 @@ class DomainProcessor(Processor):
 
                 where close_door is the intent. The intent belongs to the smart_home domain.
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -732,6 +737,7 @@ class IntentProcessor(Processor):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -855,6 +861,7 @@ class IntentProcessor(Processor):
                 query objects
             return_processed_query(boolean): Returns an instance of ProcessedQuery if True,
                 an array of entities if False (this is used to parallelize n-best entity processing)
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query

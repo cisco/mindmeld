@@ -15,7 +15,7 @@ from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridS
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC)
+                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, ingest_dynamic_gazetteer)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 from .._version import _get_wb_version
@@ -814,20 +814,14 @@ class Model(object):
 
         Args:
             example: An example object.
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             (dict of str: number): A dict of feature names to their values.
         """
         example_type = self.config.example_type
         feat_set = {}
-
-        workspace_resource = self._resources
-        if dynamic_resource and 'gazetteers' in dynamic_resource:
-            for entity in dynamic_resource['gazetteers']:
-                if entity in workspace_resource['gazetteers']:
-                    for key in dynamic_resource['gazetteers'][entity]:
-                        workspace_resource['gazetteers'][entity]['pop_dict'][key] = \
-                            dynamic_resource['gazetteers'][entity][key]
+        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
 
         for name, kwargs in self.config.features.items():
             if callable(kwargs):
