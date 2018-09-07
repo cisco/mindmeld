@@ -6,6 +6,8 @@ from sklearn.metrics import make_scorer
 import re
 import copy
 
+from ..gazetteer import Gazetteer
+
 FEATURE_MAP = {}
 MODEL_MAP = {}
 LABEL_MAP = {}
@@ -237,9 +239,11 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
     if dynamic_resource and GAZETTEER_RSC in dynamic_resource:
         for entity in dynamic_resource[GAZETTEER_RSC]:
             if entity in workspace_resource[GAZETTEER_RSC]:
+                new_gaz = Gazetteer(entity)
+                new_gaz.from_dict(workspace_resource[GAZETTEER_RSC][entity])
                 for key in dynamic_resource[GAZETTEER_RSC][entity]:
-                    workspace_resource[GAZETTEER_RSC][entity]['pop_dict'][key] = \
-                        dynamic_resource[GAZETTEER_RSC][entity][key]
+                    new_gaz._update_entity(key, dynamic_resource[GAZETTEER_RSC][entity][key])
+                workspace_resource[GAZETTEER_RSC][entity] = new_gaz.to_dict()
     return workspace_resource
 
 

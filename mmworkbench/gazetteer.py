@@ -60,6 +60,15 @@ class Gazetteer(object):
             'sys_types': self.sys_types
         }
 
+    def from_dict(self, serialized_gaz):
+        """De-serializes gaz object from a dictionary
+
+        Args:
+            serialized_gaz (dict): The serialized gaz object
+        """
+        for key in serialized_gaz:
+            setattr(self, key, serialized_gaz[key])
+
     def dump(self, gaz_path):
         """Persists the gazetteer to disk.
 
