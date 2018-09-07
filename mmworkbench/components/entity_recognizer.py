@@ -189,7 +189,7 @@ class EntityRecognizer(Classifier):
         self.ready = True
         self.dirty = False
 
-    def predict(self, query, time_zone=None, timestamp=None):
+    def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts entities for the given query using the trained recognition model
 
         Args:
@@ -203,7 +203,7 @@ class EntityRecognizer(Classifier):
             str: The predicted class label
 
         """
-        prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp) or ()
+        prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp, dynamic_resource=dynamic_resource) or ()
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
     def predict_proba(self, query):

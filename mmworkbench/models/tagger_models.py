@@ -180,7 +180,7 @@ class TaggerModel(Model):
         # todo should we do any parameter transformation for sequence models?
         return param_grid
 
-    def predict(self, examples):
+    def predict(self, examples, dynamic_resource=None):
         """
         Args:
             examples (list of mmworkbench.core.Query): a list of queries to train on

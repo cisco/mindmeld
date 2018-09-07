@@ -217,7 +217,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         self.ready = True
         self.dirty = True
 
-    def predict(self, query, time_zone=None, timestamp=None):
+    def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts a class label for the given query using the trained classification model
 
         Args:
@@ -237,7 +237,8 @@ class Classifier(with_metaclass(ABCMeta, object)):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
 
-        return self._model.predict([query])[0]
+        #dynamic_resource = {'gazetteers': {'person_name': {'ray wang': 1.0, 'chad oakley': 0.5}}}
+        return self._model.predict([query], dynamic_resource)[0]
 
     def predict_proba(self, query, time_zone=None, timestamp=None):
         """Runs prediction on a given query and generates multiple hypotheses with their

@@ -172,7 +172,7 @@ class Processor(with_metaclass(ABCMeta, object)):
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
-                timestamp=None):
+                timestamp=None, dynamic_resource=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -202,9 +202,9 @@ class Processor(with_metaclass(ABCMeta, object)):
         """
         query = self.create_query(
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
-        return self.process_query(query, allowed_nlp_classes).to_dict()
+        return self.process_query(query, allowed_nlp_classes, dynamic_resource).to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -363,10 +363,10 @@ class NaturalLanguageProcessor(Processor):
             else:
                 logger.info("Skipping domain classifier evaluation")
 
-    def _process_domain(self, query, allowed_nlp_classes=None):
+    def _process_domain(self, query, allowed_nlp_classes=None, dynamic_resource=None):
         if len(self.domains) > 1:
             if not allowed_nlp_classes:
-                return self.domain_classifier.predict(query)
+                return self.domain_classifier.predict(query, dynamic_resource=dynamic_resource)
             else:
                 if len(allowed_nlp_classes) == 1:
                     return list(allowed_nlp_classes.keys())[0]
@@ -381,7 +381,7 @@ class NaturalLanguageProcessor(Processor):
         else:
             return list(self.domains.keys())[0]
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -407,11 +407,12 @@ class NaturalLanguageProcessor(Processor):
             top_query = query[0]
         else:
             top_query = query
-        domain = self._process_domain(top_query, allowed_nlp_classes=allowed_nlp_classes)
+        domain = self._process_domain(top_query, allowed_nlp_classes=allowed_nlp_classes,
+                                      dynamic_resource=dynamic_resource)
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
-        processed_query = self.domains[domain].process_query(query, allowed_intents)
+        processed_query = self.domains[domain].process_query(query, allowed_intents, dynamic_resource=dynamic_resource)
         processed_query.domain = domain
         return processed_query
 
@@ -541,7 +542,7 @@ class DomainProcessor(Processor):
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
 
-    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None):
+    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None, dynamic_resource=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
@@ -567,11 +568,12 @@ class DomainProcessor(Processor):
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
-        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes)
+        processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes,
+                                             dynamic_resource=dynamic_resource)
         processed_query.domain = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -602,7 +604,7 @@ class DomainProcessor(Processor):
         if len(self.intents) > 1:
             # Check if the user has specified allowed intents
             if not allowed_nlp_classes:
-                intent = self.intent_classifier.predict(top_query)
+                intent = self.intent_classifier.predict(top_query, dynamic_resource=dynamic_resource)
             else:
                 if len(allowed_nlp_classes) == 1:
                     intent = list(allowed_nlp_classes.keys())[0]
@@ -620,7 +622,7 @@ class DomainProcessor(Processor):
                             'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
-        processed_query = self.intents[intent].process_query(query)
+        processed_query = self.intents[intent].process_query(query, dynamic_resource=dynamic_resource)
         processed_query.intent = intent
         return processed_query
 
@@ -719,7 +721,7 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
                             self.domain, self.name))
 
-    def process(self, query_text, time_zone=None, timestamp=None):
+    def process(self, query_text, time_zone=None, timestamp=None, dynamic_resource=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
 
@@ -736,12 +738,12 @@ class IntentProcessor(Processor):
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
-        processed_query = self.process_query(query)
+        processed_query = self.process_query(query, dynamic_resource=dynamic_resource)
         processed_query.domain = self.domain
         processed_query.intent = self.name
         return processed_query.to_dict()
 
-    def _recognize_entities(self, query):
+    def _recognize_entities(self, query, dynamic_resource=None):
         """Calls the entity recognition component.
 
         Args:
@@ -757,9 +759,9 @@ class IntentProcessor(Processor):
                     query, '_recognize_entities')
                 return nbest_transcripts_entities
             else:
-                entities = self.entity_recognizer.predict(query[0])
+                entities = self.entity_recognizer.predict(query[0], dynamic_resource=dynamic_resource)
                 return [entities]
-        entities = self.entity_recognizer.predict(query)
+        entities = self.entity_recognizer.predict(query, dynamic_resource=dynamic_resource)
         return entities
 
     def _align_entities(self, entities):
@@ -844,7 +846,7 @@ class IntentProcessor(Processor):
             if self.parser else processed_entities
         return processed_entities
 
-    def process_query(self, query, return_processed_query=True):
+    def process_query(self, query, return_processed_query=True, dynamic_resource=None):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
@@ -868,7 +870,7 @@ class IntentProcessor(Processor):
         else:
             query = (query,)
 
-        entities = self._recognize_entities(query)
+        entities = self._recognize_entities(query, dynamic_resource=dynamic_resource)
         aligned_entities = self._align_entities(entities)
         processed_entities = self._process_entities(query, entities, aligned_entities)
 

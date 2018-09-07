@@ -176,8 +176,8 @@ class TextModel(Model):
         model_class = self._get_model_constructor()
         return model_class(**params).fit(X, y)
 
-    def predict(self, examples):
-        X, _, _ = self.get_feature_matrix(examples)
+    def predict(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
         y = self._clf.predict(X)
         predictions = self._class_encoder.inverse_transform(y)
         return self._label_encoder.decode(predictions)
@@ -300,7 +300,7 @@ class TextModel(Model):
 
         return predictions
 
-    def get_feature_matrix(self, examples, y=None, fit=False):
+    def get_feature_matrix(self, examples, y=None, fit=False, dynamic_resource=None):
         """Transforms a list of examples into a feature matrix.
 
         Args:
@@ -313,7 +313,7 @@ class TextModel(Model):
         groups = []
         feats = []
         for idx, example in enumerate(examples):
-            feats.append(self._extract_features(example))
+            feats.append(self._extract_features(example, dynamic_resource))
             groups.append(idx)
 
         X, y = self._preprocess_data(feats, y, fit=fit)

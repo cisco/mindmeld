@@ -773,7 +773,7 @@ class Model(object):
         """
         raise NotImplementedError
 
-    def predict(self, examples):
+    def predict(self, examples, dynamic_resource=None):
         raise NotImplementedError
 
     def predict_proba(self, examples):
@@ -809,7 +809,7 @@ class Model(object):
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
 
-    def _extract_features(self, example):
+    def _extract_features(self, example, dynamic_resource=None):
         """Gets all features from an example.
 
         Args:
@@ -820,13 +820,22 @@ class Model(object):
         """
         example_type = self.config.example_type
         feat_set = {}
+
+        workspace_resource = self._resources
+        if dynamic_resource and 'gazetteers' in dynamic_resource:
+            for entity in dynamic_resource['gazetteers']:
+                if entity in workspace_resource['gazetteers']:
+                    for key in dynamic_resource['gazetteers'][entity]:
+                        workspace_resource['gazetteers'][entity]['pop_dict'][key] = \
+                            dynamic_resource['gazetteers'][entity][key]
+
         for name, kwargs in self.config.features.items():
             if callable(kwargs):
                 # a feature extractor function was passed in directly
                 feat_extractor = kwargs
             else:
                 feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
-            feat_set.update(feat_extractor(example, self._resources))
+            feat_set.update(feat_extractor(example, workspace_resource))
         return feat_set
 
     def _get_cv_iterator(self, settings):

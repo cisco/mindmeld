@@ -58,7 +58,8 @@ PARAM_VALIDATORS = {
     'target_dialogue_state': _validate_generic('target_dialogue_state', str),
 
     'time_zone': _validate_time_zone,
-    'timestamp': _validate_generic('timestamp', int)
+    'timestamp': _validate_generic('timestamp', int),
+    'dynamic_resource': _validate_generic('dynamic_resource', dict)
 }
 
 
@@ -227,6 +228,9 @@ class ApplicationManager(object):
         # params for nlp.process()
         process_params = {param: self._validate_param(params, param)
                           for param in ('time_zone', 'timestamp')}
+
+        if 'dynamic_resource' in frame:
+            process_params['dynamic_resource'] = frame['dynamic_resource']
 
         dm_context = self.context_class({
             'request': request,
