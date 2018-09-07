@@ -415,7 +415,8 @@ class NaturalLanguageProcessor(Processor):
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
-        processed_query = self.domains[domain].process_query(query, allowed_intents, dynamic_resource=dynamic_resource)
+        processed_query = self.domains[domain].process_query(
+            query, allowed_intents, dynamic_resource=dynamic_resource)
         processed_query.domain = domain
         return processed_query
 
@@ -545,7 +546,8 @@ class DomainProcessor(Processor):
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
 
-    def process(self, query_text, allowed_nlp_classes, time_zone=None, timestamp=None, dynamic_resource=None):
+    def process(self, query_text, allowed_nlp_classes,
+                time_zone=None, timestamp=None, dynamic_resource=None):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
@@ -609,7 +611,8 @@ class DomainProcessor(Processor):
         if len(self.intents) > 1:
             # Check if the user has specified allowed intents
             if not allowed_nlp_classes:
-                intent = self.intent_classifier.predict(top_query, dynamic_resource=dynamic_resource)
+                intent = self.intent_classifier.predict(
+                    top_query, dynamic_resource=dynamic_resource)
             else:
                 if len(allowed_nlp_classes) == 1:
                     intent = list(allowed_nlp_classes.keys())[0]
@@ -627,7 +630,8 @@ class DomainProcessor(Processor):
                             'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
-        processed_query = self.intents[intent].process_query(query, dynamic_resource=dynamic_resource)
+        processed_query = self.intents[intent].process_query(
+            query, dynamic_resource=dynamic_resource)
         processed_query.intent = intent
         return processed_query
 
@@ -765,9 +769,11 @@ class IntentProcessor(Processor):
                     query, '_recognize_entities')
                 return nbest_transcripts_entities
             else:
-                entities = self.entity_recognizer.predict(query[0], dynamic_resource=dynamic_resource)
+                entities = self.entity_recognizer.predict(
+                    query[0], dynamic_resource=dynamic_resource)
                 return [entities]
-        entities = self.entity_recognizer.predict(query, dynamic_resource=dynamic_resource)
+        entities = self.entity_recognizer.predict(
+            query, dynamic_resource=dynamic_resource)
         return entities
 
     def _align_entities(self, entities):
