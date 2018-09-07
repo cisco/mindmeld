@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from sklearn.metrics import make_scorer
 
 import re
+import copy
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -232,7 +233,7 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
     Returns:
         (dict): A new resource with the ingested dynamic resource
     """
-    workspace_resource = resource
+    workspace_resource = copy.deepcopy(resource)
     if dynamic_resource and GAZETTEER_RSC in dynamic_resource:
         for entity in dynamic_resource[GAZETTEER_RSC]:
             if entity in workspace_resource[GAZETTEER_RSC]:
