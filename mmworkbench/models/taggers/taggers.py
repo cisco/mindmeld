@@ -66,7 +66,7 @@ class Tagger(object):
         """
         raise NotImplementedError
 
-    def predict(self, X):
+    def predict(self, X, dynamic_resource=None):
         """Predicts the labels from a feature matrix X. Again X is the format of what is returned by
         extract_features.
 

@@ -4,6 +4,9 @@ from __future__ import unicode_literals
 from sklearn.metrics import make_scorer
 
 import re
+import copy
+
+from ..gazetteer import Gazetteer
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -220,6 +223,33 @@ def entity_seqs_equal(expected, predicted):
         if expected_entity.text != predicted_entity.text:
             return False
     return True
+
+
+def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
+    """Ingests dynamic gazetteers from the app and adds them to the resource
+
+    Args:
+        resource (dict): The original resource
+        dynamic_resource (dict, optional): The dynamic resource that needs to be ingested
+
+    Returns:
+        (dict): A new resource with the ingested dynamic resource
+    """
+    workspace_resource = copy.deepcopy(resource)
+    if dynamic_resource and GAZETTEER_RSC in dynamic_resource:
+        for entity in dynamic_resource[GAZETTEER_RSC]:
+            # We only add dynamic gazetteers if there exists a similar entity type in our
+            # original resource
+            if entity in workspace_resource[GAZETTEER_RSC]:
+                new_gaz = Gazetteer(entity)
+                new_gaz.from_dict(workspace_resource[GAZETTEER_RSC][entity])
+                # We only add dynamic gazetteers if there is more than one entity for the entity
+                # type
+                if workspace_resource[GAZETTEER_RSC][entity]['total_entities'] > 0:
+                    for key in dynamic_resource[GAZETTEER_RSC][entity]:
+                        new_gaz._update_entity(key, dynamic_resource[GAZETTEER_RSC][entity][key])
+                workspace_resource[GAZETTEER_RSC][entity] = new_gaz.to_dict()
+    return workspace_resource
 
 
 def requires(resource):

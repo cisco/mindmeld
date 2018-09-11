@@ -176,8 +176,8 @@ class TextModel(Model):
         model_class = self._get_model_constructor()
         return model_class(**params).fit(X, y)
 
-    def predict(self, examples):
-        X, _, _ = self.get_feature_matrix(examples)
+    def predict(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
         y = self._clf.predict(X)
         predictions = self._class_encoder.inverse_transform(y)
         return self._label_encoder.decode(predictions)
@@ -215,7 +215,7 @@ class TextModel(Model):
         else:
             return self._clf.coef_[label_class, self._feat_vectorizer.vocabulary_[feat_name]]
 
-    def inspect(self, example, gold_label=None):
+    def inspect(self, example, gold_label=None, dynamic_resource=None):
         """ This class takes an example and returns a DataFrame for every feature with feature
           name, feature value, feature weight and their product for the predicted label. If gold
           label is passed in, we will also include the feature value and weight for the gold
@@ -224,6 +224,7 @@ class TextModel(Model):
         Args:
             example (Query): The query to be predicted
             gold_label (str): The gold label for this string
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             (DataFrame): The DataFrame that includes every feature, their value, weight and
@@ -240,9 +241,9 @@ class TextModel(Model):
             logger.warning('Unable to decode label `{0}`'.format(gold_label))
             gold_class = None
 
-        pred_label = self.predict([example])[0]
+        pred_label = self.predict([example], dynamic_resource=dynamic_resource)[0]
         pred_class = self._class_encoder.transform([pred_label])
-        features = self._extract_features(example)
+        features = self._extract_features(example, dynamic_resource=dynamic_resource)
 
         logging.info("Predicted: " + pred_label)
 
@@ -300,7 +301,7 @@ class TextModel(Model):
 
         return predictions
 
-    def get_feature_matrix(self, examples, y=None, fit=False):
+    def get_feature_matrix(self, examples, y=None, fit=False, dynamic_resource=None):
         """Transforms a list of examples into a feature matrix.
 
         Args:
@@ -313,7 +314,7 @@ class TextModel(Model):
         groups = []
         feats = []
         for idx, example in enumerate(examples):
-            feats.append(self._extract_features(example))
+            feats.append(self._extract_features(example, dynamic_resource))
             groups.append(idx)
 
         X, y = self._preprocess_data(feats, y, fit=fit)

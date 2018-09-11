@@ -217,7 +217,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         self.ready = True
         self.dirty = True
 
-    def predict(self, query, time_zone=None, timestamp=None):
+    def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts a class label for the given query using the trained classification model
 
         Args:
@@ -226,6 +226,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             str: The predicted class label
@@ -236,8 +237,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
-
-        return self._model.predict([query])[0]
+        return self._model.predict([query], dynamic_resource)[0]
 
     def predict_proba(self, query, time_zone=None, timestamp=None):
         """Runs prediction on a given query and generates multiple hypotheses with their
@@ -297,7 +297,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         evaluation = self._model.evaluate(queries, labels)
         return evaluation
 
-    def inspect(self, query, gold_label=None):
+    def inspect(self, query, gold_label=None, dynamic_resource=None):
         raise NotImplemented
 
     def _get_model_config(self, loaded_config, **kwargs):

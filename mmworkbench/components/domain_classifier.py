@@ -75,8 +75,9 @@ class DomainClassifier(Classifier):
         logger.info('Loading domain classifier')
         super().load(*args, **kwargs)
 
-    def inspect(self, query, domain=None):
-        return self._model.inspect(example=query, gold_label=domain)
+    def inspect(self, query, domain=None, dynamic_resource=None):
+        return self._model.inspect(
+            example=query, gold_label=domain, dynamic_resource=dynamic_resource)
 
     def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on
