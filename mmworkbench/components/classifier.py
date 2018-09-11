@@ -297,7 +297,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         evaluation = self._model.evaluate(queries, labels)
         return evaluation
 
-    def inspect(self, query, gold_label=None):
+    def inspect(self, query, gold_label=None, dynamic_resource=None):
         raise NotImplemented
 
     def _get_model_config(self, loaded_config, **kwargs):

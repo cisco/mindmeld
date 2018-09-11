@@ -458,26 +458,29 @@ class NaturalLanguageProcessor(Processor):
 
         return nlp_components
 
-    def inspect(self, markup, domain=None, intent=None):
+    def inspect(self, markup, domain=None, intent=None, dynamic_resource=None):
         """ Inspect the marked up query and print the table of features and weights
         Args:
             markup (str): The marked up query string
             domain (str): The gold value for domain classification
             intent (str): The gold value for intent classification
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
         """
         query_factory = QueryFactory.create_query_factory()
         raw_query, query, entities = process_markup(markup, query_factory, query_options={})
 
         if domain:
             print('Inspecting domain classification')
-            domain_inspection = self.domain_classifier.inspect(query, domain=domain)
+            domain_inspection = self.domain_classifier.inspect(
+                query, domain=domain, dynamic_resource=dynamic_resource)
             print(domain_inspection)
             print('')
 
         if intent:
             print('Inspecting intent classification')
-            domain = self._process_domain(query)
-            intent_inspection = self.domains[domain].inspect(query, intent=intent)
+            domain = self._process_domain(query, dynamic_resource=dynamic_resource)
+            intent_inspection = self.domains[domain].inspect(
+                query, intent=intent, dynamic_resource=dynamic_resource)
             print(intent_inspection)
             print('')
 
@@ -635,8 +638,9 @@ class DomainProcessor(Processor):
         processed_query.intent = intent
         return processed_query
 
-    def inspect(self, query, intent=None):
-        return self.intent_classifier.inspect(query, intent=intent)
+    def inspect(self, query, intent=None, dynamic_resource=None):
+        return self.intent_classifier.inspect(
+            query, intent=intent, dynamic_resource=dynamic_resource)
 
 
 class IntentProcessor(Processor):
