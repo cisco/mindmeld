@@ -241,8 +241,9 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
             if entity in workspace_resource[GAZETTEER_RSC]:
                 new_gaz = Gazetteer(entity)
                 new_gaz.from_dict(workspace_resource[GAZETTEER_RSC][entity])
-                for key in dynamic_resource[GAZETTEER_RSC][entity]:
-                    new_gaz._update_entity(key, dynamic_resource[GAZETTEER_RSC][entity][key])
+                if workspace_resource[GAZETTEER_RSC][entity]['total_entities'] > 0:
+                    for key in dynamic_resource[GAZETTEER_RSC][entity]:
+                        new_gaz._update_entity(key, dynamic_resource[GAZETTEER_RSC][entity][key])
                 workspace_resource[GAZETTEER_RSC][entity] = new_gaz.to_dict()
     return workspace_resource
 

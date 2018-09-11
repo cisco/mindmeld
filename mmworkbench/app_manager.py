@@ -227,10 +227,7 @@ class ApplicationManager(object):
 
         # params for nlp.process()
         process_params = {param: self._validate_param(params, param)
-                          for param in ('time_zone', 'timestamp')}
-
-        if 'dynamic_resource' in frame:
-            process_params['dynamic_resource'] = frame['dynamic_resource']
+                          for param in ('time_zone', 'timestamp', 'dynamic_resource')}
 
         dm_context = self.context_class({
             'request': request,
