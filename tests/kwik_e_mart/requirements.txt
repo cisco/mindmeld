@@ -1,1 +1,1 @@
-mmworkbench==4.0.0alpha
+mmworkbench==4.0.0alpha1
