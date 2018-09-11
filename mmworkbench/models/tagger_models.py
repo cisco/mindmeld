@@ -9,7 +9,7 @@ from sklearn.externals import joblib
 import os
 
 from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
-                      get_seq_tag_accuracy_scorer)
+                      get_seq_tag_accuracy_scorer, ingest_dynamic_gazetteer)
 from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
@@ -180,18 +180,22 @@ class TaggerModel(Model):
         # todo should we do any parameter transformation for sequence models?
         return param_grid
 
-    def predict(self, examples):
+    def predict(self, examples, dynamic_resource=None):
         """
         Args:
             examples (list of mmworkbench.core.Query): a list of queries to train on
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
         """
         if self._no_entities:
             return [()]
+
+        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+
         # Process the data to generate features and predict the tags
-        predicted_tags = self._clf.extract_and_predict(examples, self.config, self._resources)
+        predicted_tags = self._clf.extract_and_predict(examples, self.config, workspace_resource)
 
         # Decode the tags to labels
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]

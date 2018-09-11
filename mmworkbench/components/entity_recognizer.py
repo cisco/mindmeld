@@ -189,7 +189,7 @@ class EntityRecognizer(Classifier):
         self.ready = True
         self.dirty = False
 
-    def predict(self, query, time_zone=None, timestamp=None):
+    def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts entities for the given query using the trained recognition model
 
         Args:
@@ -198,12 +198,14 @@ class EntityRecognizer(Classifier):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             str: The predicted class label
 
         """
-        prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp) or ()
+        prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp,
+                                     dynamic_resource=dynamic_resource) or ()
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
     def predict_proba(self, query):

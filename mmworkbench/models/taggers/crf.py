@@ -29,7 +29,7 @@ class ConditionalRandomFields(Tagger):
     def get_params(self, deep=True):
         return self._clf.get_params()
 
-    def predict(self, X):
+    def predict(self, X, dynamic_resource=None):
         return self._clf.predict(X)
 
     def extract_features(self, examples, config, resources, y=None, fit=True):

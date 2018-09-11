@@ -31,7 +31,7 @@ class LstmModel(Tagger):
         self._fit(examples_arr, labels_arr)
         return self
 
-    def predict(self, X):
+    def predict(self, X, dynamic_resource=None):
         encoded_examples_arr = np.asarray(X, dtype='float32')
         tags_by_example_arr = self._predict(encoded_examples_arr)
 

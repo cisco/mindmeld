@@ -15,7 +15,8 @@ from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridS
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC)
+                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                      ingest_dynamic_gazetteer)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 from .._version import _get_wb_version
@@ -773,7 +774,7 @@ class Model(object):
         """
         raise NotImplementedError
 
-    def predict(self, examples):
+    def predict(self, examples, dynamic_resource=None):
         raise NotImplementedError
 
     def predict_proba(self, examples):
@@ -809,24 +810,27 @@ class Model(object):
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
 
-    def _extract_features(self, example):
+    def _extract_features(self, example, dynamic_resource=None):
         """Gets all features from an example.
 
         Args:
             example: An example object.
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
             (dict of str: number): A dict of feature names to their values.
         """
         example_type = self.config.example_type
         feat_set = {}
+        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+
         for name, kwargs in self.config.features.items():
             if callable(kwargs):
                 # a feature extractor function was passed in directly
                 feat_extractor = kwargs
             else:
                 feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
-            feat_set.update(feat_extractor(example, self._resources))
+            feat_set.update(feat_extractor(example, workspace_resource))
         return feat_set
 
     def _get_cv_iterator(self, settings):

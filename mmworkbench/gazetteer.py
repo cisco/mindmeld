@@ -60,6 +60,15 @@ class Gazetteer(object):
             'sys_types': self.sys_types
         }
 
+    def from_dict(self, serialized_gaz):
+        """De-serializes gaz object from a dictionary
+
+        Args:
+            serialized_gaz (dict): The serialized gaz object
+        """
+        for key in serialized_gaz:
+            setattr(self, key, serialized_gaz[key])
+
     def dump(self, gaz_path):
         """Persists the gazetteer to disk.
 
@@ -110,7 +119,11 @@ class Gazetteer(object):
             self.entity_count += 1
 
         if keep_max:
+            old_value = self.pop_dict[entity]
             self.pop_dict[entity] = max(self.pop_dict[entity], popularity)
+            if self.pop_dict[entity] != old_value:
+                logger.warn('Updating gazetteer value of entity {} from {} to {}'.format(
+                    entity, self.pop_dict[entity], popularity))
         else:
             self.pop_dict[entity] = popularity
 
