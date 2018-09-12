@@ -123,7 +123,7 @@ class Gazetteer(object):
             self.pop_dict[entity] = max(self.pop_dict[entity], popularity)
             if self.pop_dict[entity] != old_value:
                 logger.warn('Updating gazetteer value of entity {} from {} to {}'.format(
-                    entity, self.pop_dict[entity], popularity))
+                    entity, old_value, self.pop_dict[entity]))
         else:
             self.pop_dict[entity] = popularity
 
