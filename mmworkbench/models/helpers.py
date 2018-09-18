@@ -26,6 +26,8 @@ WORD_FREQ_RSC = 'w_freq'
 WORD_NGRAM_FREQ_RSC = 'w_ngram_freq'
 CHAR_NGRAM_FREQ_RSC = 'c_ngram_freq'
 OUT_OF_BOUNDS_TOKEN = '<$>'
+ALL_SYS_ENTITY_LABELS = ['sys_time', 'sys_number', 'sys_ordinal', 'sys_duration',
+                         'sys_phone-number']
 
 
 def create_model(config):
