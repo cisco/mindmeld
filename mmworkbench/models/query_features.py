@@ -10,7 +10,7 @@ import re
 
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
                       OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC,
-                      ALL_SYS_ENTITY_LABELS, register_features, mask_numerics, get_ngram, requires)
+                      DEFAULT_SYS_ENTITIES, register_features, mask_numerics, get_ngram, requires)
 
 
 # TODO: clean this up a LOT
@@ -455,7 +455,6 @@ def extract_sys_candidate_features(start_positions=(0,)):
     def _extractor(query, resources):
         feat_seq = [{} for _ in query.normalized_tokens]
         system_entities = query.get_system_entity_candidates(resources[SYS_TYPES_RSC])
-        # resolve_entity_conflicts([system_entities])
         for entity in system_entities:
             for i in entity.token_span:
                 for j in start_positions:
@@ -555,7 +554,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,)):
     return _extractor
 
 
-def extract_sys_candidates():
+def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES):
     """
     Return an extractor for features based on a heuristic guess of numeric
         candidates in the current query.
@@ -564,12 +563,13 @@ def extract_sys_candidates():
             (function) The feature extractor.
      """
     def _extractor(query, resources):
-        system_entities = query.get_system_entity_candidates(ALL_SYS_ENTITY_LABELS)
+        system_entities = query.get_system_entity_candidates(list(entities))
         sys_ent_counter = Counter()
         for entity in system_entities:
             sys_ent_counter.update(['sys_candidate|type:{}'.format(entity.entity.type)])
             sys_ent_counter.update(['sys_candidate|type:{}|granularity:{}'.
                                     format(entity.entity.type, entity.entity.value.get('grain'))])
+        print(sys_ent_counter)
         return sys_ent_counter
     return _extractor
 
@@ -582,7 +582,7 @@ def extract_word_shape(lengths=(1,)):
         lengths (list of int): The ngram length
     Returns:
         (function) An feature extraction function that takes a query and
-            returns word shapes of ngrams of the specified lengths.
+            returns ngrams of word shapes, for n of specified lengths.
     """
     def word_shape_basic(token):
         # example: option --> xxxxxx, 123 ---> ddd
