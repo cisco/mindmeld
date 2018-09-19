@@ -569,7 +569,6 @@ def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES):
             sys_ent_counter.update(['sys_candidate|type:{}'.format(entity.entity.type)])
             sys_ent_counter.update(['sys_candidate|type:{}|granularity:{}'.
                                     format(entity.entity.type, entity.entity.value.get('grain'))])
-        print(sys_ent_counter)
         return sys_ent_counter
     return _extractor
 
