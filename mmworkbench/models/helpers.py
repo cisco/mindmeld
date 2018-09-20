@@ -29,6 +29,9 @@ WORD_FREQ_RSC = 'w_freq'
 WORD_NGRAM_FREQ_RSC = 'w_ngram_freq'
 CHAR_NGRAM_FREQ_RSC = 'c_ngram_freq'
 OUT_OF_BOUNDS_TOKEN = '<$>'
+DEFAULT_SYS_ENTITIES = ['sys_time', 'sys_temperature', 'sys_volume', 'sys_amount-of-money',
+                        'sys_email', 'sys_url', 'sys_number', 'sys_ordinal', 'sys_duration',
+                        'sys_phone-number']
 
 
 def create_model(config):
