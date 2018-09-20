@@ -593,7 +593,7 @@ def extract_word_shape(lengths=(1,)):
         for length in lengths:
             for i in range(len(tokens) - length + 1):
                 word_shapes = []
-                for token in tokens[i:i+length]:
+                for token in tokens[i: i+length]:
                     # We can incorporate different kinds of shapes in the future (capitalization)
                     tok = word_shape_basic(token)
                     word_shapes.append(tok)
