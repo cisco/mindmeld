@@ -241,14 +241,14 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
 
-    for entity in dynamic_resource[GAZETTEER_RSC]:
-        if entity in resource[GAZETTEER_RSC]:
-            resource[GAZETTEER_RSC][entity].enable_deepcopy()
-    workspace_resource = copy.deepcopy(resource)
+    workspace_resource = resource
+
     for entity in dynamic_resource[GAZETTEER_RSC]:
         # We only add dynamic gazetteers if there exists a similar entity type in our
         # original resource
         if entity in workspace_resource[GAZETTEER_RSC]:
+            workspace_resource[GAZETTEER_RSC][entity] = \
+                copy.deepcopy(resource[GAZETTEER_RSC][entity])
             new_gaz = Gazetteer(entity)
             new_gaz.from_dict(workspace_resource[GAZETTEER_RSC][entity])
             # We only add dynamic gazetteers if there is more than one entity for the entity

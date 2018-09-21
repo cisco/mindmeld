@@ -323,7 +323,8 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         labels = range(len(text_labels))
 
         confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_expected,
-                                                                y_pred=raw_predicted)
+                                                                y_pred=raw_predicted,
+                                                                labels=labels)
         stats_overall = self._get_overall_stats(y_true=raw_expected,
                                                 y_pred=raw_predicted,
                                                 labels=labels)
@@ -387,7 +388,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         }
         return stats_overall
 
-    def _get_confusion_matrix_and_counts(self, y_true, y_pred):
+    def _get_confusion_matrix_and_counts(self, y_true, y_pred, labels):
         """
         Generates the confusion matrix where each element Cij is the number of observations known to
         be in group i predicted to be in group j
@@ -395,7 +396,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns:
             dict: Contains 2d array of the confusion matrix, and an array of tp, tn, fp, fn values
         """
-        confusion_mat = confusion_matrix(y_true=y_true, y_pred=y_pred)
+        confusion_mat = confusion_matrix(y_true=y_true, y_pred=y_pred, labels=labels)
         tp_arr, tn_arr, fp_arr, fn_arr = [], [], [], []
 
         num_classes = len(confusion_mat)
@@ -463,10 +464,10 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             None
         """
         # Doesn't print if there isn't enough space to display the full matrix.
-        if len(text_labels) > 10:
-            print("Not printing confusion matrix since it is too large. The full matrix is still"
-                  " included in the dictionary returned from get_stats().")
-            return
+        # if len(text_labels) > 10:
+        #     print("Not printing confusion matrix since it is too large. The full matrix is still"
+        #           " included in the dictionary returned from get_stats().")
+        #     return
         labels = range(len(text_labels))
         title_format = "{:>15}" * (len(labels)+1)
         stat_row_format = "{:>15}" * (len(labels)+1)
@@ -533,10 +534,11 @@ class StandardModelEvaluation(ModelEvaluation):
         self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
 
     def print_graphs(self):
-        """
-        TODO generate graphs from matplotlib/scikit learn
-        """
-        return None
+        raw_results = self.raw_results()
+        stats = self._get_common_stats(raw_results.expected,
+                                       raw_results.predicted,
+                                       raw_results.text_labels)
+        return stats['confusion_matrix'], raw_results.text_labels
 
 
 class SequenceModelEvaluation(ModelEvaluation):
@@ -685,7 +687,7 @@ class Model(object):
         self.mmworkbench_version = _get_wb_version()
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
-        self._resources = SelectiveDeepcopyDict()
+        self._resources = {}
         self._clf = None
         self.cv_loss_ = None
 

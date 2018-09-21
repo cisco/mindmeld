@@ -67,8 +67,14 @@ class Gazetteer(object):
         Args:
             serialized_gaz (dict): The serialized gaz object
         """
-        for key in serialized_gaz:
-            setattr(self, key, serialized_gaz[key])
+        self.pop_dict = defaultdict(int, serialized_gaz['pop_dict'])
+        self.entities = serialized_gaz['entities']
+        self.sys_types = set(serialized_gaz['sys_types'])
+        self.entity_count = int(serialized_gaz['total_entities'])
+        self.name = str(serialized_gaz['name'])
+        self.index = defaultdict(set)
+        for key in serialized_gaz['index']:
+            self.index[key] = set(serialized_gaz['index'][key])
 
     def dump(self, gaz_path):
         """Persists the gazetteer to disk.
