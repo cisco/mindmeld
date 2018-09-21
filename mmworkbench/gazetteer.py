@@ -8,6 +8,7 @@ import logging
 import os
 
 from sklearn.externals import joblib
+from .selective_deepcopy_dict import SelectiveDeepcopyDict
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +52,14 @@ class Gazetteer(object):
         """
         Returns: dict
         """
-        return {
+        return SelectiveDeepcopyDict(**{
             'name': self.name,
             'total_entities': self.entity_count,
             'pop_dict': self.pop_dict,
             'index': self.index,
             'entities': self.entities,
             'sys_types': self.sys_types
-        }
+        })
 
     def from_dict(self, serialized_gaz):
         """De-serializes gaz object from a dictionary

@@ -23,6 +23,7 @@ from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_
                              CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
+from .selective_deepcopy_dict import SelectiveDeepcopyDict
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +77,8 @@ class ResourceLoader(object):
         """
         # TODO: get role gazetteers
         entity_types = path.get_entity_types(self.app_path)
-        return {entity_type: self.get_gazetteer(entity_type, force_reload=force_reload)
-                for entity_type in entity_types}
+        return SelectiveDeepcopyDict(**{entity_type: self.get_gazetteer(entity_type, force_reload=force_reload)
+                for entity_type in entity_types})
 
     def get_gazetteer(self, gaz_name, force_reload=False):
         """Gets a gazetteers by name

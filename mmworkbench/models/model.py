@@ -20,6 +20,8 @@ from .helpers import (get_feature_extractor, get_label_encoder, register_label, 
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 from .._version import _get_wb_version
+from ..selective_deepcopy_dict import SelectiveDeepcopyDict
+
 logger = logging.getLogger(__name__)
 
 # model scoring type
@@ -683,7 +685,7 @@ class Model(object):
         self.mmworkbench_version = _get_wb_version()
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
-        self._resources = {}
+        self._resources = SelectiveDeepcopyDict()
         self._clf = None
         self.cv_loss_ = None
 
