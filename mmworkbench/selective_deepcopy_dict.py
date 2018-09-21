@@ -2,7 +2,8 @@ from copy import deepcopy
 
 class SelectiveDeepcopyDict(dict):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
+        self.update(*args, **kwargs)
         self.copy_self = False
         self.parent = None
 
