@@ -20,7 +20,6 @@ from .helpers import (get_feature_extractor, get_label_encoder, register_label, 
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 from .._version import _get_wb_version
-from ..selective_deepcopy_dict import SelectiveDeepcopyDict
 
 logger = logging.getLogger(__name__)
 

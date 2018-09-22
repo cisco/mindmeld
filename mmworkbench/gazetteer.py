@@ -6,9 +6,9 @@ import codecs
 from collections import defaultdict
 import logging
 import os
+import copy
 
 from sklearn.externals import joblib
-from .selective_deepcopy_dict import SelectiveDeepcopyDict
 
 logger = logging.getLogger(__name__)
 
@@ -52,29 +52,27 @@ class Gazetteer(object):
         """
         Returns: dict
         """
-        return SelectiveDeepcopyDict(**{
+        return {
             'name': self.name,
             'total_entities': self.entity_count,
             'pop_dict': self.pop_dict,
             'index': self.index,
             'entities': self.entities,
             'sys_types': self.sys_types
-        })
+        }
 
-    def from_dict(self, serialized_gaz):
-        """De-serializes gaz object from a dictionary
+    def deep_copy_from_dict(self, serialized_gaz):
+        """De-serializes gaz object from a dictionary using deeop copy ops
 
         Args:
             serialized_gaz (dict): The serialized gaz object
         """
-        self.pop_dict = defaultdict(int, serialized_gaz['pop_dict'])
-        self.entities = serialized_gaz['entities']
-        self.sys_types = set(serialized_gaz['sys_types'])
-        self.entity_count = int(serialized_gaz['total_entities'])
-        self.name = str(serialized_gaz['name'])
-        self.index = defaultdict(set)
-        for key in serialized_gaz['index']:
-            self.index[key] = set(serialized_gaz['index'][key])
+        self.pop_dict = copy.deepcopy(serialized_gaz['pop_dict'])
+        self.entities = copy.deepcopy(serialized_gaz['entities'])
+        self.sys_types = copy.deepcopy(serialized_gaz['sys_types'])
+        self.entity_count = copy.deepcopy(serialized_gaz['total_entities'])
+        self.name = copy.deepcopy(serialized_gaz['name'])
+        self.index = copy.deepcopy(serialized_gaz['index'])
 
     def dump(self, gaz_path):
         """Persists the gazetteer to disk.
