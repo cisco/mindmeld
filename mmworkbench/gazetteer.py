@@ -67,12 +67,8 @@ class Gazetteer(object):
         Args:
             serialized_gaz (dict): The serialized gaz object
         """
-        self.pop_dict = copy.deepcopy(serialized_gaz['pop_dict'])
-        self.entities = copy.deepcopy(serialized_gaz['entities'])
-        self.sys_types = copy.deepcopy(serialized_gaz['sys_types'])
-        self.entity_count = copy.deepcopy(serialized_gaz['total_entities'])
-        self.name = copy.deepcopy(serialized_gaz['name'])
-        self.index = copy.deepcopy(serialized_gaz['index'])
+        for key in serialized_gaz:
+            setattr(self, key, copy.deepcopy(serialized_gaz[key]))
 
     def dump(self, gaz_path):
         """Persists the gazetteer to disk.

@@ -46,6 +46,6 @@ def validate_workbench_version(app_path):
                     '{condition} in pip requirements caused by ' \
                     '{cause}'.format(version=wb_version, condition=wb_req[0], cause=str(error))
 
-        #raise WorkbenchVersionError(error_msg)
+        raise WorkbenchVersionError(error_msg)
     logger.debug("mmworkbench version {version} satisfies app's requirements.txt.".format(
         version=wb_version))

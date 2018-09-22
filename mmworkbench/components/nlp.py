@@ -365,15 +365,6 @@ class NaturalLanguageProcessor(Processor):
             else:
                 logger.info("Skipping domain classifier evaluation")
 
-    def get_graph(self, label_set=None):
-        if len(self.domains) > 1:
-            domain_eval = self.domain_classifier.evaluate(label_set=label_set)
-            if domain_eval:
-                print("Domain classification accuracy: '{}'".format(domain_eval.get_accuracy()))
-                return domain_eval.print_graphs()
-            else:
-                logger.info("Skipping domain classifier evaluation")
-
     def _process_domain(self, query, allowed_nlp_classes=None, dynamic_resource=None):
         if len(self.domains) > 1:
             if not allowed_nlp_classes:
@@ -554,17 +545,6 @@ class DomainProcessor(Processor):
                       self.name, intent_eval.get_accuracy()))
                 if print_stats:
                     intent_eval.print_stats()
-            else:
-                logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
-                            self.name))
-
-    def get_graph(self, label_set="test"):
-        if len(self.intents) > 1:
-            intent_eval = self.intent_classifier.evaluate(label_set=label_set)
-            if intent_eval:
-                print("Intent classification accuracy for the '{}' domain: {}".format(
-                      self.name, intent_eval.get_accuracy()))
-                return intent_eval.print_graphs()
             else:
                 logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
                             self.name))
