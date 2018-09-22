@@ -6,7 +6,6 @@ import codecs
 from collections import defaultdict
 import logging
 import os
-import copy
 
 from sklearn.externals import joblib
 
