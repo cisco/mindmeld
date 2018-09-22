@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from sklearn.metrics import make_scorer
 
 import re
-import copy
 
 from ..gazetteer import Gazetteer
 

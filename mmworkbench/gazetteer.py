@@ -62,7 +62,7 @@ class Gazetteer(object):
         }
 
     def deep_copy_from_dict(self, serialized_gaz):
-        """De-serializes gaz object from a dictionary using deeop copy ops
+        """De-serializes gaz object from a dictionary using deep copy ops
 
         Args:
             serialized_gaz (dict): The serialized gaz object
