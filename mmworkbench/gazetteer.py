@@ -67,6 +67,10 @@ class Gazetteer(object):
             serialized_gaz (dict): The serialized gaz object
         """
         for key, value in serialized_gaz.items():
+            # We only shallow copy lists and dicts here since we do not have nested
+            # data structures in this container, only 1-levels dictionaries and lists,
+            # so the references only need to be copies. For all other types, like strings,
+            # they can just be passed by value.
             setattr(self, key, value.copy() if isinstance(value, (list, dict)) else value)
 
     def dump(self, gaz_path):
