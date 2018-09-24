@@ -532,23 +532,40 @@ def extract_ngrams(lengths=(1,), thresholds=(0,)):
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
+        stemmed_tokens = query.stemmed_tokens
         ngram_counter = Counter()
 
         for length, threshold in zip(lengths, word_thresholds):
             for i in range(len(tokens) - length + 1):
                 ngram = []
-                for token in tokens[i:i + length]:
+                stemmed_ngram = []
+                for index in range(i, i + length):
+                    token = tokens[index]
+                    stemmed_token = stemmed_tokens[index]
+                # for token in tokens[i:i + length]:
                     # We never want to differentiate between number tokens.
                     # We may need to convert number words too, like "eighty".
                     tok = mask_numerics(token)
+                    tok_stemmed = mask_numerics(stemmed_token)
                     ngram.append(tok)
+                    stemmed_ngram.append(tok_stemmed)
+
                 freq = resources[WORD_NGRAM_FREQ_RSC].get(' '.join(ngram), 1)
+
                 if freq > threshold:
+                    joined_ngram = ' '.join(ngram)
+                    joined_stemmed_ngram = ' '.join(stemmed_ngram)
+
                     ngram_counter.update(['bag_of_words|length:{}|ngram:{}'.format(
-                        len(ngram), ' '.join(ngram))])
+                        len(ngram), joined_ngram)])
+
+                    if len(ngram) == 1 and joined_ngram != joined_stemmed_ngram:
+                        ngram_counter.update(['bag_of_words_stemmed|length:{}|ngram:{}'.format(
+                            len(stemmed_ngram), joined_stemmed_ngram)])
                 else:
                     ngram_counter.update(['bag_of_words|length:{}|ngram:{}'.format(
                         len(ngram), 'OOV')])
+
         return ngram_counter
 
     return _extractor

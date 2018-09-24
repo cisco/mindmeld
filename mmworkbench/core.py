@@ -147,7 +147,7 @@ class Query(object):
     # TODO: look into using __slots__
 
     def __init__(self, raw_text, processed_text, normalized_tokens, char_maps,
-                 language=None, time_zone=None, timestamp=None, stemmed_text=None):
+                 language=None, time_zone=None, timestamp=None, stemmed_tokens=None):
         """Creates a query object
 
         Args:
@@ -166,7 +166,7 @@ class Query(object):
         self._language = language
         self._time_zone = time_zone
         self._timestamp = timestamp
-        self.stemmed_text = stemmed_text
+        self.stemmed_tokens = stemmed_tokens
 
     @property
     def text(self):

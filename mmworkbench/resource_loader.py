@@ -386,6 +386,11 @@ class ResourceLoader(object):
         # Unigram frequencies
         tokens = [mask_numerics(tok) for q in kwargs.get('queries')
                   for tok in q.normalized_tokens]
+
+        stemmed_tokens = [mask_numerics(tok) for q in kwargs.get('queries')
+                          for tok in q.stemmed_tokens]
+
+        tokens = tokens + stemmed_tokens
         freq_dict = Counter(tokens)
 
         return freq_dict
@@ -419,6 +424,12 @@ class ResourceLoader(object):
                                 for q in kwargs.get('queries')
                                 for i in range(len(q.normalized_tokens))]
                 word_freq_dict.update(ngram_tokens)
+
+                stemmed_ngram_tokens = [' '.join(q.normalized_tokens[i:i+1])
+                                        for q in kwargs.get('queries')
+                                        for i in range(len(q.stemmed_tokens))]
+                word_freq_dict.update(stemmed_ngram_tokens)
+
         return word_freq_dict
 
     def _build_query_freq_dict(self, **kwargs):

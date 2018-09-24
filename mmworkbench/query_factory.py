@@ -54,7 +54,7 @@ class QueryFactory(object):
 
         normalized_tokens = self.tokenizer.tokenize(processed_text)
         normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
-        stemmed_text = ' '.join(self.stem_word(t['entity']) for t in normalized_tokens)
+        stemmed_tokens = [self.stem_word(t['entity']) for t in normalized_tokens]
 
         # create normalized maps
         maps = self.tokenizer.get_char_index_map(processed_text, normalized_text)
@@ -65,7 +65,7 @@ class QueryFactory(object):
 
         query = Query(raw_text, processed_text, normalized_tokens, char_maps,
                       language=language, time_zone=time_zone, timestamp=timestamp,
-                      stemmed_text=stemmed_text)
+                      stemmed_tokens=stemmed_tokens)
         query.system_entity_candidates = sys_ent_rec.get_candidates(query)
         return query
 
