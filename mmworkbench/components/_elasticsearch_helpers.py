@@ -5,9 +5,9 @@ from __future__ import absolute_import, unicode_literals
 import os
 import logging
 
-from elasticsearch import (Elasticsearch, ImproperlyConfigured, ElasticsearchException,
-                           ConnectionError, TransportError)
-from elasticsearch.helpers import streaming_bulk
+from elasticsearch5 import (Elasticsearch, ImproperlyConfigured, ElasticsearchException,
+                            ConnectionError, TransportError)
+from elasticsearch5.helpers import streaming_bulk
 from tqdm import tqdm
 
 from ._config import DEFAULT_ES_INDEX_TEMPLATE, DEFAULT_ES_INDEX_TEMPLATE_NAME
