@@ -2,6 +2,7 @@
 """This module contains the query factory class."""
 from __future__ import absolute_import, unicode_literals
 from builtins import object
+from porter2stemmer import Porter2Stemmer
 
 
 from . import ser as sys_ent_rec
@@ -21,6 +22,7 @@ class QueryFactory(object):
     def __init__(self, tokenizer, preprocessor=None):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
+        self.stemmer = Porter2Stemmer()
 
     def create_query(self, text, language=None, time_zone=None, timestamp=None):
         """Creates a query with the given text
@@ -52,6 +54,7 @@ class QueryFactory(object):
 
         normalized_tokens = self.tokenizer.tokenize(processed_text)
         normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
+        stemmed_text = ' '.join(self.stem_word(t['entity']) for t in normalized_tokens)
 
         # create normalized maps
         maps = self.tokenizer.get_char_index_map(processed_text, normalized_text)
@@ -61,7 +64,8 @@ class QueryFactory(object):
         char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
 
         query = Query(raw_text, processed_text, normalized_tokens, char_maps,
-                      language=language, time_zone=time_zone, timestamp=timestamp)
+                      language=language, time_zone=time_zone, timestamp=timestamp,
+                      stemmed_text=stemmed_text)
         query.system_entity_candidates = sys_ent_rec.get_candidates(query)
         return query
 
@@ -75,6 +79,23 @@ class QueryFactory(object):
             str: Normalized text
         """
         return self.tokenizer.normalize(text)
+
+    def stem_word(self, word):
+        if len(word) <= 2:
+            return word
+        else:
+            # Skipped replace_suffixes_3 and replace_suffixes_4
+            # from the original stemmer
+            word = self.stemmer.remove_initial_apostrophe(word)
+            word = self.stemmer.set_ys(word)
+            self.stemmer.find_regions(word)
+            word = self.stemmer.strip_possessives(word)
+            word = self.stemmer.replace_suffixes_1(word)
+            word = self.stemmer.replace_suffixes_2(word)
+            word = self.stemmer.replace_ys(word)
+            word = self.stemmer.delete_suffixes(word)
+            word = self.stemmer.process_terminals(word)
+            return word
 
     def __repr__(self):
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))

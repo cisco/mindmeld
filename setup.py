@@ -29,7 +29,8 @@ requirements = [
     'urllib3~=1.21.1',
     'python-crfsuite~=0.9',
     'sklearn-crfsuite>=0.3.6,<1.0',
-    'tensorflow~=1.2'
+    'tensorflow~=1.2',
+    'porter2stemmer'
 ]
 
 setup_requirements = [
