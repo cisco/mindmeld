@@ -46,7 +46,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='4.0.0alpha5',
+    version='4.0.0alpha6',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",
