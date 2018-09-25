@@ -118,6 +118,7 @@ def test_nlp_hierarchy_using_domains_intents(kwik_e_mart_nlp, allowed_intents,
         'entities': []
     }
 
+
 test_data_dyn = [
     ('kadubeesanahalli', None, 'store_info', 'greet', ''),
     ('45 Fifth', None, 'store_info', 'get_store_hours', '45 Fifth'),
@@ -127,7 +128,8 @@ test_data_dyn = [
 ]
 
 
-@pytest.mark.parametrize("query,dyn_gaz,expected_domain,expected_intent,expected_entity", test_data_dyn)
+@pytest.mark.parametrize("query,dyn_gaz,expected_domain,expected_intent,expected_entity",
+                         test_data_dyn)
 def test_nlp_hierarchy_using_dynamic_gazetteer(kwik_e_mart_nlp, query, dyn_gaz,
                                                expected_domain, expected_intent, expected_entity):
     """Tests user specified allowable domains and intents"""
@@ -136,7 +138,8 @@ def test_nlp_hierarchy_using_dynamic_gazetteer(kwik_e_mart_nlp, query, dyn_gaz,
     if dyn_gaz:
         assert query not in kwik_e_mart_nlp.resource_loader.get_gazetteer('store_name')['entities']
         in_gaz_tokens = '45 Fifth'.lower()
-        assert in_gaz_tokens in kwik_e_mart_nlp.resource_loader.get_gazetteer('store_name')['entities']
+        assert in_gaz_tokens in kwik_e_mart_nlp.resource_loader.get_gazetteer(
+            'store_name')['entities']
 
     assert response['domain'] == expected_domain
     assert response['intent'] == expected_intent
