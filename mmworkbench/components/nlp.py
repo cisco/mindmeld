@@ -770,7 +770,7 @@ class IntentProcessor(Processor):
         if isinstance(query, (list, tuple)):
             if self.nbest_transcripts_enabled:
                 nbest_transcripts_entities = self._process_list(
-                    query, '_recognize_entities')
+                    query, '_recognize_entities', **{'dynamic_resource': dynamic_resource})
                 return nbest_transcripts_entities
             else:
                 entities = self.entity_recognizer.predict(

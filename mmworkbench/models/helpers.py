@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from sklearn.metrics import make_scorer
 
 import re
-import copy
 
 from ..gazetteer import Gazetteer
 
@@ -228,6 +227,47 @@ def entity_seqs_equal(expected, predicted):
     return True
 
 
+def merge_gazetteer_resource(resource, dynamic_resource):
+    """
+    Returns a new resource that is a merge between the original resource and the dynamic
+    resource passed in for only the gazetteer values
+
+    Args:
+        resource (dict): The original resource built from the app
+        dynamic_resource (dict): The dynamic resource passed in
+
+    Returns:
+        dict: The merged resource
+    """
+    return_obj = {}
+    for key in resource:
+        # Pass by reference if not a gazetteer key
+        if key != GAZETTEER_RSC:
+            return_obj[key] = resource[key]
+            continue
+
+        # Create a dict from scratch if we match the gazetteer key
+        return_obj[key] = {}
+        for entity_type in resource[key]:
+            # If the entity type is in the dyn gaz, we merge the data. Else,
+            # just pass by reference the original resource data
+            if entity_type in dynamic_resource[key]:
+                new_gaz = Gazetteer(entity_type)
+                # We deep copy here since shallow copying will also change the
+                # original resource's data during the '_update_entity' op.
+                new_gaz.from_dict(resource[key][entity_type])
+
+                for entity in dynamic_resource[key][entity_type]:
+                    new_gaz._update_entity(
+                        entity, dynamic_resource[key][entity_type][entity])
+
+                # The new gaz created is a deep copied version of the merged gaz data
+                return_obj[key][entity_type] = new_gaz.to_dict()
+            else:
+                return_obj[key][entity_type] = resource[key][entity_type]
+    return return_obj
+
+
 def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
     """Ingests dynamic gazetteers from the app and adds them to the resource
 
@@ -240,20 +280,7 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
     """
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
-
-    workspace_resource = copy.deepcopy(resource)
-    for entity in dynamic_resource[GAZETTEER_RSC]:
-        # We only add dynamic gazetteers if there exists a similar entity type in our
-        # original resource
-        if entity in workspace_resource[GAZETTEER_RSC]:
-            new_gaz = Gazetteer(entity)
-            new_gaz.from_dict(workspace_resource[GAZETTEER_RSC][entity])
-            # We only add dynamic gazetteers if there is more than one entity for the entity
-            # type
-            if workspace_resource[GAZETTEER_RSC][entity]['total_entities'] > 0:
-                for key in dynamic_resource[GAZETTEER_RSC][entity]:
-                    new_gaz._update_entity(key, dynamic_resource[GAZETTEER_RSC][entity][key])
-            workspace_resource[GAZETTEER_RSC][entity] = new_gaz.to_dict()
+    workspace_resource = merge_gazetteer_resource(resource, dynamic_resource)
     return workspace_resource
 
 
