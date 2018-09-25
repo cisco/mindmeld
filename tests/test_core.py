@@ -8,8 +8,6 @@ test_core
 Tests for `core` module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench.core import (Entity, QueryEntity, Span, NestedEntity,

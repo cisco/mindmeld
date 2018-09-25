@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains a collection of the core data structures used in workbench."""
-from __future__ import absolute_import, unicode_literals
-from builtins import object, range, super
-
 import logging
 
 
@@ -70,7 +67,7 @@ class Bunch(dict):
         pass
 
 
-class Span(object):
+class Span:
     """Simple object representing a span with start and end indices"""
     __slots__ = ['start', 'end']
 
@@ -124,7 +121,7 @@ class Span(object):
         return "{}(start={}, end={})".format(self.__class__.__name__, self.start, self.end)
 
 
-class Query(object):
+class Query:
     """The query object is responsible for processing and normalizing raw user text input so that
     classifiers can deal with it. A query stores three forms of text: raw text, processed text, and
     normalized text. The query object is also responsible for translating text ranges across these
@@ -312,7 +309,7 @@ class Query(object):
         return "<{} {!r}>".format(self.__class__.__name__, self.text)
 
 
-class ProcessedQuery(object):
+class ProcessedQuery:
     """A processed query contains a query and the additional metadata that has been labeled or
     predicted.
 
@@ -374,7 +371,7 @@ class ProcessedQuery(object):
                           len(self.entities), ', gold' if self.is_gold else '')
 
 
-class NestedEntity(object):
+class NestedEntity:
     def __init__(self, texts, spans, token_spans, entity, children=None):
         """Initializes an entity node object
 
@@ -560,7 +557,7 @@ class QueryEntity(NestedEntity):
     """
 
 
-class Entity(object):
+class Entity:
     """An Entity is any important piece of text that provides more information about the user
     intent.
 

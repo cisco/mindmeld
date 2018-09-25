@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains feature extractors for entities"""
-from __future__ import absolute_import, unicode_literals
-
 from .helpers import GAZETTEER_RSC, register_features, get_ngram, requires
 
 

@@ -1,7 +1,9 @@
-from mock import mock_open, patch
-from mmworkbench._version import validate_workbench_version
 import pkg_resources
+
+from mock import mock_open, patch
 import pytest
+
+from mmworkbench._version import validate_workbench_version
 
 
 @pytest.mark.parametrize("file_content, version", [

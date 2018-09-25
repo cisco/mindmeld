@@ -2,17 +2,13 @@
 """
 This module contains the natural language processor.
 """
-from __future__ import absolute_import, unicode_literals
 import os
 import sys
-from builtins import object, super
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor, wait
 from abc import ABCMeta, abstractmethod
 from copy import deepcopy
 import logging
-
-from future.utils import with_metaclass
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
@@ -67,7 +63,7 @@ def subproc_call_instance_function(instance_id, func_name, *args, **kwargs):
         sys.exit(1)
 
 
-class Processor(with_metaclass(ABCMeta, object)):
+class Processor(metaclass=ABCMeta):
     """A generic base class for processing queries through the workbench NLP
     components
 

@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""This module contains test utiltities for workbench
+"""
 import os
 import sys
 from .path import get_current_app_path
@@ -5,7 +8,7 @@ from .components import NaturalLanguageProcessor
 from .components.dialogue import Conversation
 
 
-class ConversationTest(object):
+class ConversationTest:
     LASTEST_HISTORY_INDEX = 0
 
     @classmethod

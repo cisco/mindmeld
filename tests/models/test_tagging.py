@@ -8,8 +8,6 @@ test_tagger
 Tests for `tagger` module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench.models.taggers import taggers

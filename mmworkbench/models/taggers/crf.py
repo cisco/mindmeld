@@ -2,7 +2,6 @@
 """
 This module contains the Memm entity recognizer.
 """
-from __future__ import print_function, absolute_import, unicode_literals, division
 from sklearn_crfsuite import CRF
 
 from .taggers import Tagger, extract_sequence_features
@@ -93,7 +92,7 @@ class ConditionalRandomFields(Tagger):
 # Feature extraction for CRF
 
 
-class FeatureMapper(object):
+class FeatureMapper:
     """
     Mapper for one feature to map numerical values to corresponding bins which are generated
     by the mean and standard deviation of this feature.
@@ -150,7 +149,7 @@ class FeatureMapper(object):
         return np.searchsorted(self._std_bins, value)
 
 
-class FeatureBinner(object):
+class FeatureBinner:
     """
     Class to convert features with numerical values to categorical values.
     """

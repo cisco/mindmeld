@@ -8,8 +8,6 @@ test_markup
 Tests for `markup` module.
 """
 # pylint: disable=I0011,W0621
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench.tokenizer import Tokenizer

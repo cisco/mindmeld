@@ -2,9 +2,6 @@
 """
 This module contains all code required to perform sequence tagging.
 """
-from __future__ import print_function, absolute_import, unicode_literals, division
-from builtins import zip
-
 from ...core import QueryEntity, Span, TEXT_FORM_RAW, \
     TEXT_FORM_NORMALIZED, sort_by_lowest_time_grain
 from ...ser import resolve_system_entity, SystemEntityResolutionError
@@ -26,7 +23,7 @@ S_TAG = 'S'
 END_TAG = 'END'
 
 
-class Tagger(object):
+class Tagger:
     """A class for all sequence tagger models implemented in house.
     It is importent to follow this interface exactly when implementing a new model so that your
     model is configured and trained as expected in the Workbench pipeline. Note that this follows

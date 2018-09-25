@@ -2,9 +2,6 @@
 """
 This module contains the entity resolver component of the Workbench natural language processor.
 """
-from __future__ import absolute_import, unicode_literals
-from builtins import object
-
 import copy
 import logging
 import hashlib
@@ -24,7 +21,7 @@ from ..exceptions import EntityResolverConnectionError, EntityResolverError
 logger = logging.getLogger(__name__)
 
 
-class EntityResolver(object):
+class EntityResolver:
     """An entity resolver is used to resolve entities in a given query to their canonical values
     (usually linked to specific entries in a knowledge base).
     """

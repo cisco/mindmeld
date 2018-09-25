@@ -10,8 +10,6 @@ Tests for dialogue module.
 These tests apply regardless of async/await support.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench.components import Conversation, DialogueManager

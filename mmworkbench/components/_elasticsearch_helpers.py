@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains helper methods for consuming Elasticsearch."""
-from __future__ import absolute_import, unicode_literals
-
 import os
 import logging
 

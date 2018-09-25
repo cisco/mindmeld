@@ -8,8 +8,6 @@ test_question_answerer
 Tests for `question_answerer` module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import pytest
 import os
 

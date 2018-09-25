@@ -10,8 +10,6 @@ Tests for app_manager module.
 These tests apply only when async/await are supported.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench.app_manager import ApplicationManager

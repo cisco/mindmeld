@@ -2,9 +2,6 @@
 """
 This module contains the app component.
 """
-from __future__ import absolute_import, unicode_literals
-from builtins import object
-
 import logging
 import os
 import sys
@@ -17,7 +14,7 @@ from .components.dialogue import DialogueResponder
 logger = logging.getLogger(__name__)
 
 
-class Application(object):
+class Application:
 
     def __init__(self, import_name, context_class=None, responder_class=None, preprocessor=None,
                  async_mode=False):

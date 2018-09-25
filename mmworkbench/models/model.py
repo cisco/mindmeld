@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains base classes for models defined in the models subpackage."""
-from __future__ import absolute_import, unicode_literals
-from builtins import object, super
-
 from collections import namedtuple
 import logging
 import json
@@ -28,7 +25,7 @@ LIKELIHOOD_SCORING = 'log_loss'
 _NEG_INF = -1e10
 
 
-class ModelConfig(object):
+class ModelConfig:
     """A value object representing a model configuration.
 
     Attributes:
@@ -672,7 +669,7 @@ class EntityModelEvaluation(SequenceModelEvaluation):
         self._print_sequence_stats_table(stats['sequence_stats'])
 
 
-class Model(object):
+class Model:
     """An abstract class upon which all models are based.
 
     Attributes:
@@ -925,7 +922,7 @@ class Model(object):
                     rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds)
 
 
-class LabelEncoder(object):
+class LabelEncoder:
     """The label encoder is responsible for converting between rich label
     objects such as a ProcessedQuery and basic formats a model can interpret.
 

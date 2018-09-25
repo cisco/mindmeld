@@ -8,8 +8,6 @@ test_parser
 Tests for parser module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench import markup

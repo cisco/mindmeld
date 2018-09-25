@@ -1,2 +1,2 @@
-DEFAULT_TRAIN_SET_REGEX = 'train.*\.txt'
-DEFAULT_TEST_SET_REGEX = 'test.*\.txt'
+DEFAULT_TRAIN_SET_REGEX = r'train.*\.txt'
+DEFAULT_TEST_SET_REGEX = r'test.*\.txt'

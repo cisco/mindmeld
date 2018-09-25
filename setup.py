@@ -14,7 +14,6 @@ requirements = [
     'elasticsearch5~=5.5',
     'Flask~=0.12',
     'Flask-Cors~=3.0',
-    'future~=0.16.0',
     'nltk~=3.2',
     'numpy>=1.14,<=1.14.5',  # tensorflow not working with latest version of numpy
     'pandas~=0.22',

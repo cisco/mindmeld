@@ -7,8 +7,6 @@ test_markup
 
 Tests for `markup` module.
 """
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench import markup
