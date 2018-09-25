@@ -227,7 +227,7 @@ def entity_seqs_equal(expected, predicted):
     return True
 
 
-def copy_gazetteer_resource(resource, dynamic_resource):
+def merge_gazetteer_resource(resource, dynamic_resource):
     """
     Returns a new resource that is a merge between the original resource and the dynamic
     resource passed in for only the gazetteer values
@@ -255,14 +255,11 @@ def copy_gazetteer_resource(resource, dynamic_resource):
                 new_gaz = Gazetteer(entity_type)
                 # We deep copy here since shallow copying will also change the
                 # original resource's data during the '_update_entity' op.
-                new_gaz.deep_copy_from_dict(resource[key][entity_type])
+                new_gaz.from_dict(resource[key][entity_type])
 
-                # We only add dynamic gazetteers if there is more than one entity for the entity
-                # type
-                if resource[key][entity_type]['total_entities'] > 0:
-                    for entity in dynamic_resource[key][entity_type]:
-                        new_gaz._update_entity(
-                            entity, dynamic_resource[key][entity_type][entity])
+                for entity in dynamic_resource[key][entity_type]:
+                    new_gaz._update_entity(
+                        entity, dynamic_resource[key][entity_type][entity])
 
                 # The new gaz created is a deep copied version of the merged gaz data
                 return_obj[key][entity_type] = new_gaz.to_dict()
@@ -283,7 +280,7 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
     """
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
-    workspace_resource = copy_gazetteer_resource(resource, dynamic_resource)
+    workspace_resource = merge_gazetteer_resource(resource, dynamic_resource)
     return workspace_resource
 
 

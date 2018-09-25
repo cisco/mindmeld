@@ -60,7 +60,7 @@ class Gazetteer(object):
             'sys_types': self.sys_types
         }
 
-    def deep_copy_from_dict(self, serialized_gaz):
+    def from_dict(self, serialized_gaz):
         """De-serializes gaz object from a dictionary using deep copy ops
 
         Args:
