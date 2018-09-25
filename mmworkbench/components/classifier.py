@@ -237,7 +237,7 @@ class Classifier(with_metaclass(ABCMeta, object)):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
-        return self._model.predict([query], dynamic_resource)[0]
+        return self._model.predict([query], dynamic_resource=dynamic_resource)[0]
 
     def predict_proba(self, query, time_zone=None, timestamp=None):
         """Runs prediction on a given query and generates multiple hypotheses with their

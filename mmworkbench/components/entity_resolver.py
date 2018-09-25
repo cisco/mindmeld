@@ -18,7 +18,7 @@ from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_in
                                      delete_index, does_index_exist, get_field_names,
                                      INDEX_TYPE_KB, INDEX_TYPE_SYNONYM)
 
-from elasticsearch.exceptions import ConnectionError, TransportError, ElasticsearchException
+from elasticsearch5.exceptions import ConnectionError, TransportError, ElasticsearchException
 from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 logger = logging.getLogger(__name__)

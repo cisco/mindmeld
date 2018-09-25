@@ -11,7 +11,7 @@ requirements = [
     'bleach==1.5.0',  # tensorflow -> tensorboard -> bleach, prevents conflicts with jupyter
     'Click~=6.0',
     'click-log==0.1.8',  # check WB3-191
-    'elasticsearch~=5.1',
+    'elasticsearch5~=5.5',
     'Flask~=0.12',
     'Flask-Cors~=3.0',
     'future~=0.16.0',
@@ -47,7 +47,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='4.0.0alpha4',
+    version='4.0.0alpha6',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",
