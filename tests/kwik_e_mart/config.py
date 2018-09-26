@@ -2,7 +2,63 @@ NLP_CONFIG = {
     'resolve_entities_using_nbest_transcripts': ['store_info.get_store_hours']
 }
 
-DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
+DOMAIN_CLASSIFIER_CONFIG = {
+    'model_type': 'text',
+    'model_settings': {
+        'classifier_type': 'logreg',
+    },
+    'param_selection': {
+        'type': 'k-fold',
+        'k': 10,
+        'grid': {
+            'fit_intercept': [True, False],
+            'C': [10, 100, 1000, 10000, 100000]
+        },
+    },
+    'features': {
+        'bag-of-words': {
+            'lengths': [1],
+            'enable_stemming': True
+        },
+        'freq': {
+            'bins': 5,
+            'include_stemmed_tokens': True
+        },
+        'in-gaz': {},
+        'exact': {'enable_stemming': True}
+    }
+}
+
+INTENT_CLASSIFIER_CONFIG = {
+    'model_type': 'text',
+    'model_settings': {
+        'classifier_type': 'logreg'
+    },
+    'param_selection': {
+        'type': 'k-fold',
+        'k': 10,
+        'grid': {
+            'fit_intercept': [True, False],
+            'C': [0.01, 1, 100, 10000, 1000000],
+            'class_bias': [1, 0.7, 0.3, 0]
+        }
+    },
+    'features': {
+        'bag-of-words': {
+            'lengths': [1],
+            'enable_stemming': True
+        },
+        'in-gaz': {},
+        'freq': {
+            'bins': 5,
+            'include_stemmed_tokens': True
+        },
+        'exact': {'enable_stemming': True},
+        'length': {}
+    }
+}
+
+ENTITY_RECOGNIZER_CONFIG = {
     'model_type': 'tagger',
     'label_type': 'entities',
     'model_settings': {
@@ -71,4 +127,4 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
 def get_entity_recognizer_config(domain, intent):
     if domain == 'store_info' and intent == 'get_store_hours':
         return TEST_ENTITY_RECOGNIZER_CONFIG
-    return DEFAULT_ENTITY_RECOGNIZER_CONFIG
+    return ENTITY_RECOGNIZER_CONFIG

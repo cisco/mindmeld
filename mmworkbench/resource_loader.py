@@ -425,7 +425,7 @@ class ResourceLoader(object):
                                 for i in range(len(q.normalized_tokens))]
                 word_freq_dict.update(ngram_tokens)
 
-                stemmed_ngram_tokens = [' '.join(q.normalized_tokens[i:i+1])
+                stemmed_ngram_tokens = [' '.join(q.stemmed_tokens[i:i+1])
                                         for q in kwargs.get('queries')
                                         for i in range(len(q.stemmed_tokens))]
                 word_freq_dict.update(stemmed_ngram_tokens)
@@ -443,6 +443,13 @@ class ResourceLoader(object):
         for query in query_dict:
             if query_dict[query] < 2:
                 query_dict[query] = 0
+
+        stemmed_query_dict = Counter(['<{}>'.format(q.stemmed_text) for q in kwargs.get('queries')])
+        for query in stemmed_query_dict:
+            if stemmed_query_dict[query] < 2:
+                stemmed_query_dict[query] = 0
+
+        query_dict += stemmed_query_dict
         query_dict += Counter()
 
         return query_dict

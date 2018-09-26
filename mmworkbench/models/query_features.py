@@ -344,7 +344,7 @@ def extract_in_gaz_ngram_features():
 
 
 @requires(WORD_NGRAM_FREQ_RSC)
-def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(0,)):
+def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(0,), enable_stemming=False):
     """Returns a bag-of-words feature extractor.
     Args:
         ngram_lengths_to_start_positions (dict):
@@ -361,6 +361,11 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
         tokens = query.normalized_tokens
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
+
+        if enable_stemming:
+            stemmed_tokens = query.stemmed_tokens
+            stemmed_tokens = [re.sub(r'\d', '0', t) for t in stemmed_tokens]
+
         for i in range(len(tokens)):
             threshold_index = 0
             for length, starts in ngram_lengths_to_start_positions.items():
@@ -374,6 +379,14 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
                     else:
                         feat_seq[i][feat_name] = 'OOV'
 
+                    if enable_stemming:
+                        stemmed_n_gram = get_ngram(stemmed_tokens, i + int(start), int(length))
+                        feat_name = 'bag_of_words_stemmed|length:{}|word_pos:{}'.format(
+                            length, start)
+                        if resources[WORD_NGRAM_FREQ_RSC].get(stemmed_n_gram, 1) > threshold:
+                            feat_seq[i][feat_name] = stemmed_n_gram
+                        else:
+                            feat_seq[i][feat_name] = 'OOV'
                 threshold_index += 1
         return feat_seq
 
@@ -516,13 +529,14 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,)):
 
 
 @requires(WORD_NGRAM_FREQ_RSC)
-def extract_ngrams(lengths=(1,), thresholds=(0,)):
+def extract_ngrams(lengths=(1,), thresholds=(0,), enable_stemming=False):
     """
     Extract ngrams of some specified lengths.
 
     Args:
         lengths (list of int): The ngram length.
         thresholds (list of int): frequency cut off value to include ngram in vocab
+        enable_stemming (bool): True if stemming should be enabled
     Returns:
         (function) An feature extraction function that takes a query and
             returns ngrams of the specified lengths.
@@ -539,27 +553,28 @@ def extract_ngrams(lengths=(1,), thresholds=(0,)):
             for i in range(len(tokens) - length + 1):
                 ngram = []
                 stemmed_ngram = []
+
                 for index in range(i, i + length):
-                    token = tokens[index]
-                    stemmed_token = stemmed_tokens[index]
-                # for token in tokens[i:i + length]:
                     # We never want to differentiate between number tokens.
                     # We may need to convert number words too, like "eighty".
+                    token = tokens[index]
                     tok = mask_numerics(token)
-                    tok_stemmed = mask_numerics(stemmed_token)
                     ngram.append(tok)
-                    stemmed_ngram.append(tok_stemmed)
+
+                    if enable_stemming:
+                        stemmed_token = stemmed_tokens[index]
+                        tok_stemmed = mask_numerics(stemmed_token)
+                        stemmed_ngram.append(tok_stemmed)
 
                 freq = resources[WORD_NGRAM_FREQ_RSC].get(' '.join(ngram), 1)
 
                 if freq > threshold:
                     joined_ngram = ' '.join(ngram)
-                    joined_stemmed_ngram = ' '.join(stemmed_ngram)
-
                     ngram_counter.update(['bag_of_words|length:{}|ngram:{}'.format(
                         len(ngram), joined_ngram)])
 
-                    if len(ngram) == 1 and joined_ngram != joined_stemmed_ngram:
+                    if enable_stemming:
+                        joined_stemmed_ngram = ' '.join(stemmed_ngram)
                         ngram_counter.update(['bag_of_words_stemmed|length:{}|ngram:{}'.format(
                             len(stemmed_ngram), joined_stemmed_ngram)])
                 else:
@@ -656,12 +671,13 @@ def extract_edge_ngrams(lengths=(1,)):
 
 
 @requires(WORD_FREQ_RSC)
-def extract_freq(bins=5):
+def extract_freq(bins=5, include_stemmed_tokens=False):
     """
     Extract frequency bin features.
 
     Args:
         bins (int): The number of frequency bins (besides OOV)
+        include_stemmed_tokens (bool): Include stemmed tokens if True
 
     Returns:
         (function): A feature extraction function that returns the log of the
@@ -671,12 +687,23 @@ def extract_freq(bins=5):
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
+        stemmed_tokens = query.stemmed_tokens
+
         freq_dict = resources[WORD_FREQ_RSC]
         max_freq = freq_dict.most_common(1)[0][1]
         freq_features = defaultdict(int)
-        for tok in tokens:
+
+        for idx in range(len(tokens)):
+            tok = tokens[idx]
             tok = mask_numerics(tok)
-            freq = freq_dict.get(tok, 0)
+
+            if include_stemmed_tokens:
+                stemmed_tok = stemmed_tokens[idx]
+                stemmed_tok = mask_numerics(stemmed_tok)
+                freq = freq_dict.get(tok, freq_dict.get(stemmed_tok, 0))
+            else:
+                freq = freq_dict.get(tok, 0)
+
             if freq < 2:
                 freq_features['in_vocab:OOV'] += 1
             else:
@@ -783,7 +810,7 @@ def extract_length():
 
 
 @requires(QUERY_FREQ_RSC)
-def extract_query_string(scaling=1000):
+def extract_query_string(scaling=1000, enable_stemming=False):
     """
     Extract whole query string as a feature.
 
@@ -795,9 +822,22 @@ def extract_query_string(scaling=1000):
 
     def _extractor(query, resources):
         query_key = '<{}>'.format(query.normalized_text)
-        if query_key not in resources[QUERY_FREQ_RSC]:
-            query_key = '<OOV>'
-        return {'exact|query:{}'.format(query_key): scaling}
+
+        if query_key in resources[QUERY_FREQ_RSC]:
+            return {'exact|query:{}'.format(query_key): scaling}
+
+        if query_key not in resources[QUERY_FREQ_RSC] and not enable_stemming:
+            return {'exact|query:{}'.format('<OOV>'): scaling}
+
+        if enable_stemming:
+            stemmed_query_key = '<{}>'.format(query.stemmed_text)
+
+            if stemmed_query_key in resources[QUERY_FREQ_RSC]:
+                return {'exact|query:{}'.format(stemmed_query_key): scaling}
+            else:
+                return {'exact|query:{}'.format('<OOV>'): scaling}
+
+        return {'exact|query:{}'.format('<OOV>'): scaling}
 
     return _extractor
 

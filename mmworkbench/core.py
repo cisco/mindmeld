@@ -184,6 +184,11 @@ class Query(object):
         return self._texts[TEXT_FORM_NORMALIZED]
 
     @property
+    def stemmed_text(self):
+        """The stemmed input text"""
+        return ' '.join(self.stemmed_tokens)
+
+    @property
     def normalized_tokens(self):
         """The tokens of the normalized input text"""
         return tuple((token['entity'] for token in self._normalized_tokens))

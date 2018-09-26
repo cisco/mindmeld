@@ -85,17 +85,23 @@ class QueryFactory(object):
             return word
         else:
             # Skipped replace_suffixes_3 and replace_suffixes_4
-            # from the original stemmer
-            word = self.stemmer.remove_initial_apostrophe(word)
-            word = self.stemmer.set_ys(word)
-            self.stemmer.find_regions(word)
-            word = self.stemmer.strip_possessives(word)
-            word = self.stemmer.replace_suffixes_1(word)
-            word = self.stemmer.replace_suffixes_2(word)
-            word = self.stemmer.replace_ys(word)
-            word = self.stemmer.delete_suffixes(word)
-            word = self.stemmer.process_terminals(word)
-            return word
+            # from the original stemmer found here:
+            # https://github.com/evandempsey/porter2-stemmer/blob/master/porter2stemmer/porter2stemmer.py
+            transformed_word = self.stemmer.remove_initial_apostrophe(word)
+            transformed_word = self.stemmer.set_ys(transformed_word)
+            self.stemmer.find_regions(transformed_word)
+            transformed_word = self.stemmer.strip_possessives(transformed_word)
+            transformed_word = self.stemmer.replace_suffixes_1(transformed_word)
+            transformed_word = self.stemmer.replace_suffixes_2(transformed_word)
+            transformed_word = self.stemmer.replace_ys(transformed_word)
+            transformed_word = self.stemmer.delete_suffixes(transformed_word)
+            transformed_word = self.stemmer.process_terminals(transformed_word)
+
+            # if the stemmed cleaves off the whole token, just return the original one
+            if transformed_word == '':
+                return word
+            else:
+                return transformed_word
 
     def __repr__(self):
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))

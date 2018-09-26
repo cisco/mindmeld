@@ -165,6 +165,23 @@ def test_nlp_hierarchy_for_queries_mallard_fails_on(kwik_e_mart_nlp, query):
     assert response['text'] == query
 
 
+test_data_stemmed = [
+    "cancelled",
+    "exited",
+    "aborted"
+]
+
+
+@pytest.mark.parametrize("query", test_data_stemmed)
+def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
+    """Tests queries that are NOT in the training data but have their stemmed
+     versions in the training data"""
+    response = kwik_e_mart_nlp.process(query)
+    assert response['text'] == query
+    assert response['domain'] == 'store_info'
+    assert response['intent'] == 'exit'
+
+
 def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
     """Tests user specified allowable domains and intents"""
     with pytest.raises(ValueError):
