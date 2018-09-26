@@ -344,11 +344,14 @@ def extract_in_gaz_ngram_features():
 
 
 @requires(WORD_NGRAM_FREQ_RSC)
-def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(0,), enable_stemming=False):
+def extract_bag_of_words_features(ngram_lengths_to_start_positions,
+                                  thresholds=(0,),
+                                  enable_stemming=False):
     """Returns a bag-of-words feature extractor.
     Args:
         ngram_lengths_to_start_positions (dict):
         thresholds (int): Cut off value to include word in n-gram vocab
+        enable_stemming (bool): Enable stemming
     Returns:
         (function) The feature extractor.
     """
