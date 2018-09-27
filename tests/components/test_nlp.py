@@ -120,7 +120,7 @@ def test_nlp_hierarchy_using_domains_intents(kwik_e_mart_nlp, allowed_intents,
 
 
 test_data_dyn = [
-    ('kadubeesanahalli', None, 'store_info', 'greet', ''),
+    ('kadubeesanahalli', None, 'store_info', 'help', ''),
     ('45 Fifth', None, 'store_info', 'get_store_hours', '45 Fifth'),
     ('kadubeesanahalli', {'gazetteers': {'store_name': {'kadubeesanahalli': 1}}},
      'store_info', 'get_store_hours', 'kadubeesanahalli'),

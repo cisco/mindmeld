@@ -167,6 +167,7 @@ class Query(object):
         self._time_zone = time_zone
         self._timestamp = timestamp
         self.stemmed_tokens = stemmed_tokens
+        self._stemmed_text = None
 
     @property
     def text(self):
@@ -186,7 +187,9 @@ class Query(object):
     @property
     def stemmed_text(self):
         """The stemmed input text"""
-        return ' '.join(self.stemmed_tokens)
+        if not self._stemmed_text:
+            self._stemmed_text = ' '.join(self.stemmed_tokens)
+        return self._stemmed_text
 
     @property
     def normalized_tokens(self):

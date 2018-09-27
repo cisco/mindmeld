@@ -14,6 +14,7 @@ import logging
 import os
 import time
 import re
+import math
 
 from . import markup, path
 from .exceptions import WorkbenchError
@@ -384,14 +385,19 @@ class ResourceLoader(object):
             queries (list of Query): A list of all queries
         """
         # Unigram frequencies
-        tokens = [mask_numerics(tok) for q in kwargs.get('queries')
-                  for tok in q.normalized_tokens]
+        tokens = []
 
-        stemmed_tokens = [mask_numerics(tok) for q in kwargs.get('queries')
-                          for tok in q.stemmed_tokens]
+        for query in kwargs.get('queries'):
+            for tok in query.normalized_tokens:
+                tokens.append(mask_numerics(tok))
 
-        tokens = tokens + stemmed_tokens
+            for tok in query.stemmed_tokens:
+                tokens.append(mask_numerics(tok))
+
         freq_dict = Counter(tokens)
+
+        for t, c in freq_dict.items():
+            freq_dict[t] = math.floor(c / 2)
 
         return freq_dict
 
@@ -412,7 +418,7 @@ class ResourceLoader(object):
         return char_freq_dict
 
     def _build_word_ngram_freq_dict(self, **kwargs):
-        """Compiles n-gram  frequency dictionary of normalized query tokens
+        """Compiles n-gram frequency dictionary of normalized query tokens
 
            Args:
                queries (list of Query): A list of all queries
@@ -420,38 +426,42 @@ class ResourceLoader(object):
         word_freq_dict = Counter()
         for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
             if threshold > 0:
-                ngram_tokens = [' '.join(q.normalized_tokens[i:i+length])
-                                for q in kwargs.get('queries')
-                                for i in range(len(q.normalized_tokens))]
+                ngram_tokens = []
+                for query in kwargs.get('queries'):
+                    for i in range(len(query.normalized_tokens)):
+                        ngram_tokens.append(' '.join(query.normalized_tokens[i:i + length]))
+                        ngram_tokens.append(' '.join(query.stemmed_tokens[i:i + length]))
                 word_freq_dict.update(ngram_tokens)
 
-                stemmed_ngram_tokens = [' '.join(q.stemmed_tokens[i:i+1])
-                                        for q in kwargs.get('queries')
-                                        for i in range(len(q.stemmed_tokens))]
-                word_freq_dict.update(stemmed_ngram_tokens)
+        for t, c in word_freq_dict.items():
+            word_freq_dict[t] = math.floor(c / 2)
 
         return word_freq_dict
 
     def _build_query_freq_dict(self, **kwargs):
-        """Compiles frequency dictionary of normalized query strings
+        """Compiles frequency dictionary of normalized and stemmed query strings
 
         Args:
             queries (list of Query): A list of all queries
         """
         # Whole query frequencies, with singletons removed
-        query_dict = Counter(['<{}>'.format(q.normalized_text) for q in kwargs.get('queries')])
+        query_dict = Counter()
+        stemmed_query_dict = Counter()
+
+        for query in kwargs.get('queries'):
+            query_dict.update('<{}>'.format(query.normalized_text))
+            stemmed_query_dict.update('<{}>'.format(query.stemmed_text))
+
         for query in query_dict:
             if query_dict[query] < 2:
                 query_dict[query] = 0
 
-        stemmed_query_dict = Counter(['<{}>'.format(q.stemmed_text) for q in kwargs.get('queries')])
         for query in stemmed_query_dict:
             if stemmed_query_dict[query] < 2:
                 stemmed_query_dict[query] = 0
 
         query_dict += stemmed_query_dict
         query_dict += Counter()
-
         return query_dict
 
     def _get_sys_entity_types(self, **kwargs):
