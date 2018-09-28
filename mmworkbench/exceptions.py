@@ -10,6 +10,10 @@ except NameError:
 FileNotFoundError = FileNotFoundError
 
 
+class WorkbenchVersionWarning(UserWarning):
+    pass
+
+
 class WorkbenchError(Exception):
 
     def __init__(self, *args):
