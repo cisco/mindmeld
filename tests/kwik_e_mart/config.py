@@ -25,7 +25,8 @@ DOMAIN_CLASSIFIER_CONFIG = {
             'include_stemmed_tokens': True
         },
         'in-gaz': {},
-        'exact': {'enable_stemming': True}
+        'exact': {'enable_stemming': True},
+        'enable_stemming': True
     }
 }
 
@@ -54,7 +55,8 @@ INTENT_CLASSIFIER_CONFIG = {
             'include_stemmed_tokens': True
         },
         'exact': {'enable_stemming': True},
-        'length': {}
+        'length': {},
+        'enable_stemming': True
     }
 }
 

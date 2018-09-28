@@ -104,7 +104,6 @@ def register_features(example_type, features):
     if example_type in FEATURE_MAP:
         msg = 'Features for example type {!r} are already registered.'.format(example_type)
         raise ValueError(msg)
-
     FEATURE_MAP[example_type] = features
 
 

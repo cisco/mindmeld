@@ -2,8 +2,8 @@
 """This module contains the query factory class."""
 from __future__ import absolute_import, unicode_literals
 from builtins import object
-from porter2stemmer import Porter2Stemmer
 
+import nltk
 
 from . import ser as sys_ent_rec
 
@@ -22,7 +22,7 @@ class QueryFactory(object):
     def __init__(self, tokenizer, preprocessor=None):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
-        self.stemmer = Porter2Stemmer()
+        self.stemmer = nltk.stem.PorterStemmer()
 
     def create_query(self, text, language=None, time_zone=None, timestamp=None):
         """Creates a query with the given text
@@ -54,7 +54,6 @@ class QueryFactory(object):
 
         normalized_tokens = self.tokenizer.tokenize(processed_text)
         normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
-        stemmed_tokens = [self.stem_word(t['entity']) for t in normalized_tokens]
 
         # create normalized maps
         maps = self.tokenizer.get_char_index_map(processed_text, normalized_text)
@@ -64,8 +63,7 @@ class QueryFactory(object):
         char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
 
         query = Query(raw_text, processed_text, normalized_tokens, char_maps,
-                      language=language, time_zone=time_zone, timestamp=timestamp,
-                      stemmed_tokens=stemmed_tokens)
+                      language=language, time_zone=time_zone, timestamp=timestamp)
         query.system_entity_candidates = sys_ent_rec.get_candidates(query)
         return query
 
@@ -84,24 +82,15 @@ class QueryFactory(object):
         if len(word) <= 2:
             return word
         else:
-            # Skipped replace_suffixes_3 and replace_suffixes_4
-            # from the original stemmer found here:
-            # https://github.com/evandempsey/porter2-stemmer/blob/master/porter2stemmer/porter2stemmer.py
-            transformed_word = self.stemmer.remove_initial_apostrophe(word)
-            transformed_word = self.stemmer.set_ys(transformed_word)
-            self.stemmer.find_regions(transformed_word)
-            transformed_word = self.stemmer.strip_possessives(transformed_word)
-            transformed_word = self.stemmer.replace_suffixes_1(transformed_word)
-            transformed_word = self.stemmer.replace_suffixes_2(transformed_word)
-            transformed_word = self.stemmer.replace_ys(transformed_word)
-            transformed_word = self.stemmer.delete_suffixes(transformed_word)
-            transformed_word = self.stemmer.process_terminals(transformed_word)
+            stem = self.stemmer._step1a(word)
+            stem = self.stemmer._step1b(stem)
+            stem = self.stemmer._step1c(stem)
 
             # if the stemmed cleaves off the whole token, just return the original one
-            if transformed_word == '':
+            if stem == '':
                 return word
             else:
-                return transformed_word
+                return stem
 
     def __repr__(self):
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))
