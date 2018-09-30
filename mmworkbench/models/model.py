@@ -155,9 +155,9 @@ class ModelConfig(object):
         # get list of resources required by feature extractors
         required_resources = set()
         for name in self.features:
-            if name == 'enable_stemming' and self.features[name]:
-                required_resources.add('enable_stemming')
-                continue
+            # if name == 'enable_stemming' and self.features[name]:
+            #     required_resources.add('enable_stemming')
+            #     continue
             feature = get_feature_extractor(self.example_type, name)
             required_resources.update(feature.__dict__.get('requirements', []))
         return required_resources

@@ -9,7 +9,7 @@ import math
 import re
 
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                      OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC,
+                      OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC, ENABLED_STEMMING,
                       DEFAULT_SYS_ENTITIES, register_features, mask_numerics, get_ngram, requires)
 
 
@@ -411,6 +411,14 @@ def char_ngrams(n, word, **args):
             return char_grams
         char_grams.append((word[i:i + n]))
     return char_grams
+
+
+@requires(ENABLED_STEMMING)
+def enabled_stemming(**args):
+    def _extractor(query, resources):
+        #no op
+        return
+    return _extractor
 
 
 @requires(CHAR_NGRAM_FREQ_RSC)
@@ -865,5 +873,6 @@ register_features('query', {
     'in-gaz-span-seq': extract_in_gaz_span_features,
     'in-gaz-ngram-seq': extract_in_gaz_ngram_features,
     'sys-candidates-seq': extract_sys_candidate_features,
-    'char-ngrams-seq': extract_char_ngrams_features
+    'char-ngrams-seq': extract_char_ngrams_features,
+    'enable_stemming': enabled_stemming
 })
