@@ -466,6 +466,8 @@ class Classifier(with_metaclass(ABCMeta, object)):
         # Hash resources
         rsc_strings = []
         for resource in sorted(model_config.required_resources()):
+            if resource == 'enable_stemming':
+                continue
             rsc_strings.append(self._resource_loader.hash_feature_resource(resource))
         rsc_hash = self._resource_loader.hash_list(rsc_strings)
 

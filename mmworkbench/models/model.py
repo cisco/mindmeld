@@ -155,6 +155,9 @@ class ModelConfig(object):
         # get list of resources required by feature extractors
         required_resources = set()
         for name in self.features:
+            if name == 'enable_stemming' and self.features[name] == True:
+                required_resources.add('enable_stemming')
+                continue
             feature = get_feature_extractor(self.example_type, name)
             required_resources.update(feature.__dict__.get('requirements', []))
         return required_resources
@@ -824,7 +827,13 @@ class Model(object):
         feat_set = {}
         workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
 
+        enable_stemming = self.config.features.get('enable_stemming', False)
+
         for name, kwargs in self.config.features.items():
+            if name == 'enable_stemming':
+                continue
+
+            kwargs['enable_stemming'] = enable_stemming
             if callable(kwargs):
                 # a feature extractor function was passed in directly
                 feat_extractor = kwargs
@@ -917,12 +926,18 @@ class Model(object):
         # get list of resources required by feature extractors
         required_resources = self.config.required_resources()
 
+        enable_stemming = False
+        if 'enable_stemming' in required_resources:
+            enable_stemming = True
+            required_resources.remove('enable_stemming')
+
         # load required resources if not present in model resources
         for rname in required_resources:
             if rname not in self._resources:
                 lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(rname)
                 self._resources[rname] = resource_loader.load_feature_resource(
-                    rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds)
+                    rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds,
+                    enable_stemming=enable_stemming)
 
 
 class LabelEncoder(object):

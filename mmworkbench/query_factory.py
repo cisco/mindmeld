@@ -54,6 +54,7 @@ class QueryFactory(object):
 
         normalized_tokens = self.tokenizer.tokenize(processed_text)
         normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
+        stemmed_tokens = [self.stem_word(t['entity']) for t in normalized_tokens]
 
         # create normalized maps
         maps = self.tokenizer.get_char_index_map(processed_text, normalized_text)
@@ -63,7 +64,8 @@ class QueryFactory(object):
         char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
 
         query = Query(raw_text, processed_text, normalized_tokens, char_maps,
-                      language=language, time_zone=time_zone, timestamp=timestamp)
+                      language=language, time_zone=time_zone, timestamp=timestamp,
+                      stemmed_tokens=stemmed_tokens)
         query.system_entity_candidates = sys_ent_rec.get_candidates(query)
         return query
 
@@ -85,6 +87,7 @@ class QueryFactory(object):
             stem = self.stemmer._step1a(word)
             stem = self.stemmer._step1b(stem)
             stem = self.stemmer._step1c(stem)
+            stem = self.stemmer._step5b(stem)
 
             # if the stemmed cleaves off the whole token, just return the original one
             if stem == '':

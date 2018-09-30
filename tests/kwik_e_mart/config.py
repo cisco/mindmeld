@@ -18,14 +18,12 @@ DOMAIN_CLASSIFIER_CONFIG = {
     'features': {
         'bag-of-words': {
             'lengths': [1],
-            'enable_stemming': True
         },
         'freq': {
-            'bins': 5,
-            'include_stemmed_tokens': True
+            'bins': 5
         },
         'in-gaz': {},
-        'exact': {'enable_stemming': True},
+        'exact': {},
         'enable_stemming': True
     }
 }
@@ -46,15 +44,13 @@ INTENT_CLASSIFIER_CONFIG = {
     },
     'features': {
         'bag-of-words': {
-            'lengths': [1],
-            'enable_stemming': True
+            'lengths': [1]
         },
         'in-gaz': {},
         'freq': {
-            'bins': 5,
-            'include_stemmed_tokens': True
+            'bins': 5
         },
-        'exact': {'enable_stemming': True},
+        'exact': {},
         'length': {},
         'enable_stemming': True
     }

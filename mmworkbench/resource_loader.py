@@ -384,6 +384,8 @@ class ResourceLoader(object):
         Args:
             queries (list of Query): A list of all queries
         """
+        enable_stemming = kwargs.get('enable_stemming')
+
         # Unigram frequencies
         tokens = []
 
@@ -391,13 +393,15 @@ class ResourceLoader(object):
             for tok in query.normalized_tokens:
                 tokens.append(mask_numerics(tok))
 
-            for tok in query.stemmed_tokens:
-                tokens.append(mask_numerics(tok))
+            if enable_stemming:
+                for tok in query.stemmed_tokens:
+                    tokens.append(mask_numerics(tok))
 
         freq_dict = Counter(tokens)
 
-        for t, c in freq_dict.items():
-            freq_dict[t] = math.floor(c / 2)
+        if enable_stemming:
+            for t, c in freq_dict.items():
+                freq_dict[t] = math.floor(c / 2)
 
         return freq_dict
 
@@ -423,6 +427,7 @@ class ResourceLoader(object):
            Args:
                queries (list of Query): A list of all queries
         """
+        enable_stemming = kwargs.get('enable_stemming')
         word_freq_dict = Counter()
         for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
             if threshold > 0:
@@ -430,11 +435,15 @@ class ResourceLoader(object):
                 for query in kwargs.get('queries'):
                     for i in range(len(query.normalized_tokens)):
                         ngram_tokens.append(' '.join(query.normalized_tokens[i:i + length]))
-                        ngram_tokens.append(' '.join(query.stemmed_tokens[i:i + length]))
+
+                        if enable_stemming:
+                            ngram_tokens.append(' '.join(query.stemmed_tokens[i:i + length]))
+
                 word_freq_dict.update(ngram_tokens)
 
-        for t, c in word_freq_dict.items():
-            word_freq_dict[t] = math.floor(c / 2)
+        if enable_stemming:
+            for t, c in word_freq_dict.items():
+                word_freq_dict[t] = math.floor(c / 2)
 
         return word_freq_dict
 
@@ -444,23 +453,28 @@ class ResourceLoader(object):
         Args:
             queries (list of Query): A list of all queries
         """
+        enable_stemming = kwargs.get('enable_stemming')
+
         # Whole query frequencies, with singletons removed
         query_dict = Counter()
         stemmed_query_dict = Counter()
 
         for query in kwargs.get('queries'):
             query_dict.update('<{}>'.format(query.normalized_text))
-            stemmed_query_dict.update('<{}>'.format(query.stemmed_text))
+
+            if enable_stemming:
+                stemmed_query_dict.update('<{}>'.format(query.stemmed_text))
 
         for query in query_dict:
             if query_dict[query] < 2:
                 query_dict[query] = 0
 
-        for query in stemmed_query_dict:
-            if stemmed_query_dict[query] < 2:
-                stemmed_query_dict[query] = 0
+        if enable_stemming:
+            for query in stemmed_query_dict:
+                if stemmed_query_dict[query] < 2:
+                    stemmed_query_dict[query] = 0
+            query_dict += stemmed_query_dict
 
-        query_dict += stemmed_query_dict
         query_dict += Counter()
         return query_dict
 

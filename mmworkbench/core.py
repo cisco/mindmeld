@@ -166,7 +166,7 @@ class Query(object):
         self._language = language
         self._time_zone = time_zone
         self._timestamp = timestamp
-        self._stemmed_tokens = tuple()
+        self.stemmed_tokens = stemmed_tokens or tuple()
 
     @property
     def text(self):
@@ -184,15 +184,9 @@ class Query(object):
         return self._texts[TEXT_FORM_NORMALIZED]
 
     @property
-    def stemmed_tokens(self):
-        """The stemmed input text"""
-        if
-        stemmed_tokens = [self.stem_word(t['entity']) for t in self._normalized_tokens]
-
-    @property
     def stemmed_text(self):
         """The stemmed input text"""
-        return ' '.join(self._stemmed_tokens)
+        return ' '.join(self.stemmed_tokens)
 
     @property
     def normalized_tokens(self):
