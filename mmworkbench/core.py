@@ -142,6 +142,7 @@ class Query(object):
         timestamp (long, optional): A unix timestamp used as the reference time.
             If not specified, the current system time is used. If `time_zone`
             is not also specified, this parameter is ignored.
+        stemmed_tokens (list): A sequence of stemmed tokens for the query text
     """
 
     # TODO: look into using __slots__
