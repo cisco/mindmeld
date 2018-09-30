@@ -9,8 +9,9 @@ import math
 import re
 
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                      OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC, ENABLED_STEMMING,
-                      DEFAULT_SYS_ENTITIES, register_features, mask_numerics, get_ngram, requires)
+                      OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC,
+                      ENABLED_STEMMING, DEFAULT_SYS_ENTITIES, register_features,
+                      mask_numerics, get_ngram, requires)
 
 
 # TODO: clean this up a LOT
@@ -416,7 +417,7 @@ def char_ngrams(n, word, **args):
 @requires(ENABLED_STEMMING)
 def enabled_stemming(**args):
     def _extractor(query, resources):
-        #no op
+        # no op
         return
     return _extractor
 

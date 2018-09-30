@@ -20,8 +20,9 @@ from . import markup, path
 from .exceptions import WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
-from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC, ENABLED_STEMMING,
-                             CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, mask_numerics)
+from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
+                             ENABLED_STEMMING, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                             mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
 
