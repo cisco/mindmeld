@@ -681,13 +681,12 @@ def extract_edge_ngrams(lengths=(1,), **args):
 
 
 @requires(WORD_FREQ_RSC)
-def extract_freq(bins=5, include_stemmed_tokens=False, **args):
+def extract_freq(bins=5, **args):
     """
     Extract frequency bin features.
 
     Args:
         bins (int): The number of frequency bins (besides OOV)
-        include_stemmed_tokens (bool): Include stemmed tokens if True
 
     Returns:
         (function): A feature extraction function that returns the log of the
@@ -707,7 +706,7 @@ def extract_freq(bins=5, include_stemmed_tokens=False, **args):
             tok = tokens[idx]
             tok = mask_numerics(tok)
 
-            if include_stemmed_tokens:
+            if args.get(ENABLE_STEMMING, False):
                 stemmed_tok = stemmed_tokens[idx]
                 stemmed_tok = mask_numerics(stemmed_tok)
                 freq = freq_dict.get(tok, freq_dict.get(stemmed_tok, 0))
