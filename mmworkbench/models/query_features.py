@@ -832,21 +832,15 @@ def extract_query_string(scaling=1000, **args):
 
     def _extractor(query, resources):
         query_key = '<{}>'.format(query.normalized_text)
-        feature_dict = {}
-
         if query_key in resources[QUERY_FREQ_RSC]:
-            feature_dict.update({'exact|query:{}'.format(query_key): scaling})
-        else:
-            feature_dict.update({'exact|query:{}'.format('<OOV>'): scaling})
+            return {'exact|query:{}'.format(query_key): scaling}
 
         if args.get(ENABLE_STEMMING, False):
             stemmed_query_key = '<{}>'.format(query.stemmed_text)
             if stemmed_query_key in resources[QUERY_FREQ_RSC]:
-                feature_dict.update({'exact|stemmed_query:{}'.format(stemmed_query_key): scaling})
-            else:
-                feature_dict.update({'exact|stemmed_query:{}'.format('<OOV>'): scaling})
+                return {'exact|query:{}'.format(stemmed_query_key): scaling}
 
-        return feature_dict
+        return {'exact|query:{}'.format('<OOV>'): scaling}
 
     return _extractor
 
