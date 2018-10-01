@@ -81,19 +81,27 @@ class QueryFactory(object):
         return self.tokenizer.normalize(text)
 
     def stem_word(self, word):
-        if len(word) <= 2:
+        stem = word.lower()
+
+        if self.stemmer.mode == self.stemmer.NLTK_EXTENSIONS and word in self.stemmer.pool:
+            return self.stemmer.pool[word]
+
+        if self.stemmer.mode != self.stemmer.ORIGINAL_ALGORITHM and len(word) <= 2:
+            # With this line, strings of length 1 or 2 don't go through
+            # the stemming process, although no mention is made of this
+            # in the published algorithm.
+            return word
+
+        stem = self.stemmer._step1a(stem)
+        stem = self.stemmer._step1b(stem)
+        stem = self.stemmer._step1c(stem)
+        stem = self.stemmer._step5b(stem)
+
+        # if the stemmed cleaves off the whole token, just return the original one
+        if stem == '':
             return word
         else:
-            stem = self.stemmer._step1a(word)
-            stem = self.stemmer._step1b(stem)
-            stem = self.stemmer._step1c(stem)
-            stem = self.stemmer._step5b(stem)
-
-            # if the stemmed cleaves off the whole token, just return the original one
-            if stem == '':
-                return word
-            else:
-                return stem
+            return stem
 
     def __repr__(self):
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))

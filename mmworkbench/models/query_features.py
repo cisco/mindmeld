@@ -10,7 +10,7 @@ import re
 
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
                       OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC,
-                      ENABLED_STEMMING, DEFAULT_SYS_ENTITIES, register_features,
+                      ENABLE_STEMMING, DEFAULT_SYS_ENTITIES, register_features,
                       mask_numerics, get_ngram, requires)
 
 
@@ -364,7 +364,7 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions,
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
 
-        if args.get('enable_stemming', False):
+        if args.get(ENABLE_STEMMING, False):
             stemmed_tokens = query.stemmed_tokens
             stemmed_tokens = [re.sub(r'\d', '0', t) for t in stemmed_tokens]
 
@@ -376,12 +376,10 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions,
                     n_gram = get_ngram(tokens, i + int(start), int(length))
                     feat_name = 'bag_of_words|length:{}|word_pos:{}'.format(
                         length, start)
+
                     if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 1) > threshold:
                         feat_seq[i][feat_name] = n_gram
-                    else:
-                        feat_seq[i][feat_name] = 'OOV'
-
-                    if args.get('enable_stemming', False):
+                    elif args.get(ENABLE_STEMMING, False):
                         stemmed_n_gram = get_ngram(stemmed_tokens, i + int(start), int(length))
                         feat_name = 'bag_of_words_stemmed|length:{}|word_pos:{}'.format(
                             length, start)
@@ -389,6 +387,9 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions,
                             feat_seq[i][feat_name] = stemmed_n_gram
                         else:
                             feat_seq[i][feat_name] = 'OOV'
+                    else:
+                        feat_seq[i][feat_name] = 'OOV'
+
                 threshold_index += 1
         return feat_seq
 
@@ -414,7 +415,7 @@ def char_ngrams(n, word, **args):
     return char_grams
 
 
-@requires(ENABLED_STEMMING)
+@requires(ENABLE_STEMMING)
 def enabled_stemming(**args):
     def _extractor(query, resources):
         # no op
@@ -570,7 +571,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
                     tok = mask_numerics(token)
                     ngram.append(tok)
 
-                    if args.get('enable_stemming', False):
+                    if args.get(ENABLE_STEMMING, False):
                         stemmed_token = stemmed_tokens[index]
                         tok_stemmed = mask_numerics(stemmed_token)
                         stemmed_ngram.append(tok_stemmed)
@@ -582,7 +583,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
                     ngram_counter.update(['bag_of_words|length:{}|ngram:{}'.format(
                         len(ngram), joined_ngram)])
 
-                    if args.get('enable_stemming', False):
+                    if args.get(ENABLE_STEMMING, False):
                         joined_stemmed_ngram = ' '.join(stemmed_ngram)
                         ngram_counter.update(['bag_of_words_stemmed|length:{}|ngram:{}'.format(
                             len(stemmed_ngram), joined_stemmed_ngram)])
@@ -835,10 +836,10 @@ def extract_query_string(scaling=1000, **args):
         if query_key in resources[QUERY_FREQ_RSC]:
             return {'exact|query:{}'.format(query_key): scaling}
 
-        if query_key not in resources[QUERY_FREQ_RSC] and not args.get('enable_stemming', False):
+        if query_key not in resources[QUERY_FREQ_RSC] and not args.get(ENABLE_STEMMING, False):
             return {'exact|query:{}'.format('<OOV>'): scaling}
 
-        if args.get('enable_stemming', False):
+        if args.get(ENABLE_STEMMING, False):
             stemmed_query_key = '<{}>'.format(query.stemmed_text)
 
             if stemmed_query_key in resources[QUERY_FREQ_RSC]:

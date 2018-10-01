@@ -7,6 +7,7 @@ from collections import namedtuple
 import logging
 import json
 import math
+import copy
 
 import numpy as np
 from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridSearchCV,
@@ -15,7 +16,7 @@ from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridS
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, ENABLE_STEMMING,
                       ingest_dynamic_gazetteer)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
@@ -155,9 +156,6 @@ class ModelConfig(object):
         # get list of resources required by feature extractors
         required_resources = set()
         for name in self.features:
-            # if name == 'enable_stemming' and self.features[name]:
-            #     required_resources.add('enable_stemming')
-            #     continue
             feature = get_feature_extractor(self.example_type, name)
             required_resources.update(feature.__dict__.get('requirements', []))
         return required_resources
@@ -826,14 +824,11 @@ class Model(object):
         example_type = self.config.example_type
         feat_set = {}
         workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+        workspace_features = copy.deepcopy(self.config.features)
+        enable_stemming = workspace_features.pop(ENABLE_STEMMING, False)
 
-        enable_stemming = self.config.features.get('enable_stemming', False)
-
-        for name, kwargs in self.config.features.items():
-            if name == 'enable_stemming':
-                continue
-
-            kwargs['enable_stemming'] = enable_stemming
+        for name, kwargs in workspace_features.items():
+            kwargs[ENABLE_STEMMING] = enable_stemming
             if callable(kwargs):
                 # a feature extractor function was passed in directly
                 feat_extractor = kwargs
@@ -926,10 +921,8 @@ class Model(object):
         # get list of resources required by feature extractors
         required_resources = self.config.required_resources()
 
-        enable_stemming = False
-        if 'enable_stemming' in required_resources:
-            enable_stemming = True
-            required_resources.remove('enable_stemming')
+        enable_stemming = ENABLE_STEMMING in required_resources
+        required_resources.discard(ENABLE_STEMMING)
 
         # load required resources if not present in model resources
         for rname in required_resources:

@@ -21,7 +21,7 @@ from .exceptions import WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
 from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                             ENABLED_STEMMING, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                             ENABLE_STEMMING, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
                              mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
@@ -385,7 +385,7 @@ class ResourceLoader(object):
         Args:
             queries (list of Query): A list of all queries
         """
-        enable_stemming = kwargs.get('enable_stemming')
+        enable_stemming = kwargs.get(ENABLE_STEMMING)
 
         # Unigram frequencies
         tokens = []
@@ -428,7 +428,7 @@ class ResourceLoader(object):
            Args:
                queries (list of Query): A list of all queries
         """
-        enable_stemming = kwargs.get('enable_stemming')
+        enable_stemming = kwargs.get(ENABLE_STEMMING)
         word_freq_dict = Counter()
         for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
             if threshold > 0:
@@ -454,7 +454,7 @@ class ResourceLoader(object):
         Args:
             queries (list of Query): A list of all queries
         """
-        enable_stemming = kwargs.get('enable_stemming')
+        enable_stemming = kwargs.get(ENABLE_STEMMING)
 
         # Whole query frequencies, with singletons removed
         query_dict = Counter()
@@ -577,7 +577,7 @@ class ResourceLoader(object):
         CHAR_NGRAM_FREQ_RSC: lambda _: 'constant',
         QUERY_FREQ_RSC: lambda _: 'constant',
         SYS_TYPES_RSC: lambda _: 'constant',
-        ENABLED_STEMMING: lambda _: 'constant'
+        ENABLE_STEMMING: lambda _: 'constant'
     }
 
 

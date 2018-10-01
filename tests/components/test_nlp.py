@@ -14,6 +14,7 @@ import pytest
 
 from mmworkbench.exceptions import ProcessorError, AllowedNlpClassesKeyError
 from mmworkbench.components import NaturalLanguageProcessor
+from mmworkbench.query_factory import QueryFactory
 
 
 @pytest.fixture
@@ -167,6 +168,58 @@ def test_nlp_hierarchy_for_queries_mallard_fails_on(kwik_e_mart_nlp, query):
     """Tests user specified allowable domains and intents"""
     response = kwik_e_mart_nlp.process(query)
     assert response['text'] == query
+
+
+test_data_not_stemmed = [
+    "airliner",
+    "gyroscopic",
+    "adjustable",
+    "defensible",
+    "irritant",
+    "replacement",
+    "adjustment",
+    "dependent",
+    "adoption",
+    "communism",
+    "activate",
+    "effective",
+    "bowdlerize",
+    "manager",
+    "proceed",
+    "exceed",
+    "succeed",
+    "outing",
+    "inning",
+    "news",
+    "sky"
+]
+
+
+@pytest.mark.parametrize("query", test_data_not_stemmed)
+def test_nlp_for_non_stemmed_queries(kwik_e_mart_nlp, query):
+    """Tests queries that are NOT in the training data but have their stemmed
+     versions in the training data"""
+    query_factory = QueryFactory.create_query_factory()
+    stemmed_tokens = query_factory.create_query(text=query).stemmed_tokens
+    assert query == stemmed_tokens[0]
+
+
+test_data_need_stemming = [
+    ("cancelled", "cancel"),
+    ("aborted", "abort"),
+    ("backwards", "backward"),
+    ("exitted", "exit"),
+    ("finished", "finish")
+]
+
+
+@pytest.mark.parametrize("query,stemmed_query", test_data_need_stemming)
+def test_nlp_for_stemmed_queries(kwik_e_mart_nlp, query, stemmed_query):
+    """Tests queries that are NOT in the training data but have their stemmed
+     versions in the training data"""
+    query_factory = QueryFactory.create_query_factory()
+    stemmed_tokens = query_factory.create_query(text=query).stemmed_tokens
+    assert stemmed_query == stemmed_tokens[0]
 
 
 test_data_stemmed = [
