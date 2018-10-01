@@ -379,16 +379,17 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions,
 
                     if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 1) > threshold:
                         feat_seq[i][feat_name] = n_gram
-                    elif args.get(ENABLE_STEMMING, False):
-                        stemmed_n_gram = get_ngram(stemmed_tokens, i + int(start), int(length))
-                        feat_name = 'bag_of_words_stemmed|length:{}|word_pos:{}'.format(
-                            length, start)
-                        if resources[WORD_NGRAM_FREQ_RSC].get(stemmed_n_gram, 1) > threshold:
-                            feat_seq[i][feat_name] = stemmed_n_gram
-                        else:
-                            feat_seq[i][feat_name] = 'OOV'
                     else:
                         feat_seq[i][feat_name] = 'OOV'
+
+                    if args.get(ENABLE_STEMMING, False):
+                        stemmed_n_gram = get_ngram(stemmed_tokens, i + int(start), int(length))
+                        stemmed_feat_name = 'bag_of_words_stemmed|length:{}|word_pos:{}'.format(
+                            length, start)
+                        if resources[WORD_NGRAM_FREQ_RSC].get(stemmed_n_gram, 1) > threshold:
+                            feat_seq[i][stemmed_feat_name] = stemmed_n_gram
+                        else:
+                            feat_seq[i][stemmed_feat_name] = 'OOV'
 
                 threshold_index += 1
         return feat_seq
