@@ -8,8 +8,6 @@ test_nlp
 Tests for NaturalLanguageProcessor module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench.exceptions import ProcessorError, AllowedNlpClassesKeyError

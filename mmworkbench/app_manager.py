@@ -2,9 +2,6 @@
 """
 This module contains the application manager
 """
-from __future__ import absolute_import, unicode_literals
-from builtins import object
-
 import copy
 import logging
 
@@ -63,7 +60,7 @@ PARAM_VALIDATORS = {
 }
 
 
-class ApplicationManager(object):
+class ApplicationManager:
     """The Application Manager is the core orchestrator of the MindMeld platform. It receives
     a client request from the gateway, and processes that request by passing it through all the
     necessary components of Workbench. Once processing is complete, the application manager

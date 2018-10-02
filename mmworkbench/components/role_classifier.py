@@ -2,9 +2,6 @@
 """
 This module contains the role classifier component of the Workbench natural language processor.
 """
-from __future__ import absolute_import, unicode_literals
-from builtins import super
-
 import logging
 import os
 

@@ -3,9 +3,6 @@
 These are capabilities that do not have an obvious home within the existing
 project structure.
 """
-from __future__ import unicode_literals, absolute_import
-from builtins import object
-
 import datetime
 from email.utils import parsedate
 import logging
@@ -40,7 +37,7 @@ BLUEPRINTS = {
 }
 
 
-class Blueprint(object):
+class Blueprint:
     """This is a callable class used to set up a blueprint app.
 
     The MindMeld website hosts the blueprints in a directory structure like this:

@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains the Memm entity recognizer."""
-from __future__ import print_function, absolute_import, unicode_literals, division
-from builtins import range, super
-
 import logging
 import random
 from sklearn.externals import joblib

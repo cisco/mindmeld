@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains the dialogue manager component of Workbench"""
-from __future__ import absolute_import, unicode_literals
-from builtins import object, str
-
 import asyncio
 from functools import cmp_to_key, partial
 import copy
@@ -18,7 +15,7 @@ from ..exceptions import WorkbenchImportError
 mod_logger = logging.getLogger(__name__)
 
 
-class DirectiveNames(object):
+class DirectiveNames:
     """A constants object for directive names.
 
     Attributes:
@@ -38,7 +35,7 @@ class DirectiveNames(object):
     SUGGESTIONS = 'suggestions'
 
 
-class DirectiveTypes(object):
+class DirectiveTypes:
     """A constants object for directive types.
 
     Attributes:
@@ -50,7 +47,7 @@ class DirectiveTypes(object):
     ACTION = 'action'
 
 
-class DialogueStateRule(object):
+class DialogueStateRule:
     """A rule that determines a dialogue state. Each rule represents a pattern that must match in
     order to invoke a particular dialogue state.
 
@@ -221,7 +218,7 @@ class DialogueStateRule(object):
         return (this.complexity > that.complexity) - (this.complexity < that.complexity)
 
 
-class DialogueManager(object):
+class DialogueManager:
     logger = mod_logger.getChild('DialogueManager')
 
     def __init__(self, responder_class=None, async_mode=False):
@@ -376,7 +373,7 @@ class DialogueManager(object):
         pass
 
 
-class DialogueResponder(object):
+class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
     system-generated natural language responses.
 
@@ -529,7 +526,7 @@ def _get_app_module(app_path):
         raise WorkbenchImportError(ex.msg)
 
 
-class Conversation(object):
+class Conversation:
     """The conversation object is a very basic workbench client.
 
     It can be useful for testing out dialogue flows in python.

@@ -2,9 +2,6 @@
 """
 This module contains the language parser component of the Workbench natural language processor
 """
-from __future__ import absolute_import, unicode_literals
-from builtins import object
-
 from collections import defaultdict, namedtuple, OrderedDict
 import logging
 import time
@@ -31,7 +28,7 @@ START_SYMBOLS = frozenset({START_SYMBOL, HEAD_SYMBOL})
 MAX_PARSE_TIME = 2.0
 
 
-class Parser(object):
+class Parser:
     """
     A language parser which is used to extract relations between entities in a
     given query and group related entities together.

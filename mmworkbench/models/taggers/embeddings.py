@@ -146,7 +146,7 @@ class GloVeEmbeddingsContainer:
         return
 
 
-class WordSequenceEmbedding(object):
+class WordSequenceEmbedding:
     """WordSequenceEmbedding encodes a sequence of words into a sequence of fixed
     dimension real-numbered vectors by mapping each word as a vector.
     """
@@ -226,7 +226,7 @@ class WordSequenceEmbedding(object):
         output.close()
 
 
-class CharacterSequenceEmbedding(object):
+class CharacterSequenceEmbedding:
     """CharacterSequenceEmbedding encodes a sequence of words into a sequence of fixed
     dimension real-numbered vectors by mapping each character in the words as vectors.
     """

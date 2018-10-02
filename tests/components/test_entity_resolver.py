@@ -8,8 +8,6 @@ test_entity_resolver
 Tests for `entity_resolver` module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import pytest
 
 from mmworkbench.core import Entity

@@ -2,8 +2,6 @@
 """
 This module contains the Memm entity recognizer.
 """
-from __future__ import print_function, absolute_import, unicode_literals, division
-
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression

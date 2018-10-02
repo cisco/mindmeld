@@ -2,8 +2,6 @@
 """
     This module contains the class which serves the workbench API.
 """
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import json
 import os
@@ -35,7 +33,7 @@ class WorkbenchRequest(Request):
         raise BadWorkbenchRequestError("Malformed request body: {0:s}".format(sys.exc_info()[1]))
 
 
-class WorkbenchServer(object):
+class WorkbenchServer:
     """This class sets up a Flask web server."""
 
     def __init__(self, app_manager):

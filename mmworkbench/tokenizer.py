@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains the tokenizer."""
-from __future__ import absolute_import, unicode_literals
-
-from builtins import range
-from builtins import object
-
 import codecs
 import logging
 import re
@@ -14,7 +9,7 @@ from .path import ASCII_FOLDING_DICT_PATH
 logger = logging.getLogger(__name__)
 
 
-class Tokenizer(object):
+class Tokenizer:
     """The Tokenizer class encapsulates all the functionality for normalizing and tokenizing a
     given piece of text"""
     ASCII_CUTOFF = ord('\u0080')

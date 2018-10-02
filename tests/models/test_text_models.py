@@ -8,8 +8,6 @@ test_standard_models
 Tests for `standard_models` module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import os
 
 import pytest

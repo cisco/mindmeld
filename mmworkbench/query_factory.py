@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 """This module contains the query factory class."""
-from __future__ import absolute_import, unicode_literals
-from builtins import object
-
-
 from . import ser as sys_ent_rec
 
 from .core import Query, TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED
 from .tokenizer import Tokenizer
 
 
-class QueryFactory(object):
+class QueryFactory:
     """An object which encapsulates the components required to create a Query object.
 
     Attributes:

@@ -7,8 +7,6 @@ conftest
 Configurations for tests. Include shared fixtures here.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
-from __future__ import unicode_literals
-
 import asyncio
 import codecs
 import os

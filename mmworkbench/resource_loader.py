@@ -2,9 +2,6 @@
 """
 This module contains the processor resource loader.
 """
-from __future__ import absolute_import, unicode_literals
-from builtins import (object, zip)
-
 from copy import deepcopy
 from collections import Counter
 
@@ -27,7 +24,7 @@ from .constants import DEFAULT_TRAIN_SET_REGEX
 logger = logging.getLogger(__name__)
 
 
-class ResourceLoader(object):
+class ResourceLoader:
 
     def __init__(self, app_path, query_factory):
         self.app_path = app_path
@@ -537,7 +534,7 @@ class ResourceLoader(object):
     }
 
 
-class Hasher(object):
+class Hasher:
     """An thin wrapper around hashlib. Uses cache for commonly hashed strings.
 
     Attributes:

@@ -11,7 +11,7 @@ from .embeddings import WordSequenceEmbedding, CharacterSequenceEmbedding
 from sklearn.preprocessing import LabelBinarizer
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
-GAZ_PATTERN_MATCH = 'in-gaz\|type:(\w+)\|pos:(\w+)\|'
+GAZ_PATTERN_MATCH = r'in-gaz\|type:(\w+)\|pos:(\w+)\|'
 REGEX_TYPE_POSITIONAL_INDEX = 1
 DEFAULT_LABEL = 'B|UNK'
 DEFAULT_GAZ_LABEL = 'O'

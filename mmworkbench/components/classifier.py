@@ -2,15 +2,11 @@
 """
 This module contains the base class for all the machine-learned classifiers in Workbench.
 """
-from __future__ import absolute_import, unicode_literals
-from builtins import object
-
 from abc import ABCMeta, abstractmethod
 import json
 import logging
 import os
 
-from future.utils import with_metaclass
 from sklearn.externals import joblib
 
 from .. import markup
@@ -23,7 +19,7 @@ from ..models import create_model, ModelConfig
 logger = logging.getLogger(__name__)
 
 
-class ClassifierConfig(object):
+class ClassifierConfig:
     """A value object representing a classifier configuration
 
     Attributes:
@@ -95,7 +91,7 @@ class ClassifierConfig(object):
         return json.dumps(self.to_dict(), sort_keys=True)
 
 
-class Classifier(with_metaclass(ABCMeta, object)):
+class Classifier(metaclass=ABCMeta):
     """The base class for all the machine-learned classifiers in Workbench. A classifier is a
     machine-learned model that categorizes input examples into one of the pre-determined class
     labels. Among other functionality, each classifier provides means by which to fit a statistical

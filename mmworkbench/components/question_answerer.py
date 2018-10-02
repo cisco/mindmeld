@@ -2,15 +2,11 @@
 """
 This module contains the question answerer component of Workbench.
 """
-from __future__ import absolute_import, unicode_literals
-from builtins import object
 from abc import ABCMeta, abstractmethod
 
 import json
 import logging
 import copy
-
-from future.utils import with_metaclass
 
 from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
@@ -24,7 +20,7 @@ from ..exceptions import KnowledgeBaseError, KnowledgeBaseConnectionError
 logger = logging.getLogger(__name__)
 
 
-class QuestionAnswerer(object):
+class QuestionAnswerer:
     """The question answerer is primarily an information retrieval system that provides all the
     necessary functionality for interacting with the application's knowledge base.
     """
@@ -587,7 +583,7 @@ class Search:
         except ElasticsearchException:
             raise KnowledgeBaseError
 
-    class Clause(with_metaclass(ABCMeta, object)):
+    class Clause(metaclass=ABCMeta):
         """This class models an abstract knowledge base clause."""
 
         def __init__(self):

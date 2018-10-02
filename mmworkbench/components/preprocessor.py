@@ -1,9 +1,11 @@
-from future.utils import with_metaclass
-
+# -*- coding: utf-8 -*-
+"""
+This module contains a preprocessor base class.
+"""
 from abc import ABCMeta, abstractmethod
 
 
-class Preprocessor(with_metaclass(ABCMeta, object)):
+class Preprocessor(metaclass=ABCMeta):
     """
     Base class for Preprocessor object
     """

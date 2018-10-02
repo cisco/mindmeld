@@ -1,7 +1,9 @@
-import pytest
-from mmworkbench.resource_loader import Hasher
-from mock import mock_open, patch
 import hashlib
+from mock import mock_open, patch
+
+import pytest
+
+from mmworkbench.resource_loader import Hasher
 
 
 @pytest.fixture

@@ -3,16 +3,13 @@
 This module contains all code required to perform multinomial classification
 of text.
 """
-from __future__ import absolute_import, division, unicode_literals
-
 import logging
+import operator
 import random
-from builtins import range, super, zip
 
 import numpy as np
 import pandas as pd
 from numpy import bincount
-from past.utils import old_div
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
@@ -20,7 +17,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-import operator
 
 from .helpers import (QUERY_FREQ_RSC, WORD_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
                       CHAR_NGRAM_FREQ_RSC, register_model)
@@ -363,7 +359,7 @@ class TextModel(Model):
             raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]
             for class_bias in raw_bias:
                 # these weights are same as sklearn's class_weight='balanced'
-                balanced_w = [old_div(len(y), (float(len(classes)) * c)) for c in class_count]
+                balanced_w = [(len(y) / len(classes) * c) for c in class_count]
                 balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
 
                 weights.append({c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples})

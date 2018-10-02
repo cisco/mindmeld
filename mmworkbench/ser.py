@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains the system entity recognizer."""
-from __future__ import absolute_import, unicode_literals
-from builtins import str
-
 import logging
 import json
 import sys

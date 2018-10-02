@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains feature extractors for queries"""
-from __future__ import absolute_import, unicode_literals, division
-from builtins import range, zip
-from past.utils import old_div
-
 from collections import Counter, defaultdict
 import math
 import re
@@ -27,7 +23,7 @@ def extract_in_gaz_span_features():
             feat_seq = [{} for _ in tokens]
 
             pop = gazes[entity_type]['pop_dict'][entity]
-            p_total = old_div(math.log(sum([g['total_entities'] for g in gazes.values()]) + 1), 2)
+            p_total = math.log(sum([g['total_entities'] for g in gazes.values()]) + 1) / 2
 
             p_entity_type = math.log(gazes[entity_type]['total_entities'] + 1)
             p_entity = math.log(sum([len(g['index'][entity])
@@ -104,8 +100,7 @@ def extract_in_gaz_span_features():
                 feat_name = feat_prefix + '|log_char_len'
                 feat_seq[i][feat_name] = math.log(len(entity))
                 feat_name = feat_prefix + '|pct_char_len'
-                feat_seq[i][feat_name] = (old_div(float(len(entity)),
-                                                  len(' '.join(tokens))))
+                feat_seq[i][feat_name] = len(entity) / len(' '.join(tokens))
 
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[i][feat_name] = p_total + p_joint - p_entity_type - p_entity
@@ -122,7 +117,7 @@ def extract_in_gaz_span_features():
                 feat_name = feat_prefix + '|log_char_len'
                 feat_seq[end][feat_name] = math.log(len(entity))
                 feat_name = feat_prefix + '|pct_char_len'
-                feat_seq[end][feat_name] = old_div(float(len(entity)), len(' '.join(tokens)))
+                feat_seq[end][feat_name] = len(entity) / len(' '.join(tokens))
                 feat_name = feat_prefix + '|pmi'
                 feat_seq[end][feat_name] = p_total + p_joint - p_entity_type - p_entity
                 feat_name = feat_prefix + '|class_prob'
@@ -283,8 +278,7 @@ def extract_in_gaz_ngram_features():
                     len(gazes[entity_type]['index'][get_ngram(tokens, i, 2)]) + 1)
 
                 # entity PMI and conditional prob
-                p_total = old_div(math.log(sum([g['total_entities']
-                                                for g in gazes.values()]) + 1), 2)
+                p_total = math.log(sum([g['total_entities'] for g in gazes.values()]) + 1) / 2
                 p_entity_type = math.log(gazes[entity_type]['total_entities'] + 1)
                 p_ngram = math.log(sum([len(g['index'][get_ngram(tokens, i, 1)])
                                         for g in gazes.values()]) + 1)
@@ -702,7 +696,7 @@ def extract_gaz_freq():
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 freq = len(gaz['index'].get(tok, []))
                 if freq > 0:
-                    freq_bin = int(old_div(math.log(freq, 2), 2))
+                    freq_bin = math.log(freq, 2) // 2
                     freq_features['in_gaz|type:{}|gaz_freq_bin:{}'.format(gaz_name, freq_bin)] += 1
                     freq_features['in_vocab:{}|in_gaz|type:{}|gaz_freq_bin:{}'.format(
                         query_freq, gaz_name, freq_bin)] += 1
@@ -732,7 +726,7 @@ def extract_in_gaz_feature(scaling=1):
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 if ngram in gaz['pop_dict']:
                     popularity = gaz['pop_dict'].get(ngram, 0.0)
-                    ratio = (old_div(len(ngram), float(len(norm_text)))) * scaling
+                    ratio = len(ngram) / len(norm_text) * scaling
                     ratio_pop = ratio * popularity
                     in_gaz_features['in_gaz|type:{}|ratio_pop'.format(gaz_name)] += ratio_pop
                     in_gaz_features['in_gaz|type:{}|ratio'.format(gaz_name)] += ratio

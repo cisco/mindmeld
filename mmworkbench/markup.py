@@ -2,9 +2,6 @@
 """The markup module contains functions for interacting with the MindMeld Markup language for
 representing annotations of query text inline.
 """
-from __future__ import absolute_import, unicode_literals
-from future.utils import raise_from
-
 import logging
 
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
@@ -150,10 +147,10 @@ def process_markup(markup, query_factory, query_options):
         entities = _process_annotations(query, annotations)
     except MarkupError as exc:
         msg = 'Invalid markup in query {!r}: {}'
-        raise_from(MarkupError(msg.format(markup, exc)), exc)
+        raise MarkupError(msg.format(markup, exc)) from exc
     except SystemEntityResolutionError as exc:
         msg = "Unable to load query {!r}: {}"
-        raise_from(SystemEntityMarkupError(msg.format(markup, exc)), exc)
+        raise SystemEntityMarkupError(msg.format(markup, exc)) from exc
     return raw_text, query, entities
 
 
@@ -172,12 +169,12 @@ def _process_annotations(query, annotations):
                 head = ann['head']
             except KeyError as exc:
                 msg = 'Group between {} and {} missing head'.format(ann['start'], ann['end'])
-                raise_from(MarkupError(msg), exc)
+                raise MarkupError(msg) from exc
             try:
                 children = ann['children']
             except KeyError as exc:
                 msg = 'Group between {} and {} missing children'.format(ann['start'], ann['end'])
-                raise_from(MarkupError(msg), exc)
+                raise MarkupError(msg) from exc
             entity = head.with_children(children)
             entities.remove(head)
             entities.append(entity)

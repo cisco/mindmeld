@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-from builtins import object
-
 import codecs
 from collections import defaultdict
 import logging
@@ -12,7 +9,7 @@ from sklearn.externals import joblib
 logger = logging.getLogger(__name__)
 
 
-class Gazetteer(object):
+class Gazetteer:
     """
     This class holds the following  fields, which are extracted and exported to file.
 

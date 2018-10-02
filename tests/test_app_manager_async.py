@@ -9,7 +9,6 @@ Tests for app_manager module.
 
 These tests apply only when async/await are supported.
 """
-
 import pytest
 
 
