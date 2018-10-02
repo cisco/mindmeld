@@ -828,11 +828,11 @@ class Model(object):
         enable_stemming = workspace_features.pop(ENABLE_STEMMING, False)
 
         for name, kwargs in workspace_features.items():
-            kwargs[ENABLE_STEMMING] = enable_stemming
             if callable(kwargs):
                 # a feature extractor function was passed in directly
                 feat_extractor = kwargs
             else:
+                kwargs[ENABLE_STEMMING] = enable_stemming
                 feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
             feat_set.update(feat_extractor(example, workspace_resource))
         return feat_set

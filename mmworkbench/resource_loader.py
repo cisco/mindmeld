@@ -14,7 +14,6 @@ import logging
 import os
 import time
 import re
-import math
 
 from . import markup, path
 from .exceptions import WorkbenchError
@@ -402,7 +401,7 @@ class ResourceLoader(object):
 
         if enable_stemming:
             for t, c in freq_dict.items():
-                freq_dict[t] = math.floor(c / 2)
+                freq_dict[t] = c / 2
 
         return freq_dict
 
@@ -444,7 +443,7 @@ class ResourceLoader(object):
 
         if enable_stemming:
             for t, c in word_freq_dict.items():
-                word_freq_dict[t] = math.floor(c / 2)
+                word_freq_dict[t] = c / 2
 
         return word_freq_dict
 
