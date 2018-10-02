@@ -573,8 +573,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
                     ngram.append(tok)
 
                     if args.get(ENABLE_STEMMING, False):
-                        stemmed_token = stemmed_tokens[index]
-                        tok_stemmed = mask_numerics(stemmed_token)
+                        tok_stemmed = mask_numerics(stemmed_tokens[index])
                         stemmed_ngram.append(tok_stemmed)
 
                 freq = resources[WORD_NGRAM_FREQ_RSC].get(' '.join(ngram), 1)
