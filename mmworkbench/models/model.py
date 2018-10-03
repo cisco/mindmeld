@@ -922,10 +922,11 @@ class Model(object):
         required_resources = self.config.required_resources()
 
         enable_stemming = ENABLE_STEMMING in required_resources
-        required_resources.discard(ENABLE_STEMMING)
 
         # load required resources if not present in model resources
         for rname in required_resources:
+            if rname == ENABLE_STEMMING:
+                continue
             if rname not in self._resources:
                 lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(rname)
                 self._resources[rname] = resource_loader.load_feature_resource(

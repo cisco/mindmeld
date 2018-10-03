@@ -24,7 +24,7 @@ DOMAIN_CLASSIFIER_CONFIG = {
         },
         'in-gaz': {},
         'exact': {},
-        'enable_stemming': True
+        'enable-stemming': True
     }
 }
 
@@ -52,7 +52,7 @@ INTENT_CLASSIFIER_CONFIG = {
         },
         'exact': {},
         'length': {},
-        'enable_stemming': True
+        'enable-stemming': True
     }
 }
 

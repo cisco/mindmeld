@@ -868,5 +868,5 @@ register_features('query', {
     'in-gaz-ngram-seq': extract_in_gaz_ngram_features,
     'sys-candidates-seq': extract_sys_candidate_features,
     'char-ngrams-seq': extract_char_ngrams_features,
-    'enable_stemming': enabled_stemming
+    'enable-stemming': enabled_stemming
 })
