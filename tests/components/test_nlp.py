@@ -12,6 +12,7 @@ import pytest
 
 from mmworkbench.exceptions import ProcessorError, AllowedNlpClassesKeyError
 from mmworkbench.components import NaturalLanguageProcessor
+from mmworkbench.query_factory import QueryFactory
 
 
 @pytest.fixture
@@ -118,7 +119,7 @@ def test_nlp_hierarchy_using_domains_intents(kwik_e_mart_nlp, allowed_intents,
 
 
 test_data_dyn = [
-    ('kadubeesanahalli', None, 'store_info', 'greet', ''),
+    ('kadubeesanahalli', None, 'store_info', 'help', ''),
     ('45 Fifth', None, 'store_info', 'get_store_hours', '45 Fifth'),
     ('kadubeesanahalli', {'gazetteers': {'store_name': {'kadubeesanahalli': 1}}},
      'store_info', 'get_store_hours', 'kadubeesanahalli'),
@@ -140,7 +141,11 @@ def test_nlp_hierarchy_using_dynamic_gazetteer(kwik_e_mart_nlp, query, dyn_gaz,
             'store_name')['entities']
 
     assert response['domain'] == expected_domain
-    assert response['intent'] == expected_intent
+
+    if expected_intent != 'get_store_hours':
+        assert response['intent'] != 'get_store_hours'
+    else:
+        assert response['intent'] == expected_intent
 
     if expected_entity == '':
         assert response['entities'] == []
@@ -161,6 +166,75 @@ def test_nlp_hierarchy_for_queries_mallard_fails_on(kwik_e_mart_nlp, query):
     """Tests user specified allowable domains and intents"""
     response = kwik_e_mart_nlp.process(query)
     assert response['text'] == query
+
+
+test_data_not_stemmed = [
+    "airliner",
+    "gyroscopic",
+    "adjustable",
+    "defensible",
+    "irritant",
+    "replacement",
+    "adjustment",
+    "dependent",
+    "adoption",
+    "communism",
+    "activate",
+    "effective",
+    "bowdlerize",
+    "manager",
+    "proceed",
+    "exceed",
+    "succeed",
+    "outing",
+    "inning",
+    "news",
+    "sky"
+]
+
+
+@pytest.mark.parametrize("query", test_data_not_stemmed)
+def test_nlp_for_non_stemmed_queries(kwik_e_mart_nlp, query):
+    """Tests queries that are NOT in the training data but have their stemmed
+     versions in the training data"""
+    query_factory = QueryFactory.create_query_factory()
+    stemmed_tokens = query_factory.create_query(text=query).stemmed_tokens
+    assert query == stemmed_tokens[0]
+
+
+test_data_need_stemming = [
+    ("cancelled", "cancel"),
+    ("aborted", "abort"),
+    ("backwards", "backward"),
+    ("exitted", "exit"),
+    ("finished", "finish")
+]
+
+
+@pytest.mark.parametrize("query,stemmed_query", test_data_need_stemming)
+def test_nlp_for_stemmed_queries(kwik_e_mart_nlp, query, stemmed_query):
+    """Tests queries that are NOT in the training data but have their stemmed
+     versions in the training data"""
+    query_factory = QueryFactory.create_query_factory()
+    stemmed_tokens = query_factory.create_query(text=query).stemmed_tokens
+    assert stemmed_query == stemmed_tokens[0]
+
+
+test_data_stemmed = [
+    "cancelled",
+    "exited",
+    "aborted"
+]
+
+
+@pytest.mark.parametrize("query", test_data_stemmed)
+def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
+    """Tests queries that are NOT in the training data but have their stemmed
+     versions in the training data"""
+    response = kwik_e_mart_nlp.process(query)
+    assert response['text'] == query
+    assert response['domain'] == 'store_info'
+    assert response['intent'] == 'exit'
 
 
 def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):

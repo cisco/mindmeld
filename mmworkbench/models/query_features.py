@@ -6,14 +6,15 @@ import re
 
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
                       OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC,
-                      DEFAULT_SYS_ENTITIES, register_features, mask_numerics, get_ngram, requires)
+                      ENABLE_STEMMING, DEFAULT_SYS_ENTITIES, register_features,
+                      mask_numerics, get_ngram, requires)
 
 
 # TODO: clean this up a LOT
 
 
 @requires(GAZETTEER_RSC)
-def extract_in_gaz_span_features():
+def extract_in_gaz_span_features(**args):
     """Returns a feature extractor for properties of spans in gazetteers
     """
 
@@ -255,7 +256,7 @@ def extract_in_gaz_span_features():
 
 
 @requires(GAZETTEER_RSC)
-def extract_in_gaz_ngram_features():
+def extract_in_gaz_ngram_features(**args):
     """Returns a feature extractor for surrounding ngrams in gazetteers
     """
 
@@ -338,7 +339,8 @@ def extract_in_gaz_ngram_features():
 
 
 @requires(WORD_NGRAM_FREQ_RSC)
-def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(0,)):
+def extract_bag_of_words_features(ngram_lengths_to_start_positions,
+                                  thresholds=(0,), **args):
     """Returns a bag-of-words feature extractor.
     Args:
         ngram_lengths_to_start_positions (dict):
@@ -355,6 +357,11 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
         tokens = query.normalized_tokens
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
         feat_seq = [{} for _ in tokens]
+
+        if args.get(ENABLE_STEMMING, False):
+            stemmed_tokens = query.stemmed_tokens
+            stemmed_tokens = [re.sub(r'\d', '0', t) for t in stemmed_tokens]
+
         for i in range(len(tokens)):
             threshold_index = 0
             for length, starts in ngram_lengths_to_start_positions.items():
@@ -363,10 +370,20 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
                     n_gram = get_ngram(tokens, i + int(start), int(length))
                     feat_name = 'bag_of_words|length:{}|word_pos:{}'.format(
                         length, start)
+
                     if resources[WORD_NGRAM_FREQ_RSC].get(n_gram, 1) > threshold:
                         feat_seq[i][feat_name] = n_gram
                     else:
                         feat_seq[i][feat_name] = 'OOV'
+
+                    if args.get(ENABLE_STEMMING, False):
+                        stemmed_n_gram = get_ngram(stemmed_tokens, i + int(start), int(length))
+                        stemmed_feat_name = 'bag_of_words_stemmed|length:{}|word_pos:{}'.format(
+                            length, start)
+                        if resources[WORD_NGRAM_FREQ_RSC].get(stemmed_n_gram, 1) > threshold:
+                            feat_seq[i][stemmed_feat_name] = stemmed_n_gram
+                        else:
+                            feat_seq[i][stemmed_feat_name] = 'OOV'
 
                 threshold_index += 1
         return feat_seq
@@ -374,7 +391,7 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions, thresholds=(
     return _extractor
 
 
-def char_ngrams(n, word):
+def char_ngrams(n, word, **args):
     char_grams = []
     for i in range(len(word)):
         """
@@ -393,8 +410,16 @@ def char_ngrams(n, word):
     return char_grams
 
 
+@requires(ENABLE_STEMMING)
+def enabled_stemming(**args):
+    def _extractor(query, resources):
+        # no op
+        return
+    return _extractor
+
+
 @requires(CHAR_NGRAM_FREQ_RSC)
-def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0,)):
+def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0,), **args):
     """Returns a character n-gram feature extractor.
         Args:
             ngram_lengths_to_start_positions (dict):
@@ -437,7 +462,7 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0
 
 
 @requires(SYS_TYPES_RSC)
-def extract_sys_candidate_features(start_positions=(0,)):
+def extract_sys_candidate_features(start_positions=(0,), **args):
     """Return an extractor for features based on a heuristic guess of numeric
     candidates at/near the current token.
     Args:
@@ -464,7 +489,7 @@ def extract_sys_candidate_features(start_positions=(0,)):
     return _extractor
 
 
-def update_features_sequence(feat_seq, update_feat_seq):
+def update_features_sequence(feat_seq, update_feat_seq, **args):
     """Update a list of features with another parallel list of features.
 
     Args:
@@ -477,7 +502,7 @@ def update_features_sequence(feat_seq, update_feat_seq):
 
 
 @requires(CHAR_NGRAM_FREQ_RSC)
-def extract_char_ngrams(lengths=(1,), thresholds=(0,)):
+def extract_char_ngrams(lengths=(1,), thresholds=(0,), **args):
     """
         Extract character ngrams of specified lengths.
 
@@ -510,7 +535,7 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,)):
 
 
 @requires(WORD_NGRAM_FREQ_RSC)
-def extract_ngrams(lengths=(1,), thresholds=(0,)):
+def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
     """
     Extract ngrams of some specified lengths.
 
@@ -526,29 +551,46 @@ def extract_ngrams(lengths=(1,), thresholds=(0,)):
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
+        stemmed_tokens = query.stemmed_tokens
         ngram_counter = Counter()
 
         for length, threshold in zip(lengths, word_thresholds):
             for i in range(len(tokens) - length + 1):
                 ngram = []
-                for token in tokens[i:i + length]:
+                stemmed_ngram = []
+
+                for index in range(i, i + length):
                     # We never want to differentiate between number tokens.
                     # We may need to convert number words too, like "eighty".
+                    token = tokens[index]
                     tok = mask_numerics(token)
                     ngram.append(tok)
+
+                    if args.get(ENABLE_STEMMING, False):
+                        tok_stemmed = mask_numerics(stemmed_tokens[index])
+                        stemmed_ngram.append(tok_stemmed)
+
                 freq = resources[WORD_NGRAM_FREQ_RSC].get(' '.join(ngram), 1)
+
                 if freq > threshold:
+                    joined_ngram = ' '.join(ngram)
                     ngram_counter.update(['bag_of_words|length:{}|ngram:{}'.format(
-                        len(ngram), ' '.join(ngram))])
+                        len(ngram), joined_ngram)])
+
+                    if args.get(ENABLE_STEMMING, False):
+                        joined_stemmed_ngram = ' '.join(stemmed_ngram)
+                        ngram_counter.update(['bag_of_words_stemmed|length:{}|ngram:{}'.format(
+                            len(stemmed_ngram), joined_stemmed_ngram)])
                 else:
                     ngram_counter.update(['bag_of_words|length:{}|ngram:{}'.format(
                         len(ngram), 'OOV')])
+
         return ngram_counter
 
     return _extractor
 
 
-def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES):
+def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES, **args):
     """
     Return an extractor for features based on a heuristic guess of numeric
         candidates in the current query.
@@ -567,7 +609,7 @@ def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES):
     return _extractor
 
 
-def extract_word_shape(lengths=(1,)):
+def extract_word_shape(lengths=(1,), **args):
     """
     Extracts word shape for ngrams of specified lengths.
 
@@ -599,7 +641,7 @@ def extract_word_shape(lengths=(1,)):
 
 
 @requires(WORD_FREQ_RSC)
-def extract_edge_ngrams(lengths=(1,)):
+def extract_edge_ngrams(lengths=(1,), **args):
     """
     Extract ngrams of some specified lengths.
 
@@ -633,7 +675,7 @@ def extract_edge_ngrams(lengths=(1,)):
 
 
 @requires(WORD_FREQ_RSC)
-def extract_freq(bins=5):
+def extract_freq(bins=5, **args):
     """
     Extract frequency bin features.
 
@@ -648,12 +690,23 @@ def extract_freq(bins=5):
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
+        stemmed_tokens = query.stemmed_tokens
+
         freq_dict = resources[WORD_FREQ_RSC]
         max_freq = freq_dict.most_common(1)[0][1]
         freq_features = defaultdict(int)
-        for tok in tokens:
+
+        for idx in range(len(tokens)):
+            tok = tokens[idx]
             tok = mask_numerics(tok)
-            freq = freq_dict.get(tok, 0)
+
+            if args.get(ENABLE_STEMMING, False):
+                stemmed_tok = stemmed_tokens[idx]
+                stemmed_tok = mask_numerics(stemmed_tok)
+                freq = freq_dict.get(tok, freq_dict.get(stemmed_tok, 0))
+            else:
+                freq = freq_dict.get(tok, 0)
+
             if freq < 2:
                 freq_features['in_vocab:OOV'] += 1
             else:
@@ -678,7 +731,7 @@ def extract_freq(bins=5):
 
 @requires(GAZETTEER_RSC)
 @requires(WORD_FREQ_RSC)
-def extract_gaz_freq():
+def extract_gaz_freq(**args):
     """
     Extract frequency bin features for each gazetteer
 
@@ -713,7 +766,7 @@ def extract_gaz_freq():
 
 
 @requires(GAZETTEER_RSC)
-def extract_in_gaz_feature(scaling=1):
+def extract_in_gaz_feature(scaling=1, **args):
     def _extractor(query, resources):
         in_gaz_features = defaultdict(float)
 
@@ -738,7 +791,7 @@ def extract_in_gaz_feature(scaling=1):
     return _extractor
 
 
-def extract_length():
+def extract_length(**args):
     """
     Extract length measures (tokens and chars; linear and log) on whole query.
 
@@ -760,7 +813,7 @@ def extract_length():
 
 
 @requires(QUERY_FREQ_RSC)
-def extract_query_string(scaling=1000):
+def extract_query_string(scaling=1000, **args):
     """
     Extract whole query string as a feature.
 
@@ -772,15 +825,21 @@ def extract_query_string(scaling=1000):
 
     def _extractor(query, resources):
         query_key = '<{}>'.format(query.normalized_text)
-        if query_key not in resources[QUERY_FREQ_RSC]:
-            query_key = '<OOV>'
-        return {'exact|query:{}'.format(query_key): scaling}
+        if query_key in resources[QUERY_FREQ_RSC]:
+            return {'exact|query:{}'.format(query_key): scaling}
+
+        if args.get(ENABLE_STEMMING, False):
+            stemmed_query_key = '<{}>'.format(query.stemmed_text)
+            if stemmed_query_key in resources[QUERY_FREQ_RSC]:
+                return {'exact|query:{}'.format(stemmed_query_key): scaling}
+
+        return {'exact|query:{}'.format('<OOV>'): scaling}
 
     return _extractor
 
 
 # Generate all n-gram combinations from a list of strings
-def find_ngrams(input_list, n):
+def find_ngrams(input_list, n, **args):
     result = []
     for ngram in zip(*[input_list[i:] for i in range(n)]):
         result.append(" ".join(ngram))
@@ -802,5 +861,6 @@ register_features('query', {
     'in-gaz-span-seq': extract_in_gaz_span_features,
     'in-gaz-ngram-seq': extract_in_gaz_ngram_features,
     'sys-candidates-seq': extract_sys_candidate_features,
-    'char-ngrams-seq': extract_char_ngrams_features
+    'char-ngrams-seq': extract_char_ngrams_features,
+    'enable-stemming': enabled_stemming
 })

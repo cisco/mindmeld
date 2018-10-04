@@ -17,11 +17,14 @@ from .exceptions import WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
 from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                             CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, mask_numerics)
+                             ENABLE_STEMMING, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                             mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
 
 logger = logging.getLogger(__name__)
+
+ENABLE_STEMMING_ARGS = 'enable_stemming'
 
 
 class ResourceLoader:
@@ -380,11 +383,24 @@ class ResourceLoader:
         Args:
             queries (list of Query): A list of all queries
         """
-        # Unigram frequencies
-        tokens = [mask_numerics(tok) for q in kwargs.get('queries')
-                  for tok in q.normalized_tokens]
-        freq_dict = Counter(tokens)
+        enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
 
+        # Unigram frequencies
+        tokens = []
+
+        for query in kwargs.get('queries'):
+            for i in range(len(query.normalized_tokens)):
+                tok = query.normalized_tokens[i]
+                tokens.append(mask_numerics(tok))
+                if enable_stemming:
+                    # We only add stemmed tokens that are not the same
+                    # as the original token to reduce the impact on
+                    # word frequencies
+                    stemmed_tok = query.stemmed_tokens[i]
+                    if stemmed_tok != tok:
+                        tokens.append(mask_numerics(stemmed_tok))
+
+        freq_dict = Counter(tokens)
         return freq_dict
 
     def _build_char_ngram_freq_dict(self, **kwargs):
@@ -404,33 +420,56 @@ class ResourceLoader:
         return char_freq_dict
 
     def _build_word_ngram_freq_dict(self, **kwargs):
-        """Compiles n-gram  frequency dictionary of normalized query tokens
+        """Compiles n-gram frequency dictionary of normalized query tokens
 
            Args:
                queries (list of Query): A list of all queries
         """
+        enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
         word_freq_dict = Counter()
         for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
             if threshold > 0:
-                ngram_tokens = [' '.join(q.normalized_tokens[i:i+length])
-                                for q in kwargs.get('queries')
-                                for i in range(len(q.normalized_tokens))]
+                ngram_tokens = []
+                for query in kwargs.get('queries'):
+                    for i in range(len(query.normalized_tokens)):
+                        ngram_query = ' '.join(query.normalized_tokens[i:i + length])
+                        ngram_tokens.append(ngram_query)
+                        if enable_stemming:
+                            stemmed_ngram_query = ' '.join(query.stemmed_tokens[i:i + length])
+                            if stemmed_ngram_query != ngram_query:
+                                ngram_tokens.append(stemmed_ngram_query)
                 word_freq_dict.update(ngram_tokens)
         return word_freq_dict
 
     def _build_query_freq_dict(self, **kwargs):
-        """Compiles frequency dictionary of normalized query strings
+        """Compiles frequency dictionary of normalized and stemmed query strings
 
         Args:
             queries (list of Query): A list of all queries
         """
+        enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
+
         # Whole query frequencies, with singletons removed
-        query_dict = Counter(['<{}>'.format(q.normalized_text) for q in kwargs.get('queries')])
+        query_dict = Counter()
+        stemmed_query_dict = Counter()
+
+        for query in kwargs.get('queries'):
+            query_dict.update('<{}>'.format(query.normalized_text))
+
+            if enable_stemming:
+                stemmed_query_dict.update('<{}>'.format(query.stemmed_text))
+
         for query in query_dict:
             if query_dict[query] < 2:
                 query_dict[query] = 0
-        query_dict += Counter()
 
+        if enable_stemming:
+            for query in stemmed_query_dict:
+                if stemmed_query_dict[query] < 2:
+                    stemmed_query_dict[query] = 0
+            query_dict += stemmed_query_dict
+
+        query_dict += Counter()
         return query_dict
 
     def _get_sys_entity_types(self, **kwargs):
@@ -530,7 +569,8 @@ class ResourceLoader:
         WORD_NGRAM_FREQ_RSC: lambda _: 'constant',
         CHAR_NGRAM_FREQ_RSC: lambda _: 'constant',
         QUERY_FREQ_RSC: lambda _: 'constant',
-        SYS_TYPES_RSC: lambda _: 'constant'
+        SYS_TYPES_RSC: lambda _: 'constant',
+        ENABLE_STEMMING: lambda _: 'constant'
     }
 
 

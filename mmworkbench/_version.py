@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 """Defines mmworkbench version information"""
+<<<<<<< HEAD
 import pkg_resources
+=======
+from __future__ import absolute_import, unicode_literals
+>>>>>>> develop
 import logging
+import warnings
 
+import pkg_resources
 from pkg_resources import DistributionNotFound, VersionConflict
-from .exceptions import WorkbenchVersionError
 
-current = '4.0.0alpha6'
+from .exceptions import WorkbenchVersionWarning, WorkbenchVersionError
+
+current = '4.0.0alpha7'
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +23,7 @@ def _get_wb_version():
     return wb.__version__
 
 
-def validate_workbench_version(app_path):
+def validate_workbench_version(app_path, raise_exception=False):
     """ Validate the application's mmworkbench requirement
     """
     requirements = app_path + "/requirements.txt"
@@ -44,7 +51,10 @@ def validate_workbench_version(app_path):
         error_msg = 'Current mworkbench ({version}) does not satisfy ' \
                     '{condition} in pip requirements caused by ' \
                     '{cause}'.format(version=wb_version, condition=wb_req[0], cause=str(error))
-
-        raise WorkbenchVersionError(error_msg)
+        if raise_exception:
+            raise WorkbenchVersionError(error_msg)
+        else:
+            warnings.warn(error_msg, category=WorkbenchVersionWarning)
+            return
     logger.debug("mmworkbench version {version} satisfies app's requirements.txt.".format(
         version=wb_version))

@@ -4,7 +4,7 @@ from .helpers import GAZETTEER_RSC, register_features, get_ngram, requires
 
 
 @requires(GAZETTEER_RSC)
-def extract_in_gaz_features():
+def extract_in_gaz_features(**args):
     def extractor(example, resources):
         _, entities, entity_index = example
         features = {}
@@ -22,7 +22,7 @@ def extract_in_gaz_features():
     return extractor
 
 
-def extract_bag_of_words_before_features(ngram_lengths_to_start_positions):
+def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **args):
     """Returns a bag-of-words feature extractor.
 
     Args:
@@ -48,7 +48,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions):
     return extractor
 
 
-def extract_bag_of_words_after_features(ngram_lengths_to_start_positions):
+def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args):
     """Returns a bag-of-words feature extractor.
 
     Args:
@@ -74,7 +74,7 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions):
     return extractor
 
 
-def extract_numeric_candidate_features():
+def extract_numeric_candidate_features(**args):
     def extractor(example, resources):
         query, _, _ = example
         feat_seq = [{}] * len(query.normalized_tokens)
@@ -88,7 +88,7 @@ def extract_numeric_candidate_features():
     return extractor
 
 
-def extract_other_entities_features():
+def extract_other_entities_features(**args):
     def extractor(example, resources):
         _, entities, entity_index = example
         features = {}
