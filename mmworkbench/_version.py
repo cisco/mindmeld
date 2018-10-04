@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """Defines mmworkbench version information"""
-<<<<<<< HEAD
-import pkg_resources
-=======
 from __future__ import absolute_import, unicode_literals
->>>>>>> develop
 import logging
 import warnings
 
