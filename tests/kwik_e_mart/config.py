@@ -83,7 +83,8 @@ ENTITY_RECOGNIZER_CONFIG = {
         'in-gaz-span-seq': {},
         'sys-candidates-seq': {
             'start_positions': [-1, 0, 1]
-        }
+        },
+        'enable-stemming': True
     }
 }
 
@@ -115,7 +116,8 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
         'in-gaz-span-seq': {},
         'sys-candidates-seq': {
             'start_positions': [-1, 0, 1]
-        }
+        },
+        'enable-stemming': True
     },
     'train_label_set': 'testtrain.*\.txt',
     'test_label_set': 'testtrain.*\.txt'
