@@ -142,12 +142,13 @@ class Query(object):
         timestamp (long, optional): A unix timestamp used as the reference time.
             If not specified, the current system time is used. If `time_zone`
             is not also specified, this parameter is ignored.
+        stemmed_tokens (list): A sequence of stemmed tokens for the query text
     """
 
     # TODO: look into using __slots__
 
     def __init__(self, raw_text, processed_text, normalized_tokens, char_maps,
-                 language=None, time_zone=None, timestamp=None):
+                 language=None, time_zone=None, timestamp=None, stemmed_tokens=None):
         """Creates a query object
 
         Args:
@@ -166,6 +167,7 @@ class Query(object):
         self._language = language
         self._time_zone = time_zone
         self._timestamp = timestamp
+        self.stemmed_tokens = stemmed_tokens or tuple()
 
     @property
     def text(self):
@@ -181,6 +183,11 @@ class Query(object):
     def normalized_text(self):
         """The normalized input text"""
         return self._texts[TEXT_FORM_NORMALIZED]
+
+    @property
+    def stemmed_text(self):
+        """The stemmed input text"""
+        return ' '.join(self.stemmed_tokens)
 
     @property
     def normalized_tokens(self):

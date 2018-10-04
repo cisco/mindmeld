@@ -8,9 +8,10 @@ from builtins import zip
 from ...core import QueryEntity, Span, TEXT_FORM_RAW, \
     TEXT_FORM_NORMALIZED, sort_by_lowest_time_grain
 from ...ser import resolve_system_entity, SystemEntityResolutionError
-from ..helpers import get_feature_extractor
+from ..helpers import get_feature_extractor, ENABLE_STEMMING
 
 import logging
+import copy
 
 logger = logging.getLogger(__name__)
 
@@ -537,11 +538,15 @@ def extract_sequence_features(example, example_type, feature_config, resources):
         (list dict): features
     """
     feat_seq = []
-    for name, kwargs in feature_config.items():
+    workspace_features = copy.deepcopy(feature_config)
+    enable_stemming = workspace_features.pop(ENABLE_STEMMING, False)
+
+    for name, kwargs in workspace_features.items():
         if callable(kwargs):
             # a feature extractor function was passed in directly
             feat_extractor = kwargs
         else:
+            kwargs[ENABLE_STEMMING] = enable_stemming
             feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
 
         update_feat_seq = feat_extractor(example, resources)

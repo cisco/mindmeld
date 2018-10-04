@@ -24,6 +24,7 @@ ENTITIES_LABEL_TYPE = 'entities'
 GAZETTEER_RSC = 'gazetteers'
 QUERY_FREQ_RSC = 'q_freq'
 SYS_TYPES_RSC = 'sys_types'
+ENABLE_STEMMING = 'enable-stemming'
 WORD_FREQ_RSC = 'w_freq'
 WORD_NGRAM_FREQ_RSC = 'w_ngram_freq'
 CHAR_NGRAM_FREQ_RSC = 'c_ngram_freq'
@@ -104,7 +105,6 @@ def register_features(example_type, features):
     if example_type in FEATURE_MAP:
         msg = 'Features for example type {!r} are already registered.'.format(example_type)
         raise ValueError(msg)
-
     FEATURE_MAP[example_type] = features
 
 

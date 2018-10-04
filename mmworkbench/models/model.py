@@ -7,6 +7,7 @@ from collections import namedtuple
 import logging
 import json
 import math
+import copy
 
 import numpy as np
 from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridSearchCV,
@@ -15,7 +16,7 @@ from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridS
 from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
                              accuracy_score)
 from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
+                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, ENABLE_STEMMING,
                       ingest_dynamic_gazetteer)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
@@ -823,12 +824,15 @@ class Model(object):
         example_type = self.config.example_type
         feat_set = {}
         workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+        workspace_features = copy.deepcopy(self.config.features)
+        enable_stemming = workspace_features.pop(ENABLE_STEMMING, False)
 
-        for name, kwargs in self.config.features.items():
+        for name, kwargs in workspace_features.items():
             if callable(kwargs):
                 # a feature extractor function was passed in directly
                 feat_extractor = kwargs
             else:
+                kwargs[ENABLE_STEMMING] = enable_stemming
                 feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
             feat_set.update(feat_extractor(example, workspace_resource))
         return feat_set
@@ -917,12 +921,17 @@ class Model(object):
         # get list of resources required by feature extractors
         required_resources = self.config.required_resources()
 
+        enable_stemming = ENABLE_STEMMING in required_resources
+
         # load required resources if not present in model resources
         for rname in required_resources:
+            if rname == ENABLE_STEMMING:
+                continue
             if rname not in self._resources:
                 lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(rname)
                 self._resources[rname] = resource_loader.load_feature_resource(
-                    rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds)
+                    rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds,
+                    enable_stemming=enable_stemming)
 
 
 class LabelEncoder(object):
