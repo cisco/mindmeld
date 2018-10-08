@@ -454,10 +454,10 @@ class ResourceLoader:
         stemmed_query_dict = Counter()
 
         for query in kwargs.get('queries'):
-            query_dict.update('<{}>'.format(query.normalized_text))
+            query_dict.update(['<{}>'.format(query.normalized_text)])
 
             if enable_stemming:
-                stemmed_query_dict.update('<{}>'.format(query.stemmed_text))
+                stemmed_query_dict.update(['<{}>'.format(query.stemmed_text)])
 
         for query in query_dict:
             if query_dict[query] < 2:

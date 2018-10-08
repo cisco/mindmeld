@@ -749,7 +749,7 @@ def extract_gaz_freq(**args):
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 freq = len(gaz['index'].get(tok, []))
                 if freq > 0:
-                    freq_bin = math.log(freq, 2) // 2
+                    freq_bin = int(math.log(freq, 2) / 2)
                     freq_features['in_gaz|type:{}|gaz_freq_bin:{}'.format(gaz_name, freq_bin)] += 1
                     freq_features['in_vocab:{}|in_gaz|type:{}|gaz_freq_bin:{}'.format(
                         query_freq, gaz_name, freq_bin)] += 1
