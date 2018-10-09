@@ -620,8 +620,14 @@ def extract_word_shape(lengths=(1,), **args):
             returns ngrams of word shapes, for n of specified lengths.
     """
     def word_shape_basic(token):
-        # example: option --> xxxxxx, 123 ---> ddd
-        return ''.join(['d' if character.isdigit() else 'x' for character in token])
+        # example: option --> xxxxx+, 123 ---> ddd, call --> xxxx
+        shape = ['d' if character.isdigit() else 'x' for character in token]
+        if len(shape) > 5:
+            if all('d' == x for x in shape):
+                return 'ddddd+'
+            elif all('x' == x for x in shape):
+                return 'xxxxx+'
+        return ''.join(shape)
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
@@ -636,6 +642,11 @@ def extract_word_shape(lengths=(1,), **args):
                 shape_counter.update(
                     ['bag_of_words|length:{}|word_shape:{}'.format(len(word_shapes),
                                                                    ' '.join(word_shapes))])
+        q_len = float(len(tokens))
+        for entry in shape_counter:
+            shape_counter[entry] = math.log(shape_counter[entry] + 1, 2)
+            shape_counter[entry] /= q_len
+
         return shape_counter
     return _extractor
 
