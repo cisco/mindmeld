@@ -53,7 +53,8 @@ def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=Fal
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
 
 
-def load_query_file(file_path, query_factory=None, domain=None, intent=None, is_gold=False, cached_queries=None):
+def load_query_file(file_path, query_factory=None, domain=None, intent=None,
+                    is_gold=False, cached_queries=None):
     """Loads the queries from the specified file
 
     Args:
@@ -64,6 +65,7 @@ def load_query_file(file_path, query_factory=None, domain=None, intent=None, is_
         intent (str, optional): The name of the intent annotated for the query.
         is_gold (bool, optional): True if the markup passed in is a reference,
             human-labeled example. Defaults to False.
+        cached_queries (dict): A dict of cached query strings to query objects
 
     Returns:
         ProcessedQuery: a processed query
@@ -75,7 +77,8 @@ def load_query_file(file_path, query_factory=None, domain=None, intent=None, is_
         if query_text[0] == '-':
             continue
 
-        query = cached_queries.get(query_text, load_query(query_text, query_factory, domain, intent, is_gold=is_gold))
+        query = cached_queries.get(query_text, load_query(
+            query_text, query_factory, domain, intent, is_gold=is_gold))
         cached_queries[query_text] = query
         queries.append(query)
     return queries
