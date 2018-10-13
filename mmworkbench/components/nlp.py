@@ -340,8 +340,11 @@ class NaturalLanguageProcessor(Processor):
             self.domain_classifier.fit(label_set=label_set)
 
     def _dump(self):
+        self.resource_loader.write_cached_queries(self._app_path)
+
         if len(self.domains) == 1:
             return
+
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.dump(model_path)
 

@@ -11,6 +11,7 @@ import logging
 import os
 import time
 import re
+import pickle
 
 from . import markup, path
 from .exceptions import WorkbenchError
@@ -21,6 +22,7 @@ from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_
                              mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
+from .path import QUERY_CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,7 @@ ENABLE_STEMMING_ARGS = 'enable_stemming'
 
 class ResourceLoader:
 
-    def __init__(self, app_path, query_factory):
+    def __init__(self, app_path, query_factory, cached_queries=None):
         self.app_path = app_path
         self.query_factory = query_factory
 
@@ -67,6 +69,7 @@ class ResourceLoader:
         # }
         self.file_to_query_info = {}
         self._hasher = Hasher()
+        self.cached_queries = cached_queries
 
     def get_gazetteers(self, force_reload=False, **kwargs):
         """Gets all gazetteers
@@ -327,7 +330,7 @@ class ResourceLoader:
             file_data['loaded_raw'] = time.time()
         else:
             queries = markup.load_query_file(file_path, self.query_factory, domain, intent,
-                                             is_gold=True)
+                                             is_gold=True, cached_queries=self.cached_queries)
             try:
                 self._check_query_entities(queries)
             except WorkbenchError as exc:
@@ -536,6 +539,18 @@ class ResourceLoader:
         """
         return self._hasher.hash_list(items)
 
+    def write_cached_queries(self, app_path):
+        file_location = QUERY_CACHE_PATH.format(app_path=app_path)
+        pickle.dump(self.cached_queries, open(file_location, "wb"))
+
+    @staticmethod
+    def read_cached_queries(app_path):
+        file_location = QUERY_CACHE_PATH.format(app_path=app_path)
+        if file_location and os.path.isfile(file_location):
+            return pickle.load(open(file_location, "rb"))
+        else:
+            return {}
+
     @staticmethod
     def create_resource_loader(app_path, query_factory=None, preprocessor=None):
         """Creates the resource loader for the app at app path
@@ -550,7 +565,7 @@ class ResourceLoader:
         """
         query_factory = query_factory or QueryFactory.create_query_factory(
             app_path, preprocessor=preprocessor)
-        return ResourceLoader(app_path, query_factory)
+        return ResourceLoader(app_path, query_factory, ResourceLoader.read_cached_queries(app_path))
 
     # resource loader map
     FEATURE_RSC_MAP = {
