@@ -69,7 +69,7 @@ class ResourceLoader:
         # }
         self.file_to_query_info = {}
         self._hasher = Hasher()
-        self.cached_queries = cached_queries
+        self.cached_queries = cached_queries or {}
 
     def get_gazetteers(self, force_reload=False, **kwargs):
         """Gets all gazetteers
@@ -540,14 +540,14 @@ class ResourceLoader:
 
     def write_cached_queries(self, app_path):
         file_location = QUERY_CACHE_PATH.format(app_path=app_path)
-        joblib.dump(self.cached_queries, open(file_location, "wb"))
+        joblib.dump(self.cached_queries, file_location)
 
     @staticmethod
     def read_cached_queries(app_path):
         file_location = QUERY_CACHE_PATH.format(app_path=app_path)
-        if file_location and os.path.isfile(file_location):
-            return joblib.load(open(file_location, "rb"))
-        else:
+        try:
+            return joblib.load(file_location)
+        except (OSError, IOError):
             return {}
 
     @staticmethod

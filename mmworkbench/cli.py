@@ -19,7 +19,7 @@ from . import markup, path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
-
+from .path import QUERY_CACHE_PATH
 from ._version import current as __version__
 
 
@@ -221,11 +221,21 @@ def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_gro
 
 @_app_cli.command('clean', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-def clean(ctx):
+@click.option('-c', '--cache', is_flag=True, required=False, help='Clean only query cache')
+def clean(ctx, cache):
     """Deletes all built data, undoing `build`."""
     app = ctx.obj.get('app')
     if app is None:
         raise ValueError("No app was given. Run 'python app.py clean' from your app folder.")
+
+    if cache:
+        try:
+            file_location = QUERY_CACHE_PATH.format(app_path=app.app_path)
+            os.remove(file_location)
+            logger.info('Query cache deleted')
+        except FileNotFoundError:
+            logger.info('No query cache to delete')
+        return
 
     gen_path = path.get_generated_data_folder(app.app_path)
     try:

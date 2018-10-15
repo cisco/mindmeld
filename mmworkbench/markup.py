@@ -77,12 +77,12 @@ def load_query_file(file_path, query_factory=None, domain=None, intent=None,
         if query_text[0] == '-':
             continue
 
-        if query_text in cached_queries:
-            query = cached_queries[query_text]
-        else:
+        try:
+            query = cached_queries[(domain, intent, query_text)]
+        except KeyError:
             query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
 
-        cached_queries[query_text] = query
+        cached_queries[(domain, intent, query_text)] = query
         queries.append(query)
     return queries
 
