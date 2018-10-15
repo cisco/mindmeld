@@ -77,9 +77,12 @@ def load_query_file(file_path, query_factory=None, domain=None, intent=None,
         if query_text[0] == '-':
             continue
 
-        query = cached_queries.get(query_text, None)
-        cached_queries[query_text] = query if query else \
-            load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
+        if query_text in cached_queries:
+            query = cached_queries[query_text]
+        else:
+            query = load_query(query_text, query_factory, domain, intent, is_gold=is_gold)
+
+        cached_queries[query_text] = query
         queries.append(query)
     return queries
 
