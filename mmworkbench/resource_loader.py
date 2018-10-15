@@ -11,7 +11,7 @@ import logging
 import os
 import time
 import re
-import pickle
+from sklearn.externals import joblib
 
 from . import markup, path
 from .exceptions import WorkbenchError
@@ -279,7 +279,6 @@ class ResourceLoader:
                 query_tree[a_domain][an_intent] = []
             queries = query_tree[a_domain][an_intent]
             queries.extend(file_info['raw_queries' if raw else 'queries'])
-
         return query_tree
 
     @staticmethod
@@ -541,13 +540,13 @@ class ResourceLoader:
 
     def write_cached_queries(self, app_path):
         file_location = QUERY_CACHE_PATH.format(app_path=app_path)
-        pickle.dump(self.cached_queries, open(file_location, "wb"))
+        joblib.dump(self.cached_queries, open(file_location, "wb"))
 
     @staticmethod
     def read_cached_queries(app_path):
         file_location = QUERY_CACHE_PATH.format(app_path=app_path)
         if file_location and os.path.isfile(file_location):
-            return pickle.load(open(file_location, "rb"))
+            return joblib.load(open(file_location, "rb"))
         else:
             return {}
 
