@@ -12,6 +12,8 @@ These tests apply only when async/await are supported.
 # pylint: disable=locally-disabled,redefined-outer-name
 import os
 from sklearn.externals import joblib
+from mmworkbench.core import ProcessedQuery
+
 
 QUERY_CACHE_RELATIVE_PATH = '.generated/query_cache.pkl'
 
@@ -22,3 +24,4 @@ def test_query_cache_has_the_correct_format(kwik_e_mart_app_path):
     assert ('store_info', 'help', 'User manual') in query_cache
     assert query_cache[('store_info', 'help', 'User manual')].domain == 'store_info'
     assert query_cache[('store_info', 'help', 'User manual')].intent == 'help'
+    assert type(query_cache[('store_info', 'help', 'User manual')]) == ProcessedQuery
