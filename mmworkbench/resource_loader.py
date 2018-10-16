@@ -22,7 +22,7 @@ from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_
                              mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
-from .path import QUERY_CACHE_PATH, GEN_FOLDER
+from .path import QUERY_CACHE_PATH, GEN_FOLDER, QUERY_CACHE_TMP_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -547,8 +547,15 @@ class ResourceLoader:
 
         file_location = QUERY_CACHE_PATH.format(app_path=app_path)
         if os.path.isfile(file_location):
+            # We write to a new cache temp file and then rename it to prevent file corruption
+            # due to the user cancelling the training operation midway during the
+            # file write.
+            file_location_tmp = QUERY_CACHE_TMP_PATH.format(app_path=app_path)
+            joblib.dump(self.cached_queries, file_location_tmp)
             os.remove(file_location)
-        joblib.dump(self.cached_queries, file_location)
+            os.rename(file_location_tmp, file_location)
+        else:
+            joblib.dump(self.cached_queries, file_location)
 
     @staticmethod
     def read_cached_queries(app_path):
