@@ -22,7 +22,7 @@ from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_
                              mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
-from .path import QUERY_CACHE_PATH
+from .path import QUERY_CACHE_PATH, GEN_FOLDER
 
 logger = logging.getLogger(__name__)
 
@@ -279,6 +279,8 @@ class ResourceLoader:
                 query_tree[a_domain][an_intent] = []
             queries = query_tree[a_domain][an_intent]
             queries.extend(file_info['raw_queries' if raw else 'queries'])
+
+        self.write_cached_queries(self.app_path)
         return query_tree
 
     @staticmethod
@@ -539,6 +541,10 @@ class ResourceLoader:
         return self._hasher.hash_list(items)
 
     def write_cached_queries(self, app_path):
+        # make generated directory if necessary
+        folder = GEN_FOLDER.format(app_path=app_path)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
         file_location = QUERY_CACHE_PATH.format(app_path=app_path)
         joblib.dump(self.cached_queries, file_location)
 
