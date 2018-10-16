@@ -338,8 +338,10 @@ class NaturalLanguageProcessor(Processor):
             self.domain_classifier.fit(previous_model_path=model_path, label_set=label_set)
         else:
             self.domain_classifier.fit(label_set=label_set)
+        self.resource_loader.write_cached_queries(self._app_path)
 
     def _dump(self):
+        self.resource_loader.write_cached_queries(self._app_path)
         if len(self.domains) == 1:
             return
 
@@ -361,6 +363,7 @@ class NaturalLanguageProcessor(Processor):
                     domain_eval.print_stats()
             else:
                 logger.info("Skipping domain classifier evaluation")
+        self.resource_loader.write_cached_queries(self._app_path)
 
     def _process_domain(self, query, allowed_nlp_classes=None, dynamic_resource=None):
         if len(self.domains) > 1:

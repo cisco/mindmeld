@@ -280,7 +280,6 @@ class ResourceLoader:
             queries = query_tree[a_domain][an_intent]
             queries.extend(file_info['raw_queries' if raw else 'queries'])
 
-        self.write_cached_queries(self.app_path)
         return query_tree
 
     @staticmethod
@@ -545,7 +544,10 @@ class ResourceLoader:
         folder = GEN_FOLDER.format(app_path=app_path)
         if not os.path.isdir(folder):
             os.makedirs(folder)
+
         file_location = QUERY_CACHE_PATH.format(app_path=app_path)
+        if os.path.isfile(file_location):
+            os.remove(file_location)
         joblib.dump(self.cached_queries, file_location)
 
     @staticmethod
