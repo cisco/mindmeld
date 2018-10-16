@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
-test_dialogue
+test_query_cache
 ----------------------------------
 
-Tests for app_manager module.
+Tests the generated query cache has to correct key value types.
 
-These tests apply only when async/await are supported.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 import os
