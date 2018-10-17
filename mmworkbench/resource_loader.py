@@ -11,9 +11,9 @@ import logging
 import os
 import time
 import re
-from sklearn.externals import joblib
 
 from . import markup, path
+from .query_cache import QueryCache
 from .exceptions import WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
@@ -22,7 +22,6 @@ from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_
                              mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
-from .path import QUERY_CACHE_PATH, GEN_FOLDER, QUERY_CACHE_TMP_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ ENABLE_STEMMING_ARGS = 'enable_stemming'
 
 class ResourceLoader:
 
-    def __init__(self, app_path, query_factory, cached_queries=None):
+    def __init__(self, app_path, query_factory, query_cache=None):
         self.app_path = app_path
         self.query_factory = query_factory
 
@@ -69,7 +68,7 @@ class ResourceLoader:
         # }
         self.file_to_query_info = {}
         self._hasher = Hasher()
-        self.cached_queries = cached_queries or {}
+        self.query_cache = query_cache or QueryCache(app_path=self.app_path)
 
     def get_gazetteers(self, force_reload=False, **kwargs):
         """Gets all gazetteers
@@ -330,7 +329,7 @@ class ResourceLoader:
             file_data['loaded_raw'] = time.time()
         else:
             queries = markup.load_query_file(file_path, self.query_factory, domain, intent,
-                                             is_gold=True, cached_queries=self.cached_queries)
+                                             is_gold=True, query_cache=self.query_cache)
             try:
                 self._check_query_entities(queries)
             except WorkbenchError as exc:
@@ -539,32 +538,6 @@ class ResourceLoader:
         """
         return self._hasher.hash_list(items)
 
-    def write_cached_queries(self, app_path):
-        # make generated directory if necessary
-        folder = GEN_FOLDER.format(app_path=app_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        file_location = QUERY_CACHE_PATH.format(app_path=app_path)
-        if os.path.isfile(file_location):
-            # We write to a new cache temp file and then rename it to prevent file corruption
-            # due to the user cancelling the training operation midway during the
-            # file write.
-            file_location_tmp = QUERY_CACHE_TMP_PATH.format(app_path=app_path)
-            joblib.dump(self.cached_queries, file_location_tmp)
-            os.remove(file_location)
-            os.rename(file_location_tmp, file_location)
-        else:
-            joblib.dump(self.cached_queries, file_location)
-
-    @staticmethod
-    def read_cached_queries(app_path):
-        file_location = QUERY_CACHE_PATH.format(app_path=app_path)
-        try:
-            return joblib.load(file_location)
-        except (OSError, IOError):
-            return {}
-
     @staticmethod
     def create_resource_loader(app_path, query_factory=None, preprocessor=None):
         """Creates the resource loader for the app at app path
@@ -579,7 +552,8 @@ class ResourceLoader:
         """
         query_factory = query_factory or QueryFactory.create_query_factory(
             app_path, preprocessor=preprocessor)
-        return ResourceLoader(app_path, query_factory, ResourceLoader.read_cached_queries(app_path))
+        query_cache = QueryCache(app_path)
+        return ResourceLoader(app_path, query_factory, query_cache)
 
     # resource loader map
     FEATURE_RSC_MAP = {
