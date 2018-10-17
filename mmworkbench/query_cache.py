@@ -20,16 +20,26 @@ class QueryCache:
         self.load()
 
     def set_value(self, domain, intent, query_text, processed_query_text):
+        if (domain, intent, query_text) in self.query_cache_dict:
+            return
+
         self.query_cache_dict[(domain, intent, query_text)] = processed_query_text
         self.is_dirty = True
 
     def get_value(self, domain, intent, query_text):
+        """
+        Gets the value associated with the triple key
+        """
         try:
             return self.query_cache_dict[(domain, intent, query_text)]
         except KeyError:
-            return None
+            return
 
     def dump(self):
+        """
+        This function dumps the query cache mapping to disk. THIS OPERATION IS EXPENSIVE,
+        SO USE IT SPARINGLY!
+        """
         if not self.is_dirty:
             return
 
@@ -55,6 +65,9 @@ class QueryCache:
             logger.error("Couldn't dump query cache to disk.")
 
     def load(self):
+        """
+        Loads the generated query cache into memory
+        """
         file_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
         try:
             self.query_cache_dict = joblib.load(file_location)
