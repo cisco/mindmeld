@@ -505,25 +505,39 @@ class DialogueResponder:
         return self._choose(text).format(**self.slots)
 
 
-def _get_app_module(app_path):
+def _get_app(app_path):
     # Get the absolute path from the relative path (such as home_assistant/app.py)
+    from importlib.machinery import SourceFileLoader
+
     app_path = os.path.abspath(app_path)
     package_name = os.path.basename(app_path)
-    module_path = path.get_app_module_path(app_path)
-
-    if not os.path.isfile(module_path):
-        raise WorkbenchImportError('Cannot import the app at {path}.'.format(app=module_path))
 
     try:
-        path.load_app_package(app_path)
+        # try to load as package first
+        loader = SourceFileLoader(package_name, os.path.join(app_path, '__init__.py'))
+        return loader.load_module().app
+    except AttributeError:
+        # __init__.py exists but has no app attribute
+        # fallback to app.py, but emit warning
+        mod_logger.warning(
+            'The application package at %r includes no %r attribute. Falling back to %r.',
+            app_path,
+            'app',
+            'app.py',
+        )
+    except FileNotFoundError:
+        # fallback to app.py
+        pass
 
-        import imp
-        app_module = imp.load_source(
-            '{package_name}.app'.format(package_name=package_name), module_path)
-        app = app_module.app
-        return app
-    except ImportError as ex:
-        raise WorkbenchImportError(ex.msg)
+    try:
+        # try to load 'app.py'
+        loader = SourceFileLoader(package_name, path.get_app_module_path(app_path))
+        return loader.load_module().app
+    except (FileNotFoundError, AttributeError):
+        raise WorkbenchImportError(
+            'Could not import application at {!r}. Create a {!r} or {!r} file containing the ' +
+            'application.'.format(app_path, '__init__.py', 'app.py')
+        )
 
 
 class Conversation:
@@ -564,7 +578,7 @@ class Conversation:
             force_sync (bool, optional): Force synchronous return for `say()` and `process()`
                 even when app is in async mode.
         """
-        app = app or _get_app_module(app_path)
+        app = app or _get_app(app_path)
         app.lazy_init(nlp)
         self._app_manager = app.app_manager
         if not self._app_manager.ready:
