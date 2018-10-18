@@ -19,7 +19,7 @@ from . import markup, path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
-from .path import QUERY_CACHE_PATH
+from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
 from ._version import current as __version__
 
 
@@ -230,8 +230,15 @@ def clean(ctx, cache):
 
     if cache:
         try:
-            file_location = QUERY_CACHE_PATH.format(app_path=app.app_path)
-            os.remove(file_location)
+            main_cache_location = QUERY_CACHE_PATH.format(app_path=app.app_path)
+            tmp_cache_location = QUERY_CACHE_TMP_PATH.format(app_path=app.app_path)
+
+            if os.path.exists(main_cache_location):
+                os.remove(main_cache_location)
+
+            if os.path.exists(tmp_cache_location):
+                os.remove(tmp_cache_location)
+
             logger.info('Query cache deleted')
         except FileNotFoundError:
             logger.info('No query cache to delete')
