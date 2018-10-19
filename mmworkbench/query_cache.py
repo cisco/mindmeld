@@ -16,11 +16,18 @@ class QueryCache:
     def __init__(self, app_path):
         self.app_path = app_path
         self.is_dirty = False
-        # We initialize query_cache_dict to None instead of {} since
+        # We initialize cached_queries to None instead of {} since
         # we want to lazy load it from disk only when necessary ie during
         # set, get and dump ops. This allows us to run the application
         # faster.
-        self.query_cache_dict = None
+        self._cached_queries = None
+
+    @property
+    def cached_queries(self):
+        if self._cached_queries is None:
+            self.load()
+
+        return self._cached_queries
 
     def set_value(self, domain, intent, query_text, processed_query):
         """
@@ -32,24 +39,18 @@ class QueryCache:
             processed_query (ProcessedQuery): The ProcessedQuery
                 object corresponding to the domain, intent and query_text
         """
-        if self.query_cache_dict is None:
-            self.load()
-
-        if (domain, intent, query_text) in self.query_cache_dict:
+        if (domain, intent, query_text) in self.cached_queries:
             return
 
-        self.query_cache_dict[(domain, intent, query_text)] = processed_query
+        self.cached_queries[(domain, intent, query_text)] = processed_query
         self.is_dirty = True
 
     def get_value(self, domain, intent, query_text):
         """
         Gets the value associated with the triple key
         """
-        if self.query_cache_dict is None:
-            self.load()
-
         try:
-            return self.query_cache_dict[(domain, intent, query_text)]
+            return self.cached_queries[(domain, intent, query_text)]
         except KeyError:
             return
 
@@ -58,9 +59,6 @@ class QueryCache:
         This function dumps the query cache mapping to disk. THIS OPERATION IS EXPENSIVE,
         SO USE IT SPARINGLY!
         """
-        if self.query_cache_dict is None:
-            self.load()
-
         if not self.is_dirty:
             return
 
@@ -77,11 +75,11 @@ class QueryCache:
                 # We write to a new cache temp file and then rename it to prevent file corruption
                 # due to the user cancelling the training operation midway during the
                 # file write.
-                joblib.dump(self.query_cache_dict, tmp_cache_location)
+                joblib.dump(self.cached_queries, tmp_cache_location)
                 os.remove(main_cache_location)
                 shutil.move(tmp_cache_location, main_cache_location)
             else:
-                joblib.dump(self.query_cache_dict, main_cache_location)
+                joblib.dump(self.cached_queries, main_cache_location)
 
             self.is_dirty = False
         except (OSError, IOError, KeyboardInterrupt):
@@ -100,7 +98,7 @@ class QueryCache:
         """
         file_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
         try:
-            self.query_cache_dict = joblib.load(file_location)
+            self._cached_queries = joblib.load(file_location)
         except (OSError, IOError, KeyboardInterrupt):
-            self.query_cache_dict = {}
+            self._cached_queries = {}
         self.is_dirty = False
