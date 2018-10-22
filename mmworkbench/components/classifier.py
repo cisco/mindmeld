@@ -296,6 +296,14 @@ class Classifier(metaclass=ABCMeta):
     def inspect(self, query, gold_label=None, dynamic_resource=None):
         raise NotImplemented
 
+    def view_extracted_features(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
+        if not self._model:
+            logger.error('You must fit or load the model to initialize resources')
+            return
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query, time_zone, timestamp)
+        return self._model.view_extracted_features(query, dynamic_resource)
+
     def _get_model_config(self, loaded_config, **kwargs):
         """Updates the loaded configuration with runtime specified options, and creates a model
         configuration object with the final configuration dictionary. If an application config
