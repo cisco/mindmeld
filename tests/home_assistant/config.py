@@ -19,8 +19,11 @@ INTENT_MODEL_CONFIG = {
         "bag-of-words": {
             "lengths": [1, 2]
         },
-        "word-shape": {"lengths": [1]},
-        "sys-candidates": {"entities": ['sys_time', 'sys_number', 'sys_phone-number']},
+        "edge-ngrams": {"lengths": [1, 2]},
+        "in-gaz": {},
+        "exact": {"scaling": 10},
+        "gaz-freq": {},
+        "freq": {"bins": 5}
     }
 }
 
