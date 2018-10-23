@@ -8,12 +8,12 @@ HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)
                                        '../home_assistant')
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def home_assistant_app_path():
     return HOME_ASSISTANT_APP_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def home_assistant_nlp(home_assistant_app_path):
     """Provides a built processor instance"""
     nlp = NaturalLanguageProcessor(app_path=home_assistant_app_path)
