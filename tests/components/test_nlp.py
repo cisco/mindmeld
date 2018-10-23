@@ -249,13 +249,13 @@ def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
 
 test_data_4 = [
     (
-        ['when is the 23 helm street quickie mart open?',
+        ['when is the 23rd elm street quickie mart open?',
          'when is the 23rd elm st kwik-e-mart open?',
          'when is the 23 elm street quicky mart open?'],
         'store_info',
         'get_store_hours',
-        [['23 helm street'], ['23rd elm st'], ['23 elm street']],
-        [['23 helm street', '23rd elm st', '23 elm street']],
+        [['23rd elm street'], ['23rd elm st'], ['23 elm street']],
+        [['23rd elm street', '23rd elm st', '23 elm street']],
      ),
     (
         ['is the 104 first street store open this sunday',
