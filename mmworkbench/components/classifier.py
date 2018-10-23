@@ -297,6 +297,19 @@ class Classifier(metaclass=ABCMeta):
         raise NotImplemented
 
     def view_extracted_features(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
+        """
+        Extracts features for the given input based on the model config.
+        Args:
+            query (Query or str): The input query
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict): Dynamic gazetteer to be included for feature extraction.
+
+        Returns:
+            dict: The extracted features from the given input
+        """
         if not self._model:
             logger.error('You must fit or load the model to initialize resources')
             return
