@@ -5,7 +5,7 @@
 test_get_app
 ----------------------------------
 
-Tests for `_get_app` function in `dialogue` module.
+Tests for `get_app` function in `path` module.
 """
 import os
 import tempfile
@@ -13,7 +13,7 @@ import tempfile
 import pytest
 
 from mmworkbench import Application
-from mmworkbench.components.dialogue import _get_app
+from mmworkbench.path import get_app
 from mmworkbench.exceptions import WorkbenchImportError
 
 
@@ -64,7 +64,7 @@ def test_package_app(app_dir):
     # prep dir
     dump_to_file(os.path.join(app_dir, '__init__.py'), GOOD_APP_FILE)
 
-    app = _get_app(app_dir)
+    app = get_app(app_dir)
     assert app
     assert isinstance(app, Application)
 
@@ -74,34 +74,34 @@ def test_module_app(app_dir):
     # prep dir
     dump_to_file(os.path.join(app_dir, 'app.py'), GOOD_APP_FILE)
 
-    app = _get_app(app_dir)
+    app = get_app(app_dir)
     assert app
     assert isinstance(app, Application)
 
 
 def test_no_files(app_dir):
     with pytest.raises(WorkbenchImportError):
-        _get_app(app_dir)
+        get_app(app_dir)
 
 
 def test_bad_package(app_dir):
     dump_to_file(os.path.join(app_dir, '__init__.py'), BAD_APP_FILE)
 
     with pytest.raises(WorkbenchImportError):
-        _get_app(app_dir)
+        get_app(app_dir)
 
 
 def test_bad_module(app_dir):
     dump_to_file(os.path.join(app_dir, 'app.py'), BAD_APP_FILE)
 
     with pytest.raises(WorkbenchImportError):
-        _get_app(app_dir)
+        get_app(app_dir)
 
 
 def test_bad_package_good_module(app_dir):
     dump_to_file(os.path.join(app_dir, '__init__.py'), "")
     dump_to_file(os.path.join(app_dir, 'app.py'), GOOD_APP_FILE)
 
-    app = _get_app(app_dir)
+    app = get_app(app_dir)
     assert app
     assert isinstance(app, Application)
