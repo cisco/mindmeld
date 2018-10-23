@@ -14,19 +14,21 @@ logger = logging.getLogger(__name__)
 # https://github.com/wit-ai/duckling_old/blob/a4bc34e3e945d403a9417df50c1fb2172d56de3e/src/duckling/time/obj.clj#L21 # noqa E722
 TIME_GRAIN_TO_ORDER = {
     'year': 0,
-    'month': 1,
-    'day': 2,
-    'hour': 3,
-    'minute': 4,
-    'second': 5,
-    'milliseconds': 6
+    'quarter': 1,
+    'month': 2,
+    'week': 3,
+    'day': 4,
+    'hour': 5,
+    'minute': 6,
+    'second': 7,
+    'milliseconds': 8
 }
 
 
 def sort_by_lowest_time_grain(system_entities):
     return sorted(
         system_entities,
-        key=lambda query_entity: TIME_GRAIN_TO_ORDER[query_entity.to_dict()['value']['grain']])
+        key=lambda query_entity: TIME_GRAIN_TO_ORDER[query_entity.entity.value['grain']])
 
 
 class Bunch(dict):
@@ -358,7 +360,7 @@ class ProcessedQuery:
                                                   for n_entities in self.nbest_transcripts_entities]
         if self.nbest_aligned_entities:
             base['nbest_aligned_entities'] = [[{'text': e.entity.text, 'type': e.entity.type}
-                                              for e in n_entities]
+                                               for e in n_entities]
                                               for n_entities in self.nbest_aligned_entities]
         return base
 
