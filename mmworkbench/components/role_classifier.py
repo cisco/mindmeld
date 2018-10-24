@@ -202,7 +202,17 @@ class RoleClassifier(Classifier):
         Returns:
             list: a list of tuples of the form (str, float) grouping roles and their probabilities
         """
-        raise NotImplementedError
+        if not self._model:
+            logger.error('You must fit or load the model before running predict')
+            return
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
+
+        predict_proba_result = self._model.predict_proba([(query, entities, entity_index)])
+        class_proba_tuples = list(predict_proba_result[0][1].items())
+        return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
     def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on
