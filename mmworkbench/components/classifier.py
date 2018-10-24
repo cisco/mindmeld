@@ -235,7 +235,7 @@ class Classifier(metaclass=ABCMeta):
                                                                      timestamp=timestamp)
         return self._model.predict([query], dynamic_resource=dynamic_resource)[0]
 
-    def predict_proba(self, query, time_zone=None, timestamp=None):
+    def predict_proba(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Runs prediction on a given query and generates multiple hypotheses with their
         associated probabilities using the trained classification model
 
@@ -257,7 +257,7 @@ class Classifier(metaclass=ABCMeta):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
 
-        predict_proba_result = self._model.predict_proba([query])
+        predict_proba_result = self._model.predict_proba([query], dynamic_resource)
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 

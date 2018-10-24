@@ -205,7 +205,7 @@ class EntityRecognizer(Classifier):
                                      dynamic_resource=dynamic_resource) or ()
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
-    def predict_proba(self, query):
+    def predict_proba(self, query, dynamic_resource=None):
         """Runs prediction on a given query and generates multiple entity tagging hypotheses with
         their associated probabilities using the trained entity recognition model
 
@@ -216,7 +216,7 @@ class EntityRecognizer(Classifier):
             list: a list of tuples of the form (Entity list, float) grouping potential entity
                 tagging hypotheses and their probabilities
         """
-        raise NotImplementedError
+        return super().predict_proba(query, dynamic_resource=dynamic_resource)
 
     def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on

@@ -199,6 +199,23 @@ class TaggerModel(Model):
                   for example_predicted_tags, example in zip(predicted_tags, examples)]
         return labels
 
+    def predict_proba(self, example, dynamic_resource=None):
+        if self._no_entities:
+            return [()]
+
+        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+
+        tags, probs = self._clf.predict_proba(example, self.config, workspace_resource)
+
+        entity_confidence = []
+        entities = self._label_encoder.decode([tags], examples=example)
+        print(entities)
+        for entity in entities:
+            entity_proba = probs[entity.token_span.start:entity.token_span.end+1]
+            entity_confidence.append(min(entity_proba))
+        print(tuple(zip(entities, entity_confidence)))
+        return tuple(zip(entities, entity_confidence))
+
     def _get_cv_scorer(self, selection_settings):
         """
         Returns the scorer to use based on the selection settings and classifier type,

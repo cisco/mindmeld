@@ -146,6 +146,9 @@ class Tagger:
         y = self.predict(X)
         return y
 
+    def predict_proba(self, example, config, resources):
+        return self.get_predict_proba(example, config, resources)
+
     def dump(self, model_path, config):
         """
         Since traditional SKLearn models are easily serializable, we can
