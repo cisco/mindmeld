@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """This module contains the Home Assistant Blueprint Application"""
+NLP_CONFIG = {
+    'resolve_entities_using_nbest_transcripts': []
+}
 
 INTENT_MODEL_CONFIG = {
     'model_type': 'text',

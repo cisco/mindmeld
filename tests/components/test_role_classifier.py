@@ -4,19 +4,14 @@ import os
 
 from mmworkbench.components import NaturalLanguageProcessor
 
-HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                       '../home_assistant')
+HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                       'home_assistant')
 
 
 @pytest.fixture
-def home_assistant_app_path():
-    return HOME_ASSISTANT_APP_PATH
-
-
-@pytest.fixture
-def home_assistant_nlp(home_assistant_app_path):
+def home_assistant_nlp():
     """Provides a built processor instance"""
-    nlp = NaturalLanguageProcessor(app_path=home_assistant_app_path)
+    nlp = NaturalLanguageProcessor(app_path=HOME_ASSISTANT_APP_PATH)
     nlp.build()
     nlp.dump()
     return nlp
