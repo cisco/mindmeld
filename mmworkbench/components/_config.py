@@ -784,8 +784,8 @@ def _expand_group_config(group_config):
 def _get_config_module(app_path):
     module_path = path.get_config_module_path(app_path)
 
-    import imp
-    config_module = imp.load_source('config_module', module_path)
+    from importlib.machinery import SourceFileLoader
+    config_module = SourceFileLoader('config', module_path).load_module()
     return config_module
 
 

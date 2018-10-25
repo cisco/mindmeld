@@ -194,6 +194,9 @@ class TextModel(Model):
                     probas[label] = _NEG_INF
         return predictions
 
+    def view_extracted_features(self, example, dynamic_resource=None):
+        return self._extract_features(example, dynamic_resource=dynamic_resource)
+
     def _get_feature_weight(self, feat_name, label_class):
         """ Retrieves the feature weight from the coefficient matrix. If there are only two
          classes, the feature vector is actually collapsed into one so we need some logic to
