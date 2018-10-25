@@ -346,7 +346,7 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
                     ' in food_ordering/data/.')
         logger.info("Then run the following commands:")
         logger.info(
-            '\nmmworkbench load-kb food_ordering menu_items food_ordering/data/menu_items.json'
+            'mmworkbench load-kb food_ordering menu_items food_ordering/data/menu_items.json'
         )
         logger.info(
             'mmworkbench load-kb food_ordering restaurants food_ordering/data/restaurants.json'
