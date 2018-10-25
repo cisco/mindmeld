@@ -1,23 +1,35 @@
 # -*- coding: utf-8 -*-
 """This module contains test utiltities for workbench
 """
+import os
+import sys
+from .path import get_current_app_path
+from .components import NaturalLanguageProcessor
 from .components.dialogue import Conversation
 
 
-class TestConversation(Conversation):
+class ConversationTest:
+    LASTEST_HISTORY_INDEX = 0
 
-    def assert_text(self, expected_text, *, text_index=0, history_index=0):
-        history_entry = self.history[history_index]
-        texts = [self._follow_directive(d) for d in history_entry['directives']]
-        assert texts[text_index] == expected_text
+    @classmethod
+    def setup_class(cls):
+        app_path = get_current_app_path(os.path.dirname(os.path.realpath(
+            sys.modules[cls.__module__].__file__)))
+        nlp = NaturalLanguageProcessor(app_path=app_path)
+        nlp.load()
+        cls.conv = Conversation(nlp=nlp, app_path=app_path)
 
-    def assert_domain(self, expected_domain, *, history_index=0):
-        history_entry = self.history[history_index]
-        assert history_entry['domain'] == expected_domain
+    @staticmethod
+    def assert_text(texts, expected_text, index=0):
+        assert texts[index] == expected_text
 
-    def assert_intent(self, expected_intent, *, history_index=0):
-        history_entry = self.history[history_index]
-        assert history_entry['intent'] == expected_intent
+    @staticmethod
+    def assert_intent(conv, expected_intent):
+        last_history = conv.history[ConversationTest.LASTEST_HISTORY_INDEX]
+        assert last_history['intent'] == expected_intent
 
-    def assert_frame(self, frame):
-        assert self.frame == frame
+    def setup_method(self, method):
+        self.conv.reset()
+
+    def say(self, text):
+        return self.conv.say(text)

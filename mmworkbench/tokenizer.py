@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains the tokenizer."""
-
 import codecs
 import logging
 import re

@@ -834,9 +834,6 @@ class Model:
             feat_set.update(feat_extractor(example, workspace_resource))
         return feat_set
 
-    def view_extracted_features(self, example, dynamic_resource=None):
-        raise NotImplementedError
-
     def _get_cv_iterator(self, settings):
         if not settings:
             return None

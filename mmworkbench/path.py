@@ -7,8 +7,6 @@ import os
 import re
 import logging
 
-from .exceptions import WorkbenchImportError
-
 WORKBENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_ROOT = os.path.join(WORKBENCH_ROOT, 'mmworkbench')
 
@@ -209,7 +207,37 @@ def get_indexes(app_path):
     return next(os.walk(indexes_dir))[1]
 
 
+def load_app_package(app_path, package_name=None):
+    """
+    Args:
+        path (str): The path to the app data (for example: /user/joe/home_assistant).
+        package_name (str): The name of the imported package. If none, use folder name.
+    """
+    import imp
+    if not package_name:
+        package_name = os.path.basename(app_path)
+    package_path = os.path.dirname(app_path)
+
+    fp, pathname, description = imp.find_module(package_name, [package_path])
+    imp.load_module(package_name, fp, pathname, description)
+
+
 # Files and folders
+
+@safe_path
+def get_current_app_path(path):
+    """
+    Args:
+        path (str): The directory path inside a particular application
+
+    Returns:
+        str: The path for the root directory of this application
+    """
+    app_path = path
+    while 'app.py' not in os.listdir(app_path):
+        app_path = os.path.dirname(app_path)
+    return app_path
+
 
 @safe_path
 def get_generated_data_folder(app_path):
@@ -418,48 +446,3 @@ def get_user_config_path():
         str: The path to the current user's workbench configuration file.
     """
     return USER_CONFIG_PATH
-
-
-def get_app(app_path):
-    """Get the Application instance for given application path
-
-    Args:
-        app_path (str): The path to an application on disk
-
-    Returns:
-        Application: the workbench application
-
-    Raises:
-        WorkbenchImportError: when the application can not be found
-    """
-    from importlib.machinery import SourceFileLoader
-
-    app_path = os.path.abspath(app_path)
-    package_name = os.path.basename(app_path)
-
-    try:
-        # try to load as package first
-        loader = SourceFileLoader(package_name, os.path.join(app_path, '__init__.py'))
-        return loader.load_module().app
-    except AttributeError:
-        # __init__.py exists but has no app attribute
-        # fallback to app.py, but emit warning
-        logger.warning(
-            'The application package at %r includes no %r attribute. Falling back to %r.',
-            app_path,
-            'app',
-            'app.py',
-        )
-    except FileNotFoundError:
-        # fallback to app.py
-        pass
-
-    try:
-        # try to load 'app.py'
-        loader = SourceFileLoader(package_name, get_app_module_path(app_path))
-        return loader.load_module().app
-    except (FileNotFoundError, AttributeError):
-        raise WorkbenchImportError(
-            'Could not import application at {!r}. Create a {!r} or {!r} file containing the ' +
-            'application.'.format(app_path, '__init__.py', 'app.py')
-        )

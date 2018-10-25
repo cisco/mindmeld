@@ -3,11 +3,11 @@
 from mmworkbench import Application
 
 
-app = Application(__name__, async_mode=True)
+app = Application(__name__)
 
 
 @app.handle(intent='greet')
-async def welcome(context, responder):
+def welcome(context, responder):
     try:
         responder.slots['name'] = context['request']['context']['name']
         prefix = 'Hello, {name}. '
@@ -19,12 +19,12 @@ async def welcome(context, responder):
 
 
 @app.handle(intent='exit')
-async def say_goodbye(context, responder):
+def say_goodbye(context, responder):
     responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
 
 
 @app.handle(intent='help')
-async def provide_help(context, responder):
+def provide_help(context, responder):
     prompts = ["I can help you find store hours for your local Kwik-E-Mart. For example, you can "
                "say 'Where's the nearest store?' or 'When does the Elm Street store open?'"]
     responder.reply(prompts)
@@ -32,7 +32,7 @@ async def provide_help(context, responder):
 
 
 @app.handle(intent='get_store_hours')
-async def send_store_hours(context, responder):
+def send_store_hours(context, responder):
     active_store = None
     store_entity = next((e for e in context['entities'] if e['type'] == 'store_name'), None)
     if store_entity:
@@ -63,7 +63,7 @@ async def send_store_hours(context, responder):
 
 
 @app.handle(intent='find_nearest_store')
-async def send_nearest_store(context, responder):
+def send_nearest_store(context, responder):
     try:
         user_location = context['request']['context']['location']
     except KeyError:
@@ -82,7 +82,7 @@ async def send_nearest_store(context, responder):
 
 
 @app.handle()
-async def default(context, responder):
+def default(context, responder):
     prompts = ["Sorry, not sure what you meant there. I can help you find store hours "
                "for your local Kwik-E-Mart."]
     responder.reply(prompts)

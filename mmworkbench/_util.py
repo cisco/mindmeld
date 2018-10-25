@@ -136,7 +136,7 @@ class Blueprint:
         cache_dir = path.get_cached_blueprint_path(name)
         try:
             local_archive = cls._fetch_archive(name, 'kb')
-        except ValueError:
+        except ValueError as ex:
             logger.warning('No knowledge base to set up.')
             return
 
