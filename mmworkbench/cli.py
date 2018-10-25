@@ -340,6 +340,18 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     logger.info(msg)
     logger.info('Extract the blueprint in the current working directory')
 
+    if blueprint_name == "food_ordering":
+        logger.info('Additionally, please download the knowledge base indexes from'
+                    ' https://devcenter.mindmeld.com/bp/food_ordering/kb.tar.gz and place the files'
+                    ' in food_ordering/data/.')
+        logger.info("Then run the following commands:")
+        logger.info(
+            'mmworkbench load-kb food_ordering menu_items food_ordering/data/menu_items.json'
+        )
+        logger.info(
+            'mmworkbench load-kb food_ordering restaurants food_ordering/data/restaurants.json'
+        )
+
     # TODO: Re-implement authenticated download of blueprints by getting oauth2
     # token from Webex broker
 
