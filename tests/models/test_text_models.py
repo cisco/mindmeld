@@ -171,3 +171,33 @@ class TestTextModel:
 
         assert model.predict([markup.load_query('hi').query]) == 'greet'
         assert model.predict([markup.load_query('bye').query]) == 'exit'
+
+    def test_extract_features(self, resource_loader):
+        """Tests extracted features after a fit"""
+        config = ModelConfig(**{
+            'model_type': 'text',
+            'example_type': QUERY_EXAMPLE_TYPE,
+            'label_type': CLASS_LABEL_TYPE,
+            'model_settings': {
+                'classifier_type': 'logreg'
+            },
+            'params': {
+                'fit_intercept': True,
+                'C': 100
+            },
+            'features': {
+                'bag-of-words': {
+                    'lengths': [1]
+                },
+            }
+        })
+        model = TextModel(config)
+        examples = [q.query for q in self.labeled_data]
+        labels = [q.intent for q in self.labeled_data]
+        model.initialize_resources(resource_loader, examples, labels)
+        model.fit(examples, labels)
+
+        expected_features = {'bag_of_words|length:1|ngram:hi': 1,
+                             'bag_of_words|length:1|ngram:there': 1}
+        extracted_features = model.view_extracted_features(markup.load_query('hi there').query)
+        assert extracted_features == expected_features

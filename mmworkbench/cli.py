@@ -169,7 +169,7 @@ def evaluate(ctx, verbose):
         nlp = app.app_manager.nlp
         try:
             nlp.load()
-        except WorkbenchError as ex:
+        except WorkbenchError:
             logger.error("You must build the app before running evaluate. "
                          "Try 'python app.py build'.")
             ctx.exit(1)
