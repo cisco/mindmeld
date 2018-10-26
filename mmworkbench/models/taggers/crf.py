@@ -31,6 +31,18 @@ class ConditionalRandomFields(Tagger):
     def predict(self, X, dynamic_resource=None):
         return self._clf.predict(X)
 
+    def predict_proba(self, examples, config, resources):
+        X, _, _ = self.extract_features(examples, config, resources)
+        seq = self._clf.predict(X)
+        marginals_dict = self._clf.predict_marginals(X)
+        marginal_tuples = []
+        for query_index in range(len(seq)):
+            query_marginal_tuples = []
+            for i, tag in enumerate(seq[query_index]):
+                query_marginal_tuples.append((tag, marginals_dict[query_index][i][tag]))
+            marginal_tuples.append(query_marginal_tuples)
+        return marginal_tuples
+
     def extract_features(self, examples, config, resources, y=None, fit=True):
         """Transforms a list of examples into a feature matrix.
 

@@ -98,26 +98,25 @@ class MemmModel(Tagger):
 
         return predicted_tags
 
-    def get_predict_proba(self, example, config, resources):
-        features_by_segment = self.extract_example_features(example[0], config, resources)
+    def _predict_proba(self, examples, config, resources):
+        return [self._predict_proba_example(example, config, resources)
+                for example in examples]
+
+    def _predict_proba_example(self, example, config, resources):
+        features_by_segment = self.extract_example_features(example, config, resources)
         if len(features_by_segment) == 0:
             return []
 
-        predicted_tags = []
         prev_tag = START_TAG
         seq_log_probs = []
         for features in features_by_segment:
             features['prev_tag'] = prev_tag
             X, _ = self._preprocess_data([features])
-            prediction = self._clf.predict_log_proba(X)[0]
-            predict_proba = max(prediction)
+            prediction = self._clf.predict_proba(X)[0]
             predicted_tag = np.argmax(prediction)
-            seq_log_probs.append(predict_proba)
             prev_tag = self.class_encoder.inverse_transform(predicted_tag)
-            predicted_tags.append(prev_tag)
-        print(predicted_tags)
-        print(seq_log_probs)
-        return predicted_tags, seq_log_probs
+            seq_log_probs.append((prev_tag, prediction[predicted_tag]))
+        return seq_log_probs
 
     def _get_feature_selector(self, selector_type):
         """Get a feature selector instance based on the feature_selector model

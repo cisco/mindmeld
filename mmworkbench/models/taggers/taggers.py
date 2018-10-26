@@ -146,8 +146,8 @@ class Tagger:
         y = self.predict(X)
         return y
 
-    def predict_proba(self, example, config, resources):
-        return self.get_predict_proba(example, config, resources)
+    def predict_proba(self, examples, config, resources):
+        return self._predict_proba(examples, config, resources)
 
     def dump(self, model_path, config):
         """
