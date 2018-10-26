@@ -11,7 +11,8 @@ Tests for `core` module.
 import pytest
 
 from mmworkbench.core import (Entity, QueryEntity, Span, NestedEntity,
-                              TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)
+                              TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED,
+                              sort_by_lowest_time_grain)
 
 
 @pytest.fixture
@@ -285,3 +286,29 @@ def test_query_timestamp(query_factory):
 
     # time in 'America/Bahia' is always -3 (no daylight savings time)
     assert entity.entity.value['value'] == '2018-01-23T12:00:00.000-03:00'
+
+
+def test_sort_system_entities(query_factory):
+    """Tests that sorting sys:time QueryEntities works correctly"""
+    query = query_factory.create_query(
+        'Can we do today or next week or 3pm or 2017 or in 20 minutes '
+        'or next quarter or at 6:30pm or in February',
+        timestamp=1516748906
+    )
+
+    time_entities = [e for e in query.system_entity_candidates if e.entity.type == 'sys_time']
+
+    assert len(time_entities) == 8
+
+    time_entities = sort_by_lowest_time_grain(time_entities)
+
+    assert time_entities[0].entity.value['grain'] == 'year'
+    assert time_entities[1].entity.value['grain'] == 'quarter'
+    assert time_entities[2].entity.value['grain'] == 'month'
+    assert time_entities[3].entity.value['grain'] == 'week'
+    assert time_entities[4].entity.value['grain'] == 'day'
+    assert time_entities[5].entity.value['grain'] == 'hour'
+    assert time_entities[6].entity.value['grain'] == 'minute'
+    assert time_entities[7].entity.value['grain'] == 'second'
+
+    # Note: could not find a query that would yield a millisecond entity
