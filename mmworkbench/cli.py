@@ -265,6 +265,7 @@ def clean(ctx, query_cache, model_cache):
 # Shared commands
 #
 
+
 @click.group()
 def shared_cli():
     """Commands for mmworkbench module and apps"""
