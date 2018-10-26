@@ -107,6 +107,7 @@ class Processor(metaclass=ABCMeta):
         for child in self._children.values():
             child.build(incremental=incremental, label_set=label_set)
 
+        self.resource_loader.query_cache.dump()
         self.ready = True
         self.dirty = True
 
@@ -122,6 +123,7 @@ class Processor(metaclass=ABCMeta):
         for child in self._children.values():
             child.dump()
 
+        self.resource_loader.query_cache.dump()
         self.dirty = False
 
     @abstractmethod
@@ -158,6 +160,8 @@ class Processor(metaclass=ABCMeta):
 
         for child in self._children.values():
             child.evaluate(print_stats, label_set=label_set)
+
+        self.resource_loader.query_cache.dump()
 
     @abstractmethod
     def _evaluate(self, label_set="test"):
@@ -342,6 +346,7 @@ class NaturalLanguageProcessor(Processor):
     def _dump(self):
         if len(self.domains) == 1:
             return
+
         model_path = path.get_domain_model_path(self._app_path)
         self.domain_classifier.dump(model_path)
 

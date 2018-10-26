@@ -13,6 +13,7 @@ import time
 import re
 
 from . import markup, path
+from .query_cache import QueryCache
 from .exceptions import WorkbenchError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
@@ -29,7 +30,7 @@ ENABLE_STEMMING_ARGS = 'enable_stemming'
 
 class ResourceLoader:
 
-    def __init__(self, app_path, query_factory):
+    def __init__(self, app_path, query_factory, query_cache=None):
         self.app_path = app_path
         self.query_factory = query_factory
 
@@ -67,6 +68,7 @@ class ResourceLoader:
         # }
         self.file_to_query_info = {}
         self._hasher = Hasher()
+        self.query_cache = query_cache or QueryCache(app_path=self.app_path)
 
     def get_gazetteers(self, force_reload=False, **kwargs):
         """Gets all gazetteers
@@ -327,7 +329,7 @@ class ResourceLoader:
             file_data['loaded_raw'] = time.time()
         else:
             queries = markup.load_query_file(file_path, self.query_factory, domain, intent,
-                                             is_gold=True)
+                                             is_gold=True, query_cache=self.query_cache)
             try:
                 self._check_query_entities(queries)
             except WorkbenchError as exc:
@@ -550,7 +552,8 @@ class ResourceLoader:
         """
         query_factory = query_factory or QueryFactory.create_query_factory(
             app_path, preprocessor=preprocessor)
-        return ResourceLoader(app_path, query_factory)
+        query_cache = QueryCache(app_path)
+        return ResourceLoader(app_path, query_factory, query_cache)
 
     # resource loader map
     FEATURE_RSC_MAP = {

@@ -1,0 +1,11 @@
+replace the {8 am|sys_time|old_time} alarm with a {10 am|sys_time|new_time} alarm
+postpone the {10 am|sys_time|old_time} alarm to {11 am|sys_time|new_time}
+move my {6 am|sys_time|old_time} alarm to {3pm in the afternoon|sys_time|new_time}
+change my {6 am|sys_time|old_time} alarm to {7pm in the evening|sys_time|new_time}
+cancel my {6 am|sys_time|old_time} and replace it with a {6:30 am|sys_time|new_time} alarm
+reschedule my {6 am|sys_time|old_time} alarm to {tomorrow morning at 10|sys_time|new_time}
+move my {6 am|sys_time|old_time} alarm to {tomorrow at 8am|sys_time|new_time}
+switch my {6 am|sys_time|old_time} alarm to {friday at noon|sys_time|new_time}
+change my {6 am|sys_time|old_time} alarm to {7 am|sys_time|new_time}
+change my {6 am|sys_time|old_time} alarm
+change my alarm from {6 am|sys_time|old_time} to {7 am|sys_time|new_time}

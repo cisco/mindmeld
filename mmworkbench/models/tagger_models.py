@@ -152,6 +152,10 @@ class TaggerModel(Model):
 
         return self
 
+    def view_extracted_features(self, query, dynamic_resource=None):
+        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+        return self._clf.extract_example_features(query, self.config, workspace_resource)
+
     def _fit(self, X, y, params):
         """Trains a classifier without cross-validation.
 

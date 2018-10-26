@@ -87,7 +87,3 @@ async def default(context, responder):
                "for your local Kwik-E-Mart."]
     responder.reply(prompts)
     responder.listen()
-
-
-if __name__ == '__main__':
-    app.cli()
