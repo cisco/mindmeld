@@ -751,7 +751,7 @@ class Model:
         raise NotImplementedError
 
     def _get_cv_estimator_and_params(self, model_class, param_grid):
-        return model_class(), param_grid
+        return model_class(warm_start=True), param_grid
 
     def _process_cv_best_params(self, best_params):
         return best_params

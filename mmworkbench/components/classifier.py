@@ -15,6 +15,7 @@ from ..core import Query
 from ..constants import DEFAULT_TRAIN_SET_REGEX, DEFAULT_TEST_SET_REGEX
 
 from ..models import create_model, ModelConfig
+from ..path import MODEL_CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,7 @@ class Classifier(metaclass=ABCMeta):
         self.config = None
         self.hash = ''
 
-    def fit(self, queries=None, label_set=None, previous_model_path=None, **kwargs):
+    def fit(self, queries=None, label_set=None, incremental=False, **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
@@ -121,10 +122,7 @@ class Classifier(metaclass=ABCMeta):
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                  training set will be loaded.
-            previous_model_path (str, optional): The path of a previous version of the model for
-                this classifier. If the previous model is equivalent to the new one, it will be
-                loaded instead. Equivalence here is determined by the model's training data and
-                configuration.
+            incremental (Boolean, optional): If true, use model cache for incremental model building
             model_type (str, optional): The type of machine learning model to use. If omitted, the
                  default model type will be used.
             model_settings (dict): Settings specific to the model type specified
@@ -184,12 +182,11 @@ class Classifier(metaclass=ABCMeta):
 
         new_hash = self._get_model_hash(model_config, queries, label_set)
 
-        if previous_model_path:
-            old_hash = self._load_hash(previous_model_path)
-            if old_hash == new_hash:
-                logger.info('No need to fit. Loading previous model.')
-                self.load(previous_model_path)
-                return
+        if incremental and self._does_cached_model_exist(new_hash):
+            cached_model = os.path.join(MODEL_CACHE_PATH.format(
+                app_path=self._resource_loader.app_path), new_hash + '.pkl')
+            self.load(cached_model)
+            return
 
         queries, classes = self._get_queries_and_labels(queries, label_set)
 
@@ -339,6 +336,17 @@ class Classifier(metaclass=ABCMeta):
                 model_config.pop('params', None)
         return ModelConfig(**model_config)
 
+    def data_dump_payload(self):
+        return self._model
+
+    def dump_cached_model(self):
+        model_cache_folder = \
+            MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
+        if not os.path.isdir(model_cache_folder):
+            os.makedirs(model_cache_folder)
+        model_path = os.path.join(model_cache_folder, self.hash + '.pkl')
+        joblib.dump(self.data_dump_payload(), model_path)
+
     def dump(self, model_path):
         """Persists the trained classification model to disk.
 
@@ -350,7 +358,10 @@ class Classifier(metaclass=ABCMeta):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        joblib.dump(self._model, model_path)
+        joblib.dump(self.data_dump_payload(), model_path)
+
+        # dump cached model
+        self.dump_cached_model()
 
         hash_path = model_path + '.hash'
         with open(hash_path, 'w') as hash_file:
@@ -397,6 +408,12 @@ class Classifier(metaclass=ABCMeta):
         with open(hash_path, 'r') as hash_file:
             model_hash = hash_file.read()
         return model_hash
+
+    def _does_cached_model_exist(self, hash):
+        cache_path = MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
+        if not os.path.exists(cache_path):
+            return False
+        return hash + '.pkl' in os.listdir(cache_path)
 
     @staticmethod
     def _build_query_tree(queries, raw=False):

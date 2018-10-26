@@ -10,6 +10,7 @@ from sklearn.externals import joblib
 from ..models import create_model, ENTITY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 from ..core import Query
 from ..constants import DEFAULT_TRAIN_SET_REGEX
+from ..path import MODEL_CACHE_PATH
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
@@ -59,17 +60,14 @@ class RoleClassifier(Classifier):
                                               entity=self.entity_type)
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set=None, previous_model_path=None, **kwargs):
+    def fit(self, queries=None, label_set=None, incremental=False, **kwargs):
         """Trains a statistical model for role classification using the provided training examples
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                 training set will be loaded.
-            previous_model_path (str, optional): The path of a previous version of the model for
-                this classifier. If the previous model is equivalent to the new one, it will be
-                loaded instead. Equivalence here is determined by the model's training data and
-                configuration.
+            incremental (Boolean, optional): If true, use model cache for incremental model building
         """
         logger.info('Fitting role classifier: domain=%r, intent=%r, entity_type=%r',
                     self.domain, self.intent, self.entity_type)
@@ -84,12 +82,12 @@ class RoleClassifier(Classifier):
 
         new_hash = self._get_model_hash(model_config, queries, label_set)
 
-        if previous_model_path:
-            old_hash = self._load_hash(previous_model_path)
-            if old_hash == new_hash:
-                logger.info('No need to fit. Loading previous model.')
-                self.load(previous_model_path)
-                return
+        if incremental and self._does_cached_model_exist(new_hash):
+            logger.info('No need to fit. Loading previous model.')
+            cached_model = os.path.join(MODEL_CACHE_PATH.format(
+                app_path=self._resource_loader.app_path), new_hash + '.pkl')
+            self.load(cached_model)
+            return
 
         # Load labeled data
         examples, labels = self._get_queries_and_labels(queries, label_set=label_set)
@@ -110,6 +108,17 @@ class RoleClassifier(Classifier):
         self.ready = True
         self.dirty = True
 
+    def data_dump_payload(self):
+        return {'model': self._model, 'roles': self.roles}
+
+    def dump_cached_model(self):
+        model_cache_folder = \
+            MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
+        if not os.path.isdir(model_cache_folder):
+            os.makedirs(model_cache_folder)
+        model_path = os.path.join(model_cache_folder, self.hash + '.pkl')
+        joblib.dump(self.data_dump_payload(), model_path)
+
     def dump(self, model_path):
         """Persists the trained role classification model to disk.
 
@@ -123,8 +132,8 @@ class RoleClassifier(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        rc_data = {'model': self._model, 'roles': self.roles}
-        joblib.dump(rc_data, model_path)
+        joblib.dump(self.data_dump_payload(), model_path)
+        self.dump_cached_model()
 
         hash_path = model_path + '.hash'
         with open(hash_path, 'w') as hash_file:

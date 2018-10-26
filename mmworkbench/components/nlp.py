@@ -103,9 +103,13 @@ class Processor(metaclass=ABCMeta):
             label_set (string, optional): The label set from which to train all classifiers
         """
         self._build(incremental=incremental, label_set=label_set)
+        if incremental:
+            self._dump()
 
         for child in self._children.values():
             child.build(incremental=incremental, label_set=label_set)
+            if incremental:
+                child.dump()
 
         self.resource_loader.query_cache.dump()
         self.ready = True
@@ -338,8 +342,7 @@ class NaturalLanguageProcessor(Processor):
         if len(self.domains) == 1:
             return
         if incremental:
-            model_path = path.get_domain_model_path(self._app_path)
-            self.domain_classifier.fit(previous_model_path=model_path, label_set=label_set)
+            self.domain_classifier.fit(incremental=incremental, label_set=label_set)
         else:
             self.domain_classifier.fit(label_set=label_set)
 
@@ -521,8 +524,7 @@ class DomainProcessor(Processor):
             return
         # train intent model
         if incremental:
-            model_path = path.get_intent_model_path(self._app_path, self.name)
-            self.intent_classifier.fit(previous_model_path=model_path, label_set=label_set)
+            self.intent_classifier.fit(incremental=incremental, label_set=label_set)
         else:
             self.intent_classifier.fit(label_set=label_set)
 
@@ -696,8 +698,7 @@ class IntentProcessor(Processor):
 
         # train entity recognizer
         if incremental:
-            model_path = path.get_entity_model_path(self._app_path, self.domain, self.name)
-            self.entity_recognizer.fit(previous_model_path=model_path, label_set=label_set)
+            self.entity_recognizer.fit(incremental=incremental, label_set=label_set)
         else:
             self.entity_recognizer.fit(label_set=label_set)
 
@@ -934,9 +935,7 @@ class EntityProcessor(Processor):
     def _build(self, incremental=False, label_set=None):
         """Builds the models for this entity type"""
         if incremental:
-            model_path = path.get_role_model_path(self._app_path, self.domain,
-                                                  self.intent, self.type)
-            self.role_classifier.fit(previous_model_path=model_path, label_set=label_set)
+            self.role_classifier.fit(incremental=incremental, label_set=label_set)
         else:
             self.role_classifier.fit(label_set=label_set)
 
