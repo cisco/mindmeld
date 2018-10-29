@@ -336,7 +336,7 @@ class Classifier(metaclass=ABCMeta):
                 model_config.pop('params', None)
         return ModelConfig(**model_config)
 
-    def data_dump_payload(self):
+    def _data_dump_payload(self):
         return self._model
 
     def dump_cached_model(self):
@@ -345,7 +345,7 @@ class Classifier(metaclass=ABCMeta):
         if not os.path.isdir(model_cache_folder):
             os.makedirs(model_cache_folder)
         model_path = os.path.join(model_cache_folder, self.hash + '.pkl')
-        joblib.dump(self.data_dump_payload(), model_path)
+        joblib.dump(self._data_dump_payload(), model_path)
 
     def dump(self, model_path):
         """Persists the trained classification model to disk.
@@ -358,7 +358,7 @@ class Classifier(metaclass=ABCMeta):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        joblib.dump(self.data_dump_payload(), model_path)
+        joblib.dump(self._data_dump_payload(), model_path)
 
         # dump cached model
         self.dump_cached_model()

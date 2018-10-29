@@ -108,7 +108,7 @@ class RoleClassifier(Classifier):
         self.ready = True
         self.dirty = True
 
-    def data_dump_payload(self):
+    def _data_dump_payload(self):
         return {'model': self._model, 'roles': self.roles}
 
     def dump_cached_model(self):
@@ -117,7 +117,7 @@ class RoleClassifier(Classifier):
         if not os.path.isdir(model_cache_folder):
             os.makedirs(model_cache_folder)
         model_path = os.path.join(model_cache_folder, self.hash + '.pkl')
-        joblib.dump(self.data_dump_payload(), model_path)
+        joblib.dump(self._data_dump_payload(), model_path)
 
     def dump(self, model_path):
         """Persists the trained role classification model to disk.
@@ -132,7 +132,7 @@ class RoleClassifier(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        joblib.dump(self.data_dump_payload(), model_path)
+        joblib.dump(self._data_dump_payload(), model_path)
         self.dump_cached_model()
 
         hash_path = model_path + '.hash'

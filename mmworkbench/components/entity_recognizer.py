@@ -106,7 +106,7 @@ class EntityRecognizer(Classifier):
         self.ready = True
         self.dirty = True
 
-    def data_dump_payload(self):
+    def _data_dump_payload(self):
         return {
             'entity_types': self.entity_types,
             'w_ngram_freq': self._model.get_resource('w_ngram_freq'),
@@ -120,7 +120,7 @@ class EntityRecognizer(Classifier):
         if not os.path.isdir(model_cache_folder):
             os.makedirs(model_cache_folder)
         model_path = os.path.join(model_cache_folder, self.hash + '.pkl')
-        self._model.dump(model_path, self.data_dump_payload())
+        self._model.dump(model_path, self._data_dump_payload())
 
     def dump(self, model_path):
         """Persists the trained entity recognition model to disk.
@@ -135,7 +135,7 @@ class EntityRecognizer(Classifier):
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
-        self._model.dump(model_path, self.data_dump_payload())
+        self._model.dump(model_path, self._data_dump_payload())
         self.dump_cached_model()
 
         hash_path = model_path + '.hash'

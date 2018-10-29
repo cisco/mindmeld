@@ -32,6 +32,8 @@ CONTEXT_SETTINGS = {
     'auto_envvar_prefix': 'MM'
 }
 
+DAY_IN_SECONDS = 86400
+
 
 def version_msg():
     """Returns the Workbench version, location and Python powering it."""
@@ -223,7 +225,9 @@ def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_gro
 @click.pass_context
 @click.option('-q', '--query-cache', is_flag=True, required=False, help='Clean only query cache')
 @click.option('-m', '--model-cache', is_flag=True, required=False, help='Clean only model cache')
-def clean(ctx, query_cache, model_cache):
+@click.option('-d', '--days', type=int, default=7,
+              help='Clear model cache older than the specified days')
+def clean(ctx, query_cache, model_cache, days):
     """Deletes all built data, undoing `build`."""
     app = ctx.obj.get('app')
     if app is None:
@@ -247,11 +251,21 @@ def clean(ctx, query_cache, model_cache):
 
     if model_cache:
         model_cache_path = MODEL_CACHE_PATH.format(app_path=app.app_path)
-        try:
-            shutil.rmtree(model_cache_path)
-            logger.info('Model cache data deleted')
-        except FileNotFoundError:
-            logger.info('No model cache to delete')
+        if days:
+            for cached_file in os.listdir(model_cache_path):
+                file_full_path = os.path.join(model_cache_path, cached_file)
+                if os.path.isfile(file_full_path):
+                    # Delete files older than x days
+                    if os.stat(file_full_path).st_mtime < time.time() - days * DAY_IN_SECONDS:
+                        os.remove(file_full_path)
+                        logger.info("Removed cached model file: {}".format(
+                            file_full_path))
+        else:
+            try:
+                shutil.rmtree(model_cache_path)
+                logger.info('Model cache data deleted')
+            except FileNotFoundError:
+                logger.info('No model cache to delete')
         return
 
     gen_path = path.get_generated_data_folder(app.app_path)
