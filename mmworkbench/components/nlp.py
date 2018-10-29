@@ -103,6 +103,9 @@ class Processor(metaclass=ABCMeta):
             label_set (string, optional): The label set from which to train all classifiers
         """
         self._build(incremental=incremental, label_set=label_set)
+        # Dumping the model when incremental builds are turned on
+        # allows for other models with identical data and configs
+        # to use a pre-existing model's results on the same run.
         if incremental:
             self._dump()
 
