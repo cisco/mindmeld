@@ -205,7 +205,7 @@ class TaggerModel(Model):
 
     def predict_proba(self, examples, dynamic_resource=None):
         if self._no_entities:
-            return [()]
+            return []
 
         workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
 

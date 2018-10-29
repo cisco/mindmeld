@@ -322,18 +322,22 @@ class ProcessedQuery:
 
 
     Attributes:
+        query (Query): The underlying query object.
         domain (str): The domain of the query
         entities (list): A list of entities present in this query
         intent (str): The intent of the query
         is_gold (bool): Indicates whether the details in this query were predicted or human labeled
-        query (Query): The underlying query object.
+        nbest_transcripts_queries (list): A list of n best transcript queries
+        nbest_transcripts_entities (list): A list of lists of entities for each query
+        nbest_aligned_entities (list): A list of lists of aligned entities
+        confidence (dict): A dictionary of the class probas for the domain and intent classifier
     """
 
     # TODO: look into using __slots__
 
     def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False,
                  nbest_transcripts_queries=None, nbest_transcripts_entities=None,
-                 nbest_aligned_entities=None):
+                 nbest_aligned_entities=None, confidence=None):
         self.query = query
         self.domain = domain
         self.intent = intent
@@ -342,6 +346,7 @@ class ProcessedQuery:
         self.nbest_transcripts_queries = nbest_transcripts_queries
         self.nbest_transcripts_entities = nbest_transcripts_entities
         self.nbest_aligned_entities = nbest_aligned_entities
+        self.confidence = confidence
 
     def to_dict(self):
         """Converts the processed query into a dictionary"""
@@ -360,6 +365,9 @@ class ProcessedQuery:
             base['nbest_aligned_entities'] = [[{'text': e.entity.text, 'type': e.entity.type}
                                               for e in n_entities]
                                               for n_entities in self.nbest_aligned_entities]
+
+        if self.confidence:
+            base['confidence'] = self.confidence
         return base
 
     def __eq__(self, other):
