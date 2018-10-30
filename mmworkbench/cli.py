@@ -252,14 +252,11 @@ def clean(ctx, query_cache, model_cache, days):
     if model_cache:
         model_cache_path = MODEL_CACHE_PATH.format(app_path=app.app_path)
         if days:
-            for cached_file in os.listdir(model_cache_path):
-                file_full_path = os.path.join(model_cache_path, cached_file)
-                if os.path.isfile(file_full_path):
-                    # Delete files older than x days
-                    if os.stat(file_full_path).st_mtime < time.time() - days * DAY_IN_SECONDS:
-                        os.remove(file_full_path)
-                        logger.info("Removed cached model file: {}".format(
-                            file_full_path))
+            for ts_folders in os.listdir(model_cache_path):
+                full_path = os.path.join(model_cache_path, ts_folders)
+                if os.stat(full_path).st_mtime < time.time() - days * DAY_IN_SECONDS:
+                    os.remove(full_path)
+                    logger.info("Removed cached ts folder: {}".format(full_path))
         else:
             try:
                 shutil.rmtree(model_cache_path)
