@@ -115,7 +115,7 @@ class MemmModel(Tagger):
             prediction = self._clf.predict_proba(X)[0]
             predicted_tag = np.argmax(prediction)
             prev_tag = self.class_encoder.inverse_transform(predicted_tag)
-            seq_log_probs.append((prev_tag, prediction[predicted_tag]))
+            seq_log_probs.append([prev_tag, prediction[predicted_tag]])
         return seq_log_probs
 
     def _get_feature_selector(self, selector_type):

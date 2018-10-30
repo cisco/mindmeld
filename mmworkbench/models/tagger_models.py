@@ -216,8 +216,8 @@ class TaggerModel(Model):
         for entity in entities:
             entity_proba = probas[entity.token_span.start:entity.token_span.end+1]
             entity_confidence.append(min(entity_proba))
-
-        return tuple(zip(entities, entity_confidence))
+        predicted_labels_scores = tuple(zip(entities, entity_confidence))
+        return predicted_labels_scores
 
     def _get_cv_scorer(self, selection_settings):
         """

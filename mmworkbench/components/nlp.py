@@ -822,17 +822,22 @@ class IntentProcessor(Processor):
         if isinstance(query, (list, tuple)):
             if self.nbest_transcripts_enabled:
                 nbest_transcripts_entities = self._process_list(
-                    query, '_recognize_entities', **{'dynamic_resource': dynamic_resource})
+                    query, '_recognize_entities', **{'dynamic_resource': dynamic_resource,
+                                                     'verbose': verbose})
                 return nbest_transcripts_entities
             else:
                 if verbose:
-                    entities = self.entity_recognizer.predict_proba(query[0])
+                    entities = self.entity_recognizer.predict_proba(
+                        query[0], dynamic_resource=dynamic_resource)
                 else:
                     entities = self.entity_recognizer.predict(
                         query[0], dynamic_resource=dynamic_resource)
                 return [entities]
-        entities = self.entity_recognizer.predict(
-            query, dynamic_resource=dynamic_resource)
+        if verbose:
+            entities = self.entity_recognizer.predict_proba(query,
+                                                            dynamic_resource=dynamic_resource)
+        else:
+            entities = self.entity_recognizer.predict(query, dynamic_resource=dynamic_resource)
         return entities
 
     def _align_entities(self, entities):

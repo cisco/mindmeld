@@ -39,7 +39,7 @@ class ConditionalRandomFields(Tagger):
         for query_index in range(len(seq)):
             query_marginal_tuples = []
             for i, tag in enumerate(seq[query_index]):
-                query_marginal_tuples.append((tag, marginals_dict[query_index][i][tag]))
+                query_marginal_tuples.append([tag, marginals_dict[query_index][i][tag]])
             marginal_tuples.append(query_marginal_tuples)
         return marginal_tuples
 
