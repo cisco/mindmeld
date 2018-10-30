@@ -6,7 +6,6 @@ from abc import ABCMeta, abstractmethod
 import json
 import logging
 import os
-import os.path
 
 from sklearn.externals import joblib
 
