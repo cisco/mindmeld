@@ -204,6 +204,15 @@ class TaggerModel(Model):
         return labels
 
     def predict_proba(self, examples, dynamic_resource=None):
+        """
+        Args:
+            examples (list of mmworkbench.core.Query): a list of queries to train on
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+
+        Returns:
+            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels
+            with confidence scores
+        """
         if self._no_entities:
             return []
 
@@ -214,7 +223,7 @@ class TaggerModel(Model):
         entity_confidence = []
         entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
         for entity in entities:
-            entity_proba = probas[entity.token_span.start:entity.token_span.end+1]
+            entity_proba = probas[entity.token_span.start: entity.token_span.end+1]
             entity_confidence.append(min(entity_proba))
         predicted_labels_scores = tuple(zip(entities, entity_confidence))
         return predicted_labels_scores

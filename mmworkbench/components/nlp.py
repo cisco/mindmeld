@@ -207,7 +207,7 @@ class Processor(metaclass=ABCMeta):
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
         return self.process_query(query, allowed_nlp_classes, dynamic_resource, verbose).to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=None):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -370,13 +370,18 @@ class NaturalLanguageProcessor(Processor):
             else:
                 logger.info("Skipping domain classifier evaluation")
 
-    def _process_domain(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=None):
+    def _process_domain(self, query, allowed_nlp_classes=None, dynamic_resource=None,
+                        verbose=False):
         domain_proba = None
 
         if len(self.domains) > 1:
             if not allowed_nlp_classes:
                 if verbose:
+                    # predict_proba() returns sorted list of tuples
+                    # ie, [(<class1>, <confidence>), (<class2>, <confidence>),...]
                     domain_proba = self.domain_classifier.predict_proba(query)
+                    # Since domain_proba is sorted by class with highest confidence,
+                    # get that as the predicted class
                     domain = domain_proba[0][0]
                 else:
                     domain = self.domain_classifier.predict(query,
@@ -444,7 +449,7 @@ class NaturalLanguageProcessor(Processor):
             query, allowed_intents, dynamic_resource=dynamic_resource, verbose=verbose)
         processed_query.domain = domain
         if domain_proba:
-            domain_scores = dict((k, v) for (k, v) in domain_proba)
+            domain_scores = dict(domain_proba)
             scores = processed_query.confidence or {}
             scores["domains"] = domain_scores
             processed_query.confidence = scores
@@ -681,7 +686,7 @@ class DomainProcessor(Processor):
             query, dynamic_resource=dynamic_resource, verbose=verbose)
         processed_query.intent = intent
         if intent_proba:
-            intent_scores = dict((k, v) for (k, v) in intent_proba)
+            intent_scores = dict(intent_proba)
             scores = processed_query.confidence or {}
             scores["intents"] = intent_scores
             processed_query.confidence = scores
@@ -834,8 +839,8 @@ class IntentProcessor(Processor):
                         query[0], dynamic_resource=dynamic_resource)
                 return [entities]
         if verbose:
-            entities = self.entity_recognizer.predict_proba(query,
-                                                            dynamic_resource=dynamic_resource)
+            entities = self.entity_recognizer.predict_proba(
+                query, dynamic_resource=dynamic_resource)
         else:
             entities = self.entity_recognizer.predict(query, dynamic_resource=dynamic_resource)
         return entities
@@ -951,10 +956,11 @@ class IntentProcessor(Processor):
 
         entities = self._recognize_entities(query, dynamic_resource=dynamic_resource,
                                             verbose=verbose)
-        if verbose and len(entities[0]) > 0:
-            for entity, score in entities[0]:
+        pred_entities = entities[0]
+        if verbose and len(pred_entities) > 0:
+            for entity, score in pred_entities:
                 entity.entity.confidence = score
-            entities, _ = zip(*entities[0])
+            entities, _ = zip(*pred_entities)
             entities = [entities]
 
         aligned_entities = self._align_entities(entities)

@@ -210,7 +210,7 @@ class EntityRecognizer(Classifier):
         their associated probabilities using the trained entity recognition model
 
         Args:
-            query (Query): The input query
+            query (Query or str): The input query
 
         Returns:
             list: a list of tuples of the form (Entity list, float) grouping potential entity
