@@ -370,8 +370,7 @@ class NaturalLanguageProcessor(Processor):
         incremental_model_path = path.get_domain_model_path(
             self._app_path,
             timestamp=self.incremental_timestamp) if self.incremental_timestamp else None
-        self.domain_classifier.dump(
-            model_path, incremental_timestamp=incremental_model_path)
+        self.domain_classifier.dump(model_path, incremental_model_path)
 
     def _load(self, incremental_timestamp=None):
         if len(self.domains) == 1:

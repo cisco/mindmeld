@@ -342,15 +342,15 @@ class Classifier(metaclass=ABCMeta):
     def _create_and_dump_payload(self, path):
         joblib.dump(self._data_dump_payload(), path)
 
-    def dump(self, model_path, incremental_model_path=None):
+    def dump(self, model_path, incremental_timestamp=None):
         """Persists the trained classification model to disk.
 
         Args:
             model_path (str): The location on disk where the model should be stored
-            incremental_model_path (str, Optional): The timestamp folder where the cached
+            incremental_timestamp (str, Optional): The timestamp folder where the cached
                 models are stored
         """
-        for path in [model_path, incremental_model_path]:
+        for path in [model_path, incremental_timestamp]:
             if not path:
                 continue
 

@@ -61,10 +61,6 @@ class EntityRecognizer(Classifier):
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
-                training set will be loaded.
-                this classifier. If the previous model is equivalent to the new one, it will be
-                loaded instead. Equivalence here is determined by the model's training data and
-                configuration.
             incremental_timestamp (str, optional): The timestamp folder to cache models in
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
