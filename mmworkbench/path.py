@@ -21,11 +21,19 @@ QUERY_CACHE_PATH = os.path.join(GEN_FOLDER, 'query_cache.pkl')
 QUERY_CACHE_TMP_PATH = os.path.join(GEN_FOLDER, 'query_cache_tmp.pkl')
 DOMAIN_MODEL_PATH = os.path.join(GEN_FOLDER, 'domain.pkl')
 GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, 'domains')
+GEN_TIMESTAMP_FOLDER = os.path.join(MODEL_CACHE_PATH, '{timestamp}')
+DOMAIN_MODEL_TIMESTAMP_PATH = os.path.join(GEN_TIMESTAMP_FOLDER, 'domain.pkl')
+GEN_DOMAINS_CHECKPOINT_FOLDER = os.path.join(GEN_TIMESTAMP_FOLDER, 'domains')
 GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, '{domain}')
+GEN_DOMAIN_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAINS_CHECKPOINT_FOLDER, '{domain}')
 INTENT_MODEL_PATH = os.path.join(GEN_DOMAIN_FOLDER, 'intent.pkl')
+INTENT_MODEL_CHECKPOINT_PATH = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, 'intent.pkl')
 GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, '{intent}')
+GEN_INTENT_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, '{intent}')
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
+ENTITY_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, 'entity.pkl')
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, '{entity}-role.pkl')
+ROLE_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, '{entity}-role.pkl')
 GAZETTEER_PATH = os.path.join(GEN_FOLDER, 'gaz-{entity}.pkl')
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, 'indexes')
 GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, '{index}')
@@ -227,7 +235,7 @@ def get_generated_data_folder(app_path):
 
 
 @safe_path
-def get_domain_model_path(app_path, model_name=None):
+def get_domain_model_path(app_path, model_name=None, timestamp=None):
     """
     Args:
         app_path (str): The path to the app data.
@@ -237,12 +245,15 @@ def get_domain_model_path(app_path, model_name=None):
         (str) The path for this app's domain classifier model.
 
     """
-    path = DOMAIN_MODEL_PATH.format(app_path=app_path)
+    if timestamp:
+        path = DOMAIN_MODEL_TIMESTAMP_PATH.format(app_path=app_path, timestamp=timestamp)
+    else:
+        path = DOMAIN_MODEL_PATH.format(app_path=app_path)
     return _resolve_model_name(path, model_name)
 
 
 @safe_path
-def get_intent_model_path(app_path, domain, model_name=None):
+def get_intent_model_path(app_path, domain, model_name=None, timestamp=None):
     """
     Args:
         app_path (str): The path to the app data.
@@ -253,12 +264,16 @@ def get_intent_model_path(app_path, domain, model_name=None):
         (str) The path for this app's domain classifier model.
 
     """
-    path = INTENT_MODEL_PATH.format(app_path=app_path, domain=domain)
+    if timestamp:
+        path = INTENT_MODEL_CHECKPOINT_PATH.format(
+            app_path=app_path, timestamp=timestamp, domain=domain)
+    else:
+        path = INTENT_MODEL_PATH.format(app_path=app_path, domain=domain)
     return _resolve_model_name(path, model_name)
 
 
 @safe_path
-def get_entity_model_path(app_path, domain, intent, model_name=None):
+def get_entity_model_path(app_path, domain, intent, model_name=None, timestamp=None):
     """
     Args:
         app_path (str): The path to the app data.
@@ -270,12 +285,16 @@ def get_entity_model_path(app_path, domain, intent, model_name=None):
         (str) The path for this intent's named entity recognizer.
 
     """
-    path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
+    if timestamp:
+        path = ENTITY_MODEL_CHECKPOINT_PATH.format(
+            app_path=app_path, domain=domain, intent=intent, timestamp=timestamp)
+    else:
+        path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
     return _resolve_model_name(path, model_name)
 
 
 @safe_path
-def get_role_model_path(app_path, domain, intent, entity, model_name=None):
+def get_role_model_path(app_path, domain, intent, entity, model_name=None, timestamp=None):
     """
     Args:
         app_path (str): The path to the app data.
@@ -287,7 +306,13 @@ def get_role_model_path(app_path, domain, intent, entity, model_name=None):
         (str) The path for the intent's role classifier pickle.
 
     """
-    path = ROLE_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent, entity=entity)
+    if timestamp:
+        path = ROLE_MODEL_CHECKPOINT_PATH.format(
+            app_path=app_path, domain=domain,
+            intent=intent, entity=entity, timestamp=timestamp)
+    else:
+        path = ROLE_MODEL_PATH.format(
+            app_path=app_path, domain=domain, intent=intent, entity=entity)
     return _resolve_model_name(path, model_name)
 
 

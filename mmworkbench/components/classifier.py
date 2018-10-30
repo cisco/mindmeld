@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 import json
 import logging
 import os
+import os.path
 
 from sklearn.externals import joblib
 
@@ -114,7 +115,7 @@ class Classifier(metaclass=ABCMeta):
         self.config = None
         self.hash = ''
 
-    def fit(self, queries=None, label_set=None, incremental=False, **kwargs):
+    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
@@ -122,7 +123,7 @@ class Classifier(metaclass=ABCMeta):
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                  training set will be loaded.
-            incremental (Boolean, optional): If true, use model cache for incremental model building
+            incremental_timestamp (str, optional): The timestamp folder to cache models in
             model_type (str, optional): The type of machine learning model to use. If omitted, the
                  default model type will be used.
             model_settings (dict): Settings specific to the model type specified
@@ -181,10 +182,10 @@ class Classifier(metaclass=ABCMeta):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         new_hash = self._get_model_hash(model_config, queries, label_set)
+        cached_model = self._get_cached_model_from_hash(new_hash)
 
-        if incremental and self._does_cached_model_exist(new_hash):
-            cached_model = os.path.join(MODEL_CACHE_PATH.format(
-                app_path=self._resource_loader.app_path), new_hash + '.pkl')
+        if incremental_timestamp and cached_model:
+            logger.info('No need to fit. Loading previous model.')
             self.load(cached_model)
             return
 
@@ -339,35 +340,34 @@ class Classifier(metaclass=ABCMeta):
     def _data_dump_payload(self):
         return self._model
 
-    def dump_cached_model(self):
-        model_cache_folder = \
-            MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
-        if not os.path.isdir(model_cache_folder):
-            os.makedirs(model_cache_folder)
-        model_path = os.path.join(model_cache_folder, self.hash + '.pkl')
-        joblib.dump(self._data_dump_payload(), model_path)
+    def _create_and_dump_payload(self, path):
+        joblib.dump(self._data_dump_payload(), path)
 
-    def dump(self, model_path):
+    def dump(self, model_path, incremental_model_path=None):
         """Persists the trained classification model to disk.
 
         Args:
             model_path (str): The location on disk where the model should be stored
+            incremental_model_path (str, Optional): The timestamp folder where the cached
+                models are stored
         """
-        # make directory if necessary
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
+        for path in [model_path, incremental_model_path]:
+            if not path:
+                continue
 
-        joblib.dump(self._data_dump_payload(), model_path)
+            # make directory if necessary
+            folder = os.path.dirname(path)
+            if not os.path.isdir(folder):
+                os.makedirs(folder)
 
-        # dump cached model
-        self.dump_cached_model()
+            self._create_and_dump_payload(path)
 
-        hash_path = model_path + '.hash'
-        with open(hash_path, 'w') as hash_file:
-            hash_file.write(self.hash)
+            hash_path = path + '.hash'
+            with open(hash_path, 'w') as hash_file:
+                hash_file.write(self.hash)
 
-        self.dirty = False
+            if path == model_path:
+                self.dirty = False
 
     def load(self, model_path):
         """Loads the trained classification model from disk
@@ -409,11 +409,19 @@ class Classifier(metaclass=ABCMeta):
             model_hash = hash_file.read()
         return model_hash
 
-    def _does_cached_model_exist(self, hash):
+    def _get_cached_model_from_hash(self, hash):
         cache_path = MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
         if not os.path.exists(cache_path):
-            return False
-        return hash + '.pkl' in os.listdir(cache_path)
+            logger.error('Model cache directory does not exist')
+            return None
+
+        for dir_path, dir_names, file_names in os.walk(cache_path):
+            for filename in [f for f in file_names if f.endswith('.hash')]:
+                file_path = os.path.join(dir_path, filename)
+                f = open(file_path, 'r')
+                if hash == f.read():
+                    classifier_file_path = file_path.split('.hash')[0]
+                    return classifier_file_path
 
     @staticmethod
     def _build_query_tree(queries, raw=False):

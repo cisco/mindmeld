@@ -3,14 +3,12 @@
 This module contains the role classifier component of the Workbench natural language processor.
 """
 import logging
-import os
 
 from sklearn.externals import joblib
 
 from ..models import create_model, ENTITY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
 from ..core import Query
 from ..constants import DEFAULT_TRAIN_SET_REGEX
-from ..path import MODEL_CACHE_PATH
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
@@ -60,14 +58,14 @@ class RoleClassifier(Classifier):
                                               entity=self.entity_type)
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set=None, incremental=False, **kwargs):
+    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains a statistical model for role classification using the provided training examples
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                 training set will be loaded.
-            incremental (Boolean, optional): If true, use model cache for incremental model building
+            incremental_timestamp (str, optional): The timestamp folder to cache models in
         """
         logger.info('Fitting role classifier: domain=%r, intent=%r, entity_type=%r',
                     self.domain, self.intent, self.entity_type)
@@ -81,11 +79,10 @@ class RoleClassifier(Classifier):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         new_hash = self._get_model_hash(model_config, queries, label_set)
+        cached_model = self._get_cached_model_from_hash(new_hash)
 
-        if incremental and self._does_cached_model_exist(new_hash):
+        if incremental_timestamp and cached_model:
             logger.info('No need to fit. Loading previous model.')
-            cached_model = os.path.join(MODEL_CACHE_PATH.format(
-                app_path=self._resource_loader.app_path), new_hash + '.pkl')
             self.load(cached_model)
             return
 
@@ -111,35 +108,8 @@ class RoleClassifier(Classifier):
     def _data_dump_payload(self):
         return {'model': self._model, 'roles': self.roles}
 
-    def dump_cached_model(self):
-        model_cache_folder = \
-            MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
-        if not os.path.isdir(model_cache_folder):
-            os.makedirs(model_cache_folder)
-        model_path = os.path.join(model_cache_folder, self.hash + '.pkl')
-        joblib.dump(self._data_dump_payload(), model_path)
-
-    def dump(self, model_path):
-        """Persists the trained role classification model to disk.
-
-        Args:
-            model_path (str): The location on disk where the model should be stored
-        """
-        logger.info('Saving role classifier: domain=%r, intent=%r, entity_type=%r',
-                    self.domain, self.intent, self.entity_type)
-        # make directory if necessary
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        joblib.dump(self._data_dump_payload(), model_path)
-        self.dump_cached_model()
-
-        hash_path = model_path + '.hash'
-        with open(hash_path, 'w') as hash_file:
-            hash_file.write(self.hash)
-
-        self.dirty = False
+    def dump(self, model_path, incremental_model_path=None):
+        super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):
         """Loads the trained role classification model from disk

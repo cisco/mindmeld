@@ -2,7 +2,6 @@
 """
 This module contains the entity recognizer component of the Workbench natural language processor.
 """
-import os
 import logging
 
 from sklearn.externals import joblib
@@ -13,7 +12,6 @@ from ..constants import DEFAULT_TRAIN_SET_REGEX
 
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 from ._config import get_classifier_config
-from ..path import MODEL_CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +55,7 @@ class EntityRecognizer(Classifier):
                                               domain=self.domain, intent=self.intent)
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set=None, incremental=None, **kwargs):
+    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains the entity recognition model using the provided training queries
 
         Args:
@@ -67,7 +65,7 @@ class EntityRecognizer(Classifier):
                 this classifier. If the previous model is equivalent to the new one, it will be
                 loaded instead. Equivalence here is determined by the model's training data and
                 configuration.
-            incremental (Boolean, optional): If true, use model cache for incremental model building
+            incremental_timestamp (str, optional): The timestamp folder to cache models in
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
@@ -80,11 +78,10 @@ class EntityRecognizer(Classifier):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         new_hash = self._get_model_hash(self._model_config, queries, label_set)
+        cached_model = self._get_cached_model_from_hash(new_hash)
 
-        if self._does_cached_model_exist(new_hash):
+        if incremental_timestamp and cached_model:
             logger.info('No need to fit. Loading previous model.')
-            cached_model = os.path.join(MODEL_CACHE_PATH.format(
-                app_path=self._resource_loader.app_path), new_hash + '.pkl')
             self.load(cached_model)
             return
 
@@ -114,35 +111,11 @@ class EntityRecognizer(Classifier):
             'model_config': self._model_config
         }
 
-    def dump_cached_model(self):
-        model_cache_folder = \
-            MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
-        if not os.path.isdir(model_cache_folder):
-            os.makedirs(model_cache_folder)
-        model_path = os.path.join(model_cache_folder, self.hash + '.pkl')
-        self._model.dump(model_path, self._data_dump_payload())
+    def _create_and_dump_payload(self, path):
+        self._model.dump(path, self._data_dump_payload())
 
-    def dump(self, model_path):
-        """Persists the trained entity recognition model to disk.
-
-        Args:
-            model_path (str): The location on disk where the model should be stored
-
-        """
-        logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
-        # make directory if necessary
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        self._model.dump(model_path, self._data_dump_payload())
-        self.dump_cached_model()
-
-        hash_path = model_path + '.hash'
-        with open(hash_path, 'w') as hash_file:
-            hash_file.write(self.hash)
-
-        self.dirty = False
+    def dump(self, model_path, incremental_model_path=None):
+        super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):
         """Loads the trained entity recognition model from disk
