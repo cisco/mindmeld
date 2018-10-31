@@ -3,6 +3,7 @@
 import logging
 import random
 from sklearn.externals import joblib
+from sklearn.exceptions import NotFittedError
 import os
 
 from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
@@ -82,6 +83,7 @@ class TaggerModel(Model):
         self._clf.setup_model(self.config)
 
         self._no_entities = False
+        self.types = None
 
     def __getstate__(self):
         """Returns the information needed to pickle an instance of this class.
@@ -194,14 +196,54 @@ class TaggerModel(Model):
             return [()]
 
         workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
-
-        # Process the data to generate features and predict the tags
-        predicted_tags = self._clf.extract_and_predict(examples, self.config, workspace_resource)
-
+        # TODO: The try catch block is a hack for the LSTM. Basically, the LSTM model doesn't know
+        # about presence or absence of entities in an intent
+        try:
+            # Process the data to generate features and predict the tags
+            predicted_tags = self._clf.extract_and_predict(examples, self.config,
+                                                           workspace_resource)
+        except NotFittedError:
+            logger.info("Probably don't have entities for intent but still trying to predict")
+            return [()]
         # Decode the tags to labels
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
                   for example_predicted_tags, example in zip(predicted_tags, examples)]
         return labels
+
+    def predict_proba(self, examples, dynamic_resource=None):
+        """
+        Args:
+            examples (list of mmworkbench.core.Query): a list of queries to train on
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+
+        Returns:
+            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels
+            with confidence scores
+        """
+        if self._no_entities:
+            return []
+
+        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+
+        # TODO: The try catch block is a hack for the LSTM. Basically, the LSTM model doesn't know
+        # about presence or absence of entities in an intent
+        try:
+            predicted_tags_probas = self._clf.predict_proba(examples, self.config,
+                                                            workspace_resource)
+        except NotFittedError:
+            logger.info("Probably don't have entities for intent but still trying to predict")
+            return []
+
+        tags, probas = zip(*predicted_tags_probas[0])
+        entity_confidence = []
+        entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
+        for entity in entities:
+            entity_proba = probas[entity.token_span.start: entity.token_span.end+1]
+            # We assume that the score of the least likely tag in the sequence as the confidence
+            # score of the entire entity sequence
+            entity_confidence.append(min(entity_proba))
+        predicted_labels_scores = tuple(zip(entities, entity_confidence))
+        return predicted_labels_scores
 
     def _get_cv_scorer(self, selection_settings):
         """

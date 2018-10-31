@@ -146,6 +146,20 @@ class Tagger:
         y = self.predict(X)
         return y
 
+    def predict_proba(self, examples, config, resources):
+        """
+        Args:
+            examples (list of mmworkbench.core.Query): A list of queries to extract features for and
+                                                       predict
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+        Returns:
+            (list of lists): A list of predicted labels (in encoded format) and confidence scores
+        """
+        X, _, _ = self.extract_features(examples, config, resources)
+        return self._predict_proba(X)
+
     def dump(self, model_path, config):
         """
         Since traditional SKLearn models are easily serializable, we can

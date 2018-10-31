@@ -6,7 +6,7 @@ import logging
 
 from sklearn.externals import joblib
 
-from ..core import Entity
+from ..core import Entity, Query
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 
@@ -186,18 +186,25 @@ class EntityRecognizer(Classifier):
                                      dynamic_resource=dynamic_resource) or ()
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
-    def predict_proba(self, query):
+    def predict_proba(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Runs prediction on a given query and generates multiple entity tagging hypotheses with
         their associated probabilities using the trained entity recognition model
 
         Args:
-            query (Query): The input query
+            query (Query or str): The input query
 
         Returns:
             list: a list of tuples of the form (Entity list, float) grouping potential entity
                 tagging hypotheses and their probabilities
         """
-        raise NotImplementedError
+        if not self._model:
+            logger.error('You must fit or load the model before running predict_proba')
+            return
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
+                                                                     timestamp=timestamp)
+        predict_proba_result = self._model.predict_proba([query])
+        return predict_proba_result
 
     def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on

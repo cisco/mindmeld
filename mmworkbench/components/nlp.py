@@ -192,7 +192,7 @@ class Processor(metaclass=ABCMeta):
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
-                timestamp=None, dynamic_resource=None):
+                timestamp=None, dynamic_resource=None, verbose=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -216,6 +216,8 @@ class Processor(metaclass=ABCMeta):
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            verbose (bool, optional): If True, returns class probabilities along with class
+                prediction
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -223,9 +225,9 @@ class Processor(metaclass=ABCMeta):
         """
         query = self.create_query(
             query_text, language=language, time_zone=time_zone, timestamp=timestamp)
-        return self.process_query(query, allowed_nlp_classes, dynamic_resource).to_dict()
+        return self.process_query(query, allowed_nlp_classes, dynamic_resource, verbose).to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -243,6 +245,8 @@ class Processor(metaclass=ABCMeta):
 
                 where smart_home is the domain and close_door is the intent.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            verbose (bool, optional): If True, returns class probabilities along with class
+                prediction
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -394,25 +398,46 @@ class NaturalLanguageProcessor(Processor):
             else:
                 logger.info("Skipping domain classifier evaluation")
 
-    def _process_domain(self, query, allowed_nlp_classes=None, dynamic_resource=None):
+    def _process_domain(self, query, allowed_nlp_classes=None, dynamic_resource=None,
+                        verbose=False):
+        domain_proba = None
+
         if len(self.domains) > 1:
             if not allowed_nlp_classes:
-                return self.domain_classifier.predict(query, dynamic_resource=dynamic_resource)
+                if verbose:
+                    # predict_proba() returns sorted list of tuples
+                    # ie, [(<class1>, <confidence>), (<class2>, <confidence>),...]
+                    domain_proba = self.domain_classifier.predict_proba(query)
+                    # Since domain_proba is sorted by class with highest confidence,
+                    # get that as the predicted class
+                    domain = domain_proba[0][0]
+                else:
+                    domain = self.domain_classifier.predict(query,
+                                                            dynamic_resource=dynamic_resource)
+                return domain, domain_proba
             else:
                 if len(allowed_nlp_classes) == 1:
-                    return list(allowed_nlp_classes.keys())[0]
+                    domain = list(allowed_nlp_classes.keys())[0]
+                    if verbose:
+                        domain_proba = [(domain, 1.0)]
+                    return domain, domain_proba
                 else:
                     sorted_domains = self.domain_classifier.predict_proba(query)
+                    if verbose:
+                        domain_proba = sorted_domains
                     for ordered_domain, _ in sorted_domains:
                         if ordered_domain in allowed_nlp_classes.keys():
-                            return ordered_domain
+                            return ordered_domain, domain_proba
 
                     raise AllowedNlpClassesKeyError(
                         'Could not find user inputted domain in NLP hierarchy')
         else:
-            return list(self.domains.keys())[0]
+            domain = list(self.domains.keys())[0]
+            if verbose:
+                domain_proba = [(domain, 1.0)]
+            return domain, domain_proba
 
-    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -429,6 +454,8 @@ class NaturalLanguageProcessor(Processor):
             where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
             is None, we just use the normal model predict functionality.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            verbose (bool, optional): If True, returns class probabilities along with class
+                prediction
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -439,14 +466,21 @@ class NaturalLanguageProcessor(Processor):
             top_query = query[0]
         else:
             top_query = query
-        domain = self._process_domain(top_query, allowed_nlp_classes=allowed_nlp_classes,
-                                      dynamic_resource=dynamic_resource)
+        domain, domain_proba = self._process_domain(top_query,
+                                                    allowed_nlp_classes=allowed_nlp_classes,
+                                                    dynamic_resource=dynamic_resource,
+                                                    verbose=verbose)
 
         allowed_intents = allowed_nlp_classes.get(domain) if allowed_nlp_classes else None
 
         processed_query = self.domains[domain].process_query(
-            query, allowed_intents, dynamic_resource=dynamic_resource)
+            query, allowed_intents, dynamic_resource=dynamic_resource, verbose=verbose)
         processed_query.domain = domain
+        if domain_proba:
+            domain_scores = dict(domain_proba)
+            scores = processed_query.confidence or {}
+            scores["domains"] = domain_scores
+            processed_query.confidence = scores
         return processed_query
 
     def extract_allowed_intents(self, allowed_intents):
@@ -582,7 +616,7 @@ class DomainProcessor(Processor):
                             self.name))
 
     def process(self, query_text, allowed_nlp_classes,
-                time_zone=None, timestamp=None, dynamic_resource=None):
+                time_zone=None, timestamp=None, dynamic_resource=None, verbose=False):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this domain
 
@@ -603,18 +637,19 @@ class DomainProcessor(Processor):
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-
+            verbose (bool, optional): If True, returns class probabilities along with class
+                prediction
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
         processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes,
-                                             dynamic_resource=dynamic_resource)
+                                             dynamic_resource=dynamic_resource, verbose=verbose)
         processed_query.domain = self.name
         return processed_query.to_dict()
 
-    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None):
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
         """Processes the given query using the full hierarchy of natural language processing models
         trained for this application
 
@@ -631,6 +666,8 @@ class DomainProcessor(Processor):
                 where close_door is the intent. The intent belongs to the smart_home domain.
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            verbose (bool, optional): If True, returns class probabilities along with class
+                prediction
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -643,18 +680,27 @@ class DomainProcessor(Processor):
         else:
             top_query = query
 
+        intent_proba = None
         if len(self.intents) > 1:
             # Check if the user has specified allowed intents
             if not allowed_nlp_classes:
-                intent = self.intent_classifier.predict(
-                    top_query, dynamic_resource=dynamic_resource)
+                if verbose:
+                    intent_proba = self.intent_classifier.predict_proba(
+                        top_query, dynamic_resource=dynamic_resource)
+                    intent = intent_proba[0][0]
+                else:
+                    intent = self.intent_classifier.predict(
+                        top_query, dynamic_resource=dynamic_resource)
             else:
                 if len(allowed_nlp_classes) == 1:
                     intent = list(allowed_nlp_classes.keys())[0]
+                    if verbose:
+                        intent_proba = [(intent, 1.0)]
                 else:
                     sorted_intents = self.intent_classifier.predict_proba(top_query)
                     intent = None
-
+                    if verbose:
+                        intent_proba = sorted_intents
                     for ordered_intent, _ in sorted_intents:
                         if ordered_intent in allowed_nlp_classes.keys():
                             intent = ordered_intent
@@ -665,9 +711,16 @@ class DomainProcessor(Processor):
                             'Could not find user inputted intent in NLP hierarchy')
         else:
             intent = list(self.intents.keys())[0]
+            if verbose:
+                intent_proba = [(intent, 1.0)]
         processed_query = self.intents[intent].process_query(
-            query, dynamic_resource=dynamic_resource)
+            query, dynamic_resource=dynamic_resource, verbose=verbose)
         processed_query.intent = intent
+        if intent_proba:
+            intent_scores = dict(intent_proba)
+            scores = processed_query.confidence or {}
+            scores["intents"] = intent_scores
+            processed_query.confidence = scores
         return processed_query
 
     def inspect(self, query, intent=None, dynamic_resource=None):
@@ -767,7 +820,8 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
                             self.domain, self.name))
 
-    def process(self, query_text, time_zone=None, timestamp=None, dynamic_resource=None):
+    def process(self, query_text, time_zone=None, timestamp=None, dynamic_resource=None,
+                verbose=False):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent
 
@@ -779,6 +833,7 @@ class IntentProcessor(Processor):
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            verbose (bool, optional): If True, returns class as well as predict probabilities
 
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
@@ -790,12 +845,13 @@ class IntentProcessor(Processor):
         processed_query.intent = self.name
         return processed_query.to_dict()
 
-    def _recognize_entities(self, query, dynamic_resource=None):
+    def _recognize_entities(self, query, dynamic_resource=None, verbose=False):
         """Calls the entity recognition component.
 
         Args:
             query (Query, or tuple): The user input query, or a list of the n-best transcripts
                 query objects
+            verbose (bool, optional): If True returns class as well as confidence scores
         Returns:
             list (of lists of QueryEntity objects): A list of lists of the entity objects for each
                 transcript
@@ -803,14 +859,22 @@ class IntentProcessor(Processor):
         if isinstance(query, (list, tuple)):
             if self.nbest_transcripts_enabled:
                 nbest_transcripts_entities = self._process_list(
-                    query, '_recognize_entities', **{'dynamic_resource': dynamic_resource})
+                    query, '_recognize_entities', **{'dynamic_resource': dynamic_resource,
+                                                     'verbose': verbose})
                 return nbest_transcripts_entities
             else:
-                entities = self.entity_recognizer.predict(
-                    query[0], dynamic_resource=dynamic_resource)
+                if verbose:
+                    entities = self.entity_recognizer.predict_proba(
+                        query[0], dynamic_resource=dynamic_resource)
+                else:
+                    entities = self.entity_recognizer.predict(
+                        query[0], dynamic_resource=dynamic_resource)
                 return [entities]
-        entities = self.entity_recognizer.predict(
-            query, dynamic_resource=dynamic_resource)
+        if verbose:
+            entities = self.entity_recognizer.predict_proba(
+                query, dynamic_resource=dynamic_resource)
+        else:
+            entities = self.entity_recognizer.predict(query, dynamic_resource=dynamic_resource)
         return entities
 
     def _align_entities(self, entities):
@@ -895,7 +959,8 @@ class IntentProcessor(Processor):
             if self.parser else processed_entities
         return processed_entities
 
-    def process_query(self, query, return_processed_query=True, dynamic_resource=None):
+    def process_query(self, query, return_processed_query=True, dynamic_resource=None,
+                      verbose=None):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
@@ -905,6 +970,7 @@ class IntentProcessor(Processor):
             return_processed_query(boolean): Returns an instance of ProcessedQuery if True,
                 an array of entities if False (this is used to parallelize n-best entity processing)
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            verbose (bool, optional): If True, returns class as well as predict probabilities
         Returns:
             ProcessedQuery: A processed query object that contains the prediction results from
                 applying the hierarchy of natural language processing models to the input query
@@ -920,7 +986,15 @@ class IntentProcessor(Processor):
         else:
             query = (query,)
 
-        entities = self._recognize_entities(query, dynamic_resource=dynamic_resource)
+        entities = self._recognize_entities(query, dynamic_resource=dynamic_resource,
+                                            verbose=verbose)
+        pred_entities = entities[0]
+        if verbose and len(pred_entities) > 0:
+            for entity, score in pred_entities:
+                entity.entity.confidence = score
+            entities, _ = zip(*pred_entities)
+            entities = [entities]
+
         aligned_entities = self._align_entities(entities)
         processed_entities = self._process_entities(query, entities, aligned_entities)
 
