@@ -98,7 +98,7 @@ class MemmModel(Tagger):
 
         return predicted_tags
 
-    def _predict_proba(self, examples, config, resources):
+    def predict_proba(self, examples, config, resources):
         return [self._predict_proba_example(example, config, resources)
                 for example in examples]
 

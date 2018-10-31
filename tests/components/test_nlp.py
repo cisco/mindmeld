@@ -270,6 +270,26 @@ def test_process_verbose(kwik_e_mart_nlp):
     assert isinstance(response['confidence']['intents']['get_store_hours'], float)
 
 
+test_nbest = [
+    (
+        ['when is the 23rd elm street quickie mart open?',
+         'when is the 23rd elm st kwik-e-mart open?',
+         'when is the 23 elm street quicky mart open?'],
+        'store_info',
+        'get_store_hours'
+     )]
+
+
+@pytest.mark.parametrize("queries,expected_domain,expected_intent",test_nbest)
+def test_nbest_process_verbose(kwik_e_mart_nlp, queries, expected_domain, expected_intent):
+    response = kwik_e_mart_nlp.process(queries, verbose=True)
+    response['entities_text'] = [e['text'] for e in response['entities']]
+    for e in response['entities']:
+        assert isinstance(e['confidence'], float)
+    assert isinstance(response['confidence']['domains'][expected_domain], float)
+    assert isinstance(response['confidence']['intents'][expected_intent], float)
+
+
 test_data_4 = [
     (
         ['when is the 23rd elm street quickie mart open?',
