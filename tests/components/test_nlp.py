@@ -280,7 +280,7 @@ test_nbest = [
      )]
 
 
-@pytest.mark.parametrize("queries,expected_domain,expected_intent",test_nbest)
+@pytest.mark.parametrize("queries,expected_domain,expected_intent", test_nbest)
 def test_nbest_process_verbose(kwik_e_mart_nlp, queries, expected_domain, expected_intent):
     response = kwik_e_mart_nlp.process(queries, verbose=True)
     response['entities_text'] = [e['text'] for e in response['entities']]

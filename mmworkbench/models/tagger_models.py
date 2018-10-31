@@ -200,7 +200,8 @@ class TaggerModel(Model):
         # about presence or absence of entities in an intent
         try:
             # Process the data to generate features and predict the tags
-            predicted_tags = self._clf.extract_and_predict(examples, self.config, workspace_resource)
+            predicted_tags = self._clf.extract_and_predict(examples, self.config,
+                                                           workspace_resource)
         except NotFittedError:
             logger.info("Probably don't have entities for intent but still trying to predict")
             return [()]
@@ -223,11 +224,12 @@ class TaggerModel(Model):
             return []
 
         workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
-        
+
         # TODO: The try catch block is a hack for the LSTM. Basically, the LSTM model doesn't know
         # about presence or absence of entities in an intent
         try:
-            predicted_tags_probas = self._clf.predict_proba(examples, self.config, workspace_resource)
+            predicted_tags_probas = self._clf.predict_proba(examples, self.config,
+                                                            workspace_resource)
         except NotFittedError:
             logger.info("Probably don't have entities for intent but still trying to predict")
             return []
