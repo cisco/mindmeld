@@ -32,6 +32,16 @@ class ConditionalRandomFields(Tagger):
         return self._clf.predict(X)
 
     def predict_proba(self, examples, config, resources):
+        """
+        Args:
+            examples (list of mmworkbench.core.Query): a list of queries to predict on
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+        Returns:
+            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels
+             with confidence scores
+        """
         X, _, _ = self.extract_features(examples, config, resources)
         seq = self._clf.predict(X)
         marginals_dict = self._clf.predict_marginals(X)

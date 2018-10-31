@@ -239,6 +239,8 @@ class TaggerModel(Model):
         entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
         for entity in entities:
             entity_proba = probas[entity.token_span.start: entity.token_span.end+1]
+            # We assume that the score of the least likely tag in the sequence as the confidence
+            # score of the entire entity sequence
             entity_confidence.append(min(entity_proba))
         predicted_labels_scores = tuple(zip(entities, entity_confidence))
         return predicted_labels_scores
