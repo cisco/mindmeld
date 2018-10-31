@@ -3,7 +3,6 @@
 This module contains the role classifier component of the Workbench natural language processor.
 """
 import logging
-import os
 
 from sklearn.externals import joblib
 
@@ -59,17 +58,14 @@ class RoleClassifier(Classifier):
                                               entity=self.entity_type)
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set=None, previous_model_path=None, **kwargs):
+    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains a statistical model for role classification using the provided training examples
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                 training set will be loaded.
-            previous_model_path (str, optional): The path of a previous version of the model for
-                this classifier. If the previous model is equivalent to the new one, it will be
-                loaded instead. Equivalence here is determined by the model's training data and
-                configuration.
+            incremental_timestamp (str, optional): The timestamp folder to cache models in
         """
         logger.info('Fitting role classifier: domain=%r, intent=%r, entity_type=%r',
                     self.domain, self.intent, self.entity_type)
@@ -83,13 +79,12 @@ class RoleClassifier(Classifier):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         new_hash = self._get_model_hash(model_config, queries, label_set)
+        cached_model = self._get_cached_model_from_hash(new_hash)
 
-        if previous_model_path:
-            old_hash = self._load_hash(previous_model_path)
-            if old_hash == new_hash:
-                logger.info('No need to fit. Loading previous model.')
-                self.load(previous_model_path)
-                return
+        if incremental_timestamp and cached_model:
+            logger.info('No need to fit. Loading previous model.')
+            self.load(cached_model)
+            return
 
         # Load labeled data
         examples, labels = self._get_queries_and_labels(queries, label_set=label_set)
@@ -110,27 +105,11 @@ class RoleClassifier(Classifier):
         self.ready = True
         self.dirty = True
 
-    def dump(self, model_path):
-        """Persists the trained role classification model to disk.
+    def _data_dump_payload(self):
+        return {'model': self._model, 'roles': self.roles}
 
-        Args:
-            model_path (str): The location on disk where the model should be stored
-        """
-        logger.info('Saving role classifier: domain=%r, intent=%r, entity_type=%r',
-                    self.domain, self.intent, self.entity_type)
-        # make directory if necessary
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        rc_data = {'model': self._model, 'roles': self.roles}
-        joblib.dump(rc_data, model_path)
-
-        hash_path = model_path + '.hash'
-        with open(hash_path, 'w') as hash_file:
-            hash_file.write(self.hash)
-
-        self.dirty = False
+    def dump(self, model_path, incremental_model_path=None):
+        super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):
         """Loads the trained role classification model from disk

@@ -719,8 +719,10 @@ class Model:
         param_grid = self._convert_params(selection_settings['grid'], labels)
         model_class = self._get_model_constructor()
         estimator, param_grid = self._get_cv_estimator_and_params(model_class, param_grid)
+        # set GridSearchCV's return_train_score attribute to False improves cross-validation
+        # runtime perf as it doesn't have to compute training scores and which we don't consume
         grid_cv = GridSearchCV(estimator=estimator, scoring=scoring, param_grid=param_grid,
-                               cv=cv_iterator, n_jobs=n_jobs)
+                               cv=cv_iterator, n_jobs=n_jobs, return_train_score=False)
         model = grid_cv.fit(examples, labels, groups)
 
         for idx, params in enumerate(model.cv_results_['params']):
@@ -751,7 +753,8 @@ class Model:
         raise NotImplementedError
 
     def _get_cv_estimator_and_params(self, model_class, param_grid):
-        return model_class(), param_grid
+        # Warm start helps speed up cross-validation
+        return model_class(warm_start=True), param_grid
 
     def _process_cv_best_params(self, best_params):
         return best_params

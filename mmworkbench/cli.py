@@ -19,7 +19,7 @@ from . import markup, path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
-from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
+from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
 
 
@@ -31,6 +31,8 @@ CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
     'auto_envvar_prefix': 'MM'
 }
+
+DAY_IN_SECONDS = 86400
 
 
 def version_msg():
@@ -221,14 +223,17 @@ def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_gro
 
 @_app_cli.command('clean', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-@click.option('-c', '--cache', is_flag=True, required=False, help='Clean only query cache')
-def clean(ctx, cache):
+@click.option('-q', '--query-cache', is_flag=True, required=False, help='Clean only query cache')
+@click.option('-m', '--model-cache', is_flag=True, required=False, help='Clean only model cache')
+@click.option('-d', '--days', type=int, default=7,
+              help='Clear model cache older than the specified days')
+def clean(ctx, query_cache, model_cache, days):
     """Deletes all built data, undoing `build`."""
     app = ctx.obj.get('app')
     if app is None:
         raise ValueError("No app was given. Run 'python app.py clean' from your app folder.")
 
-    if cache:
+    if query_cache:
         try:
             main_cache_location = QUERY_CACHE_PATH.format(app_path=app.app_path)
             tmp_cache_location = QUERY_CACHE_TMP_PATH.format(app_path=app.app_path)
@@ -244,6 +249,22 @@ def clean(ctx, cache):
             logger.info('No query cache to delete')
         return
 
+    if model_cache:
+        model_cache_path = MODEL_CACHE_PATH.format(app_path=app.app_path)
+        if days:
+            for ts_folder in os.listdir(model_cache_path):
+                full_path = os.path.join(model_cache_path, ts_folder)
+                if os.stat(full_path).st_mtime < time.time() - days * DAY_IN_SECONDS:
+                    shutil.rmtree(full_path)
+                    logger.info("Removed cached ts folder: {}".format(full_path))
+        else:
+            try:
+                shutil.rmtree(model_cache_path)
+                logger.info('Model cache data deleted')
+            except FileNotFoundError:
+                logger.info('No model cache to delete')
+        return
+
     gen_path = path.get_generated_data_folder(app.app_path)
     try:
         shutil.rmtree(gen_path)
@@ -251,10 +272,10 @@ def clean(ctx, cache):
     except FileNotFoundError:
         logger.info('No generated data to delete')
 
-
 #
 # Shared commands
 #
+
 
 @click.group()
 def shared_cli():
