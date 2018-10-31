@@ -412,7 +412,7 @@ class Classifier(metaclass=ABCMeta):
         cache_path = MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
         if not os.path.exists(cache_path):
             logger.error('Model cache directory does not exist')
-            return None
+            return
 
         for dir_path, dir_names, file_names in os.walk(cache_path):
             for filename in [f for f in file_names if f.endswith('.hash')]:
@@ -420,6 +420,9 @@ class Classifier(metaclass=ABCMeta):
                 f = open(file_path, 'r')
                 if hash == f.read():
                     classifier_file_path = file_path.split('.hash')[0]
+                    if not os.path.exists(classifier_file_path):
+                        logger.error('Could not find the serialized model')
+                        return
                     return classifier_file_path
 
     @staticmethod
