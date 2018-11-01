@@ -15,7 +15,6 @@ from ..core import Query
 from ..constants import DEFAULT_TRAIN_SET_REGEX, DEFAULT_TEST_SET_REGEX
 
 from ..models import create_model, ModelConfig
-from ..path import MODEL_CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +180,7 @@ class Classifier(metaclass=ABCMeta):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         new_hash = self._get_model_hash(model_config, queries, label_set)
-        cached_model = self._get_cached_model_from_hash(new_hash)
+        cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
             logger.info('No need to fit. Loading previous model.')
@@ -408,23 +407,6 @@ class Classifier(metaclass=ABCMeta):
         with open(hash_path, 'r') as hash_file:
             model_hash = hash_file.read()
         return model_hash
-
-    def _get_cached_model_from_hash(self, hash):
-        cache_path = MODEL_CACHE_PATH.format(app_path=self._resource_loader.app_path)
-        if not os.path.exists(cache_path):
-            logger.error('Model cache directory does not exist')
-            return
-
-        for dir_path, dir_names, file_names in os.walk(cache_path):
-            for filename in [f for f in file_names if f.endswith('.hash')]:
-                file_path = os.path.join(dir_path, filename)
-                f = open(file_path, 'r')
-                if hash == f.read():
-                    classifier_file_path = file_path.split('.hash')[0]
-                    if not os.path.exists(classifier_file_path):
-                        logger.error('Could not find the serialized model')
-                        return
-                    return classifier_file_path
 
     @staticmethod
     def _build_query_tree(queries, raw=False):
