@@ -255,7 +255,7 @@ def clean(ctx, query_cache, model_cache, days):
                 full_path = os.path.join(model_cache_path, ts_folder)
 
                 if not os.path.isdir(full_path):
-                    logger.error(
+                    logger.warn(
                         'Expected timestamped folder. Ignoring the file {}.'.format(full_path))
                     continue
 
@@ -267,7 +267,7 @@ def clean(ctx, query_cache, model_cache, days):
                         shutil.rmtree(full_path)
                         logger.info('Removed cached ts folder: {}'.format(full_path))
                 except ValueError:
-                    logger.error('Folder {} is not named as a proper timestamp. '
+                    logger.warn('Folder {} is not named as a proper timestamp. '
                                  'Ignoring it.'.format(full_path))
         else:
             try:
