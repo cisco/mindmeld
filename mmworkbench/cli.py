@@ -268,7 +268,7 @@ def clean(ctx, query_cache, model_cache, days):
                         logger.info('Removed cached ts folder: {}'.format(full_path))
                 except ValueError:
                     logger.warn('Folder {} is not named as a proper timestamp. '
-                                 'Ignoring it.'.format(full_path))
+                                'Ignoring it.'.format(full_path))
         else:
             try:
                 shutil.rmtree(model_cache_path)
