@@ -79,7 +79,7 @@ class RoleClassifier(Classifier):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         new_hash = self._get_model_hash(model_config, queries, label_set)
-        cached_model = self._get_cached_model_from_hash(new_hash)
+        cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
             logger.info('No need to fit. Loading previous model.')

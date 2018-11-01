@@ -25,7 +25,7 @@ from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
 from ..exceptions import AllowedNlpClassesKeyError
-from ..markup import process_markup
+from ..markup import process_markup, TIME_FORMAT
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
 
@@ -361,7 +361,7 @@ class NaturalLanguageProcessor(Processor):
     def _build(self, incremental=False, label_set=None):
         if incremental:
             # During an incremental build, we set the incremental_timestamp for caching
-            current_ts = datetime.datetime.fromtimestamp(int(time.time())).strftime('%Y%m%dT%H%M%S')
+            current_ts = datetime.datetime.fromtimestamp(int(time.time())).strftime(TIME_FORMAT)
             self.incremental_timestamp = current_ts
 
         if len(self.domains) == 1:

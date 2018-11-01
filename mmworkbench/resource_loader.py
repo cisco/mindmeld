@@ -22,6 +22,7 @@ from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_
                              mask_numerics)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
+from .path import MODEL_CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,13 @@ class ResourceLoader:
         self.file_to_query_info = {}
         self._hasher = Hasher()
         self.query_cache = query_cache or QueryCache(app_path=self.app_path)
+        self._hash_to_model_path = None
+
+    @property
+    def hash_to_model_path(self):
+        if self._hash_to_model_path is None:
+            self._load_cached_models()
+        return self._hash_to_model_path
 
     def get_gazetteers(self, force_reload=False, **kwargs):
         """Gets all gazetteers
@@ -180,6 +188,21 @@ class ResourceLoader:
 
         self._entity_files[entity_type]['mapping']['data'] = json_data
         self._entity_files[entity_type]['mapping']['loaded'] = time.time()
+
+    def _load_cached_models(self):
+        if not self._hash_to_model_path:
+            self._hash_to_model_path = {}
+
+        cache_path = MODEL_CACHE_PATH.format(app_path=self.app_path)
+        for dir_path, dir_names, file_names in os.walk(cache_path):
+            for filename in [f for f in file_names if f.endswith('.hash')]:
+                file_path = os.path.join(dir_path, filename)
+                hash_val = open(file_path, 'r').read()
+                classifier_file_path = file_path.split('.hash')[0]
+                if not os.path.exists(classifier_file_path):
+                    logger.error('Could not find the serialized model')
+                    continue
+                self._hash_to_model_path[hash_val] = classifier_file_path
 
     def _gaz_needs_build(self, gaz_name):
         try:

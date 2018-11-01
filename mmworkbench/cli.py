@@ -33,8 +33,6 @@ CONTEXT_SETTINGS = {
     'auto_envvar_prefix': 'MM'
 }
 
-DAY_IN_SECONDS = 86400
-
 
 def version_msg():
     """Returns the Workbench version, location and Python powering it."""
@@ -263,7 +261,7 @@ def clean(ctx, query_cache, model_cache, days):
 
                 try:
                     current_ts = datetime.datetime.fromtimestamp(time.time())
-                    folder_ts = datetime.datetime.strptime(ts_folder, "%Y%m%dT%H%M%S")
+                    folder_ts = datetime.datetime.strptime(ts_folder, markup.TIME_FORMAT)
                     diff_days = current_ts - folder_ts
                     if diff_days.days > days:
                         shutil.rmtree(full_path)
