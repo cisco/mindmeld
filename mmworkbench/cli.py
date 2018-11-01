@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 import warnings
+import datetime
 
 import click
 import click_log
@@ -254,9 +255,22 @@ def clean(ctx, query_cache, model_cache, days):
         if days:
             for ts_folder in os.listdir(model_cache_path):
                 full_path = os.path.join(model_cache_path, ts_folder)
-                if os.stat(full_path).st_mtime < time.time() - days * DAY_IN_SECONDS:
-                    shutil.rmtree(full_path)
-                    logger.info("Removed cached ts folder: {}".format(full_path))
+
+                if not os.path.isdir(full_path):
+                    logger.error(
+                        'Expected timestamped folder. Ignoring the file {}.'.format(full_path))
+                    continue
+
+                try:
+                    current_ts = datetime.datetime.fromtimestamp(time.time())
+                    folder_ts = datetime.datetime.strptime(ts_folder, "%Y%m%dT%H%M%S")
+                    diff_days = current_ts - folder_ts
+                    if diff_days.days > days:
+                        shutil.rmtree(full_path)
+                        logger.info('Removed cached ts folder: {}'.format(full_path))
+                except ValueError:
+                    logger.error('Folder {} is not named as a proper timestamp. '
+                                 'Ignoring it.'.format(full_path))
         else:
             try:
                 shutil.rmtree(model_cache_path)
