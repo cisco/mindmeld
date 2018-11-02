@@ -129,7 +129,7 @@ class IntentClassifier(Classifier):
 
         for intent in query_tree.get(self.domain, []):
             for query_text in query_tree[self.domain][intent]:
-                queries.append("{}###{}".format(intent, mark_down(query_text)))
+                queries.append(self.domain + '###' + intent + '###' + mark_down(query_text))
 
         queries.sort()
         return self._resource_loader.hash_list(queries)
