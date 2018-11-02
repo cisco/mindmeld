@@ -269,5 +269,6 @@ class RoleClassifier(Classifier):
     def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = self._resource_loader.flatten_query_tree(query_tree)
-        hashable_queries = [self.domain + '###' + self.intent + '###' + self.entity_type + '###'] + sorted(queries)
+        hashable_queries = [self.domain + '###' + self.intent + '###' +
+                            self.entity_type + '###'] + sorted(queries)
         return self._resource_loader.hash_list(hashable_queries)
