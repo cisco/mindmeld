@@ -250,6 +250,11 @@ def clean(ctx, query_cache, model_cache, days):
 
     if model_cache:
         model_cache_path = MODEL_CACHE_PATH.format(app_path=app.app_path)
+
+        if not os.path.exists(model_cache_path):
+            logger.warn("Model cache directory doesn't exist")
+            return
+
         if days:
             for ts_folder in os.listdir(model_cache_path):
                 full_path = os.path.join(model_cache_path, ts_folder)
