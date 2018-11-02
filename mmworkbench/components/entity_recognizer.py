@@ -246,6 +246,6 @@ class EntityRecognizer(Classifier):
         queries = self._resource_loader.flatten_query_tree(query_tree)
         hashable_queries = []
         for query_text in queries:
-            hashable_queries.append(self.domain + '###' + self.intent + '###' + query_text)
+            hashable_queries.append(self.domain + '###' + self.intent + '###entity###' + query_text)
         hashable_queries.sort()
         return self._resource_loader.hash_list(hashable_queries)

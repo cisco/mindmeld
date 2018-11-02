@@ -55,35 +55,34 @@ def test_model_accuracies_are_similar_before_and_after_caching():
     # Make sure no cache exists
     assert os.path.exists(model_cache_path) is False
     nlp = NaturalLanguageProcessor(HOME_ASSISTANT_APP_PATH)
-    nlp.build()
+    nlp.build(incremental=True)
+    nlp.dump()
 
-    entity_eval = \
-        nlp.domains['times_and_dates'].intents['change_alarm'].entity_recognizer.evaluate()
-    role_eval = \
-        nlp.domains[
-            'times_and_dates'].intents[
-            'change_alarm'].entities['sys_time'].role_classifier.evaluate()
+    entity_eval = nlp.domains[
+        'times_and_dates'].intents['change_alarm'].entity_recognizer.evaluate()
+
+    role_eval = nlp.domains[
+        'times_and_dates'].intents[
+        'change_alarm'].entities['sys_time'].role_classifier.evaluate()
+
     entity_accuracy_no_cache = entity_eval.get_accuracy()
     role_accuracy_no_cache = role_eval.get_accuracy()
 
-    # dump cache and use it's data
+    example_cache = os.listdir(MODEL_CACHE_PATH.format(app_path=HOME_ASSISTANT_APP_PATH))[0]
     nlp = NaturalLanguageProcessor(HOME_ASSISTANT_APP_PATH)
-    nlp.build(incremental=True)
-    nlp.dump()
-    nlp = NaturalLanguageProcessor(HOME_ASSISTANT_APP_PATH)
-    nlp.build(incremental=True)
+    nlp.load(example_cache)
 
     # make sure cache exists
     assert os.path.exists(model_cache_path) is True
 
-    entity_eval = \
-        nlp.domains[
-            'times_and_dates'].intents[
-            'change_alarm'].entity_recognizer.evaluate()
-    role_eval = \
-        nlp.domains[
-            'times_and_dates'].intents[
-            'change_alarm'].entities['sys_time'].role_classifier.evaluate()
+    entity_eval = nlp.domains[
+        'times_and_dates'].intents[
+        'change_alarm'].entity_recognizer.evaluate()
+
+    role_eval = nlp.domains[
+        'times_and_dates'].intents[
+        'change_alarm'].entities['sys_time'].role_classifier.evaluate()
+
     entity_accuracy_cached = entity_eval.get_accuracy()
     role_accuracy_cached = role_eval.get_accuracy()
 
@@ -91,7 +90,7 @@ def test_model_accuracies_are_similar_before_and_after_caching():
     assert entity_accuracy_no_cache == entity_accuracy_cached
 
 
-def test_entity_and_role_hashes_are_unique_for_incremental_builds():
+def test_all_classifier_are_unique_for_incremental_builds():
     nlp = NaturalLanguageProcessor(HOME_ASSISTANT_APP_PATH)
     nlp.build(incremental=True)
 
