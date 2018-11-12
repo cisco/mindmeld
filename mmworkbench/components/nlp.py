@@ -924,15 +924,17 @@ class IntentProcessor(Processor):
                             break
         return aligned_entities
 
-    def _classify_and_resolve_entities(self, idx, query, processed_entities, aligned_entities):
+    def _classify_and_resolve_entities(self, idx, query, processed_entities, aligned_entities,
+                                       verbose=False):
         entity = processed_entities[idx]
         # Run the role classification
-        entity = self.entities[entity.entity.type].process_entity(query, processed_entities, idx)
+        entity = self.entities[entity.entity.type].process_entity(query, processed_entities, idx,
+                                                                  verbose)
         # Run the entity resolution
         entity = self.entities[entity.entity.type].resolve_entity(entity, aligned_entities[idx])
         return entity
 
-    def _process_entities(self, query, entities, aligned_entities):
+    def _process_entities(self, query, entities, aligned_entities, verbose=False):
         """
 
         Args:
@@ -952,7 +954,8 @@ class IntentProcessor(Processor):
         processed_entities = [deepcopy(e) for e in entities[0]]
         processed_entities = self._process_list([i for i in range(len(processed_entities))],
                                                 '_classify_and_resolve_entities',
-                                                *[query, processed_entities, aligned_entities])
+                                                *[query, processed_entities, aligned_entities,
+                                                  verbose])
 
         # Run the entity parsing
         processed_entities = self.parser.parse_entities(query, processed_entities) \
@@ -960,7 +963,7 @@ class IntentProcessor(Processor):
         return processed_entities
 
     def process_query(self, query, return_processed_query=True, dynamic_resource=None,
-                      verbose=None):
+                      verbose=False):
         """Processes the given query using the hierarchy of natural language processing models
         trained for this intent
 
@@ -996,7 +999,7 @@ class IntentProcessor(Processor):
             entities = [entities]
 
         aligned_entities = self._align_entities(entities)
-        processed_entities = self._process_entities(query, entities, aligned_entities)
+        processed_entities = self._process_entities(query, entities, aligned_entities, verbose)
 
         if using_nbest_transcripts:
             return ProcessedQuery(query[0], entities=processed_entities,
@@ -1072,7 +1075,7 @@ class EntityProcessor(Processor):
         raise NotImplementedError('EntityProcessor objects do not support `process()`. '
                                   'Try `process_entity()`')
 
-    def process_entity(self, query, entities, entity_index):
+    def process_entity(self, query, entities, entity_index, verbose=False):
         """Processes the given entity using the hierarchy of natural language processing models
         trained for this entity type
 
@@ -1089,8 +1092,17 @@ class EntityProcessor(Processor):
         entity = entities[entity_index]
 
         if self.role_classifier.roles:
-            # Only run role classifier if there are roles!
-            entity.entity.role = self.role_classifier.predict(query, entities, entity_index)
+            if verbose:
+               role = self.role_classifier.predict_proba(query, entities, entity_index)
+               entity.entity.role = {
+                   'type': role[0][0],
+                   'confidence': role
+               }
+            else:
+                # Only run role classifier if there are roles!
+                entity.entity.role = {
+                    'type': self.role_classifier.predict(query, entities, entity_index)
+                }
 
         return entity
 
