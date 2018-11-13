@@ -134,4 +134,3 @@ def test_all_classifier_are_unique_for_incremental_builds():
                 hash_val = open(cached_path + '.hash', 'r').read()
                 assert hash_val not in unique_hashs
                 unique_hashs.add(hash_val)
-                
