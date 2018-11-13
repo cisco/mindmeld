@@ -1093,11 +1093,11 @@ class EntityProcessor(Processor):
 
         if self.role_classifier.roles:
             if verbose:
-               role = self.role_classifier.predict_proba(query, entities, entity_index)
-               entity.entity.role = {
+                role = self.role_classifier.predict_proba(query, entities, entity_index)
+                entity.entity.role = {
                    'type': role[0][0],
                    'confidence': role
-               }
+                }
             else:
                 # Only run role classifier if there are roles!
                 entity.entity.role = {
