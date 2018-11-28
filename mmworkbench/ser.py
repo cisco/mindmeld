@@ -252,7 +252,7 @@ def _duckling_item_to_entity(item):
         num_type = dimension
         value['value'] = item['value']['value']
 
-    # Remaining dimensions have a type key and can be turned into an interval
+    # Remaining dimensions have a type key
     # amount-of-money, distance, duration, numeral, ordinal, quantity, temperature, time, volume
     else:
         type_ = item['value']['type']
@@ -275,7 +275,7 @@ def _duckling_item_to_entity(item):
             # Some intervals will only contain one value. The other value will be None in that case
             value['value'] = (from_, to_)
 
-        # Special handling of time dimension and grains
+        # Special handling of time dimension grain
         if dimension == 'time':
             if type_ == 'value':
                 value['grain'] = item['value']['grain']
@@ -284,6 +284,9 @@ def _duckling_item_to_entity(item):
                     value['grain'] = item['value']['from']['grain']
                 elif 'to' in item['value']:
                     value['grain'] = item['value']['to']['grain']
+
+        if dimension == 'duration':
+            value['unit'] = item['value']['unit']
 
     entity_type = "sys_{}".format(num_type)
     return Entity(item['body'], entity_type, value=value)
