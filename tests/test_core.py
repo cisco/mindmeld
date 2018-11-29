@@ -272,13 +272,13 @@ def test_query_time_zone_2(query_factory):
 
     entity = query.system_entity_candidates[0]
 
-    assert entity.entity.value['value'][10:] == 'T12:00:00.000Z'
+    assert entity.entity.value['value'][10:] == 'T12:00:00.000+00:00'
 
 
 def test_query_timestamp(query_factory):
     """Tests that a query created with a time uses the correct time zone for system entities"""
     query = query_factory.create_query('Today at noon', time_zone='America/Bahia',
-                                       timestamp=1516748906)
+                                       timestamp=1516748906000)
 
     assert len(query.system_entity_candidates) == 1
 
@@ -293,7 +293,7 @@ def test_sort_system_entities(query_factory):
     query = query_factory.create_query(
         'Can we do today or next week or 3pm or 2017 or in 20 minutes '
         'or next quarter or at 6:30pm or in February',
-        timestamp=1516748906
+        timestamp=1516748906000
     )
 
     time_entities = [e for e in query.system_entity_candidates if e.entity.type == 'sys_time']

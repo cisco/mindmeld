@@ -17,6 +17,8 @@ MALLARD_ENDPOINT = "parse"
 DUCKLING_URL = "http://localhost:8000"
 DUCKLING_ENDPOINT = "parse"
 
+SUCCESSFUL_HTTP_CODE = 200
+
 
 def get_candidates(query, entity_types=None, language=None, time_zone=None, timestamp=None):
     """Identifies candidate system entities in the given query
@@ -108,7 +110,7 @@ def parse_numerics(sentence, dimensions=None, language='EN', time_zone=None, tim
 
     """
     if sentence == '':
-        return {'data': []}
+        return {}, SUCCESSFUL_HTTP_CODE
     url = '/'.join([DUCKLING_URL, DUCKLING_ENDPOINT])
     data = {
         'text': sentence,
@@ -164,8 +166,8 @@ def resolve_system_entity(query, entity_type, span):
     time_zone = query.time_zone
     timestamp = query.timestamp
 
-    duckling_candidates = parse_numerics(span.slice(query.text), language=language,
-                                         time_zone=time_zone, timestamp=timestamp)
+    duckling_candidates, response_codes = parse_numerics(span.slice(query.text), language=language,
+                                                        time_zone=time_zone, timestamp=timestamp)
     duckling_text_val_to_candidate = {}
 
     # If no matching candidate was found, try parsing only this entity
@@ -224,12 +226,15 @@ def _duckling_item_to_query_entity(query, item, offset=0):
             indexing begins
 
     Returns:
-        QueryEntity: The query entity described by the duckling item
+        QueryEntity: The query entity described by the duckling item or nothing if blank query
     """
-    start = int(item['start']) + offset
-    end = int(item['end']) - 1 + offset
-    entity = _duckling_item_to_entity(item)
-    return QueryEntity.from_query(query, Span(start, end), entity=entity)
+    if item:
+        start = int(item['start']) + offset
+        end = int(item['end']) - 1 + offset
+        entity = _duckling_item_to_entity(item)
+        return QueryEntity.from_query(query, Span(start, end), entity=entity)
+    else:
+        return
 
 
 def _duckling_item_to_entity(item):
@@ -267,26 +272,25 @@ def _duckling_item_to_entity(item):
 
             if 'from' in item['value']:
                 from_ = item['value']['from']['value']
-                value['grain'] = item['value']['from']['grain']
             if 'to' in item['value']:
                 to_ = item['value']['to']['value']
-                value['grain'] = item['value']['to']['grain']
 
             # Some intervals will only contain one value. The other value will be None in that case
             value['value'] = (from_, to_)
 
+        # Get the unit if it exists
+        if 'unit' in item['value']:
+            value['unit'] = item['value']['unit']
+
         # Special handling of time dimension grain
         if dimension == 'time':
             if type_ == 'value':
-                value['grain'] = item['value']['grain']
+                value['grain'] = item['value'].get('grain')
             elif type_ == 'interval':
                 if 'from' in item['value']:
-                    value['grain'] = item['value']['from']['grain']
+                    value['grain'] = item['value']['from'].get('grain')
                 elif 'to' in item['value']:
-                    value['grain'] = item['value']['to']['grain']
-
-        if dimension == 'duration':
-            value['unit'] = item['value']['unit']
+                    value['grain'] = item['value']['to'].get('grain')
 
     entity_type = "sys_{}".format(num_type)
     return Entity(item['body'], entity_type, value=value)
@@ -304,13 +308,3 @@ def _dimensions_from_entity_types(entity_types):
     if not dims:
         dims = None
     return dims
-
-
-# Testing TODO: Remove
-if __name__ == '__main__':
-    import pprint; pp = pprint.PrettyPrinter(indent=2)
-    result = parse_numerics("set an alarm for 8AM")
-    converted_entity = _duckling_item_to_entity(result[0])
-    print(converted_entity.text)
-    print(converted_entity.type)
-    print(converted_entity.value)
