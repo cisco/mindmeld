@@ -19,12 +19,12 @@ MINUTE_GRAIN_INDEX = 11
 
 
 @pytest.mark.parametrize("query,tags,expected_time", [
-    ('set alarm for 1130',
+    ('set alarm for 11:30',
      ['O|', 'O|', 'O|', 'B|sys_time'],
-     ["11:30:00.000-07:00", "23:30:00.000-07:00"]),
+     ["11:30:00.000+00:00", "23:30:00.000+00:00"]),
     ('the vikings fought on the year 1130',
      ['O|', 'O|', 'O|', 'O|', 'O|', 'O|', 'B|sys_time'],
-     ["1130-01-01T00:00:00.000-07:00"]),
+     ["1130-01-01T00:00:00.000+00:00"]),
 ])
 def test_get_entities_from_tags_where_tag_idx_in_sys_candidate(kwik_e_mart_nlp,
                                                                query,
@@ -33,12 +33,15 @@ def test_get_entities_from_tags_where_tag_idx_in_sys_candidate(kwik_e_mart_nlp,
     """Tests the behavior when the system entity tag index is
     within the system candidates spans"""
 
-    processed_query = kwik_e_mart_nlp.create_query(query)
+    processed_query = kwik_e_mart_nlp.create_query(query, time_zone='UTC')
+
     res_entity = taggers.get_entities_from_tags(processed_query, tags)
+
 
     if res_entity[0].to_dict()['value']['grain'] == 'minute':
         assert res_entity[0].to_dict()['value']['value'][MINUTE_GRAIN_INDEX:] in \
                set(expected_time)
+
 
     if res_entity[0].to_dict()['value']['grain'] == 'year':
         assert res_entity[0].to_dict()['value']['value'] in set(expected_time)

@@ -54,7 +54,7 @@ def test_query_with_leading_special_chars(query_factory):
     assert query.processed_text == text
     assert query.normalized_text == 'test 1 2 3'
 
-    text = '((()))'
+    text = '(())'
     query = query_factory.create_query(text)
 
     assert query.text == text
@@ -256,23 +256,23 @@ def test_query_time_zone(query_factory):
     """Tests that a query created with a time uses the correct time zone for system entities"""
     query = query_factory.create_query('Today at noon', time_zone='America/Bahia')
 
-    assert len(query.system_entity_candidates) == 1
+    assert len(query.system_entity_candidates) == 4
 
-    entity = query.system_entity_candidates[0]
+    entity_times = [qe.entity.value['value'][10:] for qe in query.system_entity_candidates]
 
     # time in 'America/Bahia' is always -3 (no daylight savings time)
-    assert entity.entity.value['value'][10:] == 'T12:00:00.000-03:00'
+    assert 'T12:00:00.000-03:00' in entity_times
+
 
 
 def test_query_time_zone_2(query_factory):
     """Tests that a query created with a time uses the correct time zone for system entities"""
     query = query_factory.create_query('Today at noon', time_zone='UTC')
 
-    assert len(query.system_entity_candidates) == 1
+    assert len(query.system_entity_candidates) == 4
 
-    entity = query.system_entity_candidates[0]
-
-    assert entity.entity.value['value'][10:] == 'T12:00:00.000+00:00'
+    entity_times = [qe.entity.value['value'][10:] for qe in query.system_entity_candidates]
+    assert 'T12:00:00.000+00:00' in entity_times
 
 
 def test_query_timestamp(query_factory):
@@ -280,12 +280,12 @@ def test_query_timestamp(query_factory):
     query = query_factory.create_query('Today at noon', time_zone='America/Bahia',
                                        timestamp=1516748906000)
 
-    assert len(query.system_entity_candidates) == 1
+    assert len(query.system_entity_candidates) == 4
 
-    entity = query.system_entity_candidates[0]
+    entity_predictions = [qe.entity.value['value'] for qe in query.system_entity_candidates]
 
     # time in 'America/Bahia' is always -3 (no daylight savings time)
-    assert entity.entity.value['value'] == '2018-01-23T12:00:00.000-03:00'
+    assert '2018-01-23T12:00:00.000-03:00' in entity_predictions
 
 
 def test_sort_system_entities(query_factory):
@@ -298,17 +298,26 @@ def test_sort_system_entities(query_factory):
 
     time_entities = [e for e in query.system_entity_candidates if e.entity.type == 'sys_time']
 
-    assert len(time_entities) == 8
+    assert len(time_entities) == 18
 
     time_entities = sort_by_lowest_time_grain(time_entities)
 
     assert time_entities[0].entity.value['grain'] == 'year'
-    assert time_entities[1].entity.value['grain'] == 'quarter'
-    assert time_entities[2].entity.value['grain'] == 'month'
-    assert time_entities[3].entity.value['grain'] == 'week'
-    assert time_entities[4].entity.value['grain'] == 'day'
-    assert time_entities[5].entity.value['grain'] == 'hour'
-    assert time_entities[6].entity.value['grain'] == 'minute'
-    assert time_entities[7].entity.value['grain'] == 'second'
-
+    assert time_entities[1].entity.value['grain'] == 'year'
+    assert time_entities[2].entity.value['grain'] == 'quarter'
+    assert time_entities[3].entity.value['grain'] == 'month'
+    assert time_entities[4].entity.value['grain'] == 'month'
+    assert time_entities[5].entity.value['grain'] == 'week'
+    assert time_entities[6].entity.value['grain'] == 'day'
+    assert time_entities[7].entity.value['grain'] == 'hour'
+    assert time_entities[8].entity.value['grain'] == 'hour'
+    assert time_entities[9].entity.value['grain'] == 'hour'
+    assert time_entities[10].entity.value['grain'] == 'hour'
+    assert time_entities[11].entity.value['grain'] == 'hour'
+    assert time_entities[12].entity.value['grain'] == 'minute'
+    assert time_entities[13].entity.value['grain'] == 'minute'
+    assert time_entities[14].entity.value['grain'] == 'minute'
+    assert time_entities[15].entity.value['grain'] == 'minute'
+    assert time_entities[16].entity.value['grain'] == 'second'
+    assert time_entities[17].entity.value['grain'] == 'second'
     # Note: could not find a query that would yield a millisecond entity

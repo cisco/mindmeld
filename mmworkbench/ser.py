@@ -114,7 +114,8 @@ def parse_numerics(sentence, dimensions=None, language='EN', time_zone=None, tim
     url = '/'.join([DUCKLING_URL, DUCKLING_ENDPOINT])
     data = {
         'text': sentence,
-        'lang': language
+        'lang': language,
+        'latent': True,
     }
     if dimensions is not None:
         # TODO - Passing in these dimensions doesn't affect Duckling output, DOES work on Postman
@@ -157,6 +158,7 @@ def resolve_system_entity(query, entity_type, span):
     alternates = []
     for candidate in query.system_entity_candidates:
         if candidate.span == span:
+            # Returns the first entity type that matches even if there are multiple
             if candidate.entity.type == entity_type:
                 return candidate
             else:
