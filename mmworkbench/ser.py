@@ -125,6 +125,10 @@ def parse_numerics(sentence, dimensions=None, language='EN', time_zone=None, tim
     if timestamp:
         if len(str(timestamp)) != 13:
             logger.debug("Warning: Possible non-millisecond unix timestamp passed in.")
+        if len(str(timestamp)) == 10:
+            # Convert a second grain unix timestamp to millisecond
+            timestamp *= 1000
+
         data['reftime'] = timestamp
     try:
         response = requests.request('POST', url, data=data)
@@ -289,6 +293,9 @@ def _duckling_item_to_entity(item):
             if type_ == 'value':
                 value['grain'] = item['value'].get('grain')
             elif type_ == 'interval':
+
+                # Want to predict time intervals as sys_interval
+                num_type = 'interval'
                 if 'from' in item['value']:
                     value['grain'] = item['value']['from'].get('grain')
                 elif 'to' in item['value']:
