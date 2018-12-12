@@ -541,7 +541,7 @@ class NaturalLanguageProcessor(Processor):
 
         if intent:
             print('Inspecting intent classification')
-            domain = self._process_domain(query, dynamic_resource=dynamic_resource)
+            domain, _ = self._process_domain(query, dynamic_resource=dynamic_resource)
             intent_inspection = self.domains[domain].inspect(
                 query, intent=intent, dynamic_resource=dynamic_resource)
             print(intent_inspection)
