@@ -162,7 +162,7 @@ test_data_3 = [
 
 
 @pytest.mark.parametrize("query", test_data_3)
-def test_nlp_hierarchy_for_queries_mallard_fails_on(kwik_e_mart_nlp, query):
+def test_nlp_hierarchy_for_queries_duckling_fails_on(kwik_e_mart_nlp, query):
     """Tests user specified allowable domains and intents"""
     response = kwik_e_mart_nlp.process(query)
     assert response['text'] == query

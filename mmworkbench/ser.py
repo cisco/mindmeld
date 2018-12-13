@@ -11,9 +11,6 @@ from .exceptions import SystemEntityResolutionError
 
 logger = logging.getLogger(__name__)
 
-MALLARD_URL = "http://localhost:2626"
-MALLARD_ENDPOINT = "parse"
-
 DUCKLING_URL = "http://localhost:8000"
 DUCKLING_ENDPOINT = "parse"
 
