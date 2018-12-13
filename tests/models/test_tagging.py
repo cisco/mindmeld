@@ -21,10 +21,7 @@ MINUTE_GRAIN_INDEX = 11
 @pytest.mark.parametrize("query,tags,expected_time", [
     ('set alarm for 1130',
      ['O|', 'O|', 'O|', 'B|sys_time'],
-     ["11:30:00.000+00:00", "23:30:00.000+00:00"]),
-    ('the vikings fought in the year 1200 AD',
-     ['O|', 'O|', 'O|', 'O|', 'O|', 'O|', 'B|sys_time'],
-     ["1200-01-01T00:00:00.000+00:00"]),
+     ["11:30:00.000+00:00", "23:30:00.000+00:00"])
 ])
 def test_get_entities_from_tags_where_tag_idx_in_sys_candidate(kwik_e_mart_nlp,
                                                                query,
