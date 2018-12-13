@@ -19,12 +19,12 @@ MINUTE_GRAIN_INDEX = 11
 
 
 @pytest.mark.parametrize("query,tags,expected_time", [
-    ('set alarm for 11:30',
+    ('set alarm for 1130',
      ['O|', 'O|', 'O|', 'B|sys_time'],
      ["11:30:00.000+00:00", "23:30:00.000+00:00"]),
-    ('the vikings fought on the year 1130',
+    ('the vikings fought in the year 1200 AD',
      ['O|', 'O|', 'O|', 'O|', 'O|', 'O|', 'B|sys_time'],
-     ["1130-01-01T00:00:00.000+00:00"]),
+     ["1200-01-01T00:00:00.000+00:00"]),
 ])
 def test_get_entities_from_tags_where_tag_idx_in_sys_candidate(kwik_e_mart_nlp,
                                                                query,
@@ -37,13 +37,12 @@ def test_get_entities_from_tags_where_tag_idx_in_sys_candidate(kwik_e_mart_nlp,
 
     res_entity = taggers.get_entities_from_tags(processed_query, tags)
 
+    import pdb; pdb.set_trace()
 
     if res_entity[0].to_dict()['value']['grain'] == 'minute':
         assert res_entity[0].to_dict()['value']['value'][MINUTE_GRAIN_INDEX:] in \
                set(expected_time)
-
-
-    if res_entity[0].to_dict()['value']['grain'] == 'year':
+    else:
         assert res_entity[0].to_dict()['value']['value'] in set(expected_time)
 
 

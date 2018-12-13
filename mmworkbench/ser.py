@@ -6,7 +6,7 @@ import sys
 
 import requests
 
-from .core import Entity, QueryEntity, Span
+from .core import Entity, QueryEntity, Span, sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
 
 logger = logging.getLogger(__name__)
@@ -159,14 +159,17 @@ def resolve_system_entity(query, entity_type, span):
     Raises:
         SystemEntityResolutionError:
     """
-    alternates = []
-    for candidate in query.system_entity_candidates:
-        if candidate.span == span:
-            # Returns the first entity type that matches even if there are multiple
-            if candidate.entity.type == entity_type:
-                return candidate
-            else:
-                alternates.append(candidate)
+    span_filered_candidates = list(
+        filter(lambda candidate: candidate.span == span, query.system_entity_candidates))
+
+    entity_type_filtered_candidates = list(
+        filter(lambda candidate: candidate.entity.type == entity_type, span_filered_candidates))
+
+    entity_type_filtered_candidates = sort_by_lowest_time_grain(
+        entity_type_filtered_candidates) if entity_type == 'sys_time' else entity_type_filtered_candidates
+
+    if len(entity_type_filtered_candidates) > 0:
+        return entity_type_filtered_candidates[-1]
 
     language = query.language
     time_zone = query.time_zone
@@ -215,7 +218,7 @@ def resolve_system_entity(query, entity_type, span):
 
     msg = 'Unable to resolve system entity of type {!r} for {!r}.'
     msg = msg.format(entity_type, span.slice(query.text))
-    if alternates:
+    if span_filered_candidates:
         msg += ' Entities found for the following types {!r}'.format([a.entity.type
                                                                       for a in alternates])
 
