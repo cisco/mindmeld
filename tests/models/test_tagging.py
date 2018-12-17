@@ -34,8 +34,6 @@ def test_get_entities_from_tags_where_tag_idx_in_sys_candidate(kwik_e_mart_nlp,
 
     res_entity = taggers.get_entities_from_tags(processed_query, tags)
 
-    import pdb; pdb.set_trace()
-
     if res_entity[0].to_dict()['value']['grain'] == 'minute':
         assert res_entity[0].to_dict()['value']['value'][MINUTE_GRAIN_INDEX:] in \
                set(expected_time)

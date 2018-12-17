@@ -217,7 +217,7 @@ def resolve_system_entity(query, entity_type, span):
     msg = msg.format(entity_type, span.slice(query.text))
     if span_filered_candidates:
         msg += ' Entities found for the following types {!r}'.format([a.entity.type
-                                                                      for a in alternates])
+                                                                      for a in span_filered_candidates])
 
     raise SystemEntityResolutionError(msg)
 
