@@ -314,7 +314,6 @@ test_data_4 = [
 ]
 
 
-# Dummy comment
 @pytest.mark.parametrize("queries,expected_domain,expected_intent,expected_nbest_entities,"
                          "expected_aligned_entities", test_data_4)
 def test_process_nbest(kwik_e_mart_nlp, queries, expected_domain, expected_intent,
