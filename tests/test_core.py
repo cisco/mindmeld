@@ -264,7 +264,6 @@ def test_query_time_zone(query_factory):
     assert 'T12:00:00.000-03:00' in entity_times
 
 
-
 def test_query_time_zone_2(query_factory):
     """Tests that a query created with a time uses the correct time zone for system entities"""
     query = query_factory.create_query('Today at noon', time_zone='UTC')
