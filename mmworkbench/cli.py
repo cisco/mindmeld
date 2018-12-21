@@ -331,25 +331,14 @@ def num_parser(ctx, start, os_type):
             logger.info('Numerical parser running, PID %s', pid[0])
             return
 
-        try:
-            # We redirect all the output of starting the process to /dev/null and all errors
-            # to stdout.
-            exec_path = path.DUCKLING_UBUNTU_PATH if os_type == 'linux' else path.DUCKLING_OSX_PATH
-            with open(os.devnull, 'w') as dev_null:
-                duckling_service = subprocess.Popen(
-                    exec_path, stdout=dev_null, stderr=subprocess.STDOUT)
+        # We redirect all the output of starting the process to /dev/null and all errors
+        # to stdout.
+        exec_path = path.DUCKLING_UBUNTU_PATH if os_type == 'linux' else path.DUCKLING_OSX_PATH
+        duckling_service = subprocess.Popen(exec_path, stderr=subprocess.STDOUT)
 
-            # duckling takes some time to start so sleep for a bit
-            time.sleep(5)
-            logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
-        except OSError as exc:
-            if exc.errno != errno.ENOENT:
-                logger.error('The numerical parser executable might be '
-                             'compiled for the wrong OS. Please make '
-                             'sure you specify the correct OS type.')
-                ctx.exit(1)
-            else:
-                raise exc
+        # duckling takes some time to start so sleep for a bit
+        time.sleep(5)
+        logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
     else:
         for pid in _get_duckling_pid(os_type):
             os.kill(int(pid), signal.SIGKILL)
