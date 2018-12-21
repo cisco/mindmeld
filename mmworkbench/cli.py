@@ -324,24 +324,24 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
 def num_parser(ctx, start, os_type):
     """Starts or stops the numerical parser service."""
     if start:
-        pid = _get_mallard_pid(os_type)
+        pid = _get_duckling_pid(os_type)
 
         if pid:
-            # if mallard is already running, leave it be
+            # if duckling is already running, leave it be
             logger.info('Numerical parser running, PID %s', pid[0])
             return
 
         try:
             # We redirect all the output of starting the process to /dev/null and all errors
             # to stdout.
-            exec_path = path.MALLARD_UBUNTU_PATH if os_type == 'linux' else path.MALLARD_OSX_PATH
+            exec_path = path.DUCKLING_UBUNTU_PATH if os_type == 'linux' else path.DUCKLING_OSX_PATH
             with open(os.devnull, 'w') as dev_null:
-                mallard_service = subprocess.Popen(
+                duckling_service = subprocess.Popen(
                     exec_path, stdout=dev_null, stderr=subprocess.STDOUT)
 
-            # mallard takes some time to start so sleep for a bit
+            # duckling takes some time to start so sleep for a bit
             time.sleep(5)
-            logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
+            logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
         except OSError as exc:
             if exc.errno != errno.ENOENT:
                 logger.error('The numerical parser executable might be '
@@ -351,13 +351,13 @@ def num_parser(ctx, start, os_type):
             else:
                 raise exc
     else:
-        for pid in _get_mallard_pid(os_type):
+        for pid in _get_duckling_pid(os_type):
             os.kill(int(pid), signal.SIGKILL)
             logger.info('Stopping numerical parsing service, PID %s', pid)
 
 
-def _get_mallard_pid(os_type):
-    os_path = path.MALLARD_UBUNTU_PATH if os_type == 'linux' else path.MALLARD_OSX_PATH
+def _get_duckling_pid(os_type):
+    os_path = path.DUCKLING_UBUNTU_PATH if os_type == 'linux' else path.DUCKLING_OSX_PATH
     _, filename = os.path.split(os_path)
     pid = []
     for line in os.popen('ps ax | grep %s | grep -v grep' % filename):

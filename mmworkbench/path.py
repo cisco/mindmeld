@@ -67,9 +67,9 @@ DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(RESOURCES_FOLDER, 'default_tokenize
 ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, 'ascii_folding_dict.txt')
 MALLARD_JAR_PATH = os.path.join(os.path.join(RESOURCES_FOLDER, 'duckling-clojure'),
                                 'mindmeld-mallard.jar')
-MALLARD_UBUNTU_PATH = os.path.join(os.path.join(RESOURCES_FOLDER, 'x86_64-linux'),
+DUCKLING_UBUNTU_PATH = os.path.join(os.path.join(RESOURCES_FOLDER, 'x86_64-linux'),
                                    'duckling-example-exe')
-MALLARD_OSX_PATH = os.path.join(os.path.join(RESOURCES_FOLDER, 'x86_64-osx'),
+DUCKLING_OSX_PATH = os.path.join(os.path.join(RESOURCES_FOLDER, 'x86_64-osx'),
                                 'duckling-example-exe')
 EMBEDDINGS_FOLDER_PATH = os.path.join(WORKBENCH_ROOT, 'data')
 EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, 'glove.6B.zip')
