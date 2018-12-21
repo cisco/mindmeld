@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import asyncio
-import errno
 import json
 import logging
 import os
