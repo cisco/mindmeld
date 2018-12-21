@@ -99,7 +99,7 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
     },
     'params': {
         'penalty': 'l1',
-        'C': 100
+        'C': 50
     },
     'features': {
         'bag-of-words-seq': {
