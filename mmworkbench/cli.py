@@ -319,10 +319,12 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('--start/--stop', default=True, help='Start or stop numerical parser')
-def num_parser(ctx, start):
+@click.option('--os_type', type=click.Choice(['linux', 'osx']),
+              help='OS of machine, could be linux/osx', required=True)
+def num_parser(ctx, start, os_type):
     """Starts or stops the numerical parser service."""
     if start:
-        pid = _get_mallard_pid()
+        pid = _get_mallard_pid(os_type)
 
         if pid:
             # if mallard is already running, leave it be
@@ -332,28 +334,31 @@ def num_parser(ctx, start):
         try:
             # We redirect all the output of starting the process to /dev/null and all errors
             # to stdout.
+            exec_path = path.MALLARD_UBUNTU_PATH if os_type == 'linux' else path.MALLARD_OSX_PATH
             with open(os.devnull, 'w') as dev_null:
-                mallard_service = subprocess.Popen(['java', '-jar', path.MALLARD_JAR_PATH],
-                                                   stdout=dev_null, stderr=subprocess.STDOUT)
+                mallard_service = subprocess.Popen(
+                    exec_path, stdout=dev_null, stderr=subprocess.STDOUT)
 
             # mallard takes some time to start so sleep for a bit
             time.sleep(5)
             logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
         except OSError as exc:
             if exc.errno != errno.ENOENT:
-                logger.error('Java is not found; please verify that Java 8 is '
-                             'installed and in your path.')
+                logger.error('The numerical parser executable might be '
+                             'compiled for the wrong OS. Please make '
+                             'sure you specify the correct OS type.')
                 ctx.exit(1)
             else:
                 raise exc
     else:
-        for pid in _get_mallard_pid():
+        for pid in _get_mallard_pid(os_type):
             os.kill(int(pid), signal.SIGKILL)
             logger.info('Stopping numerical parsing service, PID %s', pid)
 
 
-def _get_mallard_pid():
-    _, filename = os.path.split(path.MALLARD_JAR_PATH)
+def _get_mallard_pid(os_type):
+    os_path = path.MALLARD_UBUNTU_PATH if os_type == 'linux' else path.MALLARD_OSX_PATH
+    _, filename = os.path.split(os_path)
     pid = []
     for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
         pid.append(line.split()[0])
