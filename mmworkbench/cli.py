@@ -326,7 +326,7 @@ def find_duckling_os_executable():
     }
 
     for os_key in os_mappings:
-        if os_key in platform.platform():
+        if os_key in platform.platform().lower():
             return os_mappings[os_key]
 
 
