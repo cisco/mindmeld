@@ -11,6 +11,7 @@ import sys
 import time
 import warnings
 import datetime
+import platform
 
 import click
 import click_log
@@ -31,6 +32,8 @@ CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
     'auto_envvar_prefix': 'MM'
 }
+
+DUCKLING_PORT = '8000'
 
 
 def version_msg():
@@ -314,16 +317,24 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
         logger.error(ex.message)
         ctx.exit(1)
 
+def find_duckling_os_executable():
+    os_mappings = {
+        'ubuntu-16': path.DUCKLING_UBUNTU16_PATH,
+        'ubuntu-18': path.DUCKLING_UBUNTU18_PATH,
+        'i386': path.DUCKLING_OSX_PATH
+    }
+
+    for os_key in os_mappings:
+        if os_key in platform.platform():
+            return os_mappings[os_key]
 
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('--start/--stop', default=True, help='Start or stop numerical parser')
-@click.option('--os_type', type=click.Choice(['linux', 'osx']),
-              help='OS of machine, could be linux/osx', required=True)
-def num_parser(ctx, start, os_type):
+def num_parser(ctx, start):
     """Starts or stops the numerical parser service."""
     if start:
-        pid = _get_duckling_pid(os_type)
+        pid = _get_duckling_pid()
 
         if pid:
             # if duckling is already running, leave it be
@@ -332,20 +343,28 @@ def num_parser(ctx, start, os_type):
 
         # We redirect all the output of starting the process to /dev/null and all errors
         # to stdout.
-        exec_path = path.DUCKLING_UBUNTU_PATH if os_type == 'linux' else path.DUCKLING_OSX_PATH
-        duckling_service = subprocess.Popen(exec_path, stderr=subprocess.STDOUT)
+        exec_path = find_duckling_os_executable()
+
+        if not exec_path:
+            logger.error('OS is incompatible with duckling executable. Use docker to install duckling.')
+            return
+
+        duckling_service = subprocess.Popen([exec_path, '--port', DUCKLING_PORT], stderr=subprocess.STDOUT)
 
         # duckling takes some time to start so sleep for a bit
         time.sleep(5)
         logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
     else:
-        for pid in _get_duckling_pid(os_type):
+        for pid in _get_duckling_pid():
             os.kill(int(pid), signal.SIGKILL)
             logger.info('Stopping numerical parsing service, PID %s', pid)
 
 
-def _get_duckling_pid(os_type):
-    os_path = path.DUCKLING_UBUNTU_PATH if os_type == 'linux' else path.DUCKLING_OSX_PATH
+def _get_duckling_pid():
+    os_path = find_duckling_os_executable()
+    if not os_path:
+        return
+
     _, filename = os.path.split(os_path)
     pid = []
     for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
