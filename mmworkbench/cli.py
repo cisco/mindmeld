@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import stat
 import signal
 import shutil
 import subprocess
@@ -352,6 +353,11 @@ def num_parser(ctx, start):
                          'Use docker to install duckling.')
             return
 
+        # make the file executable
+        st = os.stat(exec_path)
+        os.chmod(exec_path, st.st_mode | stat.S_IEXEC)
+
+        # run duckling
         duckling_service = subprocess.Popen([exec_path, '--port',
                                              DUCKLING_PORT], stderr=subprocess.STDOUT)
 
