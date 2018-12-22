@@ -317,6 +317,7 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
         logger.error(ex.message)
         ctx.exit(1)
 
+
 def find_duckling_os_executable():
     os_mappings = {
         'ubuntu-16': path.DUCKLING_UBUNTU16_PATH,
@@ -327,6 +328,7 @@ def find_duckling_os_executable():
     for os_key in os_mappings:
         if os_key in platform.platform():
             return os_mappings[os_key]
+
 
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
@@ -346,10 +348,12 @@ def num_parser(ctx, start):
         exec_path = find_duckling_os_executable()
 
         if not exec_path:
-            logger.error('OS is incompatible with duckling executable. Use docker to install duckling.')
+            logger.error('OS is incompatible with duckling executable. '
+                         'Use docker to install duckling.')
             return
 
-        duckling_service = subprocess.Popen([exec_path, '--port', DUCKLING_PORT], stderr=subprocess.STDOUT)
+        duckling_service = subprocess.Popen([exec_path, '--port',
+                                             DUCKLING_PORT], stderr=subprocess.STDOUT)
 
         # duckling takes some time to start so sleep for a bit
         time.sleep(5)
