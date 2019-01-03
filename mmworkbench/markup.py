@@ -131,22 +131,40 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
     """
     import csv
     import sys
+    show_confidence = kwargs.get("confidence")
     with open(output_file, 'w') if output_file else sys.stdout as csv_file:
         field_names = ["query"]
         if not kwargs.get("no_domain"):
             field_names.append("domain")
+            if show_confidence:
+                field_names.append("domain_conf")
         if not kwargs.get("no_intent"):
             field_names.append("intent")
+            if show_confidence:
+                field_names.append("intent_conf")
+        if show_confidence and not kwargs.get("no_entity"):
+            field_names.append("entity_conf")
+        if show_confidence and not kwargs.get("no_role"):
+            field_names.append("role_conf")
         csv_output = csv.DictWriter(csv_file, field_names, dialect=csv.excel_tab)
+        csv_output.writeheader()
 
         for raw_query in mark_down_file(input_file):
-            processed_query = nlp.process_query(nlp.create_query(raw_query))
+            processed_query = nlp.process_query(nlp.create_query(raw_query), verbose=True)
             marked_up_query = dump_query(processed_query, **kwargs)
             csv_row = {"query": marked_up_query}
             if not kwargs.get("no_domain"):
                 csv_row["domain"] = processed_query.domain
+                if show_confidence:
+                    csv_row["domain_conf"] = processed_query.confidence["domains"][processed_query.domain]
             if not kwargs.get("no_intent"):
                 csv_row["intent"] = processed_query.intent
+                if show_confidence:
+                    csv_row["intent_conf"] = processed_query.confidence["intents"][processed_query.intent]
+            if show_confidence and not kwargs.get("no_entity"):
+                csv_row["entity_conf"] = min([e.entity.confidence for e in processed_query.entities] + [1])
+            if show_confidence and not kwargs.get("no_role"):
+                csv_row["role_conf"] = min([e.entity.role.confidence for e in processed_query.entities if e.entity.role] + [1])
 
             csv_output.writerow(csv_row)
 
