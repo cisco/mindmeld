@@ -150,21 +150,23 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
         csv_output.writeheader()
 
         for raw_query in mark_down_file(input_file):
-            processed_query = nlp.process_query(nlp.create_query(raw_query), verbose=True)
-            marked_up_query = dump_query(processed_query, **kwargs)
+            proc_query = nlp.process_query(nlp.create_query(raw_query), verbose=True)
+            marked_up_query = dump_query(proc_query, **kwargs)
             csv_row = {"query": marked_up_query}
             if not kwargs.get("no_domain"):
-                csv_row["domain"] = processed_query.domain
+                csv_row["domain"] = proc_query.domain
                 if show_confidence:
-                    csv_row["domain_conf"] = processed_query.confidence["domains"][processed_query.domain]
+                    csv_row["domain_conf"] = proc_query.confidence["domains"][proc_query.domain]
             if not kwargs.get("no_intent"):
-                csv_row["intent"] = processed_query.intent
+                csv_row["intent"] = proc_query.intent
                 if show_confidence:
-                    csv_row["intent_conf"] = processed_query.confidence["intents"][processed_query.intent]
+                    csv_row["intent_conf"] = proc_query.confidence["intents"][proc_query.intent]
             if show_confidence and not kwargs.get("no_entity"):
-                csv_row["entity_conf"] = min([e.entity.confidence for e in processed_query.entities] + [1])
+                csv_row["entity_conf"] = min([e.entity.confidence
+                                              for e in proc_query.entities] + [1.0])
             if show_confidence and not kwargs.get("no_role"):
-                csv_row["role_conf"] = min([e.entity.role.confidence for e in processed_query.entities if e.entity.role] + [1])
+                csv_row["role_conf"] = min([e.entity.role.confidence
+                                            for e in proc_query.entities if e.entity.role] + [1.0])
 
             csv_output.writerow(csv_row)
 
