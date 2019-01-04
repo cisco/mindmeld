@@ -187,6 +187,8 @@ def evaluate(ctx, verbose):
 @click.pass_context
 @click.option('-o', '--output', required=False,
               help='Send output to file rather than standard out')
+@click.option('-c', '--confidence', is_flag=True,
+              help='Show confidence scores for each prediction')
 @click.option('-D', '--no_domain', is_flag=True,
               help='Suppress predicted domain column')
 @click.option('-I', '--no_intent', is_flag=True,
@@ -198,7 +200,7 @@ def evaluate(ctx, verbose):
 @click.option('-G', '--no_group', is_flag=True,
               help='Suppress predicted group annotations')
 @click.argument('input', required=True)
-def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_group):
+def predict(ctx, input, output, confidence, no_domain, no_intent, no_entity, no_role, no_group):
     """Runs predictions on a given query file"""
     app = ctx.obj.get('app')
     if app is None:
@@ -215,7 +217,7 @@ def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_gro
                      "Try 'python app.py build'.")
         ctx.exit(1)
 
-    markup.bootstrap_query_file(input, output, nlp,
+    markup.bootstrap_query_file(input, output, nlp, confidence=confidence,
                                 no_domain=no_domain, no_intent=no_intent,
                                 no_entity=no_entity, no_role=no_role, no_group=no_group)
 
