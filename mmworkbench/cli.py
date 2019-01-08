@@ -1,10 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import asyncio
-import errno
 import json
 import logging
 import os
+import stat
 import signal
 import shutil
 import subprocess
@@ -12,16 +12,21 @@ import sys
 import time
 import warnings
 import datetime
+import platform
+import requests
 
 import click
 import click_log
+import math
 
+from tqdm import tqdm
 from . import markup, path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
+from .constants import DEVCENTER_URL
 
 
 logger = logging.getLogger(__name__)
@@ -32,6 +37,8 @@ CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
     'auto_envvar_prefix': 'MM'
 }
+
+DUCKLING_PORT = '8000'
 
 
 def version_msg():
@@ -318,44 +325,80 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
         ctx.exit(1)
 
 
+def find_duckling_os_executable():
+    os_mappings = {
+        'ubuntu-16': path.DUCKLING_UBUNTU16_PATH,
+        'ubuntu-18': path.DUCKLING_UBUNTU18_PATH,
+        'i386': path.DUCKLING_OSX_PATH
+    }
+
+    for os_key in os_mappings:
+        if os_key in platform.platform().lower():
+            return os_mappings[os_key]
+
+
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('--start/--stop', default=True, help='Start or stop numerical parser')
 def num_parser(ctx, start):
     """Starts or stops the numerical parser service."""
     if start:
-        pid = _get_mallard_pid()
+        pid = _get_duckling_pid()
 
         if pid:
-            # if mallard is already running, leave it be
+            # if duckling is already running, leave it be
             logger.info('Numerical parser running, PID %s', pid[0])
             return
 
-        try:
-            # We redirect all the output of starting the process to /dev/null and all errors
-            # to stdout.
-            with open(os.devnull, 'w') as dev_null:
-                mallard_service = subprocess.Popen(['java', '-jar', path.MALLARD_JAR_PATH],
-                                                   stdout=dev_null, stderr=subprocess.STDOUT)
+        # We redirect all the output of starting the process to /dev/null and all errors
+        # to stdout.
+        exec_path = find_duckling_os_executable()
 
-            # mallard takes some time to start so sleep for a bit
-            time.sleep(5)
-            logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
-        except OSError as exc:
-            if exc.errno != errno.ENOENT:
-                logger.error('Java is not found; please verify that Java 8 is '
-                             'installed and in your path.')
-                ctx.exit(1)
-            else:
-                raise exc
+        if not exec_path:
+            logger.error('OS is incompatible with duckling executable. '
+                         'Use docker to install duckling.')
+            return
+
+        if not os.path.exists(exec_path):
+            url = os.path.join(os.path.join(DEVCENTER_URL, 'binaries'), os.path.basename(exec_path))
+            logger.info('Could not find {} binary file, downloading from {}'.format(exec_path, url))
+            r = requests.get(url, stream=True)
+
+            # Total size in bytes.
+            total_size = int(r.headers.get('content-length', 0))
+            block_size = 1024
+
+            with open(exec_path, 'wb') as f:
+                for data in tqdm(r.iter_content(block_size),
+                                 total=math.ceil(total_size // block_size),
+                                 unit='KB',
+                                 unit_scale=True):
+                    f.write(data)
+                    f.flush()
+
+        # make the file executable
+        st = os.stat(exec_path)
+        os.chmod(exec_path, st.st_mode | stat.S_IEXEC)
+
+        # run duckling
+        duckling_service = subprocess.Popen([exec_path, '--port',
+                                             DUCKLING_PORT], stderr=subprocess.STDOUT)
+
+        # duckling takes some time to start so sleep for a bit
+        time.sleep(5)
+        logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
     else:
-        for pid in _get_mallard_pid():
+        for pid in _get_duckling_pid():
             os.kill(int(pid), signal.SIGKILL)
             logger.info('Stopping numerical parsing service, PID %s', pid)
 
 
-def _get_mallard_pid():
-    _, filename = os.path.split(path.MALLARD_JAR_PATH)
+def _get_duckling_pid():
+    os_path = find_duckling_os_executable()
+    if not os_path:
+        return
+
+    _, filename = os.path.split(os_path)
     pid = []
     for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
         pid.append(line.split()[0])

@@ -162,7 +162,7 @@ test_data_3 = [
 
 
 @pytest.mark.parametrize("query", test_data_3)
-def test_nlp_hierarchy_for_queries_mallard_fails_on(kwik_e_mart_nlp, query):
+def test_nlp_hierarchy_for_queries_duckling_fails_on(kwik_e_mart_nlp, query):
     """Tests user specified allowable domains and intents"""
     response = kwik_e_mart_nlp.process(query)
     assert response['text'] == query
@@ -299,17 +299,17 @@ test_data_4 = [
         'get_store_hours',
         [['23rd elm street'], ['23rd elm st'], ['23 elm street']],
         [['23rd elm street', '23rd elm st', '23 elm street']],
-     ),
+    ),
     (
         ['is the 104 first street store open this sunday',
          'is the first street store open this sunday',
          'is the 10 4 street store open this sunday'],
         'store_info',
         'get_store_hours',
-        [['104 first street', 'this sunday'], ['first street', 'this sunday'],
-         ['10 4 street', 'this sunday']],
+        [['104 first street', 'sunday'], ['first street', 'sunday'],
+         ['10 4 street', 'sunday']],
         [['104 first street', 'first street', '10 4 street'],
-         ['this sunday', 'this sunday', 'this sunday']]
+         ['sunday', 'sunday']]
     )
 ]
 
