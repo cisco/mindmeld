@@ -15,11 +15,13 @@ logger = logging.getLogger(__name__)
 TIME_GRAIN_TO_ORDER = {
     'year': 0,
     'month': 1,
-    'day': 2,
-    'hour': 3,
-    'minute': 4,
-    'second': 5,
-    'milliseconds': 6
+    'quarter': 2,
+    'week': 3,
+    'day': 4,
+    'hour': 5,
+    'minute': 6,
+    'second': 7,
+    'milliseconds': 8
 }
 
 
