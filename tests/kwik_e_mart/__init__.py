@@ -2,7 +2,6 @@
 """This module contains the Kwik-E-Mart workbench demo application"""
 from mmworkbench import Application
 
-
 app = Application(__name__)
 
 
