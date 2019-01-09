@@ -145,7 +145,7 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
                 'Invalid locale provided, it should be from this '
                 'set: {}. Ignoring argument.'.format(valid_locales))
     if dimensions is not None:
-        data['dims'] = dimensions
+        data['dims'] = json.dumps(dimensions)
     if time_zone:
         data['tz'] = time_zone
     if timestamp:
