@@ -385,8 +385,11 @@ def num_parser(ctx, start):
                                              DUCKLING_PORT], stderr=subprocess.STDOUT)
 
         # duckling takes some time to start so sleep for a bit
-        time.sleep(5)
-        logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
+        for i in range(50):
+            if duckling_service.pid:
+                logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
+                return
+            time.sleep(0.1)
     else:
         for pid in _get_duckling_pid():
             os.kill(int(pid), signal.SIGKILL)

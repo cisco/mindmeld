@@ -8,6 +8,7 @@ import requests
 
 from .core import Entity, QueryEntity, Span, sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
+from enum import Enum
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,21 @@ DUCKLING_URL = "http://localhost:8000"
 DUCKLING_ENDPOINT = "parse"
 
 SUCCESSFUL_HTTP_CODE = 200
+
+
+class DucklingDimension(Enum):
+    AMOUNT_OF_MONEY = 'amount-of-money'
+    DISTANCE = 'distance'
+    DURATION = 'duration'
+    NUMERAL = 'numeral'
+    ORDINAL = 'ordinal'
+    QUANTITY = 'quantity'
+    TEMPERATURE = 'temperature'
+    VOLUME = 'volume'
+    EMAIL = 'email'
+    PHONE_NUMBER = 'phone-number'
+    URL = 'url'
+    TIME = 'time'
 
 
 def get_candidates(query, entity_types=None, language=None, time_zone=None, timestamp=None):
@@ -40,7 +56,7 @@ def get_candidates(query, entity_types=None, language=None, time_zone=None, time
     timestamp = timestamp or query.timestamp
     response, response_code = parse_numerics(query.text, dimensions=dims, language=language,
                                              time_zone=time_zone, timestamp=timestamp)
-    if response_code == 200:
+    if response_code == SUCCESSFUL_HTTP_CODE:
         return [e for e in [_duckling_item_to_query_entity(query, item) for item in response]
                 if entity_types is None or e.entity.type in entity_types]
 
@@ -49,7 +65,6 @@ def get_candidates(query, entity_types=None, language=None, time_zone=None, time
     return []
 
 
-# TODO - Remove? Never called
 def get_candidates_for_text(text, entity_types=None, span=None, language=None,
                             time_zone=None, timestamp=None):
     """Identifies candidate system entities in the given text
@@ -71,7 +86,7 @@ def get_candidates_for_text(text, entity_types=None, span=None, language=None,
 
     dims = _dimensions_from_entity_types(entity_types)
     response, response_code = parse_numerics(text, dimensions=dims)
-    if response_code == 200:
+    if response_code == SUCCESSFUL_HTTP_CODE:
         items = []
         for item in response:
             entity = _duckling_item_to_entity(item)
@@ -85,7 +100,8 @@ def get_candidates_for_text(text, entity_types=None, span=None, language=None,
         return []
 
 
-def parse_numerics(sentence, dimensions=None, language='EN', time_zone=None, timestamp=None):
+def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
+                   time_zone=None, timestamp=None):
     """Calls Duckling API to extract numerical entities from a sentence.
 
     Args:
@@ -94,6 +110,9 @@ def parse_numerics(sentence, dimensions=None, language='EN', time_zone=None, tim
             temperature) to restrict the output to. If None, include all types
         language (str, optional): Language of the sentence specified using a 639-1 code.
             If omitted, English is assumed.
+        locale (str, optional): The english locale being used, could be en_AU, en_BE, en_BZ,
+            en_CA, en_CN, en_GB, en_HK, en_IE, en_IN, en_JM, en_MO, en_NZ, en_PH, en_TT, en_TW,
+            en_US, en_ZA.
         time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
             If not specified, the system time zone is used.
         timestamp (long, optional): A unix millisecond timestamp used as the reference time.
@@ -114,8 +133,13 @@ def parse_numerics(sentence, dimensions=None, language='EN', time_zone=None, tim
         'lang': language,
         'latent': True,
     }
+
+    valid_locales = ["en_AU", "en_BE", "en_BZ", "en_CA", "en_CN", "en_GB", "en_HK", "en_IE",
+                     "en_IN", "en_JM", "en_MO", "en_NZ", "en_PH", "en_TT", "en_TW", "en_US",
+                     "en_ZA"]
+    if locale in valid_locales:
+        data['locale'] = locale
     if dimensions is not None:
-        # TODO - Passing in these dimensions doesn't affect Duckling output, DOES work on Postman
         data['dims'] = dimensions
     if time_zone:
         data['tz'] = time_zone
@@ -132,14 +156,16 @@ def parse_numerics(sentence, dimensions=None, language='EN', time_zone=None, tim
         return response.json(), response.status_code
     except requests.ConnectionError:
         logger.debug('Unable to connect to Duckling.')
-        raise RuntimeError("Unable to connect to Duckling. Make sure it's running by ...")  # TODO
+        raise RuntimeError("Unable to connect to Mallard. Make sure it's running by typing "
+                           "'mmworkbench num-parse' at the command line.")
     except Exception as ex:
         logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
                      json.dumps(data))
         sys.exit('\nThe numerical parser service encountered the following ' +
                  'error:\n' + str(ex) + '\nURL: ' + url + '\nRaw data: ' + str(data) +
-                 '\nPlease check your data and ensure Duckling is running. You may ' +
-                 "run Duckling by ... ")  # TODO
+                 "\nPlease check your data and ensure Mallard is running. "
+                 "Make sure it's running by typing "
+                 "'mmworkbench num-parse' at the command line.")
 
 
 def resolve_system_entity(query, entity_type, span):
@@ -233,7 +259,8 @@ def _duckling_item_to_query_entity(query, item, offset=0):
             indexing begins
 
     Returns:
-        QueryEntity: The query entity described by the duckling item or nothing if blank query
+        QueryEntity: The query entity described by the duckling item or
+        None if no item is present
     """
     if item:
         start = int(item['start']) + offset
@@ -260,12 +287,11 @@ def _duckling_item_to_entity(item):
     dimension = item['dim']
 
     # These dimensions have no 'type' key in the 'value' dict
-    if dimension == 'email' or dimension == 'phone-number' or dimension == 'url':
+    if dimension in map(lambda x: x.value, [DucklingDimension.EMAIL,
+                                            DucklingDimension.PHONE_NUMBER,
+                                            DucklingDimension.URL]):
         num_type = dimension
         value['value'] = item['value']['value']
-
-    # Remaining dimensions have a type key
-    # amount-of-money, distance, duration, numeral, ordinal, quantity, temperature, time, volume
     else:
         type_ = item['value']['type']
         # num_type = f'{dimension}-{type_}'  # e.g. time-interval, temperature-value, etc
@@ -290,7 +316,7 @@ def _duckling_item_to_entity(item):
             value['unit'] = item['value']['unit']
 
         # Special handling of time dimension grain
-        if dimension == 'time':
+        if dimension == DucklingDimension.TIME.value:
             if type_ == 'value':
                 value['grain'] = item['value'].get('grain')
             elif type_ == 'interval':

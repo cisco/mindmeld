@@ -28,7 +28,7 @@ definitions:
     duckling-image: &duckling-image
       image: mindmeldworkbench/duckling:master
       auth:
-        username: mindmeldworkbench
+        username: $DOCKERHUB_USERNAME
         password: $DOCKERHUB_PASSWORD
       command: stack exec duckling-example-exe
 
