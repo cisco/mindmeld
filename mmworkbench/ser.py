@@ -137,8 +137,13 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
     valid_locales = ["en_AU", "en_BE", "en_BZ", "en_CA", "en_CN", "en_GB", "en_HK", "en_IE",
                      "en_IN", "en_JM", "en_MO", "en_NZ", "en_PH", "en_TT", "en_TW", "en_US",
                      "en_ZA"]
-    if locale in valid_locales:
-        data['locale'] = locale
+    if locale:
+        if locale in valid_locales:
+            data['locale'] = locale
+        else:
+            logger.error(
+                'Invalid locale provided, it should be from this '
+                'set: {}. Ignoring argument.'.format(valid_locales))
     if dimensions is not None:
         data['dims'] = dimensions
     if time_zone:
