@@ -297,7 +297,7 @@ def test_sort_system_entities(query_factory):
 
     time_entities = [e for e in query.system_entity_candidates if e.entity.type == 'sys_time']
 
-    assert len(time_entities) == 18
+    assert len(time_entities) == 19
 
     time_entities = sort_by_lowest_time_grain(time_entities)
 
@@ -317,6 +317,7 @@ def test_sort_system_entities(query_factory):
     assert time_entities[13].entity.value['grain'] == 'minute'
     assert time_entities[14].entity.value['grain'] == 'minute'
     assert time_entities[15].entity.value['grain'] == 'minute'
-    assert time_entities[16].entity.value['grain'] == 'second'
+    assert time_entities[16].entity.value['grain'] == 'minute'
     assert time_entities[17].entity.value['grain'] == 'second'
+    assert time_entities[18].entity.value['grain'] == 'second'
     # Note: could not find a query that would yield a millisecond entity

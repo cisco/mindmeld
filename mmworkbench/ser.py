@@ -158,7 +158,14 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
         data['reftime'] = timestamp
     try:
         response = requests.request('POST', url, data=data)
-        return response.json(), response.status_code
+        response_json = response.json()
+
+        # Remove the redundant 'values' key in the response['value'] dictionary
+        for i, entity_dict in enumerate(response_json):
+            if 'values' in entity_dict['value']:
+                del response_json[i]['value']['values']
+
+        return response_json, response.status_code
     except requests.ConnectionError:
         logger.debug('Unable to connect to Duckling.')
         raise RuntimeError("Unable to connect to Mallard. Make sure it's running by typing "
