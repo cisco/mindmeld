@@ -421,6 +421,10 @@ class EntityResolver:
 
             results = []
             for hit in hits:
+                if self._use_double_metaphone and len(entity) > 1:
+                    if hit['_score'] < 0.5 * len(entity):
+                        continue
+
                 top_synonym = None
                 synonym_hits = hit['inner_hits']['whitelist']['hits']['hits']
                 if len(synonym_hits) > 0:
@@ -435,10 +439,6 @@ class EntityResolver:
 
                 if hit['_source'].get('sort_factor'):
                     result['sort_factor'] = hit['_source'].get('sort_factor')
-
-                if self._use_double_metaphone and len(entity) > 1:
-                    if result['score'] < 0.5 * len(entity):
-                        continue
 
                 results.append(result)
 
