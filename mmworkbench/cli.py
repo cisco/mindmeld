@@ -18,6 +18,7 @@ import requests
 import click
 import click_log
 import math
+import distro
 
 from tqdm import tqdm
 from . import markup, path
@@ -329,11 +330,14 @@ def find_duckling_os_executable():
     os_mappings = {
         'ubuntu-16': path.DUCKLING_UBUNTU16_PATH,
         'ubuntu-18': path.DUCKLING_UBUNTU18_PATH,
-        'i386': path.DUCKLING_OSX_PATH
+        'darwin': path.DUCKLING_OSX_PATH
     }
 
+    os_platform_name = '-'.join(distro.linux_distribution(
+        full_distribution_name=False)).lower()
+
     for os_key in os_mappings:
-        if os_key in platform.platform().lower():
+        if os_key in os_platform_name:
             return os_mappings[os_key]
 
 
