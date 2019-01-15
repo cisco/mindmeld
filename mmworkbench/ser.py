@@ -168,14 +168,14 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
         return response_json, response.status_code
     except requests.ConnectionError:
         logger.debug('Unable to connect to Duckling.')
-        raise RuntimeError("Unable to connect to Mallard. Make sure it's running by typing "
+        raise RuntimeError("Unable to connect to Duckling. Make sure it's running by typing "
                            "'mmworkbench num-parse' at the command line.")
     except Exception as ex:
         logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
                      json.dumps(data))
         sys.exit('\nThe numerical parser service encountered the following ' +
                  'error:\n' + str(ex) + '\nURL: ' + url + '\nRaw data: ' + str(data) +
-                 "\nPlease check your data and ensure Mallard is running. "
+                 "\nPlease check your data and ensure Duckling is running. "
                  "Make sure it's running by typing "
                  "'mmworkbench num-parse' at the command line.")
 
