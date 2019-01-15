@@ -12,7 +12,6 @@ import sys
 import time
 import warnings
 import datetime
-import platform
 import requests
 
 import click
