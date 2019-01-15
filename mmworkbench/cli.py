@@ -327,8 +327,8 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
 
 def find_duckling_os_executable():
     os_mappings = {
-        'ubuntu-16': path.DUCKLING_UBUNTU16_PATH,
-        'ubuntu-18': path.DUCKLING_UBUNTU18_PATH,
+        'ubuntu-16.04': path.DUCKLING_UBUNTU16_PATH,
+        'ubuntu-18.04': path.DUCKLING_UBUNTU18_PATH,
         'darwin': path.DUCKLING_OSX_PATH
     }
 
