@@ -86,3 +86,61 @@ def default(context, responder):
                "for your local Kwik-E-Mart."]
     responder.reply(prompts)
     responder.listen()
+
+
+@app.dialogue_flow(domain='store_info', intent='get_store_hours')
+def get_store_hours_entry(context, responder):
+    active_store = None
+    store_entity = next((e for e in context['entities'] if e['type'] == 'store_name'), None)
+    if store_entity:
+        try:
+            stores = app.question_answerer.get(index='stores', id=store_entity['value']['id'])
+        except TypeError:
+            # failed to resolve entity
+            stores = app.question_answerer.get(index='stores', store_name=store_entity['text'])
+        try:
+            active_store = stores[0]
+            context['frame']['target_store'] = active_store
+        except IndexError:
+            # No active store... continue
+            pass
+    elif 'target_store' in context['frame']:
+        active_store = context['frame']['target_store']
+
+    if active_store:
+        responder.slots['store_name'] = active_store['store_name']
+        responder.slots['open_time'] = active_store['open_time']
+        responder.slots['close_time'] = active_store['close_time']
+        responder.reply('The {store_name} Kwik-E-Mart opens at {open_time} and '
+                        'closes at {close_time}.')
+        return
+
+    context['frame']['count'] = context['frame'].get('count', 0) + 1
+
+    if context['frame']['count'] <= 3:
+        responder.reply('Which store would you like to know about?')
+        responder.listen()
+    else:
+        responder.reply('Sorry I cannot help you. Please try again.')
+        context.exit_flow()
+
+
+@get_store_hours_entry.handle(default=True)
+def default_handler(context, responder):
+    context['frame']['count'] += 1
+    if context['frame']['count'] <= 3:
+        responder.reply('Sorry, I did not get you. Which store would you like to know about?')
+        responder.listen()
+    else:
+        responder.reply('Sorry I cannot help you. Please try again.')
+
+
+@get_store_hours_entry.handle(intent='exit', exit_flow=True)
+def exit_handler(context, responder):
+    del context
+    responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
+
+
+@get_store_hours_entry.handle(intent='get_store_hours')
+def get_store_hours_handler(context, responder):
+    get_store_hours_entry(context, responder)

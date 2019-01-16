@@ -8,7 +8,9 @@ import logging
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
 
-from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
+from .components import (
+    NaturalLanguageProcessor, DialogueManager, QuestionAnswerer, DialogueContext
+)
 from .components.dialogue import DialogueResponder
 from .resource_loader import ResourceLoader
 from .exceptions import AllowedNlpClassesKeyError
@@ -90,7 +92,7 @@ class ApplicationManager:
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
         self.question_answerer = question_answerer or QuestionAnswerer(app_path, resource_loader,
                                                                        es_host)
-        self.context_class = context_class or dict
+        self.context_class = context_class or DialogueContext
         self.responder_class = responder_class or DialogueResponder
         self.dialogue_manager = DialogueManager(self.responder_class, async_mode=self.async_mode)
 
