@@ -270,6 +270,42 @@ def test_process_verbose(kwik_e_mart_nlp):
     assert isinstance(response['confidence']['intents']['get_store_hours'], float)
 
 
+def test_process_verbose_long_tokens(kwik_e_mart_nlp):
+    """Test confidence for entities that have lower raw tokens indices than normalized tokens"""
+    text = 'Is the Kwik-E-Mart open tomorrow?'
+    response = kwik_e_mart_nlp.process(text, verbose=True)
+
+    tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
+    raw_tokens = [t['text'] for t in tokenizer.tokenize_raw(text)]
+    normalized_tokens = [t['entity'] for t in tokenizer.tokenize(text)]
+
+    assert raw_tokens == ['Is', 'the', 'Kwik-E-Mart', 'open', 'tomorrow?']
+    assert normalized_tokens == ['is', 'the', 'kwik', 'e', 'mart', 'open', 'tomorrow']
+
+    assert response['domain'] == 'store_info'
+    assert response['intent'] == 'get_store_hours'
+    assert response['entities'][0]['text'] == 'tomorrow'
+    assert isinstance(response['entities'][0]['confidence'], float)
+
+
+def test_process_verbose_short_tokens(kwik_e_mart_nlp):
+    """Test confidence for entities that have higher raw tokens indices than normalized tokens"""
+    text = 'when ** open -- tomorrow?'
+    response = kwik_e_mart_nlp.process(text, verbose=True)
+
+    tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
+    raw_tokens = [t['text'] for t in tokenizer.tokenize_raw(text)]
+    normalized_tokens = [t['entity'] for t in tokenizer.tokenize(text)]
+
+    assert raw_tokens == ['when', '**', 'open', '--', 'tomorrow?']
+    assert normalized_tokens == ['when', 'open', 'tomorrow']
+
+    assert response['domain'] == 'store_info'
+    assert response['intent'] == 'get_store_hours'
+    assert response['entities'][0]['text'] == 'tomorrow'
+    assert isinstance(response['entities'][0]['confidence'], float)
+
+
 test_nbest = [
     (
         ['when is the 23rd elm street quickie mart open?',
