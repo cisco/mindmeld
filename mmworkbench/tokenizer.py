@@ -42,19 +42,26 @@ class Tokenizer:
         letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
         # Make keep special regex list
-        keep_special_regex_list.append("?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+")  # noqa: W605
-        keep_special_regex_list.append("?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$")  # noqa: W605
-        keep_special_regex_list.append("?P<pattern1>(?P<pattern1_replace>" + letter_pattern_str  # noqa: W605
-                                       + ")" + "[^\w\d\s&" + exception_chars + "]+(?=[\d]+)")  # noqa: W605
-        keep_special_regex_list.append("?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&" +  # noqa: W605
-                                       exception_chars + "]+" + "u(?=" + letter_pattern_str + ")")  # noqa: W605
-        keep_special_regex_list.append("?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str +  # noqa: W605
-                                       ")" + "[^\w\d\s&" + exception_chars + "]+" +  # noqa: W605
-                                       "(?=" + letter_pattern_str + ")")  # noqa: W605
-        keep_special_regex_list.append("?P<escape1>(?P<escape1_replace>[\w\d]+)" +  # noqa: W605
-                                       "[^\w\d\s" + exception_chars + "]+" + "(?=\|)")  # noqa: W605
-        keep_special_regex_list.append("?P<escape2>(?P<escape2_replace>[\]\}]+)" +  # noqa: W605
-                                       "[^\w\d\s" + exception_chars + "]+(?=s)")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<pattern1>(?P<pattern1_replace>" + letter_pattern_str  # noqa: W605
+            + ")" + "[^\w\d\s&" + exception_chars + "]+(?=[\d]+)")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&" +  # noqa: W605
+            exception_chars + "]+" + "u(?=" + letter_pattern_str + ")")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str +  # noqa: W605
+            ")" + "[^\w\d\s&" + exception_chars + "]+" +  # noqa: W605
+            "(?=" + letter_pattern_str + ")")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<escape1>(?P<escape1_replace>[\w\d]+)" +  # noqa: W605
+            "[^\w\d\s" + exception_chars + "]+" + "(?=\|)")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<escape2>(?P<escape2_replace>[\]\}]+)" +  # noqa: W605
+            "[^\w\d\s" + exception_chars + "]+(?=s)")  # noqa: W605
 
         # Make regex list
         regex_list.append("?P<start>^[^\w\d&" + to_exclude + "]+")  # noqa: W605
@@ -63,8 +70,9 @@ class Tokenizer:
                           ")" + "[^\w\d\s&]+(?=[\d]+)")  # noqa: W605
         regex_list.append("?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?=" +  # noqa: W605
                           letter_pattern_str + ")")  # noqa: W605
-        regex_list.append("?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str + ")" +  # noqa: W605
-                          "[^\w\d\s&]+(?=" + letter_pattern_str + ")")  # noqa: W605
+        regex_list.append(
+            "?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str + ")" +  # noqa: W605
+            "[^\w\d\s&]+(?=" + letter_pattern_str + ")")  # noqa: W605
 
         # commonalities between lists
         regex_list.append("?P<underscore>_")  # noqa: W605
