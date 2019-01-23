@@ -47,10 +47,10 @@ class QueryCache:
             processed_query (ProcessedQuery): The ProcessedQuery
                 object corresponding to the domain, intent and query_text
         """
-        if (domain, intent, query_text) in self.query_cache_dict:
+        if (domain, intent, query_text) in self.cached_queries:
             return
 
-        self.query_cache_dict[(domain, intent, query_text)] = processed_query
+        self.cached_queries[(domain, intent, query_text)] = processed_query
         self.is_dirty = True
 
     def get_value(self, domain, intent, query_text):
@@ -58,7 +58,7 @@ class QueryCache:
         Gets the value associated with the triple key
         """
         try:
-            return self.query_cache_dict[(domain, intent, query_text)]
+            return self.cached_queries[(domain, intent, query_text)]
         except KeyError:
             return
 
