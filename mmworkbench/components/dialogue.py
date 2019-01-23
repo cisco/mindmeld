@@ -6,10 +6,8 @@ import copy
 import logging
 import random
 import json
-import os
 
 from .. import path
-from ..exceptions import WorkbenchImportError
 
 
 mod_logger = logging.getLogger(__name__)
@@ -693,7 +691,7 @@ class Conversation:
             force_sync (bool, optional): Force synchronous return for `say()` and `process()`
                 even when app is in async mode.
         """
-        app = app or _get_app_module(app_path)
+        app = app or path.get_app(app_path)
         app.lazy_init(nlp)
         self._app_manager = app.app_manager
         if not self._app_manager.ready:
