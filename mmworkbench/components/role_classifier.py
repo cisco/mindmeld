@@ -181,7 +181,37 @@ class RoleClassifier(Classifier):
         Returns:
             list: a list of tuples of the form (str, float) grouping roles and their probabilities
         """
-        raise NotImplementedError
+        if not self._model:
+            logger.error('You must fit or load the model before running predict')
+            return
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
+
+        predict_proba_result = self._model.predict_proba([(query, entities, entity_index)])
+        class_proba_tuples = list(predict_proba_result[0][1].items())
+        return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
+
+    def view_extracted_features(self, query, entities, entity_index):
+        """
+        Extracts features for a given entity for role classification.
+        Args:
+            query (Query or str): The input query
+            entities (list): The entities in the query
+            entity_index (int): The index of the entity whose role should be classified
+
+        Returns:
+            dict: The extracted features from the given input
+        """
+        if not self._model:
+            logger.error('You must fit or load the model to initialize resources')
+            return
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query)
+        gazetteers = self._resource_loader.get_gazetteers()
+        self._model.register_resources(gazetteers=gazetteers)
+        return self._model._extract_features((query, entities, entity_index))
 
     def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on
