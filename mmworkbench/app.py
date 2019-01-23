@@ -9,7 +9,7 @@ import sys
 from .app_manager import ApplicationManager
 from .cli import app_cli
 from .server import WorkbenchServer
-from .components.dialogue import DialogueResponder
+from .components.dialogue import DialogueResponder, DialogueContext, DialogueFlow
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class Application:
         self._server = None
         self._dialogue_rules = []
         self._middleware = []
-        self.context_class = context_class or dict
+        self.context_class = context_class or DialogueContext
         self.responder_class = responder_class or DialogueResponder
         self.preprocessor = preprocessor
         self.async_mode = async_mode
@@ -116,6 +116,16 @@ class Application:
             self.app_manager.add_dialogue_rule(name, handler, **kwargs)
         else:
             self._dialogue_rules.append((name, handler, kwargs))
+
+    def dialogue_flow(self, **kwargs):
+        """Creates a dialogue flow for the application"""
+
+        def _decorator(func):
+            name = kwargs.pop('name', func.__name__)
+            flow = DialogueFlow(name, func, self, **kwargs)
+            return flow
+
+        return _decorator
 
     def cli(self):
         # pylint:

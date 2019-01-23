@@ -306,7 +306,7 @@ class DialogueManager:
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
-            context (dict): Description
+            context (dict): The context object from the DM
             target_dialogue_state (str, optional): The target dialogue state
 
         Returns:
@@ -324,7 +324,7 @@ class DialogueManager:
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
-            context (dict): Description
+            context (dict): The context object from the DM
             target_dialogue_state (str, optional): The target dialogue state
 
         Returns:
@@ -338,7 +338,7 @@ class DialogueManager:
 
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
-    def _get_dialogue_state(self, context, target_dialogue_state):
+    def _get_dialogue_state(self, context, target_dialogue_state=None):
         dialogue_state = None
         for rule in self.rules:
             if target_dialogue_state:
@@ -371,6 +371,133 @@ class DialogueManager:
     def _default_handler(context, responder):
         # TODO: implement default handler
         pass
+
+
+class DialogueFlow(DialogueManager):
+    """A special dialogue manager subclass used to implement dialogue flows.
+    Dialogue flows allow developers to implement multiple turn interactions
+    where only a subset of dialogue states should be accessible or where
+    different dialogue rules should apply.
+    """
+    logger = mod_logger.getChild('DialogueFlow')
+
+    all_flows = {}
+
+    def __init__(self, name, entrance_handler, app, **kwargs):
+        super().__init__(async_mode=app.async_mode)
+
+        self._name = name
+
+        self.all_flows[name] = self
+        self.app = app
+        self.exit_flow_states = []
+
+        def _set_target_state(context, responder):
+            context.set_target_dialogue_state(self.flow_state)
+            return entrance_handler(context, responder)
+
+        async def _async_set_target_state(context, responder):
+            context.set_target_dialogue_state(self.flow_state)
+            return await entrance_handler(context, responder)
+
+        self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
+        app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
+        handler = self.apply_handler_async if self.async_mode else self.apply_handler
+        app.add_dialogue_rule(self.flow_state, handler, targeted_only=True)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def flow_state(self):
+        return self._name + '_flow'
+
+    @property
+    def dialogue_manager(self):
+        if self.app and self.app.app_manager:
+            return self.app.app_manager.dialogue_manager
+        return None
+
+    def __call__(self, ctx, responder):
+        return self._entrance_handler(ctx, responder)
+
+    def use_middleware(self, *args):
+        def _decorator(func):
+            self.add_middleware(func)
+            return func
+
+        try:
+            # Support syntax: @middleware
+            func = args[0]
+            if not callable(func):
+                raise TypeError
+            _decorator(func)
+            return func
+        except (IndexError, TypeError):
+            # Support syntax: @middleware()
+            return _decorator
+
+        self._entrance_handler = func
+        return func
+
+    def handle(self, **kwargs):
+        def _decorator(func):
+            name = kwargs.pop('name', None)
+            exit_flow = kwargs.pop('exit_flow', False)
+            if exit_flow:
+                func_name = name or func.__name__
+                self.exit_flow_states.append(func_name)
+            self.add_dialogue_rule(name, func, **kwargs)
+            return func
+
+        return _decorator
+
+    def apply_handler(self, context, responder=None):  # pylint: disable=arguments-differ
+        """Applies the dialogue state handler for the dialogue flow and set the target dialogue
+        state to the flow state
+
+        Args:
+            context (DialogueContext)
+            responder (DialogueResponder)
+
+        Returns:
+            dict: A dict containing the dialogue state and directives
+        """
+        if self.async_mode:
+            return self.apply_handler_async(context, responder)
+
+        context.dialogue_flow = self.name
+        dialogue_state = self._get_dialogue_state(context)
+        handler = self._get_dialogue_handler(dialogue_state)
+        if dialogue_state not in self.exit_flow_states:
+            context.set_target_dialogue_state(self.flow_state)
+        handler(context, responder)
+        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+
+    async def apply_handler_async(self, context, responder):
+        context.dialogue_flow = self.name
+        dialogue_state = self._get_dialogue_state(context)
+        handler = self._get_dialogue_handler(dialogue_state)
+        if dialogue_state not in self.exit_flow_states:
+            context.set_target_dialogue_state(self.flow_state)
+        res = handler(context, responder)
+        if asyncio.iscoroutine(res):
+            await res
+        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+
+    def _get_dialogue_handler(self, dialogue_state):
+        handler = self.handler_map[dialogue_state] if dialogue_state else self._default_handler
+
+        try:
+            middlewares = self.middlewares
+        except AttributeError:
+            middlewares = getattr(self, 'middleware', tuple())
+
+        for m in reversed(middlewares):
+            handler = partial(m, handler=handler)
+
+        return handler
 
 
 class DialogueResponder:
@@ -505,25 +632,27 @@ class DialogueResponder:
         return self._choose(text).format(**self.slots)
 
 
-def _get_app_module(app_path):
-    # Get the absolute path from the relative path (such as home_assistant/app.py)
-    app_path = os.path.abspath(app_path)
-    package_name = os.path.basename(app_path)
-    module_path = path.get_app_module_path(app_path)
+class DialogueContext(dict):
+    "A thin wrapper around the dictionary object for our convenience"
+    @property
+    def dialogue_flow(self):
+        return self.get('dialogue_flow', '')
 
-    if not os.path.isfile(module_path):
-        raise WorkbenchImportError('Cannot import the app at {path}.'.format(app=module_path))
+    @dialogue_flow.setter
+    def dialogue_flow(self, value):
+        self['dialogue_flow'] = value
 
-    try:
-        path.load_app_package(app_path)
+    def set_target_dialogue_state(self, target_dialogue_state):
+        """Set target dialogue state for the next turn
 
-        import imp
-        app_module = imp.load_source(
-            '{package_name}.app'.format(package_name=package_name), module_path)
-        app = app_module.app
-        return app
-    except ImportError as ex:
-        raise WorkbenchImportError(ex.msg)
+        Args:
+             target_dialogue_state (string): Handler name for dialogue state of next turn
+        """
+        self['params']['target_dialogue_state'] = target_dialogue_state
+
+    def exit_flow(self):
+        """Exit the current flow by clearing the target dialogue state"""
+        self['params'].pop('target_dialogue_state', None)
 
 
 class Conversation:

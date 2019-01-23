@@ -21,14 +21,15 @@ requirements = [
     'py~=1.4',
     'python-dateutil~=2.6',
     'pytz>=2017.2',
-    'requests~=2.13',
+    'requests~=2.19',
     'scipy~=0.9',
     'scikit-learn>=0.18.1,<0.20',
     'tqdm~=4.15',
-    'urllib3~=1.21.1',
+    'urllib3~=1.23',
     'python-crfsuite~=0.9',
     'sklearn-crfsuite>=0.3.6,<1.0',
-    'tensorflow~=1.2'
+    'tensorflow~=1.2',
+    'distro~=1.3'
 ]
 
 setup_requirements = [
@@ -45,7 +46,7 @@ test_requirements = [
 
 setup(
     name='mmworkbench',
-    version='4.0.0alpha11',
+    version='4.0.0alpha20',
     description="A Python module for building natural language processing models.",
     long_description=history,
     author="MindMeld, Inc.",

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """This module contains feature extractors for entities"""
-from .helpers import GAZETTEER_RSC, register_features, get_ngram, requires
+from .helpers import GAZETTEER_RSC, register_entity_feature, get_ngram, requires
 
 
+@register_entity_feature(feature_name='in-gaz')
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_features(**args):
     def extractor(example, resources):
@@ -22,6 +23,7 @@ def extract_in_gaz_features(**args):
     return extractor
 
 
+@register_entity_feature(feature_name='bag-of-words-before')
 def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **args):
     """Returns a bag-of-words feature extractor.
 
@@ -48,6 +50,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **arg
     return extractor
 
 
+@register_entity_feature(feature_name='bag-of-words-after')
 def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args):
     """Returns a bag-of-words feature extractor.
 
@@ -74,6 +77,7 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
     return extractor
 
 
+@register_entity_feature(feature_name='numeric')
 def extract_numeric_candidate_features(**args):
     def extractor(example, resources):
         query, _, _ = example
@@ -88,6 +92,7 @@ def extract_numeric_candidate_features(**args):
     return extractor
 
 
+@register_entity_feature(feature_name='other-entities')
 def extract_other_entities_features(**args):
     def extractor(example, resources):
         _, entities, entity_index = example
@@ -101,11 +106,3 @@ def extract_other_entities_features(**args):
         return features
 
     return extractor
-
-
-register_features('entity', {
-    'bag-of-words-before': extract_bag_of_words_before_features,
-    'bag-of-words-after': extract_bag_of_words_after_features,
-    'in-gaz': extract_in_gaz_features,
-    'other-entities': extract_other_entities_features
-})

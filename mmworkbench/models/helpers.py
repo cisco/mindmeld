@@ -90,21 +90,35 @@ def register_model(model_type, model_class):
     MODEL_MAP[model_type] = model_class
 
 
-def register_features(example_type, features):
-    """Register a set of feature extractors for use with
-    `get_feature_extractor()`
+def register_query_feature(feature_name):
+    return register_feature(QUERY_EXAMPLE_TYPE, feature_name=feature_name)
 
-    Args:
-        example_type (str): The example type of the feature extractors
-        features (dict): Features extractor templates keyed by name
 
-    Raises:
-        ValueError: If the example type is already registered
+def register_entity_feature(feature_name):
+    return register_feature(ENTITY_EXAMPLE_TYPE, feature_name=feature_name)
+
+
+def register_feature(feature_type, feature_name):
     """
-    if example_type in FEATURE_MAP:
-        msg = 'Features for example type {!r} are already registered.'.format(example_type)
-        raise ValueError(msg)
-    FEATURE_MAP[example_type] = features
+    Decorator for adding feature extractor mappings to FEATURE_MAP
+    Args:
+        feature_type: 'query' or 'entity'
+        feature_name: The name of the feature, used in config.py
+    Returns:
+        (func): the feature extractor
+    """
+    def add_feature(func):
+        if feature_type not in {QUERY_EXAMPLE_TYPE, ENTITY_EXAMPLE_TYPE}:
+            raise TypeError("Feature type can only be 'query' or 'entity'")
+
+        # Add func to feature map with given type and name
+        if feature_type in FEATURE_MAP:
+            FEATURE_MAP[feature_type][feature_name] = func
+        else:
+            FEATURE_MAP[feature_type] = {feature_name: func}
+        return func
+
+    return add_feature
 
 
 def register_label(label_type, label_encoder):

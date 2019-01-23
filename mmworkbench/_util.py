@@ -19,12 +19,13 @@ from . import path
 from .components import QuestionAnswerer
 from .exceptions import AuthNotFoundError, KnowledgeBaseConnectionError
 from .components._config import get_app_namespace
+from .constants import DEVCENTER_URL
 
 
 logger = logging.getLogger(__name__)
 
 CONFIG_FILE_NAME = 'mmworkbench.cfg'
-BLUEPRINT_URL = '{mindmeld_url}/blueprints/{blueprint}/{filename}'
+BLUEPRINT_URL = '{mindmeld_url}/bp/{blueprint}/{filename}'
 
 BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
 BLUEPRINT_KB_ARCHIVE = 'kb.tar.gz'
@@ -187,7 +188,7 @@ class Blueprint:
         local_archive = os.path.join(cache_dir, filename)
 
         config = load_global_configuration()
-        mindmeld_url = config.get('mindmeld_url', 'https://www.mindmeld.com')
+        mindmeld_url = config.get('mindmeld_url', DEVCENTER_URL)
         token = config.get('token', None)
         if token:
             username = 'token'

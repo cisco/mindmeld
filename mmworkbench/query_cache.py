@@ -7,6 +7,7 @@ import shutil
 import logging
 from sklearn.externals import joblib
 
+from ._version import _get_wb_version
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, GEN_FOLDER
 
 logger = logging.getLogger(__name__)
@@ -16,8 +17,25 @@ class QueryCache:
     def __init__(self, app_path):
         self.app_path = app_path
         self.is_dirty = False
-        self.query_cache_dict = {}
-        self.load()
+        # We initialize cached_queries to None instead of {} since
+        # we want to lazy load it from disk only when necessary ie during
+        # set, get and dump ops. This allows us to run the application
+        # faster.
+        self._cached_queries = None
+        self.gen_folder = GEN_FOLDER.format(app_path=self.app_path)
+        self.main_cache_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
+        self.tmp_cache_location = QUERY_CACHE_TMP_PATH.format(app_path=self.app_path)
+
+    @property
+    def cached_queries(self):
+        if self._cached_queries is None:
+            self.load()
+
+        return self._cached_queries
+
+    @property
+    def versioned_data(self):
+        return {'wb_version': _get_wb_version(), 'cached_queries': self.cached_queries}
 
     def set_value(self, domain, intent, query_text, processed_query):
         """
@@ -53,25 +71,27 @@ class QueryCache:
             return
 
         # make generated directory if necessary
-        folder = GEN_FOLDER.format(app_path=self.app_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
+        if not os.path.isdir(self.gen_folder):
+            os.makedirs(self.gen_folder)
 
         try:
-            file_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
-            if os.path.isfile(file_location):
-                # We write to a new cache temp file and then rename it to prevent file corruption
-                # due to the user cancelling the training operation midway during the
-                # file write.
-                file_location_tmp = QUERY_CACHE_TMP_PATH.format(app_path=self.app_path)
-                joblib.dump(self.query_cache_dict, file_location_tmp)
-                os.remove(file_location)
-                shutil.move(file_location_tmp, file_location)
-            else:
-                joblib.dump(self.query_cache_dict, file_location)
+            # We write to a new cache temp file and then rename it to prevent file corruption
+            # due to the user cancelling the training operation midway during the
+            # file write.
+            joblib.dump(self.versioned_data, self.tmp_cache_location)
+            if os.path.isfile(self.main_cache_location):
+                os.remove(self.main_cache_location)
+            shutil.move(self.tmp_cache_location, self.main_cache_location)
             self.is_dirty = False
-        except (OSError, IOError):
-            logger.error("Couldn't dump query cache to disk.")
+        except (OSError, IOError, KeyboardInterrupt):
+            if os.path.exists(self.main_cache_location):
+                os.remove(self.main_cache_location)
+
+            if os.path.exists(self.tmp_cache_location):
+                os.remove(self.tmp_cache_location)
+
+            logger.error("Couldn't dump query cache to disk properly, "
+                         "so deleting query cache due to possible corruption.")
 
     def load(self):
         """
@@ -79,7 +99,15 @@ class QueryCache:
         """
         file_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
         try:
-            self.query_cache_dict = joblib.load(file_location)
-        except (OSError, IOError):
-            pass
+            versioned_data = joblib.load(file_location)
+            if 'cached_queries' not in versioned_data:
+                # The old version of caching did not have versions
+                logger.warn('The cache contains deprecated versions of queries. Please '
+                            'run this command to clear the query cache: '
+                            '"python -m <app_name> clean -q"')
+                self._cached_queries = versioned_data
+            else:
+                self._cached_queries = versioned_data['cached_queries']
+        except (OSError, IOError, KeyboardInterrupt):
+            self._cached_queries = {}
         self.is_dirty = False

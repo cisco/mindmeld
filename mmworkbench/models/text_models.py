@@ -178,12 +178,12 @@ class TextModel(Model):
         predictions = self._class_encoder.inverse_transform(y)
         return self._label_encoder.decode(predictions)
 
-    def predict_proba(self, examples):
-        X, _, _ = self.get_feature_matrix(examples)
+    def predict_proba(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
         return self._predict_proba(X, self._clf.predict_proba)
 
-    def predict_log_proba(self, examples):
-        X, _, _ = self.get_feature_matrix(examples)
+    def predict_log_proba(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
         predictions = self._predict_proba(X, self._clf.predict_log_proba)
 
         # JSON can't reliably encode infinity, so replace it with large number
@@ -359,7 +359,7 @@ class TextModel(Model):
             raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]
             for class_bias in raw_bias:
                 # these weights are same as sklearn's class_weight='balanced'
-                balanced_w = [(len(y) / len(classes) * c) for c in class_count]
+                balanced_w = [(len(y) / len(classes) / c) for c in class_count]
                 balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
 
                 weights.append({c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples})

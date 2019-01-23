@@ -2,12 +2,11 @@
 """
 This module contains the entity recognizer component of the Workbench natural language processor.
 """
-import os
 import logging
 
 from sklearn.externals import joblib
 
-from ..core import Entity
+from ..core import Entity, Query
 from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 from ..constants import DEFAULT_TRAIN_SET_REGEX
 
@@ -56,17 +55,13 @@ class EntityRecognizer(Classifier):
                                               domain=self.domain, intent=self.intent)
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set=None, previous_model_path=None, **kwargs):
+    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains the entity recognition model using the provided training queries
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
-                training set will be loaded.
-            previous_model_path (str, optional): The path of a previous version of the model for
-                this classifier. If the previous model is equivalent to the new one, it will be
-                loaded instead. Equivalence here is determined by the model's training data and
-                configuration.
+            incremental_timestamp (str, optional): The timestamp folder to cache models in
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
@@ -79,13 +74,12 @@ class EntityRecognizer(Classifier):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         new_hash = self._get_model_hash(self._model_config, queries, label_set)
+        cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
-        if previous_model_path:
-            old_hash = self._load_hash(previous_model_path)
-            if old_hash == new_hash:
-                logger.info('No need to fit. Loading previous model.')
-                self.load(previous_model_path)
-                return
+        if incremental_timestamp and cached_model:
+            logger.info('No need to fit. Loading previous model.')
+            self.load(cached_model)
+            return
 
         # Load labeled data
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
@@ -105,32 +99,19 @@ class EntityRecognizer(Classifier):
         self.ready = True
         self.dirty = True
 
-    def dump(self, model_path):
-        """Persists the trained entity recognition model to disk.
+    def _data_dump_payload(self):
+        return {
+            'entity_types': self.entity_types,
+            'w_ngram_freq': self._model.get_resource('w_ngram_freq'),
+            'c_ngram_freq': self._model.get_resource('c_ngram_freq'),
+            'model_config': self._model_config
+        }
 
-        Args:
-            model_path (str): The location on disk where the model should be stored
+    def _create_and_dump_payload(self, path):
+        self._model.dump(path, self._data_dump_payload())
 
-        """
-        logger.info('Saving entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
-        # make directory if necessary
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        er_data = {'entity_types': self.entity_types,
-                   'w_ngram_freq': self._model.get_resource('w_ngram_freq'),
-                   'c_ngram_freq': self._model.get_resource('c_ngram_freq'),
-                   'model_config': self._model_config
-                   }
-
-        self._model.dump(model_path, er_data)
-
-        hash_path = model_path + '.hash'
-        with open(hash_path, 'w') as hash_file:
-            hash_file.write(self.hash)
-
-        self.dirty = False
+    def dump(self, model_path, incremental_model_path=None):
+        super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):
         """Loads the trained entity recognition model from disk
@@ -205,18 +186,25 @@ class EntityRecognizer(Classifier):
                                      dynamic_resource=dynamic_resource) or ()
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
-    def predict_proba(self, query):
+    def predict_proba(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Runs prediction on a given query and generates multiple entity tagging hypotheses with
         their associated probabilities using the trained entity recognition model
 
         Args:
-            query (Query): The input query
+            query (Query or str): The input query
 
         Returns:
             list: a list of tuples of the form (Entity list, float) grouping potential entity
                 tagging hypotheses and their probabilities
         """
-        raise NotImplementedError
+        if not self._model:
+            logger.error('You must fit or load the model before running predict_proba')
+            return
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
+                                                                     timestamp=timestamp)
+        predict_proba_result = self._model.predict_proba([query])
+        return predict_proba_result
 
     def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
         """Returns the set of queries to train on
@@ -256,5 +244,5 @@ class EntityRecognizer(Classifier):
     def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = self._resource_loader.flatten_query_tree(query_tree)
-        queries.sort()
-        return self._resource_loader.hash_list(queries)
+        hashable_queries = [self.domain + '###' + self.intent + '###entity###'] + sorted(queries)
+        return self._resource_loader.hash_list(hashable_queries)

@@ -75,7 +75,7 @@ def test_load_entity(query_factory):
 @pytest.mark.system
 def test_load_system(query_factory):
     """Tests loading a query with a system entity"""
-    text = 'show me houses under {600,000 dollars|sys_currency}'
+    text = 'show me houses under {600,000 dollars|sys_amount-of-money}'
     processed_query = markup.load_query(text, query_factory)
 
     assert processed_query
@@ -83,7 +83,7 @@ def test_load_system(query_factory):
 
     entity = processed_query.entities[0]
     assert entity.text == '600,000 dollars'
-    assert entity.entity.type == 'sys_currency'
+    assert entity.entity.type == 'sys_amount-of-money'
     assert entity.span.start == 21
     assert not isinstance(entity.entity.value, str)
 

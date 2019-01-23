@@ -162,7 +162,7 @@ test_data_3 = [
 
 
 @pytest.mark.parametrize("query", test_data_3)
-def test_nlp_hierarchy_for_queries_mallard_fails_on(kwik_e_mart_nlp, query):
+def test_nlp_hierarchy_for_queries_duckling_fails_on(kwik_e_mart_nlp, query):
     """Tests user specified allowable domains and intents"""
     response = kwik_e_mart_nlp.process(query)
     assert response['text'] == query
@@ -247,6 +247,85 @@ def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
         kwik_e_mart_nlp.extract_allowed_intents(['store_info.unrelated_intent'])
 
 
+def test_process_verbose_no_entity(kwik_e_mart_nlp):
+    """Test basic processing without metadata"""
+    response = kwik_e_mart_nlp.process('Hello', verbose=True)
+
+    assert response['domain'] == 'store_info'
+    assert response['intent'] == 'greet'
+    assert response['entities'] == []
+    assert isinstance(response['confidence']['domains']['store_info'], float)
+    assert isinstance(response['confidence']['intents']['greet'], float)
+
+
+def test_process_verbose(kwik_e_mart_nlp):
+    """Test basic processing with metadata"""
+    response = kwik_e_mart_nlp.process('is the elm street store open', verbose=True)
+
+    assert response['domain'] == 'store_info'
+    assert response['intent'] == 'get_store_hours'
+    assert response['entities'][0]['text'] == 'elm street'
+    assert isinstance(response['entities'][0]['confidence'], float)
+    assert isinstance(response['confidence']['domains']['store_info'], float)
+    assert isinstance(response['confidence']['intents']['get_store_hours'], float)
+
+
+def test_process_verbose_long_tokens(kwik_e_mart_nlp):
+    """Test confidence for entities that have lower raw tokens indices than normalized tokens"""
+    text = 'Is the Kwik-E-Mart open tomorrow?'
+    response = kwik_e_mart_nlp.process(text, verbose=True)
+
+    tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
+    raw_tokens = [t['text'] for t in tokenizer.tokenize_raw(text)]
+    normalized_tokens = [t['entity'] for t in tokenizer.tokenize(text)]
+
+    assert raw_tokens == ['Is', 'the', 'Kwik-E-Mart', 'open', 'tomorrow?']
+    assert normalized_tokens == ['is', 'the', 'kwik', 'e', 'mart', 'open', 'tomorrow']
+
+    assert response['domain'] == 'store_info'
+    assert response['intent'] == 'get_store_hours'
+    assert response['entities'][0]['text'] == 'tomorrow'
+    assert isinstance(response['entities'][0]['confidence'], float)
+
+
+def test_process_verbose_short_tokens(kwik_e_mart_nlp):
+    """Test confidence for entities that have higher raw tokens indices than normalized tokens"""
+    text = 'when ** open -- tomorrow?'
+    response = kwik_e_mart_nlp.process(text, verbose=True)
+
+    tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
+    raw_tokens = [t['text'] for t in tokenizer.tokenize_raw(text)]
+    normalized_tokens = [t['entity'] for t in tokenizer.tokenize(text)]
+
+    assert raw_tokens == ['when', '**', 'open', '--', 'tomorrow?']
+    assert normalized_tokens == ['when', 'open', 'tomorrow']
+
+    assert response['domain'] == 'store_info'
+    assert response['intent'] == 'get_store_hours'
+    assert response['entities'][0]['text'] == 'tomorrow'
+    assert isinstance(response['entities'][0]['confidence'], float)
+
+
+test_nbest = [
+    (
+        ['when is the 23rd elm street quickie mart open?',
+         'when is the 23rd elm st kwik-e-mart open?',
+         'when is the 23 elm street quicky mart open?'],
+        'store_info',
+        'get_store_hours'
+     )]
+
+
+@pytest.mark.parametrize("queries,expected_domain,expected_intent", test_nbest)
+def test_nbest_process_verbose(kwik_e_mart_nlp, queries, expected_domain, expected_intent):
+    response = kwik_e_mart_nlp.process(queries, verbose=True)
+    response['entities_text'] = [e['text'] for e in response['entities']]
+    for e in response['entities']:
+        assert isinstance(e['confidence'], float)
+    assert isinstance(response['confidence']['domains'][expected_domain], float)
+    assert isinstance(response['confidence']['intents'][expected_intent], float)
+
+
 test_data_4 = [
     (
         ['when is the 23rd helm street quickie mart open?',
@@ -254,19 +333,19 @@ test_data_4 = [
          'when is the 23 elm street quicky mart open?'],
         'store_info',
         'get_store_hours',
-        [['23rd helm street'], ['23rd elm st'], ['23 elm street']],
-        [['23rd helm street', '23rd elm st', '23 elm street']],
-     ),
+        [['23rd elm street'], ['23rd elm st'], ['23 elm street']],
+        [['23rd elm street', '23rd elm st', '23 elm street']],
+    ),
     (
         ['is the 104 first street store open this sunday',
          'is the first street store open this sunday',
          'is the 10 4 street store open this sunday'],
         'store_info',
         'get_store_hours',
-        [['104 first street', 'this sunday'], ['first street', 'this sunday'],
-         ['10 4 street', 'this sunday']],
+        [['104 first street', 'sunday'], ['first street', 'sunday'],
+         ['10 4 street', 'sunday']],
         [['104 first street', 'first street', '10 4 street'],
-         ['this sunday', 'this sunday', 'this sunday']]
+         ['sunday', 'sunday']]
     )
 ]
 

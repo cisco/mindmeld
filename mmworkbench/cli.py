@@ -1,26 +1,32 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import asyncio
-import errno
 import json
 import logging
 import os
+import stat
 import signal
 import shutil
 import subprocess
 import sys
 import time
 import warnings
+import datetime
+import requests
 
 import click
 import click_log
+import math
+import distro
 
+from tqdm import tqdm
 from . import markup, path
 from .components import Conversation, QuestionAnswerer
 from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
-from .path import QUERY_CACHE_PATH
+from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
+from .constants import DEVCENTER_URL
 
 
 logger = logging.getLogger(__name__)
@@ -31,6 +37,8 @@ CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
     'auto_envvar_prefix': 'MM'
 }
+
+DUCKLING_PORT = '8000'
 
 
 def version_msg():
@@ -186,6 +194,8 @@ def evaluate(ctx, verbose):
 @click.pass_context
 @click.option('-o', '--output', required=False,
               help='Send output to file rather than standard out')
+@click.option('-c', '--confidence', is_flag=True,
+              help='Show confidence scores for each prediction')
 @click.option('-D', '--no_domain', is_flag=True,
               help='Suppress predicted domain column')
 @click.option('-I', '--no_intent', is_flag=True,
@@ -197,7 +207,7 @@ def evaluate(ctx, verbose):
 @click.option('-G', '--no_group', is_flag=True,
               help='Suppress predicted group annotations')
 @click.argument('input', required=True)
-def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_group):
+def predict(ctx, input, output, confidence, no_domain, no_intent, no_entity, no_role, no_group):
     """Runs predictions on a given query file"""
     app = ctx.obj.get('app')
     if app is None:
@@ -214,27 +224,64 @@ def predict(ctx, input, output, no_domain, no_intent, no_entity, no_role, no_gro
                      "Try 'python app.py build'.")
         ctx.exit(1)
 
-    markup.bootstrap_query_file(input, output, nlp,
+    markup.bootstrap_query_file(input, output, nlp, confidence=confidence,
                                 no_domain=no_domain, no_intent=no_intent,
                                 no_entity=no_entity, no_role=no_role, no_group=no_group)
 
 
 @_app_cli.command('clean', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-@click.option('-c', '--cache', is_flag=True, required=False, help='Clean only query cache')
-def clean(ctx, cache):
+@click.option('-q', '--query-cache', is_flag=True, required=False, help='Clean only query cache')
+@click.option('-m', '--model-cache', is_flag=True, required=False, help='Clean only model cache')
+@click.option('-d', '--days', type=int, default=7,
+              help='Clear model cache older than the specified days')
+def clean(ctx, query_cache, model_cache, days):
     """Deletes all built data, undoing `build`."""
     app = ctx.obj.get('app')
     if app is None:
         raise ValueError("No app was given. Run 'python app.py clean' from your app folder.")
 
-    if cache:
+    if query_cache:
         try:
             file_location = QUERY_CACHE_PATH.format(app_path=app.app_path)
             os.remove(file_location)
             logger.info('Query cache deleted')
         except FileNotFoundError:
             logger.info('No query cache to delete')
+        return
+
+    if model_cache:
+        model_cache_path = MODEL_CACHE_PATH.format(app_path=app.app_path)
+
+        if not os.path.exists(model_cache_path):
+            logger.warn("Model cache directory doesn't exist")
+            return
+
+        if days:
+            for ts_folder in os.listdir(model_cache_path):
+                full_path = os.path.join(model_cache_path, ts_folder)
+
+                if not os.path.isdir(full_path):
+                    logger.warn(
+                        'Expected timestamped folder. Ignoring the file {}.'.format(full_path))
+                    continue
+
+                try:
+                    current_ts = datetime.datetime.fromtimestamp(time.time())
+                    folder_ts = datetime.datetime.strptime(ts_folder, markup.TIME_FORMAT)
+                    diff_days = current_ts - folder_ts
+                    if diff_days.days > days:
+                        shutil.rmtree(full_path)
+                        logger.info('Removed cached ts folder: {}'.format(full_path))
+                except ValueError:
+                    logger.warn('Folder {} is not named as a proper timestamp. '
+                                'Ignoring it.'.format(full_path))
+        else:
+            try:
+                shutil.rmtree(model_cache_path)
+                logger.info('Model cache data deleted')
+            except FileNotFoundError:
+                logger.info('No model cache to delete')
         return
 
     gen_path = path.get_generated_data_folder(app.app_path)
@@ -244,10 +291,10 @@ def clean(ctx, cache):
     except FileNotFoundError:
         logger.info('No generated data to delete')
 
-
 #
 # Shared commands
 #
+
 
 @click.group()
 def shared_cli():
@@ -271,44 +318,86 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
         ctx.exit(1)
 
 
+def find_duckling_os_executable():
+    os_mappings = {
+        'ubuntu-16.04': path.DUCKLING_UBUNTU16_PATH,
+        'ubuntu-18.04': path.DUCKLING_UBUNTU18_PATH,
+        'darwin': path.DUCKLING_OSX_PATH
+    }
+
+    os_platform_name = '-'.join(distro.linux_distribution(
+        full_distribution_name=False)).lower()
+
+    for os_key in os_mappings:
+        if os_key in os_platform_name:
+            return os_mappings[os_key]
+
+
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('--start/--stop', default=True, help='Start or stop numerical parser')
 def num_parser(ctx, start):
     """Starts or stops the numerical parser service."""
     if start:
-        pid = _get_mallard_pid()
+        pid = _get_duckling_pid()
 
         if pid:
-            # if mallard is already running, leave it be
+            # if duckling is already running, leave it be
             logger.info('Numerical parser running, PID %s', pid[0])
             return
 
-        try:
-            # We redirect all the output of starting the process to /dev/null and all errors
-            # to stdout.
-            with open(os.devnull, 'w') as dev_null:
-                mallard_service = subprocess.Popen(['java', '-jar', path.MALLARD_JAR_PATH],
-                                                   stdout=dev_null, stderr=subprocess.STDOUT)
+        # We redirect all the output of starting the process to /dev/null and all errors
+        # to stdout.
+        exec_path = find_duckling_os_executable()
 
-            # mallard takes some time to start so sleep for a bit
-            time.sleep(5)
-            logger.info('Starting numerical parsing service, PID %s', mallard_service.pid)
-        except OSError as exc:
-            if exc.errno != errno.ENOENT:
-                logger.error('Java is not found; please verify that Java 8 is '
-                             'installed and in your path.')
-                ctx.exit(1)
-            else:
-                raise exc
+        if not exec_path:
+            logger.error('OS is incompatible with duckling executable. '
+                         'Use docker to install duckling.')
+            return
+
+        if not os.path.exists(exec_path):
+            url = os.path.join(os.path.join(DEVCENTER_URL, 'binaries'), os.path.basename(exec_path))
+            logger.info('Could not find {} binary file, downloading from {}'.format(exec_path, url))
+            r = requests.get(url, stream=True)
+
+            # Total size in bytes.
+            total_size = int(r.headers.get('content-length', 0))
+            block_size = 1024
+
+            with open(exec_path, 'wb') as f:
+                for data in tqdm(r.iter_content(block_size),
+                                 total=math.ceil(total_size // block_size),
+                                 unit='KB',
+                                 unit_scale=True):
+                    f.write(data)
+                    f.flush()
+
+        # make the file executable
+        st = os.stat(exec_path)
+        os.chmod(exec_path, st.st_mode | stat.S_IEXEC)
+
+        # run duckling
+        duckling_service = subprocess.Popen([exec_path, '--port',
+                                             DUCKLING_PORT], stderr=subprocess.STDOUT)
+
+        # duckling takes some time to start so sleep for a bit
+        for i in range(50):
+            if duckling_service.pid:
+                logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
+                return
+            time.sleep(0.1)
     else:
-        for pid in _get_mallard_pid():
+        for pid in _get_duckling_pid():
             os.kill(int(pid), signal.SIGKILL)
             logger.info('Stopping numerical parsing service, PID %s', pid)
 
 
-def _get_mallard_pid():
-    _, filename = os.path.split(path.MALLARD_JAR_PATH)
+def _get_duckling_pid():
+    os_path = find_duckling_os_executable()
+    if not os_path:
+        return
+
+    _, filename = os.path.split(os_path)
     pid = []
     for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
         pid.append(line.split()[0])

@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 # https://github.com/wit-ai/duckling_old/blob/a4bc34e3e945d403a9417df50c1fb2172d56de3e/src/duckling/time/obj.clj#L21 # noqa E722
 TIME_GRAIN_TO_ORDER = {
     'year': 0,
-    'month': 1,
-    'quarter': 2,
+    'quarter': 1,
+    'month': 2,
     'week': 3,
     'day': 4,
     'hour': 5,
@@ -28,7 +28,7 @@ TIME_GRAIN_TO_ORDER = {
 def sort_by_lowest_time_grain(system_entities):
     return sorted(
         system_entities,
-        key=lambda query_entity: TIME_GRAIN_TO_ORDER[query_entity.to_dict()['value']['grain']])
+        key=lambda query_entity: TIME_GRAIN_TO_ORDER[query_entity.entity.value['grain']])
 
 
 class Bunch(dict):
@@ -324,18 +324,22 @@ class ProcessedQuery:
 
 
     Attributes:
+        query (Query): The underlying query object.
         domain (str): The domain of the query
         entities (list): A list of entities present in this query
         intent (str): The intent of the query
         is_gold (bool): Indicates whether the details in this query were predicted or human labeled
-        query (Query): The underlying query object.
+        nbest_transcripts_queries (list): A list of n best transcript queries
+        nbest_transcripts_entities (list): A list of lists of entities for each query
+        nbest_aligned_entities (list): A list of lists of aligned entities
+        confidence (dict): A dictionary of the class probas for the domain and intent classifier
     """
 
     # TODO: look into using __slots__
 
     def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False,
                  nbest_transcripts_queries=None, nbest_transcripts_entities=None,
-                 nbest_aligned_entities=None):
+                 nbest_aligned_entities=None, confidence=None):
         self.query = query
         self.domain = domain
         self.intent = intent
@@ -344,6 +348,7 @@ class ProcessedQuery:
         self.nbest_transcripts_queries = nbest_transcripts_queries
         self.nbest_transcripts_entities = nbest_transcripts_entities
         self.nbest_aligned_entities = nbest_aligned_entities
+        self.confidence = confidence
 
     def to_dict(self):
         """Converts the processed query into a dictionary"""
@@ -360,8 +365,11 @@ class ProcessedQuery:
                                                   for n_entities in self.nbest_transcripts_entities]
         if self.nbest_aligned_entities:
             base['nbest_aligned_entities'] = [[{'text': e.entity.text, 'type': e.entity.type}
-                                              for e in n_entities]
+                                               for e in n_entities]
                                               for n_entities in self.nbest_aligned_entities]
+
+        if self.confidence:
+            base['confidence'] = self.confidence
         return base
 
     def __eq__(self, other):
