@@ -328,7 +328,7 @@ def test_nbest_process_verbose(kwik_e_mart_nlp, queries, expected_domain, expect
 
 test_data_4 = [
     (
-        ['when is the 23rd helm street quickie mart open?',
+        ['when is the 23rd elm street quickie mart open?',
          'when is the 23rd elm st kwik-e-mart open?',
          'when is the 23 elm street quicky mart open?'],
         'store_info',
