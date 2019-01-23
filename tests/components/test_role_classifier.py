@@ -26,7 +26,7 @@ test_data_7 = [
         ['old_time', 'new_time'],
         ['new_time', 'old_time']
      )
-]
+]   
 
 
 @pytest.mark.parametrize("example,role_order_0,role_order_1", test_data_7)
