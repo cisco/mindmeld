@@ -291,7 +291,7 @@ class Classifier(metaclass=ABCMeta):
         return evaluation
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):
-        raise NotImplemented
+        raise NotImplementedError
 
     def _get_model_config(self, loaded_config, **kwargs):
         """Updates the loaded configuration with runtime specified options, and creates a model

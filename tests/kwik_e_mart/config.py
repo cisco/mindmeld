@@ -114,8 +114,8 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
         },
         'enable-stemming': True
     },
-    'train_label_set': 'testtrain.*\.txt',
-    'test_label_set': 'testtrain.*\.txt'
+    'train_label_set': 'testtrain.*\.txt',  # noqa: W605
+    'test_label_set': 'testtrain.*\.txt'  # noqa: W605
 }
 
 
