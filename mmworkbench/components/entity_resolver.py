@@ -275,6 +275,26 @@ class EntityResolver:
                                     "boost": 10 * weight
                                 }
                             }
+                       },
+                       {
+                            "match": {
+                                "cname.char_ngram": {
+                                    "query": entity.text,
+                                    "boost": weight
+                                }
+                            }
+                        }
+                   ]
+
+        def _construct_nbest_match_query(entity, weight=1):
+            return [
+                       {
+                            "match": {
+                                "cname.normalized_keyword": {
+                                    "query": entity.text,
+                                    "boost": weight
+                                }
+                            }
                        }
                    ]
 
@@ -335,7 +355,7 @@ class EntityResolver:
                         "match": {
                             "whitelist.double_metaphone": {
                                 "query": entity.text,
-                                "boost": weight
+                                "boost": 3 * weight
                             }
                         }
                    }
@@ -364,8 +384,13 @@ class EntityResolver:
         }
 
         match_query = []
+        top_transcript = True
         for e, weight in zip(entity, weight_factors):
-            match_query.extend(_construct_match_query(e, weight))
+            if top_transcript:
+                match_query.extend(_construct_match_query(e, weight))
+                top_transcript = False
+            else:
+                match_query.extend(_construct_nbest_match_query(e, weight))
             if self._use_double_metaphone:
                 match_query.extend(_construct_phonetic_match_query(e, weight))
         text_relevance_query["query"]["function_score"]["query"]["bool"]["should"].append(
@@ -396,6 +421,10 @@ class EntityResolver:
 
             results = []
             for hit in hits:
+                if self._use_double_metaphone and len(entity) > 1:
+                    if hit['_score'] < 0.5 * len(entity):
+                        continue
+
                 top_synonym = None
                 synonym_hits = hit['inner_hits']['whitelist']['hits']['hits']
                 if len(synonym_hits) > 0:
