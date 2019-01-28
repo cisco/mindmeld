@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains the tokenizer."""
+
 import codecs
 import logging
 import re
@@ -31,62 +32,70 @@ class Tokenizer:
         # List of regex's for matching and tokenizing when keep_special_chars=True
         keep_special_regex_list = []
 
-        exception_chars = "\@\[\]\|\{\}'"
+        exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
 
         # This is more of a tactical fix at this moment. Will probably need a more generic way
         # to handle all currency symbols.
         currency_symbols = "$¥"
         to_exclude = currency_symbols + ''.join(self.exclude_from_norm)
 
-        letter_pattern_str = "[^\W\d_]+"
+        letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
         # Make keep special regex list
-        keep_special_regex_list.append("?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+")
-        keep_special_regex_list.append("?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$")
-        keep_special_regex_list.append("?P<pattern1>(?P<pattern1_replace>" + letter_pattern_str
-                                       + ")" + "[^\w\d\s&" + exception_chars + "]+(?=[\d]+)")
-        keep_special_regex_list.append("?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&" +
-                                       exception_chars + "]+" + "u(?=" + letter_pattern_str + ")")
-        keep_special_regex_list.append("?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str +
-                                       ")" + "[^\w\d\s&" + exception_chars + "]+" +
-                                       "(?=" + letter_pattern_str + ")")
-        keep_special_regex_list.append("?P<escape1>(?P<escape1_replace>[\w\d]+)" +
-                                       "[^\w\d\s" + exception_chars + "]+" + "(?=\|)")
-        keep_special_regex_list.append("?P<escape2>(?P<escape2_replace>[\]\}]+)" +
-                                       "[^\w\d\s" + exception_chars + "]+(?=s)")
+        keep_special_regex_list.append(
+            "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<pattern1>(?P<pattern1_replace>" + letter_pattern_str  # noqa: W605
+            + ")" + "[^\w\d\s&" + exception_chars + "]+(?=[\d]+)")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&" +  # noqa: W605
+            exception_chars + "]+" + "u(?=" + letter_pattern_str + ")")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str +  # noqa: W605
+            ")" + "[^\w\d\s&" + exception_chars + "]+" +  # noqa: W605
+            "(?=" + letter_pattern_str + ")")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<escape1>(?P<escape1_replace>[\w\d]+)" +  # noqa: W605
+            "[^\w\d\s" + exception_chars + "]+" + "(?=\|)")  # noqa: W605
+        keep_special_regex_list.append(
+            "?P<escape2>(?P<escape2_replace>[\]\}]+)" +  # noqa: W605
+            "[^\w\d\s" + exception_chars + "]+(?=s)")  # noqa: W605
 
         # Make regex list
-        regex_list.append("?P<start>^[^\w\d&" + to_exclude + "]+")
-        regex_list.append("?P<end>[^\w\d&" + to_exclude + "]+$")
-        regex_list.append("?P<pattern1>(?P<pattern1_replace>" + letter_pattern_str +
-                          ")" + "[^\w\d\s&]+(?=[\d]+)")
-        regex_list.append("?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?=" +
-                          letter_pattern_str + ")")
-        regex_list.append("?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str + ")" +
-                          "[^\w\d\s&]+(?=" + letter_pattern_str + ")")
+        regex_list.append("?P<start>^[^\w\d&" + to_exclude + "]+")  # noqa: W605
+        regex_list.append("?P<end>[^\w\d&" + to_exclude + "]+$")  # noqa: W605
+        regex_list.append("?P<pattern1>(?P<pattern1_replace>" + letter_pattern_str +  # noqa: W605
+                          ")" + "[^\w\d\s&]+(?=[\d]+)")  # noqa: W605
+        regex_list.append("?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?=" +  # noqa: W605
+                          letter_pattern_str + ")")  # noqa: W605
+        regex_list.append(
+            "?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str + ")" +  # noqa: W605
+            "[^\w\d\s&]+(?=" + letter_pattern_str + ")")  # noqa: W605
 
         # commonalities between lists
-        regex_list.append("?P<underscore>_")
-        keep_special_regex_list.append("?P<underscore>_")
+        regex_list.append("?P<underscore>_")  # noqa: W605
+        keep_special_regex_list.append("?P<underscore>_")  # noqa: W605
 
-        regex_list.append("?P<begspace>^\s+")
-        keep_special_regex_list.append("?P<begspace>^\s+")
+        regex_list.append("?P<begspace>^\s+")  # noqa: W605
+        keep_special_regex_list.append("?P<begspace>^\s+")  # noqa: W605
 
-        regex_list.append("?P<trailspace>\s+$")
-        keep_special_regex_list.append("?P<trailspace>\s+$")
+        regex_list.append("?P<trailspace>\s+$")  # noqa: W605
+        keep_special_regex_list.append("?P<trailspace>\s+$")  # noqa: W605
 
-        regex_list.append("?P<spaceplus>\s+")
-        keep_special_regex_list.append("?P<spaceplus>\s+")
+        regex_list.append("?P<spaceplus>\s+")  # noqa: W605
+        keep_special_regex_list.append("?P<spaceplus>\s+")  # noqa: W605
 
-        keep_special_regex_list.append("?P<bar> '|' ")
-        regex_list.append("?P<bar> '|' ")
+        keep_special_regex_list.append("?P<bar> '|' ")  # noqa: W605
+        regex_list.append("?P<bar> '|' ")  # noqa: W605
 
-        keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")
-        regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")
+        keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
+        regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
 
         # handle the apostrophes used at the end of a possessive form, e.g. dennis'
-        keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")
-        regex_list.append("?P<apos_poss>(?<=[^\\s])'$")
+        keep_special_regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
+        regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
 
         # Replace lookup based on regex
         self.replace_lookup = {'apos_s': (" 's", None),

@@ -39,7 +39,7 @@ def test_get_labeled_query_tree():
 
 
 def test_get_labeled_query_tree_pattern():
-    tree = path.get_labeled_query_tree(APP_PATH, ['testtrain.*\.txt'])
+    tree = path.get_labeled_query_tree(APP_PATH, ['testtrain.*\.txt'])  # noqa: W605
     for domain in DOMAINS:
         for intent in tree[domain]:
             for key in tree[domain][intent].keys():

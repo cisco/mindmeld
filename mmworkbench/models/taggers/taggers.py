@@ -146,6 +146,20 @@ class Tagger:
         y = self.predict(X)
         return y
 
+    def predict_proba(self, examples, config, resources):
+        """
+        Args:
+            examples (list of mmworkbench.core.Query): A list of queries to extract features for and
+                                                       predict
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+        Returns:
+            (list of lists): A list of predicted labels (in encoded format) and confidence scores
+        """
+        X, _, _ = self.extract_features(examples, config, resources)
+        return self._predict_proba(X)
+
     def dump(self, model_path, config):
         """
         Since traditional SKLearn models are easily serializable, we can
@@ -302,10 +316,10 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
             if _is_system_entity(ent_type):
                 # During predict time, we construct sys_candidates for the input query.
                 # These candidates are "global" sys_candidates, in that the entire query
-                # is sent to Mallard to extract sys_candidates and not just a span range
+                # is sent to Duckling to extract sys_candidates and not just a span range
                 # within the query. However, the tagging model could more restrictive in
                 # its classifier, so a sub-span of the original sys_candidate could be tagged
-                # as a sys_entity. For example, the query "set alarm for 1130", mallard
+                # as a sys_entity. For example, the query "set alarm for 1130", Duckling
                 # provides the following sys_time entity candidate: "for 1130". However,
                 # our entity recognizer only tags the token "1130" as a sys-time entity,
                 # and not "at". Therefore, when we append system entities for this query,

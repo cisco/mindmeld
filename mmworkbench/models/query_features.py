@@ -6,13 +6,13 @@ import re
 
 from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
                       OUT_OF_BOUNDS_TOKEN, WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC,
-                      ENABLE_STEMMING, DEFAULT_SYS_ENTITIES, register_features,
+                      ENABLE_STEMMING, DEFAULT_SYS_ENTITIES, register_query_feature,
                       mask_numerics, get_ngram, requires)
-
 
 # TODO: clean this up a LOT
 
 
+@register_query_feature(feature_name='in-gaz-span-seq')
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_span_features(**args):
     """Returns a feature extractor for properties of spans in gazetteers
@@ -255,6 +255,7 @@ def extract_in_gaz_span_features(**args):
     return _extractor
 
 
+@register_query_feature(feature_name='in-gaz-ngram-seq')
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_ngram_features(**args):
     """Returns a feature extractor for surrounding ngrams in gazetteers
@@ -338,6 +339,7 @@ def extract_in_gaz_ngram_features(**args):
     return _extractor
 
 
+@register_query_feature(feature_name='bag-of-words-seq')
 @requires(WORD_NGRAM_FREQ_RSC)
 def extract_bag_of_words_features(ngram_lengths_to_start_positions,
                                   thresholds=(0,), **args):
@@ -410,6 +412,7 @@ def char_ngrams(n, word, **args):
     return char_grams
 
 
+@register_query_feature(feature_name='enable-stemming')
 @requires(ENABLE_STEMMING)
 def enabled_stemming(**args):
     def _extractor(query, resources):
@@ -418,6 +421,7 @@ def enabled_stemming(**args):
     return _extractor
 
 
+@register_query_feature(feature_name='char-ngrams-seq')
 @requires(CHAR_NGRAM_FREQ_RSC)
 def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0,), **args):
     """Returns a character n-gram feature extractor.
@@ -461,6 +465,7 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0
     return _extractor
 
 
+@register_query_feature(feature_name='sys-candidates-seq')
 @requires(SYS_TYPES_RSC)
 def extract_sys_candidate_features(start_positions=(0,), **args):
     """Return an extractor for features based on a heuristic guess of numeric
@@ -501,6 +506,7 @@ def update_features_sequence(feat_seq, update_feat_seq, **args):
         feat_seq[i].update(update_feat_seq[i])
 
 
+@register_query_feature(feature_name='char-ngrams')
 @requires(CHAR_NGRAM_FREQ_RSC)
 def extract_char_ngrams(lengths=(1,), thresholds=(0,), **args):
     """
@@ -534,6 +540,7 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,), **args):
     return _extractor
 
 
+@register_query_feature(feature_name='bag-of-words')
 @requires(WORD_NGRAM_FREQ_RSC)
 def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
     """
@@ -590,6 +597,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
     return _extractor
 
 
+@register_query_feature(feature_name='sys-candidates')
 def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES, **args):
     """
     Return an extractor for features based on a heuristic guess of numeric
@@ -609,6 +617,7 @@ def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES, **args):
     return _extractor
 
 
+@register_query_feature(feature_name='word-shape')
 def extract_word_shape(lengths=(1,), **args):
     """
     Extracts word shape for ngrams of specified lengths.
@@ -649,6 +658,7 @@ def extract_word_shape(lengths=(1,), **args):
     return _extractor
 
 
+@register_query_feature(feature_name='edge-ngrams')
 @requires(WORD_FREQ_RSC)
 def extract_edge_ngrams(lengths=(1,), **args):
     """
@@ -683,6 +693,7 @@ def extract_edge_ngrams(lengths=(1,), **args):
     return _extractor
 
 
+@register_query_feature(feature_name='freq')
 @requires(WORD_FREQ_RSC)
 def extract_freq(bins=5, **args):
     """
@@ -738,6 +749,7 @@ def extract_freq(bins=5, **args):
     return _extractor
 
 
+@register_query_feature(feature_name='gaz-freq')
 @requires(GAZETTEER_RSC)
 @requires(WORD_FREQ_RSC)
 def extract_gaz_freq(**args):
@@ -774,6 +786,7 @@ def extract_gaz_freq(**args):
     return _extractor
 
 
+@register_query_feature(feature_name='in-gaz')
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_feature(scaling=1, **args):
     def _extractor(query, resources):
@@ -800,6 +813,7 @@ def extract_in_gaz_feature(scaling=1, **args):
     return _extractor
 
 
+@register_query_feature(feature_name='length')
 def extract_length(**args):
     """
     Extract length measures (tokens and chars; linear and log) on whole query.
@@ -821,6 +835,7 @@ def extract_length(**args):
     return _extractor
 
 
+@register_query_feature(feature_name='exact')
 @requires(QUERY_FREQ_RSC)
 def extract_query_string(scaling=1000, **args):
     """
@@ -853,23 +868,3 @@ def find_ngrams(input_list, n, **args):
     for ngram in zip(*[input_list[i:] for i in range(n)]):
         result.append(" ".join(ngram))
     return result
-
-
-register_features('query', {
-    'bag-of-words': extract_ngrams,
-    'word-shape': extract_word_shape,
-    'sys-candidates': extract_sys_candidates,
-    'edge-ngrams': extract_edge_ngrams,
-    'char-ngrams': extract_char_ngrams,
-    'freq': extract_freq,
-    'in-gaz': extract_in_gaz_feature,
-    'gaz-freq': extract_gaz_freq,
-    'length': extract_length,
-    'exact': extract_query_string,
-    'bag-of-words-seq': extract_bag_of_words_features,
-    'in-gaz-span-seq': extract_in_gaz_span_features,
-    'in-gaz-ngram-seq': extract_in_gaz_ngram_features,
-    'sys-candidates-seq': extract_sys_candidate_features,
-    'char-ngrams-seq': extract_char_ngrams_features,
-    'enable-stemming': enabled_stemming
-})

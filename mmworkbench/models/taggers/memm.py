@@ -6,7 +6,7 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
-
+import numpy as np
 from .taggers import Tagger, START_TAG, extract_sequence_features
 
 import logging
@@ -97,6 +97,26 @@ class MemmModel(Tagger):
             prev_tag = predicted_tag
 
         return predicted_tags
+
+    def predict_proba(self, examples, config, resources):
+        return [self._predict_proba_example(example, config, resources)
+                for example in examples]
+
+    def _predict_proba_example(self, example, config, resources):
+        features_by_segment = self.extract_example_features(example, config, resources)
+        if len(features_by_segment) == 0:
+            return []
+
+        prev_tag = START_TAG
+        seq_log_probs = []
+        for features in features_by_segment:
+            features['prev_tag'] = prev_tag
+            X, _ = self._preprocess_data([features])
+            prediction = self._clf.predict_proba(X)[0]
+            predicted_tag = np.argmax(prediction)
+            prev_tag = self.class_encoder.inverse_transform(predicted_tag)
+            seq_log_probs.append([prev_tag, prediction[predicted_tag]])
+        return seq_log_probs
 
     def _get_feature_selector(self, selector_type):
         """Get a feature selector instance based on the feature_selector model

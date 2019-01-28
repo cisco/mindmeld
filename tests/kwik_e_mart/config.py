@@ -97,14 +97,9 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
         'tag_scheme': 'IOB',
         'feature_scaler': 'max-abs'
     },
-    'param_selection': {
-        'type': 'k-fold',
-        'k': 5,
-        'scoring': 'accuracy',
-        'grid': {
-            'penalty': ['l1', 'l2'],
-            'C': [0.01, 1, 100, 10000, 1000000, 100000000]
-        },
+    'params': {
+        'penalty': 'l1',
+        'C': 50
     },
     'features': {
         'bag-of-words-seq': {
@@ -119,8 +114,8 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
         },
         'enable-stemming': True
     },
-    'train_label_set': 'testtrain.*\.txt',
-    'test_label_set': 'testtrain.*\.txt'
+    'train_label_set': 'testtrain.*\.txt',  # noqa: W605
+    'test_label_set': 'testtrain.*\.txt'  # noqa: W605
 }
 
 

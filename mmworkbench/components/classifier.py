@@ -113,7 +113,7 @@ class Classifier(metaclass=ABCMeta):
         self.config = None
         self.hash = ''
 
-    def fit(self, queries=None, label_set=None, previous_model_path=None, **kwargs):
+    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
@@ -121,10 +121,7 @@ class Classifier(metaclass=ABCMeta):
             queries (list of ProcessedQuery): The labeled queries to use as training data
             label_set (list, optional): A label set to load. If not specified, the default
                  training set will be loaded.
-            previous_model_path (str, optional): The path of a previous version of the model for
-                this classifier. If the previous model is equivalent to the new one, it will be
-                loaded instead. Equivalence here is determined by the model's training data and
-                configuration.
+            incremental_timestamp (str, optional): The timestamp folder to cache models in
             model_type (str, optional): The type of machine learning model to use. If omitted, the
                  default model type will be used.
             model_settings (dict): Settings specific to the model type specified
@@ -183,13 +180,12 @@ class Classifier(metaclass=ABCMeta):
             label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
 
         new_hash = self._get_model_hash(model_config, queries, label_set)
+        cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
-        if previous_model_path:
-            old_hash = self._load_hash(previous_model_path)
-            if old_hash == new_hash:
-                logger.info('No need to fit. Loading previous model.')
-                self.load(previous_model_path)
-                return
+        if incremental_timestamp and cached_model:
+            logger.info('No need to fit. Loading previous model.')
+            self.load(cached_model)
+            return
 
         queries, classes = self._get_queries_and_labels(queries, label_set)
 
@@ -235,7 +231,7 @@ class Classifier(metaclass=ABCMeta):
                                                                      timestamp=timestamp)
         return self._model.predict([query], dynamic_resource=dynamic_resource)[0]
 
-    def predict_proba(self, query, time_zone=None, timestamp=None):
+    def predict_proba(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Runs prediction on a given query and generates multiple hypotheses with their
         associated probabilities using the trained classification model
 
@@ -245,6 +241,7 @@ class Classifier(metaclass=ABCMeta):
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict, optional):  A dynamic resource to aid NLP inference
 
         Returns:
             list: a list of tuples of the form (str, float) grouping predicted class labels and
@@ -257,7 +254,7 @@ class Classifier(metaclass=ABCMeta):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
 
-        predict_proba_result = self._model.predict_proba([query])
+        predict_proba_result = self._model.predict_proba([query], dynamic_resource=dynamic_resource)
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
@@ -294,7 +291,7 @@ class Classifier(metaclass=ABCMeta):
         return evaluation
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):
-        raise NotImplemented
+        raise NotImplementedError
 
     def _get_model_config(self, loaded_config, **kwargs):
         """Updates the loaded configuration with runtime specified options, and creates a model
@@ -318,24 +315,37 @@ class Classifier(metaclass=ABCMeta):
                 model_config.pop('params', None)
         return ModelConfig(**model_config)
 
-    def dump(self, model_path):
+    def _data_dump_payload(self):
+        return self._model
+
+    def _create_and_dump_payload(self, path):
+        joblib.dump(self._data_dump_payload(), path)
+
+    def dump(self, model_path, incremental_model_path=None):
         """Persists the trained classification model to disk.
 
         Args:
             model_path (str): The location on disk where the model should be stored
+            incremental_model_path (str, Optional): The timestamp folder where the cached
+                models are stored
         """
-        # make directory if necessary
-        folder = os.path.dirname(model_path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
+        for path in [model_path, incremental_model_path]:
+            if not path:
+                continue
 
-        joblib.dump(self._model, model_path)
+            # make directory if necessary
+            folder = os.path.dirname(path)
+            if not os.path.isdir(folder):
+                os.makedirs(folder)
 
-        hash_path = model_path + '.hash'
-        with open(hash_path, 'w') as hash_file:
-            hash_file.write(self.hash)
+            self._create_and_dump_payload(path)
 
-        self.dirty = False
+            hash_path = path + '.hash'
+            with open(hash_path, 'w') as hash_file:
+                hash_file.write(self.hash)
+
+            if path == model_path:
+                self.dirty = False
 
     def load(self, model_path):
         """Loads the trained classification model from disk

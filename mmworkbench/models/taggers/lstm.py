@@ -745,10 +745,10 @@ class LstmModel(Tagger):
         return self
 
     def _predict(self, X):
-        """Trains a classifier without cross-validation.
+        """Predicts tags for query sequence
 
         Args:
-            X (list of list of list of str): a list of queries to train on
+            X (list of list of list of str): a list of input representations
 
         Returns:
             (list): A list of decoded labelled predicted by the model
@@ -773,6 +773,41 @@ class LstmModel(Tagger):
             decoded_query = []
             for tag in encoded_predict[:self.sequence_lengths[idx]]:
                 decoded_query.append(self.label_encoder.classes_[tag])
+            decoded_queries.append(decoded_query)
+
+        return decoded_queries
+
+    def _predict_proba(self, X):
+        """Predict tags for query sequence with their confidence scores
+
+        Args:
+            X (list of list of list of str): a list of input representations
+
+        Returns:
+            (list): A list of decoded labelled predicted by the model with confidence scores
+        """
+
+        seq_len_arr = np.array(self.sequence_lengths)
+
+        # During predict time, we make sure no nodes are dropped out
+        self.dense_keep_probability = 1.0
+        self.lstm_input_keep_prob = 1.0
+        self.lstm_output_keep_prob = 1.0
+
+        output = self.session.run(
+            [self.lstm_output_softmax_tf],
+            feed_dict=self.construct_feed_dictionary(
+                X, self.char_features_arr, self.gaz_features_arr, seq_len_arr))
+
+        output = np.reshape(output, [-1, int(self.padding_length), self.output_dimension])
+        class_output = np.argmax(output, 2)
+
+        decoded_queries = []
+        for idx, encoded_predict in enumerate(class_output):
+            decoded_query = []
+            for token_idx, tag in enumerate(encoded_predict[:self.sequence_lengths[idx]]):
+                decoded_query.append([self.label_encoder.classes_[tag],
+                                      output[idx][token_idx][tag]])
             decoded_queries.append(decoded_query)
 
         return decoded_queries
