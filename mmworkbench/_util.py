@@ -106,7 +106,6 @@ class Blueprint:
         app_path = os.path.abspath(app_path)
 
         local_archive = cls._fetch_archive(name, 'app')
-        print("local archive", local_archive)
         tarball = tarfile.open(local_archive)
         tarball.extractall(path=app_path)
         logger.info('Created %r app at %r', name, app_path)
