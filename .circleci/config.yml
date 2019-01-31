@@ -112,6 +112,11 @@ definitions:
             # run tests
             mkdir ~/test-reports
             pytest --junitxml=~/test-reports/junit.xml
+      - run:
+          name: Food ordering blueprint kb setup
+          # run this even when linting fails
+          when: always
+          command: python -c "from mmworkbench._util import Blueprint; Blueprint.setup_kb(name='food_ordering', app_path='./food_ordering')"
 
       - store_test_results:
           path: ~/test-reports

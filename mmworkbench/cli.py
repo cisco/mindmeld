@@ -26,6 +26,7 @@ from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
                          KnowledgeBaseError, WorkbenchError)
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
+from ._util import blueprint
 from .constants import DEVCENTER_URL
 
 
@@ -429,26 +430,14 @@ def module_cli():
 @click.argument('app_path', required=False)
 def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     """Sets up a blueprint application."""
-
-    logger.info('Automatic blueprint download functionality is currently disabled')
-    msg = ('Navigate to https://devcenter.mindmeld.com/bp/{}/app.tar.gz'
-           ' and manually download the tar').format(blueprint_name)
-    logger.info(msg)
-    logger.info('Extract the blueprint in the current working directory')
-
-    # TODO: Re-implement authenticated download of blueprints by getting oauth2
-    # token from Webex broker
-
-    """
-        try:
+    try:
         blueprint(blueprint_name, app_path, es_host=es_host, skip_kb=skip_kb)
     except ValueError as ex:
         logger.error(ex)
         ctx.exit(1)
-    except (AuthNotFoundError, KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
+    except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
-    """
 
 
 #
