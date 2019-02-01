@@ -121,11 +121,11 @@ class DialogueStateRule:
             raise ValueError('For a dialogue state rule, if default is True, '
                              'domain, intent, has_entity, and targeted_only must be omitted')
 
-    def apply(self, context):
+    def apply(self, request):
         """Applies the dialogue state rule to the given context.
 
         Args:
-            context (dict): A request context
+            context (Context): A request context
 
         Returns:
             bool: whether or not the context matches
@@ -137,18 +137,18 @@ class DialogueStateRule:
             return False
 
         # check domain is correct
-        if self.domain is not None and self.domain != context['domain']:
+        if self.domain is not None and self.domain != request.domain:
             return False
 
         # check intent is correct
-        if self.intent is not None and self.intent != context['intent']:
+        if self.intent is not None and self.intent != request.intent:
             return False
 
         # check expected entity types are present
         if self.entity_types is not None:
             # TODO cache entity types
             entity_types = set()
-            for entity in context['entities']:
+            for entity in request.entities:
                 entity_types.add(entity['type'])
 
             if len(self.entity_types & entity_types) < len(self.entity_types):
@@ -300,7 +300,7 @@ class DialogueManager:
                     raise AssertionError('Only one default rule may be specified')
                 self.default_rule = rule
 
-    def apply_handler(self, context, target_dialogue_state=None):
+    def apply_handler(self, request, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
@@ -311,14 +311,14 @@ class DialogueManager:
             dict: A dict containing the dialogue state and directives
         """
         if self.async_mode:
-            return self._apply_handler_async(context, target_dialogue_state=target_dialogue_state)
-        dialogue_state = self._get_dialogue_state(context, target_dialogue_state)
+            return self._apply_handler_async(request, target_dialogue_state=target_dialogue_state)
+        dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder = self._create_responder()
-        handler(context, responder)
+        handler(request, responder)
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
-    async def _apply_handler_async(self, context, target_dialogue_state=None):
+    async def _apply_handler_async(self, request, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
@@ -328,12 +328,10 @@ class DialogueManager:
         Returns:
             dict: A dict containing the dialogue state and directives
         """
-        dialogue_state = self._get_dialogue_state(context, target_dialogue_state)
+        dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder = self._create_responder()
-
-        await handler(context, responder)
-
+        await handler(request, responder)
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
     def _get_dialogue_state(self, context, target_dialogue_state=None):
@@ -696,7 +694,7 @@ class Conversation:
         self._app_manager = app.app_manager
         if not self._app_manager.ready:
             self._app_manager.load()
-        self.context = context or {}
+        self.context = context
         self.history = []
         self.frame = {}
         self.default_params = default_params or {}
@@ -788,9 +786,9 @@ class Conversation:
         response = self._app_manager.parse(text, params=params, context=self.context,
                                            frame=self.frame, history=self.history)
 
-        self.history = response['history']
-        self.frame = response['frame']
-        self.params = response['params']
+        self.history = response.history
+        self.frame = response.frame
+        self.params = response.params
 
         return response
 
@@ -816,11 +814,9 @@ class Conversation:
 
         response = await self._app_manager.parse(text, params=params, context=self.context,
                                                  frame=self.frame, history=self.history)
-
-        self.history = response['history']
-        self.frame = response['frame']
-        self.params = response['params']
-
+        self.history = response.history
+        self.frame = response.frame
+        self.params = response.params
         return response
 
     def _follow_directive(self, directive):

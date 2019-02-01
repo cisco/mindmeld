@@ -29,6 +29,7 @@ requirements = [
     'python-crfsuite~=0.9',
     'sklearn-crfsuite>=0.3.6,<1.0',
     'tensorflow~=1.2',
+    'attr~=0.3',
     'distro~=1.3'
 ]
 

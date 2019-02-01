@@ -8,8 +8,9 @@ import logging
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
 
+from .components.context import Request
 from .components import (
-    NaturalLanguageProcessor, DialogueManager, QuestionAnswerer, DialogueContext
+    NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 )
 from .components.dialogue import DialogueResponder
 from .resource_loader import ResourceLoader
@@ -72,7 +73,7 @@ class ApplicationManager:
     MAX_HISTORY_LEN = 100
 
     def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None,
-                 context_class=None, responder_class=None, preprocessor=None, async_mode=False):
+                 request_class=None, responder_class=None, preprocessor=None, async_mode=False):
         self.async_mode = async_mode
 
         self._app_path = app_path
@@ -92,7 +93,7 @@ class ApplicationManager:
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
         self.question_answerer = question_answerer or QuestionAnswerer(app_path, resource_loader,
                                                                        es_host)
-        self.context_class = context_class or DialogueContext
+        self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
         self.dialogue_manager = DialogueManager(self.responder_class, async_mode=self.async_mode)
 
@@ -149,21 +150,18 @@ class ApplicationManager:
                                      history=history, verbose=verbose)
 
         params = params or {}
-        context = context or {}
         history = history or []
         frame = frame or {}
         # TODO: what do we do with verbose???
 
-        dm_context, nlp_hierarchy, process_params, dm_params = \
-            self._pre_nlp(text, params, context, history, frame)
-
+        nlp_hierarchy, process_params, dm_params = self._pre_nlp(params)
         processed_query = self.nlp.process(text, nlp_hierarchy, **process_params)
+        request = self.request_class(context=context, history=history, frame=frame,
+                                     params={}, previous_turn_params=params,
+                                     **processed_query)
 
-        dm_context = self._pre_dm(dm_context, processed_query)
-        dm_response = self.dialogue_manager.apply_handler(dm_context, **dm_params)
-
-        response = self._post_dm(dm_context, dm_response, history)
-
+        dm_response = self.dialogue_manager.apply_handler(request, **dm_params)
+        response = self._post_dm(request, dm_response)
         return response
 
     async def _parse_async(self, text, params=None, context=None, frame=None,
@@ -199,24 +197,19 @@ class ApplicationManager:
         history = history or []
         frame = frame or {}
 
-        dm_context, nlp_hierarchy, process_params, dm_params = \
-            self._pre_nlp(text, params, context, history, frame)
-
+        nlp_hierarchy, process_params, dm_params = self._pre_nlp(params)
         processed_query = self.nlp.process(text, nlp_hierarchy, **process_params)
-
+        request = self.request_class(context=context,
+                                     history=history, frame=frame,
+                                     params={}, previous_turn_params=params,
+                                     **processed_query)
         # TODO: make an async nlp
         # processed_query = await self.nlp.process(text, nlp_hierarchy, **process_params)
-
-        dm_context = self._pre_dm(dm_context, processed_query)
-        dm_response = await self.dialogue_manager.apply_handler(dm_context, **dm_params)
-
-        response = self._post_dm(dm_context, dm_response, history)
-
+        dm_response = await self.dialogue_manager.apply_handler(request, **dm_params)
+        response = self._post_dm(request, dm_response)
         return response
 
-    def _pre_nlp(self, text, params, context, history, frame):
-        request = {'text': text, 'params': params, 'context': context}
-
+    def _pre_nlp(self, params):
         # validate params
         allowed_intents = self._validate_param(params, 'allowed_intents')
         target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
@@ -227,14 +220,6 @@ class ApplicationManager:
         # params for nlp.process()
         process_params = {param: self._validate_param(params, param)
                           for param in ('time_zone', 'timestamp', 'dynamic_resource')}
-
-        dm_context = self.context_class({
-            'request': request,
-            'history': history,
-            'params': {},  # params for next turn
-            'frame': copy.deepcopy(frame),
-            'entities': []
-        })
 
         # Validate target dialogue state
         if target_dialogue_state and target_dialogue_state not in self.dialogue_manager.handler_map:
@@ -255,29 +240,35 @@ class ApplicationManager:
                     "Not applying domain/intent restrictions this "
                     "turn".format(ex, allowed_intents))
 
-        return dm_context, nlp_hierarchy, process_params, dm_params
+        return nlp_hierarchy, process_params, dm_params
 
-    @staticmethod
-    def _pre_dm(context, processed_query):
-        context.update(processed_query)
-        context.pop('text')
-        return context
-
-    def _post_dm(self, context, dm_response, history):
-        context.update(dm_response)
-
+    def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
-        history = context.pop('history')
-        history.insert(0, context)
+        request.directives = dm_response['directives']
+        request.dialogue_state = dm_response['dialogue_state']
 
-        # validate outgoing params
-        self._validate_param(context['params'], 'allowed_intents', mode='outgoing')
-        self._validate_param(context['params'], 'target_dialogue_state', mode='outgoing')
+        new_history = copy.deepcopy(request.history)
+        prev_request = request.to_json()
+        prev_request.pop('history')
+        new_history.insert(0, prev_request)
 
         # limit length of history
-        history = history[:self.MAX_HISTORY_LEN]
-        response = copy.deepcopy(context)
-        response['history'] = history
+        new_history = new_history[:self.MAX_HISTORY_LEN]
+
+        response = self.request_class(
+            text=request.text, context=request.context, history=new_history,
+            frame=request.frame, params=request.params, domain=request.domain,
+            intent=request.intent, entities=request.entities,
+            previous_turn_params=request.previous_turn_params,
+            dialogue_state=request.dialogue_state,
+            directives=request.directives, confidence=request.confidence,
+            nbest_transcripts_text=request.nbest_transcripts_text,
+            nbest_transcripts_entities=request.nbest_transcripts_entities,
+            nbest_aligned_entities=request.nbest_aligned_entities, name=request.name)
+
+        # validate outgoing params
+        self._validate_param(response.params, 'allowed_intents', mode='outgoing')
+        self._validate_param(response.params, 'target_dialogue_state', mode='outgoing')
 
         return response
 
