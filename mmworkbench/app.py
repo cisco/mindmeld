@@ -9,8 +9,8 @@ import sys
 from .app_manager import ApplicationManager
 from .cli import app_cli
 from .server import WorkbenchServer
-from .components.dialogue import DialogueResponder, DialogueContext, DialogueFlow
-from .components.context import Request
+from .components.dialogue import DialogueResponder, DialogueFlow
+from .components.request import Request
 
 logger = logging.getLogger(__name__)
 

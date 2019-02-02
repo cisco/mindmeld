@@ -12,13 +12,20 @@ These tests apply regardless of async/await support.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mmworkbench.components import Conversation, DialogueManager
+from mmworkbench.components import Conversation, DialogueManager, DialogueResponder
+from mmworkbench.components.request import Request, Params
 
 
-def create_context(domain, intent, entities=None):
-    """Creates a context object for use by the dialogue manager"""
+def create_request(domain, intent, entities=None):
+    """Creates a request object for use by the dialogue manager"""
     entities = entities or ()
-    return {'domain': domain, 'intent': intent, 'entities': entities}
+    return Request(domain=domain, intent=intent, entities=entities, history=[],
+                   text='', frame={}, params={}, context={})
+
+
+def create_response(request):
+    """Creates a response object for use by the dialogue manager"""
+    return DialogueResponder(frame={}, params={}, history=[], slots={}, request=request)
 
 
 @pytest.fixture
@@ -48,8 +55,10 @@ class TestDialogueManager:
     def test_default(self, dm):
         """Default dialogue state when no rules match
            This will select the rule with default=True"""
-        result = dm.apply_handler(create_context('other', 'other'))
-        assert result['dialogue_state'] == 'default'
+        request = create_request('other', 'other')
+        response = create_response(request)
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'default'
 
     def test_default_uniqueness(self, dm):
         with pytest.raises(AssertionError):
@@ -62,42 +71,53 @@ class TestDialogueManager:
 
     def test_domain(self, dm):
         """Correct dialogue state is found for a domain"""
-        result = dm.apply_handler(create_context('domain', 'other'))
-        assert result['dialogue_state'] == 'domain'
+        request = create_request('domain', 'other')
+        response = create_response(request)
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'domain'
 
     def test_domain_intent(self, dm):
         """Correct state should be found for domain and intent"""
-        result = dm.apply_handler(create_context('domain', 'intent'))
-        assert result['dialogue_state'] == 'domain_intent'
+        request = create_request('domain', 'intent')
+        response = create_response(request)
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'domain_intent'
 
     def test_intent(self, dm):
         """Correct state should be found for intent"""
-        result = dm.apply_handler(create_context('other', 'intent'))
-        assert result['dialogue_state'] == 'intent'
+        request = create_request('other', 'intent')
+        response = create_response(request)
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'intent'
 
     def test_intent_entity(self, dm):
         """Correctly match intent and entity"""
-        result = dm.apply_handler(create_context('domain', 'intent', [{'type': 'entity_2'}]))
-        assert result['dialogue_state'] == 'intent_entity_2'
+        request = create_request('domain', 'intent', [{'type': 'entity_2'}])
+        response = create_response(request)
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'intent_entity_2'
 
     def test_intent_entity_tiebreak(self, dm):
         """Correctly break ties between rules of equal complexity"""
-        context = create_context('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'}])
-        result = dm.apply_handler(context)
-        assert result['dialogue_state'] == 'intent_entity_1'
+        request = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'}])
+        response = create_response(request)
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'intent_entity_1'
 
     def test_intent_entities(self, dm):
         """Correctly break ties between rules of equal complexity"""
-        context = create_context('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'},
+        request = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'},
                                                       {'type': 'entity_3'}])
-        result = dm.apply_handler(context)
-        assert result['dialogue_state'] == 'intent_entities'
+        response = create_response(request)
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'intent_entities'
 
     def test_target_dialogue_state_management(self, dm):
         """Correctly sets the dialogue state based on the target_dialogue_state"""
-        context = create_context('domain', 'intent')
-        result = dm.apply_handler(context, target_dialogue_state='intent_entity_2')
-        assert result['dialogue_state'] == 'intent_entity_2'
+        request = create_request('domain', 'intent')
+        response = create_response(request)
+        result = dm.apply_handler(request, response, target_dialogue_state='intent_entity_2')
+        assert result.dialogue_state == 'intent_entity_2'
 
     def test_targeted_only_kwarg_exclusion(self, dm):
         with pytest.raises(ValueError):
@@ -106,46 +126,53 @@ class TestDialogueManager:
 
     def test_middleware_single(self, dm):
         """Adding a single middleware works"""
-        def _middle(ctx, responder, handler):
-            ctx['flag'] = True
-            handler(ctx, responder)
+        def _middle(request, responder, handler):
+            responder.flag = True
+            handler(request, responder)
 
-        def _handler(ctx, responder):
-            assert ctx['flag']
+        def _handler(request, responder):
+            assert responder.flag
 
         dm.add_middleware(_middle)
         dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
-        result = dm.apply_handler(create_context('domain', 'middle'))
-        assert result['dialogue_state'] == 'middleware_test'
+
+        request = create_request('domain', 'middle')
+        response = create_response(request)
+
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'middleware_test'
 
     def test_middleware_multiple(self, dm):
         """Adding multiple middleware works"""
-        def _first(ctx, responder, handler):
-            ctx['middles'] = ctx.get('middles', []) + ['first']
-            handler(ctx, responder)
+        def _first(request, responder, handler):
+            responder.middles = vars(responder).get('middles', []) + ['first']
+            handler(request, responder)
 
-        def _second(ctx, responder, handler):
-            ctx['middles'] = ctx.get('middles', []) + ['second']
-            handler(ctx, responder)
+        def _second(request, responder, handler):
+            responder.middles = vars(responder).get('middles', []) + ['second']
+            handler(request, responder)
 
-        def _handler(ctx, responder):
+        def _handler(request, responder):
             # '_first' should have been called first, then '_second'
-            assert ctx['middles'] == ['first', 'second']
+            assert responder.middles == ['first', 'second']
 
         dm.add_middleware(_first)
         dm.add_middleware(_second)
         dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
-        result = dm.apply_handler(create_context('domain', 'middle'))
-        assert result['dialogue_state'] == 'middleware_test'
+
+        request = create_request('domain', 'middle')
+        response = create_response(request)
+
+        result = dm.apply_handler(request, response)
+        assert result.dialogue_state == 'middleware_test'
 
 
 def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
     """Tests that the params are cleared in one trip from app to wb."""
     convo = Conversation(nlp=kwik_e_mart_nlp, app_path=kwik_e_mart_app_path)
-    convo.params = {
-        'allowed_intents': ['store_info.find_nearest_store'],
-        'target_dialogue_state': 'greeting'
-    }
+    convo.params = Params(allowed_intents=['store_info.find_nearest_store'],
+                          target_dialogue_state='greeting')
     convo.say('close door')
-
-    assert convo.params == {}
+    assert convo.params == Params(previous_params=Params(
+        allowed_intents=['store_info.find_nearest_store'],
+        target_dialogue_state='greeting'))

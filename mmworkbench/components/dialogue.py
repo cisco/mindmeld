@@ -8,6 +8,7 @@ import random
 import json
 
 from .. import path
+from .request import Params
 
 
 mod_logger = logging.getLogger(__name__)
@@ -300,7 +301,7 @@ class DialogueManager:
                     raise AssertionError('Only one default rule may be specified')
                 self.default_rule = rule
 
-    def apply_handler(self, request, target_dialogue_state=None):
+    def apply_handler(self, request, responder, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
@@ -311,14 +312,15 @@ class DialogueManager:
             dict: A dict containing the dialogue state and directives
         """
         if self.async_mode:
-            return self._apply_handler_async(request, target_dialogue_state=target_dialogue_state)
+            return self._apply_handler_async(
+                request, responder, target_dialogue_state=target_dialogue_state)
         dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
-        responder = self._create_responder()
+        responder.dialogue_state = dialogue_state
         handler(request, responder)
-        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+        return responder
 
-    async def _apply_handler_async(self, request, target_dialogue_state=None):
+    async def _apply_handler_async(self, request, responder, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
@@ -330,11 +332,11 @@ class DialogueManager:
         """
         dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
-        responder = self._create_responder()
+        responder.dialogue_state = dialogue_state
         await handler(request, responder)
-        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+        return responder
 
-    def _get_dialogue_state(self, context, target_dialogue_state=None):
+    def _get_dialogue_state(self, request, target_dialogue_state=None):
         dialogue_state = None
         for rule in self.rules:
             if target_dialogue_state:
@@ -342,13 +344,13 @@ class DialogueManager:
                     dialogue_state = rule.dialogue_state
                     break
             else:
-                if rule.apply(context):
+                if rule.apply(request):
                     dialogue_state = rule.dialogue_state
                     break
         if dialogue_state is None:
             msg = 'Failed to find dialogue state for {domain}.{intent}'.format(
-                domain=context.get('domain'), intent=context.get('intent'))
-            self.logger.info(msg, context)
+                domain=request.domain, intent=request.intent)
+            self.logger.info(msg, request)
 
         return dialogue_state
 
@@ -389,11 +391,11 @@ class DialogueFlow(DialogueManager):
         self.exit_flow_states = []
 
         def _set_target_state(context, responder):
-            context.set_target_dialogue_state(self.flow_state)
+            responder.set_target_dialogue_state(self.flow_state)
             return entrance_handler(context, responder)
 
         async def _async_set_target_state(context, responder):
-            context.set_target_dialogue_state(self.flow_state)
+            responder.set_target_dialogue_state(self.flow_state)
             return await entrance_handler(context, responder)
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
@@ -449,35 +451,34 @@ class DialogueFlow(DialogueManager):
 
         return _decorator
 
-    def apply_handler(self, context, responder=None):  # pylint: disable=arguments-differ
+    def apply_handler(self, request, responder=None):  # pylint: disable=arguments-differ
         """Applies the dialogue state handler for the dialogue flow and set the target dialogue
         state to the flow state
 
         Args:
-            context (DialogueContext)
+            request (Request)
             responder (DialogueResponder)
 
         Returns:
             dict: A dict containing the dialogue state and directives
         """
         if self.async_mode:
-            return self.apply_handler_async(context, responder)
-
-        context.dialogue_flow = self.name
-        dialogue_state = self._get_dialogue_state(context)
+            return self.apply_handler_async(request, responder)
+        request.context['dialogue_flow'] = self.name
+        dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
-            context.set_target_dialogue_state(self.flow_state)
-        handler(context, responder)
+            responder.set_target_dialogue_state(self.flow_state)
+        handler(request, responder)
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
-    async def apply_handler_async(self, context, responder):
-        context.dialogue_flow = self.name
-        dialogue_state = self._get_dialogue_state(context)
+    async def apply_handler_async(self, request, responder):
+        request.context['dialogue_flow'] = self.name
+        dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
-            context.set_target_dialogue_state(self.flow_state)
-        res = handler(context, responder)
+            responder.set_target_dialogue_state(self.flow_state)
+        res = handler(request, responder)
         if asyncio.iscoroutine(res):
             await res
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
@@ -509,15 +510,21 @@ class DialogueResponder:
     DirectiveNames = DirectiveNames
     DirectiveTypes = DirectiveTypes
 
-    def __init__(self, slots):
+    def __init__(self, frame, params, history, slots, request,
+                 dialogue_state=None, directives=[], **kwargs):
         """Initializes a dialogue responder
 
         Args:
             slots (dict): Values to populate the placeholder slots in the natural language
                 response
         """
+        self.directives = directives
+        self.frame = frame
+        self.params = params
+        self.dialogue_state = dialogue_state
         self.slots = slots
-        self.directives = []
+        self.history = history
+        self.request = request
 
     def reply(self, text):
         """Adds a 'reply' directive
@@ -627,28 +634,50 @@ class DialogueResponder:
     def _process_template(self, text):
         return self._choose(text).format(**self.slots)
 
-
-class DialogueContext(dict):
-    "A thin wrapper around the dictionary object for our convenience"
-    @property
-    def dialogue_flow(self):
-        return self.get('dialogue_flow', '')
-
-    @dialogue_flow.setter
-    def dialogue_flow(self, value):
-        self['dialogue_flow'] = value
-
     def set_target_dialogue_state(self, target_dialogue_state):
         """Set target dialogue state for the next turn
 
         Args:
              target_dialogue_state (string): Handler name for dialogue state of next turn
         """
-        self['params']['target_dialogue_state'] = target_dialogue_state
+        self.params.target_dialogue_state = target_dialogue_state
 
     def exit_flow(self):
         """Exit the current flow by clearing the target dialogue state"""
-        self['params'].pop('target_dialogue_state', None)
+        self.params.target_dialogue_state = None
+
+    def to_json(self):
+        attrs_to_serialize = ['params', 'directives', 'dialogue_state',
+                              'history', 'frame', 'slots', 'request']
+        serialized_obj = {}
+        for attr, value in vars(self).items():
+            if attr not in attrs_to_serialize or value is None:
+                continue
+            serialized_obj[attr] = value
+        return serialized_obj
+
+
+class DialogOutput(DialogueResponder):
+    def __init__(self, frame, params, history, slots,
+                 request, context={}, domain='', intent='', entities='',
+                 dialogue_state=None, directives=[]):
+        super().__init__(frame, params, history, slots, request,
+                         dialogue_state=dialogue_state, directives=directives)
+        self.domain = domain
+        self.intent = intent
+        self.entities = entities
+        self.context = context
+
+    def to_json(self):
+        attrs_to_serialize = ['params', 'directives', 'dialogue_state',
+                              'history', 'frame', 'slots', 'request',
+                              'domain', 'intent', 'entities']
+        serialized_obj = {}
+        for attr, value in vars(self).items():
+            if attr not in attrs_to_serialize or value is None:
+                continue
+            serialized_obj[attr] = value
+        return serialized_obj
 
 
 class Conversation:
@@ -694,12 +723,12 @@ class Conversation:
         self._app_manager = app.app_manager
         if not self._app_manager.ready:
             self._app_manager.load()
-        self.context = context
+        self.context = context or {}
         self.history = []
         self.frame = {}
-        self.default_params = default_params or {}
+        self.default_params = default_params or Params()
         self.force_sync = force_sync
-        self.params = {}
+        self.params = Params()
 
     @property
     def session(self):
@@ -733,7 +762,7 @@ class Conversation:
         response = self.process(text, params=params)
 
         # handle directives
-        response_texts = [self._follow_directive(a) for a in response['directives']]
+        response_texts = [self._follow_directive(a) for a in response.directives]
         return response_texts
 
     async def _say_async(self, text, params=None):
@@ -754,7 +783,7 @@ class Conversation:
         response = await self.process(text, params=params)
 
         # handle directives
-        response_texts = [self._follow_directive(a) for a in response['directives']]
+        response_texts = [self._follow_directive(a) for a in response.directives]
         return response_texts
 
     def process(self, text, params=None, force_sync=False):
@@ -779,17 +808,24 @@ class Conversation:
         if not self._app_manager.ready:
             self._app_manager.load()
 
-        external_params = params or copy.deepcopy(self.default_params)
-        params = copy.deepcopy(self.params)
-        params.update(external_params)
+        internal_params = copy.deepcopy(self.params)
 
-        response = self._app_manager.parse(text, params=params, context=self.context,
+        if type(params) == dict:
+            params = Params(**params)
+
+        if type(internal_params) == dict:
+            internal_params = Params(**internal_params)
+
+        if params:
+            # If the params arg is explicitly set, overight the internal params
+            for k, v in vars(params).items():
+                vars(internal_params)[k] = v
+
+        response = self._app_manager.parse(text, params=internal_params, context=self.context,
                                            frame=self.frame, history=self.history)
-
         self.history = response.history
         self.frame = response.frame
         self.params = response.params
-
         return response
 
     async def _process_async(self, text, params=None):
@@ -808,11 +844,20 @@ class Conversation:
         if not self._app_manager.ready:
             await self._app_manager.load()
 
-        external_params = params or copy.deepcopy(self.default_params)
-        params = copy.deepcopy(self.params)
-        params.update(external_params)
+        internal_params = copy.deepcopy(self.params)
 
-        response = await self._app_manager.parse(text, params=params, context=self.context,
+        if type(params) == dict:
+            params = Params(**params)
+
+        if type(internal_params) == dict:
+            internal_params = Params(**internal_params)
+
+        if params:
+            # If the params arg is explicitly set, overight the internal params
+            for k, v in vars(params).items():
+                vars(internal_params)[k] = v
+
+        response = await self._app_manager.parse(text, params=internal_params, context=self.context,
                                                  frame=self.frame, history=self.history)
         self.history = response.history
         self.frame = response.frame
@@ -864,4 +909,4 @@ class Conversation:
     def reset(self):
         self.history = []
         self.frame = {}
-        self.params = {}
+        self.params = Params()

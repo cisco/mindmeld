@@ -26,4 +26,4 @@ def test_parse(app_manager):
     fields = {'domain', 'intent', 'entities', 'params', 'request', 'dialogue_state',
               'directives', 'history'}
     for field in fields:
-        assert field in response
+        assert field in vars(response).keys()

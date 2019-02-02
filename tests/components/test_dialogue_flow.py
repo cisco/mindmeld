@@ -24,7 +24,7 @@ def assert_reply(directives, templates, *, start_index=0, slots=None):
 
 
 def assert_target_dialogue_state(convo, target_dialogue_state):
-    assert convo.params.get('target_dialogue_state') == target_dialogue_state
+    assert convo.params.target_dialogue_state == target_dialogue_state
 
 
 @pytest.mark.conversation
@@ -33,7 +33,7 @@ def test_default_handler(async_kwik_e_mart_app, kwik_e_mart_app_path):
     convo = Conversation(app=async_kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True)
     convo.process('When does that open?')
     assert_target_dialogue_state(convo, 'get_store_hours_entry_flow')
-    directives = convo.process('are there any stores near me?')['directives']
+    directives = convo.process('are there any stores near me?').directives
     assert_target_dialogue_state(convo, 'get_store_hours_entry_flow')
     assert_reply(directives,
                  templates='Sorry, I did not get you. Which store would you like to know about?')
@@ -46,10 +46,10 @@ def test_repeated_flow(async_kwik_e_mart_app, kwik_e_mart_app_path):
     convo.process('When does that open?')
     assert_target_dialogue_state(convo, 'get_store_hours_entry_flow')
     for i in range(2):
-        directives = convo.process('When does that open?')['directives']
+        directives = convo.process('When does that open?').directives
         assert_reply(directives, 'Which store would you like to know about?')
         assert_target_dialogue_state(convo, 'get_store_hours_entry_flow')
-    directives = convo.process('When does that open?')['directives']
+    directives = convo.process('When does that open?').directives
     assert_reply(directives, 'Sorry I cannot help you. Please try again.')
     assert_target_dialogue_state(convo, None)
 
@@ -60,7 +60,7 @@ def test_intent_handler_and_exit_flow(async_kwik_e_mart_app, kwik_e_mart_app_pat
     convo = Conversation(app=async_kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True)
     convo.process('When does that open?')
     assert_target_dialogue_state(convo, 'get_store_hours_entry_flow')
-    directives = convo.process('exit')['directives']
+    directives = convo.process('exit').directives
     assert_target_dialogue_state(convo, None)
     assert_reply(directives, templates=['Bye', 'Goodbye', 'Have a nice day.'])
 

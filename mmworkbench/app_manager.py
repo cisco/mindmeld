@@ -8,11 +8,11 @@ import logging
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
 
-from .components.context import Request
+from .components.request import Request, Params
 from .components import (
     NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 )
-from .components.dialogue import DialogueResponder
+from .components.dialogue import DialogueResponder, DialogOutput
 from .resource_loader import ResourceLoader
 from .exceptions import AllowedNlpClassesKeyError
 
@@ -91,8 +91,8 @@ class ApplicationManager:
         self._query_factory = resource_loader.query_factory
 
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
-        self.question_answerer = question_answerer or QuestionAnswerer(app_path, resource_loader,
-                                                                       es_host)
+        self.question_answerer = question_answerer or QuestionAnswerer(
+            app_path, resource_loader, es_host)
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
         self.dialogue_manager = DialogueManager(self.responder_class, async_mode=self.async_mode)
@@ -123,14 +123,14 @@ class ApplicationManager:
         """
         Args:
             text (str): The text of the message sent by the user
-            params (dict, optional): Contains parameters which modify how text is parsed
-            params['allowed_intents'] (list, optional): A list of allowed intents
+            params (Params, optional): Contains parameters which modify how text is parsed
+            params.allowed_intents (list, optional): A list of allowed intents
                 for model consideration
-            params['target_dialogue_state'] (str, optional): The target dialogue state
-            params['time_zone'] (str, optional): The name of an IANA time zone, such as
+            params.target_dialogue_state (str, optional): The target dialogue state
+            params.time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
-            params['timestamp'] (long, optional): A unix time stamp for the request (in seconds).
+            params.timestamp (long, optional): A unix time stamp for the request (in seconds).
             context (dict, optional): Description
             history (list, optional): Description
             verbose (bool, optional): Description
@@ -149,34 +149,43 @@ class ApplicationManager:
             return self._parse_async(text, params=params, context=context, frame=frame,
                                      history=history, verbose=verbose)
 
-        params = params or {}
+        params = params or Params()
         history = history or []
         frame = frame or {}
+        context = context or {}
         # TODO: what do we do with verbose???
 
         nlp_hierarchy, process_params, dm_params = self._pre_nlp(params)
         processed_query = self.nlp.process(text, nlp_hierarchy, **process_params)
-        request = self.request_class(context=context, history=history, frame=frame,
-                                     params={}, previous_turn_params=params,
-                                     **processed_query)
 
-        dm_response = self.dialogue_manager.apply_handler(request, **dm_params)
+        request = self.request_class(context=context, history=history, frame=frame,
+                                     params=Params(previous_params=params), **processed_query)
+
+        response = self.responder_class(frame=frame, params=Params(previous_params=params),
+                                        slots={}, history=history, request=request,
+                                        directives=[])
+
+        dm_response = self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
-        return response
+
+        output = DialogOutput(domain=request.domain, intent=request.intent,
+                              entities=request.entities, context=request.context,
+                              **response.to_json())
+        return output
 
     async def _parse_async(self, text, params=None, context=None, frame=None,
                            history=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
-            params (dict, optional): Contains parameters which modify how text is parsed
-            params['allowed_intents'] (list, optional): A list of allowed intents
+            params (Params, optional): Contains parameters which modify how text is parsed
+            params.allowed_intents (list, optional): A list of allowed intents
                 for model consideration
-            params['target_dialogue_state'] (str, optional): The target dialogue state
-            params['time_zone'] (str, optional): The name of an IANA time zone, such as
+            params.target_dialogue_state (str, optional): The target dialogue state
+            params.time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
-            params['timestamp'] (long, optional): A unix time stamp for the request (in seconds).
+            params.timestamp (long, optional): A unix time stamp for the request (in seconds).
             context (dict, optional): Description
             history (list, optional): Description
             verbose (bool, optional): Description
@@ -191,23 +200,30 @@ class ApplicationManager:
            https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
         """
-
-        params = params or {}
+        params = params or Params()
         context = context or {}
         history = history or []
         frame = frame or {}
 
         nlp_hierarchy, process_params, dm_params = self._pre_nlp(params)
         processed_query = self.nlp.process(text, nlp_hierarchy, **process_params)
-        request = self.request_class(context=context,
-                                     history=history, frame=frame,
-                                     params={}, previous_turn_params=params,
+
+        request = self.request_class(context=context, history=history,
+                                     frame=frame, params=Params(previous_params=params),
                                      **processed_query)
+
+        response = self.responder_class(frame=frame, params=Params(previous_params=params),
+                                        slots={}, history=history, request=request,
+                                        directives=[])
         # TODO: make an async nlp
         # processed_query = await self.nlp.process(text, nlp_hierarchy, **process_params)
-        dm_response = await self.dialogue_manager.apply_handler(request, **dm_params)
+        dm_response = await self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
-        return response
+
+        output = DialogOutput(domain=request.domain, intent=request.intent,
+                              entities=request.entities, context=request.context,
+                              **response.to_json())
+        return output
 
     def _pre_nlp(self, params):
         # validate params
@@ -244,33 +260,20 @@ class ApplicationManager:
 
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
-        request.directives = dm_response['directives']
-        request.dialogue_state = dm_response['dialogue_state']
-
         new_history = copy.deepcopy(request.history)
-        prev_request = request.to_json()
+        prev_request = dm_response.to_json()
         prev_request.pop('history')
         new_history.insert(0, prev_request)
 
         # limit length of history
         new_history = new_history[:self.MAX_HISTORY_LEN]
-
-        response = self.request_class(
-            text=request.text, context=request.context, history=new_history,
-            frame=request.frame, params=request.params, domain=request.domain,
-            intent=request.intent, entities=request.entities,
-            previous_turn_params=request.previous_turn_params,
-            dialogue_state=request.dialogue_state,
-            directives=request.directives, confidence=request.confidence,
-            nbest_transcripts_text=request.nbest_transcripts_text,
-            nbest_transcripts_entities=request.nbest_transcripts_entities,
-            nbest_aligned_entities=request.nbest_aligned_entities, name=request.name)
+        dm_response.history = new_history
 
         # validate outgoing params
-        self._validate_param(response.params, 'allowed_intents', mode='outgoing')
-        self._validate_param(response.params, 'target_dialogue_state', mode='outgoing')
+        self._validate_param(dm_response.params, 'allowed_intents', mode='outgoing')
+        self._validate_param(dm_response.params, 'target_dialogue_state', mode='outgoing')
 
-        return response
+        return dm_response
 
     def add_middleware(self, middleware):
         """Adds middleware for the dialogue manager.
@@ -293,7 +296,7 @@ class ApplicationManager:
     @staticmethod
     def _validate_param(params, name, mode='incoming'):
         validator = PARAM_VALIDATORS.get(name)
-        param = params.get(name)
+        param = vars(params).get(name)
         if param:
             return validator(param)
         return param
