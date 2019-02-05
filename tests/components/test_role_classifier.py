@@ -7,18 +7,6 @@ from mmworkbench.path import MODEL_CACHE_PATH, get_role_model_paths, get_entity_
 from mmworkbench.exceptions import FileNotFoundError
 from mmworkbench.components import NaturalLanguageProcessor
 
-HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                       'home_assistant')
-
-
-@pytest.fixture
-def home_assistant_nlp():
-    """Provides a built processor instance"""
-    nlp = NaturalLanguageProcessor(app_path=HOME_ASSISTANT_APP_PATH)
-    nlp.build()
-    nlp.dump()
-    return nlp
-
 
 test_data_7 = [
     (
@@ -67,17 +55,17 @@ def test_nlp_process_for_roles(home_assistant_nlp, example, role_type):
     assert (result['entities'][1]['role'].get('confidence', None))
 
 
-def test_model_accuracies_are_similar_before_and_after_caching():
+def test_model_accuracies_are_similar_before_and_after_caching(home_assistant_app_path):
     # clear model cache
-    model_cache_path = MODEL_CACHE_PATH.format(app_path=HOME_ASSISTANT_APP_PATH)
+    model_cache_path = MODEL_CACHE_PATH.format(app_path=home_assistant_app_path)
     try:
-        shutil.rmtree(MODEL_CACHE_PATH.format(app_path=HOME_ASSISTANT_APP_PATH))
+        shutil.rmtree(MODEL_CACHE_PATH.format(app_path=home_assistant_app_path))
     except FileNotFoundError:
         pass
 
     # Make sure no cache exists
     assert os.path.exists(model_cache_path) is False
-    nlp = NaturalLanguageProcessor(HOME_ASSISTANT_APP_PATH)
+    nlp = NaturalLanguageProcessor(home_assistant_app_path)
     nlp.build(incremental=True)
     nlp.dump()
 
@@ -91,8 +79,8 @@ def test_model_accuracies_are_similar_before_and_after_caching():
     entity_accuracy_no_cache = entity_eval.get_accuracy()
     role_accuracy_no_cache = role_eval.get_accuracy()
 
-    example_cache = os.listdir(MODEL_CACHE_PATH.format(app_path=HOME_ASSISTANT_APP_PATH))[0]
-    nlp = NaturalLanguageProcessor(HOME_ASSISTANT_APP_PATH)
+    example_cache = os.listdir(MODEL_CACHE_PATH.format(app_path=home_assistant_app_path))[0]
+    nlp = NaturalLanguageProcessor(home_assistant_app_path)
     nlp.load(example_cache)
 
     # make sure cache exists
@@ -113,24 +101,24 @@ def test_model_accuracies_are_similar_before_and_after_caching():
     assert entity_accuracy_no_cache == entity_accuracy_cached
 
 
-def test_all_classifier_are_unique_for_incremental_builds():
-    nlp = NaturalLanguageProcessor(HOME_ASSISTANT_APP_PATH)
+def test_all_classifier_are_unique_for_incremental_builds(home_assistant_app_path):
+    nlp = NaturalLanguageProcessor(home_assistant_app_path)
     nlp.build(incremental=True)
 
-    example_cache = os.listdir(MODEL_CACHE_PATH.format(app_path=HOME_ASSISTANT_APP_PATH))[0]
+    example_cache = os.listdir(MODEL_CACHE_PATH.format(app_path=home_assistant_app_path))[0]
     unique_hashs = set()
 
     for domain in nlp.domains:
         for intent in nlp.domains[domain].intents:
             _, cached_path = get_entity_model_paths(
-                HOME_ASSISTANT_APP_PATH, domain, intent, timestamp=example_cache)
+                home_assistant_app_path, domain, intent, timestamp=example_cache)
             hash_val = open(cached_path + '.hash', 'r').read()
             assert hash_val not in unique_hashs
             unique_hashs.add(hash_val)
 
             for entity in nlp.domains[domain].intents[intent].entity_recognizer.entity_types:
                 _, cached_path = get_role_model_paths(
-                    HOME_ASSISTANT_APP_PATH, domain, intent, entity, timestamp=example_cache)
+                    home_assistant_app_path, domain, intent, entity, timestamp=example_cache)
                 hash_val = open(cached_path + '.hash', 'r').read()
                 assert hash_val not in unique_hashs
                 unique_hashs.add(hash_val)

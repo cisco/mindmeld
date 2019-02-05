@@ -1,0 +1,96 @@
+change the thermostat to {67 degrees|sys_temperature} in the {living room|location}
+adjust the thermostat to {70 degrees|sys_temperature}
+temperature to {72 degrees|sys_temperature} in the {living room|location}
+{kitchen|location} {71 degrees|sys_temperature}
+make it {65|sys_temperature} in the {bedroom|location}
+set the temperature in the {living room|location} to {72 degrees|sys_temperature} at {8 pm|sys_time}
+heat to {66 degrees|sys_temperature} in the {bathroom|location}
+{kitchen|location} temperature to {72|sys_temperature}
+set temperature to {69|sys_temperature}
+{living room|location} temperature to {70|sys_temperature}
+adjust the thermostat to {66 degrees|sys_temperature}
+adjust the thermostat to {73|sys_temperature}
+change the thermostat to {72|sys_temperature}
+temperature to {65 degrees|sys_temperature}
+thermostat to {72 degrees|sys_temperature}
+make it {75|sys_temperature} in {bedroom|location}
+change the thermostat setting to {78 degrees|sys_temperature} in the {bathroom|location}
+set the temp in the {living room|location} to {72 degrees|sys_temperature} at {8 o clock tonight|sys_time}
+heating to {77 degrees|sys_temperature} in the {living room|location}
+set the temperature
+make it {65 degrees|sys_temperature} in {living room|location}
+set thermostat to {75 degrees|sys_temperature} in the {kitchen|location}
+change the thermostat in the {garage|location} to {72|sys_temperature}
+{living room|location} {70 degrees|sys_temperature}
+{bedroom|location} {69 degrees|sys_temperature}
+set the thermostat setting to {69|sys_temperature} in the {living room|location}
+make it {70 degrees|sys_temperature}
+adjust temperature in the {bathroom|location} to {79 degrees|sys_temperature}
+adjust temp to {78|sys_temperature} in the {bedroom|location}
+set temp in the {kitchen|location} to {76|sys_temperature}
+set the thermostat in the {bathroom|location} to {72|sys_temperature}
+temperature to {72 degrees|sys_temperature} at {6 pm|sys_time}
+change the {bedroom|location} temperature to {66 degrees|sys_temperature}
+change the temperature in the {garage|location} to {72 degrees|sys_temperature}
+{kitchen|location} temperature to {68|sys_temperature}
+set the temp to {72 degrees|sys_temperature} at {6 pm tonight|sys_time}
+set the temperature to {72|sys_temperature} in the {bedroom|location}
+{bathroom|location} temperature to {78 degrees|sys_temperature}
+heater to {77|sys_temperature} in the {living room|location}
+make it {74|sys_temperature} in {kitchen|location}
+change house thermostat to {72|sys_temperature}
+make it {71 degrees|sys_temperature} in the {bedroom|location}
+change thermostat setting to {78|sys_temperature} in the {living room|location}
+change the thermostat setting to {73 degrees|sys_temperature}
+set the thermostat to {72|sys_temperature} at {5 am|sys_time}
+temperature to {72|sys_temperature}
+adjust house temperature to {67 degrees|sys_temperature}
+adjust temperature settings
+{bedroom|location} {71 degrees|sys_temperature}
+set thermostat setting to {75 degrees|sys_temperature} in the {kitchen|location}
+change the thermostat in the {kitchen|location} to {71|sys_temperature}
+set the temp to {71 degrees|sys_temperature} in the {living room|location}
+set the {garage|location} thermostat to {72|sys_temperature}
+set the temperature to {72 degrees|sys_temperature}
+heat to {69 degrees|sys_temperature} in the {bathroom|location}
+set the temp to {72 degrees|sys_temperature}
+adjust the temp in the {bedroom|location} to {65|sys_temperature}
+set the thermostat to {72 degrees|sys_temperature}
+adjust the thermostat setting to {74 degrees|sys_temperature} in the {bedroom|location}
+change temperature to {78|sys_temperature} in the {bedroom|location}
+temperature to {74 degrees|sys_temperature}
+set thermostat settings
+set the thermostat setting to {78 degrees|sys_temperature} in the {living room|location}
+thermostat to {67 degrees|sys_temperature} in the {living room|location}
+{living room|location} {66 degrees|sys_temperature}
+set house temperature to {71 degrees|sys_temperature}
+set the temperature to {68|sys_temperature}
+set the thermostat in the {living room|location} to {72|sys_temperature} {at 8|sys_time}
+adjust the thermostat to {79|sys_temperature}
+set thermostat to {79|sys_temperature} in the {kitchen|location}
+change temp in the {kitchen|location} to {69 degrees|sys_temperature}
+change the temperature to {72 degrees|sys_temperature}
+heater to {65|sys_temperature} in the {bathroom|location}
+{living room|location} {73 degrees|sys_temperature}
+change temp to {73|sys_temperature} in the {bathroom|location}
+set the temperature to {72 degrees|sys_temperature} at {5 pm|sys_time}
+{kitchen|location} temperature to {75|sys_temperature}
+change the temp in the {garage|location} to {72 degrees|sys_temperature}
+make it {71 degrees|sys_temperature}
+{living room|location} temperature to {80|sys_temperature}
+set the {kitchen|location} temp to {72 degrees|sys_temperature}
+change thermostat setting to {79|sys_temperature} in the {living room|location}
+make it {80 degrees|sys_temperature}
+{kitchen|location} temperature to {76 degrees|sys_temperature}
+set thermostat setting to {79|sys_temperature} in the {bathroom|location}
+change the {bedroom|location} temperature to {72 degrees|sys_temperature} at {8 am|sys_time}
+change the {living room|location} temperature to {72|sys_temperature}
+change the temperature in the {kitchen|location} to {71 degrees|sys_temperature}
+heat to {77 degrees|sys_temperature} in the {living room|location}
+thermostat to {70 degrees|sys_temperature}
+change the thermostat settings
+{kitchen|location} {66 degrees|sys_temperature}
+change temp in the {bathroom|location} to {73|sys_temperature}
+{bathroom|location} temperature to {80|sys_temperature}
+{living room|location} temperature to {73|sys_temperature}
+set the thermostat setting to {76|sys_temperature} in the {bedroom|location}
