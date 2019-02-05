@@ -27,7 +27,7 @@ def extract_entity_span_start(**args):
     Returns:
         (function) A feature extraction function that returns the start span of the entity
     """
-    def extractor(example, resources):
+    def _extractor(example, resources):
         query, entities, entity_index = example
         features = {}
 
@@ -37,4 +37,4 @@ def extract_entity_span_start(**args):
         features['entity_span_start'] = current_entity_token_start
         return features
 
-    return extractor
+    return _extractor
