@@ -14,6 +14,7 @@ import pytest
 
 from mmworkbench.components import Conversation, DialogueManager, DialogueResponder
 from mmworkbench.components.request import Request, Params
+from mmworkbench.components.dialogue import DialogueOutput
 
 
 def create_request(domain, intent, entities=None):
@@ -173,6 +174,6 @@ def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
     convo.params = Params(allowed_intents=['store_info.find_nearest_store'],
                           target_dialogue_state='greeting')
     convo.say('close door')
-    assert convo.params == Params(previous_params=Params(
+    assert convo.params == DialogueOutput.to_json(Params(previous_params=Params(
         allowed_intents=['store_info.find_nearest_store'],
-        target_dialogue_state='greeting'))
+        target_dialogue_state='greeting')))

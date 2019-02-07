@@ -12,7 +12,7 @@ from .components.request import Request, Params
 from .components import (
     NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 )
-from .components.dialogue import DialogueResponder, DialogOutput
+from .components.dialogue import DialogueResponder, DialogueOutput
 from .resource_loader import ResourceLoader
 from .exceptions import AllowedNlpClassesKeyError
 
@@ -168,9 +168,9 @@ class ApplicationManager:
         dm_response = self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
 
-        output = DialogOutput(domain=request.domain, intent=request.intent,
-                              entities=request.entities, context=request.context,
-                              **response.to_json())
+        output = DialogueOutput(domain=request.domain, intent=request.intent,
+                                entities=request.entities, context=request.context,
+                                **DialogueOutput.to_json(response))
         return output
 
     async def _parse_async(self, text, params=None, context=None, frame=None,
@@ -220,9 +220,9 @@ class ApplicationManager:
         dm_response = await self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
 
-        output = DialogOutput(domain=request.domain, intent=request.intent,
-                              entities=request.entities, context=request.context,
-                              **response.to_json())
+        output = DialogueOutput(domain=request.domain, intent=request.intent,
+                                entities=request.entities, context=request.context,
+                                **DialogueOutput.to_json(response))
         return output
 
     def _pre_nlp(self, params):
@@ -261,7 +261,7 @@ class ApplicationManager:
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
         new_history = list(copy.deepcopy(request.history))
-        prev_request = dm_response.to_json()
+        prev_request = DialogueOutput.to_json(dm_response)
         prev_request.pop('history')
         new_history.insert(0, prev_request)
 

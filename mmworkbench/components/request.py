@@ -11,18 +11,7 @@ class Params:
     timestamp = attr.ib(default=0)
     dynamic_resource = attr.ib(default=immutables.Map(),
                                converter=immutables.Map)
-
-    def to_json(self):
-        # We have to do this since attr.asdict cannot serialize immutables Map objects
-        serialized_obj = {}
-        for k, v in vars(self).items():
-            if type(v) == immutables._map.Map:
-                serialized_obj[k] = dict(v)
-            elif type(v) == Params:
-                serialized_obj[k] = v.to_json()
-            else:
-                serialized_obj[k] = v
-        return serialized_obj
+    dialogue_flow = attr.ib(default=None)
 
 
 @attr.s(frozen=True, kw_only=True)
@@ -42,15 +31,3 @@ class Request:
     nbest_transcripts_text = attr.ib(default=tuple(), converter=tuple)
     nbest_transcripts_entities = attr.ib(default=tuple(), converter=tuple)
     nbest_aligned_entities = attr.ib(default=tuple(), converter=tuple)
-
-    def to_json(self):
-        # Have to do this since attr.asdict cannot serialize immutables Map objects
-        serialized_obj = {}
-        for k, v in vars(self).items():
-            if type(v) == immutables._map.Map:
-                serialized_obj[k] = dict(v)
-            elif type(v) == Params:
-                serialized_obj[k] = v.to_json()
-            else:
-                serialized_obj[k] = v
-        return serialized_obj

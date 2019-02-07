@@ -649,22 +649,12 @@ class DialogueResponder:
         """Exit the current flow by clearing the target dialogue state"""
         self.params.target_dialogue_state = None
 
-    def to_json(self):
-        attrs_to_serialize = ['params', 'directives', 'dialogue_state',
-                              'history', 'frame', 'slots', 'request']
-        serialized_obj = {}
-        for attribute, value in vars(self).items():
-            if attribute not in attrs_to_serialize or value is None:
-                continue
-            serialized_obj[attribute] = value
-        return serialized_obj
-
     @property
     def dialogue_flow(self):
         return vars(self.params).get('dialogue_flow', None)
 
 
-class DialogOutput(DialogueResponder):
+class DialogueOutput(DialogueResponder):
     def __init__(self, frame, params, history, slots,
                  request, context={}, domain='', intent='', entities='',
                  dialogue_state=None, directives=[]):
@@ -675,18 +665,16 @@ class DialogOutput(DialogueResponder):
         self.entities = entities
         self.context = context
 
-    def to_json(self):
+    @staticmethod
+    def to_json(instance):
         serialized_obj = {}
-        for attribute, value in vars(self).items():
+        for attribute, value in vars(instance).items():
             if type(value) == Params or type(value) == Request:
-                serialized_obj[attribute] = value.to_json()
+                serialized_obj[attribute] = DialogueOutput.to_json(value)
             elif type(value) == immutables._map.Map:
                 serialized_obj[attribute] = dict(value)
             else:
                 serialized_obj[attribute] = value
-
-        # We pop out the history for the response
-        serialized_obj.pop('history')
         return serialized_obj
 
 

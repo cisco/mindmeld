@@ -24,7 +24,7 @@ def assert_reply(directives, templates, *, start_index=0, slots=None):
 
 
 def assert_target_dialogue_state(convo, target_dialogue_state):
-    assert convo.params.target_dialogue_state == target_dialogue_state
+    assert convo.params['target_dialogue_state'] == target_dialogue_state
 
 
 @pytest.mark.conversation
