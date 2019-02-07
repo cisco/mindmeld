@@ -2,13 +2,9 @@
 """
 This module contains the application manager
 """
-import copy
 import logging
 
-from pytz import timezone
-from pytz.exceptions import UnknownTimeZoneError
-
-from .components.request import Request, Params
+from .components.request import Request, Params, FrozenParams
 from .components import (
     NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 )
@@ -18,49 +14,6 @@ from .exceptions import AllowedNlpClassesKeyError
 
 
 logger = logging.getLogger(__name__)
-
-
-def _validate_generic(name, ptype):
-    def validator(param):
-        if not isinstance(param, ptype):
-            logger.warning("Invalid %r param: %s is not of type %s.", name, param, ptype)
-            param = None
-        return param
-    return validator
-
-
-def _validate_time_zone(param=None):
-    """Validates time zone parameters
-
-    Args:
-        param (str, optional): The time zone parameter
-
-    Returns:
-        str: The passed in time zone
-    """
-    if not param:
-        return None
-    if not isinstance(param, str):
-        logger.warning("Invalid %r param: %s is not of type %s.", 'time_zone', param, str)
-        return None
-    try:
-        timezone(param)
-    except UnknownTimeZoneError:
-        logger.warning("Invalid %r param: %s is not a valid time zone.", 'time_zone', param)
-        return None
-    return param
-
-
-PARAM_VALIDATORS = {
-    'allowed_intents': _validate_generic('allowed_intents', list),
-
-    # TODO: use a better validator for this
-    'target_dialogue_state': _validate_generic('target_dialogue_state', str),
-
-    'time_zone': _validate_time_zone,
-    'timestamp': _validate_generic('timestamp', int),
-    'dynamic_resource': _validate_generic('dynamic_resource', dict)
-}
 
 
 class ApplicationManager:
@@ -119,11 +72,20 @@ class ApplicationManager:
         # TODO: make an async nlp
         # await self.nlp.load()
 
+    def _pre_dm(self, processed_query, context, params, frame, history):
+        request = self.request_class(context=context, history=history, frame=frame,
+                                     params=FrozenParams(previous_params=params), **processed_query)
+
+        response = self.responder_class(frame=frame, params=Params(previous_params=params),
+                                        slots={}, history=history, request=request,
+                                        directives=[])
+        return request, response
+
     def parse(self, text, params=None, context=None, frame=None, history=None, verbose=False):
         """
         Args:
             text (str): The text of the message sent by the user
-            params (Params, optional): Contains parameters which modify how text is parsed
+            params (Params/dict, optional): Contains parameters which modify how text is parsed
             params.allowed_intents (list, optional): A list of allowed intents
                 for model consideration
             params.target_dialogue_state (str, optional): The target dialogue state
@@ -149,7 +111,15 @@ class ApplicationManager:
             return self._parse_async(text, params=params, context=context, frame=frame,
                                      history=history, verbose=verbose)
 
-        params = params or Params()
+        params = params or FrozenParams()
+        if isinstance(params, dict):
+            params = FrozenParams(**params)
+        elif isinstance(params, Params):
+            params = FrozenParams(**DialogueOutput.to_json(params))
+        elif not isinstance(params, FrozenParams):
+            raise TypeError(f"Invalid type for params argument. "
+                            f"Should be dict or {FrozenParams.__name__}.")
+
         history = history or []
         frame = frame or {}
         context = context or {}
@@ -157,14 +127,9 @@ class ApplicationManager:
 
         nlp_hierarchy, process_params, dm_params = self._pre_nlp(params)
         processed_query = self.nlp.process(text, nlp_hierarchy, **process_params)
-
-        request = self.request_class(context=context, history=history, frame=frame,
-                                     params=Params(previous_params=params), **processed_query)
-
-        response = self.responder_class(frame=frame, params=Params(previous_params=params),
-                                        slots={}, history=history, request=request,
-                                        directives=[])
-
+        request, response = self._pre_dm(processed_query=processed_query,
+                                         context=context, history=history,
+                                         frame=frame, params=params)
         dm_response = self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
 
@@ -200,21 +165,25 @@ class ApplicationManager:
            https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
         """
-        params = params or Params()
+        params = params or FrozenParams()
+        if isinstance(params, dict):
+            params = FrozenParams(**params)
+        elif isinstance(params, Params):
+            params = FrozenParams(**DialogueOutput.to_json(params))
+        elif not isinstance(params, FrozenParams):
+            raise TypeError(f"Invalid type for params argument. "
+                            f"Should be dict or {FrozenParams.__name__}.")
+
         context = context or {}
         history = history or []
         frame = frame or {}
 
         nlp_hierarchy, process_params, dm_params = self._pre_nlp(params)
         processed_query = self.nlp.process(text, nlp_hierarchy, **process_params)
+        request, response = self._pre_dm(processed_query=processed_query,
+                                         context=context, history=history,
+                                         frame=frame, params=params)
 
-        request = self.request_class(context=context, history=history,
-                                     frame=frame, params=Params(previous_params=params),
-                                     **processed_query)
-
-        response = self.responder_class(frame=frame, params=Params(previous_params=params),
-                                        slots={}, history=history, request=request,
-                                        directives=[])
         # TODO: make an async nlp
         # processed_query = await self.nlp.process(text, nlp_hierarchy, **process_params)
         dm_response = await self.dialogue_manager.apply_handler(request, response, **dm_params)
@@ -227,15 +196,8 @@ class ApplicationManager:
 
     def _pre_nlp(self, params):
         # validate params
-        allowed_intents = self._validate_param(params, 'allowed_intents')
-        target_dialogue_state = self._validate_param(params, 'target_dialogue_state')
-
-        # params for dm.apply_handler()
-        dm_params = {'target_dialogue_state': target_dialogue_state}
-
-        # params for nlp.process()
-        process_params = {param: self._validate_param(params, param)
-                          for param in ('time_zone', 'timestamp', 'dynamic_resource')}
+        allowed_intents = params.validate_param('allowed_intents')
+        target_dialogue_state = params.validate_param('target_dialogue_state')
 
         # Validate target dialogue state
         if target_dialogue_state and target_dialogue_state not in self.dialogue_manager.handler_map:
@@ -256,23 +218,20 @@ class ApplicationManager:
                     "Not applying domain/intent restrictions this "
                     "turn".format(ex, allowed_intents))
 
-        return nlp_hierarchy, process_params, dm_params
+        return nlp_hierarchy, params.nlp_params(), params.dm_params()
 
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
-        new_history = list(copy.deepcopy(request.history))
         prev_request = DialogueOutput.to_json(dm_response)
         prev_request.pop('history')
-        new_history.insert(0, prev_request)
 
         # limit length of history
-        new_history = new_history[:self.MAX_HISTORY_LEN]
-        dm_response.history = new_history
+        new_history = (prev_request,) + request.history
+        dm_response.history = new_history[:self.MAX_HISTORY_LEN]
 
         # validate outgoing params
-        self._validate_param(dm_response.params, 'allowed_intents', mode='outgoing')
-        self._validate_param(dm_response.params, 'target_dialogue_state', mode='outgoing')
-
+        dm_response.params.validate_param('allowed_intents', mode='outgoing')
+        dm_response.params.validate_param('target_dialogue_state', mode='outgoing')
         return dm_response
 
     def add_middleware(self, middleware):
@@ -292,11 +251,3 @@ class ApplicationManager:
             **kwargs (dict): A list of options which specify the dialogue rule
         """
         self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)
-
-    @staticmethod
-    def _validate_param(params, name, mode='incoming'):
-        validator = PARAM_VALIDATORS.get(name)
-        param = vars(params).get(name)
-        if param:
-            return validator(param)
-        return param

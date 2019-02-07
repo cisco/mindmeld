@@ -9,7 +9,7 @@ import json
 import immutables
 
 from .. import path
-from .request import Params, Request
+from .request import Params, Request, FrozenParams
 
 
 mod_logger = logging.getLogger(__name__)
@@ -669,7 +669,7 @@ class DialogueOutput(DialogueResponder):
     def to_json(instance):
         serialized_obj = {}
         for attribute, value in vars(instance).items():
-            if type(value) == Params or type(value) == Request:
+            if type(value) == Params or type(value) == Request or type(value) == FrozenParams:
                 serialized_obj[attribute] = DialogueOutput.to_json(value)
             elif type(value) == immutables._map.Map:
                 serialized_obj[attribute] = dict(value)
@@ -726,7 +726,7 @@ class Conversation:
         self.frame = {}
         self.default_params = default_params or Params()
         self.force_sync = force_sync
-        self.params = Params()
+        self.params = FrozenParams()
 
     @property
     def session(self):
@@ -809,10 +809,10 @@ class Conversation:
         internal_params = copy.deepcopy(self.params)
 
         if type(params) == dict:
-            params = Params(**params)
+            params = FrozenParams(**params)
 
         if type(internal_params) == dict:
-            internal_params = Params(**internal_params)
+            internal_params = FrozenParams(**internal_params)
 
         if params:
             # If the params arg is explicitly set, overight the internal params
@@ -845,10 +845,10 @@ class Conversation:
         internal_params = copy.deepcopy(self.params)
 
         if type(params) == dict:
-            params = Params(**params)
+            params = FrozenParams(**params)
 
         if type(internal_params) == dict:
-            internal_params = Params(**internal_params)
+            internal_params = FrozenParams(**internal_params)
 
         if params:
             # If the params arg is explicitly set, overight the internal params

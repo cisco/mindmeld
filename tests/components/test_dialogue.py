@@ -13,7 +13,7 @@ These tests apply regardless of async/await support.
 import pytest
 
 from mmworkbench.components import Conversation, DialogueManager, DialogueResponder
-from mmworkbench.components.request import Request, Params
+from mmworkbench.components.request import Request, Params, FrozenParams
 from mmworkbench.components.dialogue import DialogueOutput
 
 
@@ -174,6 +174,6 @@ def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
     convo.params = Params(allowed_intents=['store_info.find_nearest_store'],
                           target_dialogue_state='greeting')
     convo.say('close door')
-    assert convo.params == DialogueOutput.to_json(Params(previous_params=Params(
-        allowed_intents=['store_info.find_nearest_store'],
+    assert convo.params == DialogueOutput.to_json(Params(previous_params=FrozenParams(
+        allowed_intents=('store_info.find_nearest_store',),
         target_dialogue_state='greeting')))

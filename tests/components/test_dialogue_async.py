@@ -15,7 +15,7 @@ import asyncio
 import pytest
 from mmworkbench.components import Conversation, DialogueManager
 from mmworkbench.components.dialogue import DialogueOutput
-from mmworkbench.components.request import Params
+from mmworkbench.components.request import Params, FrozenParams
 
 from .test_dialogue import create_request, create_response
 
@@ -246,9 +246,9 @@ async def test_convo_params_are_cleared(async_kwik_e_mart_app, kwik_e_mart_app_p
         allowed_intents=['store_info.find_nearest_store'],
         target_dialogue_state='welcome')
     await convo.say('close door')
-    assert convo.params == Params(
-        previous_params=Params(allowed_intents=['store_info.find_nearest_store'],
-                               target_dialogue_state='welcome'))
+    assert convo.params == FrozenParams(
+        previous_params=FrozenParams(allowed_intents=['store_info.find_nearest_store'],
+                                     target_dialogue_state='welcome'))
 
 
 @pytest.mark.conversation
