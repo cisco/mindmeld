@@ -6,9 +6,10 @@ import copy
 import logging
 import random
 import json
+import immutables
 
 from .. import path
-from .request import Params
+from .request import Params, Request
 
 
 mod_logger = logging.getLogger(__name__)
@@ -126,7 +127,7 @@ class DialogueStateRule:
         """Applies the dialogue state rule to the given context.
 
         Args:
-            context (Context): A request context
+            request (Request): A request object
 
         Returns:
             bool: whether or not the context matches
@@ -305,7 +306,8 @@ class DialogueManager:
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
-            context (dict): The context object from the DM
+            request (Request): The request object
+            responder (DialogueResponder): The responder object
             target_dialogue_state (str, optional): The target dialogue state
 
         Returns:
@@ -324,7 +326,8 @@ class DialogueManager:
         """Applies the dialogue state handler for the most complex matching rule
 
         Args:
-            context (dict): The context object from the DM
+            request (Request): The request object from the DM
+            responder (DialogueResponder): The responder from the DM
             target_dialogue_state (str, optional): The target dialogue state
 
         Returns:
@@ -390,13 +393,13 @@ class DialogueFlow(DialogueManager):
         self.app = app
         self.exit_flow_states = []
 
-        def _set_target_state(context, responder):
+        def _set_target_state(request, responder):
             responder.set_target_dialogue_state(self.flow_state)
-            return entrance_handler(context, responder)
+            return entrance_handler(request, responder)
 
-        async def _async_set_target_state(context, responder):
+        async def _async_set_target_state(request, responder):
             responder.set_target_dialogue_state(self.flow_state)
-            return await entrance_handler(context, responder)
+            return await entrance_handler(request, responder)
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
         app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
@@ -464,7 +467,7 @@ class DialogueFlow(DialogueManager):
         """
         if self.async_mode:
             return self.apply_handler_async(request, responder)
-        request.context['dialogue_flow'] = self.name
+        responder.params.dialogue_flow = self.name
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
@@ -473,7 +476,7 @@ class DialogueFlow(DialogueManager):
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
     async def apply_handler_async(self, request, responder):
-        request.context['dialogue_flow'] = self.name
+        responder.params.dialogue_flow = self.name
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
@@ -650,11 +653,15 @@ class DialogueResponder:
         attrs_to_serialize = ['params', 'directives', 'dialogue_state',
                               'history', 'frame', 'slots', 'request']
         serialized_obj = {}
-        for attr, value in vars(self).items():
-            if attr not in attrs_to_serialize or value is None:
+        for attribute, value in vars(self).items():
+            if attribute not in attrs_to_serialize or value is None:
                 continue
-            serialized_obj[attr] = value
+            serialized_obj[attribute] = value
         return serialized_obj
+
+    @property
+    def dialogue_flow(self):
+        return vars(self.params).get('dialogue_flow', None)
 
 
 class DialogOutput(DialogueResponder):
@@ -669,14 +676,17 @@ class DialogOutput(DialogueResponder):
         self.context = context
 
     def to_json(self):
-        attrs_to_serialize = ['params', 'directives', 'dialogue_state',
-                              'history', 'frame', 'slots', 'request',
-                              'domain', 'intent', 'entities']
         serialized_obj = {}
-        for attr, value in vars(self).items():
-            if attr not in attrs_to_serialize or value is None:
-                continue
-            serialized_obj[attr] = value
+        for attribute, value in vars(self).items():
+            if type(value) == Params or type(value) == Request:
+                serialized_obj[attribute] = value.to_json()
+            elif type(value) == immutables._map.Map:
+                serialized_obj[attribute] = dict(value)
+            else:
+                serialized_obj[attribute] = value
+
+        # We pop out the history for the response
+        serialized_obj.pop('history')
         return serialized_obj
 
 

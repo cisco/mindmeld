@@ -78,8 +78,10 @@ class WorkbenchServer:
             # add request id to response
             # use the passed in id if any
             request_id = request_json.get('request_id', str(uuid.uuid4()))
-            response['request_id'] = request_id
-            return jsonify(response)
+            response.request_id = request_id
+
+            to_dict_version = response.to_json()
+            return jsonify(to_dict_version)
 
         @server.before_request
         def _before_request(*args, **kwargs):

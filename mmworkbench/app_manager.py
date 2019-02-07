@@ -260,7 +260,7 @@ class ApplicationManager:
 
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
-        new_history = copy.deepcopy(request.history)
+        new_history = list(copy.deepcopy(request.history))
         prev_request = dm_response.to_json()
         prev_request.pop('history')
         new_history.insert(0, prev_request)
