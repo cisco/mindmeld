@@ -95,11 +95,11 @@ class FrozenParams(Params):
 
 @attr.s(frozen=True, kw_only=True)
 class Request:
-    domain = attr.ib()
-    intent = attr.ib()
+    domain = attr.ib(default=None)
+    intent = attr.ib(default=None)
     entities = attr.ib(default=tuple(), converter=tuple)
     history = attr.ib(default=tuple(), converter=tuple)
-    text = attr.ib()
+    text = attr.ib(default=None)
     frame = attr.ib(default=immutables.Map(),
                     converter=immutables.Map)
     params = attr.ib(default=FrozenParams())

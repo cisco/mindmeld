@@ -20,13 +20,12 @@ from mmworkbench.components.dialogue import DialogueOutput
 def create_request(domain, intent, entities=None):
     """Creates a request object for use by the dialogue manager"""
     entities = entities or ()
-    return Request(domain=domain, intent=intent, entities=entities, history=[],
-                   text='', frame={}, params={}, context={})
+    return Request(domain=domain, intent=intent, entities=entities, text='')
 
 
-def create_response(request):
+def create_responder(request):
     """Creates a response object for use by the dialogue manager"""
-    return DialogueResponder(frame={}, params={}, history=[], slots={}, request=request)
+    return DialogueResponder(request=request)
 
 
 @pytest.fixture
@@ -57,7 +56,7 @@ class TestDialogueManager:
         """Default dialogue state when no rules match
            This will select the rule with default=True"""
         request = create_request('other', 'other')
-        response = create_response(request)
+        response = create_responder(request)
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'default'
 
@@ -73,35 +72,35 @@ class TestDialogueManager:
     def test_domain(self, dm):
         """Correct dialogue state is found for a domain"""
         request = create_request('domain', 'other')
-        response = create_response(request)
+        response = create_responder(request)
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'domain'
 
     def test_domain_intent(self, dm):
         """Correct state should be found for domain and intent"""
         request = create_request('domain', 'intent')
-        response = create_response(request)
+        response = create_responder(request)
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'domain_intent'
 
     def test_intent(self, dm):
         """Correct state should be found for intent"""
         request = create_request('other', 'intent')
-        response = create_response(request)
+        response = create_responder(request)
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'intent'
 
     def test_intent_entity(self, dm):
         """Correctly match intent and entity"""
         request = create_request('domain', 'intent', [{'type': 'entity_2'}])
-        response = create_response(request)
+        response = create_responder(request)
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'intent_entity_2'
 
     def test_intent_entity_tiebreak(self, dm):
         """Correctly break ties between rules of equal complexity"""
         request = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'}])
-        response = create_response(request)
+        response = create_responder(request)
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'intent_entity_1'
 
@@ -109,14 +108,14 @@ class TestDialogueManager:
         """Correctly break ties between rules of equal complexity"""
         request = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'},
                                                       {'type': 'entity_3'}])
-        response = create_response(request)
+        response = create_responder(request)
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'intent_entities'
 
     def test_target_dialogue_state_management(self, dm):
         """Correctly sets the dialogue state based on the target_dialogue_state"""
         request = create_request('domain', 'intent')
-        response = create_response(request)
+        response = create_responder(request)
         result = dm.apply_handler(request, response, target_dialogue_state='intent_entity_2')
         assert result.dialogue_state == 'intent_entity_2'
 
@@ -138,7 +137,7 @@ class TestDialogueManager:
         dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
 
         request = create_request('domain', 'middle')
-        response = create_response(request)
+        response = create_responder(request)
 
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'middleware_test'
@@ -162,7 +161,7 @@ class TestDialogueManager:
         dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
 
         request = create_request('domain', 'middle')
-        response = create_response(request)
+        response = create_responder(request)
 
         result = dm.apply_handler(request, response)
         assert result.dialogue_state == 'middleware_test'

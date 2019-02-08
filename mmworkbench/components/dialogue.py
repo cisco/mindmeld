@@ -513,21 +513,27 @@ class DialogueResponder:
     DirectiveNames = DirectiveNames
     DirectiveTypes = DirectiveTypes
 
-    def __init__(self, frame, params, history, slots, request,
-                 dialogue_state=None, directives=[], **kwargs):
-        """Initializes a dialogue responder
+    def __init__(self, frame=None, params=None, history=None, slots=None, request=None,
+                 dialogue_state=None, directives=None, **kwargs):
+        """
+        Initializes a dialogue responder
 
         Args:
-            slots (dict): Values to populate the placeholder slots in the natural language
-                response
+            frame: The frame object
+            params: The params object
+            history: The history of the responder
+            slots: The slots of the responder
+            request: The request object associated with the responder
+            dialogue_state: The dialog
+            directives: The directives of the responder
         """
-        self.directives = directives
-        self.frame = frame
-        self.params = params
+        self.directives = directives or []
+        self.frame = frame or {}
+        self.params = params or Params()
         self.dialogue_state = dialogue_state
-        self.slots = slots
-        self.history = history
-        self.request = request
+        self.slots = slots or {}
+        self.history = history or []
+        self.request = request or Request()
 
     def reply(self, text):
         """Adds a 'reply' directive
@@ -656,14 +662,14 @@ class DialogueResponder:
 
 class DialogueOutput(DialogueResponder):
     def __init__(self, frame, params, history, slots,
-                 request, context={}, domain='', intent='', entities='',
-                 dialogue_state=None, directives=[]):
+                 request, context=None, domain='', intent='', entities='',
+                 dialogue_state=None, directives=None):
         super().__init__(frame, params, history, slots, request,
                          dialogue_state=dialogue_state, directives=directives)
         self.domain = domain
         self.intent = intent
         self.entities = entities
-        self.context = context
+        self.context = context if context else {}
 
     @staticmethod
     def to_json(instance):

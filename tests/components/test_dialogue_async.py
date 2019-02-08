@@ -17,7 +17,7 @@ from mmworkbench.components import Conversation, DialogueManager
 from mmworkbench.components.dialogue import DialogueOutput
 from mmworkbench.components.request import Params, FrozenParams
 
-from .test_dialogue import create_request, create_response
+from .test_dialogue import create_request, create_responder
 
 
 @pytest.fixture
@@ -172,7 +172,7 @@ class TestDialogueManager:
         dm.add_dialogue_rule(
             'middleware_test', _handler, intent='middle')
         request = create_request('domain', 'middle')
-        response = create_response(request)
+        response = create_responder(request)
         result = await dm.apply_handler(request, response)
         assert result.dialogue_state == 'middleware_test'
         assert result.handler
@@ -207,7 +207,7 @@ async def test_async_handler(dm):
     """Test asynchronous dialogue state handler works correctly"""
     assert not dm.called_async_handler
     request = create_request('domain', 'async')
-    response = create_response(request)
+    response = create_responder(request)
     result = await dm.apply_handler(request, response)
     assert dm.called_async_handler
     assert result.dialogue_state == 'async_handler'
@@ -230,7 +230,7 @@ async def test_async_middleware(dm):
     dm.add_middleware(_middle)
     dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
     request = create_request('domain', 'middle')
-    response = create_response(request)
+    response = create_responder(request)
     result = await dm.apply_handler(request, response)
     dm.apply_handler(request, response)
     assert result.dialogue_state == 'middleware_test'
