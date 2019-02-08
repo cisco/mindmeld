@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+try:
+    # register test module for assertion rewrite
+    import pytest
+    pytest.register_assert_rewrite('mmworkbench.test')
+except ImportError:
+    pass  # no worries
+
 from .app import Application
 from .components import (Conversation, DialogueResponder, DialogueContext,
                          NaturalLanguageProcessor, QuestionAnswerer)
