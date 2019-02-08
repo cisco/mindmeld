@@ -711,7 +711,7 @@ class Conversation:
             nlp (NaturalLanguageProcessor, optional): A natural language processor for the app.
                 If passed, changes to this processor will affect the response from `say()`
             context (dict, optional): The context to be used in the conversation
-            default_params (dict, optional): The default params to use with each turn. These
+            default_params (FrozenParams, optional): The default params to use with each turn. These
                 defaults will be overridden by params passed for each turn.
             force_sync (bool, optional): Force synchronous return for `say()` and `process()`
                 even when app is in async mode.
@@ -724,7 +724,7 @@ class Conversation:
         self.context = context or {}
         self.history = []
         self.frame = {}
-        self.default_params = default_params or Params()
+        self.default_params = default_params or FrozenParams()
         self.force_sync = force_sync
         self.params = FrozenParams()
 
@@ -907,4 +907,4 @@ class Conversation:
     def reset(self):
         self.history = []
         self.frame = {}
-        self.params = Params()
+        self.params = FrozenParams()
