@@ -193,3 +193,33 @@ def test_get_boundary_counts_sequential(kwik_e_mart_nlp, expected, predicted, ex
     for key in predicted_counts.keys():
         if predicted_counts[key] != expected_counts.get(key, 0):
             assert False
+
+
+def test_view_extracted_features(kwik_e_mart_nlp):
+    config = {
+        'model_type': 'tagger',
+        'model_settings': {
+            'classifier_type': 'memm',
+            'tag_scheme': 'IOB',
+            'feature_scaler': 'max-abs'
+        },
+        'params': {
+            'penalty': 'l2',
+            'C': 10000
+        },
+        'features': {
+            'bag-of-words-seq': {
+                'ngram_lengths_to_start_positions': {
+                    1: [0],
+                }
+            },
+        }
+    }
+    er = kwik_e_mart_nlp.domains["store_info"].intents["get_store_hours"].entity_recognizer
+    er.fit(**config)
+    extracted_features = er.view_extracted_features("Main st store hours")
+    expected_features = [{'bag_of_words|length:1|word_pos:0': 'main'},
+                         {'bag_of_words|length:1|word_pos:0': 'st'},
+                         {'bag_of_words|length:1|word_pos:0': 'store'},
+                         {'bag_of_words|length:1|word_pos:0': 'hours'}]
+    assert extracted_features == expected_features
