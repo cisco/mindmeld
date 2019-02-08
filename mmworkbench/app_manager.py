@@ -10,7 +10,6 @@ from .components import (
 )
 from .components.dialogue import DialogueResponder, DialogueOutput
 from .resource_loader import ResourceLoader
-from .exceptions import AllowedNlpClassesKeyError
 
 
 logger = logging.getLogger(__name__)
@@ -117,16 +116,17 @@ class ApplicationManager:
         elif isinstance(params, Params):
             params = FrozenParams(**DialogueOutput.to_json(params))
         elif not isinstance(params, FrozenParams):
-            raise TypeError(f"Invalid type for params argument. "
-                            f"Should be dict or {FrozenParams.__name__}.")
+            raise TypeError("Invalid type for params argument. "
+                            "Should be dict or {}".format(FrozenParams.__name__))
 
         history = history or []
         frame = frame or {}
         context = context or {}
         # TODO: what do we do with verbose???
 
-        nlp_hierarchy, process_params, dm_params = self._pre_nlp(params)
-        processed_query = self.nlp.process(text, nlp_hierarchy, **process_params)
+        allowed_intents, process_params, dm_params = self._pre_nlp(params)
+        processed_query = self.nlp.process(query_text=text, allowed_intents=allowed_intents,
+                                           **process_params)
         request, response = self._pre_dm(processed_query=processed_query,
                                          context=context, history=history,
                                          frame=frame, params=params)
@@ -171,19 +171,20 @@ class ApplicationManager:
         elif isinstance(params, Params):
             params = FrozenParams(**DialogueOutput.to_json(params))
         elif not isinstance(params, FrozenParams):
-            raise TypeError(f"Invalid type for params argument. "
-                            f"Should be dict or {FrozenParams.__name__}.")
+            raise TypeError("Invalid type for params argument. "
+                            "Should be dict or {}".format(FrozenParams.__name__))
 
         context = context or {}
         history = history or []
         frame = frame or {}
 
-        nlp_hierarchy, process_params, dm_params = self._pre_nlp(params)
-        processed_query = self.nlp.process(text, nlp_hierarchy, **process_params)
+        allowed_intents, process_params, dm_params = self._pre_nlp(params)
+        processed_query = self.nlp.process(query_text=text,
+                                           allowed_intents=allowed_intents,
+                                           **process_params)
         request, response = self._pre_dm(processed_query=processed_query,
                                          context=context, history=history,
                                          frame=frame, params=params)
-
         # TODO: make an async nlp
         # processed_query = await self.nlp.process(text, nlp_hierarchy, **process_params)
         dm_response = await self.dialogue_manager.apply_handler(request, response, **dm_params)
@@ -197,28 +198,8 @@ class ApplicationManager:
     def _pre_nlp(self, params):
         # validate params
         allowed_intents = params.validate_param('allowed_intents')
-        target_dialogue_state = params.validate_param('target_dialogue_state')
-
-        # Validate target dialogue state
-        if target_dialogue_state and target_dialogue_state not in self.dialogue_manager.handler_map:
-            logger.error("Target dialogue state {} does not match any dialogue state names "
-                         "in for the application. Not applying the target dialogue state "
-                         "this turn.".format(target_dialogue_state))
-            target_dialogue_state = None
-
-        nlp_hierarchy = None
-        if allowed_intents:
-            try:
-                nlp_hierarchy = self.nlp.extract_allowed_intents(allowed_intents)
-            except (AllowedNlpClassesKeyError, ValueError, KeyError) as ex:
-                # We have to print the error object since it sometimes contains a message
-                # and sometimes it doesn't, like a ValueError.
-                logger.error(
-                    "Validation error '{}' on input allowed intents {}. "
-                    "Not applying domain/intent restrictions this "
-                    "turn".format(ex, allowed_intents))
-
-        return nlp_hierarchy, params.nlp_params(), params.dm_params()
+        return allowed_intents, params.nlp_params(), params.dm_params(
+            self.dialogue_manager.handler_map)
 
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history

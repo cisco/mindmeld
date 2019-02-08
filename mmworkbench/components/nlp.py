@@ -358,6 +358,18 @@ class NaturalLanguageProcessor(Processor):
         """The domains supported by this application"""
         return self._children
 
+    def process(self, query_text, allowed_nlp_classes=None, allowed_intents=None,
+                language=None, time_zone=None, timestamp=None,
+                dynamic_resource=None, verbose=False):
+        if allowed_intents is not None and allowed_nlp_classes is not None:
+            raise TypeError("'allowed_intents' and 'allowed_nlp_classes' cannot be used together")
+        if allowed_intents:
+            allowed_nlp_classes = self.extract_allowed_intents(allowed_intents)
+        return super().process(query_text, allowed_nlp_classes=allowed_nlp_classes,
+                               language=language, time_zone=time_zone,
+                               timestamp=timestamp, dynamic_resource=dynamic_resource,
+                               verbose=verbose)
+
     def _build(self, incremental=False, label_set=None):
         if incremental:
             # During an incremental build, we set the incremental_timestamp for caching
