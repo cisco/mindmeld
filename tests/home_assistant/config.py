@@ -46,7 +46,6 @@ DOMAIN_MODEL_CONFIG = {
         "in-gaz": {},
         "exact": {"scaling": 10},
         "gaz-freq": {},
-        "freq": {"bins": 5},
-        "average-token-length": {}  # Custom feature
+        "freq": {"bins": 5}
     }
 }

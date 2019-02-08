@@ -98,6 +98,21 @@ def safe_path(func):
     return _wrapper
 
 
+@safe_path
+def get_current_app_path(path):
+    """
+    Args:
+        path (str): The directory path inside a particular application
+
+    Returns:
+        str: The path for the root directory of this application
+    """
+    app_path = path
+    while 'app.py' not in os.listdir(app_path):
+        app_path = os.path.dirname(app_path)
+    return app_path
+
+
 def _resolve_model_name(path, model_name=None):
     if model_name:
         path, ext = os.path.splitext(path)
