@@ -8,7 +8,7 @@ from .components.request import Request, Params, FrozenParams
 from .components import (
     NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 )
-from .components.dialogue import DialogueResponder, DialogueOutput
+from .components.dialogue import DialogueResponder
 from .resource_loader import ResourceLoader
 
 
@@ -114,7 +114,7 @@ class ApplicationManager:
         if isinstance(params, dict):
             params = FrozenParams(**params)
         elif isinstance(params, Params):
-            params = FrozenParams(**DialogueOutput.to_json(params))
+            params = FrozenParams(**DialogueResponder.to_json(params))
         elif not isinstance(params, FrozenParams):
             raise TypeError("Invalid type for params argument. "
                             "Should be dict or {}".format(FrozenParams.__name__))
@@ -132,11 +132,7 @@ class ApplicationManager:
                                          frame=frame, params=params)
         dm_response = self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
-
-        output = DialogueOutput(domain=request.domain, intent=request.intent,
-                                entities=request.entities, context=request.context,
-                                **DialogueOutput.to_json(response))
-        return output
+        return response
 
     async def _parse_async(self, text, params=None, context=None, frame=None,
                            history=None, verbose=False):
@@ -169,7 +165,7 @@ class ApplicationManager:
         if isinstance(params, dict):
             params = FrozenParams(**params)
         elif isinstance(params, Params):
-            params = FrozenParams(**DialogueOutput.to_json(params))
+            params = FrozenParams(**DialogueResponder.to_json(params))
         elif not isinstance(params, FrozenParams):
             raise TypeError("Invalid type for params argument. "
                             "Should be dict or {}".format(FrozenParams.__name__))
@@ -190,10 +186,7 @@ class ApplicationManager:
         dm_response = await self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
 
-        output = DialogueOutput(domain=request.domain, intent=request.intent,
-                                entities=request.entities, context=request.context,
-                                **DialogueOutput.to_json(response))
-        return output
+        return response
 
     def _pre_nlp(self, params):
         # validate params
@@ -203,7 +196,7 @@ class ApplicationManager:
 
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
-        prev_request = DialogueOutput.to_json(dm_response)
+        prev_request = DialogueResponder.to_json(dm_response)
         prev_request.pop('history')
 
         # limit length of history

@@ -58,7 +58,6 @@ class Params:
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
     dynamic_resource = attr.ib(default={})
-    dialogue_flow = attr.ib(default=None)
 
     def validate_param(self, name, mode='incoming'):
         validator = PARAM_VALIDATORS.get(name)
@@ -90,7 +89,6 @@ class FrozenParams(Params):
     timestamp = attr.ib(default=0)
     dynamic_resource = attr.ib(default=immutables.Map(),
                                converter=immutables.Map)
-    dialogue_flow = attr.ib(default=None)
 
 
 @attr.s(frozen=True, kw_only=True)

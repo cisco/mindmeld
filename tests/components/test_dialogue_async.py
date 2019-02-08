@@ -14,7 +14,7 @@ import asyncio
 
 import pytest
 from mmworkbench.components import Conversation, DialogueManager
-from mmworkbench.components.dialogue import DialogueOutput
+from mmworkbench.components.dialogue import DialogueResponder
 from mmworkbench.components.request import Params, FrozenParams
 
 from .test_dialogue import create_request, create_responder
@@ -262,7 +262,7 @@ def test_convo_force_sync_creation(async_kwik_e_mart_app, kwik_e_mart_app_path):
 
     response = convo.process('close door')
 
-    assert isinstance(response, DialogueOutput)
+    assert isinstance(response, DialogueResponder)
 
 
 @pytest.mark.conversation
@@ -274,4 +274,4 @@ def test_convo_force_sync_invocation(async_kwik_e_mart_app, kwik_e_mart_app_path
 
     response = convo.process('close door', force_sync=True)
 
-    assert isinstance(response, DialogueOutput)
+    assert isinstance(response, DialogueResponder)

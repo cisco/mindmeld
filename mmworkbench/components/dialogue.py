@@ -467,7 +467,6 @@ class DialogueFlow(DialogueManager):
         """
         if self.async_mode:
             return self.apply_handler_async(request, responder)
-        responder.params.dialogue_flow = self.name
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
@@ -476,7 +475,6 @@ class DialogueFlow(DialogueManager):
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
     async def apply_handler_async(self, request, responder):
-        responder.params.dialogue_flow = self.name
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
@@ -640,6 +638,18 @@ class DialogueResponder:
             return random.choice(tuple(items))
         return items
 
+    @staticmethod
+    def to_json(instance):
+        serialized_obj = {}
+        for attribute, value in vars(instance).items():
+            if type(value) == Params or type(value) == Request or type(value) == FrozenParams:
+                serialized_obj[attribute] = DialogueResponder.to_json(value)
+            elif type(value) == immutables._map.Map:
+                serialized_obj[attribute] = dict(value)
+            else:
+                serialized_obj[attribute] = value
+        return serialized_obj
+
     def _process_template(self, text):
         return self._choose(text).format(**self.slots)
 
@@ -654,34 +664,6 @@ class DialogueResponder:
     def exit_flow(self):
         """Exit the current flow by clearing the target dialogue state"""
         self.params.target_dialogue_state = None
-
-    @property
-    def dialogue_flow(self):
-        return vars(self.params).get('dialogue_flow', None)
-
-
-class DialogueOutput(DialogueResponder):
-    def __init__(self, frame, params, history, slots,
-                 request, context=None, domain='', intent='', entities='',
-                 dialogue_state=None, directives=None):
-        super().__init__(frame, params, history, slots, request,
-                         dialogue_state=dialogue_state, directives=directives)
-        self.domain = domain
-        self.intent = intent
-        self.entities = entities
-        self.context = context if context else {}
-
-    @staticmethod
-    def to_json(instance):
-        serialized_obj = {}
-        for attribute, value in vars(instance).items():
-            if type(value) == Params or type(value) == Request or type(value) == FrozenParams:
-                serialized_obj[attribute] = DialogueOutput.to_json(value)
-            elif type(value) == immutables._map.Map:
-                serialized_obj[attribute] = dict(value)
-            else:
-                serialized_obj[attribute] = value
-        return serialized_obj
 
 
 class Conversation:
