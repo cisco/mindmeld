@@ -11,6 +11,7 @@ These tests apply regardless of async/await support.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
+import attr
 
 from mmworkbench.components import Conversation, DialogueManager, DialogueResponder
 from mmworkbench.components.request import Request, Params, FrozenParams
@@ -176,3 +177,22 @@ def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
     assert convo.params == DialogueOutput.to_json(Params(previous_params=FrozenParams(
         allowed_intents=('store_info.find_nearest_store',), target_dialogue_state='greeting'),
         target_dialogue_state='get_store_hours_entry_flow'))
+
+
+def test_immutability_of_request_and_params():
+    """Test the immutability of the request and params objects"""
+    with pytest.raises(attr.exceptions.FrozenInstanceError):
+        params = FrozenParams()
+        params.allowed_intents = []
+
+    with pytest.raises(TypeError):
+        params = FrozenParams()
+        params.dynamic_resource['a'] = 'b'
+
+    with pytest.raises(attr.exceptions.FrozenInstanceError):
+        request = Request()
+        request.params = Params()
+
+    with pytest.raises(TypeError):
+        request = Request()
+        request.frame['a'] = 'b'
