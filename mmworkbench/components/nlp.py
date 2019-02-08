@@ -24,7 +24,8 @@ from .entity_resolver import EntityResolver
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
-from ..exceptions import AllowedNlpClassesKeyError
+from ..path import get_app
+from ..exceptions import AllowedNlpClassesKeyError, WorkbenchImportError
 from ..markup import process_markup, TIME_FORMAT
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
@@ -371,6 +372,13 @@ class NaturalLanguageProcessor(Processor):
                                verbose=verbose)
 
     def _build(self, incremental=False, label_set=None):
+
+        # Load __init__.py so nlp object recognizes custom features in python console
+        try:
+            get_app(self._app_path)
+        except WorkbenchImportError:
+            pass
+
         if incremental:
             # During an incremental build, we set the incremental_timestamp for caching
             current_ts = datetime.datetime.fromtimestamp(int(time.time())).strftime(TIME_FORMAT)

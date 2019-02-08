@@ -6,7 +6,7 @@ from .helpers import GAZETTEER_RSC, register_entity_feature, get_ngram, requires
 @register_entity_feature(feature_name='in-gaz')
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_features(**args):
-    def extractor(example, resources):
+    def _extractor(example, resources):
         _, entities, entity_index = example
         features = {}
         current_entity = entities[entity_index]
@@ -20,7 +20,7 @@ def extract_in_gaz_features(**args):
 
         return features
 
-    return extractor
+    return _extractor
 
 
 @register_entity_feature(feature_name='bag-of-words-before')
@@ -33,7 +33,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **arg
     Returns:
         (function) The feature extractor.
     """
-    def extractor(example, resources):
+    def _extractor(example, resources):
         query, entities, entity_index = example
         features = {}
         tokens = query.normalized_tokens
@@ -47,7 +47,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **arg
 
         return features
 
-    return extractor
+    return _extractor
 
 
 @register_entity_feature(feature_name='bag-of-words-after')
@@ -60,7 +60,7 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
     Returns:
         (function) The feature extractor.
     """
-    def extractor(example, resources):
+    def _extractor(example, resources):
         query, entities, entity_index = example
         features = {}
         tokens = query.normalized_tokens
@@ -74,12 +74,12 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
 
         return features
 
-    return extractor
+    return _extractor
 
 
 @register_entity_feature(feature_name='numeric')
 def extract_numeric_candidate_features(**args):
-    def extractor(example, resources):
+    def _extractor(example, resources):
         query, _, _ = example
         feat_seq = [{}] * len(query.normalized_tokens)
         sys_entities = query.get_system_entity_candidates(['time', 'interval'])
@@ -89,12 +89,12 @@ def extract_numeric_candidate_features(**args):
                 feat_seq[i][feat_name] = 1
         return feat_seq
 
-    return extractor
+    return _extractor
 
 
 @register_entity_feature(feature_name='other-entities')
 def extract_other_entities_features(**args):
-    def extractor(example, resources):
+    def _extractor(example, resources):
         _, entities, entity_index = example
         features = {}
         for idx, entity in enumerate(entities):
@@ -105,4 +105,4 @@ def extract_other_entities_features(**args):
 
         return features
 
-    return extractor
+    return _extractor
