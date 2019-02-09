@@ -111,9 +111,9 @@ class ApplicationManager:
                                      history=history, verbose=verbose)
 
         params = params or FrozenParams()
-        if isinstance(params, dict):
+        if type(params) == dict:
             params = FrozenParams(**params)
-        elif isinstance(params, Params):
+        elif type(params) == Params:
             params = FrozenParams(**DialogueResponder.to_json(params))
         elif not isinstance(params, FrozenParams):
             raise TypeError("Invalid type for params argument. "
@@ -204,8 +204,8 @@ class ApplicationManager:
         dm_response.history = new_history[:self.MAX_HISTORY_LEN]
 
         # validate outgoing params
-        dm_response.params.validate_param('allowed_intents', mode='outgoing')
-        dm_response.params.validate_param('target_dialogue_state', mode='outgoing')
+        dm_response.params.validate_param('allowed_intents')
+        dm_response.params.validate_param('target_dialogue_state')
         return dm_response
 
     def add_middleware(self, middleware):

@@ -394,11 +394,11 @@ class DialogueFlow(DialogueManager):
         self.exit_flow_states = []
 
         def _set_target_state(request, responder):
-            responder.set_target_dialogue_state(self.flow_state)
+            responder.params.target_dialogue_state = self.flow_state
             return entrance_handler(request, responder)
 
         async def _async_set_target_state(request, responder):
-            responder.set_target_dialogue_state(self.flow_state)
+            responder.params.target_dialogue_state = self.flow_state
             return await entrance_handler(request, responder)
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
@@ -470,7 +470,8 @@ class DialogueFlow(DialogueManager):
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
-            responder.set_target_dialogue_state(self.flow_state)
+            responder.params.target_dialogue_state = self.flow_state
+
         handler(request, responder)
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
@@ -478,7 +479,7 @@ class DialogueFlow(DialogueManager):
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
-            responder.set_target_dialogue_state(self.flow_state)
+            responder.params.target_dialogue_state = self.flow_state
         res = handler(request, responder)
         if asyncio.iscoroutine(res):
             await res
@@ -642,9 +643,9 @@ class DialogueResponder:
     def to_json(instance):
         serialized_obj = {}
         for attribute, value in vars(instance).items():
-            if type(value) == Params or type(value) == Request or type(value) == FrozenParams:
+            if isinstance(value, (Params, Request, FrozenParams)):
                 serialized_obj[attribute] = DialogueResponder.to_json(value)
-            elif type(value) == immutables._map.Map:
+            elif isinstance(value, immutables.Map):
                 serialized_obj[attribute] = dict(value)
             else:
                 serialized_obj[attribute] = value
@@ -652,14 +653,6 @@ class DialogueResponder:
 
     def _process_template(self, text):
         return self._choose(text).format(**self.slots)
-
-    def set_target_dialogue_state(self, target_dialogue_state):
-        """Set target dialogue state for the next turn
-
-        Args:
-             target_dialogue_state (string): Handler name for dialogue state of next turn
-        """
-        self.params.target_dialogue_state = target_dialogue_state
 
     def exit_flow(self):
         """Exit the current flow by clearing the target dialogue state"""
@@ -699,7 +692,7 @@ class Conversation:
             nlp (NaturalLanguageProcessor, optional): A natural language processor for the app.
                 If passed, changes to this processor will affect the response from `say()`
             context (dict, optional): The context to be used in the conversation
-            default_params (FrozenParams, optional): The default params to use with each turn. These
+            default_params (Params, optional): The default params to use with each turn. These
                 defaults will be overridden by params passed for each turn.
             force_sync (bool, optional): Force synchronous return for `say()` and `process()`
                 even when app is in async mode.
@@ -712,7 +705,7 @@ class Conversation:
         self.context = context or {}
         self.history = []
         self.frame = {}
-        self.default_params = default_params or FrozenParams()
+        self.default_params = default_params or Params()
         self.force_sync = force_sync
         self.params = FrozenParams()
 

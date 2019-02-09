@@ -59,7 +59,7 @@ class Params:
     timestamp = attr.ib(default=0)
     dynamic_resource = attr.ib(default={})
 
-    def validate_param(self, name, mode='incoming'):
+    def validate_param(self, name):
         validator = PARAM_VALIDATORS.get(name)
         param = vars(self).get(name)
         if param:
