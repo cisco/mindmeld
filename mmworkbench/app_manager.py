@@ -115,7 +115,7 @@ class ApplicationManager:
             params = FrozenParams(**params)
         elif type(params) == Params:
             params = FrozenParams(**DialogueResponder.to_json(params))
-        elif not isinstance(params, FrozenParams):
+        elif not type(params) == FrozenParams:
             raise TypeError("Invalid type for params argument. "
                             "Should be dict or {}".format(FrozenParams.__name__))
 

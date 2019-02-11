@@ -287,7 +287,6 @@ class DialogueManager:
             raise TypeError(msg.format(name))
 
         rule = DialogueStateRule(name, **kwargs)
-
         self.rules.append(rule)
         self.rules.sort(key=cmp_to_key(DialogueStateRule.compare), reverse=True)
         if handler is not None:
