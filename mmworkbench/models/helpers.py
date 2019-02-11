@@ -272,7 +272,7 @@ def merge_gazetteer_resource(resource, dynamic_resource):
 
                 for entity in dynamic_resource[key][entity_type]:
                     new_gaz._update_entity(
-                        entity, dynamic_resource[key][entity_type][entity])
+                        entity.lower(), dynamic_resource[key][entity_type][entity])
 
                 # The new gaz created is a deep copied version of the merged gaz data
                 return_obj[key][entity_type] = new_gaz.to_dict()
