@@ -555,6 +555,50 @@ class NaturalLanguageProcessor(Processor):
             print(intent_inspection)
             print('')
 
+    def process(self, query_text, allowed_nlp_classes=None, allowed_intents=None,
+                language=None, time_zone=None, timestamp=None,
+                dynamic_resource=None, verbose=False):
+        """Processes the given query using the full hierarchy of natural language processing models
+        trained for this application
+
+        Args:
+            query_text (str, or tuple): The raw user text input, or a list of the n-best query
+                transcripts from ASR
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
+                selected for NLP analysis. An example:
+
+                    {
+                        smart_home: {
+                            close_door: {}
+                        }
+                    }
+
+                where smart_home is the domain and close_door is the intent.
+            allowed_intents (list, optional): A list of allowed intents to use for
+            the NLP processing
+            language (str, optional): Language as specified using a 639-2 code;
+                if omitted, English is assumed.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            verbose (bool, optional): If True, returns class probabilities along with class
+                prediction
+
+        Returns:
+            ProcessedQuery: A processed query object that contains the prediction results from
+                applying the full hierarchy of natural language processing models to the input query
+        """
+        if allowed_intents is not None and allowed_nlp_classes is not None:
+            raise TypeError("'allowed_intents' and 'allowed_nlp_classes' cannot be used together")
+        if allowed_intents:
+            allowed_nlp_classes = self.extract_allowed_intents(allowed_intents)
+        return super().process(query_text, allowed_nlp_classes=allowed_nlp_classes,
+                               language=language, time_zone=time_zone,
+                               timestamp=timestamp, dynamic_resource=dynamic_resource,
+                               verbose=verbose)
+
 
 class DomainProcessor(Processor):
     """The domain processor houses the hierarchy of domain-specific natural language processing

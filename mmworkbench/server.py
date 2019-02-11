@@ -14,6 +14,7 @@ from flask_cors import CORS
 
 from ._version import current as __version__
 from .exceptions import BadWorkbenchRequestError
+from .components.dialogue import DialogueResponder
 
 logger = logging.getLogger(__name__)
 
@@ -78,8 +79,8 @@ class WorkbenchServer:
             # add request id to response
             # use the passed in id if any
             request_id = request_json.get('request_id', str(uuid.uuid4()))
-            response['request_id'] = request_id
-            return jsonify(response)
+            response.request_id = request_id
+            return jsonify(DialogueResponder.to_json(response))
 
         @server.before_request
         def _before_request(*args, **kwargs):

@@ -23,7 +23,6 @@ def app_manager(kwik_e_mart_app_path, kwik_e_mart_nlp):
 def test_parse(app_manager):
     response = app_manager.parse('hello')
 
-    fields = {'domain', 'intent', 'entities', 'params', 'request', 'dialogue_state',
-              'directives', 'history'}
+    fields = {'params', 'request', 'dialogue_state', 'directives', 'history'}
     for field in fields:
-        assert field in response
+        assert field in vars(response).keys()
