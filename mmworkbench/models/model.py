@@ -811,7 +811,7 @@ class Model:
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
 
-    def _extract_features(self, example, dynamic_resource=None):
+    def _extract_features(self, example, dynamic_resource=None, tokenizer=None):
         """Gets all features from an example.
 
         Args:
@@ -823,7 +823,7 @@ class Model:
         """
         example_type = self.config.example_type
         feat_set = {}
-        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource, tokenizer)
         workspace_features = copy.deepcopy(self.config.features)
         enable_stemming = workspace_features.pop(ENABLE_STEMMING, False)
 
