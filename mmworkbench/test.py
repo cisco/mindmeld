@@ -13,11 +13,11 @@ class TestConversation(Conversation):
 
     def assert_domain(self, expected_domain, *, history_index=0):
         history_entry = self.history[history_index]
-        assert history_entry.domain == expected_domain
+        assert history_entry['request']['domain'] == expected_domain
 
     def assert_intent(self, expected_intent, *, history_index=0):
         history_entry = self.history[history_index]
-        assert history_entry.intent == expected_intent
+        assert history_entry['request']['intent'] == expected_intent
 
     def assert_frame(self, frame):
         assert self.frame == frame
