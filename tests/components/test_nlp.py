@@ -480,3 +480,10 @@ def test_custom_data(kwik_e_mart_nlp):
     exit_ent_rec = store_info_processor.intents.exit.entity_recognizer
     assert exit_ent_rec._model_config.train_label_set != 'testtrain.*\\.txt'
     assert exit_ent_rec._model_config.test_label_set != 'testtrain.*\\.txt'
+
+
+def test_dynamic_gazetteer_case_sensitiveness(kwik_e_mart_nlp):
+    response = kwik_e_mart_nlp.process(
+        "find me ala bazaar",
+        dynamic_resource={'gazetteers': {'store_name': {"aLA bazAAr": 1000.0}}})
+    assert response['entities'][0]['text'] == "ala bazaar"

@@ -5,6 +5,7 @@ from sklearn.metrics import make_scorer
 import re
 
 from ..gazetteer import Gazetteer
+from ..tokenizer import Tokenizer
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -240,7 +241,7 @@ def entity_seqs_equal(expected, predicted):
     return True
 
 
-def merge_gazetteer_resource(resource, dynamic_resource):
+def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
     """
     Returns a new resource that is a merge between the original resource and the dynamic
     resource passed in for only the gazetteer values
@@ -248,6 +249,7 @@ def merge_gazetteer_resource(resource, dynamic_resource):
     Args:
         resource (dict): The original resource built from the app
         dynamic_resource (dict): The dynamic resource passed in
+        tokenizer (Tokenizer): This component is used to normalize entities in dyn gaz
 
     Returns:
         dict: The merged resource
@@ -272,7 +274,8 @@ def merge_gazetteer_resource(resource, dynamic_resource):
 
                 for entity in dynamic_resource[key][entity_type]:
                     new_gaz._update_entity(
-                        entity, dynamic_resource[key][entity_type][entity])
+                        tokenizer.normalize(entity),
+                        dynamic_resource[key][entity_type][entity])
 
                 # The new gaz created is a deep copied version of the merged gaz data
                 return_obj[key][entity_type] = new_gaz.to_dict()
@@ -281,19 +284,21 @@ def merge_gazetteer_resource(resource, dynamic_resource):
     return return_obj
 
 
-def ingest_dynamic_gazetteer(resource, dynamic_resource=None):
+def ingest_dynamic_gazetteer(resource, dynamic_resource=None, tokenizer=None):
     """Ingests dynamic gazetteers from the app and adds them to the resource
 
     Args:
         resource (dict): The original resource
         dynamic_resource (dict, optional): The dynamic resource that needs to be ingested
+        tokenizer (Tokenizer): This used to normalize the entities in the dynamic resource
 
     Returns:
         (dict): A new resource with the ingested dynamic resource
     """
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
-    workspace_resource = merge_gazetteer_resource(resource, dynamic_resource)
+    tokenizer = tokenizer or Tokenizer()
+    workspace_resource = merge_gazetteer_resource(resource, dynamic_resource, tokenizer)
     return workspace_resource
 
 

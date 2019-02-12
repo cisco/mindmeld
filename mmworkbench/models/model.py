@@ -811,19 +811,20 @@ class Model:
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
 
-    def _extract_features(self, example, dynamic_resource=None):
+    def _extract_features(self, example, dynamic_resource=None, tokenizer=None):
         """Gets all features from an example.
 
         Args:
             example: An example object.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            tokenizer (Tokenizer): The component used to normalize entities in dynamic_resource
 
         Returns:
             (dict of str: number): A dict of feature names to their values.
         """
         example_type = self.config.example_type
         feat_set = {}
-        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource, tokenizer)
         workspace_features = copy.deepcopy(self.config.features)
         enable_stemming = workspace_features.pop(ENABLE_STEMMING, False)
 

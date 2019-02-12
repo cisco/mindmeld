@@ -13,6 +13,7 @@ from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from .taggers.lstm import LstmModel
 from ..exceptions import WorkbenchError
+from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +156,9 @@ class TaggerModel(Model):
         return self
 
     def view_extracted_features(self, query, dynamic_resource=None):
-        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+        tokenizer = Tokenizer()
+        workspace_resource = ingest_dynamic_gazetteer(
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
         return self._clf.extract_example_features(query, self.config, workspace_resource)
 
     def _fit(self, X, y, params):
@@ -195,7 +198,9 @@ class TaggerModel(Model):
         if self._no_entities:
             return [()]
 
-        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+        tokenizer = Tokenizer()
+        workspace_resource = ingest_dynamic_gazetteer(
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
         # TODO: The try catch block is a hack for the LSTM. Basically, the LSTM model doesn't know
         # about presence or absence of entities in an intent
         try:
@@ -223,7 +228,9 @@ class TaggerModel(Model):
         if self._no_entities:
             return []
 
-        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource)
+        tokenizer = Tokenizer()
+        workspace_resource = ingest_dynamic_gazetteer(
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
 
         # TODO: The try catch block is a hack for the LSTM. Basically, the LSTM model doesn't know
         # about presence or absence of entities in an intent
