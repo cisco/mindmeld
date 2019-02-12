@@ -249,6 +249,7 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
     Args:
         resource (dict): The original resource built from the app
         dynamic_resource (dict): The dynamic resource passed in
+        tokenizer (Tokenizer): This component is used to normalize entities in dyn gaz
 
     Returns:
         dict: The merged resource
@@ -289,6 +290,7 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None, tokenizer=None):
     Args:
         resource (dict): The original resource
         dynamic_resource (dict, optional): The dynamic resource that needs to be ingested
+        tokenizer (Tokenizer): This used to normalize the entities in the dynamic resource
 
     Returns:
         (dict): A new resource with the ingested dynamic resource

@@ -817,6 +817,7 @@ class Model:
         Args:
             example: An example object.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            tokenizer (Tokenizer): The component used to normalize entities in dynamic_resource
 
         Returns:
             (dict of str: number): A dict of feature names to their values.
