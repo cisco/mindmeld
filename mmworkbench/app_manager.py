@@ -92,12 +92,13 @@ class ApplicationManager:
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             params.timestamp (long, optional): A unix time stamp for the request (in seconds).
-            context (dict, optional): Description
-            history (list, optional): Description
-            verbose (bool, optional): Description
+            context (dict, optional): A dictionary of app-specific data
+            history (list, optional): A list of previous and current responder objects
+                                      through interactions with workbench
+            verbose (bool, optional): Flag to return confidence scores for domains and intents
 
         Returns:
-            (dict): Context object
+            (dict): A deserialized Responder object
 
         .. _IANA tz database:
            https://www.iana.org/time-zones
@@ -122,11 +123,10 @@ class ApplicationManager:
         history = history or []
         frame = frame or {}
         context = context or {}
-        # TODO: what do we do with verbose???
 
-        allowed_intents, process_params, dm_params = self._pre_nlp(params)
+        allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         processed_query = self.nlp.process(query_text=text, allowed_intents=allowed_intents,
-                                           **process_params)
+                                           **nlp_params)
         request, response = self._pre_dm(processed_query=processed_query,
                                          context=context, history=history,
                                          frame=frame, params=params)
@@ -147,12 +147,13 @@ class ApplicationManager:
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             params.timestamp (long, optional): A unix time stamp for the request (in seconds).
-            context (dict, optional): Description
-            history (list, optional): Description
-            verbose (bool, optional): Description
+            context (dict, optional): A dictionary of app-specific data
+            history (list, optional): A list of previous and current responder objects
+                                      through interactions with workbench
+            verbose (bool, optional): Flag to return confidence scores for domains and intents
 
         Returns:
-            (dict): Context object
+            (dict): A deserialized Responder object
 
         .. _IANA tz database:
            https://www.iana.org/time-zones
@@ -174,10 +175,10 @@ class ApplicationManager:
         history = history or []
         frame = frame or {}
 
-        allowed_intents, process_params, dm_params = self._pre_nlp(params)
+        allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         processed_query = self.nlp.process(query_text=text,
                                            allowed_intents=allowed_intents,
-                                           **process_params)
+                                           **nlp_params)
         request, response = self._pre_dm(processed_query=processed_query,
                                          context=context, history=history,
                                          frame=frame, params=params)
@@ -188,10 +189,12 @@ class ApplicationManager:
 
         return response
 
-    def _pre_nlp(self, params):
+    def _pre_nlp(self, params, verbose=False):
         # validate params
         allowed_intents = params.validate_param('allowed_intents')
-        return allowed_intents, params.nlp_params(), params.dm_params(
+        nlp_params = params.nlp_params()
+        nlp_params['verbose'] = verbose
+        return allowed_intents, nlp_params, params.dm_params(
             self.dialogue_manager.handler_map)
 
     def _post_dm(self, request, dm_response):
