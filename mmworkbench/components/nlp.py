@@ -30,6 +30,11 @@ from ..markup import process_markup, TIME_FORMAT
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
 
+import warnings
+
+# ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
+warnings.filterwarnings(action='ignore', category=DeprecationWarning)
+
 SUBPROCESS_WAIT_TIME = 0.5
 default_num_workers = 0
 if sys.version_info > (3, 0):
