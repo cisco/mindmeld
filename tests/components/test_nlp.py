@@ -15,6 +15,7 @@ from mmworkbench.exceptions import ProcessorError, AllowedNlpClassesKeyError
 from mmworkbench.components import NaturalLanguageProcessor
 from mmworkbench.query_factory import QueryFactory
 
+
 @pytest.fixture
 def empty_nlp(kwik_e_mart_app_path):
     """Provides an empty, unbuilt processor instance"""
