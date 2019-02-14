@@ -46,10 +46,12 @@ INTENT_CLASSIFIER_CONFIG = {
         'bag-of-words': {
             'lengths': [1]
         },
+        'word-shape': {'lengths': [1]},
         'in-gaz': {},
         'freq': {
             'bins': 5
         },
+        'sys-candidates': {'entities': ['sys_number', 'sys_ordinal']},
         'exact': {},
         'length': {},
         'enable-stemming': True
