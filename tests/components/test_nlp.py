@@ -9,6 +9,7 @@ Tests for NaturalLanguageProcessor module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
+import math
 
 from mmworkbench.exceptions import ProcessorError, AllowedNlpClassesKeyError
 from mmworkbench.components import NaturalLanguageProcessor
@@ -487,3 +488,44 @@ def test_dynamic_gazetteer_case_sensitiveness(kwik_e_mart_nlp):
         "find me ala bazaar",
         dynamic_resource={'gazetteers': {'store_name': {"aLA bazAAr": 1000.0}}})
     assert response['entities'][0]['text'] == "ala bazaar"
+
+
+def test_word_shape_feature(kwik_e_mart_nlp):
+    ic = kwik_e_mart_nlp.domains['store_info'].intent_classifier
+    features = ic.view_extracted_features("is the 104 first street store open")
+
+    word_shape_features = {}
+    for key in features:
+        if 'word_shape' in key:
+            word_shape_features[key] = features[key]
+
+    shape_1_value = math.log(2, 2)/7
+    expected_features = {
+        'bag_of_words|length:1|word_shape:xx': shape_1_value,
+        'bag_of_words|length:1|word_shape:xxx': shape_1_value,
+        'bag_of_words|length:1|word_shape:xxxx': shape_1_value,
+        'bag_of_words|length:1|word_shape:xxxxx': math.log(3, 2)/7,
+        'bag_of_words|length:1|word_shape:xxxxx+': shape_1_value,
+        'bag_of_words|length:1|word_shape:ddd': shape_1_value
+    }
+
+    assert expected_features == word_shape_features
+
+
+def test_sys_entity_feature(kwik_e_mart_nlp):
+    ic = kwik_e_mart_nlp.domains['store_info'].intent_classifier
+    features = ic.view_extracted_features("is the 104 1st street store open")
+
+    sys_candidate_features = {}
+    for key in features:
+        if 'sys_candidate' in key:
+            sys_candidate_features[key] = features[key]
+
+    expected_features = {
+        'sys_candidate|type:sys_number': 2,
+        'sys_candidate|type:sys_number|granularity:None': 2,
+        'sys_candidate|type:sys_ordinal': 1,
+        'sys_candidate|type:sys_ordinal|granularity:None': 1
+    }
+
+    assert expected_features == sys_candidate_features
