@@ -18,6 +18,7 @@ import click
 import click_log
 import math
 import distro
+import hashlib
 
 from tqdm import tqdm
 from . import markup, path
@@ -327,18 +328,11 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
 
 
 def find_duckling_os_executable():
-    os_mappings = {
-        'ubuntu-16.04': path.DUCKLING_UBUNTU16_PATH,
-        'ubuntu-18.04': path.DUCKLING_UBUNTU18_PATH,
-        'darwin': path.DUCKLING_OSX_PATH
-    }
-
     os_platform_name = '-'.join(distro.linux_distribution(
         full_distribution_name=False)).lower()
-
-    for os_key in os_mappings:
+    for os_key in path.DUCKLING_OS_MAPPINGS:
         if os_key in os_platform_name:
-            return os_mappings[os_key]
+            return path.DUCKLING_OS_MAPPINGS[os_key]
 
 
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
@@ -362,6 +356,13 @@ def num_parser(ctx, start):
             logger.error('OS is incompatible with duckling executable. '
                          'Use docker to install duckling.')
             return
+
+        # Download the binary from the cloud if the binary does not already exist OR
+        # the binary is out of date.
+        if os.path.exists(exec_path):
+            hash_digest = hashlib.md5(open(exec_path, 'rb').read()).hexdigest()
+            if hash_digest != path.DUCKLING_PATH_TO_MD5_MAPPINGS[exec_path]:
+                os.remove(exec_path)
 
         if not os.path.exists(exec_path):
             url = os.path.join(os.path.join(DEVCENTER_URL, 'binaries'), os.path.basename(exec_path))
