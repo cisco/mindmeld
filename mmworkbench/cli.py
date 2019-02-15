@@ -359,14 +359,12 @@ def num_parser(ctx, start):
 
         # Download the binary from the cloud if the binary does not already exist OR
         # the binary is out of date.
-        binary_contents = open(exec_path, 'rb').read()
-        download_binary = \
-            (os.path.exists(exec_path) and
-             hashlib.md5(binary_contents).hexdigest() !=
-             path.DUCKLING_PATH_TO_MD5_MAPPINGS[exec_path]) \
-            or not os.path.exists(exec_path)
+        if os.path.exists(exec_path):
+            hash_digest = hashlib.md5(open(exec_path, 'rb').read()).hexdigest()
+            if hash_digest != path.DUCKLING_PATH_TO_MD5_MAPPINGS[exec_path]:
+                os.remove(exec_path)
 
-        if download_binary:
+        if not os.path.exists(exec_path):
             url = os.path.join(os.path.join(DEVCENTER_URL, 'binaries'), os.path.basename(exec_path))
             logger.info('Could not find {} binary file, downloading from {}'.format(exec_path, url))
             r = requests.get(url, stream=True)
