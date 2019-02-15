@@ -151,24 +151,39 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
 
         for raw_query in mark_down_file(input_file):
             proc_query = nlp.process_query(nlp.create_query(raw_query), verbose=True)
-            marked_up_query = dump_query(proc_query, **kwargs)
-            csv_row = {"query": marked_up_query}
-            if not kwargs.get("no_domain"):
-                csv_row["domain"] = proc_query.domain
-                if show_confidence:
-                    csv_row["domain_conf"] = proc_query.confidence["domains"][proc_query.domain]
-            if not kwargs.get("no_intent"):
-                csv_row["intent"] = proc_query.intent
-                if show_confidence:
-                    csv_row["intent_conf"] = proc_query.confidence["intents"][proc_query.intent]
-            if show_confidence and not kwargs.get("no_entity"):
-                csv_row["entity_conf"] = min([e.entity.confidence
-                                              for e in proc_query.entities] + [1.0])
-            if show_confidence and not kwargs.get("no_role"):
-                csv_row["role_conf"] = min([e.entity.role.confidence
-                                            for e in proc_query.entities if e.entity.role] + [1.0])
-
+            csv_row = bootstrap_query_row(proc_query, show_confidence, **kwargs)
             csv_output.writerow(csv_row)
+
+
+def bootstrap_query_row(proc_query, show_confidence, **kwargs):
+    """
+    Produce predicted annotation values and confidences for a single query
+
+    Args:
+        proc_query (ProcessedQuery): a labeled query
+        show_confidence (bool): whether to generate confidence columns
+        **kwargs: flags indicating which columns to generate
+
+    Returns:
+        (dict)
+    """
+    marked_up_query = dump_query(proc_query, **kwargs)
+    csv_row = {"query": marked_up_query}
+    if not kwargs.get("no_domain"):
+        csv_row["domain"] = proc_query.domain
+        if show_confidence:
+            csv_row["domain_conf"] = proc_query.confidence["domains"][proc_query.domain]
+    if not kwargs.get("no_intent"):
+        csv_row["intent"] = proc_query.intent
+        if show_confidence:
+            csv_row["intent_conf"] = proc_query.confidence["intents"][proc_query.intent]
+    if show_confidence and not kwargs.get("no_entity"):
+        csv_row["entity_conf"] = min([max(e.values())
+                                      for e in proc_query.confidence['entities']] + [1.0])
+    if show_confidence and not kwargs.get("no_role"):
+        csv_row["role_conf"] = min([max(r.values())
+                                    for r in proc_query.confidence['roles'] if r] + [1.0])
+    return csv_row
 
 
 def process_markup(markup, query_factory, query_options):

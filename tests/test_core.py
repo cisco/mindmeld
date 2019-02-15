@@ -207,9 +207,9 @@ def test_query_equality_2(query_factory):
 
 def test_query_entity_equality():
     """Tests query entity equality"""
-    entity_a = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+    entity_a = QueryEntity(('Entity', 'Entity', 'entity'), (Span(0, 5),)*3, (Span(0, 0),)*3,
                            Entity('text', 'type', 'role', 'value', 'display'))
-    entity_b = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+    entity_b = QueryEntity(('Entity', 'Entity', 'entity'), (Span(0, 5),)*3, (Span(0, 0),)*3,
                            Entity('text', 'type', 'role', 'value', 'display'))
 
     assert entity_a == entity_b
@@ -223,19 +223,26 @@ def test_entity_equality():
     assert entity_a == entity_b
 
 
+def test_entity_string():
+    """Tests string representation of entities"""
+    entity = NestedEntity(('Entity', 'Entity', 'entity'), (Span(0, 5),)*3, (Span(0, 0),)*3,
+                          Entity('text', 'type', 'role', 'value', 'display'))
+    assert str(entity) == "type:role 'Entity' 0-5"
+
+
 def test_nested_and_query_entity_equality():
     """Tests NestedEntity and QueryEntity equality operations"""
-    entity_a = NestedEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+    entity_a = NestedEntity(('Entity', 'Entity', 'entity'), (Span(0, 5),)*3, (Span(0, 0),)*3,
                             Entity('text', 'type', 'role', 'value', 'display'))
-    entity_b = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+    entity_b = QueryEntity(('Entity', 'Entity', 'entity'), (Span(0, 5),)*3, (Span(0, 0),)*3,
                            Entity('text', 'type', 'role', 'value', 'display'))
 
     assert entity_a == entity_b
     assert not entity_a != entity_b
 
-    entity_a = NestedEntity(('Entity123', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+    entity_a = NestedEntity(('Entity123', 'Entity', 'entity'), (Span(0, 5),)*3, (Span(0, 0),)*3,
                             Entity('text', 'type', 'role', 'value', 'display'))
-    entity_b = QueryEntity(('Entity', 'Entity', 'entity'), Span(0, 5), Span(0, 0),
+    entity_b = QueryEntity(('Entity', 'Entity', 'entity'), (Span(0, 5),)*3, (Span(0, 0),)*3,
                            Entity('text', 'type', 'role', 'value', 'display'))
 
     assert not entity_a == entity_b

@@ -706,3 +706,88 @@ def test_load_dump_2(query_factory):
     markup_text = markup.dump_query(processed_query)
 
     assert text == markup_text
+
+
+def test_bootstrap_query_with_entities(query_factory):
+    query_text = 'Can I get one curry sauce with my rice ball with house salad'
+
+    query = query_factory.create_query(query_text)
+    entities = [
+        QueryEntity.from_query(query, Span(10, 12), entity_type='sys_number', role='quantity'),
+        QueryEntity.from_query(query, Span(14, 24), entity_type='option'),
+        QueryEntity.from_query(query, Span(34, 59), entity_type='dish')
+    ]
+    entities[1] = entities[1].with_children((entities[0],))
+    entities[2] = entities[2].with_children((entities[1],))
+    confidence = {
+        'domains': {
+            'food': 0.95,
+            'music': 0.05
+        },
+        'intents': {
+            'get_comestibles': 0.99,
+            'reorder': 0.01
+        },
+        'entities': [
+            {'sys_number': 0.9},
+            {'option': 0.99},
+            {'dish': 0.65}
+        ],
+        'roles': [
+            {'quantity': 0.8, 'quality': 0.2},
+            None,
+            None
+        ]
+    }
+
+    processed_query = ProcessedQuery(
+        query, domain='food', intent='get_comestibles', entities=entities, confidence=confidence
+    )
+    bootstrap_data = markup.bootstrap_query_row(processed_query, show_confidence=True)
+
+    expected_data = {
+        'query': ('Can I get [[{one|sys_number|quantity} {curry sauce|option}|option] '
+                  'with my {rice ball with house salad|dish}|dish]'),
+        'domain': 'food',
+        'domain_conf': 0.95,
+        'intent': 'get_comestibles',
+        'intent_conf': 0.99,
+        'entity_conf': 0.65,
+        'role_conf': 0.8
+    }
+    assert bootstrap_data == expected_data
+
+
+def test_bootstrap_query_no_entity(query_factory):
+    """"Tests bootstrap output for a query without entities"""
+    query_text = 'cancel the timer'
+    query = query_factory.create_query(query_text)
+    confidence = {
+        'domains': {
+            'times_and_dates': 0.95,
+            'espionage': 0.05
+        },
+        'intents': {
+            'stop_timer': 0.9,
+            'start_timer': 0.07,
+            'cut_blue_wire': 0.03
+        },
+        'entities': [],
+        'roles': []
+    }
+
+    processed_query = ProcessedQuery(
+        query, domain='times_and_dates', intent='stop_timer', entities=[], confidence=confidence
+    )
+    bootstrap_data = markup.bootstrap_query_row(processed_query, show_confidence=True)
+
+    expected_data = {
+        'query': 'cancel the timer',
+        'domain': 'times_and_dates',
+        'domain_conf': 0.95,
+        'intent': 'stop_timer',
+        'intent_conf': 0.9,
+        'entity_conf': 1.0,
+        'role_conf': 1.0
+    }
+    assert bootstrap_data == expected_data
