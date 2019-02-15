@@ -18,6 +18,7 @@ import click
 import click_log
 import math
 import distro
+import hashlib
 
 from tqdm import tqdm
 from . import markup, path
@@ -327,18 +328,11 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
 
 
 def find_duckling_os_executable():
-    os_mappings = {
-        'ubuntu-16.04': path.DUCKLING_UBUNTU16_PATH,
-        'ubuntu-18.04': path.DUCKLING_UBUNTU18_PATH,
-        'darwin': path.DUCKLING_OSX_PATH
-    }
-
     os_platform_name = '-'.join(distro.linux_distribution(
         full_distribution_name=False)).lower()
-
-    for os_key in os_mappings:
+    for os_key in path.DUCKLING_OS_MAPPINGS:
         if os_key in os_platform_name:
-            return os_mappings[os_key]
+            return path.DUCKLING_OS_MAPPINGS[os_key]
 
 
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
@@ -363,7 +357,16 @@ def num_parser(ctx, start):
                          'Use docker to install duckling.')
             return
 
-        if not os.path.exists(exec_path):
+        # Download the binary from the cloud if the binary does not already exist OR
+        # the binary is out of date.
+        binary_contents = open(exec_path, 'rb').read()
+        download_binary = \
+            (os.path.exists(exec_path) and
+             hashlib.md5(binary_contents).hexdigest() !=
+             path.DUCKLING_PATH_TO_MD5_MAPPINGS[exec_path]) \
+            or not os.path.exists(exec_path)
+
+        if download_binary:
             url = os.path.join(os.path.join(DEVCENTER_URL, 'binaries'), os.path.basename(exec_path))
             logger.info('Could not find {} binary file, downloading from {}'.format(exec_path, url))
             r = requests.get(url, stream=True)
