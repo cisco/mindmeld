@@ -255,8 +255,8 @@ def test_process_verbose_no_entity(kwik_e_mart_nlp):
     assert response['domain'] == 'store_info'
     assert response['intent'] == 'greet'
     assert response['entities'] == []
-    assert isinstance(response['confidence']['domains']['store_info'], float)
-    assert isinstance(response['confidence']['intents']['greet'], float)
+    assert isinstance(response['confidences']['domains']['store_info'], float)
+    assert isinstance(response['confidences']['intents']['greet'], float)
 
 
 def test_process_verbose(kwik_e_mart_nlp):
@@ -266,9 +266,9 @@ def test_process_verbose(kwik_e_mart_nlp):
     assert response['domain'] == 'store_info'
     assert response['intent'] == 'get_store_hours'
     assert response['entities'][0]['text'] == 'elm street'
-    assert isinstance(response['confidence']['entities'][0][response['entities'][0]['type']], float)
-    assert isinstance(response['confidence']['domains']['store_info'], float)
-    assert isinstance(response['confidence']['intents']['get_store_hours'], float)
+    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']], float)
+    assert isinstance(response['confidences']['domains']['store_info'], float)
+    assert isinstance(response['confidences']['intents']['get_store_hours'], float)
 
 
 def test_process_verbose_long_tokens(kwik_e_mart_nlp):
@@ -286,7 +286,7 @@ def test_process_verbose_long_tokens(kwik_e_mart_nlp):
     assert response['domain'] == 'store_info'
     assert response['intent'] == 'get_store_hours'
     assert response['entities'][0]['text'] == 'tomorrow'
-    assert isinstance(response['confidence']['entities'][0][response['entities'][0]['type']], float)
+    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']], float)
 
 
 def test_process_verbose_short_tokens(kwik_e_mart_nlp):
@@ -304,7 +304,7 @@ def test_process_verbose_short_tokens(kwik_e_mart_nlp):
     assert response['domain'] == 'store_info'
     assert response['intent'] == 'get_store_hours'
     assert response['entities'][0]['text'] == 'tomorrow'
-    assert isinstance(response['confidence']['entities'][0][response['entities'][0]['type']], float)
+    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']], float)
 
 
 test_nbest = [
@@ -322,9 +322,9 @@ def test_nbest_process_verbose(kwik_e_mart_nlp, queries, expected_domain, expect
     response = kwik_e_mart_nlp.process(queries, verbose=True)
     response['entities_text'] = [e['text'] for e in response['entities']]
     for i, e in enumerate(response['entities']):
-        assert isinstance(response['confidence']['entities'][i][e['type']], float)
-    assert isinstance(response['confidence']['domains'][expected_domain], float)
-    assert isinstance(response['confidence']['intents'][expected_intent], float)
+        assert isinstance(response['confidences']['entities'][i][e['type']], float)
+    assert isinstance(response['confidences']['domains'][expected_domain], float)
+    assert isinstance(response['confidences']['intents'][expected_intent], float)
 
 
 test_data_4 = [

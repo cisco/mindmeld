@@ -369,7 +369,7 @@ class ProcessedQuery:
                                               for n_entities in self.nbest_aligned_entities]
 
         if self.confidence:
-            base['confidence'] = self.confidence
+            base['confidences'] = self.confidence
         return base
 
     def __eq__(self, other):

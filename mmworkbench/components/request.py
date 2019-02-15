@@ -103,8 +103,8 @@ class Request:
     params = attr.ib(default=FrozenParams())
     context = attr.ib(default=immutables.Map(),
                       converter=immutables.Map)
-    confidence = attr.ib(default=immutables.Map(),
-                         converter=immutables.Map)
+    confidences = attr.ib(default=immutables.Map(),
+                          converter=immutables.Map)
     nbest_transcripts_text = attr.ib(default=tuple(), converter=tuple)
     nbest_transcripts_entities = attr.ib(default=tuple(), converter=tuple)
     nbest_aligned_entities = attr.ib(default=tuple(), converter=tuple)
