@@ -62,7 +62,6 @@ WORKDIR /root
 
 RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
 RUN python3 /tmp/get-pip.py
-RUN pip3 install --pre mmworkbench~=4.0.0rc
 # Get home_assistant blueprint
 RUN wget https://devcenter.mindmeld.com/bp/home_assistant/app.tar.gz -P /root/projects/
 RUN mkdir home_assistant
@@ -75,16 +74,14 @@ EXPOSE 9200
 EXPOSE 9300
 EXPOSE 7150
 
-# RUN pip install mmworkbench -U
-
 # system as both 2 and 3, make 3 the default
 RUN echo alias python=python3  >> /root/.bashrc
 RUN echo alias pip=pip3  >> /root/.bashrc
 
-RUN pip install click-log==0.1.8 mmworkbench
-
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
+    pip3 install --pre mmworkbench~=4.0.0rc && \
+    pip3 install click-log==0.1.8 mmworkbench && \
     su mmworkbench -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
     mmworkbench num-parse --start && \
     python3 -m home_assistant build && \
