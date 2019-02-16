@@ -266,7 +266,8 @@ def test_process_verbose(kwik_e_mart_nlp):
     assert response['domain'] == 'store_info'
     assert response['intent'] == 'get_store_hours'
     assert response['entities'][0]['text'] == 'elm street'
-    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']], float)
+    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']],
+                      float)
     assert isinstance(response['confidences']['domains']['store_info'], float)
     assert isinstance(response['confidences']['intents']['get_store_hours'], float)
 
@@ -286,7 +287,8 @@ def test_process_verbose_long_tokens(kwik_e_mart_nlp):
     assert response['domain'] == 'store_info'
     assert response['intent'] == 'get_store_hours'
     assert response['entities'][0]['text'] == 'tomorrow'
-    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']], float)
+    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']],
+                      float)
 
 
 def test_process_verbose_short_tokens(kwik_e_mart_nlp):
@@ -304,7 +306,8 @@ def test_process_verbose_short_tokens(kwik_e_mart_nlp):
     assert response['domain'] == 'store_info'
     assert response['intent'] == 'get_store_hours'
     assert response['entities'][0]['text'] == 'tomorrow'
-    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']], float)
+    assert isinstance(response['confidences']['entities'][0][response['entities'][0]['type']],
+                      float)
 
 
 test_nbest = [
