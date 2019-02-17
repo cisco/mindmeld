@@ -45,7 +45,7 @@ def test_context(request):
 
 def test_nbest(request):
     with pytest.raises(FrozenInstanceError):
-        request.confidence = {'key': 'value'}
+        request.confidences = {'key': 'value'}
 
     with pytest.raises(FrozenInstanceError):
         request.nbest_transcripts_text = ['some_text']

@@ -51,8 +51,8 @@ def test_nlp_process_for_roles(home_assistant_nlp, example, role_type):
 
     assert (result['entities'][0]['role'] == role_type[0])
     assert (result['entities'][1]['role'] == role_type[1])
-    assert (result['confidence']['roles'][0])
-    assert (result['confidence']['roles'][1])
+    assert (result['confidences']['roles'][0])
+    assert (result['confidences']['roles'][1])
 
 
 def test_model_accuracies_are_similar_before_and_after_caching(home_assistant_app_path):
