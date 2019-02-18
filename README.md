@@ -1,8 +1,8 @@
-# MindMeld Workbench 3.0
+# MindMeld Workbench
 
-[![CircleCI](https://circleci.com/gh/expectlabs/mindmeld-workbench3.svg?style=svg&circle-token=437cf905895688ac1b58b60fe79144c180893372)](https://circleci.com/gh/expectlabs/mindmeld-workbench3)
+[![CircleCI](https://circleci.com/gh/expectlabs/mindmeld-workbench.svg?style=svg&circle-token=437cf905895688ac1b58b60fe79144c180893372)](https://circleci.com/gh/expectlabs/mindmeld-workbench)
 
-This repository contains MindMeld Workbench 3.0.
+This repository contains MindMeld Workbench.  This repository was renamed to https://github.com/expectlabs/mindmeld-workbench/ from https://github.com/expectlabs/mindmeld-workbench3/ to avoid confusion in relation to the upcoming 4.0.0 release.  Please update any configuration that is still pointed to the mindmeld-workbench3 repo.
 
 ## TLDR: Quick Start
 
