@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains the Kwik-E-Mart workbench demo application"""
 from mmworkbench import Application
+from . import custom_features  # noqa: F401
 
 app = Application(__name__)
 
