@@ -18,7 +18,7 @@ workflows:
                 - develop
                 - staging
                 - master
-                - /release*/
+                - release/4.0.0
 
 # Definitions (keep config D.R.Y.)
 
