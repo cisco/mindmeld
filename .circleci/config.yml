@@ -18,6 +18,7 @@ workflows:
                 - develop
                 - staging
                 - master
+                - /release*/
 
 # Definitions (keep config D.R.Y.)
 
@@ -173,4 +174,5 @@ jobs:
 
       - deploy:
           command: |
-            MM_BRANCH=$CIRCLE_BRANCH bash scripts/upload_blueprint.sh -d `pwd`/tests/kwik_e_mart -b kwik_e_mart
+            MM_BRANCH=staging bash scripts/upload_blueprint.sh -d `pwd`/tests/kwik_e_mart -b kwik_e_mart
+            MM_BRANCH=master bash scripts/upload_blueprint.sh -d `pwd`/tests/kwik_e_mart -b kwik_e_mart

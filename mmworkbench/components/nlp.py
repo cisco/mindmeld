@@ -343,7 +343,7 @@ class NaturalLanguageProcessor(Processor):
         self._app_path = app_path
         validate_workbench_version(self._app_path)
         self.name = app_path
-
+        self._load_custom_features()
         self.domain_classifier = DomainClassifier(self.resource_loader)
 
         for domain in path.get_domains(self._app_path):
@@ -359,19 +359,19 @@ class NaturalLanguageProcessor(Processor):
                 for intent in nbest_transcripts_nlp_classes[domain].keys():
                     self.domains[domain].intents[intent].nbest_transcripts_enabled = True
 
-    @property
-    def domains(self):
-        """The domains supported by this application"""
-        return self._children
-
-    def _build(self, incremental=False, label_set=None):
-
+    def _load_custom_features(self):
         # Load __init__.py so nlp object recognizes custom features in python console
         try:
             get_app(self._app_path)
         except WorkbenchImportError:
             pass
 
+    @property
+    def domains(self):
+        """The domains supported by this application"""
+        return self._children
+
+    def _build(self, incremental=False, label_set=None):
         if incremental:
             # During an incremental build, we set the incremental_timestamp for caching
             current_ts = datetime.datetime.fromtimestamp(int(time.time())).strftime(TIME_FORMAT)
