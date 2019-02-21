@@ -785,7 +785,8 @@ def _get_config_module(app_path):
     module_path = path.get_config_module_path(app_path)
 
     import imp
-    config_module = imp.load_source('config_module', module_path)
+    config_module = imp.load_source(
+        'config_module_' + os.path.basename(app_path), module_path)
     return config_module
 
 
