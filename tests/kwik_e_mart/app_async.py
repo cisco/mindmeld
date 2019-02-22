@@ -36,7 +36,6 @@ async def send_nearest_store(request, responder):
     try:
         user_location = request.context['location']
     except KeyError:
-        # request and context should always be here so assume location is the problem
         responder.reply("I'm not sure. You haven't told me where you are!")
         responder.suggest([{'type': 'location', 'text': 'Share your location'}])
         return
@@ -59,7 +58,7 @@ async def default(request, responder):
 
 
 @app.dialogue_flow(domain='store_info', intent='get_store_hours')
-async def get_store_hours_entry(request, responder):
+async def send_store_hours(request, responder):
     active_store = None
     store_entity = next((e for e in request.entities if e['type'] == 'store_name'), None)
     if store_entity:
@@ -74,8 +73,8 @@ async def get_store_hours_entry(request, responder):
         except IndexError:
             # No active store... continue
             pass
-    elif 'target_store' in responder.frame:
-        active_store = responder.frame['target_store']
+    elif 'target_store' in request.frame:
+        active_store = request.frame['target_store']
 
     if active_store:
         responder.slots['store_name'] = active_store['store_name']
@@ -95,7 +94,7 @@ async def get_store_hours_entry(request, responder):
         responder.exit_flow()
 
 
-@get_store_hours_entry.handle(default=True)
+@send_store_hours.handle(default=True)
 async def default_handler(request, responder):
     responder.frame['count'] += 1
     if responder.frame['count'] <= 3:
@@ -103,13 +102,14 @@ async def default_handler(request, responder):
         responder.listen()
     else:
         responder.reply('Sorry I cannot help you. Please try again.')
+        responder.exit_flow()
 
 
-@get_store_hours_entry.handle(intent='exit', exit_flow=True)
+@send_store_hours.handle(intent='exit', exit_flow=True)
 async def exit_handler(request, responder):
     responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
 
 
-@get_store_hours_entry.handle(intent='get_store_hours')
-async def get_store_hours_handler(request, responder):
-    return await get_store_hours_entry(request, responder)
+@send_store_hours.handle(intent='get_store_hours')
+async def send_store_hours_in_flow_handler(request, responder):
+    return await send_store_hours(request, responder)
