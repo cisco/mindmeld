@@ -147,9 +147,16 @@ class Blueprint:
 
         _, _, index_files = next(os.walk(kb_dir))
 
+        data_dir = os.path.join(app_path, 'data')
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+
         for index in index_files:
             index_name, _ = os.path.splitext(index)
             data_file = os.path.join(kb_dir, index)
+
+            # Copy the index files into the app's data directory
+            shutil.copy2(data_file, data_dir)
 
             try:
                 QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host)
