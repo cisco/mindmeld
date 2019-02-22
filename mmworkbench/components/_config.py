@@ -522,6 +522,9 @@ def get_app_namespace(app_path):
     except AttributeError:
         logger.debug('App namespace not set in app configuration')
 
+    # If a relative path is passed in, we resolve to its abspath
+    app_path = os.path.abspath(app_path) if not os.path.isabs(app_path) else app_path
+
     _app_namespace = os.path.split(app_path)[1]
     if 'JUPYTER_USER' in os.environ:
         _app_namespace = '{jupyter_user}_{app_namespace}'.format(
