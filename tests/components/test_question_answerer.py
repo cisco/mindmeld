@@ -36,6 +36,18 @@ def answerer(kwik_e_mart_app_path, es_client):
 
 
 @pytest.fixture
+def relative_answerer(kwik_e_mart_app_path, es_client):
+    QuestionAnswerer.load_kb(app_namespace='kwik_e_mart', index_name='store_name',
+                             data_file=STORE_DATA_FILE_PATH)
+    es_client.indices.flush(index='_all')
+    old_cwd = os.getcwd()
+    os.chdir(kwik_e_mart_app_path)
+    qa = QuestionAnswerer('.')
+    os.chdir(old_cwd)
+    return qa
+
+
+@pytest.fixture
 def food_ordering_answerer(food_ordering_app_path, es_client):
     QuestionAnswerer.load_kb(app_namespace='food_ordering', index_name='menu_items',
                              data_file=DISH_DATA_FILE_PATH)
@@ -62,6 +74,26 @@ def test_basic_search(answerer):
 
     # multiple text queries
     res = answerer.get(index='store_name', store_name='peanut', address='peanut st')
+    assert len(res) > 0
+
+
+def test_basic_relative_search(relative_answerer):
+    """Test basic search."""
+
+    # retrieve object using ID
+    res = relative_answerer.get(index='store_name', id='20')
+    assert len(res) > 0
+
+    # simple text query
+    res = relative_answerer.get(index='store_name', store_name='peanut')
+    assert len(res) > 0
+
+    # simple text query
+    res = relative_answerer.get(index='store_name', store_name='Springfield Heights')
+    assert len(res) > 0
+
+    # multiple text queries
+    res = relative_answerer.get(index='store_name', store_name='peanut', address='peanut st')
     assert len(res) > 0
 
 
