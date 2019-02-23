@@ -27,18 +27,6 @@ LIKELIHOOD_SCORING = 'log_loss'
 _NEG_INF = -1e10
 
 
-def clean_params(model_class, params):
-    expected_params = signature(model_class).parameters.keys()
-    result = copy.deepcopy(params)
-    for param in params:
-        if param not in expected_params:
-            msg = 'Unexpected param `{param}`, dropping it from model config.'.format(
-                param=param)
-            logger.warning(msg)
-            result.pop(param)
-    return result
-
-
 class ModelConfig:
     """A value object representing a model configuration.
 
@@ -765,8 +753,24 @@ class Model:
         """
         raise NotImplementedError
 
+    @staticmethod
+    def _clean_params(model_class, params):
+        """
+        Make sure that the params to be passed into model construction meet the model's expected
+        params
+        """
+        expected_params = signature(model_class).parameters.keys()
+        result = copy.deepcopy(params)
+        for param in params:
+            if param not in expected_params:
+                msg = 'Unexpected param `{param}`, dropping it from model config.'.format(
+                    param=param)
+                logger.warning(msg)
+                result.pop(param)
+        return result
+
     def _get_cv_estimator_and_params(self, model_class, param_grid):
-        param_grid = clean_params(model_class, param_grid)
+        param_grid = self._clean_params(model_class, param_grid)
         if 'warm_start' in signature(model_class).parameters.keys():
             # Warm start helps speed up cross-validation for some models such as random forest
             return model_class(warm_start=True), param_grid

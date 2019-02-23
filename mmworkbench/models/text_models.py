@@ -171,6 +171,7 @@ class TextModel(Model):
         """
         params = self._convert_params(params, y, is_grid=False)
         model_class = self._get_model_constructor()
+        params = self._clean_params(model_class, params)
         return model_class(**params).fit(X, y)
 
     def predict(self, examples, dynamic_resource=None):
