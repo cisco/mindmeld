@@ -8,7 +8,7 @@ class TestConversation(Conversation):
 
     def assert_text(self, expected_text, *, text_index=0, history_index=0):
         history_entry = self.history[history_index]
-        texts = [self._follow_directive(d) for d in history_entry.directives]
+        texts = [self._follow_directive(d) for d in history_entry["directives"]]
         assert texts[text_index] == expected_text
 
     def assert_domain(self, expected_domain, *, history_index=0):
