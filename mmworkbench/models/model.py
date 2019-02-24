@@ -760,6 +760,10 @@ class Model:
         params
         """
         expected_params = signature(model_class).parameters.keys()
+        if len(expected_params) == 1 and 'parameters' in expected_params:
+            # if there is only one key, this is our custom TaggerModel which is supposed to be a
+            # pass-through and pass everything to the actual sklearn model
+            return params
         result = copy.deepcopy(params)
         for param in params:
             if param not in expected_params:
