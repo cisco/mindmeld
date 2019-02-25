@@ -13,7 +13,7 @@ import requests
 NOW_TIMESTAMP = 1544706000000
 SECONDS_IN_HOUR = 3600
 SECONDS_IN_MINUTE = 60
-DUCKLING_URL = "http://localhost:8000/parse"
+DUCKLING_URL = "http://localhost:7151/parse"
 
 
 @pytest.mark.parametrize(
