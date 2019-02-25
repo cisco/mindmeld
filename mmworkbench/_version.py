@@ -44,7 +44,7 @@ def validate_workbench_version(app_path, raise_exception=False):
     try:
         pkg_resources.require(wb_req)
     except (DistributionNotFound, VersionConflict) as error:
-        error_msg = 'Current mworkbench ({version}) does not satisfy ' \
+        error_msg = 'Current mmworkbench ({version}) does not satisfy ' \
                     '{condition} in pip requirements caused by ' \
                     '{cause}'.format(version=wb_version, condition=wb_req[0], cause=str(error))
         if raise_exception:
