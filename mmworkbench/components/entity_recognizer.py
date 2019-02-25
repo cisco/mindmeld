@@ -111,6 +111,7 @@ class EntityRecognizer(Classifier):
         self._model.dump(path, self._data_dump_payload())
 
     def dump(self, model_path, incremental_model_path=None):
+        logger.info('Saving entity classifier: domain=%r, intent=%r', self.domain, self.intent)
         super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):

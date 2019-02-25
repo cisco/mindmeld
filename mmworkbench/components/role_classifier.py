@@ -109,6 +109,8 @@ class RoleClassifier(Classifier):
         return {'model': self._model, 'roles': self.roles}
 
     def dump(self, model_path, incremental_model_path=None):
+        logger.info('Saving role classifier: domain=%r, intent=%r, entity=%r',
+                    self.domain, self.intent, self.entity_type)
         super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):
