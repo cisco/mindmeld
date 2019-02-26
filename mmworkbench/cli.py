@@ -40,7 +40,7 @@ CONTEXT_SETTINGS = {
     'auto_envvar_prefix': 'MM'
 }
 
-DUCKLING_PORT = '8000'
+DUCKLING_PORT = '7151'
 
 
 def version_msg():

@@ -12,7 +12,7 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
-DUCKLING_URL = "http://localhost:8000"
+DUCKLING_URL = "http://localhost:7151"
 DUCKLING_ENDPOINT = "parse"
 
 SUCCESSFUL_HTTP_CODE = 200
