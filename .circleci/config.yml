@@ -109,7 +109,7 @@ definitions:
           command: |
             # run tests
             mkdir ~/test-reports
-            pytest --junitxml=~/test-reports/junit.xml --cov=mmworkbench
+            pytest --junitxml=~/test-reports/junit.xml -cov-report xml:~/test-reports/cov.xml --cov=mmworkbench
       - run:
           name: Food ordering blueprint kb setup
           # run this even when linting fails
