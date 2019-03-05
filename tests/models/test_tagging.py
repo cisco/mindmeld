@@ -195,18 +195,18 @@ def test_get_boundary_counts_sequential(kwik_e_mart_nlp, expected, predicted, ex
             assert False
 
 
-def test_view_extracted_features(kwik_e_mart_nlp):
+@pytest.mark.parametrize("model_type,params",
+                         [('memm', {'penalty': 'l2', 'C': 10000}),
+                          ('crf', {'c1': 0.01, 'c2': 0.01})])
+def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
     config = {
         'model_type': 'tagger',
         'model_settings': {
-            'classifier_type': 'memm',
+            'classifier_type': model_type,
             'tag_scheme': 'IOB',
             'feature_scaler': 'max-abs'
         },
-        'params': {
-            'penalty': 'l2',
-            'C': 10000
-        },
+        'params': params,
         'features': {
             'bag-of-words-seq': {
                 'ngram_lengths_to_start_positions': {
@@ -223,3 +223,26 @@ def test_view_extracted_features(kwik_e_mart_nlp):
                          {'bag_of_words|length:1|word_pos:0': 'store'},
                          {'bag_of_words|length:1|word_pos:0': 'hours'}]
     assert extracted_features == expected_features
+
+
+def test_lstm_er_model(kwik_e_mart_nlp):
+    config = {
+        'model_type': 'tagger',
+        'model_settings': {
+            'classifier_type': 'lstm',
+            'tag_scheme': 'IOB',
+            'feature_scaler': 'max-abs'
+        },
+        'params': {'number_of_epochs': 1},
+        'features': {
+            'bag-of-words-seq': {
+                'ngram_lengths_to_start_positions': {
+                    1: [0],
+                }
+            },
+        }
+    }
+    er = kwik_e_mart_nlp.domains["store_info"].intents["get_store_hours"].entity_recognizer
+    er.fit(**config)
+    response = kwik_e_mart_nlp.process('Does the 156th location open on Saturday?')
+    assert response['entities'][0]['value'][0]['cname'] == '156th Street'
