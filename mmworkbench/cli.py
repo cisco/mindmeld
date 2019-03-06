@@ -242,7 +242,6 @@ def clean(ctx, query_cache, model_cache, days):
     app = ctx.obj.get('app')
     if app is None:
         raise ValueError("No app was given. Run 'python app.py clean' from your app folder.")
-
     if query_cache:
         try:
             main_cache_location = QUERY_CACHE_PATH.format(app_path=app.app_path)
@@ -271,7 +270,7 @@ def clean(ctx, query_cache, model_cache, days):
                 full_path = os.path.join(model_cache_path, ts_folder)
 
                 if not os.path.isdir(full_path):
-                    logger.warn(
+                    logger.warning(
                         'Expected timestamped folder. Ignoring the file {}.'.format(full_path))
                     continue
 
@@ -461,7 +460,6 @@ def cli(ctx):
     es_logger.setLevel(logging.ERROR)
     warnings.filterwarnings("module", category=DeprecationWarning,
                             module="sklearn.preprocessing.label")
-
     if ctx.obj is None:
         ctx.obj = {}
 
