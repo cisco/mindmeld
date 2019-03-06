@@ -328,3 +328,16 @@ def test_sort_system_entities(query_factory):
     assert time_entities[17].entity.value['grain'] == 'second'
     assert time_entities[18].entity.value['grain'] == 'second'
     # Note: could not find a query that would yield a millisecond entity
+
+
+def test_system_entity_time_resolution(home_assistant_nlp):
+    """Tests that intervals with two numbers as times (no AM/PM) are resolved correctly"""
+    query = 'change my alarm from 2 to 6'
+
+    entities = home_assistant_nlp.process(query)['entities']
+
+    assert len(entities) == 2
+
+    # Check that resolved entities are '2' and '6' rather than '2' and '2 to 6' (5:58)
+    assert entities[0]['text'] == '2'
+    assert entities[1]['text'] == '6'
