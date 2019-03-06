@@ -19,3 +19,20 @@ def test_memm_model(kwik_e_mart_app_path):
         assert 'C' in er.config.param_selection['grid']
         assert 'penalty' in er.config.param_selection['grid']
         mock.assert_not_called()
+
+
+def test_tagger_get_stats(kwik_e_mart_app_path, capsys):
+    nlp = NaturalLanguageProcessor(app_path=kwik_e_mart_app_path)
+    er = nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer
+    er.fit()
+    eval = er.evaluate()
+    eval.print_stats()
+    captured = capsys.readouterr()
+    all_elems = set([k for k in captured.out.replace('\n', '').split(' ') if k != ''])
+    assert 'Overall' in all_elems
+    assert 'statistics:' in all_elems
+    assert 'accuracy' in all_elems
+    assert 'f1_weighted' in all_elems
+    assert 'tp' in all_elems
+    assert 'fp' in all_elems
+    assert 'fn' in all_elems

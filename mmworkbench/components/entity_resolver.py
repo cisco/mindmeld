@@ -453,7 +453,7 @@ class EntityResolver:
         normed = self._normalizer(entity.text)
         try:
             cnames = self._exact_match_mapping['synonyms'][normed]
-        except KeyError:
+        except (KeyError, TypeError) as e:
             logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.type)
             return None
 
