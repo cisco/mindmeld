@@ -26,6 +26,7 @@ warnings.filterwarnings("module", category=DeprecationWarning,
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
 FOOD_ORDERING_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'food_ordering')
+HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'home_assistant')
 AENEID_FILE = 'aeneid.txt'
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
 
@@ -63,9 +64,23 @@ def food_ordering_app_path():
 
 
 @pytest.fixture(scope='session')
+def home_assistant_app_path():
+    return HOME_ASSISTANT_APP_PATH
+
+
+@pytest.fixture(scope='session')
 def kwik_e_mart_nlp(kwik_e_mart_app_path):
     """Provides a built processor instance"""
     nlp = NaturalLanguageProcessor(app_path=kwik_e_mart_app_path)
+    nlp.build()
+    nlp.dump()
+    return nlp
+
+
+@pytest.fixture
+def home_assistant_nlp(home_assistant_app_path):
+    """Provides a built processor instance"""
+    nlp = NaturalLanguageProcessor(app_path=home_assistant_app_path)
     nlp.build()
     nlp.dump()
     return nlp

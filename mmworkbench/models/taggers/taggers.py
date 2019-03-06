@@ -338,7 +338,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
                     start_span = sys_candidate.normalized_token_span.start
                     end_span = sys_candidate.normalized_token_span.end
 
-                    if start_span <= tag_idx <= end_span:
+                    if start_span == tag_idx and tag_idx <= end_span:
                         # We currently don't prioritize any sys_candidate if there are
                         # multiple candidates that meet this conditional.
                         # TODO: Assess if a priority is needed
