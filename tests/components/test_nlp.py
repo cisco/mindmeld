@@ -489,7 +489,7 @@ def test_custom_data(kwik_e_mart_nlp):
 def test_dynamic_gazetteer_case_sensitiveness(kwik_e_mart_nlp):
     response = kwik_e_mart_nlp.process(
         "find me ala bazaar",
-        dynamic_resource={'gazetteers': {'store_name': {"aLA bazAAr": 1000.0}}})
+        dynamic_resource={'gazetteers': {'store_name': {"aLA bazAAr": 1000000.0}}})
     assert response['entities'][0]['text'] == "ala bazaar"
 
 

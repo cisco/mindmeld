@@ -41,7 +41,7 @@ setup_requirements = [
 test_requirements = [
     'flake8==3.5.0',
     'pylint==1.6.5',
-    'pytest==3.0.5',
+    'pytest==3.8.0',
     'pytest-cov==2.4.0',
     'pytest-asyncio==0.8.0'
 ]
