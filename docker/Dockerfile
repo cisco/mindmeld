@@ -80,7 +80,7 @@ RUN echo alias pip=pip3  >> /root/.bashrc
 
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
-    pip3 install --pre mmworkbench~=4.0.0rc && \
+    pip3 install -U mmworkbench && \
     pip3 install click-log==0.1.8 mmworkbench && \
     su mmworkbench -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
     mmworkbench num-parse --start && \
