@@ -60,6 +60,7 @@ definitions:
             # install mmworkbench and test requirements
             pip install -e .
             pip install -r test-requirements.txt
+            python setup.py install
 
     # Step Sequences
 

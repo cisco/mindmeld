@@ -78,8 +78,9 @@ class TestDialogueManager:
     async def test_default(self, dm):
         """Default dialogue state when no rules match
            This will select the rule with default=True"""
-        result = await dm.apply_handler(create_request('other', 'other'))
-        assert result['dialogue_state'] == 'default'
+        request = create_request('other', 'other')
+        result = await dm.apply_handler(request, create_responder(request))
+        assert result.dialogue_state == 'default'
 
     def test_default_uniqueness(self, dm):
         with pytest.raises(AssertionError):
@@ -108,48 +109,53 @@ class TestDialogueManager:
     @pytest.mark.asyncio
     async def test_domain(self, dm):
         """Correct dialogue state is found for a domain"""
-        result = await dm.apply_handler(create_request('domain', 'other'))
-        assert result['dialogue_state'] == 'domain'
+        request = create_request('domain', 'other')
+        result = await dm.apply_handler(request, create_responder(request))
+        assert result.dialogue_state == 'domain'
 
     @pytest.mark.asyncio
     async def test_domain_intent(self, dm):
         """Correct state should be found for domain and intent"""
-        result = await dm.apply_handler(create_request('domain', 'intent'))
-        assert result['dialogue_state'] == 'domain_intent'
+        request = create_request('domain', 'intent')
+        result = await dm.apply_handler(request, create_responder(request))
+        assert result.dialogue_state == 'domain_intent'
 
     @pytest.mark.asyncio
     async def test_intent(self, dm):
         """Correct state should be found for intent"""
-        result = await dm.apply_handler(create_request('other', 'intent'))
-        assert result['dialogue_state'] == 'intent'
+        request = create_request('other', 'intent')
+        result = await dm.apply_handler(request, create_responder(request))
+        assert result.dialogue_state == 'intent'
 
     @pytest.mark.asyncio
     async def test_intent_entity(self, dm):
         """Correctly match intent and entity"""
-        result = await dm.apply_handler(create_request('domain', 'intent', [{'type': 'entity_2'}]))
-        assert result['dialogue_state'] == 'intent_entity_2'
+        request = create_request('domain', 'intent', [{'type': 'entity_2'}])
+        result = await dm.apply_handler(request, create_responder(request))
+        assert result.dialogue_state == 'intent_entity_2'
 
     @pytest.mark.asyncio
     async def test_intent_entity_tiebreak(self, dm):
         """Correctly break ties between rules of equal complexity"""
-        context = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'}])
-        result = await dm.apply_handler(context)
-        assert result['dialogue_state'] == 'intent_entity_1'
+        request = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'}])
+        result = await dm.apply_handler(request, create_responder(request))
+        assert result.dialogue_state == 'intent_entity_1'
 
     @pytest.mark.asyncio
     async def test_intent_entities(self, dm):
         """Correctly break ties between rules of equal complexity"""
         context = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'},
                                                       {'type': 'entity_3'}])
-        result = await dm.apply_handler(context)
-        assert result['dialogue_state'] == 'intent_entities'
+        result = await dm.apply_handler(context, create_responder(context))
+        assert result.dialogue_state == 'intent_entities'
 
     @pytest.mark.asyncio
     async def test_target_dialogue_state_management(self, dm):
         """Correctly sets the dialogue state based on the target_dialogue_state"""
         context = create_request('domain', 'intent')
-        result = await dm.apply_handler(context, target_dialogue_state='intent_entity_2')
-        assert result['dialogue_state'] == 'intent_entity_2'
+        result = await dm.apply_handler(
+            context, create_responder(context), target_dialogue_state='intent_entity_2')
+        assert result.dialogue_state == 'intent_entity_2'
 
     def test_targeted_only_kwarg_exclusion(self, dm):
         with pytest.raises(ValueError):
@@ -181,25 +187,23 @@ class TestDialogueManager:
     async def test_middleware_multiple(self, dm):
         """Adding multiple middleware works"""
         async def _first(ctx, responder, handler):
-            ctx['middles'] = ctx.get('middles', []) + ['first']
+            responder.frame['middles'] = responder.frame.get('middles', []) + ['first']
             await handler(ctx, responder)
 
         async def _second(ctx, responder, handler):
-            ctx['middles'] = ctx.get('middles', []) + ['second']
+            responder.frame['middles'] = responder.frame.get('middles', []) + ['second']
             await handler(ctx, responder)
 
         async def _handler(ctx, responder):
             # '_first' should have been called first, then '_second'
-            assert ctx['middles'] == ['first', 'second']
-            ctx['handler'] = True
+            assert responder.frame['middles'] == ['first', 'second']
 
         dm.add_middleware(_first)
         dm.add_middleware(_second)
         dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
         ctx = create_request('domain', 'middle')
-        result = await dm.apply_handler(ctx)
-        assert result['dialogue_state'] == 'middleware_test'
-        assert ctx['handler']
+        result = await dm.apply_handler(ctx, create_responder(ctx))
+        assert result.dialogue_state == 'middleware_test'
 
 
 @pytest.mark.asyncio
@@ -246,7 +250,7 @@ async def test_convo_params_are_cleared(async_kwik_e_mart_app, kwik_e_mart_app_p
         allowed_intents=['store_info.find_nearest_store'],
         target_dialogue_state='welcome')
     await convo.say('close door')
-    assert convo.params == FrozenParams(
+    assert convo.params == Params(
         previous_params=FrozenParams(allowed_intents=['store_info.find_nearest_store'],
                                      target_dialogue_state='welcome'))
 
