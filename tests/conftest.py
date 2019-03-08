@@ -88,10 +88,17 @@ def home_assistant_nlp(home_assistant_app_path):
 
 
 @pytest.fixture(scope='session')
+def kwik_e_mart_app(kwik_e_mart_nlp):
+    from .kwik_e_mart import app
+    app.lazy_init(kwik_e_mart_nlp)
+    return app
+
+
+@pytest.fixture(scope='session')
 def async_kwik_e_mart_app(kwik_e_mart_nlp):
     from .kwik_e_mart import app_async
     app = app_async.app
-    app.lazy_init()
+    app.lazy_init(kwik_e_mart_nlp)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(app.app_manager.load())
     return app

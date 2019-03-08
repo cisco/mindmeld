@@ -105,15 +105,11 @@ class DialogueStateRule:
         entities = resolved.get('has_entities', None)
         self.entity_types = None
         if entities is not None:
-            if isinstance(entities, str):
-                # Single entity type passed in
-                self.entity_types = frozenset((entities,))
-            elif isinstance(entities, (list, set)):
-                # List of entity types passed in
-                self.entity_types = frozenset(entities)
-            else:
-                msg = 'Invalid entity specification for dialogue state rule: {!r}'
-                raise ValueError(msg.format(entities))
+            for entity in entities:
+                if not isinstance(entity, str):
+                    msg = 'Invalid entity specification for dialogue state rule: {!r}'
+                    raise ValueError(msg.format(entities))
+            self.entity_types = frozenset(entities)
 
         if self.targeted_only and any([self.domain, self.intent, self.entity_types]):
             raise ValueError('For a dialogue state rule, if targeted_only is '
@@ -187,12 +183,12 @@ class DialogueStateRule:
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
-        return NotImplemented
+        raise NotImplementedError
 
     def __ne__(self, other):
         if isinstance(other, self.__class__):
             return not self.__eq__(other)
-        return NotImplemented
+        raise NotImplementedError
 
     def __repr__(self):
         return '<{} {!r}>'.format(self.__class__.__name__, self.dialogue_state)
@@ -212,7 +208,7 @@ class DialogueStateRule:
                  1: this is more complex than that
         """
         if not (isinstance(this, DialogueStateRule) and isinstance(that, DialogueStateRule)):
-            return NotImplemented
+            raise NotImplementedError
 
         # https://docs.python.org/3.0/whatsnew/3.0.html#ordering-comparisons
         return (this.complexity > that.complexity) - (this.complexity < that.complexity)
