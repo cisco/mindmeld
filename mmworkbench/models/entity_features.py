@@ -80,13 +80,14 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
 @register_entity_feature(feature_name='numeric')
 def extract_numeric_candidate_features(**args):
     def _extractor(example, resources):
+
         query, _, _ = example
-        feat_seq = [{}] * len(query.normalized_tokens)
-        sys_entities = query.get_system_entity_candidates(['time', 'interval'])
+        feat_seq = {}
+        sys_entities = query.get_system_entity_candidates(['sys_time', 'sys_interval'])
         for ent in sys_entities:
             for i in ent.token_span:
-                feat_name = 'sys_candidate|type:{}'.format(ent.entity.type)
-                feat_seq[i][feat_name] = 1
+                feat_name = 'sys_candidate|type:{}|pos:{}'.format(ent.entity.type, i)
+                feat_seq[feat_name] = 1
         return feat_seq
 
     return _extractor
