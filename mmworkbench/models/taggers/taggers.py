@@ -317,16 +317,8 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
                 # During predict time, we construct sys_candidates for the input query.
                 # These candidates are "global" sys_candidates, in that the entire query
                 # is sent to Duckling to extract sys_candidates and not just a span range
-                # within the query. However, the tagging model could more restrictive in
-                # its classifier, so a sub-span of the original sys_candidate could be tagged
-                # as a sys_entity. For example, the query "set alarm for 1130", Duckling
-                # provides the following sys_time entity candidate: "for 1130". However,
-                # our entity recognizer only tags the token "1130" as a sys-time entity,
-                # and not "at". Therefore, when we append system entities for this query,
-                # we pick the start of the sys_entity to be the sys_candidate's start span
-                # if the tagger identified a sys_entity within that sys_candidate's span
-                # range of the same sys_entity type. Else, we just use the tag_idx tracked
-                # in the control logic.
+                # within the query. When we append system entities for a given token,
+                # we pick among candidates with start_span equivalent to the token's tag_idx.
 
                 picked_by_existing_system_entity_candidates = False
 
