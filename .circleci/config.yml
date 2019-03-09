@@ -118,10 +118,10 @@ definitions:
           command: python -c "from mmworkbench._util import Blueprint; Blueprint.setup_kb(name='food_ordering', app_path='./food_ordering')"
 
       - store_test_results:
-          path: ~/test-reports
+          path: /home/circleci/test-reports
 
       - store_artifacts:
-          path: ~/test-reports
+          path: /home/circleci/test-reports
 
 
 # Jobs
