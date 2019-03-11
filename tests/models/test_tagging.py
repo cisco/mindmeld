@@ -233,7 +233,8 @@ def test_lstm_er_model(kwik_e_mart_nlp):
             'tag_scheme': 'IOB',
             'feature_scaler': 'max-abs'
         },
-        'params': {'number_of_epochs': 1},
+        'params': {'number_of_epochs': 3, 'token_embedding_dimension': 50,
+                   'gaz_encoding_dimension': 50, 'token_lstm_hidden_state_dimension': 200},
         'features': {
             'bag-of-words-seq': {
                 'ngram_lengths_to_start_positions': {

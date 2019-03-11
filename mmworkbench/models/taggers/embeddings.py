@@ -216,7 +216,8 @@ class WordSequenceEmbedding:
             pkl_file.close()
 
         for word in historic_word_embeddings:
-            self.token_to_embedding_mapping[word] = historic_word_embeddings.get(word)
+            if len(historic_word_embeddings[word]) == self.token_embedding_dimension:
+                self.token_to_embedding_mapping[word] = historic_word_embeddings.get(word)
 
     def save_embeddings(self):
         """Save extracted embeddings to historic pickle file
