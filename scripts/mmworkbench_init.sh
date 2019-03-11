@@ -145,7 +145,6 @@ mkdir -p ~/.mmworkbench
 cat >~/.mmworkbench/config <<EOL
 [mmworkbench]
 mindmeld_url = https://devcenter.mindmeld.com
-token = token
 EOL
 
 echo ~/.mmworkbench/config created.

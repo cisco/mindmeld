@@ -13,7 +13,6 @@ import tarfile
 from dateutil import tz
 import py
 import requests
-from requests.auth import HTTPBasicAuth
 
 from . import path
 from .components import QuestionAnswerer
@@ -196,19 +195,10 @@ class Blueprint:
 
         config = load_global_configuration()
         mindmeld_url = config.get('mindmeld_url', DEVCENTER_URL)
-        token = config.get('token', None)
-        if token:
-            username = 'token'
-            password = token
-        else:
-            username = config['username']
-            password = config['password']
-
         remote_url = BLUEPRINT_URL.format(mindmeld_url=mindmeld_url, blueprint=name,
                                           filename=filename)
-        auth = HTTPBasicAuth(username, password)
 
-        res = requests.head(remote_url, auth=auth)
+        res = requests.head(remote_url)
         if res.status_code == 401:
             # authentication error
             msg = ('Invalid MindMeld credentials. Cannot download blueprint. Please confirm '
@@ -233,7 +223,7 @@ class Blueprint:
             logger.info('Using cached %r %s archive', name, archive_type)
         else:
             logger.info('Fetching %s archive from %r', archive_type, remote_url)
-            res = requests.get(remote_url, stream=True, auth=auth)
+            res = requests.get(remote_url, stream=True)
             if res.status_code == 200:
                 with open(local_archive, 'wb') as file_pointer:
                     res.raw.decode_content = True
@@ -266,24 +256,20 @@ def load_global_configuration():
     def _filter_bad_keys(config):
         return {key: config[key] for key in config if key is not None}
 
-    config = {
-        'mindmeld_url': os.environ.get('MM_URL', None),
-        'username': os.environ.get('MM_USERNAME', None),
-        'password': os.environ.get('MM_PASSWORD', None),
-        'token': os.environ.get('MM_TOKEN', None)
-    }
-    if config['username'] or config['token']:
+    mindmeld_url = os.environ.get('MM_URL', None)
+
+    if mindmeld_url:
+        config = {
+            'mindmeld_url': mindmeld_url
+        }
         return _filter_bad_keys(config)
 
     try:
-        logging.info('loading auth from mmworkbench config file.')
+        logging.info('loading info from mmworkbench config file.')
         config_file = path.get_user_config_path()
         iniconfig = py.iniconfig.IniConfig(config_file)
         config = {
             'mindmeld_url': iniconfig.get('mmworkbench', 'mindmeld_url'),
-            'username': iniconfig.get('mmworkbench', 'username'),
-            'password': iniconfig.get('mmworkbench', 'password'),
-            'token': iniconfig.get('mmworkbench', 'token')
         }
         return _filter_bad_keys(config)
     except OSError:
