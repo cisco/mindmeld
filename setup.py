@@ -15,7 +15,7 @@ requirements = [
     'Flask~=0.12',
     'Flask-Cors~=3.0',
     'nltk~=3.2',
-    'numpy>=1.14,<=1.14.5',  # tensorflow not working with latest version of numpy
+    'numpy~=1.14',
     'pandas~=0.22',
     'pip>=9.0.1',
     'py~=1.4',
