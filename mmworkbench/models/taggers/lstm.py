@@ -200,7 +200,6 @@ class LstmModel(Tagger):
 
         # There are no groups in this model
         groups = None
-
         return x_sequence_embeddings_arr, encoded_labels, groups
 
     def setup_model(self, config):
