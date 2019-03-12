@@ -244,7 +244,7 @@ class Classifier(metaclass=ABCMeta):
             dynamic_resource (dict, optional):  A dynamic resource to aid NLP inference
 
         Returns:
-            list: a list of tuples of the form (str, float) grouping predicted class labels and
+            list: a list of tuples of the form (str, float) grouping predicted class labels and \
                 their probabilities
         """
         if not self._model:

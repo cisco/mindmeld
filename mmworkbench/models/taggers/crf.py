@@ -38,8 +38,9 @@ class ConditionalRandomFields(Tagger):
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
+
         Returns:
-            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels
+            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels \
              with confidence scores
         """
         X, _, _ = self.extract_features(examples, config, resources)
@@ -61,6 +62,7 @@ class ConditionalRandomFields(Tagger):
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
+
         Returns:
             (list of list of str): features in CRF suite format
         """
@@ -79,6 +81,7 @@ class ConditionalRandomFields(Tagger):
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
+
         Returns:
             (list dict): features
         """
@@ -91,6 +94,7 @@ class ConditionalRandomFields(Tagger):
         Args:
             X (list of dict): features of an example
             fit (bool, optional): True if processing data at fit time, false for predict time.
+
         Returns:
             (list of list of str): features in CRF suite format
         """

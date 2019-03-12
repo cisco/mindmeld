@@ -119,10 +119,12 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
             If not specified, the current system time is used. If `time_zone` \
             is not also specified, this parameter is ignored.
 
-    Returns:
-        response (list, dict): Duckling response that consist of a list of dicts, each \
-            corresponding to a single prediction
-        response_code (int): http status code
+        Returns:
+            (tuple): tuple containing:
+
+                * response (list, dict): Duckling response that consist of a list of dicts, each \
+                      corresponding to a single prediction
+                * response_code (int): http status code
     """
     if sentence == '':
         return {}, SUCCESSFUL_HTTP_CODE
@@ -270,8 +272,8 @@ def _duckling_item_to_query_entity(query, item, offset=0):
             indexing begins
 
     Returns:
-        QueryEntity: The query entity described by the duckling item or
-        None if no item is present
+        QueryEntity: The query entity described by the duckling item or \
+            None if no item is present
     """
     if item:
         start = int(item['start']) + offset

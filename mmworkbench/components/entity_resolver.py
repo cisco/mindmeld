@@ -478,7 +478,7 @@ class EntityResolver:
             entity (Entity): An entity found in an input query
 
         Returns:
-            list: a list of tuples of the form (str, float) grouping resolved values and their
+            list: a list of tuples of the form (str, float) grouping resolved values and their \
                 probabilities
         """
         pass

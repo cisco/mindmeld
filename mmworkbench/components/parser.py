@@ -93,7 +93,7 @@ class Parser:
                 time out
 
         Returns:
-            tuple of QueryEntity: An updated version of the entities collection passed in with
+            tuple of QueryEntity: An updated version of the entities collection passed in with \
                 their parent and children attributes set appropriately.
         """
         if not self._configured_entities:

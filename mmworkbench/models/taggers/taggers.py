@@ -120,10 +120,14 @@ class Tagger:
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
+
         Returns:
-            (list of feature vectors): X
-            (list of labels): y
-            (list of groups): A list of groups to be used for splitting with sklearn GridSearchCV
+            (tuple): tuple containing:
+
+                * (list of feature vectors): X
+                * (list of labels): y
+                * (list of groups): A list of groups to be used for splitting with \
+                    sklearn GridSearchCV
         """
         raise NotImplementedError
 
@@ -139,6 +143,7 @@ class Tagger:
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
+
         Returns:
             (list of classification labels): A list of predicted labels (in encoded format)
         """
@@ -154,6 +159,7 @@ class Tagger:
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
+
         Returns:
             (list of lists): A list of predicted labels (in encoded format) and confidence scores
         """
@@ -200,10 +206,10 @@ def get_tags_from_entities(query, entities, scheme='IOB'):
         entities (List of QueryEntity): A list of queries found in the query
 
     Returns:
-        (list of str): The tags for each token in the query. A tag has four
-            parts separated by '|'. The first two are the IOB status for
-            app entities followed by the type of app entity or
-            '' if the IOB status is 'O'. The last two are like the first two,
+        (list of str): The tags for each token in the query. A tag has four \
+            parts separated by '|'. The first two are the IOB status for \
+            app entities followed by the type of app entity or \
+            '' if the IOB status is 'O'. The last two are like the first two, \
             but for system entities.
     """
     entities = [e for e in entities]
@@ -545,6 +551,7 @@ def extract_sequence_features(example, example_type, feature_config, resources):
         example_type (str): The type of example
         feature_config (dict): The config for features
         resources (dict): Resources of this model
+
     Returns:
         (list dict): features
     """

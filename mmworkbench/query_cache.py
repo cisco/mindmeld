@@ -40,12 +40,13 @@ class QueryCache:
     def set_value(self, domain, intent, query_text, processed_query):
         """
         Set value for the corresponding argument parameters
+
         Args:
             domain (str): The domain
             intent (str): The intent
             query_text (str): The query text
-            processed_query (ProcessedQuery): The ProcessedQuery
-            object corresponding to the domain, intent and query_text
+            processed_query (ProcessedQuery): The ProcessedQuery \
+                object corresponding to the domain, intent and query_text
         """
         if (domain, intent, query_text) in self.cached_queries:
             return

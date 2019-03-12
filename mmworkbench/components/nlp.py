@@ -652,8 +652,8 @@ class DomainProcessor(Processor):
         trained for this domain
 
         Args:
-            query_text (str, or list/tuple): The raw user text input, or a list of the n-best query \
-                transcripts from ASR
+            query_text (str, or list/tuple): The raw user text input, or a list of the n-best \
+                query transcripts from ASR
             allowed_nlp_classes (dict, optional): A dictionary of the intent section of the \
                 NLP hierarchy that is selected for NLP analysis. An example: \
                     { \
@@ -861,7 +861,7 @@ class IntentProcessor(Processor):
             verbose (bool, optional): If True, returns class as well as predict probabilities
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
@@ -878,7 +878,7 @@ class IntentProcessor(Processor):
                 query objects
             verbose (bool, optional): If True returns class as well as confidence scores
         Returns:
-            list (of lists of QueryEntity objects): A list of lists of the entity objects for each
+            list (of lists of QueryEntity objects): A list of lists of the entity objects for each \
                 transcript
         """
         if isinstance(query, (list, tuple)):
@@ -917,7 +917,7 @@ class IntentProcessor(Processor):
                 where each list is the recognized entities for the nth query
 
         Returns:
-            list (of lists of QueryEntity objects): A list of lists of entity objects, where
+            list (of lists of QueryEntity objects): A list of lists of entity objects, where \
                 each list is a group of spans that represent the same canonical entity
         """
         # Treat entities and their spans found in the first transcript as global base/reference
@@ -1003,10 +1003,13 @@ class IntentProcessor(Processor):
                 an array of entities if False (this is used to parallelize n-best entity processing)
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
             verbose (bool, optional): If True, returns class as well as predict probabilities
+
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from \
+            (tuple): tuple containing:
+
+            * ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input query
-            list(entities): If return_procesed_query is False
+            * list(entities): If return_procesed_query is False
         """
         self._check_ready()
 
@@ -1121,9 +1124,12 @@ class EntityProcessor(Processor):
             verbose (bool): If set to True, returns confidence scores of classes
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from \
-                applying the hierarchy of natural language processing models to the input entity
-            confidence_score: confidence scores returned by classifier
+            (tuple): tuple containing:
+
+                * ProcessedQuery: A processed query object that contains the prediction results \
+                     from applying the hierarchy of natural language processing models to the \
+                        input entity
+                * confidence_score: confidence scores returned by classifier
         """
         self._check_ready()
         entity = entities[entity_index]
