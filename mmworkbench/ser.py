@@ -106,24 +106,23 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
 
     Args:
         sentence (str): A raw sentence.
-        dimensions (None or list of str): The list of types (e.g. volume,
+        dimensions (None or list of str): The list of types (e.g. volume, \
             temperature) to restrict the output to. If None, include all types
-        language (str, optional): Language of the sentence specified using a 639-1 code.
+        language (str, optional): Language of the sentence specified using a 639-1 code. \
             If omitted, English is assumed.
-        locale (str, optional): The english locale being used, could be en_AU, en_BE, en_BZ,
-            en_CA, en_CN, en_GB, en_HK, en_IE, en_IN, en_JM, en_MO, en_NZ, en_PH, en_TT, en_TW,
+        locale (str, optional): The english locale being used, could be en_AU, en_BE, en_BZ, \
+            en_CA, en_CN, en_GB, en_HK, en_IE, en_IN, en_JM, en_MO, en_NZ, en_PH, en_TT, en_TW, \
             en_US, en_ZA.
-        time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
+        time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'. \
             If not specified, the system time zone is used.
-        timestamp (long, optional): A unix millisecond timestamp used as the reference time.
-            If not specified, the current system time is used. If `time_zone`
+        timestamp (long, optional): A unix millisecond timestamp used as the reference time. \
+            If not specified, the current system time is used. If `time_zone` \
             is not also specified, this parameter is ignored.
 
     Returns:
-        response (list, dict): Duckling response that consist of a list of dicts, each
+        response (list, dict): Duckling response that consist of a list of dicts, each \
             corresponding to a single prediction
         response_code (int): http status code
-
     """
     if sentence == '':
         return {}, SUCCESSFUL_HTTP_CODE

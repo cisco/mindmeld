@@ -497,7 +497,7 @@ def get_app(app_path):
         app_path (str): The path to an application on disk
 
     Returns:
-        Application: the workbench application
+        mmworkbench.app.Application: the workbench application
 
     Raises:
         WorkbenchImportError: when the application can not be found

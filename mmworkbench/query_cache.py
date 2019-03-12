@@ -45,7 +45,7 @@ class QueryCache:
             intent (str): The intent
             query_text (str): The query text
             processed_query (ProcessedQuery): The ProcessedQuery
-                object corresponding to the domain, intent and query_text
+            object corresponding to the domain, intent and query_text
         """
         if (domain, intent, query_text) in self.cached_queries:
             return

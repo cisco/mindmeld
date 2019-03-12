@@ -936,14 +936,15 @@ class Model:
         return False
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
-        """Load the required resources for feature extractors. Each feature extractor uses
-        @requires decorator to declare required resources. Based on feature list in model config
-        a list of required resources are compiled, and the passed in resource loader is then used to
+        """Load the required resources for feature extractors. Each feature extractor uses \
+        @requires decorator to declare required resources. Based on feature list in model config \
+        a list of required resources are compiled, and the passed in resource loader is then used to \
         load the resources accordingly.
+
         Args:
             resource_loader (ResourceLoader): application resource loader object
             examples (list): Optional. A list of examples.
-            labels (list): Optional. A parallel list to examples. The gold labels
+            labels (list): Optional. A parallel list to examples. The gold labels \
                            for each example.
         """
 
