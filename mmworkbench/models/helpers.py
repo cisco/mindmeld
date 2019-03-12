@@ -102,9 +102,11 @@ def register_entity_feature(feature_name):
 def register_feature(feature_type, feature_name):
     """
     Decorator for adding feature extractor mappings to FEATURE_MAP
+
     Args:
         feature_type: 'query' or 'entity'
         feature_name: The name of the feature, used in config.py
+
     Returns:
         (func): the feature extractor
     """

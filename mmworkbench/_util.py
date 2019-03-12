@@ -236,6 +236,7 @@ blueprint = Blueprint()  # pylint: disable=locally-disabled,invalid-name
 
 def configure_logs(**kwargs):
     """Helper method for easily configuring logs from the python shell.
+
     Args:
         level (TYPE, optional): A logging level recognized by python's logging module.
     """

@@ -103,8 +103,8 @@ class ModelConfig:
         """This method resolves any config incompatibility issues by
         loading the latest settings from the app config to the current config
 
-        Arguments:
-        new_config (ModelConfig): The ModelConfig representing the app's latest config
+        Args:
+            new_config (ModelConfig): The ModelConfig representing the app's latest config
         """
         new_settings = ['train_label_set', 'test_label_set']
         logger.warn('Loading missing properties {} from app '
@@ -116,12 +116,14 @@ class ModelConfig:
         """
         Returns the n-gram lengths and thresholds to extract to optimize resource collection
 
-        Arguments:
-        rname (string): Name of the resource
+        Args:
+            rname (string): Name of the resource
 
         Returns:
-            lengths (list of int): list of n-gram lengths to be extracted
-            thresholds (list of int): thresholds to be applied to corresponding n-gram lengths
+            (tuple): tuple containing:
+
+                * lengths (list of int): list of n-gram lengths to be extracted
+                * thresholds (list of int): thresholds to be applied to corresponding n-gram lengths
         """
         lengths = thresholds = None
         # if it's not the n-gram feature, we don't need length and threshold information
@@ -258,7 +260,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Returns a structured stats object for evaluation.
 
         Returns:
-            dict: Structured dict containing evaluation statistics. Contains precision,
+            dict: Structured dict containing evaluation statistics. Contains precision, \
                   recall, f scores, support, etc.
         """
         raise NotImplementedError
@@ -268,7 +270,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Prints a useful stats table for evaluation.
 
         Returns:
-            dict: Structured dict containing evaluation statistics. Contains precision,
+            dict: Structured dict containing evaluation statistics. Contains precision, \
                   recall, f scores, support, etc.
         """
         raise NotImplementedError
@@ -288,11 +290,13 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         evaluation metrics or to generate graphs of their choice.
 
         Returns:
-            NamedTuple: RawResults named tuple containing
-                expected: vector of predicted classes (numeric value)
-                predicted: vector of gold classes (numeric value)
-                text_labels: a list of all the text label values, the index of the text label in
-                this array is the numeric label
+            (tuple): tuple containing:
+
+                * NamedTuple: RawResults named tuple containing
+                * expected: vector of predicted classes (numeric value)
+                * predicted: vector of gold classes (numeric value)
+                * text_labels: a list of all the text label values, the index of the text label in
+                * this array is the numeric label
         """
         raise NotImplementedError
 
@@ -301,8 +305,10 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Helper method for updating the text to numeric label vectors
 
         Returns:
-            text_labels: The updated text_labels array
-            vec: The updated label vector with the given label appended
+            (tuple): tuple containing:
+
+                * text_labels: The updated text_labels array
+                * vec: The updated label vector with the given label appended
         """
         if label not in text_labels:
             text_labels.append(label)
@@ -314,7 +320,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Prints a useful stats table and returns a structured stats object for evaluation.
 
         Returns:
-            dict: Structured dict containing evaluation statistics. Contains precision,
+            dict: Structured dict containing evaluation statistics. Contains precision, \
                   recall, f scores, support, etc.
         """
         labels = range(len(text_labels))
@@ -349,7 +355,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Method for getting some basic statistics by class.
 
         Returns:
-            dict: A structured dictionary containing precision, recall, f_beta, and support
+            dict: A structured dictionary containing precision, recall, f_beta, and support \
                   vectors (1 x number of classes)
         """
         precision, recall, f_beta, support = score(y_true=y_true, y_pred=y_pred,
@@ -368,7 +374,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         Method for getting some overall statistics.
 
         Returns:
-            dict: A structured dictionary containing scalar values for f1 scores and overall
+            dict: A structured dictionary containing scalar values for f1 scores and overall \
                   accuracy.
         """
         f1_weighted = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='weighted')
@@ -694,13 +700,13 @@ class Model:
         validation and returns the best estimator and parameters.
 
         Args:
-            examples (list): A list of examples. Should be in the format expected by the underlying
-                             estimator.
+            examples (list): A list of examples. Should be in the format expected by the \
+                             underlying estimator.
             labels (list): The target output values.
-            groups (None, optional): Same length as examples and labels. Used to group examples when
-                                     splitting the dataset into train/test
-            selection_settings (dict, optional): A dictionary containing the cross validation
-                                                 selection settings.
+            groups (None, optional): Same length as examples and labels. Used to group \
+                                     examples when splitting the dataset into train/test
+            selection_settings (dict, optional): A dictionary containing the cross \
+                                                 validation selection settings.
 
         """
         selection_settings = selection_settings or self.config.param_selection
@@ -792,10 +798,10 @@ class Model:
         passed in to the actual classifier.
 
         Args:
-            param_grid (dict): lists of classifier parameter values, keyed by
+            param_grid (dict): lists of classifier parameter values, keyed by \
                 parameter name
             y (list): A list of labels
-            is_grid (bool, optional): Indicates whether param_grid is actually a grid
+            is_grid (bool, optional): Indicates whether param_grid is actually a grid \
                 or a params dict.
         """
         raise NotImplementedError
@@ -813,7 +819,7 @@ class Model:
         raise NotImplementedError
 
     def _get_effective_config(self):
-        """Create a model config object for the current effective config (after
+        """Create a model config object for the current effective config (after \
         param selection)
 
         Returns:
@@ -936,14 +942,15 @@ class Model:
         return False
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
-        """Load the required resources for feature extractors. Each feature extractor uses
-        @requires decorator to declare required resources. Based on feature list in model config
-        a list of required resources are compiled, and the passed in resource loader is then used to
-        load the resources accordingly.
+        """Load the required resources for feature extractors. Each feature extractor uses \
+        @requires decorator to declare required resources. Based on feature list in model config \
+        a list of required resources are compiled, and the passed in resource loader is then used \
+        to load the resources accordingly.
+
         Args:
             resource_loader (ResourceLoader): application resource loader object
             examples (list): Optional. A list of examples.
-            labels (list): Optional. A parallel list to examples. The gold labels
+            labels (list): Optional. A parallel list to examples. The gold labels \
                            for each example.
         """
 

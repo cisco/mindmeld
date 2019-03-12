@@ -244,7 +244,7 @@ class Classifier(metaclass=ABCMeta):
             dynamic_resource (dict, optional):  A dynamic resource to aid NLP inference
 
         Returns:
-            list: a list of tuples of the form (str, float) grouping predicted class labels and
+            list: a list of tuples of the form (str, float) grouping predicted class labels and \
                 their probabilities
         """
         if not self._model:
@@ -294,15 +294,16 @@ class Classifier(metaclass=ABCMeta):
         raise NotImplementedError
 
     def view_extracted_features(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
-        """
-        Extracts features for the given input based on the model config.
+        """Extracts features for the given input based on the model config.
+
         Args:
             query (Query or str): The input query
-            time_zone (str, optional): The name of an IANA time zone, such as
-                'America/Los_Angeles', or 'Asia/Kolkata'
+            time_zone (str, optional): The name of an IANA time zone, such as \
+                'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict): Dynamic gazetteer to be included for feature extraction.
+
         Returns:
             dict: The extracted features from the given input
         """

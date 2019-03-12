@@ -344,9 +344,11 @@ def extract_in_gaz_ngram_features(**args):
 def extract_bag_of_words_features(ngram_lengths_to_start_positions,
                                   thresholds=(0,), **args):
     """Returns a bag-of-words feature extractor.
+
     Args:
-        ngram_lengths_to_start_positions (dict):
+        ngram_lengths_to_start_positions (dict)
         thresholds (int): Cut off value to include word in n-gram vocab
+
     Returns:
         (function) The feature extractor.
     """
@@ -425,11 +427,13 @@ def enabled_stemming(**args):
 @requires(CHAR_NGRAM_FREQ_RSC)
 def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0,), **args):
     """Returns a character n-gram feature extractor.
+
         Args:
             ngram_lengths_to_start_positions (dict):
             The window of tokens to be considered relative to the
             current token while extracting char n-grams
             thresholds (int): Cut off value to include word in n-gram vocab
+
         Returns:
             (function) The feature extractor.
         """
@@ -470,8 +474,10 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0
 def extract_sys_candidate_features(start_positions=(0,), **args):
     """Return an extractor for features based on a heuristic guess of numeric
     candidates at/near the current token.
+
     Args:
         start_positions (tuple): positions relative to current token (=0)
+
     Returns:
         (function) The feature extractor.
     """
@@ -509,12 +515,12 @@ def update_features_sequence(feat_seq, update_feat_seq, **args):
 @register_query_feature(feature_name='char-ngrams')
 @requires(CHAR_NGRAM_FREQ_RSC)
 def extract_char_ngrams(lengths=(1,), thresholds=(0,), **args):
-    """
-        Extract character ngrams of specified lengths.
+    """Extract character ngrams of specified lengths.
 
         Args:
             lengths (list of int): The ngram length.
             thresholds (list of int): frequency cut off value to include ngram in vocab
+
         Returns:
             (function) An feature extraction function that takes a query and
                 returns character ngrams of specified lengths.
@@ -549,8 +555,9 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
     Args:
         lengths (list of int): The ngram length.
         thresholds (list of int): frequency cut off value to include ngram in vocab
+
     Returns:
-        (function) An feature extraction function that takes a query and
+        (function) An feature extraction function that takes a query and \
             returns ngrams of the specified lengths.
     """
     threshold_list = list(thresholds)
@@ -600,7 +607,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
 @register_query_feature(feature_name='sys-candidates')
 def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES, **args):
     """
-    Return an extractor for features based on a heuristic guess of numeric
+    Return an extractor for features based on a heuristic guess of numeric \
         candidates in the current query.
 
     Returns:
@@ -624,8 +631,9 @@ def extract_word_shape(lengths=(1,), **args):
 
     Args:
         lengths (list of int): The ngram length
+
     Returns:
-        (function) An feature extraction function that takes a query and
+        (function) An feature extraction function that takes a query and \
             returns ngrams of word shapes, for n of specified lengths.
     """
     def word_shape_basic(token):
@@ -668,7 +676,7 @@ def extract_edge_ngrams(lengths=(1,), **args):
         lengths (list of int): The ngram length.
 
     Returns:
-        (function) An feature extraction function that takes a query and
+        (function) An feature extraction function that takes a query and \
             returns ngrams of the specified lengths at start and end of query.
     """
 
@@ -703,7 +711,7 @@ def extract_freq(bins=5, **args):
         bins (int): The number of frequency bins (besides OOV)
 
     Returns:
-        (function): A feature extraction function that returns the log of the
+        (function): A feature extraction function that returns the log of the \
             count of query tokens within each frequency bin.
 
     """
@@ -757,7 +765,7 @@ def extract_gaz_freq(**args):
     Extract frequency bin features for each gazetteer
 
     Returns:
-        (function): A feature extraction function that returns the log of the
+        (function): A feature extraction function that returns the log of the \
             count of query tokens within each gazetteer's frequency bins.
     """
 
@@ -819,7 +827,7 @@ def extract_length(**args):
     Extract length measures (tokens and chars; linear and log) on whole query.
 
     Returns:
-        (function) A feature extraction function that takes a query and
+        (function) A feature extraction function that takes a query and \
             returns number of tokens and characters on linear and log scales
     """
 
@@ -842,7 +850,7 @@ def extract_query_string(scaling=1000, **args):
     Extract whole query string as a feature.
 
     Returns:
-        (function) A feature extraction function that takes a query and
+        (function) A feature extraction function that takes a query and \
             returns the whole query string for exact matching
 
     """

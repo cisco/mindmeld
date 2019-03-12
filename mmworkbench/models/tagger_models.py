@@ -222,7 +222,7 @@ class TaggerModel(Model):
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
-            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels
+            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels \
             with confidence scores
         """
         if self._no_entities:
@@ -288,7 +288,7 @@ class TaggerModel(Model):
             labels: A list of expected labels
 
         Returns:
-            ModelEvaluation: an object containing information about the
+            ModelEvaluation: an object containing information about the \
                 evaluation
         """
         # TODO: also expose feature weights?

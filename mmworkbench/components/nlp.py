@@ -199,34 +199,27 @@ class Processor(metaclass=ABCMeta):
 
     def process(self, query_text, allowed_nlp_classes=None, language=None, time_zone=None,
                 timestamp=None, dynamic_resource=None, verbose=False):
-        """Processes the given query using the full hierarchy of natural language processing models
+        """Processes the given query using the full hierarchy of natural language processing models \
         trained for this application
 
         Args:
-            query_text (str, or tuple): The raw user text input, or a list of the n-best query
+            query_text (str, or tuple): The raw user text input, or a list of the n-best query \
                 transcripts from ASR
-            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-                selected for NLP analysis. An example:
-
-                    {
-                        smart_home: {
-                            close_door: {}
-                        }
-                    }
-
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
                 where smart_home is the domain and close_door is the intent.
-            language (str, optional): Language as specified using a 639-2 code;
+            language (str, optional): Language as specified using a 639-2 code; \
                 if omitted, English is assumed.
-            time_zone (str, optional): The name of an IANA time zone, such as
-                'America/Los_Angeles', or 'Asia/Kolkata'
+            time_zone (str, optional): The name of an IANA time zone, such as \
+                'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            verbose (bool, optional): If True, returns class probabilities along with class
+            verbose (bool, optional): If True, returns class probabilities along with class \
                 prediction
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the full hierarchy of natural language processing models to the input query
         """
         query = self.create_query(
@@ -234,28 +227,21 @@ class Processor(metaclass=ABCMeta):
         return self.process_query(query, allowed_nlp_classes, dynamic_resource, verbose).to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
-        """Processes the given query using the full hierarchy of natural language processing models
+        """Processes the given query using the full hierarchy of natural language processing models \
         trained for this application
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts \
                 query objects
-            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-                selected for NLP analysis. An example:
-
-                    {
-                        smart_home: {
-                            close_door: {}
-                        }
-                    }
-
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
                 where smart_home is the domain and close_door is the intent.
-            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            verbose (bool, optional): If True, returns class probabilities along with class
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference \
+            verbose (bool, optional): If True, returns class probabilities along with class \
                 prediction
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the full hierarchy of natural language processing models to the input query
         """
         raise NotImplementedError
@@ -451,27 +437,22 @@ class NaturalLanguageProcessor(Processor):
             return domain, domain_proba
 
     def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
-        """Processes the given query using the full hierarchy of natural language processing models
+        """Processes the given query using the full hierarchy of natural language processing models \
         trained for this application
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts \
                 query objects
-            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-            selected for NLP analysis. An example:
-            {
-                smart_home: {
-                    close_door: {}
-                }
-            }
-            where smart_home is the domain and close_door is the intent. If allowed_nlp_classes
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is \
+            selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
+            where smart_home is the domain and close_door is the intent. If allowed_nlp_classes \
             is None, we just use the normal model predict functionality.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            verbose (bool, optional): If True, returns class probabilities along with class
+            verbose (bool, optional): If True, returns class probabilities along with class \
                 prediction
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the full hierarchy of natural language processing models to the input query
         """
         self._check_ready()
@@ -563,36 +544,29 @@ class NaturalLanguageProcessor(Processor):
     def process(self, query_text, allowed_nlp_classes=None, allowed_intents=None,
                 language=None, time_zone=None, timestamp=None,
                 dynamic_resource=None, verbose=False):
-        """Processes the given query using the full hierarchy of natural language processing models
+        """Processes the given query using the full hierarchy of natural language processing models \
         trained for this application
 
         Args:
-            query_text (str, or tuple): The raw user text input, or a list of the n-best query
+            query_text (str, or tuple): The raw user text input, or a list of the n-best query \
                 transcripts from ASR
-            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is
-                selected for NLP analysis. An example:
-
-                    {
-                        smart_home: {
-                            close_door: {}
-                        }
-                    }
-
+            allowed_nlp_classes (dict, optional): A dictionary of the NLP hierarchy that is \
+                selected for NLP analysis. An example: ``{'smart_home': {'close_door': {}}}`` \
                 where smart_home is the domain and close_door is the intent.
-            allowed_intents (list, optional): A list of allowed intents to use for
+            allowed_intents (list, optional): A list of allowed intents to use for \
             the NLP processing
-            language (str, optional): Language as specified using a 639-2 code;
+            language (str, optional): Language as specified using a 639-2 code; \
                 if omitted, English is assumed.
-            time_zone (str, optional): The name of an IANA time zone, such as
-                'America/Los_Angeles', or 'Asia/Kolkata'
+            time_zone (str, optional): The name of an IANA time zone, such as \
+                'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            verbose (bool, optional): If True, returns class probabilities along with class
+            verbose (bool, optional): If True, returns class probabilities along with class \
                 prediction
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the full hierarchy of natural language processing models to the input query
         """
         if allowed_intents is not None and allowed_nlp_classes is not None:
@@ -674,30 +648,29 @@ class DomainProcessor(Processor):
 
     def process(self, query_text, allowed_nlp_classes,
                 time_zone=None, timestamp=None, dynamic_resource=None, verbose=False):
-        """Processes the given input text using the hierarchy of natural language processing models
+        """Processes the given input text using the hierarchy of natural language processing models \
         trained for this domain
 
         Args:
-            query_text (str, or list/tuple): The raw user text input, or a list of the n-best query
-                transcripts from ASR
-            allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
-                NLP hierarchy that is selected for NLP analysis. An example:
-
-                    {
-                        close_door: {}
-                    }
-
-                where close_door is the intent. The intent belongs to the smart_home domain.
+            query_text (str, or list/tuple): The raw user text input, or a list of the n-best \
+                query transcripts from ASR
+            allowed_nlp_classes (dict, optional): A dictionary of the intent section of the \
+                NLP hierarchy that is selected for NLP analysis. An example: \
+                    { \
+                        close_door: {} \
+                    } \
+                where close_door is the intent. The intent belongs to the smart_home domain. \
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
-            time_zone (str, optional): The name of an IANA time zone, such as
-                'America/Los_Angeles', or 'Asia/Kolkata'
+            time_zone (str, optional): The name of an IANA time zone, such as \
+                'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            verbose (bool, optional): If True, returns class probabilities along with class
+            verbose (bool, optional): If True, returns class probabilities along with class \
                 prediction
+
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
@@ -707,27 +680,22 @@ class DomainProcessor(Processor):
         return processed_query.to_dict()
 
     def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
-        """Processes the given query using the full hierarchy of natural language processing models
+        """Processes the given query using the full hierarchy of natural language processing models \
         trained for this application
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts \
                 query objects
-            allowed_nlp_classes (dict, optional): A dictionary of the intent section of the
-                NLP hierarchy that is selected for NLP analysis. An example:
-
-                    {
-                        close_door: {}
-                    }
-
-                where close_door is the intent. The intent belongs to the smart_home domain.
+            allowed_nlp_classes (dict, optional): A dictionary of the intent section of the \
+                NLP hierarchy that is selected for NLP analysis. An example: ``{'close_door': {}}``
+                where close_door is the intent. The intent belongs to the smart_home domain. \
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            verbose (bool, optional): If True, returns class probabilities along with class
+            verbose (bool, optional): If True, returns class probabilities along with class \
                 prediction
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the full hierarchy of natural language processing models to the input query
         """
         self._check_ready()
@@ -893,7 +861,7 @@ class IntentProcessor(Processor):
             verbose (bool, optional): If True, returns class as well as predict probabilities
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text
         """
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp)
@@ -910,7 +878,7 @@ class IntentProcessor(Processor):
                 query objects
             verbose (bool, optional): If True returns class as well as confidence scores
         Returns:
-            list (of lists of QueryEntity objects): A list of lists of the entity objects for each
+            list (of lists of QueryEntity objects): A list of lists of the entity objects for each \
                 transcript
         """
         if isinstance(query, (list, tuple)):
@@ -949,7 +917,7 @@ class IntentProcessor(Processor):
                 where each list is the recognized entities for the nth query
 
         Returns:
-            list (of lists of QueryEntity objects): A list of lists of entity objects, where
+            list (of lists of QueryEntity objects): A list of lists of entity objects, where \
                 each list is a group of spans that represent the same canonical entity
         """
         # Treat entities and their spans found in the first transcript as global base/reference
@@ -1025,20 +993,23 @@ class IntentProcessor(Processor):
 
     def process_query(self, query, return_processed_query=True, dynamic_resource=None,
                       verbose=False):
-        """Processes the given query using the hierarchy of natural language processing models
+        """Processes the given query using the hierarchy of natural language processing models \
         trained for this intent
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n-best transcripts
+            query (Query, or tuple): The user input query, or a list of the n-best transcripts \
                 query objects
-            return_processed_query(boolean): Returns an instance of ProcessedQuery if True,
+            return_processed_query(boolean): Returns an instance of ProcessedQuery if True, \
                 an array of entities if False (this is used to parallelize n-best entity processing)
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
             verbose (bool, optional): If True, returns class as well as predict probabilities
+
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
+            (tuple): tuple containing:
+
+            * ProcessedQuery: A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input query
-            list(entities): If return_procesed_query is False
+            * list(entities): If return_procesed_query is False
         """
         self._check_ready()
 
@@ -1143,7 +1114,7 @@ class EntityProcessor(Processor):
                                   'Try `process_entity()`')
 
     def process_entity(self, query, entities, entity_index, verbose=False):
-        """Processes the given entity using the hierarchy of natural language processing models
+        """Processes the given entity using the hierarchy of natural language processing models \
         trained for this entity type
 
         Args:
@@ -1153,9 +1124,12 @@ class EntityProcessor(Processor):
             verbose (bool): If set to True, returns confidence scores of classes
 
         Returns:
-            ProcessedQuery: A processed query object that contains the prediction results from
-                applying the hierarchy of natural language processing models to the input entity
-            confidence_score: confidence scores returned by classifier
+            (tuple): tuple containing:
+
+                * ProcessedQuery: A processed query object that contains the prediction results \
+                     from applying the hierarchy of natural language processing models to the \
+                        input entity
+                * confidence_score: confidence scores returned by classifier
         """
         self._check_ready()
         entity = entities[entity_index]

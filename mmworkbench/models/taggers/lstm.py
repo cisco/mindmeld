@@ -582,6 +582,7 @@ class LstmModel(Tagger):
 
         Args:
             examples (list of mmworkbench.core.Query): a list of queries
+
         Returns:
             (tuple): Word embeddings and Gazetteer one-hot embeddings
         """
@@ -629,6 +630,7 @@ class LstmModel(Tagger):
 
         Args:
             example (mmworkbench.core.Query): an query
+
         Returns:
             (list dict): features
         """

@@ -56,8 +56,10 @@ class MemmModel(Tagger):
             resources (dict): Resources which may be used for this model's feature extraction
 
         Returns:
-            (numpy.matrix): The feature matrix.
-            (numpy.array): The group labels for examples.
+            (tuple): tuple containing:
+
+                * (numpy.matrix): The feature matrix.
+                * (numpy.array): The group labels for examples.
         """
         groups = []
         X = []
@@ -123,7 +125,7 @@ class MemmModel(Tagger):
         parameter
 
         Returns:
-            (Object): a feature selector which returns a reduced feature matrix,
+            (Object): a feature selector which returns a reduced feature matrix, \
                 given the full feature matrix, X and the class labels, y
         """
         selector = {'l1': SelectFromModel(LogisticRegression(penalty='l1', C=1)),

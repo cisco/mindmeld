@@ -127,7 +127,7 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
         input_file (str): filename of queries to be processed
         output_file (str or None): filename for processed queries
         nlp (NaturalLanguageProcessor): an application's NLP with built models
-        **kwargs:
+        **kwargs (dict): A dictionary of additional args
     """
     import csv
     import sys

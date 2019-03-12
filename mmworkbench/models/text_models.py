@@ -92,7 +92,7 @@ class TextModel(Model):
             labels: A list of expected labels
 
         Returns:
-            ModelEvaluation: an object containing information about the
+            ModelEvaluation: an object containing information about the \
                 evaluation
         """
         # TODO: also expose feature weights?
@@ -122,7 +122,7 @@ class TextModel(Model):
                 selection will be bypassed if this is provided
 
         Returns:
-            (TextModel): Returns self to match classifier scikit-learn
+            (TextModel): Returns self to match classifier scikit-learn \
                 interfaces.
         """
         params = params or self.config.params
@@ -230,7 +230,7 @@ class TextModel(Model):
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
-            (DataFrame): The DataFrame that includes every feature, their value, weight and
+            (DataFrame): The DataFrame that includes every feature, their value, weight and \
              probability
         """
         if not isinstance(self._clf, LogisticRegression):
@@ -313,8 +313,10 @@ class TextModel(Model):
             examples (list): The examples.
 
         Returns:
-            (numpy.matrix): The feature matrix.
-            (numpy.array): The group labels for examples.
+            (tuple): tuple containing:
+
+                * (numpy.matrix): The feature matrix.
+                * (numpy.array): The group labels for examples.
         """
         groups = []
         feats = []
@@ -383,7 +385,7 @@ class TextModel(Model):
         parameter
 
         Returns:
-            (Object): a feature selector which returns a reduced feature matrix,
+            (Object): a feature selector which returns a reduced feature matrix, \
                 given the full feature matrix, X and the class labels, y
         """
         if self.config.model_settings is None:

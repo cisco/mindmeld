@@ -85,15 +85,15 @@ class ApplicationManager:
         Args:
             text (str): The text of the message sent by the user
             params (Params/dict, optional): Contains parameters which modify how text is parsed
-            params.allowed_intents (list, optional): A list of allowed intents
+            params.allowed_intents (list, optional): A list of allowed intents \
                 for model consideration
             params.target_dialogue_state (str, optional): The target dialogue state
-            params.time_zone (str, optional): The name of an IANA time zone, such as
-                'America/Los_Angeles', or 'Asia/Kolkata'
+            params.time_zone (str, optional): The name of an IANA time zone, such as \
+                'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             params.timestamp (long, optional): A unix time stamp for the request (in seconds).
             context (dict, optional): A dictionary of app-specific data
-            history (list, optional): A list of previous and current responder objects
+            history (list, optional): A list of previous and current responder objects \
                                       through interactions with workbench
             verbose (bool, optional): Flag to return confidence scores for domains and intents
 
