@@ -3,7 +3,7 @@
 This module contains all code required to perform sequence tagging.
 """
 from ...core import QueryEntity, Span, TEXT_FORM_RAW, \
-    TEXT_FORM_NORMALIZED, sort_by_lowest_time_grain
+    TEXT_FORM_NORMALIZED, _sort_by_lowest_time_grain
 from ...ser import resolve_system_entity, SystemEntityResolutionError
 from ..helpers import get_feature_extractor, ENABLE_STEMMING
 
@@ -330,7 +330,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
 
                 sys_entities = query.get_system_entity_candidates(ent_type)
                 if ent_type == 'sys_time':
-                    sys_entities = sort_by_lowest_time_grain(sys_entities)
+                    sys_entities = _sort_by_lowest_time_grain(sys_entities)
 
                 for sys_candidate in sys_entities:
                     start_span = sys_candidate.normalized_token_span.start

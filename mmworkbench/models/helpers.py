@@ -92,10 +92,26 @@ def register_model(model_type, model_class):
 
 
 def register_query_feature(feature_name):
+    """Registers query feature
+
+    Args:
+        feature_name (str): The name of the entity feature
+
+    Returns:
+        (func): the feature extractor
+    """
     return register_feature(QUERY_EXAMPLE_TYPE, feature_name=feature_name)
 
 
 def register_entity_feature(feature_name):
+    """Registers entity feature
+
+    Args:
+        feature_name (str): The name of the query feature
+
+    Returns:
+        (func): the feature extractor
+    """
     return register_feature(ENTITY_EXAMPLE_TYPE, feature_name=feature_name)
 
 
@@ -143,7 +159,14 @@ def register_label(label_type, label_encoder):
 
 
 def mask_numerics(token):
-    """Masks digit characters in a token"""
+    """Masks digit characters in a token
+
+    Args:
+        token (str): A string
+
+    Returns:
+        str: A masked string for digit characters
+    """
     if token.isdigit():
         return '#NUM'
     else:
@@ -189,9 +212,15 @@ def get_seq_tag_accuracy_scorer():
 
 
 def sequence_accuracy_scoring(y_true, y_pred):
-    """
-    Accuracy score which calculates two sequences to be equal only if all of
-    their predicted tags are equal.
+    """Accuracy score which calculates two sequences to be equal only if all of
+        their predicted tags are equal.
+
+    Args:
+        y_true (list): A sequence of true expected labels
+        y_pred (list): A sequence of predicted labels
+
+    Returns:
+        float: The accuracy of the predicted labels over the truth labels
     """
     total = len(y_true)
     if not total:
@@ -204,9 +233,16 @@ def sequence_accuracy_scoring(y_true, y_pred):
 
 
 def sequence_tag_accuracy_scoring(y_true, y_pred):
-    """
-    Accuracy score which calculates the number of tags that were predicted
-    correctly.
+    """Accuracy score which calculates the number of tags that were predicted
+        correctly.
+
+    Args:
+        y_true (list): A sequence of true expected labels
+        y_pred (list): A sequence of predicted labels
+
+    Returns:
+        float: The sequence-level accuracy when comparing the predicted labels \
+            against the true expected labels
     """
     y_true_flat = [tag for seq in y_true for tag in seq]
     y_pred_flat = [tag for seq in y_pred for tag in seq]

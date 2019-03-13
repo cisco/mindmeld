@@ -12,7 +12,7 @@ import pytest
 
 from mmworkbench.core import (Entity, QueryEntity, Span, NestedEntity,
                               TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED,
-                              sort_by_lowest_time_grain)
+                              _sort_by_lowest_time_grain)
 
 
 @pytest.fixture
@@ -306,7 +306,7 @@ def test_sort_system_entities(query_factory):
 
     assert len(time_entities) == 19
 
-    time_entities = sort_by_lowest_time_grain(time_entities)
+    time_entities = _sort_by_lowest_time_grain(time_entities)
 
     assert time_entities[0].entity.value['grain'] == 'year'
     assert time_entities[1].entity.value['grain'] == 'year'

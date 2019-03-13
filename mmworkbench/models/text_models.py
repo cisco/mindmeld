@@ -219,7 +219,7 @@ class TextModel(Model):
             return self._clf.coef_[label_class, self._feat_vectorizer.vocabulary_[feat_name]]
 
     def inspect(self, example, gold_label=None, dynamic_resource=None):
-        """ This class takes an example and returns a DataFrame for every feature with feature
+        """This class takes an example and returns a DataFrame for every feature with feature
           name, feature value, feature weight and their product for the predicted label. If gold
           label is passed in, we will also include the feature value and weight for the gold
           label and returns the log probability of the difference.

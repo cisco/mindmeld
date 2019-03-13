@@ -52,6 +52,10 @@ class ModelConfig:
             values are either a kwargs dict which will be passed into the
             feature extractor function, or a callable which will be used as to
             extract features
+        train_label_set (regex pattern): The regex pattern for finding training
+            file names.
+        test_label_set (regex pattern): The regex pattern for finding testing
+            file names.
     """
 
     __slots__ = ['model_type', 'example_type', 'label_type', 'features', 'model_settings', 'params',

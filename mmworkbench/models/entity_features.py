@@ -6,6 +6,10 @@ from .helpers import GAZETTEER_RSC, register_entity_feature, get_ngram, requires
 @register_entity_feature(feature_name='in-gaz')
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_features(**args):
+    """Returns a feature extractor that generates features indicating the presence
+    of query n-grams in different entity gazetteers. It is called when the 'in-gaz'
+    feature parameter is specified. Used by the role classifiers.
+    """
     def _extractor(example, resources):
         _, entities, entity_index = example
         features = {}
@@ -79,6 +83,12 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
 
 @register_entity_feature(feature_name='numeric')
 def extract_numeric_candidate_features(**args):
+    """Returns a feature extractor that generates features indicating the presence
+    of numeric entities. These numeric entities are identified by duckling, our numerical
+    entity recognition service and boosted by the training data contained the entity labels ``sys_time``
+    and ``sys_interval`` of the application. The feature extractor only generates features for the
+    `sys_time` and `sys_interval` entity types.
+    """
     def _extractor(example, resources):
 
         query, _, _ = example
@@ -95,6 +105,8 @@ def extract_numeric_candidate_features(**args):
 
 @register_entity_feature(feature_name='other-entities')
 def extract_other_entities_features(**args):
+    """Returns a feature extractor for other entities types not listed in the other
+    feature extractors, like non-numeric features and non in-gaz features"""
     def _extractor(example, resources):
         _, entities, entity_index = example
         features = {}

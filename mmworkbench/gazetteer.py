@@ -13,18 +13,15 @@ class Gazetteer:
     """
     This class holds the following  fields, which are extracted and exported to file.
 
-      entity_count: Total entities in the file
-
-      pop_dict: This is a dictionary with the entity name as a key and the popularity score as the
+    Attributes:
+      entity_count (int): Total entities in the file
+      pop_dict (dict): This is a dictionary with the entity name as a key and the popularity score as the
         value. If there are more than one entity with the same name, the popularity is the maximum
         value across all duplicate entities.
-
-      index: This contains the inverted index, which maps terms and n-grams to the set of documents
+      index (dict): This contains the inverted index, which maps terms and n-grams to the set of documents
         which contain them
-
-      entities: This is simply a list of all entities
-
-      sys_types: The set of nested numeric types for this entity
+      entities (list): This is simply a list of all entities
+      sys_types (set): The set of nested numeric types for this entity
      """
 
     def __init__(self, name, exclude_ngrams=False):
