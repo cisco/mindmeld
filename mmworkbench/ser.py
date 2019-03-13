@@ -119,12 +119,12 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
             If not specified, the current system time is used. If `time_zone` \
             is not also specified, this parameter is ignored.
 
-        Returns:
-            (tuple): tuple containing:
+    Returns:
+        (tuple): tuple containing:
 
-                * response (list, dict): Duckling response that consist of a list of dicts, each \
-                      corresponding to a single prediction
-                * response_code (int): http status code
+            * response (list, dict): Duckling response that consist of a list of dicts, each \
+                  corresponding to a single prediction
+            * response_code (int): http status code
     """
     if sentence == '':
         return {}, SUCCESSFUL_HTTP_CODE
