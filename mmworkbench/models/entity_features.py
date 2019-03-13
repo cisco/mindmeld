@@ -6,6 +6,7 @@ from .helpers import GAZETTEER_RSC, register_entity_feature, get_ngram, requires
 @register_entity_feature(feature_name='in-gaz')
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_features(**args):
+    """Returns a gazetteer feature extractor."""
     def _extractor(example, resources):
         _, entities, entity_index = example
         features = {}
@@ -79,6 +80,7 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
 
 @register_entity_feature(feature_name='numeric')
 def extract_numeric_candidate_features(**args):
+    """Returns a numeric candidates feature extractor."""
     def _extractor(example, resources):
 
         query, _, _ = example
@@ -95,6 +97,7 @@ def extract_numeric_candidate_features(**args):
 
 @register_entity_feature(feature_name='other-entities')
 def extract_other_entities_features(**args):
+    """Returns a custom feature extractor."""
     def _extractor(example, resources):
         _, entities, entity_index = example
         features = {}

@@ -396,6 +396,15 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions,
 
 
 def char_ngrams(n, word, **args):
+    """This function creates ngrams for the given word
+
+    Args:
+        n (int): A size of the n-gram
+        word (str): The word to be n-grammed
+
+    Returns:
+        list: A list of character n-grams for the given word
+    """
     char_grams = []
     for i in range(len(word)):
         """
@@ -417,6 +426,8 @@ def char_ngrams(n, word, **args):
 @register_query_feature(feature_name='enable-stemming')
 @requires(ENABLE_STEMMING)
 def enabled_stemming(**args):
+    """Feature extractor for enabling stemming
+    """
     def _extractor(query, resources):
         # no op
         return
@@ -797,6 +808,14 @@ def extract_gaz_freq(**args):
 @register_query_feature(feature_name='in-gaz')
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_feature(scaling=1, **args):
+    """This function extracts gazetteer features
+
+    Args:
+        scaling (int): A scale factor for the gazetteer feature
+
+    Returns:
+        function: Returns an extractor function
+    """
     def _extractor(query, resources):
         in_gaz_features = defaultdict(float)
 
@@ -870,8 +889,17 @@ def extract_query_string(scaling=1000, **args):
     return _extractor
 
 
-# Generate all n-gram combinations from a list of strings
 def find_ngrams(input_list, n, **args):
+    """Generates all n-gram combinations from a list of strings
+
+    Args:
+        input_list (list): List of string to n-gramize
+        n (int): The size of the n-gram
+
+    Returns:
+        list: A list of ngrams across all the strings in the \
+            input list
+    """
     result = []
     for ngram in zip(*[input_list[i:] for i in range(n)]):
         result.append(" ".join(ngram))

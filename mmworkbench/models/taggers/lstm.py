@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class LstmModel(Tagger):
-    """"This class encapsulates the bi-directional LSTM model and provides
+    """This class encapsulates the bi-directional LSTM model and provides
     the correct interface for use by the tagger model"""
 
     def fit(self, X, y):
