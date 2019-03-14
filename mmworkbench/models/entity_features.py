@@ -106,7 +106,8 @@ def extract_numeric_candidate_features(**args):
 @register_entity_feature(feature_name='other-entities')
 def extract_other_entities_features(**args):
     """Returns a feature extractor for other entities types not listed in the other
-    feature extractors, like non-numeric features and non in-gaz features"""
+    feature extractors, like non-numeric features and non in-gaz features. Used by the role classifier
+    when the ``'other-entities'`` feature is specified in the config."""
     def _extractor(example, resources):
         _, entities, entity_index = example
         features = {}
