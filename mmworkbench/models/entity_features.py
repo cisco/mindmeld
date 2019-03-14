@@ -88,7 +88,7 @@ def extract_numeric_candidate_features(**args):
     entity recognition service and boosted by the training data contained the entity labels
     ``sys_time`` and ``sys_interval`` of the application. The feature extractor only
     generates features for the `sys_time` and `sys_interval` entity types.
-    """
+    Used by the role classifier when the ``'numeric'`` feature is specified in the config."""
     def _extractor(example, resources):
 
         query, _, _ = example
