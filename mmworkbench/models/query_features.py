@@ -809,7 +809,8 @@ def extract_gaz_freq(**args):
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_feature(scaling=1, **args):
     """Returns a feature extractor that generates a set of features indicating the presence
-    of query n-grams in different entity gazetteers.
+    of query n-grams in different entity gazetteers. Used by the domain and intent classifiers
+    when the 'in-gaz' feature is specified in the config.
 
     Args:
         scaling (int): A scale factor affects the ``ratio_pop`` and ``ratio`` features of

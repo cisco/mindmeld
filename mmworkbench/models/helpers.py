@@ -95,7 +95,7 @@ def register_query_feature(feature_name):
     """Registers query feature
 
     Args:
-        feature_name (str): The name of the entity feature
+        feature_name (str): The name of the query feature
 
     Returns:
         (func): the feature extractor
@@ -107,7 +107,7 @@ def register_entity_feature(feature_name):
     """Registers entity feature
 
     Args:
-        feature_name (str): The name of the query feature
+        feature_name (str): The name of the entity feature
 
     Returns:
         (func): the feature extractor
@@ -220,7 +220,8 @@ def sequence_accuracy_scoring(y_true, y_pred):
         y_pred (list): A sequence of predicted labels
 
     Returns:
-        float: The accuracy of the predicted labels over the truth labels
+        float: The tag-level accuracy when comparing the predicted labels \
+            against the true expected labels
     """
     total = len(y_true)
     if not total:

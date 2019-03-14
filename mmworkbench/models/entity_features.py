@@ -7,8 +7,8 @@ from .helpers import GAZETTEER_RSC, register_entity_feature, get_ngram, requires
 @requires(GAZETTEER_RSC)
 def extract_in_gaz_features(**args):
     """Returns a feature extractor that generates features indicating the presence
-    of query n-grams in different entity gazetteers. It is called when the 'in-gaz'
-    feature parameter is specified. Used by the role classifiers.
+    of query n-grams in different entity gazetteers. Used by the role classifier
+    when the 'in-gaz' feature is specified in the config.
     """
     def _extractor(example, resources):
         _, entities, entity_index = example
@@ -105,9 +105,9 @@ def extract_numeric_candidate_features(**args):
 
 @register_entity_feature(feature_name='other-entities')
 def extract_other_entities_features(**args):
-    """Returns a feature extractor for other entities types not listed in the other
-    feature extractors, like non-numeric features and non in-gaz features. Used by the role classifier
-    when the ``'other-entities'`` feature is specified in the config."""
+    """Returns a feature extractor for all other entities apart from the current entity
+    associated with the role. Used by the role classifier when the ``'other-entities'``
+    feature is specified in the config."""
     def _extractor(example, resources):
         _, entities, entity_index = example
         features = {}
