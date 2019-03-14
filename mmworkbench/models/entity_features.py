@@ -85,9 +85,9 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
 def extract_numeric_candidate_features(**args):
     """Returns a feature extractor that generates features indicating the presence
     of numeric entities. These numeric entities are identified by duckling, our numerical
-    entity recognition service and boosted by the training data contained the entity labels ``sys_time``
-    and ``sys_interval`` of the application. The feature extractor only generates features for the
-    `sys_time` and `sys_interval` entity types.
+    entity recognition service and boosted by the training data contained the entity labels
+    ``sys_time`` and ``sys_interval`` of the application. The feature extractor only
+    generates features for the `sys_time` and `sys_interval` entity types.
     """
     def _extractor(example, resources):
 

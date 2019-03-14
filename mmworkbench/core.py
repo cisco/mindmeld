@@ -390,7 +390,7 @@ class ProcessedQuery:
 
 class NestedEntity:
     """An entity with the context of the query it came from, along with \
-        information like the entities parents and children.
+        information like the entity's parent and children.
 
     Attributes:
         texts (tuple): Tuple containing the three forms of text: raw text, \
