@@ -70,7 +70,7 @@ class Bunch(dict):
 
 
 class Span:
-    """Simple object representing a span with start and end indices"""
+    """Object representing a span with start and end indices"""
     __slots__ = ['start', 'end']
 
     def __init__(self, start, end):
@@ -130,17 +130,17 @@ class Query:
     forms.
 
     Attributes:
-        text (str): the original input text
-        processed_text (str): the text after it has been preprocessed. TODO: better description here
+        raw_text (str): the original input text
+        processed_text (str): the text after it has been preprocessed. The pre-processing happens
+            at the application level and is generally used for special characters
         normalized_tokens (tuple of str): a list of normalized tokens
-        normalized_text (str): the normalized text. TODO: better description here
-        system_entity_candidates (tuple): Description
-        language (str): Language of the query specified using a 639-2 code.
+        system_entity_candidates (tuple): A list of system entities extracted from the text
+        language (str): Language of the query specified using a 639-2 code
         time_zone (str): The IANA id for the time zone in which the query originated
-            such as 'America/Los_Angeles'.
-        timestamp (long, optional): A unix timestamp used as the reference time.
+            such as 'America/Los_Angeles'
+        timestamp (long, optional): A unix timestamp used as the reference time
             If not specified, the current system time is used. If `time_zone`
-            is not also specified, this parameter is ignored.
+            is not also specified, this parameter is ignored
         stemmed_tokens (list): A sequence of stemmed tokens for the query text
     """
 
@@ -394,7 +394,7 @@ class NestedEntity:
 
     Attributes:
         texts (tuple): Tuple containing the three forms of text: raw text, \
-            processed text, and normalized text.
+            processed text, and normalized text
         spans (tuple): Tuple containing the character index spans of the \
             text for this entity for each text form
         token_spans (tuple): Tuple containing the token index spans of the \
@@ -588,7 +588,7 @@ class Entity:
         value (str): The resolved value of the entity
         display_text (str): A human readable text representation of the entity for use in natural
             language responses.
-        confidence (float): The confidence value, from 0 to 1, about how confident the entity
+        confidence (float): A confidence value from 0 to 1 about how confident the entity
             recognizer was for the given class label.
         is_system_entity (bool): True if the entity is a system entity
     """

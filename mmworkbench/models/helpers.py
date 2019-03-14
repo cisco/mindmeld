@@ -220,7 +220,7 @@ def sequence_accuracy_scoring(y_true, y_pred):
         y_pred (list): A sequence of predicted labels
 
     Returns:
-        float: The tag-level accuracy when comparing the predicted labels \
+        float: The sequence-level accuracy when comparing the predicted labels \
             against the true expected labels
     """
     total = len(y_true)
@@ -242,7 +242,7 @@ def sequence_tag_accuracy_scoring(y_true, y_pred):
         y_pred (list): A sequence of predicted labels
 
     Returns:
-        float: The sequence-level accuracy when comparing the predicted labels \
+        float: The tag-level accuracy when comparing the predicted labels \
             against the true expected labels
     """
     y_true_flat = [tag for seq in y_true for tag in seq]

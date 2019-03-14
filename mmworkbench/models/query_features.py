@@ -426,7 +426,7 @@ def char_ngrams(n, word, **args):
 @register_query_feature(feature_name='enable-stemming')
 @requires(ENABLE_STEMMING)
 def enabled_stemming(**args):
-    """Feature extractor for enabling stemming
+    """Feature extractor for enabling stemming of the query
     """
     def _extractor(query, resources):
         # no op
@@ -813,8 +813,8 @@ def extract_in_gaz_feature(scaling=1, **args):
     when the 'in-gaz' feature is specified in the config.
 
     Args:
-        scaling (int): A scale factor affects the ``ratio_pop`` and ``ratio`` features of
-        the in-gaz feature set by a multiplicative factor
+        scaling (int): A multiplicative scale factor to the ``ratio_pop`` and ``ratio`` features of
+        the in-gaz feature set.
 
     Returns:
         function: Returns an extractor function

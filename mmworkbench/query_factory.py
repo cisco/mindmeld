@@ -119,7 +119,8 @@ class QueryFactory:
             preprocessor (Processor, optional): The app's preprocessor.
 
         Returns:
-            QueryFactory:
+            QueryFactory: A query factory object that can be used to generate
+                new queries
         """
         tokenizer = tokenizer or Tokenizer.create_tokenizer(app_path)
         return QueryFactory(tokenizer, preprocessor)

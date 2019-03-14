@@ -137,9 +137,6 @@ class FeatureMapper:
     Attributes:
         _num_std (int): number of standard deviations to generate the bins
         _size_std (float): size of each bin in standard deviation
-        values (list): A list of numeric values
-        std (float): The standard deviation
-        mean (float): The mean
     """
     def __init__(self, num_std=2, size_std=0.5):
         self._num_std = num_std
