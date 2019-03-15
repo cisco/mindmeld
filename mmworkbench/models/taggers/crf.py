@@ -84,7 +84,7 @@ class ConditionalRandomFields(Tagger):
             resources (dict): Resources which may be used for this model's feature extraction
 
         Returns:
-            (list dict): features
+            (list of dict): features
         """
         return extract_sequence_features(example, config.example_type,
                                          config.features, resources)
@@ -127,12 +127,12 @@ class FeatureMapper:
     The size and number of bins are decided by num_std and size_std. For example, say
     num_std = 2 and size_std = 0.5, then the bins would look like:
 
-    bucket 0: (-INF, mean - std * 2)
-    bucket 1: [mean - std * 2, mean - std * 1.5)
-    bucket 2: [mean - std * 1.5, mean - std * 1)
-    ...
-    bucket 8: [mean + std * 1.5, mean + std * 2)
-    bucket 9: [mean + std * 2, INF)
+    * bucket 0: (-INF, mean - std * 2)
+    * bucket 1: [mean - std * 2, mean - std * 1.5)
+    * bucket 2: [mean - std * 1.5, mean - std * 1)
+    * ...
+    * bucket 8: [mean + std * 1.5, mean + std * 2)
+    * bucket 9: [mean + std * 2, INF)
 
     Attributes:
         _num_std (int): number of standard deviations to generate the bins

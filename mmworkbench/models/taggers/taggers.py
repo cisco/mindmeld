@@ -545,7 +545,7 @@ def extract_sequence_features(example, example_type, feature_config, resources):
         resources (dict): Resources of this model
 
     Returns:
-        (list dict): features
+        (list of dict): features
     """
     feat_seq = []
     workspace_features = copy.deepcopy(feature_config)

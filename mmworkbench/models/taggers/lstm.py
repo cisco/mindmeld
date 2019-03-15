@@ -42,30 +42,44 @@ class LstmModel(Tagger):
         return resized_predicted_tags
 
     def set_params(self, **parameters):
-        """Initialize params
+        """
+        Initialize params for the LSTM. The keys in the parameters dictionary
+        are as follows:
 
         Args:
-            The keys in the parameters dictionary are as follows:
+            parameters (dict): The keys in the parameters dictionary are as follows:
 
-            number_of_epochs (int): The number of epochs to run
-            batch_size (int): The batch size for mini-batch training
-            token_lstm_hidden_state_dimension (int): The hidden state
-            dimension of the LSTM cell
-            learning_rate (int): The learning rate of the optimizer
-            optimizer (str): The optimizer used to train the network
-            is the number of entities in the dataset
-            display_epoch (int): The number of epochs after which the
-            network displays common stats like accuracy
-            padding_length (int): The length of each query, which is
-            fixed, so some queries will be cut short in length
-            representing the word embedding, the row index
-            is the word's index
-            token_embedding_dimension (int): The embedding dimension of the word
-            token_pretrained_embedding_filepath (str): The pretrained embedding file-path
-            dense_keep_prob (float): The dropout rate of the dense layers
-            lstm_input_keep_prob (float): The dropout rate of the inputs to the LSTM cell
-            lstm_output_keep_prob (float): The dropout rate of the outputs of the LSTM cell
-            gaz_encoding_dimension (int): The gazetteer encoding dimension
+            number_of_epochs: The number of epochs to run (int)
+
+            batch_size: The batch size for mini-batch training (int)
+
+            token_lstm_hidden_state_dimension: The hidden state
+                dimension of the LSTM cell (int)
+
+            learning_rate: The learning rate of the optimizer (int)
+
+            optimizer: The optimizer used to train the network
+                is the number of entities in the dataset (str)
+
+            display_epoch: The number of epochs after which the
+                network displays common stats like accuracy (int)
+
+            padding_length: The length of each query, which is
+                fixed, so some queries will be cut short in length
+                representing the word embedding, the row index
+                is the word's index (int)
+
+            token_embedding_dimension: The embedding dimension of the word (int)
+
+            token_pretrained_embedding_filepath: The pretrained embedding file-path (str)
+
+            dense_keep_prob: The dropout rate of the dense layers (float)
+
+            lstm_input_keep_prob: The dropout rate of the inputs to the LSTM cell (float)
+
+            lstm_output_keep_prob: The dropout rate of the outputs of the LSTM cell (float)
+
+            gaz_encoding_dimension: The gazetteer encoding dimension (int)
         """
         self.number_of_epochs = parameters.get('number_of_epochs', 20)
         self.batch_size = parameters.get('batch_size', 20)
@@ -305,7 +319,7 @@ class LstmModel(Tagger):
             char_window_size (int): The character window size of each stride
 
         Returns:
-            Convolved output tensor
+            (Tensor): Convolved output tensor
         """
         convolution_reshaped_char_embedding = tf.reshape(input_tensor,
                                                          [-1, self.padding_length,
@@ -359,7 +373,7 @@ class LstmModel(Tagger):
         """ This function defines the optimizer and cost function of the LSTM model
 
         Returns:
-            The optimizer function to reduce loss and the loss values
+            AdamOptimizer, Tensor: The optimizer function to reduce loss and the loss values
         """
         if self.use_crf_layer:
             flattened_labels = tf.cast(tf.argmax(self.label_tf, axis=2), tf.int32)
@@ -396,7 +410,7 @@ class LstmModel(Tagger):
             seq_lengths_arr (ndarray): A real sequence lengths of each example
 
         Returns:
-            The number of queries where all the tags are correct
+            int: The number of queries where all the tags are correct
         """
         reshaped_output_arr = np.reshape(
             output_arr, [-1, int(self.padding_length), self.output_dimension])
@@ -418,11 +432,11 @@ class LstmModel(Tagger):
         Pads the label sequence
 
         Args:
-            list_of_sequences: A list of label sequences
-            default_token: The default label token for padding purposes
+            list_of_sequences (list): A list of label sequences
+            default_token (str): The default label token for padding purposes
 
         Returns:
-            padded output
+            list: padded output
         """
         padded_output = []
         for sequence in list_of_sequences:
@@ -438,10 +452,10 @@ class LstmModel(Tagger):
         Generates boolean masks for each query in a query list
 
         Args:
-            seq_lengths: A list of sequence lengths
+            seq_lengths (list): A list of sequence lengths
 
         Return:
-            A list of boolean masking values
+            list: A list of boolean masking values
         """
         mask = [False] * (len(seq_lengths) * self.padding_length)
         for idx, seq_len in enumerate(seq_lengths):
@@ -632,7 +646,7 @@ class LstmModel(Tagger):
             example (mmworkbench.core.Query): an query
 
         Returns:
-            (list dict): features
+            (list of dict): features
         """
         default_gaz_one_hot = self._gaz_transform([DEFAULT_GAZ_LABEL]).tolist()[0]
         extracted_gaz_tokens = [default_gaz_one_hot] * self.padding_length
