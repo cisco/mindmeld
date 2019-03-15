@@ -40,7 +40,7 @@ class MemmModel(Tagger):
             resources (dict): Resources which may be used for this model's feature extraction
 
         Returns:
-            (list dict): features
+            (list of dict): features
         """
         return extract_sequence_features(example, config.example_type, config.features, resources)
 
