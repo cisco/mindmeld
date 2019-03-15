@@ -156,6 +156,15 @@ class TaggerModel(Model):
         return self
 
     def view_extracted_features(self, query, dynamic_resource=None):
+        """Returns a dictionary of extracted features and their weights for a given query
+
+        Args:
+            query (mmworkbench.core.Query): The query to extract features from
+            dynamic_resource (dict): The dynamic resource used along with the query
+
+        Returns:
+            dict: A dictionary of extracted features and their weights
+        """
         tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
             self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)

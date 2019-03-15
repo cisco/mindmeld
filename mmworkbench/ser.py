@@ -6,7 +6,7 @@ import sys
 
 import requests
 
-from .core import Entity, QueryEntity, Span, sort_by_lowest_time_grain
+from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
 from enum import Enum
 
@@ -202,7 +202,8 @@ def resolve_system_entity(query, entity_type, span):
         filter(lambda candidate: candidate.entity.type == entity_type, span_filtered_candidates))
 
     if entity_type == 'sys_time':
-        entity_type_filtered_candidates = sort_by_lowest_time_grain(entity_type_filtered_candidates)
+        entity_type_filtered_candidates = \
+            _sort_by_lowest_time_grain(entity_type_filtered_candidates)
 
     if len(entity_type_filtered_candidates) > 0:
         return entity_type_filtered_candidates[-1]

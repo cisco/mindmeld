@@ -65,8 +65,8 @@ class QueryCache:
 
     def dump(self):
         """
-        This function dumps the query cache mapping to disk. THIS OPERATION IS EXPENSIVE,
-        SO USE IT SPARINGLY!
+        This function dumps the query cache mapping to disk. This operation is expensive,
+        so use it sparingly!
         """
         if not self.is_dirty:
             return

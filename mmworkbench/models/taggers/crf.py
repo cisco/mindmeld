@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the Memm entity recognizer.
+This module contains the CRF entity recognizer.
 """
 from sklearn_crfsuite import CRF
 
@@ -16,6 +16,7 @@ ZERO = 1e-20
 
 class ConditionalRandomFields(Tagger):
     """A Conditional Random Fields model."""
+
     def fit(self, X, y):
         self._clf.fit(X, y)
         return self
@@ -133,9 +134,9 @@ class FeatureMapper:
     bucket 8: [mean + std * 1.5, mean + std * 2)
     bucket 9: [mean + std * 2, INF)
 
-    Args:
-        num_std (int): number of standard deviations to generate the bins
-        size_std (float): size of each bin in standard deviation
+    Attributes:
+        _num_std (int): number of standard deviations to generate the bins
+        _size_std (float): size of each bin in standard deviation
     """
     def __init__(self, num_std=2, size_std=0.5):
         self._num_std = num_std
@@ -147,7 +148,11 @@ class FeatureMapper:
         self._std_bins = []
 
     def add_value(self, value):
-        """Collect values for this feature."""
+        """Collect values for this feature.
+
+        Args:
+            value (numeric): A numeric value
+        """
         self.values.append(value)
 
     def fit(self):
