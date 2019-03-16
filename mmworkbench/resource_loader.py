@@ -30,6 +30,8 @@ ENABLE_STEMMING_ARGS = 'enable_stemming'
 
 
 class ResourceLoader:
+    """ResourceLoader objects are responsible for loading resources necessary for nlp components
+    (classifiers, entity recognizer, parsers, etc)."""
 
     def __init__(self, app_path, query_factory, query_cache=None):
         self.app_path = app_path
@@ -74,12 +76,16 @@ class ResourceLoader:
 
     @property
     def hash_to_model_path(self):
+        """
+        Returns:
+            A dictionary that maps hashes to the file path of the classifier.
+        """
         if self._hash_to_model_path is None:
             self._load_cached_models()
         return self._hash_to_model_path
 
     def get_gazetteers(self, force_reload=False, **kwargs):
-        """Gets all gazetteers
+        """Gets gazetteers for all entities.
 
         Returns:
             dict: Gazetteer data keyed by entity type
@@ -90,10 +96,10 @@ class ResourceLoader:
                 for entity_type in entity_types}
 
     def get_gazetteer(self, gaz_name, force_reload=False):
-        """Gets a gazetteers by name
+        """Gets a gazetteers by name.
 
         Args:
-            gaz_name (str): The name of the entity
+            gaz_name (str): The name of the entity the gazetteer corresponds to
 
         Returns:
             dict: Gazetteer data
@@ -108,11 +114,26 @@ class ResourceLoader:
         return self._entity_files[gaz_name]['gazetteer']['data']
 
     def get_gazetteers_hash(self):
+        """
+        Gets a single hash of all the gazetteer ordered by alphabetical entity type.
+
+        Returns:
+            str: Hash of a list of gazetteer hashes.
+        """
         entity_types = path.get_entity_types(self.app_path)
         return self._hasher.hash_list((self.get_gazetteer_hash(entity_type)
                                       for entity_type in sorted(entity_types)))
 
     def get_gazetteer_hash(self, gaz_name):
+        """
+        Gets the hash of a gazetteer by entity name.
+
+        Args:
+            gaz_name (str): The name of the entity the gazetteer corresponds to
+
+        Returns:
+            str: Hash of a gazetteer specified by name.
+        """
         self._update_entity_file_dates(gaz_name)
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
         entity_data_hash = self._hasher.hash_file(entity_data_path)
@@ -123,10 +144,10 @@ class ResourceLoader:
         return self._hasher.hash_list([entity_data_hash, mapping_hash])
 
     def build_gazetteer(self, gaz_name, exclude_ngrams=False, force_reload=False):
-        """Builds the specified gazetteer using the entity data and mapping files
+        """Builds the specified gazetteer using the entity data and mapping files.
 
         Args:
-            gaz_name (str): The name of the gazetteer
+            gaz_name (str): The name of the entity the gazetteer corresponds to
             exclude_ngrams (bool, optional): Whether partial matches of
                  entities should be included in the gazetteer
             force_reload (bool, optional): Whether file should be forcefully
@@ -154,6 +175,12 @@ class ResourceLoader:
         self._entity_files[gaz_name]['gazetteer']['loaded'] = time.time()
 
     def load_gazetteer(self, gaz_name):
+        """
+        Loads a gazetteer specified by the entity name.
+
+        Args:
+            gaz_name (str): The name of the entity the gazetteer corresponds to
+        """
         gaz = Gazetteer(gaz_name)
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.load(gaz_path)
@@ -161,6 +188,11 @@ class ResourceLoader:
         self._entity_files[gaz_name]['gazetteer']['loaded'] = time.time()
 
     def get_entity_map(self, entity_type, force_reload=False):
+        """Creates a mapping file for a given entity.
+
+        Args:
+            entity_type (str): The name of the entity
+        """
         self._update_entity_file_dates(entity_type)
         if self._entity_file_needs_load('mapping', entity_type) or force_reload:
             # file is out of date, load it
@@ -168,10 +200,10 @@ class ResourceLoader:
         return deepcopy(self._entity_files[entity_type]['mapping']['data'])
 
     def load_entity_map(self, entity_type):
-        """Loads an entity map
+        """Loads an entity mapping file.
 
         Args:
-            entity_type (str): The type of entity to load a mapping
+            entity_type (str): The name of the entity
         """
         file_path = path.get_entity_map_path(self.app_path, entity_type)
         logger.debug("Loading entity map from file '{}'".format(file_path))
@@ -306,6 +338,15 @@ class ResourceLoader:
 
     @staticmethod
     def flatten_query_tree(query_tree):
+        """
+        Takes a query tree and returns the elements in list form.
+
+        Args:
+            query_tree (dict): A nested dictionary that organizes queries by domain then intent.
+
+        Returns:
+            list: A list of Query objects.
+        """
         flattened = []
         for _, intent_queries in query_tree.items():
             for _, queries in intent_queries.items():
@@ -332,7 +373,7 @@ class ResourceLoader:
                         yield a_domain, an_intent, file_path
 
     def load_query_file(self, domain, intent, file_path, raw=False):
-        """Loads the queries from the specified file
+        """Loads the queries from the specified file.
 
         Args:
             domain (str): The domain of the query file
@@ -525,7 +566,7 @@ class ResourceLoader:
             raise ValueError('Invalid resource name {!r}.'.format(name))
 
     def hash_feature_resource(self, name):
-        """Hashes the named resource
+        """Hashes the named resource.
 
         Args:
             name (str): The name of the resource to hash
@@ -540,7 +581,7 @@ class ResourceLoader:
             raise ValueError('Invalid resource name {!r}.'.format(name))
 
     def hash_string(self, string):
-        """Hashes a string
+        """Hashes a string.
 
         Args:
             string (str): The string to hash
@@ -551,7 +592,7 @@ class ResourceLoader:
         return self._hasher.hash(string)
 
     def hash_list(self, items):
-        """Hashes the list of items
+        """Hashes the list of items.
 
         Args:
             items (list[str]): A list of strings to hash
@@ -563,7 +604,7 @@ class ResourceLoader:
 
     @staticmethod
     def create_resource_loader(app_path, query_factory=None, preprocessor=None):
-        """Creates the resource loader for the app at app path
+        """Creates the resource loader for the app at app path.
 
         Args:
             app_path (str): The path to the directory containing the app's data
@@ -626,7 +667,7 @@ class Hasher:
         return self._algorithm
 
     def _set_algorithm(self, value):
-        """Setter for algorithm property
+        """Setter for algorithm property.
 
         Args:
             value (str): The hashing algorithm to use. Defaults
@@ -645,7 +686,7 @@ class Hasher:
     algorithm = property(_get_algorithm, _set_algorithm)
 
     def hash(self, string):
-        """Hashes a string
+        """Hashes a string.
 
         Args:
             string (str): The string to hash
@@ -663,7 +704,7 @@ class Hasher:
         return result
 
     def hash_list(self, strings):
-        """Hashes a list of strings
+        """Hashes a list of strings.
 
         Args:
             strings (list[str]): The strings to hash
@@ -678,7 +719,7 @@ class Hasher:
 
     def hash_file(self, filename):
         """Creates a hash of the file. If the file does not exist, use the empty string instead
-        and return the resulting hash digest
+        and return the resulting hash digest.
 
         Args:
             filename (str): The path of a file to hash.

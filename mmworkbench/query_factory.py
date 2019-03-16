@@ -25,7 +25,7 @@ class QueryFactory:
         self.stemmer = nltk.stem.PorterStemmer()
 
     def create_query(self, text, language=None, time_zone=None, timestamp=None):
-        """Creates a query with the given text
+        """Creates a query with the given text.
 
         Args:
             text (str): Text to create a query object for
@@ -70,7 +70,7 @@ class QueryFactory:
         return query
 
     def normalize(self, text):
-        """Normalizes the given text
+        """Normalizes the given text.
 
         Args:
             text (str): Text to process
@@ -81,6 +81,15 @@ class QueryFactory:
         return self.tokenizer.normalize(text)
 
     def stem_word(self, word):
+        """
+        Gets the stem of a word. For example, the stem of the word 'fishing' is 'fish'.
+
+        Args:
+            word (str): The word to stem
+
+        Returns:
+            str: Stemmed version of a word.
+        """
         stem = word.lower()
 
         if self.stemmer.mode == self.stemmer.NLTK_EXTENSIONS and word in self.stemmer.pool:
@@ -108,7 +117,7 @@ class QueryFactory:
 
     @staticmethod
     def create_query_factory(app_path=None, tokenizer=None, preprocessor=None):
-        """Creates a query factory for the app
+        """Creates a query factory for the application.
 
         Args:
             app_path (str, optional): The path to the directory containing the
@@ -119,8 +128,7 @@ class QueryFactory:
             preprocessor (Processor, optional): The app's preprocessor.
 
         Returns:
-            QueryFactory: A query factory object that can be used to generate
-                new queries
+            QueryFactory: A QueryFactory object that is used to create Query objects.
         """
         tokenizer = tokenizer or Tokenizer.create_tokenizer(app_path)
         return QueryFactory(tokenizer, preprocessor)
