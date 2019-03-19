@@ -502,12 +502,18 @@ def get_app(app_path):
     Raises:
         WorkbenchImportError: when the application can not be found
     """
+    import sys
     from importlib.machinery import SourceFileLoader
 
     app_path = os.path.abspath(app_path)
     package_name = os.path.basename(app_path)
 
     try:
+        # check if package is already imported
+        if package_name in sys.modules:
+            logger.warning('The application package %s is already imported.', package_name)
+            mod = __import__(package_name)
+            return mod.app
         # try to load as package first
         loader = SourceFileLoader(package_name, os.path.join(app_path, '__init__.py'))
         return loader.load_module().app
