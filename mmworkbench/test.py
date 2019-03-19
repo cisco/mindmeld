@@ -24,4 +24,3 @@ class TestConversation(Conversation):
 
     def assert_frame(self, frame):
         assert self.frame == frame
-

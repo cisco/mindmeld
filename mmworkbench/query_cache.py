@@ -35,7 +35,7 @@ class QueryCache:
     def cached_queries(self):
         """
         Returns:
-            All cached queries stored in the object
+            dict: A dictionary containing all the cached queries
         """
         if self._cached_queries is None:
             self.load()
@@ -46,13 +46,13 @@ class QueryCache:
     def versioned_data(self):
         """
         Returns:
-            The workbench version in addition to any cached queries.
+            dict: A dictionary containing the workbench version in addition to any cached queries.
         """
         return {'wb_version': _get_wb_version(), 'cached_queries': self.cached_queries}
 
     def set_value(self, domain, intent, query_text, processed_query):
         """
-        Set value for the corresponding argument parameters
+        Set value for the corresponding argument parameters.
 
         Args:
             domain (str): The domain
@@ -70,6 +70,11 @@ class QueryCache:
     def get_value(self, domain, intent, query_text):
         """
         Gets the value associated with the triplet key (domain, intent, query_text).
+
+        Args:
+            domain (str): The domain
+            intent (str): The intent
+            query_text (str): The query text
         """
         try:
             return self.cached_queries[(domain, intent, query_text)]

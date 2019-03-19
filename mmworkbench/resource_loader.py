@@ -78,7 +78,7 @@ class ResourceLoader:
     def hash_to_model_path(self):
         """
         Returns:
-            A dictionary that maps hashes to the file path of the classifier.
+            dict: A dictionary that maps hashes to the file path of the classifier.
         """
         if self._hash_to_model_path is None:
             self._load_cached_models()
