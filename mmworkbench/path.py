@@ -8,6 +8,7 @@ import re
 import logging
 
 from .exceptions import WorkbenchImportError
+from functools import wraps
 
 WORKBENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_ROOT = os.path.join(WORKBENCH_ROOT, 'mmworkbench')
@@ -102,6 +103,7 @@ logger = logging.getLogger(__name__)
 # Helpers
 def safe_path(func):
     """A decorator to make the path safe by replacing unsafe characters"""
+    @wraps(func)
     def _wrapper(*args, **kwargs):
         res = func(*args, **kwargs)
         if type(res) == tuple:
@@ -158,9 +160,6 @@ def get_labeled_query_tree(app_path, patterns=None):
 
     Args:
         app_path (str): The path to the app data.
-        domain (str): A domain under the application.
-        intents (list(str)): A list of intents to be considered. If none is passed, all intents will
-            be used.
         patterns (list(str)): A list of file patterns to match
 
     Returns:
@@ -244,7 +243,8 @@ def get_indexes(app_path):
 
 @safe_path
 def get_generated_data_folder(app_path):
-    """
+    """Gets the path to the folder containing files the app generates.
+
     Args:
         app_path (str): The path to the app data.
 
@@ -258,7 +258,9 @@ def get_generated_data_folder(app_path):
 
 @safe_path
 def get_domain_model_paths(app_path, model_name=None, timestamp=None):
-    """
+    """Gets the path to the domain classifier model as well as the path to a
+    timestamp-cached domain classifier model.
+
     Args:
         app_path (str): The path to the app data.
         model_name (str): The name of the model. Allows multiple models to be stored.
@@ -282,7 +284,9 @@ def get_domain_model_paths(app_path, model_name=None, timestamp=None):
 
 @safe_path
 def get_intent_model_paths(app_path, domain, model_name=None, timestamp=None):
-    """
+    """Gets the path to the intent classifier model as well as the path to a
+    timestamp-cached intent classifier model.
+
     Args:
         app_path (str): The path to the app data.
         domain (str): A domain under the application.
@@ -307,7 +311,9 @@ def get_intent_model_paths(app_path, domain, model_name=None, timestamp=None):
 
 @safe_path
 def get_entity_model_paths(app_path, domain, intent, model_name=None, timestamp=None):
-    """
+    """Gets the path to the entity recognizer model as well as the path to a
+    timestamp-cached entity recognizer model.
+
     Args:
         app_path (str): The path to the app data.
         domain (str): A domain under the application.
@@ -333,7 +339,9 @@ def get_entity_model_paths(app_path, domain, intent, model_name=None, timestamp=
 
 @safe_path
 def get_role_model_paths(app_path, domain, intent, entity, model_name=None, timestamp=None):
-    """
+    """Gets the path to the role classifier model as well as the path to a
+    timestamp-cached role classifier model.
+
     Args:
         app_path (str): The path to the app data.
         domain (str): A domain under the application.
@@ -362,10 +370,12 @@ def get_role_model_paths(app_path, domain, intent, entity, model_name=None, time
 
 @safe_path
 def get_gazetteer_data_path(app_path, gaz_name, model_name=None):
-    """
+    """Gets path to the saved gazetteer pickle.
+
     Args:
         app_path (str): The path to the app data.
-        gaz_name (str): The name of the gazetteer
+        gaz_name (str): The name of the gazetteer.
+        model_name (str): The name of the model.
 
     Returns:
         (str) The path for the gazetteer pickle.
@@ -376,7 +386,8 @@ def get_gazetteer_data_path(app_path, gaz_name, model_name=None):
 
 @safe_path
 def get_labeled_query_file_path(app_path, domain, intent, filename):
-    """
+    """Gets path to a labeled query file corresponding to a specific domain and intent.
+
     Args:
         app_path (str): The path to the app data.
         domain (str): A domain under the application.
@@ -392,13 +403,14 @@ def get_labeled_query_file_path(app_path, domain, intent, filename):
 
 @safe_path
 def get_entity_gaz_path(app_path, entity):
-    """
+    """Gets the path to the gazetteer text file for a given entity.
+
     Args:
         app_path (str): The path to the app data.
         entity (str): An entity under the application.
 
     Returns:
-        (str) The path for an mapping of the entity
+        (str) The path for a mapping of the entity
 
     """
     return GAZETTEER_TXT_PATH.format(app_path=app_path, entity=entity)
@@ -406,7 +418,8 @@ def get_entity_gaz_path(app_path, entity):
 
 @safe_path
 def get_entity_folder(app_path, entity):
-    """
+    """Gets the path to the folder for a given entity.
+
     Args:
         app_path (str): The path to the app data.
         entity (str): An entity under the application.
@@ -420,13 +433,14 @@ def get_entity_folder(app_path, entity):
 
 @safe_path
 def get_entity_map_path(app_path, entity):
-    """
+    """Gets the path to the entity mapping file (mapping.json) for a given entity.
+
     Args:
         app_path (str): The path to the app data.
         entity (str): An entity under the application.
 
     Returns:
-        (str) The path for an mapping of the entity
+        (str) The path for a mapping of the entity
 
     """
     return ENTITY_MAP_PATH.format(app_path=app_path, entity=entity)
@@ -434,13 +448,14 @@ def get_entity_map_path(app_path, entity):
 
 @safe_path
 def get_ranking_file_path(app_path, index):
-    """
+    """Gets the path to the ranking.json file for a given entity.
+
     Args:
         app_path (str): The path to the app data.
         index (str): A knowledge base index under the application.
 
     Returns:
-        (str) The path for an mapping of the entity
+        (str) The path for a mapping of the entity
 
     """
     return RANKING_FILE_PATH.format(app_path=app_path, index=index)
@@ -448,7 +463,8 @@ def get_ranking_file_path(app_path, index):
 
 @safe_path
 def get_app_module_path(app_path):
-    """
+    """Gets the path to the application file (app.py) for a given application if it exists.
+
     Args:
         app_path (str): The path to the app data.
 
@@ -460,7 +476,8 @@ def get_app_module_path(app_path):
 
 @safe_path
 def get_config_module_path(app_path):
-    """
+    """Gets the path to the configuration file (config.py) for a given application.
+
     Args:
         app_path (str): The path to the app data.
 
@@ -471,7 +488,8 @@ def get_config_module_path(app_path):
 
 
 def get_cached_blueprint_path(name):
-    """
+    """Gets the path to a cached version of the given blueprint.
+
     Args:
         name (str): The name of the blueprint
 
@@ -482,7 +500,7 @@ def get_cached_blueprint_path(name):
 
 
 def get_user_config_path():
-    """
+    """Gets the path to the current configuration file used by Workbench.
 
     Returns:
         str: The path to the current user's workbench configuration file.
@@ -491,7 +509,7 @@ def get_user_config_path():
 
 
 def get_app(app_path):
-    """Get the Application instance for given application path
+    """Get the Application instance for given application path.
 
     Args:
         app_path (str): The path to an application on disk
