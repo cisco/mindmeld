@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the query cache implementation
+This module contains the query cache implementation.
 """
 import os
 import shutil
@@ -14,6 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class QueryCache:
+    """
+    An object that stores ProcessedQuery objects in memory to save time on reloading.
+    ProcessedQuery objects consist of the query itself, the domain/intent classifications,
+    recognized entities in the query, and more.
+    """
     def __init__(self, app_path):
         self.app_path = app_path
         self.is_dirty = False
@@ -28,6 +33,7 @@ class QueryCache:
 
     @property
     def cached_queries(self):
+        """A dictionary containing all the cached queries"""
         if self._cached_queries is None:
             self.load()
 
@@ -35,11 +41,12 @@ class QueryCache:
 
     @property
     def versioned_data(self):
+        """A dictionary containing the workbench version in addition to any cached queries."""
         return {'wb_version': _get_wb_version(), 'cached_queries': self.cached_queries}
 
     def set_value(self, domain, intent, query_text, processed_query):
         """
-        Set value for the corresponding argument parameters
+        Set value for the corresponding argument parameters.
 
         Args:
             domain (str): The domain
@@ -56,7 +63,12 @@ class QueryCache:
 
     def get_value(self, domain, intent, query_text):
         """
-        Gets the value associated with the triple key
+        Gets the value associated with the triplet key (domain, intent, query_text).
+
+        Args:
+            domain (str): The domain
+            intent (str): The intent
+            query_text (str): The query text
         """
         try:
             return self.cached_queries[(domain, intent, query_text)]
@@ -96,7 +108,7 @@ class QueryCache:
 
     def load(self):
         """
-        Loads the generated query cache into memory
+        Loads a generated query cache into memory.
         """
         file_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
         try:

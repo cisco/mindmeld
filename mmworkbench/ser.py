@@ -34,7 +34,7 @@ class DucklingDimension(Enum):
 
 
 def get_candidates(query, entity_types=None, language=None, time_zone=None, timestamp=None):
-    """Identifies candidate system entities in the given query
+    """Identifies candidate system entities in the given query.
 
     Args:
         query (Query): The query to examine
@@ -67,7 +67,7 @@ def get_candidates(query, entity_types=None, language=None, time_zone=None, time
 
 def get_candidates_for_text(text, entity_types=None, span=None, language=None,
                             time_zone=None, timestamp=None):
-    """Identifies candidate system entities in the given text
+    """Identifies candidate system entities in the given text.
 
     Args:
         text (str): The text to examine
@@ -182,7 +182,7 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
 
 
 def resolve_system_entity(query, entity_type, span):
-    """Resolves a system entity in the provided query at the specified span
+    """Resolves a system entity in the provided query at the specified span.
 
     Args:
         query (Query): The query containing the entity
