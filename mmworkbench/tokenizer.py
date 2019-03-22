@@ -181,7 +181,8 @@ class Tokenizer:
 
         Args:
             text (str): The text to normalize
-            keep_special_chars (bool): When True, the tokenizer excludes a list of special characters used in annotations
+            keep_special_chars (bool): If True, the tokenizer excludes a list of special
+                characters used in annotations
 
         Returns:
             str: the original text string with each token in normalized form
@@ -211,7 +212,8 @@ class Tokenizer:
 
         Args:
             text (str): The text to normalize
-            keep_special_chars (bool): When True, the tokenizer excludes a list of special characters used in annotations
+            keep_special_chars (bool): If True, the tokenizer excludes a list of special
+                characters used in annotations
 
         Returns:
             list: A list of normalized tokens
@@ -256,13 +258,13 @@ class Tokenizer:
 
     def tokenize_raw(self, text):
         """
-        Identify tokens in text and create unprocessed normalized tokens (dict).
+        Identify tokens in text and create normalized tokens that contain the text and start index.
 
         Args:
             text (str): The text to normalize
 
         Returns:
-            list: A list of normalized tokens (dict)
+            list: A list of normalized tokens
         """
         tokens = []
         token = None
