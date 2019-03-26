@@ -229,8 +229,7 @@ class RoleClassifier(Classifier):
             List: list of queries
         """
         if queries:
-            # TODO: should we filter these by domain?
-            return self._build_query_tree(queries, raw=raw)
+            return self._build_query_tree(queries, domain=self.domain, intent=self.intent, raw=raw)
 
         return self._resource_loader.get_labeled_queries(domain=self.domain, intent=self.intent,
                                                          label_set=label_set, raw=raw)

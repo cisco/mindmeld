@@ -3,7 +3,6 @@
 import logging
 import random
 from sklearn.externals import joblib
-from sklearn.exceptions import NotFittedError
 import os
 
 from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
@@ -126,12 +125,6 @@ class TaggerModel(Model):
                         "fit the model.")
             return self
 
-        # TODO: check if there at least more than one label
-        # TODO: add this code back in
-        # distinct_labels = set(labels)
-        # if len(set(distinct_labels)) <= 1:
-        #     return None
-
         # Extract labels - label encoders are the same accross all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
@@ -192,7 +185,6 @@ class TaggerModel(Model):
         Returns:
             (dict): revised param_grid
         """
-        # todo should we do any parameter transformation for sequence models?
         return param_grid
 
     def predict(self, examples, dynamic_resource=None):
@@ -210,15 +202,8 @@ class TaggerModel(Model):
         tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
             self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
-        # TODO: The try catch block is a hack for the LSTM. Basically, the LSTM model doesn't know
-        # about presence or absence of entities in an intent
-        try:
-            # Process the data to generate features and predict the tags
-            predicted_tags = self._clf.extract_and_predict(examples, self.config,
-                                                           workspace_resource)
-        except NotFittedError:
-            logger.info("Probably don't have entities for intent but still trying to predict")
-            return [()]
+        predicted_tags = self._clf.extract_and_predict(examples, self.config,
+                                                       workspace_resource)
         # Decode the tags to labels
         labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
                   for example_predicted_tags, example in zip(predicted_tags, examples)]
@@ -240,16 +225,8 @@ class TaggerModel(Model):
         tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
             self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
-
-        # TODO: The try catch block is a hack for the LSTM. Basically, the LSTM model doesn't know
-        # about presence or absence of entities in an intent
-        try:
-            predicted_tags_probas = self._clf.predict_proba(examples, self.config,
-                                                            workspace_resource)
-        except NotFittedError:
-            logger.info("Probably don't have entities for intent but still trying to predict")
-            return []
-
+        predicted_tags_probas = self._clf.predict_proba(examples, self.config,
+                                                        workspace_resource)
         tags, probas = zip(*predicted_tags_probas[0])
         entity_confidence = []
         entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
@@ -300,8 +277,6 @@ class TaggerModel(Model):
             ModelEvaluation: an object containing information about the \
                 evaluation
         """
-        # TODO: also expose feature weights?
-
         if self._no_entities:
             logger.info("There are no labels in this label set, so we don't "
                         "run model evaluation.")
@@ -347,7 +322,8 @@ class TaggerModel(Model):
         else:
             variables_to_dump = {
                 'current_params': self._current_params,
-                'label_encoder': self._label_encoder
+                'label_encoder': self._label_encoder,
+                'no_entities': self._no_entities
             }
             joblib.dump(variables_to_dump, os.path.join(config['model'], '.tagger_vars'))
 
@@ -366,6 +342,7 @@ class TaggerModel(Model):
         variables_to_load = joblib.load(os.path.join(config['model'], '.tagger_vars'))
         self._current_params = variables_to_load['current_params']
         self._label_encoder = variables_to_load['label_encoder']
+        self._no_entities = variables_to_load['no_entities']
 
 
 register_model('tagger', TaggerModel)

@@ -9,8 +9,6 @@ from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RS
                       ENABLE_STEMMING, DEFAULT_SYS_ENTITIES, register_query_feature,
                       mask_numerics, get_ngram, requires)
 
-# TODO: clean this up a LOT
-
 
 @register_query_feature(feature_name='in-gaz-span-seq')
 @requires(GAZETTEER_RSC)
@@ -155,9 +153,7 @@ def extract_in_gaz_span_features(**args):
 
             return feat_seq
 
-        # TODO: clean up this method -- currently the parts involving sys_types are
-        # completely broken
-        def get_gaz_spans(query, gazetteers, sys_types):
+        def get_gaz_spans(query, gazetteers):
             """Collect tuples of (start index, end index, ngram, entity type)
             tracking ngrams that match with the entity gazetteer data
             """
@@ -171,61 +167,11 @@ def extract_in_gaz_span_features(**args):
                         ngram = ' '.join(tokens[start:end])
                         if ngram in gaz['pop_dict']:
                             in_gaz_spans.append((start, end, gaz_name, ngram))
-
-            # Check ngrams with flattened numerics against the gazetteer
-            # This algorithm iterates through each pair of numeric entities
-            # and through every ngram that includes the entire entity span.
-            # This limits regular entities to contain at most two numeric entities
-            system_entities = query.get_system_entity_candidates(sys_types)
-
-            for gaz_name, gaz in gazetteers.items():
-                for i, num_entity_i in enumerate(system_entities):
-                    if num_entity_i['type'] not in gaz['sys_types']:
-                        continue
-                    # logging.debug('Looking for [{}|num:{}] in {} gazetteer '
-                    #               'with known numeric types {}'
-                    #               .format(num_entity_i['entity'],
-                    #                       num_entity_i['type'],
-                    #                       gaz_name, list(gaz['sys_types'])))
-
-                    # Collect ngrams that include all of num_entity_i
-                    for start in range(num_entity_i['start'] + 1):
-                        for end in range(num_entity_i['end'] + 1, len(tokens) + 1):
-                            ngram, ntoks = get_flattened_ngram(tokens, start, end, num_entity_i, 0)
-                            if ngram in gaz['pop_dict']:
-                                in_gaz_spans.append((start, end, gaz_name, ngram))
-
-                            # Check if we can fit any other num_entity_j between
-                            # num_entity_i and the edge of the ngram
-                            for j, num_entity_j in enumerate(system_entities[i + 1:]):
-                                if (num_entity_j['type'] in gaz['sys_types']
-                                    and (start <= num_entity_j['start'])
-                                    and (num_entity_j['end'] < end)
-                                    and (num_entity_j['end'] < num_entity_i['start']
-                                         or num_entity_i['end'] < num_entity_j['start'])):
-                                    ngram, ntoks2 = get_flattened_ngram(
-                                        ntoks, start, end, num_entity_j, start)
-                                    if ngram in gaz['pop_dict']:
-                                        in_gaz_spans.append((start, end, gaz_name, ngram))
-
             return in_gaz_spans
-
-        def get_flattened_ngram(tokens, start, end, num_entity, offset):
-            flattened_token = '@' + num_entity['type'] + '@'
-            ntoks = (tokens[start - offset:num_entity['start'] - offset] +
-                     [flattened_token] +
-                     [None] * (num_entity['end'] - num_entity['start']) +
-                     tokens[num_entity['end'] + 1 - offset:end - offset])
-            ngram = ' '.join([t for t in ntoks if t is not None])
-            return ngram, ntoks
 
         gazetteers = resources[GAZETTEER_RSC]
         feat_seq = [{} for _ in query.normalized_tokens]
-        sys_types = set()
-        for gaz in gazetteers.values():
-            sys_types.update(gaz['sys_types'])
-
-        in_gaz_spans = get_gaz_spans(query, gazetteers, list(sys_types))
+        in_gaz_spans = get_gaz_spans(query, gazetteers)
 
         # Sort the spans by their indices. The algorithm below assumes this
         # sort order.
@@ -234,7 +180,6 @@ def extract_in_gaz_span_features(**args):
             span = in_gaz_spans.pop(0)
             span_feat_seq = _get_span_features(query, gazetteers, *span)
             update_features_sequence(feat_seq, span_feat_seq)
-            # logging.debug(span_feat_seq)
 
             for other_span in in_gaz_spans:
                 if other_span[0] >= span[1]:
@@ -249,7 +194,6 @@ def extract_in_gaz_span_features(**args):
                             query, gazetteers, span[0], span[1], span[2],
                             other_span[2], span[3])
                         update_features_sequence(feat_seq, cmp_span_features)
-
         return feat_seq
 
     return _extractor

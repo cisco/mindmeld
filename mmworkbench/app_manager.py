@@ -67,9 +67,8 @@ class ApplicationManager:
         if self.nlp.ready:
             # if we are ready, don't load again
             return
-        self.nlp.load()
         # TODO: make an async nlp
-        # await self.nlp.load()
+        self.nlp.load()
 
     def _pre_dm(self, processed_query, context, params, frame, history):
         request = self.request_class(context=context, history=history, frame=frame,
@@ -176,14 +175,13 @@ class ApplicationManager:
         frame = frame or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
+        # TODO: make an async nlp
         processed_query = self.nlp.process(query_text=text,
                                            allowed_intents=allowed_intents,
                                            **nlp_params)
         request, response = self._pre_dm(processed_query=processed_query,
                                          context=context, history=history,
                                          frame=frame, params=params)
-        # TODO: make an async nlp
-        # processed_query = await self.nlp.process(text, nlp_hierarchy, **process_params)
         dm_response = await self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
 
