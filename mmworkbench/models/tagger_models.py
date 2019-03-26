@@ -156,7 +156,7 @@ class TaggerModel(Model):
             dynamic_resource (dict): The dynamic resource used along with the query
 
         Returns:
-            dict: A dictionary of extracted features and their weights
+            list: A list of dictionaries of extracted features and their weights
         """
         tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(

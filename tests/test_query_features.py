@@ -232,57 +232,133 @@ def test_entity_query_features(home_assistant_nlp, query, feature_keys, expected
 @pytest.mark.parametrize(
     "query, feature_keys, expected_feature_values, index",
     [
-        # Test for extract_in_gaz_ngram_features
         ("When will one on 23 Elm Street open?",
-         ['in_gaz|type:duration|ngram|length:1|pos:0|class_prob',
-          'in_gaz|type:duration|ngram|length:1|pos:0|idf',
-          'in_gaz|type:duration|ngram|length:1|pos:0|output_prob',
-          'in_gaz|type:duration|ngram|length:1|pos:0|pmi'],
-         [math.log(2 + 1) / 2,
-          0,
-          math.log(2 + 1) / 2 - math.log(2),
-          math.log(2 + 1) / 2 - math.log(2)],
-         0),
-
-        # Test for extract_bag_of_words_features
-        ("change alarm from 8am to 9am",
-         ['bag_of_words|length:1|word_pos:0',
+         ['in_gaz|type:store_name',
+          'in_gaz|type:store_name|ngram_before|length:1',
+          'in_gaz|type:store_name|ngram_after|length:1',
+          'in_gaz|type:store_name|ngram_first|length:1',
+          'in_gaz|type:store_name|ngram_last|length:1',
+          'in_gaz|type:store_name|pop',
+          'in_gaz|type:store_name|log_char_len',
+          'in_gaz|type:store_name|pct_char_len',
+          'in_gaz|type:store_name|pmi',
+          'in_gaz|type:store_name|class_prob',
+          'in_gaz|type:store_name|output_prob',
+          'in_gaz|type:store_name|segment:start',
+          'in_gaz|type:store_name|segment:start|ngram_before|length:1',
+          'in_gaz|type:store_name|segment:start|ngram_after|length:1',
+          'in_gaz|type:store_name|segment:start|ngram_first|length:1',
+          'in_gaz|type:store_name|segment:start|ngram_last|length:1',
+          'in_gaz|type:store_name|segment:start|pop',
+          'in_gaz|type:store_name|segment:start|log_char_len',
+          'in_gaz|type:store_name|segment:start|pct_char_len',
+          'in_gaz|type:store_name|segment:start|pmi',
+          'in_gaz|type:store_name|segment:start|class_prob',
+          'in_gaz|type:store_name|segment:start|output_prob',
+          'in_gaz|type:store_name|ngram|length:1|pos:0|idf',
+          'in_gaz|type:store_name|ngram|length:2|pos:-1|idf',
+          'in_gaz|type:store_name|ngram|length:2|pos:1|idf',
+          'in_gaz|type:store_name|ngram|length:1|pos:0|pmi',
+          'in_gaz|type:store_name|ngram|length:1|pos:0|class_prob',
+          'in_gaz|type:store_name|ngram|length:1|pos:0|output_prob',
+          'in_gaz|type:store_name|ngram|length:2|pos:-1|pmi',
+          'in_gaz|type:store_name|ngram|length:2|pos:-1|class_prob',
+          'in_gaz|type:store_name|ngram|length:2|pos:-1|output_prob',
+          'in_gaz|type:store_name|ngram|length:2|pos:1|pmi',
+          'in_gaz|type:store_name|ngram|length:2|pos:1|class_prob',
+          'in_gaz|type:store_name|ngram|length:2|pos:1|output_prob',
+          'in_gaz|type:store_name|ngram|length:3|pos:0|pmi',
+          'in_gaz|type:store_name|ngram|length:3|pos:0|class_prob',
+          'in_gaz|type:store_name|ngram|length:3|pos:0|output_prob',
+          'bag_of_words|length:1|word_pos:-1',
+          'bag_of_words|length:1|word_pos:0',
           'bag_of_words|length:1|word_pos:1',
-          'bag_of_words|length:2|word_pos:0'],
-         ['change',
-          'alarm',
-          'change alarm'],
-         0),
-
-        # Test for extract_char_ngrams_features
-        ("change alarm from 8am to 9am",
-         ['char_ngrams|length:1|word_pos:0|char_pos:0',
-          'char_ngrams|length:2|word_pos:0|char_pos:0'],
-         ['c',
-          'ch'],
-         0),
-
-        # Test for extract_sys_candidates
-        ("change alarm from 8am to 9am",
-         ['sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len',
+          'bag_of_words|length:2|word_pos:-1',
+          'bag_of_words|length:2|word_pos:0',
+          'bag_of_words|length:2|word_pos:1',
+          'char_ngrams|length:1|word_pos:-1|char_pos:0',
+          'char_ngrams|length:1|word_pos:-1|char_pos:1',
+          'char_ngrams|length:1|word_pos:0|char_pos:0',
+          'char_ngrams|length:1|word_pos:0|char_pos:1',
+          'char_ngrams|length:1|word_pos:1|char_pos:0',
+          'char_ngrams|length:1|word_pos:1|char_pos:1',
+          'char_ngrams|length:1|word_pos:1|char_pos:2',
+          'char_ngrams|length:2|word_pos:-1|char_pos:0',
+          'char_ngrams|length:2|word_pos:0|char_pos:0',
+          'char_ngrams|length:2|word_pos:1|char_pos:0',
+          'char_ngrams|length:2|word_pos:1|char_pos:1',
+          'sys_candidate|type:sys_time|granularity:hour|pos:0',
           'sys_candidate|type:sys_time|granularity:hour|pos:0|log_len'],
-         [math.log(10),
-          math.log(3)],
-         -1),
+         [1,
+          'on',
+          'open',
+          '00',
+          'street',
+          1.0,
+          2.5649493574615367,
+          0.37142857142857144,
+          -2.5852419975190757,
+          2.5852419975190757,
+          -2.5852419975190757,
+          1,
+          'on',
+          'open',
+          '00',
+          'street',
+          1.0,
+          2.5649493574615367,
+          0.37142857142857144,
+          -2.5852419975190757,
+          2.5852419975190757,
+          -2.5852419975190757,
+          1.3862943611198906,
+          0.0,
+          0.0,
+          -2.585241997519076,
+          2.5852419975190752,
+          -1.1989476363991853,
+          -2.5852419975190757,
+          2.5852419975190757,
+          -2.5852419975190757,
+          -2.5852419975190757,
+          2.5852419975190757,
+          -2.5852419975190757,
+          -2.5852419975190757,
+          2.5852419975190757,
+          -2.5852419975190757,
+          'on',
+          '00',
+          'elm',
+          'on 00',
+          '00 elm',
+          'elm street',
+          'o',
+          'n',
+          '0',
+          '0',
+          'e',
+          'l',
+          'm',
+          'on',
+          '00',
+          'el',
+          'lm',
+          1,
+          0.6931471805599453],
+         4),
     ]
 )
 def test_entity_gaz_query_features(kwik_e_mart_nlp, query, feature_keys, expected_feature_values,
-                               index):
+                                   index):
     """
-    Test to make sure tagger model features work as expected
+    Test to make sure tagger model gazetteer features work as expected
     Args:
-        home_assistant_nlp: nlp object for the home_assistant blueprint
+        kwik_e_mart_nlp: nlp object for the kwik e mart blueprint
         query: text query to use
         feature_keys: list of keys in the feature dictionary
         expected_feature_values: the expected values corresponding to each key
         index: the index of the token to examine
     """
-    #assert len(feature_keys) == len(expected_feature_values)
     entity_recognizer_config_all_features = {
         'model_type': 'tagger',
         'model_settings': {
@@ -312,13 +388,10 @@ def test_entity_gaz_query_features(kwik_e_mart_nlp, query, feature_keys, expecte
     entity_recognizer = \
         kwik_e_mart_nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer
     entity_recognizer.fit(**entity_recognizer_config_all_features)
-
     extracted_features = entity_recognizer.view_extracted_features(query)[index]
-    import pdb; pdb.set_trace()
-
     for feature_key, expected_value in zip(feature_keys, expected_feature_values):
-
         if isinstance(expected_value, float):
             assert abs(expected_value - extracted_features[feature_key]) < EPSILON
         else:
             assert expected_value == extracted_features[feature_key]
+    entity_recognizer.fit()

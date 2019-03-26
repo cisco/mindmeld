@@ -187,13 +187,16 @@ def extract_in_gaz_ngram_features(**args):
                 features = {
                     '|length:{}|pos:{}|idf'.format(1, 0): math.log(
                         len(gazes[entity_type]['index'][get_ngram(tokens, i, 1)]) + 1),
+                    '|length:{}|pos:{}|idf'.format(2, -1): math.log(
+                        len(gazes[entity_type]['index'][get_ngram(tokens, i - 1, 2)]) + 1),
                     '|length:{}|pos:{}|idf'.format(2, 1):  math.log(
-                        len(gazes[entity_type]['index'][get_ngram(tokens, i, 2)]) + 1),
+                        len(gazes[entity_type]['index'][get_ngram(tokens, i, 2)]) + 1)
                 }
 
                 for key, value in features.items():
                     feat_seq[i][feat_prefix + key] = value
 
+                # these features are extracted on a window span around the current token
                 window_features = [
                     {
                         'length': 1,

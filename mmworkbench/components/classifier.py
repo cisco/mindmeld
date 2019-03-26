@@ -417,6 +417,9 @@ class Classifier(metaclass=ABCMeta):
             queries (list): list of ProcessedQuery
             domain (str, optional): The domain to filter on
             intent (str, optional): The intent to filter on
+            raw (bool, optional): If true, the leaves of the query tree are
+                strings associated with the ProcessedQueries, else the leaves
+                are ProcessedQueries
         """
         query_tree = {}
         for query in queries:
