@@ -350,7 +350,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
             entity_tokens.append(normalized_tokens[tag_idx])
 
         # Close the entity if the tag indicates it closed
-        if (entity_start is not None and iob in (E_TAG, S_TAG)):
+        if entity_start is not None and iob in (E_TAG, S_TAG):
             logger.debug("Entity closed here")
             if _is_system_entity(ent_type):
                 _append_system_entity(entity_start, tag_idx+1, ent_type)

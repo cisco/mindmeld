@@ -414,7 +414,7 @@ class Classifier(metaclass=ABCMeta):
         organized by domain then by intent.
 
         Args:
-            queries (List): list of ProcessedQuery
+            queries (list): list of ProcessedQuery
             domain (str, optional): The domain to filter on
             intent (str, optional): The intent to filter on
         """

@@ -227,3 +227,98 @@ def test_entity_query_features(home_assistant_nlp, query, feature_keys, expected
             assert abs(expected_value - extracted_features[feature_key]) < EPSILON
         else:
             assert expected_value == extracted_features[feature_key]
+
+
+@pytest.mark.parametrize(
+    "query, feature_keys, expected_feature_values, index",
+    [
+        # Test for extract_in_gaz_ngram_features
+        ("When will one on 23 Elm Street open?",
+         ['in_gaz|type:duration|ngram|length:1|pos:0|class_prob',
+          'in_gaz|type:duration|ngram|length:1|pos:0|idf',
+          'in_gaz|type:duration|ngram|length:1|pos:0|output_prob',
+          'in_gaz|type:duration|ngram|length:1|pos:0|pmi'],
+         [math.log(2 + 1) / 2,
+          0,
+          math.log(2 + 1) / 2 - math.log(2),
+          math.log(2 + 1) / 2 - math.log(2)],
+         0),
+
+        # Test for extract_bag_of_words_features
+        ("change alarm from 8am to 9am",
+         ['bag_of_words|length:1|word_pos:0',
+          'bag_of_words|length:1|word_pos:1',
+          'bag_of_words|length:2|word_pos:0'],
+         ['change',
+          'alarm',
+          'change alarm'],
+         0),
+
+        # Test for extract_char_ngrams_features
+        ("change alarm from 8am to 9am",
+         ['char_ngrams|length:1|word_pos:0|char_pos:0',
+          'char_ngrams|length:2|word_pos:0|char_pos:0'],
+         ['c',
+          'ch'],
+         0),
+
+        # Test for extract_sys_candidates
+        ("change alarm from 8am to 9am",
+         ['sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len',
+          'sys_candidate|type:sys_time|granularity:hour|pos:0|log_len'],
+         [math.log(10),
+          math.log(3)],
+         -1),
+    ]
+)
+def test_entity_gaz_query_features(kwik_e_mart_nlp, query, feature_keys, expected_feature_values,
+                               index):
+    """
+    Test to make sure tagger model features work as expected
+    Args:
+        home_assistant_nlp: nlp object for the home_assistant blueprint
+        query: text query to use
+        feature_keys: list of keys in the feature dictionary
+        expected_feature_values: the expected values corresponding to each key
+        index: the index of the token to examine
+    """
+    #assert len(feature_keys) == len(expected_feature_values)
+    entity_recognizer_config_all_features = {
+        'model_type': 'tagger',
+        'model_settings': {
+            'classifier_type': 'memm', 'tag_scheme': 'IOB', 'feature_scaler': 'max-abs'
+        },
+        'params': {
+            'C': 10,
+            'penalty': 'l2'
+        },
+        'features': {
+            "in-gaz-span-seq": {},
+            "in-gaz-ngram-seq": {},
+            "bag-of-words-seq": {
+                'ngram_lengths_to_start_positions': {1: [-1, 0, 1], 2: [-1, 0, 1]},
+                "thresholds": [0]
+            },
+            "char-ngrams-seq": {
+                'ngram_lengths_to_start_positions': {1: [-1, 0, 1], 2: [-1, 0, 1]},
+                "thresholds": [0]
+            },
+            "sys-candidates-seq": {
+                'start_positions': [0]
+            },
+        }
+    }
+
+    entity_recognizer = \
+        kwik_e_mart_nlp.domains['store_info'].intents['get_store_hours'].entity_recognizer
+    entity_recognizer.fit(**entity_recognizer_config_all_features)
+
+    extracted_features = entity_recognizer.view_extracted_features(query)[index]
+    import pdb; pdb.set_trace()
+
+    for feature_key, expected_value in zip(feature_keys, expected_feature_values):
+
+        if isinstance(expected_value, float):
+            assert abs(expected_value - extracted_features[feature_key]) < EPSILON
+        else:
+            assert expected_value == extracted_features[feature_key]
