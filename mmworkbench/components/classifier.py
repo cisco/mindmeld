@@ -417,15 +417,27 @@ class Classifier(metaclass=ABCMeta):
         return model_hash
 
     @staticmethod
-    def _build_query_tree(queries, raw=False):
+    def _build_query_tree(queries, domain=None, intent=None, raw=False):
         """Build a query tree from a list of ProcessedQueries. The tree is
         organized by domain then by intent.
 
         Args:
-            queries (List): list of ProcessedQuery
+            queries (list): list of ProcessedQuery
+            domain (str, optional): The domain to filter on
+            intent (str, optional): The intent to filter on
+            raw (bool, optional): If true, the leaves of the query tree are
+                strings associated with the ProcessedQueries, else the leaves
+                are ProcessedQueries
         """
         query_tree = {}
         for query in queries:
+
+            if domain and query.domain != domain:
+                continue
+
+            if intent and query.intent != intent:
+                continue
+
             if query.domain not in query_tree:
                 query_tree[query.domain] = {}
             if query.intent not in query_tree[query.domain]:

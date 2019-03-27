@@ -113,17 +113,14 @@ class WorkbenchServer:
         def handle_bad_request(error):
             response = jsonify(error.to_dict())
             response.status_code = error.status_code
-            # TODO: should this be in the request log?
             logger.error(json.dumps(error.to_dict()))
             return response
 
         @server.errorhandler(500)
         def handle_server_error(error):
-            # TODO: only expose this when verbose param is true
             response_data = {'error': error.message}
             response = jsonify(response_data)
             response.status_code = 500
-            # TODO: should this be in the request log?
             logger.error(json.dumps(response_data))
             return response
 

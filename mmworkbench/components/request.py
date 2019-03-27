@@ -40,10 +40,7 @@ def _validate_generic(name, ptype):
 
 PARAM_VALIDATORS = {
     'allowed_intents': _validate_generic('allowed_intents', list),
-
-    # TODO: use a better validator for this
     'target_dialogue_state': _validate_generic('target_dialogue_state', str),
-
     'time_zone': _validate_time_zone,
     'timestamp': _validate_generic('timestamp', int),
     'dynamic_resource': _validate_generic('dynamic_resource', dict)
