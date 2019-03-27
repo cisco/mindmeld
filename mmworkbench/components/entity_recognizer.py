@@ -28,6 +28,7 @@ class EntityRecognizer(Classifier):
     """
 
     CLF_TYPE = 'entity'
+    """The classifier type."""
 
     def __init__(self, resource_loader, domain, intent):
         """Initializes an entity recognizer
@@ -56,12 +57,12 @@ class EntityRecognizer(Classifier):
         return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
-        """Trains the entity recognition model using the provided training queries
+        """Trains the entity recognition model using the provided training queries.
 
         Args:
-            queries (list of ProcessedQuery): The labeled queries to use as training data
-            label_set (list, optional): A label set to load. If not specified, the default
-            incremental_timestamp (str, optional): The timestamp folder to cache models in
+            queries (list[ProcessedQuery]): The labeled queries to use as training data.
+            label_set (list, optional): A label set to load. If not specified, use the default.
+            incremental_timestamp (str, optional): The timestamp folder to cache models in.
         """
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
@@ -111,15 +112,21 @@ class EntityRecognizer(Classifier):
         self._model.dump(path, self._data_dump_payload())
 
     def dump(self, model_path, incremental_model_path=None):
+        """Save the model.
+
+        Args:
+            model_path (str): The model path.
+            incremental_model_path (str, Optional): The timestamped folder where the cached \
+                models are stored.
+        """
         logger.info('Saving entity classifier: domain=%r, intent=%r', self.domain, self.intent)
         super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):
-        """Loads the trained entity recognition model from disk
+        """Loads the trained entity recognition model from disk.
 
         Args:
-            model_path (str): The location on disk where the model is stored
-
+            model_path (str): The location on disk where the model is stored.
         """
         logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
         try:
@@ -169,19 +176,18 @@ class EntityRecognizer(Classifier):
         self.dirty = False
 
     def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
-        """Predicts entities for the given query using the trained recognition model
+        """Predicts entities for the given query using the trained recognition model.
 
         Args:
-            query (Query or str): The input query
+            query (Query, str): The input query.
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             timestamp (long, optional): A unix time stamp for the request (in seconds).
-            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
 
         Returns:
-            str: The predicted class label
-
+            (str): The predicted class label.
         """
         prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp,
                                      dynamic_resource=dynamic_resource) or ()
@@ -192,12 +198,19 @@ class EntityRecognizer(Classifier):
         their associated probabilities using the trained entity recognition model
 
         Args:
-            query (Query or str): The input query
+            query (Query, str): The input query.
+            time_zone (str, optional): The name of an IANA time zone, such as
+                'America/Los_Angeles', or 'Asia/Kolkata'
+                See the [tz database](https://www.iana.org/time-zones) for more information.
+            timestamp (long, optional): A unix time stamp for the request (in seconds).
+            dynamic_resource (optional): Dynamic resource, unused.
 
         Returns:
-            list: a list of tuples of the form (Entity list, float) grouping potential entity \
-                tagging hypotheses and their probabilities
+            (list): A list of tuples of the form (Entity list, float) grouping potential entity \
+                tagging hypotheses and their probabilities.
         """
+        del dynamic_resource
+
         if not self._model:
             logger.error('You must fit or load the model before running predict_proba')
             return

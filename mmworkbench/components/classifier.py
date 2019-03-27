@@ -22,24 +22,24 @@ logger = logging.getLogger(__name__)
 class ClassifierConfig:
     """A value object representing a classifier configuration
 
-    Attributes:
-        model_type (str): The name of the model type. Will be used to find the
-            model class to instantiate
-        model_settings (dict): Settings specific to the model type specified
-        params (dict): Params to pass to the underlying classifier
-        param_selection (dict): Configuration for param selection (using cross
-            validation)
-            {'type': 'shuffle',
-            'n': 3,
-            'k': 10,
-            'n_jobs': 2,
-            'scoring': '',
-            'grid': {}
-            }
-        features (dict): The keys are the names of feature extractors and the
-            values are either a kwargs dict which will be passed into the
-            feature extractor function, or a callable which will be used as to
-            extract features.
+        Attributes:
+            model_type (str): The name of the model type. Will be used to find the \
+                model class to instantiate.
+            model_settings (dict): Settings specific to the model type specified.
+            params (dict): Params to pass to the underlying classifier.
+            param_selection (dict): Configuration for param selection (using cross \
+                validation). For example:
+                {'type': 'shuffle',
+                'n': 3,
+                'k': 10,
+                'n_jobs': 2,
+                'scoring': '',
+                'grid': {}
+                }
+            features (dict): The keys are the names of feature extractors and the \
+                values are either a kwargs dict which will be passed into the \
+                feature extractor function, or a callable which will be used as to \
+                extract features.
     """
 
     __slots__ = ['model_type', 'features', 'model_settings', 'params', 'param_selection']
@@ -59,10 +59,10 @@ class ClassifierConfig:
         self.param_selection = param_selection
 
     def to_dict(self):
-        """Converts the model config object into a dict
+        """Converts the model config object into a dict.
 
         Returns:
-            dict: A dict version of the config
+            (dict): A dict version of the config.
         """
         result = {}
         for attr in self.__slots__:
@@ -83,22 +83,30 @@ class ClassifierConfig:
         return cls(**config)
 
     def to_json(self):
-        """Converts the model config object to JSON
+        """Converts the model config object to JSON.
 
         Returns:
-            str: JSON representation of the classifier
+            (str): JSON representation of the classifier.
         """
         return json.dumps(self.to_dict(), sort_keys=True)
 
 
 class Classifier(metaclass=ABCMeta):
-    """The base class for all the machine-learned classifiers in Workbench. A classifier is a
-    machine-learned model that categorizes input examples into one of the pre-determined class
-    labels. Among other functionality, each classifier provides means by which to fit a statistical
-    model on a given training dataset and then use the trained model to make predictions on new
-    unseen data."""
+    """The base class for all the machine-learned classifiers in Workbench. A classifier is a \
+    machine-learned model that categorizes input examples into one of the pre-determined class \
+    labels. Among other functionality, each classifier provides means by which to fit a \
+    statistical model on a given training dataset and then use the trained model to make \
+    predictions on new unseen data.
+
+        Attributes:
+            ready (bool): Whether the classifier is ready.
+            dirty (bool): Whether the classifier has unsaved changes to its model.
+            config (ClassifierConfig): The classifier configuration.
+            hash (str): A hash representing the inputs into the model.
+    """
 
     CLF_TYPE = None
+    """Classifier type (`str`)."""
 
     def __init__(self, resource_loader):
         """Initializes a classifier
@@ -346,9 +354,9 @@ class Classifier(metaclass=ABCMeta):
         """Persists the trained classification model to disk.
 
         Args:
-            model_path (str): The location on disk where the model should be stored
-            incremental_model_path (str, Optional): The timestamp folder where the cached
-                models are stored
+            model_path (str): The location on disk where the model should be stored.
+            incremental_model_path (str, optional): The timestamp folder where the cached
+                models are stored.
         """
         for path in [model_path, incremental_model_path]:
             if not path:

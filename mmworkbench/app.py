@@ -16,6 +16,19 @@ logger = logging.getLogger(__name__)
 
 
 class Application:
+    """The conversational application.
+
+        Attributes:
+            import_name (str): The name of the application package.
+            app_path (str): The application path.
+            app_manager (ApplicationManager): The application manager.
+            request_class (Request): Any class that inherits from \
+                Request.
+            responder_class (DialogueResponder): Any class that \
+                inherits from the DialogueResponder.
+            preprocessor (Preprocessor): The application preprocessor, if any.
+            async_mode (bool): ``True`` if the application is async, ``False`` otherwise.
+        """
 
     def __init__(self, import_name, request_class=None, responder_class=None, preprocessor=None,
                  async_mode=False):
@@ -36,9 +49,16 @@ class Application:
 
     @property
     def question_answerer(self):
+        """
+        The application's Question Answerer, which is initialized as part of the application \
+            manager.
+        """
         return None if self.app_manager is None else self.app_manager.question_answerer
 
     def lazy_init(self, nlp=None):
+        """
+        Initialize the application manager, spin up the server and compile the dialogue rules.
+        """
         if self.app_manager:
             return
         self.app_manager = ApplicationManager(
@@ -129,5 +149,6 @@ class Application:
         return _decorator
 
     def cli(self):
+        """Initialize the application's command line interface."""
         # pylint:
         app_cli(obj={'app': self})

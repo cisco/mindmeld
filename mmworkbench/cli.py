@@ -43,7 +43,7 @@ CONTEXT_SETTINGS = {
 DUCKLING_PORT = '7151'
 
 
-def version_msg():
+def _version_msg():
     """Returns the Workbench version, location and Python powering it."""
     python_version = sys.version[:3]
     location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -326,7 +326,8 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file):
         ctx.exit(1)
 
 
-def find_duckling_os_executable():
+def _find_duckling_os_executable():
+    """Returns the correct duckling path for this OS."""
     os_platform_name = '-'.join(distro.linux_distribution(
         full_distribution_name=False)).lower()
     for os_key in path.DUCKLING_OS_MAPPINGS:
@@ -349,7 +350,7 @@ def num_parser(ctx, start):
 
         # We redirect all the output of starting the process to /dev/null and all errors
         # to stdout.
-        exec_path = find_duckling_os_executable()
+        exec_path = _find_duckling_os_executable()
 
         if not exec_path:
             logger.error('OS is incompatible with duckling executable. '
@@ -401,7 +402,7 @@ def num_parser(ctx, start):
 
 
 def _get_duckling_pid():
-    os_path = find_duckling_os_executable()
+    os_path = _find_duckling_os_executable()
     if not os_path:
         return
 
@@ -446,7 +447,7 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
 
 @click.command(cls=click.CommandCollection, context_settings=CONTEXT_SETTINGS,
                sources=[module_cli, shared_cli])
-@click.version_option(__version__, '-V', '--version', message=version_msg())
+@click.version_option(__version__, '-V', '--version', message=_version_msg())
 @click.pass_context
 @click_log.simple_verbosity_option()
 @click_log.init(__package__)
@@ -466,7 +467,7 @@ def cli(ctx):
 
 @click.command(cls=click.CommandCollection, context_settings=CONTEXT_SETTINGS,
                sources=[_app_cli, shared_cli])
-@click.version_option(__version__, '-V', '--version', message=version_msg())
+@click.version_option(__version__, '-V', '--version', message=_version_msg())
 @click.pass_context
 @click_log.simple_verbosity_option()
 @click_log.init(__package__)

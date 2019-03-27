@@ -18,7 +18,7 @@ def test_num_parse_not_running(mocker):
     runner = CliRunner()
     with patch('logging.Logger.error') as mocking:
         mocker.patch.object(cli, '_get_duckling_pid', return_value=None)
-        mocker.patch.object(cli, 'find_duckling_os_executable', return_value=None)
+        mocker.patch.object(cli, '_find_duckling_os_executable', return_value=None)
         runner.invoke(num_parser, ['--start'])
         mocking.assert_any_call(
             'OS is incompatible with duckling executable. Use docker to install duckling.')

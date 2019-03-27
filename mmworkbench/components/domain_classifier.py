@@ -23,6 +23,7 @@ class DomainClassifier(Classifier):
     """
 
     CLF_TYPE = 'domain'
+    """The classifier type."""
 
     def _get_model_config(self, **kwargs):
         """Gets a machine learning model configuration
@@ -73,6 +74,17 @@ class DomainClassifier(Classifier):
         super().load(*args, **kwargs)
 
     def inspect(self, query, domain=None, dynamic_resource=None):
+        """Inspects the query.
+
+        Args:
+            query (Query): The query to be predicted.
+            domain (str): The expected domain label for this query.
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
+
+        Returns:
+            (DataFrame): The DataFrame that includes every feature, their value, weight and \
+                probability.
+        """
         return self._model.inspect(
             example=query, gold_label=domain, dynamic_resource=dynamic_resource)
 
@@ -87,7 +99,7 @@ class DomainClassifier(Classifier):
             raw (bool, optional): When True, raw query strings will be returned
 
         Returns:
-            List: list of queries
+            (list): list of queries
         """
         if queries:
             return self._build_query_tree(queries, raw=raw)

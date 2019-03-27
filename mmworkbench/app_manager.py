@@ -16,13 +16,23 @@ logger = logging.getLogger(__name__)
 
 
 class ApplicationManager:
-    """The Application Manager is the core orchestrator of the MindMeld platform. It receives
-    a client request from the gateway, and processes that request by passing it through all the
-    necessary components of Workbench. Once processing is complete, the application manager
-    returns the final response back to the gateway.
-    """
+    """The Application Manager is the core orchestrator of the MindMeld platform. It receives \
+    a client request, and processes that request by passing it through all the necessary \
+    components of Workbench. Once processing is complete, the application manager returns \
+    the final response back to the client.
 
+        Attributes:
+            async_mode (bool): Whether the application is asynchronous or synchronous.
+            nlp (NaturalLanguageProcessor): The natural language processor.
+            question_answerer (QuestionAnswerer): The question answerer.
+            request_class (Request): Any class that inherits \
+                from Request
+            responder_class (DialogueResponder): Any class \
+                that inherits from the DialogueResponder
+            dialogue_manager (DialogueManager): The application's dialogue manager.
+    """
     MAX_HISTORY_LEN = 100
+    """The max number of turns in history."""
 
     def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None,
                  request_class=None, responder_class=None, preprocessor=None, async_mode=False):
@@ -51,6 +61,7 @@ class ApplicationManager:
 
     @property
     def ready(self):
+        """Whether the nlp component is ready."""
         return self.nlp.ready
 
     def load(self):

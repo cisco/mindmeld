@@ -40,6 +40,9 @@ class Parser:
     This rule based parser will be helpful in many situations, but if you have
     a sufficiently sophisticated entity hierarchy, you may benefit from using a
     statistical approach.
+
+    Attributes:
+        config (dict): The parser config.
     """
 
     def __init__(self, resource_loader=None, config=None, allow_relaxed=True,
@@ -83,9 +86,9 @@ class Parser:
         """Determines groupings of entities for the given query.
 
         Args:
-            query (Query): The query being parsed
-            entities (iterable of QueryEntity): The entities to find groupings for
-            all_candidates (bool, optional): Description
+            query (Query): The query being parsed.
+            entities (list[QueryEntity]): The entities to find groupings for.
+            all_candidates (bool, optional): Whether to return all the entity candidates.
             handle_timeout (bool, optional): False if an exception should be raised in the event of
                 a parsing times out. Defaults to True.
             timeout (float, optional): The amount of time to wait for the parsing to complete.
@@ -93,7 +96,7 @@ class Parser:
                 time out
 
         Returns:
-            tuple of QueryEntity: An updated version of the entities collection passed in with \
+            (tuple[QueryEntity]): An updated version of the entities collection passed in with \
                 their parent and children attributes set appropriately.
         """
         if not self._configured_entities:

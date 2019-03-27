@@ -27,6 +27,7 @@ class EntityResolver:
     """
     # prefix for Elasticsearch indices used to store synonyms for entity resolution
     ES_SYNONYM_INDEX_PREFIX = "synonym"
+    """The prefix of the ES index."""
 
     def __init__(self, app_path, resource_loader, entity_type, es_host=None, es_client=None):
         """Initializes an entity resolver
@@ -73,7 +74,7 @@ class EntityResolver:
             app_namespace (str): The namespace of the app. Used to prevent
                 collisions between the indices of this app and those of other
                 apps.
-            index_name (str): The name of the new index to be created
+            index_name (str): The name of the new index to be created.
             index_type (str): specify whether to import to synonym index or
                 knowledge base object index. INDEX_TYPE_SYNONYM is the default
                 which indicates the synonyms to be imported to synonym index,
@@ -82,10 +83,10 @@ class EntityResolver:
             field_name (str): specify name of the knowledge base field that the
                 synonym list corresponds to when index_type is
                 INDEX_TYPE_SYNONYM.
-            data (list): A list of documents to be loaded into the index
-            es_host (str): The Elasticsearch host server
-            es_client (Elasticsearch): The Elasticsearch client
-            use_double_metaphone (bool): Whether to use the phonetic mapping or not
+            data (list): A list of documents to be loaded into the index.
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+            use_double_metaphone (bool): Whether to use the phonetic mapping or not.
         """
         def _action_generator(docs):
 
@@ -132,8 +133,8 @@ class EntityResolver:
         The synonym info is then used by Question Answerer for text relevance matches.
 
         Args:
-            clean (bool): If True, deletes and recreates the index from scratch instead of
-                          updating the existing index with synonyms in the mapping.json
+            clean (bool): If ``True``, deletes and recreates the index from scratch instead of
+                          updating the existing index with synonyms in the mapping.json.
         """
         if self._is_system_entity:
             return
@@ -233,14 +234,14 @@ class EntityResolver:
 
     def predict(self, entity):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
-        trained entity resolution model
+        trained entity resolution model.
 
         Args:
-            entity (Entity, or tuple): An entity found in an input query, or a list of n-best entity
-                                       objects
+            entity (Entity, tuple): An entity found in an input query, or a list of n-best entity \
+                objects.
 
         Returns:
-            The top 20 resolved values for the provided entity
+            (list): The top 20 resolved values for the provided entity.
         """
         if isinstance(entity, (list, tuple)):
             top_entity = entity[0]
@@ -470,41 +471,8 @@ class EntityResolver:
 
         return values
 
-    def predict_proba(self, entity):
-        """Runs prediction on a given entity and generates multiple hypotheses with their
-        associated probabilities using the trained entity resolution model
-
-        Args:
-            entity (Entity): An entity found in an input query
-
-        Returns:
-            list: a list of tuples of the form (str, float) grouping resolved values and their \
-                probabilities
-        """
-        pass
-
-    def evaluate(self, use_blind=False):
-        """Evaluates the trained entity resolution model on the given test data
-
-        Returns:
-            TYPE: Description
-        """
-        pass
-
-    def dump(self, model_path):
-        """Persists the trained entity resolution model to disk.
-
-        Args:
-            model_path (str): The location on disk where the model should be stored
-        """
-        pass
-
     def load(self):
-        """Loads the trained entity resolution model from disk
-
-        Args:
-            model_path (str): The location on disk where the model is stored
-        """
+        """Loads the trained entity resolution model from disk."""
         try:
             if self._use_text_rel:
                 scoped_index_name = get_scoped_index_name(self._app_namespace, self._es_index_name)

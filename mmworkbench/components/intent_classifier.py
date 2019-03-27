@@ -19,18 +19,18 @@ class IntentClassifier(Classifier):
     labels for the training data are the intent names associated with each query.
 
     Attributes:
-        domain (str): The domain that this intent classifier belongs to
-
+        domain (str): The domain that this intent classifier belongs to.
     """
     CLF_TYPE = 'intent'
+    """The classifier type."""
 
     def __init__(self, resource_loader, domain):
-        """Initializes an intent classifier
+        """Initializes an intent classifier.
 
         Args:
-        resource_loader (ResourceLoader): An object which can load resources for the classifier
-            domain (str): The domain that this intent classifier belongs to
-
+            resource_loader (ResourceLoader): An object which can load resources for the \
+                classifier.
+            domain (str): The domain that this intent classifier belongs to.
         """
         super().__init__(resource_loader)
         self.domain = domain
@@ -48,7 +48,7 @@ class IntentClassifier(Classifier):
         return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, *args, **kwargs):
-        """Trains the intent classification model using the provided training queries
+        """Trains the intent classification model using the provided training queries.
 
         Args:
             model_type (str): The type of machine learning model to use. If omitted, the default
@@ -59,9 +59,8 @@ class IntentClassifier(Classifier):
             params_grid (dict): The grid of hyper-parameters to search, for finding the optimal
                 hyper-parameter settings for the model. If omitted, the default hyper-parameter
                 search grid will be used.
-            cv (None, optional): Cross-validation settings
-            queries (list of ProcessedQuery): The labeled queries to use as training data
-
+            queries (list[ProcessedQuery]): The labeled queries to use as training data.
+            cv (optional): Cross-validation settings.
         """
         logger.info('Fitting intent classifier: domain=%r', self.domain)
         super().fit(*args, **kwargs)
@@ -70,21 +69,32 @@ class IntentClassifier(Classifier):
         """Persists the trained intent classification model to disk.
 
         Args:
-            model_path (str): The location on disk where the model should be stored
+            model_path (str): The location on disk where the model should be stored.
         """
         logger.info('Saving intent classifier: domain=%r', self.domain)
         super().dump(*args, **kwargs)
 
     def load(self, *args, **kwargs):
-        """Loads the trained intent classification model from disk
+        """Loads the trained intent classification model from disk.
 
         Args:
-            model_path (str): The location on disk where the model is stored
+            model_path (str): The location on disk where the model is stored.
         """
         logger.info('Loading intent classifier: domain=%r', self.domain)
         super().load(*args, **kwargs)
 
     def inspect(self, query, intent=None, dynamic_resource=None):
+        """Inspects the query.
+
+        Args:
+            query (Query): The query to be predicted.
+            intent (str): The expected intent label for this query.
+            dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
+
+        Returns:
+            (DataFrame): The DataFrame that includes every feature, their value, weight and \
+                probability.
+        """
         return self._model.inspect(
             example=query, gold_label=intent, dynamic_resource=dynamic_resource)
 
@@ -99,7 +109,7 @@ class IntentClassifier(Classifier):
             raw (bool, optional): When True, raw query strings will be returned
 
         Returns:
-            List: list of queries
+            (list): list of queries
         """
         if queries:
             # TODO: should we filter these by domain?

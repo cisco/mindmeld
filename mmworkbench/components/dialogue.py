@@ -16,35 +16,35 @@ mod_logger = logging.getLogger(__name__)
 
 
 class DirectiveNames:
-    """A constants object for directive names.
-
-    Attributes:
-        LIST (str): A directive to display a list.
-        LISTEN (str): A directive to listen (start speech recognition).
-        REPLY (str): A directive to display a text view.
-        RESET (str): Description
-        SPEAK (str): A directive to speak text out loud.
-        SUGGESTIONS (str): A view for a list of suggestions.
-    """
+    """A constants object for directive names."""
 
     LIST = 'list'
+    """A directive to display a list."""
+
     LISTEN = 'listen'
+    """A directive to listen (start speech recognition)."""
+
     REPLY = 'reply'
+    """A directive to display a text view."""
+
     RESET = 'reset'
+    """A directive to reset."""
+
     SPEAK = 'speak'
+    """A directive to speak text out loud."""
+
     SUGGESTIONS = 'suggestions'
+    """A view for a list of suggestions."""
 
 
 class DirectiveTypes:
-    """A constants object for directive types.
-
-    Attributes:
-        ACTION (str): An action directive
-        VIEW (str): A view directive.
-    """
+    """A constants object for directive types."""
 
     VIEW = 'view'
+    """An action directive."""
+
     ACTION = 'action'
+    """A view directive."""
 
 
 class DialogueStateRule:
@@ -52,24 +52,27 @@ class DialogueStateRule:
     order to invoke a particular dialogue state.
 
     Attributes:
-        dialogue_state (str): The name of the dialogue state
-        domain (str): The name of the domain to match against
-        entity_types (set): The set of entity types to match against
-        intent (str): The name of the intent to match against
+        dialogue_state (str): The name of the dialogue state.
+        domain (str): The name of the domain to match against.
+        entity_types (set): The set of entity types to match against.
+        intent (str): The name of the intent to match against.
+        targeted_only (bool): Whether the state is targeted only.
+        default (bool): Whether this is the default state.
     """
 
     logger = mod_logger.getChild('DialogueStateRule')
+    """Class logger."""
 
     def __init__(self, dialogue_state, **kwargs):
         """Initializes a dialogue state rule.
 
         Args:
-            dialogue_state (str): The name of the dialogue state
-            domain (str): The name of the domain to match against
-            has_entity (str|list|set): A synonym for the ``has_entities`` param
-            has_entities (str|list|set): A single entity type or a list of entity types to match
+            dialogue_state (str): The name of the dialogue state.
+            domain (str): The name of the domain to match against.
+            has_entity (str, list, set): A synonym for the ``has_entities`` param.
+            has_entities (str, list, set): A single entity type or a list of entity types to match
                 against.
-            intent (str): The name of the intent to match against
+            intent (str): The name of the intent to match against.
         """
 
         self.dialogue_state = dialogue_state
@@ -123,10 +126,10 @@ class DialogueStateRule:
         """Applies the dialogue state rule to the given context.
 
         Args:
-            request (Request): A request object
+            request (Request): A request object.
 
         Returns:
-            bool: whether or not the context matches
+            (bool): Whether or not the context matches.
         """
         # Note: this will probably change as the details of "context" are worked out
 
@@ -157,12 +160,11 @@ class DialogueStateRule:
     @property
     def complexity(self):
         """Returns an integer representing the complexity of this dialogue state rule.
-
         Components of a rule in order of increasing complexity are as follows:
-            default rule, domains, intents, entity types, entity mappings
+        default rule, domains, intents, entity types, entity mappings.
 
         Returns:
-            int: A number representing the rule complexity
+            (int): A number representing the rule complexity.
         """
         complexity = [0] * 4
 
@@ -195,14 +197,13 @@ class DialogueStateRule:
 
     @staticmethod
     def compare(this, that):
-        """Compares the complexity of two dialogue state rules
-
+        """Compares the complexity of two dialogue state rules.
         Args:
-            this (DialogueStateRule): a dialogue state rule
-            that (DialogueStateRule): a dialogue state rule
+            this (DialogueStateRule): A dialogue state rule.
+            that (DialogueStateRule): A dialogue state rule.
 
         Returns:
-            int: the comparison result
+            (int): The comparison result
                  -1: that is more complex than this
                  0: this and that are equally complex
                  1: this is more complex than that
@@ -227,7 +228,7 @@ class DialogueManager:
         self.default_rule = None
 
     def handle(self, **kwargs):
-        """A decorator that is used to register dialogue state rules"""
+        """A decorator that is used to register dialogue state rules."""
 
         def _decorator(func):
             name = kwargs.pop('name', None)
@@ -236,7 +237,7 @@ class DialogueManager:
         return _decorator
 
     def middleware(self, *args):
-        """A decorator that is used to register dialogue handler middleware"""
+        """A decorator that is used to register dialogue handler middleware."""
 
         def _decorator(func):
             self.add_middleware(func)
@@ -257,7 +258,7 @@ class DialogueManager:
 
         Args:
             middleware (callable): A dialogue manager middleware
-                function
+                function.
         """
         if self.async_mode and not asyncio.iscoroutinefunction(middleware):
             msg = ('Cannot use middleware {!r} in async mode. '
@@ -270,9 +271,9 @@ class DialogueManager:
         """Adds a dialogue state rule for the dialogue manager.
 
         Args:
-            name (str): The name of the dialogue state
-            handler (function): The dialogue state handler function
-            **kwargs (dict): A list of options to be passed to the DialogueStateRule initializer
+            name (str): The name of the dialogue state.
+            handler (function): The dialogue state handler function.
+            **kwargs (dict): A list of options to be passed to the DialogueStateRule initializer.
         """
         if name is None:
             name = handler.__name__
@@ -298,15 +299,15 @@ class DialogueManager:
                 self.default_rule = rule
 
     def apply_handler(self, request, responder, target_dialogue_state=None):
-        """Applies the dialogue state handler for the most complex matching rule
+        """Applies the dialogue state handler for the most complex matching rule.
 
         Args:
-            request (Request): The request object
-            responder (DialogueResponder): The responder object
-            target_dialogue_state (str, optional): The target dialogue state
+            request (Request): The request object.
+            responder (DialogueResponder): The responder object.
+            target_dialogue_state (str, optional): The target dialogue state.
 
         Returns:
-            dict: A dict containing the dialogue state and directives
+            (dict): A dict containing the dialogue state and directives.
         """
         if self.async_mode:
             return self._apply_handler_async(
@@ -374,10 +375,16 @@ class DialogueFlow(DialogueManager):
     Dialogue flows allow developers to implement multiple turn interactions
     where only a subset of dialogue states should be accessible or where
     different dialogue rules should apply.
+
+    Attributes:
+        app (Application): The application that initializes this flow.
+        exit_flow_states (list):  The list of exit states.
     """
     logger = mod_logger.getChild('DialogueFlow')
+    """Class logger."""
 
     all_flows = {}
+    """The dictionary that references all dialogue flows."""
 
     def __init__(self, name, entrance_handler, app, **kwargs):
         super().__init__(async_mode=app.async_mode)
@@ -403,14 +410,17 @@ class DialogueFlow(DialogueManager):
 
     @property
     def name(self):
+        """The name of this flow."""
         return self._name
 
     @property
     def flow_state(self):
+        """The state of the flow (<name>_flow)."""
         return self._name + '_flow'
 
     @property
     def dialogue_manager(self):
+        """The dialogue manager which contains this flow."""
         if self.app and self.app.app_manager:
             return self.app.app_manager.dialogue_manager
         return None
@@ -419,6 +429,7 @@ class DialogueFlow(DialogueManager):
         return self._entrance_handler(ctx, responder)
 
     def use_middleware(self, *args):
+        """Allows a middleware to be added to this flow."""
         def _decorator(func):
             self.add_middleware(func)
             return func
@@ -438,6 +449,7 @@ class DialogueFlow(DialogueManager):
         return func
 
     def handle(self, **kwargs):
+        """The dialogue flow handler."""
         def _decorator(func):
             name = kwargs.pop('name', None)
             exit_flow = kwargs.pop('exit_flow', False)
@@ -451,14 +463,14 @@ class DialogueFlow(DialogueManager):
 
     def apply_handler(self, request, responder=None):  # pylint: disable=arguments-differ
         """Applies the dialogue state handler for the dialogue flow and set the target dialogue
-        state to the flow state
+        state to the flow state.
 
         Args:
-            request (Request)
-            responder (DialogueResponder)
+            request (Request): The request object.
+            responder (DialogueResponder): The responder object.
 
         Returns:
-            dict: A dict containing the dialogue state and directives
+            (dict): A dict containing the dialogue state and directives.
         """
         if self.async_mode:
             return self.apply_handler_async(request, responder)
@@ -471,6 +483,16 @@ class DialogueFlow(DialogueManager):
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
     async def apply_handler_async(self, request, responder):
+        """Applies the dialogue state handler for the dialogue flow and sets the target dialogue
+       state to the flow state asynchronously.
+
+       Args:
+           request (Request): The request object.
+           responder (DialogueResponder): The responder object.
+
+       Returns:
+           (dict): A dict containing the dialogue state and directives.
+       """
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
@@ -499,27 +521,32 @@ class DialogueResponder:
     system-generated natural language responses.
 
     Attributes:
-        directives (list): A list of directives that the responder has added
+        directives (list): A list of directives that the responder has added.
         slots (dict): Values to populate the placeholder slots in the natural language
-            response
+            response.
     """
     logger = mod_logger.getChild('DialogueResponder')
+    """The class logger."""
+
     DirectiveNames = DirectiveNames
+    """The list of directive names."""
+
     DirectiveTypes = DirectiveTypes
+    """The list of directive types."""
 
     def __init__(self, frame=None, params=None, history=None, slots=None, request=None,
                  dialogue_state=None, directives=None, **kwargs):
         """
-        Initializes a dialogue responder
+        Initializes a dialogue responder.
 
         Args:
-            frame: The frame object
-            params: The params object
-            history: The history of the responder
-            slots: The slots of the responder
-            request: The request object associated with the responder
-            dialogue_state: The dialog
-            directives: The directives of the responder
+            frame (dict): The frame object.
+            params (Params): The params object.
+            history (list): The history of the responder.
+            slots (dict): The slots of the responder.
+            request (Request): The request object associated with the responder.
+            dialogue_state (str): The dialogue state.
+            directives (list): The directives of the responder.
         """
         self.directives = directives or []
         self.frame = frame or {}
@@ -530,37 +557,37 @@ class DialogueResponder:
         self.request = request or Request()
 
     def reply(self, text):
-        """Adds a 'reply' directive
+        """Adds a 'reply' directive.
 
         Args:
-            text (str): The text of the reply
+            text (str): The text of the reply.
         """
         text = self._process_template(text)
         self.display(DirectiveNames.REPLY, payload={'text': text})
 
     def speak(self, text):
-        """Adds a 'speak' directive
+        """Adds a 'speak' directive.
 
         Args:
-            text (str): The text to speak aloud
+            text (str): The text to speak aloud.
         """
         text = self._process_template(text)
         self.act(DirectiveNames.SPEAK, payload={'text': text})
 
     def list(self, items):
-        """Adds a 'list' view directive
+        """Adds a 'list' view directive.
 
         Args:
-            items (list): The list of dictionary objects
+            items (list): The list of dictionary objects.
         """
         items = items or []
         self.display(DirectiveNames.LIST, payload=items)
 
     def suggest(self, suggestions):
-        """Adds a 'suggestions' directive
+        """Adds a 'suggestions' directive.
 
         Args:
-            suggestions (list): A list of suggestions
+            suggestions (list): A list of suggestions.
         """
         suggestions = suggestions or []
         self.display(DirectiveNames.SUGGESTIONS, payload=suggestions)
@@ -577,8 +604,8 @@ class DialogueResponder:
         """Adds an arbitrary directive of type 'view'.
 
         Args:
-            name (str): The name of the directive
-            payload (dict, optional): The payload for the view
+            name (str): The name of the directive.
+            payload (dict, optional): The payload for the view.
         """
         self.direct(name, DirectiveTypes.VIEW, payload=payload)
 
@@ -586,18 +613,18 @@ class DialogueResponder:
         """Adds an arbitrary directive of type 'action'.
 
         Args:
-            name (str): The name of the directive
-            payload (dict, optional): The payload for the action
+            name (str): The name of the directive.
+            payload (dict, optional): The payload for the action.
         """
         self.direct(name, DirectiveTypes.ACTION, payload=payload)
 
     def direct(self, name, dtype, payload=None):
-        """Adds an arbitrary directive
+        """Adds an arbitrary directive.
 
         Args:
-            name (str): The name of the directive
-            dtype (str): The type of the directive
-            payload (dict, optional): The payload for the view
+            name (str): The name of the directive.
+            dtype (str): The type of the directive.
+            payload (dict, optional): The payload for the view.
         """
 
         directive = {'name': name, 'type': dtype}
@@ -619,7 +646,7 @@ class DialogueResponder:
         """Alias for `reply()`. Deprecated.
 
         Args:
-            text (str): The text of the reply
+            text (str): The text of the reply.
         """
         self.logger.warning('prompt() is deprecated. '
                             'Please use reply() and listen() instead')
@@ -627,7 +654,7 @@ class DialogueResponder:
 
     @staticmethod
     def _choose(items):
-        """Chooses a random item from items"""
+        """Chooses a random item from items."""
         if isinstance(items, (tuple, list)):
             return random.choice(items)
         elif isinstance(items, set):
@@ -636,6 +663,13 @@ class DialogueResponder:
 
     @staticmethod
     def to_json(instance):
+        """Convert the responder into a JSON representation.
+        Args:
+             instance (DialogueResponder): The responder object.
+
+        Returns:
+            (dict): The JSON representation.
+        """
         serialized_obj = {}
         for attribute, value in vars(instance).items():
             if isinstance(value, (Params, Request, FrozenParams)):
@@ -650,7 +684,7 @@ class DialogueResponder:
         return self._choose(text).format(**self.slots)
 
     def exit_flow(self):
-        """Exit the current flow by clearing the target dialogue state"""
+        """Exit the current flow by clearing the target dialogue state."""
         self.params.target_dialogue_state = None
 
 
@@ -667,14 +701,17 @@ class Conversation:
         ['The 23 Elm Street Kwik-E-Mart is open from 7:00 to 19:00.']
 
     Attributes:
-        history (list): The history of the conversation. Most recent messages are earliry
-        context (dict): The context of the conversation, containing user context
-        default_params (dict): The default params to use with each turn. These
+        history (list): The history of the conversation. Starts with the most recent message.
+        context (dict): The context of the conversation, containing user context.
+        default_params (Params): The default params to use with each turn. These \
             defaults will be overridden by params passed for each turn.
-        params (dict): The params returned by the most recent turn.
+        params (FrozenParams): The params returned by the most recent turn.
+        force_sync (bool): Force synchronous return for `say()` and `process()` \
+            even when app is in async mode.
     """
 
     logger = mod_logger.getChild('Conversation')
+    """Class logger (`Logger`)"""
 
     def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None,
                  force_sync=False):
@@ -686,7 +723,7 @@ class Conversation:
                 Either app or app_path must be given.
             nlp (NaturalLanguageProcessor, optional): A natural language processor for the app.
                 If passed, changes to this processor will affect the response from `say()`
-            context (dict, optional): The context to be used in the conversation
+            context (dict, optional): The context to be used in the conversation.
             default_params (Params, optional): The default params to use with each turn. These
                 defaults will be overridden by params passed for each turn.
             force_sync (bool, optional): Force synchronous return for `say()` and `process()`
@@ -704,28 +741,20 @@ class Conversation:
         self.force_sync = force_sync
         self.params = FrozenParams()
 
-    @property
-    def session(self):
-        raise AttributeError("'session' was removed in Workbench 4.0.0. Use 'context' instead.")
-
-    @session.setter
-    def session(self, value):
-        raise AttributeError("'session' was removed in Workbench 4.0.0. Use 'context' instead.")
-
     def say(self, text, params=None, force_sync=False):
         """Send a message in the conversation. The message will be
         processed by the app based on the current state of the conversation and
         returns the extracted messages from the directives.
 
         Args:
-            text (str): The text of a message
+            text (str): The text of a message.
             params (dict): The params to use with this message,
-                overriding any defaults which may have been set
+                overriding any defaults which may have been set.
             force_sync (bool, optional): Force synchronous response
                 even when app is in async mode.
 
         Returns:
-            list of str: A text representation of the dialogue responses
+            (list): A text representation of the dialogue responses.
         """
         if self._app_manager.async_mode:
             res = self._say_async(text, params=params)
@@ -745,14 +774,12 @@ class Conversation:
         returns the extracted messages from the directives.
 
         Args:
-            text (str): The text of a message
+            text (str): The text of a message.
             params (dict): The params to use with this message,
-                overriding any defaults which may have been set
-            force_sync (bool, optional): Force synchronous response
-                even when app is in async mode.
+                overriding any defaults which may have been set.
 
         Returns:
-            list of str: A text representation of the dialogue responses
+            (list): A text representation of the dialogue responses.
         """
         response = await self.process(text, params=params)
 
@@ -766,12 +793,14 @@ class Conversation:
         the response.
 
         Args:
-            text (str): The text of a message
+            text (str): The text of a message.
             params (dict): The params to use with this message, overriding any defaults
-                which may have been set
+                which may have been set.
+            force_sync (bool, optional): Force synchronous response
+                even when app is in async mode.
 
         Returns:
-            (dictionary): The dictionary Response
+            (dict): The dictionary response.
         """
         if self._app_manager.async_mode:
             res = self._process_async(text, params=params)
@@ -808,12 +837,12 @@ class Conversation:
         the response.
 
         Args:
-            text (str): The text of a message
+            text (str): The text of a message.
             params (dict): The params to use with this message, overriding any defaults
-                which may have been set
+                which may have been set.
 
         Returns:
-            (dictionary): The dictionary Response
+            (dict): The dictionary Response.
         """
         if not self._app_manager.ready:
             await self._app_manager.load()
@@ -881,6 +910,7 @@ class Conversation:
         return ' '.join(pieces)
 
     def reset(self):
+        """Reset the history, frame and params of the Conversation object."""
         self.history = []
         self.frame = {}
         self.params = FrozenParams()
