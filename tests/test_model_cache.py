@@ -13,7 +13,6 @@ import shutil
 import os
 
 from mmworkbench.path import MODEL_CACHE_PATH
-from mmworkbench.exceptions import FileNotFoundError
 from mmworkbench.components import NaturalLanguageProcessor
 
 

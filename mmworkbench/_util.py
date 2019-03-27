@@ -231,7 +231,7 @@ class Blueprint:
         return local_archive
 
 
-blueprint = Blueprint()  # pylint: disable=locally-disabled,invalid-name
+blueprint = Blueprint()  # pylint: disable=invalid-name
 
 
 def configure_logs(**kwargs):
@@ -268,7 +268,7 @@ def load_global_configuration():
     try:
         logging.info('loading info from mmworkbench config file.')
         config_file = path.get_user_config_path()
-        iniconfig = py.iniconfig.IniConfig(config_file)
+        iniconfig = py.iniconfig.IniConfig(config_file)  # pylint: disable=no-member
         config = {
             'mindmeld_url': iniconfig.get('mmworkbench', 'mindmeld_url'),
         }
@@ -285,9 +285,9 @@ def load_configuration():
     """
     config_file = _find_config_file()
     if config_file:
-        logger.debug("Using config file at '{}'".format(config_file))
+        logger.debug("Using config file at '%s'", config_file)
         # Do the thing
-        iniconfig = py.iniconfig.IniConfig(config_file)
+        iniconfig = py.iniconfig.IniConfig(config_file)  # pylint: disable=no-member
         config = {}
         config['app_name'] = iniconfig.get('mmworkbench', 'app_name')
         config['app_path'] = iniconfig.get('mmworkbench', 'app_path')

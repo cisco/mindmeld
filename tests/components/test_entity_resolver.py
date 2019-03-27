@@ -9,6 +9,9 @@ Tests for `entity_resolver` module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
+import mock
+
+from mock import PropertyMock
 
 from mmworkbench.core import Entity
 
@@ -38,10 +41,12 @@ def resolver(resource_loader, es_client):
 def resolver_text_rel(resource_loader, es_client):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
     resolver = EntityResolver(APP_PATH, resource_loader, ENTITY_TYPE, es_client=es_client)
-    resolver._use_text_rel = False
-    resolver.fit()
-    es_client.indices.flush(index='_all')
-    return resolver
+    with mock.patch('mmworkbench.components.entity_resolver.EntityResolver._use_text_rel',
+                    new_callable=PropertyMock) as _use_text_rel:
+        _use_text_rel.return_value = False
+        resolver.fit()
+        es_client.indices.flush(index='_all')
+        return resolver
 
 
 def test_canonical(resolver):

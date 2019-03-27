@@ -4,7 +4,6 @@ import os
 import shutil
 
 from mmworkbench.path import MODEL_CACHE_PATH, get_role_model_paths, get_entity_model_paths
-from mmworkbench.exceptions import FileNotFoundError
 from mmworkbench.components import NaturalLanguageProcessor
 
 

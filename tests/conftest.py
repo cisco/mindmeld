@@ -148,3 +148,13 @@ def aeneid_path():
 def aeneid_content(aeneid_path):
     with codecs.open(aeneid_path, mode='r', encoding='utf-8') as f:
         return f.read()
+
+
+class FakeApp:
+    def __init__(self, app_path):
+        self.app_path = app_path
+
+
+@pytest.fixture
+def fake_app():
+    return FakeApp('123')

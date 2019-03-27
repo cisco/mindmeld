@@ -12,19 +12,18 @@ import sys
 import time
 import warnings
 import datetime
-import requests
 
+import math
+import hashlib
 import click
 import click_log
-import math
 import distro
-import hashlib
+import requests
 
 from tqdm import tqdm
 from . import markup, path
 from .components import Conversation, QuestionAnswerer
-from .exceptions import (FileNotFoundError, KnowledgeBaseConnectionError,
-                         KnowledgeBaseError, WorkbenchError)
+from .exceptions import (KnowledgeBaseConnectionError, KnowledgeBaseError, WorkbenchError)
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
 from ._util import blueprint
@@ -209,7 +208,8 @@ def evaluate(ctx, verbose):
 @click.option('-G', '--no_group', is_flag=True,
               help='Suppress predicted group annotations')
 @click.argument('input', required=True)
-def predict(ctx, input, output, confidence, no_domain, no_intent, no_entity, no_role, no_group):
+def predict(ctx, input_file, output, confidence, no_domain, no_intent, no_entity, no_role,
+            no_group):
     """Runs predictions on a given query file"""
     app = ctx.obj.get('app')
     if app is None:
@@ -226,7 +226,7 @@ def predict(ctx, input, output, confidence, no_domain, no_intent, no_entity, no_
                      "Try 'python app.py build'.")
         ctx.exit(1)
 
-    markup.bootstrap_query_file(input, output, nlp, confidence=confidence,
+    markup.bootstrap_query_file(input_file, output, nlp, confidence=confidence,
                                 no_domain=no_domain, no_intent=no_intent,
                                 no_entity=no_entity, no_role=no_role, no_group=no_group)
 
@@ -262,7 +262,7 @@ def clean(ctx, query_cache, model_cache, days):
         model_cache_path = MODEL_CACHE_PATH.format(app_path=app.app_path)
 
         if not os.path.exists(model_cache_path):
-            logger.warn("Model cache directory doesn't exist")
+            logger.warning("Model cache directory doesn't exist")
             return
 
         if days:
@@ -271,7 +271,7 @@ def clean(ctx, query_cache, model_cache, days):
 
                 if not os.path.isdir(full_path):
                     logger.warning(
-                        'Expected timestamped folder. Ignoring the file {}.'.format(full_path))
+                        'Expected timestamped folder. Ignoring the file %s.', full_path)
                     continue
 
                 try:
@@ -280,10 +280,10 @@ def clean(ctx, query_cache, model_cache, days):
                     diff_days = current_ts - folder_ts
                     if diff_days.days > days:
                         shutil.rmtree(full_path)
-                        logger.info('Removed cached ts folder: {}'.format(full_path))
+                        logger.info('Removed cached ts folder: %s', full_path)
                 except ValueError:
-                    logger.warn('Folder {} is not named as a proper timestamp. '
-                                'Ignoring it.'.format(full_path))
+                    logger.warning('Folder %s is not named as a proper timestamp. Ignoring it.',
+                                   full_path)
         else:
             try:
                 shutil.rmtree(model_cache_path)
@@ -336,9 +336,8 @@ def _find_duckling_os_executable():
 
 
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
-@click.pass_context
 @click.option('--start/--stop', default=True, help='Start or stop numerical parser')
-def num_parser(ctx, start):
+def num_parser(start):
     """Starts or stops the numerical parser service."""
     if start:
         pid = _get_duckling_pid()
@@ -366,7 +365,7 @@ def num_parser(ctx, start):
 
         if not os.path.exists(exec_path):
             url = os.path.join(os.path.join(DEVCENTER_URL, 'binaries'), os.path.basename(exec_path))
-            logger.info('Could not find {} binary file, downloading from {}'.format(exec_path, url))
+            logger.info('Could not find %s binary file, downloading from %s', exec_path, url)
             r = requests.get(url, stream=True)
 
             # Total size in bytes.
@@ -390,7 +389,7 @@ def num_parser(ctx, start):
                                              DUCKLING_PORT], stderr=subprocess.STDOUT)
 
         # duckling takes some time to start so sleep for a bit
-        for i in range(50):
+        for _ in range(50):
             if duckling_service.pid:
                 logger.info('Starting numerical parsing service, PID %s', duckling_service.pid)
                 return

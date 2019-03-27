@@ -19,7 +19,7 @@ from .components.dialogue import DialogueResponder
 logger = logging.getLogger(__name__)
 
 
-class WorkbenchRequest(Request):
+class WorkbenchRequest(Request):  # pylint: disable=too-many-ancestors
     """This class represents requests to the WorkbenchServer. It extends
     flask.Request to provide
     custom handling of certain exceptions.
@@ -31,6 +31,7 @@ class WorkbenchRequest(Request):
         The return value of this method is used by get_json() when an error
         occurred. The default implementation just raises a BadRequest exception.
         """
+        del exc
         raise BadWorkbenchRequestError("Malformed request body: {0:s}".format(sys.exc_info()[1]))
 
 
@@ -60,9 +61,9 @@ class WorkbenchServer:
                     self._app_version = file.readline().strip()
             except (OSError, IOError):
                 # failed to set version
-                logger.warning("Failed to open app version file: '{}'".format(version_file))
+                logger.warning("Failed to open app version file: '%s'", version_file)
 
-        # pylint: disable=locally-disabled,unused-variable
+        # pylint: disable=unused-variable
         @server.route('/parse', methods=['POST'])
         def parse():
             """The main endpoint for the workbench API"""
@@ -83,7 +84,7 @@ class WorkbenchServer:
             return jsonify(DialogueResponder.to_json(response))
 
         @server.before_request
-        def _before_request(*args, **kwargs):
+        def _before_request():
             g.start_time = time.time()
 
         @server.after_request
@@ -103,7 +104,8 @@ class WorkbenchServer:
             return response
 
         @server.teardown_request
-        def _teardown_request(*args, **kwargs):
+        def _teardown_request(error):
+            del error
             if hasattr(g, 'log_this_request') and g.log_this_request:
                 response = g.get('response', None)
                 self._log_request(request, response)

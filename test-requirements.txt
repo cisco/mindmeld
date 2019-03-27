@@ -1,7 +1,7 @@
 coverage==4.2
 flake8==3.5.0
-pylint==1.6.5
-pytest>=3.1.2
+pylint>=2.3.1
+pytest>=3.8.0
 pytest-cov==2.4.0
 tox==2.6.0
 mock==2.0.0

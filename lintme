@@ -8,3 +8,5 @@ if [[ -z "$EXCLUDE_ASYNC" ]]; then
 fi
 
 flake8 mmworkbench tests $OPTIONS
+cd mmworkbench
+pylint components/ _util.py _version.py app_manager.py cli.py core.py gazetteer.py markup.py models/entity_features.py models/helpers.py models/query_features.py path.py query_cache.py resource_loader.py ser.py server.py

@@ -44,7 +44,7 @@ class EntityRecognizer(Classifier):
         self.entity_types = set()
         self._model_config = None
 
-    def _get_model_config(self, **kwargs):
+    def _get_model_config(self, **kwargs):  # pylint: disable=arguments-differ
         """Gets a machine learning model configuration
 
         Returns:
@@ -213,7 +213,7 @@ class EntityRecognizer(Classifier):
 
         if not self._model:
             logger.error('You must fit or load the model before running predict_proba')
-            return
+            return []
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
@@ -259,3 +259,9 @@ class EntityRecognizer(Classifier):
         queries = self._resource_loader.flatten_query_tree(query_tree)
         hashable_queries = [self.domain + '###' + self.intent + '###entity###'] + sorted(queries)
         return self._resource_loader.hash_list(hashable_queries)
+
+    def inspect(self, query, gold_label=None, dynamic_resource=None):
+        del query
+        del gold_label
+        del dynamic_resource
+        logger.warning("method not implemented")

@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 """This module contains exceptions used by the mmworkbench package."""
-try:
-    FileNotFoundError
-except NameError:
-    FileNotFoundError = IOError
-FileNotFoundError = FileNotFoundError
 
 
 class WorkbenchVersionWarning(UserWarning):

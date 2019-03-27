@@ -596,7 +596,7 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
                 raw_args = {'domain': domain, 'intent': intent, 'entity': entity}
                 args = {k: raw_args[k] for k in func_args}
                 return copy.deepcopy(func(**args))
-            except Exception as exc:
+            except Exception as exc:  # pylint: disable=broad-except
                 # Note: this is intentionally broad -- provider could raise any exception
                 logger.warning('%r configuration provider raised exception: %s', clf_type, exc)
 
@@ -666,7 +666,7 @@ def get_parser_config(app_path=None, config=None, domain=None, intent=None):
         try:
             config = config or config_provider(domain, intent)
             return _expand_parser_config(config)
-        except Exception as exc:
+        except Exception as exc:  # pylint: disable=broad-except
             # Note: this is intentionally broad -- provider could raise any exception
             logger.warning('Parser configuration provider raised exception: %s', exc)
 

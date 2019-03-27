@@ -247,9 +247,8 @@ class DialogueManager:
             # Support syntax: @middleware
             _decorator(args[0])
             return args[0]
-        else:
-            # Support syntax: @middleware()
-            return _decorator
+        # Support syntax: @middleware()
+        return _decorator
 
     def add_middleware(self, middleware):
         """Adds middleware for the dialogue manager. Middleware will be
@@ -535,7 +534,7 @@ class DialogueResponder:
     """The list of directive types."""
 
     def __init__(self, frame=None, params=None, history=None, slots=None, request=None,
-                 dialogue_state=None, directives=None, **kwargs):
+                 dialogue_state=None, directives=None):
         """
         Initializes a dialogue responder.
 
@@ -655,11 +654,12 @@ class DialogueResponder:
     @staticmethod
     def _choose(items):
         """Chooses a random item from items."""
+        result = items
         if isinstance(items, (tuple, list)):
-            return random.choice(items)
+            result = random.choice(items)
         elif isinstance(items, set):
-            return random.choice(tuple(items))
-        return items
+            result = random.choice(tuple(items))
+        return result
 
     @staticmethod
     def to_json(instance):
@@ -813,10 +813,10 @@ class Conversation:
 
         internal_params = copy.deepcopy(self.params)
 
-        if type(params) == dict:
+        if isinstance(params, dict):
             params = FrozenParams(**params)
 
-        if type(internal_params) == dict:
+        if isinstance(internal_params, dict):
             internal_params = FrozenParams(**internal_params)
 
         if params:
@@ -849,10 +849,10 @@ class Conversation:
 
         internal_params = copy.deepcopy(self.params)
 
-        if type(params) == dict:
+        if isinstance(params, dict):
             params = FrozenParams(**params)
 
-        if type(internal_params) == dict:
+        if isinstance(internal_params, dict):
             internal_params = FrozenParams(**internal_params)
 
         if params:

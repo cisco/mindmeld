@@ -2,17 +2,18 @@
 """
 This module contains the question answerer component of Workbench.
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 import json
 import logging
 import copy
+from elasticsearch5 import TransportError, ElasticsearchException,\
+    ConnectionError as EsConnectionError
 
 from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      does_index_exist)
 from .._version import validate_workbench_version
-from elasticsearch5 import TransportError, ElasticsearchException, ConnectionError
 
 from ..resource_loader import ResourceLoader
 from ..exceptions import KnowledgeBaseError, KnowledgeBaseConnectionError
@@ -80,7 +81,7 @@ class QuestionAnswerer:
 
         # If an id was passed in, simply retrieve the specified document
         if doc_id:
-            logger.info("Retrieve object from KB: index= '{}', id= '{}'.".format(index, doc_id))
+            logger.info("Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id)
             s = self.build_search(index)
             s = s.filter(id=doc_id)
             results = s.execute()
@@ -92,7 +93,7 @@ class QuestionAnswerer:
         # iterate through keyword arguments to get KB field and value pairs for search and custom
         # sort criteria
         for key, value in kwargs.items():
-            logger.debug("Processing argument: key= {} value= {}.".format(key, value))
+            logger.debug("Processing argument: key= %s value= %s.", key, value)
             if key == '_sort':
                 sort_clause['field'] = value
             elif key == '_sort_type':
@@ -101,9 +102,9 @@ class QuestionAnswerer:
                 sort_clause['location'] = value
             else:
                 query_clauses.append({key: value})
-                logger.debug("Added query clause: field= {} value= {}.".format(key, value))
+                logger.debug("Added query clause: field= %s value= %s.", key, value)
 
-        logger.debug("Custom sort criteria {}.".format(sort_clause))
+        logger.debug("Custom sort criteria %s.", sort_clause)
 
         # build Search object with overriding ranking setting to require all query clauses are
         # matched.
@@ -165,13 +166,12 @@ class QuestionAnswerer:
                 for field_name in all_field_info:
                     field_type = all_field_info[field_name].get('type')
                     self._es_field_info[index][field_name] = FieldInfo(field_name, field_type)
-            except ConnectionError as e:
-                logger.error(
-                    'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+            except EsConnectionError as e:
+                logger.error('Unable to connect to Elasticsearch: %s details: %s', e.error, e.info)
                 raise KnowledgeBaseConnectionError(es_host=self._es_client.transport.hosts)
             except TransportError as e:
-                logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
-                             'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+                logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
+                             'Status code: %s details: %s', e.error, e.status_code, e.info)
                 raise KnowledgeBaseError
             except ElasticsearchException:
                 raise KnowledgeBaseError
@@ -252,9 +252,9 @@ class FieldInfo:
     DATE_TYPES = {'date'}
     GEO_TYPES = {'geo_point'}
 
-    def __init__(self, name, type):
+    def __init__(self, name, field_type):
         self.name = name
-        self.type = type
+        self.type = field_type
 
     def get_name(self):
         """Returns knowledge base field name"""
@@ -331,69 +331,83 @@ class Search:
 
         return s
 
-    def _build_clause(self, type, **kwargs):
+    def _build_query_clause(self, **kwargs):
+        field, value = next(iter(kwargs.items()))
+        field_info = self._kb_field_info.get(field)
+        if not field_info:
+            raise ValueError('Invalid knowledge base field \'{}\''.format(field))
+
+        # check whether the synonym field is available. By default the synonyms are
+        # imported to "<field_name>$whitelist" field.
+        synonym_field = field + self.SYN_FIELD_SUFFIX \
+            if self._kb_field_info.get(field + self.SYN_FIELD_SUFFIX) else None
+        clause = Search.QueryClause(field, field_info, value, synonym_field)
+        clause.validate()
+        self._clauses[clause.get_type()].append(clause)
+
+    def _build_filter_clause(self, **kwargs):
+        # set the filter type to be 'range' if any range operator is specified.
+        if kwargs.get('gt') or kwargs.get('gte') or kwargs.get('lt') or kwargs.get('lte'):
+            field = kwargs.get('field')
+            gt = kwargs.get('gt')
+            gte = kwargs.get('gte')
+            lt = kwargs.get('lt')
+            lte = kwargs.get('lte')
+
+            if field not in self._kb_field_info:
+                raise ValueError('Invalid knowledge base field \'{}\''.format(field))
+
+            clause = Search.FilterClause(
+                field=field,
+                field_info=self._kb_field_info.get(field),
+                range_gt=gt,
+                range_gte=gte,
+                range_lt=lt,
+                range_lte=lte)
+        else:
+            key, value = next(iter(kwargs.items()))
+            if key not in self._kb_field_info:
+                raise ValueError('Invalid knowledge base field \'{}\''.format(key))
+            clause = Search.FilterClause(field=key, value=value)
+        clause.validate()
+        self._clauses[clause.get_type()].append(clause)
+
+    def _build_sort_clause(self, **kwargs):
+        sort_field = kwargs.get('field')
+        sort_type = kwargs.get('sort_type')
+        sort_location = kwargs.get('location')
+
+        field_info = self._kb_field_info.get(sort_field)
+        if not field_info:
+            raise ValueError('Invalid knowledge base field \'{}\''.format(sort_field))
+
+        # only compute field stats if sort field is number or date type.
+        field_stats = None
+        if field_info.is_number_field() or field_info.is_date_field():
+            field_stats = self._get_field_stats(sort_field)
+
+        clause = Search.SortClause(sort_field,
+                                   field_info,
+                                   sort_type,
+                                   field_stats,
+                                   sort_location)
+        clause.validate()
+        self._clauses[clause.get_type()].append(clause)
+
+    def _build_clause(self, clause_type, **kwargs):
         """Helper method to build query, filter and sort clauses.
 
         Args:
-            type (str): type of clause
+            clause_type (str): type of clause
         """
-        if type == "query":
-            field, value = next(iter(kwargs.items()))
-            field_info = self._kb_field_info.get(field)
-            if not field_info:
-                raise ValueError('Invalid knowledge base field \'{}\''.format(field))
-
-            # check whether the synonym field is available. By default the synonyms are
-            # imported to "<field_name>$whitelist" field.
-            synonym_field = field + self.SYN_FIELD_SUFFIX \
-                if self._kb_field_info.get(field + self.SYN_FIELD_SUFFIX) else None
-            clause = Search.QueryClause(field, field_info, value, synonym_field)
-        elif type == "filter":
-            # set the filter type to be 'range' if any range operator is specified.
-            if kwargs.get('gt') or kwargs.get('gte') or kwargs.get('lt') or kwargs.get('lte'):
-                field = kwargs.get('field')
-                gt = kwargs.get('gt')
-                gte = kwargs.get('gte')
-                lt = kwargs.get('lt')
-                lte = kwargs.get('lte')
-
-                if field not in self._kb_field_info:
-                    raise ValueError('Invalid knowledge base field \'{}\''.format(field))
-
-                clause = Search.FilterClause(field=field,
-                                             field_info=self._kb_field_info.get(field),
-                                             range_gt=gt,
-                                             range_gte=gte,
-                                             range_lt=lt,
-                                             range_lte=lte)
-            else:
-                key, value = next(iter(kwargs.items()))
-                if key not in self._kb_field_info:
-                    raise ValueError('Invalid knowledge base field \'{}\''.format(key))
-                clause = Search.FilterClause(field=key, value=value)
-
-        elif type == "sort":
-            sort_field = kwargs.get('field')
-            sort_type = kwargs.get('sort_type')
-            sort_location = kwargs.get('location')
-
-            field_info = self._kb_field_info.get(sort_field)
-            if not field_info:
-                raise ValueError('Invalid knowledge base field \'{}\''.format(sort_field))
-
-            # only compute field stats if sort field is number or date type.
-            field_stats = None
-            if field_info.is_number_field() or field_info.is_date_field():
-                field_stats = self._get_field_stats(sort_field)
-
-            clause = Search.SortClause(sort_field,
-                                       field_info,
-                                       sort_type,
-                                       field_stats,
-                                       sort_location)
-
-        clause.validate()
-        self._clauses[clause.get_type()].append(clause)
+        if clause_type == "query":
+            self._build_query_clause(**kwargs)
+        elif clause_type == "filter":
+            self._build_filter_clause(**kwargs)
+        elif clause_type == "sort":
+            self._build_sort_clause(**kwargs)
+        else:
+            raise Exception('Unknown clause type.')
 
     def query(self, **kwargs):
         """Specify the query text to match on a knowledge base text field. The query text is
@@ -557,7 +571,7 @@ class Search:
             sort_function = clause.build_query()
             es_query['query']['function_score']['functions'].append(sort_function)
 
-        logger.debug("ES query syntax: {}.".format(es_query))
+        logger.debug("ES query syntax: %s.", es_query)
         return es_query
 
     def execute(self):
@@ -572,18 +586,18 @@ class Search:
             response = self.client.search(index=self.index, body=es_query)
             results = [hit['_source'] for hit in response['hits']['hits']]
             return results
-        except ConnectionError as e:
+        except EsConnectionError as e:
             logger.error(
-                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+                'Unable to connect to Elasticsearch: %s details: %s', e.error, e.info)
             raise KnowledgeBaseConnectionError(es_host=self.client.transport.hosts)
         except TransportError as e:
-            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
-                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
+                         'Status code: %s details: %s', e.error, e.status_code, e.info)
             raise KnowledgeBaseError
         except ElasticsearchException:
             raise KnowledgeBaseError
 
-    class Clause(metaclass=ABCMeta):
+    class Clause(ABC):
         """This class models an abstract knowledge base clause."""
 
         def __init__(self):

@@ -48,7 +48,7 @@ def load_query(markup, query_factory=None, domain=None, intent=None, is_gold=Fal
     """
     query_factory = query_factory or QueryFactory.create_query_factory()
     query_options = query_options or {}
-    raw_text, query, entities = process_markup(
+    _, query, entities = process_markup(
         markup, query_factory=query_factory, query_options=query_options)
 
     return ProcessedQuery(query, domain=domain, intent=intent, entities=entities, is_gold=is_gold)
@@ -206,10 +206,9 @@ def _process_annotations(query, annotations):
     Returns:
         list of ProcessedQuery:
     """
-    entities = []
     stack = []
 
-    def _close_ann(ann):
+    def _close_ann(ann, entities):
         if ann['ann_type'] == 'group':
             try:
                 head = ann['head']
@@ -236,8 +235,7 @@ def _process_annotations(query, annotations):
                 try:
                     raw_entity = resolve_system_entity(query, ann['type'], span).entity
                 except SystemEntityResolutionError as e:
-                    msg = "Unable to load query: {}"
-                    logger.warn(msg.format(e))
+                    logger.warning("Unable to load query: %s", e)
                     return
                 try:
                     raw_entity.role = ann['role']
@@ -278,19 +276,20 @@ def _process_annotations(query, annotations):
             ann['parent'] = stack[-1]
         stack.append(ann)
 
+    entities = []
+
     for ann in annotations:
         while stack and stack[-1]['depth'] >= ann['depth']:
             # if there are annotations on the stack of the same or greater depth,
             # they have no more children so close them
-            _close_ann(stack.pop())
+            _close_ann(stack.pop(), entities)
 
         _open_ann(ann)
 
     while stack:
-        _close_ann(stack.pop())
+        _close_ann(stack.pop(), entities)
 
-    entities = tuple(sorted(entities, key=lambda e: e.span.start))
-    return entities
+    return tuple(sorted(entities, key=lambda e: e.span.start))
 
 
 def _parse_tokens(tokens):
@@ -518,6 +517,8 @@ def validate_markup(markup, query_factory):
     Returns:
         bool: True if the markup is valid
     """
+    del markup
+    del query_factory
     return NotImplemented
 
 

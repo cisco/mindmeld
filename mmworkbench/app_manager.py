@@ -15,6 +15,27 @@ from .resource_loader import ResourceLoader
 logger = logging.getLogger(__name__)
 
 
+def freeze_params(params):
+    """
+    If params is a dictionary or Params we convert it into FrozenParams
+    Otherwise we raise a TypeError.
+    Args:
+        params (dict, Params)
+
+    Returns:
+        FrozenParams
+    """
+    params = params or FrozenParams()
+    if isinstance(params, dict):
+        params = FrozenParams(**params)
+    elif params.__class__ == Params:
+        params = FrozenParams(**DialogueResponder.to_json(params))
+    elif not isinstance(params, FrozenParams):
+        raise TypeError("Invalid type for params argument. "
+                        "Should be dict or {}".format(FrozenParams.__name__))
+    return params
+
+
 class ApplicationManager:
     """The Application Manager is the core orchestrator of the MindMeld platform. It receives \
     a client request, and processes that request by passing it through all the necessary \
@@ -121,15 +142,7 @@ class ApplicationManager:
             return self._parse_async(text, params=params, context=context, frame=frame,
                                      history=history, verbose=verbose)
 
-        params = params or FrozenParams()
-        if type(params) == dict:
-            params = FrozenParams(**params)
-        elif type(params) == Params:
-            params = FrozenParams(**DialogueResponder.to_json(params))
-        elif not type(params) == FrozenParams:
-            raise TypeError("Invalid type for params argument. "
-                            "Should be dict or {}".format(FrozenParams.__name__))
-
+        params = freeze_params(params)
         history = history or []
         frame = frame or {}
         context = context or {}
@@ -172,15 +185,7 @@ class ApplicationManager:
            https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
         """
-        params = params or FrozenParams()
-        if isinstance(params, dict):
-            params = FrozenParams(**params)
-        elif isinstance(params, Params):
-            params = FrozenParams(**DialogueResponder.to_json(params))
-        elif not isinstance(params, FrozenParams):
-            raise TypeError("Invalid type for params argument. "
-                            "Should be dict or {}".format(FrozenParams.__name__))
-
+        params = freeze_params(params)
         context = context or {}
         history = history or []
         frame = frame or {}

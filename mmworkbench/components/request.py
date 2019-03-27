@@ -1,6 +1,6 @@
+import logging
 import attr
 import immutables
-import logging
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
 
@@ -66,9 +66,9 @@ class Params:
     def dm_params(self, handler_map):
         target_dialogue_state = self.validate_param('target_dialogue_state')
         if target_dialogue_state and target_dialogue_state not in handler_map:
-            logger.error("Target dialogue state {} does not match any dialogue state names "
+            logger.error("Target dialogue state %s does not match any dialogue state names "
                          "in for the application. Not applying the target dialogue state "
-                         "this turn.".format(target_dialogue_state))
+                         "this turn.", target_dialogue_state)
             return {'target_dialogue_state': None}
         return {'target_dialogue_state': target_dialogue_state}
 

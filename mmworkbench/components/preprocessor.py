@@ -2,10 +2,10 @@
 """
 This module contains a preprocessor base class.
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 
-class Preprocessor(metaclass=ABCMeta):
+class Preprocessor(ABC):
     """
     Base class for Preprocessor object
     """

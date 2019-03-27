@@ -118,7 +118,7 @@ class DomainClassifier(Classifier):
         query_tree = self._get_query_tree(queries, label_set=label_set)
         queries = self._resource_loader.flatten_query_tree(query_tree)
 
-        if len(queries) < 1:
+        if not queries:
             return [None, None]
         return list(zip(*[(q.query, q.domain) for q in queries]))
 

@@ -15,6 +15,7 @@ from .helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RS
 def extract_in_gaz_span_features(**args):
     """Returns a feature extractor for properties of spans in gazetteers
     """
+    del args
 
     def _extractor(query, resources):
         def _get_span_features(query, gazes, start, end, entity_type, entity):
@@ -170,6 +171,7 @@ def extract_in_gaz_span_features(**args):
 def extract_in_gaz_ngram_features(**args):
     """Returns a feature extractor for surrounding ngrams in gazetteers
     """
+    del args
 
     def _extractor(query, resources):
 
@@ -177,7 +179,7 @@ def extract_in_gaz_ngram_features(**args):
             tokens = query.normalized_tokens
             feat_seq = [{} for _ in tokens]
 
-            for i in range(len(feat_seq)):
+            for i, _ in enumerate(feat_seq):
                 feat_prefix = 'in_gaz|type:{}|ngram'.format(entity_type)
 
                 # entity PMI and conditional prob
@@ -256,7 +258,6 @@ def extract_in_gaz_ngram_features(**args):
 
                     for key, value in features.items():
                         feat_seq[i][feat_prefix + key] = value
-
             return feat_seq
 
         gazetteers = resources[GAZETTEER_RSC]
@@ -289,7 +290,6 @@ def extract_bag_of_words_features(ngram_lengths_to_start_positions,
     word_thresholds = threshold_list + [0] * (len(ngram_lengths_to_start_positions.keys())
                                               - len(threshold_list))
 
-    # pylint: disable=locally-disabled,unused-argument
     def _extractor(query, resources):
         tokens = query.normalized_tokens
         tokens = [re.sub(r'\d', '0', t) for t in tokens]
@@ -338,16 +338,12 @@ def char_ngrams(n, word, **args):
     Returns:
         list: A list of character n-grams for the given word
     """
+    del args
     char_grams = []
     for i in range(len(word)):
-        """
-        if char ngram of length n doesn't exist,
-        if no ngrams have been extracted for the token,
-        add token to the list and return. No need to compute
-        for other windows.
-        Ex: token is "you", n=4, return ["you"]
-            token is "doing", n=4 return ["doin","oing"]
-        """
+        # if char ngram of length n doesn't exist, if no ngrams have been extracted for the token,
+        # add token to the list and return. No need to compute for other windows.
+        # Ex: token is "you", n=4, return ["you"], token is "doing", n=4 return ["doin","oing"]
         if len(word[i:i + n]) < n:
             if not char_grams:
                 char_grams.append((word[i:i + n]))
@@ -361,9 +357,12 @@ def char_ngrams(n, word, **args):
 def enabled_stemming(**args):
     """Feature extractor for enabling stemming of the query
     """
+    del args
+
     def _extractor(query, resources):
         # no op
-        return
+        del query
+        del resources
     return _extractor
 
 
@@ -381,6 +380,7 @@ def extract_char_ngrams_features(ngram_lengths_to_start_positions, thresholds=(0
         Returns:
             (function) The feature extractor.
         """
+    del args
     threshold_list = list(thresholds)
     char_thresholds = threshold_list + [0] * (len(ngram_lengths_to_start_positions.keys())
                                               - len(threshold_list))
@@ -425,6 +425,7 @@ def extract_sys_candidate_features(start_positions=(0,), **args):
     Returns:
         (function) The feature extractor.
     """
+    del args
 
     def _extractor(query, resources):
         feat_seq = [{} for _ in query.normalized_tokens]
@@ -452,8 +453,9 @@ def update_features_sequence(feat_seq, update_feat_seq, **args):
             mutated.
         update_feat_seq (list of dict): The list of features to update with.
     """
-    for i in range(len(feat_seq)):
-        feat_seq[i].update(update_feat_seq[i])
+    del args
+    for i, feat_seq_i in enumerate(feat_seq):
+        feat_seq_i.update(update_feat_seq[i])
 
 
 @register_query_feature(feature_name='char-ngrams')
@@ -469,6 +471,7 @@ def extract_char_ngrams(lengths=(1,), thresholds=(0,), **args):
             (function) An feature extraction function that takes a query and
                 returns character ngrams of specified lengths.
         """
+    del args
     threshold_list = list(thresholds)
     char_thresholds = threshold_list + [0] * (len(lengths) - len(threshold_list))
 
@@ -549,7 +552,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
 
 
 @register_query_feature(feature_name='sys-candidates')
-def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES, **args):
+def extract_sys_candidates(entities=None, **args):
     """
     Return an extractor for features based on a heuristic guess of numeric \
         candidates in the current query.
@@ -557,7 +560,11 @@ def extract_sys_candidates(entities=DEFAULT_SYS_ENTITIES, **args):
     Returns:
             (function) The feature extractor.
      """
+    del args
+    entities = entities or DEFAULT_SYS_ENTITIES
+
     def _extractor(query, resources):
+        del resources
         system_entities = query.get_system_entity_candidates(list(entities))
         sys_ent_counter = Counter()
         for entity in system_entities:
@@ -580,17 +587,20 @@ def extract_word_shape(lengths=(1,), **args):
         (function) An feature extraction function that takes a query and \
             returns ngrams of word shapes, for n of specified lengths.
     """
+    del args
+
     def word_shape_basic(token):
         # example: option --> xxxxx+, 123 ---> ddd, call --> xxxx
         shape = ['d' if character.isdigit() else 'x' for character in token]
         if len(shape) > 5:
-            if all('d' == x for x in shape):
+            if all(x == 'd' for x in shape):
                 return 'ddddd+'
-            elif all('x' == x for x in shape):
+            elif all(x == 'x' for x in shape):
                 return 'xxxxx+'
         return ''.join(shape)
 
     def _extractor(query, resources):
+        del resources
         tokens = query.normalized_tokens
         shape_counter = Counter()
         for length in lengths:
@@ -623,6 +633,7 @@ def extract_edge_ngrams(lengths=(1,), **args):
         (function) An feature extraction function that takes a query and \
             returns ngrams of the specified lengths at start and end of query.
     """
+    del args
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
@@ -668,8 +679,7 @@ def extract_freq(bins=5, **args):
         max_freq = freq_dict.most_common(1)[0][1]
         freq_features = defaultdict(int)
 
-        for idx in range(len(tokens)):
-            tok = tokens[idx]
+        for idx, tok in enumerate(tokens):
             tok = mask_numerics(tok)
 
             if args.get(ENABLE_STEMMING, False):
@@ -712,6 +722,7 @@ def extract_gaz_freq(**args):
         (function): A feature extraction function that returns the log of the \
             count of query tokens within each gazetteer's frequency bins.
     """
+    del args
 
     def _extractor(query, resources):
         tokens = query.normalized_tokens
@@ -752,6 +763,8 @@ def extract_in_gaz_feature(scaling=1, **args):
     Returns:
         function: Returns an extractor function
     """
+    del args
+
     def _extractor(query, resources):
         in_gaz_features = defaultdict(float)
 
@@ -785,9 +798,10 @@ def extract_length(**args):
         (function) A feature extraction function that takes a query and \
             returns number of tokens and characters on linear and log scales
     """
+    del args
 
-    # pylint: disable=locally-disabled,unused-argument
     def _extractor(query, resources):
+        del resources
         tokens = len(query.normalized_tokens)
         chars = len(query.normalized_text)
         return {'tokens': tokens,
@@ -836,6 +850,7 @@ def find_ngrams(input_list, n, **args):
         list: A list of ngrams across all the strings in the \
             input list
     """
+    del args
     result = []
     for ngram in zip(*[input_list[i:] for i in range(n)]):
         result.append(" ".join(ngram))

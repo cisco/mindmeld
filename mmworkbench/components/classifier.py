@@ -2,7 +2,7 @@
 """
 This module contains the base class for all the machine-learned classifiers in Workbench.
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 import json
 import logging
 import os
@@ -91,7 +91,7 @@ class ClassifierConfig:
         return json.dumps(self.to_dict(), sort_keys=True)
 
 
-class Classifier(metaclass=ABCMeta):
+class Classifier(ABC):
     """The base class for all the machine-learned classifiers in Workbench. A classifier is a \
     machine-learned model that categorizes input examples into one of the pre-determined class \
     labels. Among other functionality, each classifier provides means by which to fit a \
@@ -199,13 +199,13 @@ class Classifier(metaclass=ABCMeta):
 
         if not queries:
             logger.warning('Could not fit model since no relevant examples were found. '
-                           'Make sure the labeled queries for training are placed in "{}" '
-                           'files in your Workbench project.'.format(label_set))
+                           'Make sure the labeled queries for training are placed in "%s" '
+                           'files in your Workbench project.', label_set)
             return
 
         if len(set(classes)) <= 1:
-            logger.info("Not doing anything for fit since there {}.".format(
-                ["are no classes", "is only one class"][len(set(classes))]))
+            phrase = ["are no classes", "is only one class"][len(set(classes))]
+            logger.info("Not doing anything for fit since there %s.", phrase)
             return
 
         model.initialize_resources(self._resource_loader, queries, classes)
@@ -233,7 +233,7 @@ class Classifier(metaclass=ABCMeta):
         """
         if not self._model:
             logger.error('You must fit or load the model before running predict')
-            return
+            return None
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
@@ -257,7 +257,7 @@ class Classifier(metaclass=ABCMeta):
         """
         if not self._model:
             logger.error('You must fit or load the model before running predict_proba')
-            return
+            return []
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
                                                                      timestamp=timestamp)
@@ -285,15 +285,15 @@ class Classifier(metaclass=ABCMeta):
 
         if not self._model:
             logger.error('You must fit or load the model before running evaluate.')
-            return
+            return None
 
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
 
         if not queries:
             logger.info('Could not evaluate model since no relevant examples were found. Make sure '
-                        'the labeled queries for evaluation are placed in "{}" files '
-                        'in your Workbench project.'.format(label_set))
-            return
+                        'the labeled queries for evaluation are placed in "%s" files '
+                        'in your Workbench project.', label_set)
+            return None
 
         evaluation = self._model.evaluate(queries, labels)
         return evaluation
@@ -317,12 +317,13 @@ class Classifier(metaclass=ABCMeta):
         """
         if not self._model:
             logger.error('You must fit or load the model to initialize resources')
-            return
+            return None
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query, time_zone, timestamp)
         return self._model.view_extracted_features(query, dynamic_resource)
 
-    def _get_model_config(self, loaded_config, **kwargs):
+    @staticmethod
+    def _get_model_config(loaded_config=None, **kwargs):
         """Updates the loaded configuration with runtime specified options, and creates a model
         configuration object with the final configuration dictionary. If an application config
         exists it should be passed in, if not the default config should be passed in.
@@ -335,7 +336,9 @@ class Classifier(metaclass=ABCMeta):
             return ModelConfig(**kwargs)
         except (TypeError, ValueError):
             # Use application specified or default config, customizing with provided kwargs
-            model_config = loaded_config
+            if not loaded_config:
+                logger.warning('loaded_config is not passed in')
+            model_config = loaded_config or {}
             model_config.update(kwargs)
 
             # If a parameter selection grid was passed in at runtime, override params set in the

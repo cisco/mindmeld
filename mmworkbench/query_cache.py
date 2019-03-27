@@ -115,9 +115,9 @@ class QueryCache:
             versioned_data = joblib.load(file_location)
             if 'cached_queries' not in versioned_data:
                 # The old version of caching did not have versions
-                logger.warn('The cache contains deprecated versions of queries. Please '
-                            'run this command to clear the query cache: '
-                            '"python -m <app_name> clean -q"')
+                logger.warning('The cache contains deprecated versions of queries. Please '
+                               'run this command to clear the query cache: '
+                               '"python -m <app_name> clean -q"')
                 self._cached_queries = versioned_data
             else:
                 self._cached_queries = versioned_data['cached_queries']

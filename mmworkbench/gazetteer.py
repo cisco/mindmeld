@@ -120,8 +120,8 @@ class Gazetteer:
             old_value = self.pop_dict[entity]
             self.pop_dict[entity] = max(self.pop_dict[entity], popularity)
             if self.pop_dict[entity] != old_value:
-                logger.debug('Updating gazetteer value of entity {} from {} to {}'.format(
-                    entity, old_value, self.pop_dict[entity]))
+                logger.debug('Updating gazetteer value of entity %s from %s to %s',
+                             entity, old_value, self.pop_dict[entity])
         else:
             self.pop_dict[entity] = popularity
 
@@ -135,13 +135,13 @@ class Gazetteer:
                 popularity below this value are ignored.
             normalizer (function): A function that normalizes text.
         """
-        logger.info("Loading entity data from '{}'".format(filename))
+        logger.info("Loading entity data from '%s'", filename)
         line_count = 0
         entities_added = 0
         num_cols = None
 
         if not os.path.isfile(filename):
-            logger.warn("Entity data file was not found at {!r}".format(filename))
+            logger.warning("Entity data file was not found at %s", filename)
         else:
             with codecs.open(filename, encoding='utf8') as data_file:
                 for i, row in enumerate(data_file.readlines()):
@@ -168,8 +168,8 @@ class Gazetteer:
                         self._update_entity(entity, float(pop))
                         entities_added += 1
 
-            logger.info('{}/{} entities in entity data file exceeded popularity '
-                        "cutoff and were added to the gazetteer".format(entities_added, line_count))
+            logger.info('%d/%d entities in entity data file exceeded popularity '
+                        "cutoff and were added to the gazetteer", entities_added, line_count)
 
     def update_with_sys_types(self, numeric_types):
         self.sys_types.update(numeric_types)
@@ -194,13 +194,12 @@ class Gazetteer:
                     synonyms_added += 1
                 if canonical not in self.pop_dict:
                     missing_canonicals += 1
-                    logger.debug("Synonym '{}' for entity '{}' not in "
-                                 'gazetteer'.format(synonym, canonical))
-        logger.info('Added {}/{} synonyms from file into '
-                    'gazetteer'.format(synonyms_added, line_count))
+                    logger.debug("Synonym '%s' for entity '%s' not in gazetteer", synonym,
+                                 canonical)
+        logger.info('Added %d/%d synonyms from file into gazetteer', synonyms_added, line_count)
         if update_if_missing_canonical and missing_canonicals:
-            logger.info('Loaded {} synonyms where the canonical name is not '
-                        'in the gazetteer'.format(missing_canonicals))
+            logger.info('Loaded %d synonyms where the canonical name is not in the gazetteer',
+                        missing_canonicals)
 
 
 def iterate_ngrams(tokens, min_length=1, max_length=1):

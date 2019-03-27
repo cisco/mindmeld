@@ -94,7 +94,7 @@ definitions:
       - run:
           name: Run linters and static analysis
           command: |
-            flake8 mmworkbench tests
+           ./lintme
 
       - run:
           name: Wait for elasticsearch & numerical parser

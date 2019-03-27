@@ -27,7 +27,7 @@ def validate_workbench_version(app_path, raise_exception=False):
         with open(requirements) as f:
             lines = f.readlines()
     except (OSError, IOError):
-        logger.warning('requirements.txt is missing at {app_path}.'.format(app_path=app_path))
+        logger.warning('requirements.txt is missing at %s.', app_path)
         return
     wb_req = None
     for item in pkg_resources.parse_requirements(lines):
@@ -52,5 +52,4 @@ def validate_workbench_version(app_path, raise_exception=False):
         else:
             warnings.warn(error_msg, category=WorkbenchVersionWarning)
             return
-    logger.debug("mmworkbench version {version} satisfies app's requirements.txt.".format(
-        version=wb_version))
+    logger.debug("mmworkbench version %s satisfies app's requirements.txt.", wb_version)

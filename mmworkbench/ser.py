@@ -3,12 +3,11 @@
 import logging
 import json
 import sys
-
+from enum import Enum
 import requests
 
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
-from enum import Enum
 
 logger = logging.getLogger(__name__)
 
@@ -60,30 +59,20 @@ def get_candidates(query, entity_types=None, language=None, time_zone=None, time
         return [e for e in [_duckling_item_to_query_entity(query, item) for item in response]
                 if entity_types is None or e.entity.type in entity_types]
 
-    logger.debug("Duckling did not process query: {} with dims: {} correctly and "
-                 "returned response: {}".format(query.text, str(dims), str(response)))
+    logger.debug("Duckling did not process query: %s with dims: %s correctly and "
+                 "returned response: %s", query.text, str(dims), str(response))
     return []
 
 
-def get_candidates_for_text(text, entity_types=None, span=None, language=None,
-                            time_zone=None, timestamp=None):
+def get_candidates_for_text(text, entity_types=None):
     """Identifies candidate system entities in the given text.
 
     Args:
         text (str): The text to examine
         entity_types (list of str): The entity types to consider
-        language (str, optional): Language as specified using a 639-2 code.
-            If omitted, English is assumed.
-        time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
-            If not specified, the system time zone is used.
-        timestamp (long, optional): A unix timestamp used as the reference time.
-            If not specified, the current system time is used. If `time_zone`
-            is not also specified, this parameter is ignored.
-
     Returns:
         list of dict: The system entities found in the text
     """
-
     dims = _dimensions_from_entity_types(entity_types)
     response, response_code = parse_numerics(text, dimensions=dims)
     if response_code == SUCCESSFUL_HTTP_CODE:
@@ -95,8 +84,8 @@ def get_candidates_for_text(text, entity_types=None, span=None, language=None,
                 items.append(item)
         return items
     else:
-        logger.debug("Ducking did not process text: {} with dims: {} correctly and "
-                     "return response: {}".format(text, str(dims), str(response)))
+        logger.debug("Duckling did not process query: %s with dims: %s correctly and "
+                     "returned response: %s", text, str(dims), str(response))
         return []
 
 
@@ -143,8 +132,8 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
             data['locale'] = locale
         else:
             logger.error(
-                'Invalid locale provided, it should be from this '
-                'set: {}. Ignoring argument.'.format(valid_locales))
+                'Invalid locale provided, it should be from this set: %s. Ignoring argument.',
+                valid_locales)
     if dimensions is not None:
         data['dims'] = json.dumps(dimensions)
     if time_zone:
@@ -171,7 +160,7 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
         logger.debug('Unable to connect to Duckling.')
         raise RuntimeError("Unable to connect to Duckling. Make sure it's running by typing "
                            "'mmworkbench num-parse' at the command line.")
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
                      json.dumps(data))
         sys.exit('\nThe numerical parser service encountered the following ' +
@@ -212,7 +201,7 @@ def resolve_system_entity(query, entity_type, span):
     time_zone = query.time_zone
     timestamp = query.timestamp
 
-    duckling_candidates, response_codes = parse_numerics(
+    duckling_candidates, _ = parse_numerics(
         span.slice(query.text), language=language,
         time_zone=time_zone, timestamp=timestamp)
     duckling_text_val_to_candidate = {}
@@ -354,7 +343,6 @@ def _dimensions_from_entity_types(entity_types):
             dims.add('time')
         if entity_type.startswith('sys_'):
             dims.add(entity_type.split('_')[1])
-    dims = list(dims)
     if not dims:
-        dims = None
-    return dims
+        return None
+    return list(dims)

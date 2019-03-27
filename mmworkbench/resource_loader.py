@@ -31,7 +31,11 @@ ENABLE_STEMMING_ARGS = 'enable_stemming'
 
 class ResourceLoader:
     """ResourceLoader objects are responsible for loading resources necessary for nlp components
-    (classifiers, entity recognizer, parsers, etc)."""
+    (classifiers, entity recognizer, parsers, etc).
+
+    Note: we need to keep resource helpers as instance methods, as ``load_feature_resource``
+    assumes all helpers to be instance methods.
+    """
 
     def __init__(self, app_path, query_factory, query_cache=None):
         self.app_path = app_path
@@ -88,6 +92,7 @@ class ResourceLoader:
             dict: Gazetteer data keyed by entity type
         """
         # TODO: get role gazetteers
+        del kwargs
         entity_types = path.get_entity_types(self.app_path)
         return {entity_type: self.get_gazetteer(entity_type, force_reload=force_reload)
                 for entity_type in entity_types}
@@ -152,7 +157,7 @@ class ResourceLoader:
         """
         popularity_cutoff = 0.0
 
-        logger.info("Building gazetteer '{}'".format(gaz_name))
+        logger.info("Building gazetteer '%s'", gaz_name)
 
         # TODO: support role gazetteers
         gaz = Gazetteer(gaz_name, exclude_ngrams)
@@ -203,9 +208,9 @@ class ResourceLoader:
             entity_type (str): The name of the entity
         """
         file_path = path.get_entity_map_path(self.app_path, entity_type)
-        logger.debug("Loading entity map from file '{}'".format(file_path))
+        logger.debug("Loading entity map from file '%s'", file_path)
         if not os.path.isfile(file_path):
-            logger.warn("Entity map file not found at {!r}".format(file_path))
+            logger.warning("Entity map file not found at %s", file_path)
             json_data = {}
         else:
             try:
@@ -223,13 +228,13 @@ class ResourceLoader:
             self._hash_to_model_path = {}
 
         cache_path = MODEL_CACHE_PATH.format(app_path=self.app_path)
-        for dir_path, dir_names, file_names in os.walk(cache_path):
+        for dir_path, _, file_names in os.walk(cache_path):
             for filename in [f for f in file_names if f.endswith('.hash')]:
                 file_path = os.path.join(dir_path, filename)
                 hash_val = open(file_path, 'r').read()
                 classifier_file_path = file_path.split('.hash')[0]
                 if not os.path.exists(classifier_file_path):
-                    logger.warn('Could not find the serialized model')
+                    logger.warning('Could not find the serialized model')
                     continue
                 self._hash_to_model_path[hash_val] = classifier_file_path
 
@@ -440,7 +445,7 @@ class ResourceLoader:
             # file existed before and now -> update
             old_file_info['modified'] = new_file_info['modified']
 
-    def _build_word_freq_dict(self, **kwargs):
+    def _build_word_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles unigram frequency dictionary of normalized query tokens
 
         Args:
@@ -466,7 +471,7 @@ class ResourceLoader:
         freq_dict = Counter(tokens)
         return freq_dict
 
-    def _build_char_ngram_freq_dict(self, **kwargs):
+    def _build_char_ngram_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles n-gram character frequency dictionary of normalized query tokens
 
            Args:
@@ -482,7 +487,7 @@ class ResourceLoader:
                     char_freq_dict.update(character_tokens)
         return char_freq_dict
 
-    def _build_word_ngram_freq_dict(self, **kwargs):
+    def _build_word_ngram_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles n-gram frequency dictionary of normalized query tokens
 
            Args:
@@ -504,7 +509,7 @@ class ResourceLoader:
                 word_freq_dict.update(ngram_tokens)
         return word_freq_dict
 
-    def _build_query_freq_dict(self, **kwargs):
+    def _build_query_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles frequency dictionary of normalized and stemmed query strings
 
         Args:
@@ -535,13 +540,12 @@ class ResourceLoader:
         query_dict += Counter()
         return query_dict
 
-    def _get_sys_entity_types(self, **kwargs):
+    def _get_sys_entity_types(self, **kwargs):  # pylint: disable=no-self-use
         """Get all system entity types from the entity labels.
 
         Args:
             labels (list of QueryEntity): a list of labeled entities
         """
-
         # Build entity types set
         entity_types = set()
         for label in kwargs.get('labels'):

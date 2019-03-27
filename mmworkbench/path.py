@@ -6,9 +6,9 @@ This module is responsible for locating various Workbench app files.
 import os
 import re
 import logging
+from functools import wraps
 
 from .exceptions import WorkbenchImportError
-from functools import wraps
 
 WORKBENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_ROOT = os.path.join(WORKBENCH_ROOT, 'mmworkbench')
@@ -106,9 +106,9 @@ def safe_path(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
         res = func(*args, **kwargs)
-        if type(res) == tuple:
+        if isinstance(res, tuple):
             return tuple(map(lambda x: x.replace(':', '_') if x else x, res))
-        elif type(res) == str:
+        elif isinstance(res, str):
             return res.replace(':', '_')
         else:
             return res
@@ -155,6 +155,17 @@ def get_intents(app_path, domain):
     return set(next(os.walk(domain_dir))[1])
 
 
+def _search_pattern(patterns, parent, domain, intent, tree, found_pattern):
+    domain_intent_dir = os.path.join(parent, domain, intent)
+    for app_file in os.listdir(domain_intent_dir):
+        for pattern in patterns:
+            if re.match(pattern, app_file):
+                abs_filepath = os.path.join(domain_intent_dir, app_file)
+                mod_time = os.path.getmtime(abs_filepath)
+                tree[domain][intent][abs_filepath] = mod_time
+                found_pattern[pattern] = True
+
+
 def get_labeled_query_tree(app_path, patterns=None):
     """Gets labeled query files for a given domain and application.
 
@@ -183,15 +194,7 @@ def get_labeled_query_tree(app_path, patterns=None):
             intent = components[0]
             tree[domain][intent] = {}
             if patterns:
-                domain_intent_dir = os.path.join(parent, domain, intent)
-                for app_file in os.listdir(domain_intent_dir):
-                    for pattern in patterns:
-                        if re.match(pattern, app_file):
-                            abs_filepath = os.path.join(domain_intent_dir, app_file)
-                            _, filename = os.path.split(abs_filepath)
-                            mod_time = os.path.getmtime(abs_filepath)
-                            tree[domain][intent][abs_filepath] = mod_time
-                            found_pattern[pattern] = True
+                _search_pattern(patterns, parent, domain, intent, tree, found_pattern)
             else:
                 for filename in files:
                     abs_filepath = os.path.join(parent, domain, intent, filename)
@@ -200,8 +203,8 @@ def get_labeled_query_tree(app_path, patterns=None):
 
     for pattern in found_pattern:
         if not found_pattern[pattern]:
-            logger.error("Couldn't find {} pattern files in {} directory".format(
-                patterns, domains_dir))
+            logger.error("Couldn't find %s pattern files in %s directory",
+                         patterns, domains_dir)
 
     return tree
 
@@ -534,7 +537,7 @@ def get_app(app_path):
             return mod.app
         # try to load as package first
         loader = SourceFileLoader(package_name, os.path.join(app_path, '__init__.py'))
-        return loader.load_module().app
+        return loader.load_module(package_name).app  # pylint: disable=deprecated-method
     except AttributeError:
         # __init__.py exists but has no app attribute
         # fallback to app.py, but emit warning
@@ -551,9 +554,8 @@ def get_app(app_path):
     try:
         # try to load 'app.py'
         loader = SourceFileLoader(package_name, get_app_module_path(app_path))
-        return loader.load_module().app
+        return loader.load_module(package_name).app  # pylint: disable=deprecated-method
     except (FileNotFoundError, AttributeError):
-        raise WorkbenchImportError(
-            'Could not import application at {!r}. Create a {!r} or {!r} file containing the ' +
-            'application.'.format(app_path, '__init__.py', 'app.py')
-        )
+        msg = 'Could not import application at {!r}. Create a __init__.py or app.py file' \
+              ' containing the application.'.format(app_path)
+        raise WorkbenchImportError(msg)

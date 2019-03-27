@@ -606,7 +606,7 @@ class Entity:
         self.is_system_entity = self.__class__.is_system_entity(entity_type)
 
     @staticmethod
-    def is_system_entity(entity_type):
+    def is_system_entity(entity_type):  # pylint: disable=method-hidden
         """Checks whether the provided entity type is a Workbench-recognized system entity.
 
         Args:
@@ -670,25 +670,25 @@ def resolve_entity_conflicts(query_entities):
         while j < len(filtered):
             other = filtered[j]
             if _is_superset(target, other) and not _is_same_span(target, other):
-                logger.debug('Removing {{{1:s}|{2:s}}} entity in query {0:d} since it is a '
-                             'subset of another.'.format(i, other.text, other.entity.type))
+                logger.debug('Removing {{%s|%s}} entity in query %d since it is a '
+                             'subset of another.', other.text, other.entity.type, i)
                 del filtered[j]
                 continue
             elif _is_subset(target, other) and not _is_same_span(target, other):
-                logger.debug('Removing {{{1:s}|{2:s}}} entity in query {0:d} since it is a '
-                             'subset of another.'.format(i, target.text, target.entity.type))
+                logger.debug('Removing {{%s|%s}} entity in query %d since it is a '
+                             'subset of another.', target.text, target.entity.type, i)
                 del filtered[i]
                 include_target = False
                 break
             elif _is_same_span(target, other) or _is_overlapping(target, other):
                 if target.entity.confidence >= other.entity.confidence:
-                    logger.debug('Removing {{{1:s}|{2:s}}} entity in query {0:d} since it overlaps '
-                                 'with another.'.format(i, other.text, other.entity.type))
+                    logger.debug('Removing {{%s|%s}} entity in query %d since it overlaps '
+                                 'with another.', other.text, other.entity.type, i)
                     del filtered[j]
                     continue
                 elif target.entity.confidence < other.entity.confidence:
-                    logger.debug('Removing {{{1:s}|{2:s}}} entity in query {0:d} since it overlaps '
-                                 'with another.'.format(i, target.text, target.entity.type))
+                    logger.debug('Removing {{%s|%s}} entity in query %d since it overlaps '
+                                 'with another.', target.text, target.entity.type, i)
                     del filtered[i]
                     include_target = False
                     break

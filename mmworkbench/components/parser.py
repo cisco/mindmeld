@@ -65,9 +65,9 @@ class Parser:
         self._resource_loader = resource_loader
         self.config = get_parser_config(app_path, config, domain, intent) or {}
         configured_entities = set()
-        for entity_type, config in self.config.items():
+        for entity_type, entity_config in self.config.items():
             configured_entities.add(entity_type)
-            configured_entities.update(config.keys())
+            configured_entities.update(entity_config.keys())
 
         self._configured_entities = configured_entities
         rules = generate_grammar(self.config, entity_types)

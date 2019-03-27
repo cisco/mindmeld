@@ -7,6 +7,9 @@ import logging
 import hashlib
 import os
 
+from elasticsearch5.exceptions import ConnectionError as EsConnectionError, TransportError,\
+    ElasticsearchException
+
 from ..core import Entity
 from ._config import (get_app_namespace, get_classifier_config, DOC_TYPE,
                       DEFAULT_ES_SYNONYM_MAPPING, PHONETIC_ES_SYNONYM_MAPPING)
@@ -15,7 +18,6 @@ from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_in
                                      delete_index, does_index_exist, get_field_names,
                                      INDEX_TYPE_KB, INDEX_TYPE_SYNONYM)
 
-from elasticsearch5.exceptions import ConnectionError, TransportError, ElasticsearchException
 from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 logger = logging.getLogger(__name__)
@@ -43,28 +45,33 @@ class EntityResolver:
         self._normalizer = resource_loader.query_factory.normalize
         self.type = entity_type
         self._is_system_entity = Entity.is_system_entity(self.type)
-
         self._exact_match_mapping = None
-
-        er_config = get_classifier_config('entity_resolution', app_path=app_path)
-        self._use_text_rel = er_config['model_type'] == 'text_relevance'
-        self._use_double_metaphone = 'double_metaphone' in er_config.get('phonetic_match_types', [])
+        self._er_config = get_classifier_config('entity_resolution', app_path=app_path)
         self._es_host = es_host
-        self.__es_client = es_client
-        self._pid = os.getpid()
-        self._es_index_name = EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + entity_type
+        self._es_config = {'client': es_client, 'pid': os.getpid()}
+
+    @property
+    def _es_index_name(self):
+        return EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + self.type
+
+    @property
+    def _use_text_rel(self):
+        return self._er_config['model_type'] == 'text_relevance'
+
+    @property
+    def _use_double_metaphone(self):
+        return 'double_metaphone' in self._er_config.get('phonetic_match_types', [])
 
     @property
     def _es_client(self):
         # Lazily connect to Elasticsearch.  Make sure each subprocess gets it's own connection
-        if self.__es_client is None or self._pid != os.getpid():
-            self._pid = os.getpid()
-            self.__es_client = create_es_client()
-        return self.__es_client
+        if self._es_config['client'] is None or self._es_config['pid'] != os.getpid():
+            self._es_config = {'pid': os.getpid(), 'client': create_es_client()}
+        return self._es_config['client']
 
     @classmethod
     def ingest_synonym(cls, app_namespace, index_name, index_type=INDEX_TYPE_SYNONYM,
-                       field_name=None, data=[], es_host=None, es_client=None,
+                       field_name=None, data=None, es_host=None, es_client=None,
                        use_double_metaphone=False):
         """Loads synonym documents from the mapping.json data into the
         specified index. If an index with the specified name doesn't exist, a
@@ -88,6 +95,8 @@ class EntityResolver:
             es_client (Elasticsearch): The Elasticsearch client.
             use_double_metaphone (bool): Whether to use the phonetic mapping or not.
         """
+        data = data or []
+
         def _action_generator(docs):
 
             for doc in docs:
@@ -152,7 +161,7 @@ class EntityResolver:
         entities = entity_map.get('entities', [])
 
         # create synonym index and import synonyms
-        logger.info("Importing synonym data to synonym index '{}'".format(self._es_index_name))
+        logger.info("Importing synonym data to synonym index '%s'", self._es_index_name)
         EntityResolver.ingest_synonym(app_namespace=self._app_namespace,
                                       index_name=self._es_index_name, data=entities,
                                       es_host=self._es_host, es_client=self._es_client,
@@ -179,7 +188,7 @@ class EntityResolver:
             if entities and not entities[0].get('id'):
                 raise ValueError("Knowledge base index and field cannot be specified for entities "
                                  "without ID.")
-            logger.info("Importing synonym data to knowledge base index '{}'".format(kb_index))
+            logger.info("Importing synonym data to knowledge base index '%s'", kb_index)
             EntityResolver.ingest_synonym(app_namespace=self._app_namespace, index_name=kb_index,
                                           index_type='kb', field_name=kb_field, data=entities,
                                           es_host=self._es_host, es_client=self._es_client,
@@ -202,8 +211,8 @@ class EntityResolver:
             cname = item['cname']
             item_id = item.get('id')
             if cname in item_map:
-                msg = 'Canonical name {!r} specified in {!r} entity map multiple times'
-                logger.debug(msg.format(cname, entity_type))
+                msg = 'Canonical name %s specified in %s entity map multiple times'
+                logger.debug(msg, cname, entity_type)
             if item_id:
                 if item_id in seen_ids:
                     msg = 'Item id {!r} specified in {!r} entity map multiple times'
@@ -217,8 +226,8 @@ class EntityResolver:
             for alias in aliases:
                 norm_alias = normalizer(alias)
                 if norm_alias in syn_map:
-                    msg = 'Synonym {!r} specified in {!r} entity map multiple times'
-                    logger.debug(msg.format(cname, entity_type))
+                    msg = 'Synonym %s specified in %s entity map multiple times'
+                    logger.debug(msg, cname, entity_type)
                 cnames_for_syn = syn_map.get(norm_alias, [])
                 cnames_for_syn.append(cname)
                 syn_map[norm_alias] = list(set(cnames_for_syn))
@@ -405,16 +414,16 @@ class EntityResolver:
         try:
             index = get_scoped_index_name(self._app_namespace, self._es_index_name)
             response = self._es_client.search(index=index, body=text_relevance_query)
-        except ConnectionError as e:
+        except EsConnectionError as ex:
             logger.error(
-                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+                'Unable to connect to Elasticsearch: %s details: %s', ex.error, ex.info)
             raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
-        except TransportError as e:
-            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
-                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+        except TransportError as ex:
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
+                         'Status code: %s details: %s', ex.error, ex.status_code, ex.info)
             raise EntityResolverError('Unexpected error occurred when sending requests to '
                                       'Elasticsearch: {} Status code: {} details: '
-                                      '{}'.format(e.error, e.status_code, e.info))
+                                      '{}'.format(ex.error, ex.status_code, ex.info))
         except ElasticsearchException:
             raise EntityResolverError
         else:
@@ -428,7 +437,7 @@ class EntityResolver:
 
                 top_synonym = None
                 synonym_hits = hit['inner_hits']['whitelist']['hits']['hits']
-                if len(synonym_hits) > 0:
+                if synonym_hits:
                     top_synonym = synonym_hits[0]['_source']['name']
                 result = {
                     'cname': hit['_source']['cname'],
@@ -454,7 +463,7 @@ class EntityResolver:
         normed = self._normalizer(entity.text)
         try:
             cnames = self._exact_match_mapping['synonyms'][normed]
-        except (KeyError, TypeError) as e:
+        except (KeyError, TypeError):
             logger.warning('Failed to resolve entity %r for type %r', entity.text, entity.type)
             return None
 
@@ -481,13 +490,13 @@ class EntityResolver:
             else:
                 self.fit()
 
-        except ConnectionError as e:
+        except EsConnectionError as e:
             logger.error(
-                'Unable to connect to Elasticsearch: {} details: {}'.format(e.error, e.info))
+                'Unable to connect to Elasticsearch: %s details: %s', e.error, e.info)
             raise EntityResolverConnectionError(es_host=self._es_client.transport.hosts)
         except TransportError as e:
-            logger.error('Unexpected error occurred when sending requests to Elasticsearch: {} '
-                         'Status code: {} details: {}'.format(e.error, e.status_code, e.info))
+            logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
+                         'Status code: %s details: %s', e.error, e.status_code, e.info)
             raise EntityResolverError
         except ElasticsearchException:
             raise EntityResolverError

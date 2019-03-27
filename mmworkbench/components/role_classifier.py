@@ -45,6 +45,7 @@ class RoleClassifier(Classifier):
         self.entity_type = entity_type
         self.roles = set()
 
+    # pylint: disable=arguments-differ
     def _get_model_config(self, **kwargs):
         """Gets a machine learning model configuration
 
@@ -151,7 +152,7 @@ class RoleClassifier(Classifier):
         self.ready = True
         self.dirty = False
 
-    def predict(self, query, entities, entity_index):
+    def predict(self, query, entities, entity_index):  # pylint: disable=arguments-differ
         """Predicts a role for the given entity using the trained role classification model
 
         Args:
@@ -171,7 +172,7 @@ class RoleClassifier(Classifier):
         self._model.register_resources(gazetteers=gazetteers)
         return self._model.predict([(query, entities, entity_index)])[0]
 
-    def predict_proba(self, query, entities, entity_index):
+    def predict_proba(self, query, entities, entity_index):  # pylint: disable=arguments-differ
         """Runs prediction on a given entity and generates multiple role hypotheses with their
         associated probabilities using the trained role classification model
 
@@ -195,6 +196,7 @@ class RoleClassifier(Classifier):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
+    # pylint: disable=arguments-differ
     def view_extracted_features(self, query, entities, entity_index):
         """
         Extracts features for a given entity for role classification.
@@ -273,3 +275,9 @@ class RoleClassifier(Classifier):
         hashable_queries = [self.domain + '###' + self.intent + '###' +
                             self.entity_type + '###'] + sorted(queries)
         return self._resource_loader.hash_list(hashable_queries)
+
+    def inspect(self, query, gold_label=None, dynamic_resource=None):
+        del gold_label
+        del dynamic_resource
+        del query
+        logger.warning('method not implemented')

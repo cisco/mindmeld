@@ -6,15 +6,16 @@ import os
 import sys
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor, wait
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from copy import deepcopy
 import logging
 import datetime
 import time
+import warnings
 
 from .. import path
 from ..core import ProcessedQuery, Bunch
-from ..exceptions import FileNotFoundError, ProcessorError
+from ..exceptions import ProcessorError
 from ..resource_loader import ResourceLoader
 from .._version import validate_workbench_version
 
@@ -30,8 +31,6 @@ from ..markup import process_markup, TIME_FORMAT
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
 
-import warnings
-
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
 
@@ -46,7 +45,7 @@ executor = ProcessPoolExecutor(max_workers=num_workers) if num_workers > 0 else 
 
 
 def restart_subprocesses():
-    global executor
+    global executor  # pylint: disable=global-statement
     executor.shutdown(wait=False)
     executor = ProcessPoolExecutor(max_workers=num_workers)
 
@@ -65,13 +64,13 @@ def subproc_call_instance_function(instance_id, func_name, *args, **kwargs):
     try:
         instance = Processor.instance_map[instance_id]
         return getattr(instance, func_name)(*args, **kwargs)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # This subprocess does not have the requested instance.  Shut down and
         # it will be recreated by the parent process with updated instances.
         sys.exit(1)
 
 
-class Processor(metaclass=ABCMeta):
+class Processor(ABC):
     """A generic base class for processing queries through the workbench NLP
     components.
 
@@ -188,7 +187,7 @@ class Processor(metaclass=ABCMeta):
             label_set (str, optional): The label set from which to evaluate
                                 all classifiers.
         """
-        self._evaluate(print_stats, label_set=label_set)
+        self._evaluate(print_stats, label_set)
 
         for child in self._children.values():
             child.evaluate(print_stats, label_set=label_set)
@@ -196,7 +195,7 @@ class Processor(metaclass=ABCMeta):
         self.resource_loader.query_cache.dump()
 
     @abstractmethod
-    def _evaluate(self, label_set="test"):
+    def _evaluate(self, print_stats, label_set="test"):
         raise NotImplementedError
 
     def _check_ready(self):
@@ -280,7 +279,7 @@ class Processor(metaclass=ABCMeta):
                     item_idx = future_to_idx_map[future]
                     results[item_idx] = item
                 return tuple(results)
-            except (Exception, SystemExit):
+            except (Exception, SystemExit):  # pylint: disable=broad-except
                 # process pool is broken, restart it and process current request in series
                 restart_subprocesses()
         # process the list in series
@@ -348,8 +347,8 @@ class NaturalLanguageProcessor(Processor):
             nbest_transcripts_nlp_classes = self.extract_allowed_intents(
                 nbest_transcripts_nlp_classes)
 
-            for domain in nbest_transcripts_nlp_classes.keys():
-                for intent in nbest_transcripts_nlp_classes[domain].keys():
+            for domain in nbest_transcripts_nlp_classes:
+                for intent in nbest_transcripts_nlp_classes[domain]:
                     self.domains[domain].intents[intent].nbest_transcripts_enabled = True
 
     def _load_custom_features(self):
@@ -534,7 +533,7 @@ class NaturalLanguageProcessor(Processor):
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
         """
         query_factory = QueryFactory.create_query_factory()
-        raw_query, query, entities = process_markup(markup, query_factory, query_options={})
+        _, query, _ = process_markup(markup, query_factory, query_options={})
 
         if domain:
             print('Inspecting domain classification')
@@ -551,9 +550,12 @@ class NaturalLanguageProcessor(Processor):
             print(intent_inspection)
             print('')
 
-    def process(self, query_text, allowed_nlp_classes=None, allowed_intents=None,
+    def process(self, query_text,   # pylint: disable=arguments-differ
+                allowed_nlp_classes=None,
+                allowed_intents=None,
                 language=None, time_zone=None, timestamp=None,
-                dynamic_resource=None, verbose=False):
+                dynamic_resource=None,
+                verbose=False):
         """Processes the given query using the full hierarchy of natural language processing models \
         trained for this application.
 
@@ -648,15 +650,15 @@ class DomainProcessor(Processor):
         if len(self.intents) > 1:
             intent_eval = self.intent_classifier.evaluate(label_set=label_set)
             if intent_eval:
-                print("Intent classification accuracy for the '{}' domain: {}".format(
-                      self.name, intent_eval.get_accuracy()))
+                print("Intent classification accuracy for the '%s' domain: %s",
+                      self.name, intent_eval.get_accuracy())
                 if print_stats:
                     intent_eval.print_stats()
             else:
-                logger.info("Skipping intent classifier evaluation for the '{}' domain".format(
-                            self.name))
+                logger.info("Skipping intent classifier evaluation for the '%s' domain", self.name)
 
-    def process(self, query_text, allowed_nlp_classes,
+    def process(self, query_text,  # pylint: disable=arguments-differ
+                allowed_nlp_classes=None,
                 time_zone=None, timestamp=None, dynamic_resource=None, verbose=False):
         """Processes the given input text using the hierarchy of natural language processing models \
         trained for this domain.
@@ -863,11 +865,11 @@ class IntentProcessor(Processor):
                 if print_stats:
                     entity_eval.print_stats()
             else:
-                logger.info("Skipping entity recognizer evaluation for the '{}.{}' intent".format(
-                            self.domain, self.name))
+                logger.info("Skipping entity recognizer evaluation for the '%s.%s' intent",
+                            self.domain, self.name)
 
-    def process(self, query_text, time_zone=None, timestamp=None, dynamic_resource=None,
-                verbose=False):
+    def process(self, query_text,  # pylint: disable=arguments-differ
+                time_zone=None, timestamp=None, dynamic_resource=None, verbose=False):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent.
 
@@ -895,12 +897,11 @@ class IntentProcessor(Processor):
         """Calls the entity recognition component.
 
         Args:
-            query (Query, or tuple): The user input query, or a list of the n-best transcripts
-                query objects
-            verbose (bool, optional): If True returns class as well as confidence scores
+            query (Query, tuple): The user input query, or a list of the n-best transcripts
+                query objects.
+            verbose (bool, optional): If True returns class as well as confidence scores.
         Returns:
-            list (of lists of QueryEntity objects): A list of lists of the entity objects for each \
-                transcript
+            (list): A list of lists of the QueryEntity objects for each transcript.
         """
         if isinstance(query, (list, tuple)):
             if self.nbest_transcripts_enabled:
@@ -910,18 +911,16 @@ class IntentProcessor(Processor):
                 return nbest_transcripts_entities
             else:
                 if verbose:
-                    entities = self.entity_recognizer.predict_proba(
-                        query[0], dynamic_resource=dynamic_resource)
+                    return [self.entity_recognizer.predict_proba(
+                        query[0], dynamic_resource=dynamic_resource)]
                 else:
-                    entities = self.entity_recognizer.predict(
-                        query[0], dynamic_resource=dynamic_resource)
-                return [entities]
+                    return [self.entity_recognizer.predict(
+                        query[0], dynamic_resource=dynamic_resource)]
         if verbose:
-            entities = self.entity_recognizer.predict_proba(
+            return self.entity_recognizer.predict_proba(
                 query, dynamic_resource=dynamic_resource)
         else:
-            entities = self.entity_recognizer.predict(query, dynamic_resource=dynamic_resource)
-        return entities
+            return self.entity_recognizer.predict(query, dynamic_resource=dynamic_resource)
 
     def _align_entities(self, entities):
         """If n-best transcripts is enabled, align the spans across transcripts.
@@ -947,7 +946,7 @@ class IntentProcessor(Processor):
         if len(entities) > 1 and self.nbest_transcripts_enabled:
             for entities_n in entities[1:]:
                 index_to_align = 0  # keep track of entities to align
-                for i, entity in enumerate(entities_n):
+                for entity in entities_n:
                     n_start = entity.span.start
                     n_end = entity.span.end
                     # if span is just one character long, add one to enable some overlap
@@ -1012,26 +1011,31 @@ class IntentProcessor(Processor):
             if self.parser else processed_entities
         return processed_entities, role_confidence
 
-    def process_query(self, query, return_processed_query=True, dynamic_resource=None,
-                      verbose=False):
+    def _get_pred_entities(self, query, dynamic_resource=None, verbose=False):
+        entities = self._recognize_entities(query, dynamic_resource=dynamic_resource,
+                                            verbose=verbose)
+        pred_entities = entities[0]
+        entity_confidence = []
+        if verbose and len(pred_entities) > 0:
+            for entity, score in pred_entities:
+                entity_confidence.append({entity.entity.type: score})
+            _pred_entities, _ = zip(*pred_entities)
+            return entity_confidence, [_pred_entities]
+        return entity_confidence, entities
+
+    def process_query(self, query, dynamic_resource=None, verbose=False):
         """Processes the given query using the hierarchy of natural language processing models \
         trained for this intent.
 
         Args:
             query (Query, tuple): The user input query, or a list of the n-best transcripts \
                 query objects.
-            return_processed_query(boolean): Returns an instance of ProcessedQuery if ``True``, \
-                an array of entities if ``False`` (this is used to parallelize n-best entity \
-                processing).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
             verbose (bool, optional): If ``True``, returns class as well as predict probabilities.
 
         Returns:
-            (tuple): Tuple containing: \
-                * ProcessedQuery: A processed query object that contains the prediction results \
-                from applying the hierarchy of natural language processing models to the input \
-                query. \
-                * list(entities): If return_processed_query is ``False``.
+            (ProcessedQuery): A processed query object that contains the prediction results from \
+                applying the hierarchy of natural language processing models to the input query.
         """
         self._check_ready()
 
@@ -1043,15 +1047,8 @@ class IntentProcessor(Processor):
         else:
             query = (query,)
 
-        entities = self._recognize_entities(query, dynamic_resource=dynamic_resource,
-                                            verbose=verbose)
-        pred_entities = entities[0]
-        entity_confidence = []
-        if verbose and len(pred_entities) > 0:
-            for entity, score in pred_entities:
-                entity_confidence.append({entity.entity.type: score})
-            entities, _ = zip(*pred_entities)
-            entities = [entities]
+        entity_confidence, entities = self._get_pred_entities(
+            query, dynamic_resource=dynamic_resource, verbose=verbose)
 
         aligned_entities = self._align_entities(entities)
         processed_entities, role_confidence = self._process_entities(query, entities,
@@ -1129,13 +1126,8 @@ class EntityProcessor(Processor):
                 if print_stats:
                     role_eval.print_stats()
             else:
-                logger.info("Skipping role classifier evaluation for the '{}.{}.{}' "
-                            "entity type".format(self.domain, self.intent, self.type))
-
-    def process(self, text):
-        """Not implemented."""
-        raise NotImplementedError('EntityProcessor objects do not support `process()`. '
-                                  'Try `process_entity()`')
+                logger.info("Skipping role classifier evaluation for the '%s.%s.%s' entity type",
+                            self.domain, self.intent, self.type)
 
     def process_entity(self, query, entities, entity_index, verbose=False):
         """Processes the given entity using the hierarchy of natural language processing models \
@@ -1189,3 +1181,12 @@ class EntityProcessor(Processor):
             entity_list = [entity.entity]
         entity.entity.value = self.entity_resolver.predict(entity_list)
         return entity
+
+    def process_query(self, query, allowed_nlp_classes=None, dynamic_resource=None, verbose=False):
+        """Not implemented"""
+        del self
+        del query
+        del allowed_nlp_classes
+        del dynamic_resource
+        del verbose
+        raise NotImplementedError
