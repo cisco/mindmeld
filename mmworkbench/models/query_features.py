@@ -115,7 +115,7 @@ def extract_in_gaz_span_features(**args):
                     '|diff_class_prob': p_joint_1 - p_joint_2
                 }
 
-                for key, value in features:
+                for key, value in features.items():
                     feature_sequence[i][feat_prefix + key] = value
 
             return feature_sequence
