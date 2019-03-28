@@ -487,7 +487,7 @@ class NaturalLanguageProcessor(Processor):
 
     def extract_allowed_intents(self, allowed_intents):
         """This function validates a user inputted list of allowed_intents against the NLP
-        hierarchy and construct a hierarchy dictionary as follows: {domain: {intent: {}} if
+        hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
         the validation of allowed_intents has passed.
 
         Args:

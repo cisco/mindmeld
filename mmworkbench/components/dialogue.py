@@ -518,14 +518,8 @@ class DialogueFlow(DialogueManager):
 class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
     system-generated natural language responses.
-
-    Attributes:
-        directives (list): A list of directives that the responder has added.
-        slots (dict): Values to populate the placeholder slots in the natural language
-            response.
     """
-    logger = mod_logger.getChild('DialogueResponder')
-    """The class logger."""
+    _logger = mod_logger.getChild('DialogueResponder')
 
     DirectiveNames = DirectiveNames
     """The list of directive names."""
@@ -638,7 +632,7 @@ class DialogueResponder:
         Args:
             directive (dict): A directive.
         """
-        self.logger.warning('respond() is deprecated. Instead use direct().')
+        self._logger.warning('respond() is deprecated. Instead use direct().')
         self.directives.append(directive)
 
     def prompt(self, text):
@@ -647,7 +641,7 @@ class DialogueResponder:
         Args:
             text (str): The text of the reply.
         """
-        self.logger.warning('prompt() is deprecated. '
+        self._logger.warning('prompt() is deprecated. '
                             'Please use reply() and listen() instead')
         self.reply(text)
 
@@ -710,8 +704,7 @@ class Conversation:
             even when app is in async mode.
     """
 
-    logger = mod_logger.getChild('Conversation')
-    """Class logger (`Logger`)"""
+    _logger = mod_logger.getChild('Conversation')
 
     def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None,
                  force_sync=False):

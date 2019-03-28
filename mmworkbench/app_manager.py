@@ -17,13 +17,14 @@ logger = logging.getLogger(__name__)
 
 def freeze_params(params):
     """
-    If params is a dictionary or Params we convert it into FrozenParams
+    If params is a dictionary or Params we convert it into FrozenParams.
     Otherwise we raise a TypeError.
+
     Args:
-        params (dict, Params)
+        params (dict, Params): The input params to convert
 
     Returns:
-        FrozenParams
+        FrozenParams: The converted params object
     """
     params = params or FrozenParams()
     if isinstance(params, dict):

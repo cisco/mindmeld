@@ -59,11 +59,13 @@ class QuestionAnswerer:
 
         Examples:
 
-        question_answerer.get(index='menu_items',
-                              name='pork and shrimp',
-                              restaurant_id='B01CGKGQ40',
-                              _sort='price',
-                              _sort_type='asc')
+        ```
+            question_answerer.get(index='menu_items',
+                                  name='pork and shrimp',
+                                  restaurant_id='B01CGKGQ40',
+                                  _sort='price',
+                                  _sort_type='asc')
+        ```
 
         Args:
             index (str): The name of an index

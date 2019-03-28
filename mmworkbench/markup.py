@@ -430,7 +430,7 @@ def dump_query(processed_query, markup_format=MINDMELD_FORMAT, **kwargs):
         str: A marked up representation of the query
 
     Raises:
-        ValueError: Description
+        ValueError
     """
     if markup_format not in MARKUP_FORMATS:
         raise ValueError('Invalid markup format {!r}'.format(markup_format))

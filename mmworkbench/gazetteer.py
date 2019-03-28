@@ -171,10 +171,14 @@ class Gazetteer:
             logger.info('%d/%d entities in entity data file exceeded popularity '
                         "cutoff and were added to the gazetteer", entities_added, line_count)
 
-    def update_with_sys_types(self, numeric_types):
-        self.sys_types.update(numeric_types)
-
     def update_with_entity_map(self, mapping, normalizer, update_if_missing_canonical=True):
+        """Update gazetteer with a list of normalized key,value pairs from the input mapping list
+
+        Args:
+            mapping (list): A list of dicts containing canonnical names and whitelists of a
+                particular entity
+            normalizer (func): A QueryFactory normalize function
+        """
         logger.info('Loading synonyms from entity mapping')
         line_count = 0
         synonyms_added = 0
