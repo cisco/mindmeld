@@ -258,5 +258,5 @@ jobs:
             python -m venv ~/venv
             echo ". ~/venv/bin/activate" >> $BASH_ENV
             source $BASH_ENV
-            MM_BRANCH=$CIRCLE_BRANCH make docs
+            MM_BRANCH=$CIRCLE_BRANCH make apidoc
             scripts/upload_to_s3.sh
