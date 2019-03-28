@@ -70,7 +70,7 @@ class Bunch(dict):
 
 
 class Span:
-    """Object representing a span with start and end indices
+    """Object representing a text span with start and end indices
 
     Attributes:
         start (int): The index from the original text that represents the start of the span

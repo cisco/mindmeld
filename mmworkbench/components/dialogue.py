@@ -272,7 +272,7 @@ class DialogueManager:
         Args:
             name (str): The name of the dialogue state.
             handler (function): The dialogue state handler function.
-            **kwargs (dict): A list of options to be passed to the DialogueStateRule initializer.
+            kwargs (dict): A list of options to be passed to the DialogueStateRule initializer.
         """
         if name is None:
             name = handler.__name__
@@ -641,8 +641,7 @@ class DialogueResponder:
         Args:
             text (str): The text of the reply.
         """
-        self._logger.warning('prompt() is deprecated. '
-                            'Please use reply() and listen() instead')
+        self._logger.warning('prompt() is deprecated. Please use reply() and listen() instead')
         self.reply(text)
 
     @staticmethod

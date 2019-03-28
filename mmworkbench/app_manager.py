@@ -240,6 +240,6 @@ class ApplicationManager:
         Args:
             name (str): The name of the dialogue state
             handler (function): The dialogue state handler function
-            **kwargs (dict): A list of options which specify the dialogue rule
+            kwargs (dict): A list of options which specify the dialogue rule
         """
         self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)

@@ -34,7 +34,7 @@ Enhancements
 ------------------
 
 Bug Fixes
-~~~~~~~~~
+^^^^^^^^^
 
 - ``mmworkbench blueprint`` has been temporarily disabled. Blueprints can manually downloaded from https://devcenter.mindmeld.com/bp/{blueprint_name}/app.tar.gz.
 

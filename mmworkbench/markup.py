@@ -130,7 +130,7 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
         input_file (str): filename of queries to be processed
         output_file (str or None): filename for processed queries
         nlp (NaturalLanguageProcessor): an application's NLP with built models
-        **kwargs (dict): A dictionary of additional args
+        kwargs (dict): A dictionary of additional args
     """
     import csv
     import sys
@@ -199,7 +199,7 @@ def process_markup(markup, query_factory, query_options):
         query_options (dict): A dictionary containing options for language, time_zone and time_stamp
 
     Returns:
-        (str, Query, list): Returns a tuple of the raw text, Query object associated with the text
+        (str, Query, list): Returns a tuple of the raw text, the Query object associated with the text
             and a list of entities (ProcessedQuery) associated with the text
     """
     try:

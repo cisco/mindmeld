@@ -25,10 +25,10 @@ function check_dependency {
 	if [[ `which $command` ]]; then
 		if [[ $command == "java" ]]; then
 			version=$(java -version 2>&1 | head -1 | awk '{print $3}' | sed "s/\"//g")
-			if [[ $version == 1.8* ]]; then
+			if [[ $version == 8* ]]; then
 				echo yes
 			else
-				echo older version $version found. 1.8+ needed.
+				echo older version $version found. 8+ needed.
 				NEEDS_JAVA=1
 				NEEDS_DEP_INSTALL=1
 			fi
@@ -60,7 +60,7 @@ function install_dependency {
 			sudo -H easy_install pip
 		elif [[ $command == "java" ]]; then
 			brew tap caskroom/cask
-			brew cask install java
+			brew cask install homebrew/cask-versions/java8
 	    elif [[ $command == "elasticsearch" ]]; then
 	    	brew install elasticsearch
 			brew services start elasticsearch
@@ -72,7 +72,7 @@ function install_dependency {
 	elif [[ ($command == "java") && (${NEEDS_JAVA} == 1) ]]; then
 		echo "   " $command ...
 		brew tap caskroom/cask
-		brew cask install java
+		brew cask install homebrew/cask-versions/java8
     elif [[ ($command == "virtualenv") && (${NEEDS_VIRTUALENV} == 1) ]]; then
 		sudo -H pip install --upgrade virtualenv
 	fi

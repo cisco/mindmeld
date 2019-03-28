@@ -177,7 +177,8 @@ class Gazetteer:
         Args:
             mapping (list): A list of dicts containing canonnical names and whitelists of a
                 particular entity
-            normalizer (func): A QueryFactory normalize function
+            normalizer (func): A QueryFactory normalization function that is used to normalize
+                the input mapping data before they are added to the gazetteer.
         """
         logger.info('Loading synonyms from entity mapping')
         line_count = 0

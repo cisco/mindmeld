@@ -45,6 +45,7 @@ executor = ProcessPoolExecutor(max_workers=num_workers) if num_workers > 0 else 
 
 
 def restart_subprocesses():
+    """Restarts the process pool executor"""
     global executor  # pylint: disable=global-statement
     executor.shutdown(wait=False)
     executor = ProcessPoolExecutor(max_workers=num_workers)

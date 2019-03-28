@@ -8,6 +8,16 @@ workflows:
     jobs:
       - test-py3.6
       - test-py3.5
+      - make-docs
+      - deploy-docs:
+          requires:
+            - make-docs
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
       - deploy-blueprint:
           requires:
             - test-py3.6
@@ -18,7 +28,6 @@ workflows:
                 - develop
                 - staging
                 - master
-                - release/4.0.0
 
 # Definitions (keep config D.R.Y.)
 
@@ -61,6 +70,54 @@ definitions:
             pip install -e .
             pip install -r test-requirements.txt
             python setup.py install
+
+    # Make docs
+    docs-steps: &docs-steps
+
+      - checkout
+      - restore_cache:
+          key: v1-docs-cache--{{ checksum "docs-requirements.txt" }}-{{ checksum "setup.py" }}
+
+      - run:
+          name: Activate virtualenv and install requirements
+          command: |
+
+            # create and activate venv
+            python -m venv ~/venv
+            echo ". ~/venv/bin/activate" >> $BASH_ENV
+            source $BASH_ENV
+
+            # upgrade pip to latest
+            pip install -U pip
+            pip install awscli
+
+            # install mmworkbench and requirements
+            mkdir ~/packages -p
+            RTD_WHEEL="sphinx_rtd_theme-0.1.10mm9.tar.gz"
+            if [ -f "~/packages/$RTD_WHEEL" ]; then
+              echo "Using cached docs theme wheel"
+            else
+              echo "Downloading docs theme wheel"
+              aws s3 cp s3://mindmeld-pypi/develop/$RTD_WHEEL ~/packages
+            fi
+            pip install ~/packages/$RTD_WHEEL
+            pip install -e .
+            pip install -r docs-requirements.txt
+
+      - save_cache:
+          name: Save python deps cache
+          key: v1-docs-cache--{{ checksum "docs-requirements.txt" }}-{{ checksum "setup.py" }}
+          paths:
+            - ~/venv
+            - ~/packages
+
+      - run:
+          name: Make the docs
+          command: |
+            MM_BRANCH=$CIRCLE_BRANCH make apidoc
+
+      - store_artifacts:
+          path: ./build/html
 
     # Step Sequences
 
@@ -111,6 +168,7 @@ definitions:
             # run tests
             mkdir ~/test-reports
             pytest --junitxml=~/test-reports/junit.xml --cov-report html:/home/circleci/test-reports/cov_html --cov=mmworkbench
+
       - run:
           name: Food ordering blueprint kb setup
           # run this even when linting fails
@@ -147,6 +205,14 @@ jobs:
       - *duckling-image
     steps: *test-steps
 
+  make-docs:
+    docker:
+      - image: circleci/python:3.6.6
+        environment:
+          PYTHON_VERSION: "3.6.6"
+          _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+    steps: *docs-steps
+
   deploy-blueprint:
     docker:
       - image: circleci/python:3.6.6
@@ -177,3 +243,20 @@ jobs:
           command: |
             MM_BRANCH=staging bash scripts/upload_blueprint.sh -d `pwd`/tests/kwik_e_mart -b kwik_e_mart
             MM_BRANCH=master bash scripts/upload_blueprint.sh -d `pwd`/tests/kwik_e_mart -b kwik_e_mart
+
+  deploy-docs:
+    docker:
+      - image: circleci/python:3.6.6
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: v1-docs-cache--{{ checksum "docs-requirements.txt" }}-{{ checksum "setup.py" }}
+      - run:
+          command: |
+            # create and activate venv
+            python -m venv ~/venv
+            echo ". ~/venv/bin/activate" >> $BASH_ENV
+            source $BASH_ENV
+            MM_BRANCH=master make apidoc
+            CIRCLE_BRANCH=master scripts/upload_to_s3.sh
