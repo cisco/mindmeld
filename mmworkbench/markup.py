@@ -91,10 +91,13 @@ def load_query_file(file_path, query_factory=None, domain=None, intent=None,
 
 
 def mark_down_file(file_path):
-    """
+    """Read all annotated queries from the input file and remove all the annotations
 
     Args:
         file_path (str): The path of the file to load
+
+    Yields:
+        (str): marked down query text for each line
     """
     for markup in read_query_file(file_path):
         yield mark_down(markup)
@@ -187,6 +190,18 @@ def bootstrap_query_row(proc_query, show_confidence, **kwargs):
 
 
 def process_markup(markup, query_factory, query_options):
+    """This function takes in some text and returns a constructed Query object associated with the
+        text, along with other objects like a list of entities.
+
+    Args:
+        markup (str): The markup string to process
+        query_factory (QueryFactory): The factory used to construct Query objects
+        query_options (dict): A dictionary containing options for language, time_zone and time_stamp
+
+    Returns:
+        (str, Query, list): Returns a tuple of the raw text, Query object associated with the text
+            and a list of entities (ProcessedQuery) associated with the text
+    """
     try:
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
         query = query_factory.create_query(raw_text, **query_options)
