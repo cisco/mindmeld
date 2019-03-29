@@ -167,7 +167,7 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-# modindex_common_prefix = []
+# modindex_common_prefix = ['mmworkbench.']
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
