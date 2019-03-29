@@ -45,6 +45,7 @@ executor = ProcessPoolExecutor(max_workers=num_workers) if num_workers > 0 else 
 
 
 def restart_subprocesses():
+    """Restarts the process pool executor"""
     global executor  # pylint: disable=global-statement
     executor.shutdown(wait=False)
     executor = ProcessPoolExecutor(max_workers=num_workers)
@@ -487,7 +488,7 @@ class NaturalLanguageProcessor(Processor):
 
     def extract_allowed_intents(self, allowed_intents):
         """This function validates a user inputted list of allowed_intents against the NLP
-        hierarchy and construct a hierarchy dictionary as follows: {domain: {intent: {}} if
+        hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
         the validation of allowed_intents has passed.
 
         Args:

@@ -70,7 +70,12 @@ class Bunch(dict):
 
 
 class Span:
-    """Object representing a span with start and end indices"""
+    """Object representing a text span with start and end indices
+
+    Attributes:
+        start (int): The index from the original text that represents the start of the span
+        end (int): The index from the original text that represents the end of the span
+    """
     __slots__ = ['start', 'end']
 
     def __init__(self, start, end):

@@ -17,13 +17,14 @@ logger = logging.getLogger(__name__)
 
 def freeze_params(params):
     """
-    If params is a dictionary or Params we convert it into FrozenParams
+    If params is a dictionary or Params we convert it into FrozenParams.
     Otherwise we raise a TypeError.
+
     Args:
-        params (dict, Params)
+        params (dict, Params): The input params to convert
 
     Returns:
-        FrozenParams
+        FrozenParams: The converted params object
     """
     params = params or FrozenParams()
     if isinstance(params, dict):
@@ -239,6 +240,6 @@ class ApplicationManager:
         Args:
             name (str): The name of the dialogue state
             handler (function): The dialogue state handler function
-            **kwargs (dict): A list of options which specify the dialogue rule
+            kwargs (dict): A list of options which specify the dialogue rule
         """
         self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)

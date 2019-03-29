@@ -279,7 +279,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         """
         raise NotImplementedError
 
-    def print_graphs(self):
+    def _print_graphs(self):
         """
         Generates some graphs to help with evaluating of models.
 
@@ -512,6 +512,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
 class StandardModelEvaluation(ModelEvaluation):
     def raw_results(self):
+        """Returns the raw results of the model evaluation"""
         text_labels = []
         predicted, expected = [], []
 
@@ -523,6 +524,7 @@ class StandardModelEvaluation(ModelEvaluation):
         return RawResults(predicted=predicted, expected=expected, text_labels=text_labels)
 
     def get_stats(self):
+        """Prints model evaluation stats in a table to stdout"""
         raw_results = self.raw_results()
         stats = self._get_common_stats(raw_results.expected,
                                        raw_results.predicted,
@@ -532,18 +534,13 @@ class StandardModelEvaluation(ModelEvaluation):
         return stats
 
     def print_stats(self):
+        """Prints model evaluation stats to stdout"""
         raw_results = self.raw_results()
         stats = self.get_stats()
 
         self._print_overall_stats_table(stats['stats_overall'])
         self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
         self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
-
-    def print_graphs(self):
-        """
-        TODO generate graphs from matplotlib/scikit learn
-        """
-        return None
 
 
 class SequenceModelEvaluation(ModelEvaluation):
@@ -552,6 +549,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         super().__init__(config, results)
 
     def raw_results(self):
+        """Returns the raw results of the model evaluation"""
         text_labels = []
         predicted, expected = [], []
         predicted_flat, expected_flat = [], []
@@ -602,6 +600,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         print("\n\n")
 
     def get_stats(self):
+        """Prints model evaluation stats in a table to stdout"""
         raw_results = self.raw_results()
         stats = self._get_common_stats(raw_results.expected_flat,
                                        raw_results.predicted_flat,
@@ -615,6 +614,7 @@ class SequenceModelEvaluation(ModelEvaluation):
         return stats
 
     def print_stats(self):
+        """Prints model evaluation stats to stdout"""
         raw_results = self.raw_results()
         stats = self.get_stats()
 
@@ -623,12 +623,6 @@ class SequenceModelEvaluation(ModelEvaluation):
                                       'Tag-level statistics by class')
         self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
         self._print_sequence_stats_table(stats['sequence_stats'])
-
-    def print_graphs(self):
-        """
-        TODO generate graphs from matplotlib/scikitlearn
-        """
-        return None
 
 
 class EntityModelEvaluation(SequenceModelEvaluation):
@@ -795,6 +789,17 @@ class Model:
         return best_params
 
     def select_params(self, examples, labels, selection_settings=None):
+        """Selects the best set of hyper-parameters for a given set of examples and true labels
+            through cross-validation
+
+        Args:
+            examples: A list of example queries
+            labels: A list of labels associated with the queries
+            selection_settings: A dictionary of parameter lists to select from
+
+        Returns:
+            dict: A dictionary of optimized parameters to use
+        """
         raise NotImplementedError
 
     def _convert_params(self, param_grid, y, is_grid=True):
@@ -811,15 +816,43 @@ class Model:
         raise NotImplementedError
 
     def predict(self, examples, dynamic_resource=None):
+        """Predicts a list of class labels for the given list of queries using the trained
+            classification model
+
+        Args:
+            examples (list): A list of queries to predict
+            dynamic_resource (dict): A dictionary containing dynamic resource keys like
+                dynamic gazetteers that is used to bias the NLP classifier
+
+        Returns:
+            list: A list of predicted labels per query
+        """
         raise NotImplementedError
 
     def predict_proba(self, examples):
-        raise NotImplementedError
+        """Runs prediction on each of the given queries and generates multiple hypotheses with their
+        associated probabilities using the trained classification model
 
-    def predict_log_proba(self, examples):
+        Args:
+            examples (list of mmworkbench.core.Query): a list of queries to train on
+
+        Returns:
+            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels \
+                with confidence scores
+        """
         raise NotImplementedError
 
     def evaluate(self, examples, labels):
+        """Evaluates the predictions of each query against the labels provided.
+
+        Args:
+            examples (list): A list of queries to predict
+            labels (list): A list of labels corresponding to each query
+
+        Returns:
+            list(ModelEvaluation): an list containing ModelEvaluation information about the \
+                evaluation for each query
+        """
         raise NotImplementedError
 
     def _get_effective_config(self):
@@ -1017,6 +1050,17 @@ class EntityLabelEncoder(LabelEncoder):
         return self.config.model_settings.get('tag_scheme', 'IOB').upper()
 
     def encode(self, labels, **kwargs):
+        """"Gets a list of joint app and system IOB tags from each query's entities.
+
+        Args:
+            labels (list): A list of labels associated with each query
+            kwargs (dict): A dict containing atleast the "examples" key, which is a
+                list of queries to process
+
+        Returns:
+            list: A list of list of joint app and system IOB tags from each
+                query's entities
+        """
         examples = kwargs['examples']
         scheme = self._get_tag_scheme()
         # Here each label is a list of entities for the corresponding example
@@ -1026,6 +1070,16 @@ class EntityLabelEncoder(LabelEncoder):
         return all_tags
 
     def decode(self, tags_by_example, **kwargs):
+        """Decodes the labels from the tags passed in for each query
+
+        Args:
+            tags_by_example (list): A list of tags per query
+            kwargs (dict): A dict containing atleast the "examples" key, which is a
+                list of queries to process
+
+        Returns:
+            list: A list of decoded labels per query
+        """
         # TODO: support decoding multiple queries at once
         scheme = self._get_tag_scheme()
         examples = kwargs['examples']

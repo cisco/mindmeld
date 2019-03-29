@@ -131,7 +131,7 @@ class Application:
         Args:
             name (str): The name of the dialogue state
             handler (callable): The dialogue state handler function
-            **kwargs (dict): A list of options which specify the dialogue rule
+            kwargs (dict): A list of options which specify the dialogue rule
         """
         if self.app_manager:
             self.app_manager.add_dialogue_rule(name, handler, **kwargs)
