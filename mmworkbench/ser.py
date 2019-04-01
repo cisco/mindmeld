@@ -2,21 +2,15 @@
 """This module contains the system entity recognizer."""
 import logging
 import json
-import sys
 from enum import Enum
-import requests
 
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
-from .numerical_parser import NumericalParser
+from .system_entity_recognizer import SystemEntityRecognizer
 
 logger = logging.getLogger(__name__)
 
-DUCKLING_URL = "http://localhost:7151"
-DUCKLING_ENDPOINT = "parse"
-
 SUCCESSFUL_HTTP_CODE = 200
-NO_RESPONSE_CODE = -1
 
 
 class DucklingDimension(Enum):
@@ -61,8 +55,8 @@ def get_candidates(query, entity_types=None, language=None, time_zone=None, time
         return [e for e in [_duckling_item_to_query_entity(query, item) for item in response]
                 if entity_types is None or e.entity.type in entity_types]
 
-    logger.debug("Numerical parsing service did not process query: %s with dims: %s correctly and "
-                 "returned response: %s", query.text, str(dims), str(response))
+    logger.debug("System Entity Recognizer service did not process query: %s with dims: %s "
+                 "correctly and returned response: %s", query.text, str(dims), str(response))
     return []
 
 
@@ -86,14 +80,14 @@ def get_candidates_for_text(text, entity_types=None):
                 items.append(item)
         return items
     else:
-        logger.debug("Numerical parsing service did not process query: %s with dims: %s correctly and "
-                     "returned response: %s", text, str(dims), str(response))
+        logger.debug("System Entity Recognizer service did not process query: %s with dims: %s "
+                     "correctly and returned response: %s", text, str(dims), str(response))
         return []
 
 
 def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
                    time_zone=None, timestamp=None):
-    """Calls Numerical parsing service API to extract numerical entities from a sentence.
+    """Calls System Entity Recognizer service API to extract numerical entities from a sentence.
 
     Args:
         sentence (str): A raw sentence.
@@ -113,8 +107,8 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
     Returns:
         (tuple): tuple containing:
 
-            * response (list, dict): Numerical parsing service response that consist of a list of dicts, each \
-                  corresponding to a single prediction
+            * response (list, dict): System Entity Recognizer service response that consist
+            of a list of dicts, each corresponding to a single prediction
             * response_code (int): http status code
     """
     if sentence == '':
@@ -148,7 +142,7 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
             timestamp *= 1000
         data['reftime'] = timestamp
 
-    return NumericalParser.get_instance().get_response(data)
+    return SystemEntityRecognizer.get_instance().get_response(data)
 
 
 def resolve_system_entity(query, entity_type, span):
@@ -188,7 +182,8 @@ def resolve_system_entity(query, entity_type, span):
     duckling_text_val_to_candidate = {}
 
     # If no matching candidate was found, try parsing only this entity
-    # Refer to this ticket for how we prioritize Numerical parsing service candidates:
+    # Refer to this ticket for how we prioritize System Entity Recognizer service candidates:
+    # TODO: Find the contents in the link below
     # https://mindmeldinc.atlassian.net/browse/WB3-54
     #
     # For secondary candidate picking, we prioritize candidates as follows:
@@ -208,7 +203,7 @@ def resolve_system_entity(query, entity_type, span):
             else:
                 duckling_text_val_to_candidate.setdefault(candidate.text, []).append(candidate)
 
-    # Sort Numerical parsing service matching candidates by the length of the value
+    # Sort duckling matching candidates by the length of the value
     best_duckling_candidate_names = list(duckling_text_val_to_candidate.keys())
     best_duckling_candidate_names.sort(key=len, reverse=True)
 
@@ -234,16 +229,16 @@ def resolve_system_entity(query, entity_type, span):
 
 
 def _duckling_item_to_query_entity(query, item, offset=0):
-    """Converts an item from Numerical parsing service into a QueryEntity
+    """Converts an item from System Entity Recognizer service into a QueryEntity
 
     Args:
         query (Query): The query
-        item (dict): The Numerical parsing service item
+        item (dict): The System Entity Recognizer service item
         offset (int, optional): The offset into the query that the item's
             indexing begins
 
     Returns:
-        QueryEntity: The query entity described by the Numerical parsing service item or \
+        QueryEntity: The query entity described by the System Entity Recognizer service item or \
             None if no item is present
     """
     if item:
@@ -256,16 +251,16 @@ def _duckling_item_to_query_entity(query, item, offset=0):
 
 
 def _duckling_item_to_entity(item):
-    """Converts an item from Numerical parsing service into an Entity
+    """Converts an item from System Entity Recognizer service into an Entity
 
     Args:
         query (Query): The query
-        item (dict): The Numerical parsing service item
+        item (dict): The System Entity Recognizer service item
         offset (int, optional): The offset into the query that the item's
             indexing begins
 
     Returns:
-        Entity: The entity described by the Numerical parsing service item
+        Entity: The entity described by the System Entity Recognizer service item
     """
     value = {}
     dimension = item['dim']

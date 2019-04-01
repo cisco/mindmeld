@@ -87,3 +87,29 @@ Currently we do not have a deployment process that takes a package from `dev` to
 Hence you should deploy to all three environments.
 
 Usually it takes about 5 - 10 minutes to for the PyPI server to update, and you can check at `https://mindmeld.com/packages/`.
+
+## MindMeld Workbench Documentation
+
+
+This repository contains documentation for MindMeld Workbench.
+
+### TLDR: Quick Start
+
+Assuming you have pyenv installed.
+```
+cd mindmeld-workbench-docs/  # go to the root of the workbench repo
+pyenv install 3.5.3  # install an appropriate version of python
+pyenv virtualenv 3.5.3 wb-doc  # create a virtualenv
+pyenv local wb-doc  # set the virtualenv for the repo
+pip install -r requirements.txt  # install development dependencies
+```
+
+### Building Docs
+
+```
+make apidoc
+```
+
+### Viewing Docs
+
+`open build/html/index.html`

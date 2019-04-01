@@ -30,7 +30,7 @@ from ..exceptions import AllowedNlpClassesKeyError, WorkbenchImportError
 from ..markup import process_markup, TIME_FORMAT
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
-from ..numerical_parser import NumericalParser
+from ..system_entity_recognizer import SystemEntityRecognizer
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
@@ -46,6 +46,7 @@ executor = ProcessPoolExecutor(max_workers=num_workers) if num_workers > 0 else 
 
 
 def restart_subprocesses():
+    """Restarts the process pool executor"""
     global executor  # pylint: disable=global-statement
     executor.shutdown(wait=False)
     executor = ProcessPoolExecutor(max_workers=num_workers)
@@ -336,8 +337,8 @@ class NaturalLanguageProcessor(Processor):
         self._app_path = app_path
         validate_workbench_version(self._app_path)
 
-        # initialize the numerical parser singleton
-        NumericalParser.get_instance(app_path)
+        # initialize the system entity recognizer singleton
+        SystemEntityRecognizer.get_instance(app_path)
 
         self.name = app_path
         self._load_custom_features()
@@ -492,7 +493,7 @@ class NaturalLanguageProcessor(Processor):
 
     def extract_allowed_intents(self, allowed_intents):
         """This function validates a user inputted list of allowed_intents against the NLP
-        hierarchy and construct a hierarchy dictionary as follows: {domain: {intent: {}} if
+        hierarchy and construct a hierarchy dictionary as follows: ``{domain: {intent: {}}`` if
         the validation of allowed_intents has passed.
 
         Args:

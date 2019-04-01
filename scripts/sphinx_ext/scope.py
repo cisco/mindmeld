@@ -49,4 +49,3 @@ def doctree_read(app, doctree):
             ref = str(e[1])
             if ref in docs_to_remove:
                 toctreenode['entries'].remove(e)
-

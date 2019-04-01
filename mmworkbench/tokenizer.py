@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class Tokenizer:
     """The Tokenizer class encapsulates all the functionality for normalizing and tokenizing a
     given piece of text."""
-    ASCII_CUTOFF = ord('\u0080')
+    _ASCII_CUTOFF = ord('\u0080')
 
     def __init__(self, exclude_from_norm=None):
         """Initializes the tokenizer.
@@ -394,7 +394,7 @@ class Tokenizer:
             char: a ASCII character
         """
         char_ord = ord(char)
-        if char_ord < self.ASCII_CUTOFF:
+        if char_ord < self._ASCII_CUTOFF:
             return char
 
         try:

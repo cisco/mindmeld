@@ -2,37 +2,44 @@ import requests
 import logging
 import json
 import sys
-from mmworkbench.components._config import get_numerical_parser_config
+from mmworkbench.components._config import get_system_entity_recognizer_config
 
 DUCKLING_URL = "http://localhost:7151"
 DUCKLING_ENDPOINT = "parse"
 
-SUCCESSFUL_HTTP_CODE = 200
 NO_RESPONSE_CODE = -1
 
 logger = logging.getLogger(__name__)
 
 
-class NumericalParser:
+class SystemEntityRecognizer:
+    """SystemEntityRecognizer is the numerical parsing service used o extract
+    system entities. Its intended to be used as a singleton, so its
+    initialized only once during NLP object construction.
+
+    TODO: Abstract this class into an interface and implement the duckling
+    service as one such service.
+    """
 
     _instance = None
 
     def __init__(self, app_path=None):
-        """Private constructor for NumericalParser. Do not directly
-        construct the NumericalParser object. Instead, use the
+        """Private constructor for SystemEntityRecognizer. Do not directly
+        construct the SystemEntityRecognizer object. Instead, use the
         static get_instance method.
 
         Args:
             app_path (str): A application path
         """
-        if NumericalParser._instance:
-            raise Exception("Numerical Parser is a singleton")
+        if SystemEntityRecognizer._instance:
+            raise Exception("SystemEntityRecognizer is a singleton")
         else:
             if not app_path:
-                self.is_service_alive = False
+                # The service is turned on by default
+                self.is_service_alive = True
             else:
-                self.is_service_alive = get_numerical_parser_config(app_path)
-            NumericalParser._instance = self
+                self.is_service_alive = get_system_entity_recognizer_config(app_path)
+            SystemEntityRecognizer._instance = self
 
     @staticmethod
     def get_instance(app_path=None):
@@ -42,11 +49,11 @@ class NumericalParser:
             app_path (str): A application path
 
         Returns:
-            (NumericalParser): A NumericalParser instance
+            (SystemEntityRecognizer): A SystemEntityRecognizer instance
         """
-        if not NumericalParser._instance:
-            NumericalParser(app_path)
-        return NumericalParser._instance
+        if not SystemEntityRecognizer._instance:
+            SystemEntityRecognizer(app_path)
+        return SystemEntityRecognizer._instance
 
     def get_response(self, data):
 
@@ -67,16 +74,15 @@ class NumericalParser:
             return response_json, response.status_code
 
         except requests.ConnectionError:
-            logger.error("Unable to connect to the numerical parser. Make sure it's running by typing "
-                         "'mmworkbench num-parse' at the command line.")
+            logger.error("Unable to connect to the system entity recognizer. Make sure it's "
+                         "running by typing 'mmworkbench num-parse' at the command line.")
             return [], NO_RESPONSE_CODE
 
         except Exception as ex:  # pylint: disable=broad-except
             logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
                          json.dumps(data))
-            sys.exit('\nThe numerical parser service encountered the following ' +
+            sys.exit('\nThe system entity recognizer encountered the following ' +
                      'error:\n' + str(ex) + '\nURL: ' + url + '\nRaw data: ' + str(data) +
                      "\nPlease check your data and ensure Numerical parsing service is running. "
                      "Make sure it's running by typing "
                      "'mmworkbench num-parse' at the command line.")
-

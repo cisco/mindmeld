@@ -11,6 +11,8 @@ from .. import path
 
 logger = logging.getLogger(__name__)
 
+DUCKLING_SERVICE_NAME = 'duckling'
+
 CONFIG_DEPRECATION_MAPPING = {
     'DOMAIN_CLASSIFIER_CONFIG': 'DOMAIN_MODEL_CONFIG',
     'INTENT_CLASSIFIER_CONFIG': 'INTENT_MODEL_CONFIG',
@@ -506,7 +508,8 @@ DEFAULT_RANKING_CONFIG = {
 }
 
 DEFAULT_NLP_CONFIG = {
-    'resolve_entities_using_nbest_transcripts': []
+    'resolve_entities_using_nbest_transcripts': [],
+    'system_entity_recognizer': 'duckling'
 }
 
 
@@ -532,8 +535,8 @@ def get_app_namespace(app_path):
     return _app_namespace
 
 
-def get_numerical_parser_config(app_path):
-    """Returns True if the app config specifies that the numerical parsing
+def get_system_entity_recognizer_config(app_path):
+    """Returns True if the app config specifies that the system entity recognition
         service should be run
 
     Args:
@@ -543,16 +546,8 @@ def get_numerical_parser_config(app_path):
         (bool): True if the app config specifies that the numerical parsing
             should be run
     """
-    try:
-        module_conf = _get_config_module(app_path)
-    except (OSError, IOError):
-        logger.info('No app configuration file found')
-        return False
-
-    try:
-        return getattr(module_conf, 'NLP_CONFIG').get('numerical_parser', False) == True
-    except AttributeError:
-        return False
+    return get_nlp_config(app_path).get(
+        'system_entity_recognizer', 'duckling') == DUCKLING_SERVICE_NAME
 
 
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):

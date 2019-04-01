@@ -20,6 +20,10 @@ import os
 import sphinx_rtd_theme
 import sys
 from sphinx.domains.python import PythonDomain
+import mmworkbench
+
+# Mock imports
+from mock import Mock as MagicMock
 
 # Insert our custom sphinx extensions
 cwd = os.getcwd()
@@ -36,12 +40,6 @@ project_root = os.path.dirname(os.path.dirname(cwd))
 sys.path.insert(0, project_root)
 
 
-import mmworkbench
-
-# Mock imports
-from mock import Mock as MagicMock
-
-
 class PatchedPythonDomain(PythonDomain):
     def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
         if 'refspecific' in node:
@@ -55,8 +53,10 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return Mock()
 
+
 MOCK_MODULES = ['duckling', 'pandas']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
 
 def setup(app):
     app.add_stylesheet('custom.css')
@@ -167,7 +167,7 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-# modindex_common_prefix = []
+modindex_common_prefix = ['mmworkbench.']
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
@@ -195,7 +195,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-#html_title = u'Workbench v1.0.0'
+# html_title = u'Workbench v1.0.0'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
