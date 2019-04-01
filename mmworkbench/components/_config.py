@@ -532,6 +532,29 @@ def get_app_namespace(app_path):
     return _app_namespace
 
 
+def get_numerical_parser_config(app_path):
+    """Returns True if the app config specifies that the numerical parsing
+        service should be run
+
+    Args:
+        app_path (str): A application path
+
+    Returns:
+        (bool): True if the app config specifies that the numerical parsing
+            should be run
+    """
+    try:
+        module_conf = _get_config_module(app_path)
+    except (OSError, IOError):
+        logger.info('No app configuration file found')
+        return False
+
+    try:
+        return getattr(module_conf, 'NLP_CONFIG').get('numerical_parser', False) == True
+    except AttributeError:
+        return False
+
+
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):
     """Returns the config for the specified classifier, with the
     following  order of precedence.

@@ -8,6 +8,7 @@ import requests
 
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
+from .numerical_parser import NumericalParser
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +119,7 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
     """
     if sentence == '':
         return {}, SUCCESSFUL_HTTP_CODE
-    url = '/'.join([DUCKLING_URL, DUCKLING_ENDPOINT])
+
     data = {
         'text': sentence,
         'lang': language,
@@ -145,30 +146,9 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
         if len(str(timestamp)) == 10:
             # Convert a second grain unix timestamp to millisecond
             timestamp *= 1000
-
         data['reftime'] = timestamp
-    try:
-        response = requests.request('POST', url, data=data)
-        response_json = response.json()
 
-        # Remove the redundant 'values' key in the response['value'] dictionary
-        for i, entity_dict in enumerate(response_json):
-            if 'values' in entity_dict['value']:
-                del response_json[i]['value']['values']
-
-        return response_json, response.status_code
-    except requests.ConnectionError:
-        logger.debug("Unable to connect to Duckling. Make sure it's running by typing "
-                     "'mmworkbench num-parse' at the command line.")
-        return [], NO_RESPONSE_CODE
-    except Exception as ex:  # pylint: disable=broad-except
-        logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
-                     json.dumps(data))
-        sys.exit('\nThe numerical parser service encountered the following ' +
-                 'error:\n' + str(ex) + '\nURL: ' + url + '\nRaw data: ' + str(data) +
-                 "\nPlease check your data and ensure Numerical parsing service is running. "
-                 "Make sure it's running by typing "
-                 "'mmworkbench num-parse' at the command line.")
+    return NumericalParser.get_instance().get_response(data)
 
 
 def resolve_system_entity(query, entity_type, span):
