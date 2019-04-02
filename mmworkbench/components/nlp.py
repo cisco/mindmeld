@@ -30,6 +30,7 @@ from ..exceptions import AllowedNlpClassesKeyError, WorkbenchImportError
 from ..markup import process_markup, TIME_FORMAT
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
+from ..system_entity_recognizer import SystemEntityRecognizer
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
@@ -335,6 +336,10 @@ class NaturalLanguageProcessor(Processor):
         super().__init__(app_path, resource_loader, config)
         self._app_path = app_path
         validate_workbench_version(self._app_path)
+
+        # initialize the system entity recognizer singleton
+        SystemEntityRecognizer.get_instance(app_path)
+
         self.name = app_path
         self._load_custom_features()
         self.domain_classifier = DomainClassifier(self.resource_loader)

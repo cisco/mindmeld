@@ -11,6 +11,8 @@ from .. import path
 
 logger = logging.getLogger(__name__)
 
+DUCKLING_SERVICE_NAME = 'duckling'
+
 CONFIG_DEPRECATION_MAPPING = {
     'DOMAIN_CLASSIFIER_CONFIG': 'DOMAIN_MODEL_CONFIG',
     'INTENT_CLASSIFIER_CONFIG': 'INTENT_MODEL_CONFIG',
@@ -506,7 +508,8 @@ DEFAULT_RANKING_CONFIG = {
 }
 
 DEFAULT_NLP_CONFIG = {
-    'resolve_entities_using_nbest_transcripts': []
+    'resolve_entities_using_nbest_transcripts': [],
+    'system_entity_recognizer': 'duckling'
 }
 
 
@@ -530,6 +533,21 @@ def get_app_namespace(app_path):
         _app_namespace = '{jupyter_user}_{app_namespace}'.format(
             jupyter_user=os.environ['JUPYTER_USER'], app_namespace=_app_namespace)
     return _app_namespace
+
+
+def get_system_entity_recognizer_config(app_path):
+    """Returns True if the app config specifies that the system entity recognition
+        service should be run
+
+    Args:
+        app_path (str): A application path
+
+    Returns:
+        (bool): True if the app config specifies that the numerical parsing
+            should be run
+    """
+    return get_nlp_config(app_path).get(
+        'system_entity_recognizer', 'duckling') == DUCKLING_SERVICE_NAME
 
 
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):

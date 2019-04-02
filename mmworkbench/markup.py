@@ -199,8 +199,8 @@ def process_markup(markup, query_factory, query_options):
         query_options (dict): A dictionary containing options for language, time_zone and time_stamp
 
     Returns:
-        (str, Query, list): Returns a tuple of the raw text, the Query object associated with the text
-            and a list of entities (ProcessedQuery) associated with the text
+        (str, Query, list): Returns a tuple of the raw text, the Query object associated with the
+        text and a list of entities (ProcessedQuery) associated with the text
     """
     try:
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
