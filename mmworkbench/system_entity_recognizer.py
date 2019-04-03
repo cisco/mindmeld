@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class SystemEntityRecognizer:
-    """SystemEntityRecognizer is the numerical parsing service used o extract
-    system entities. Its intended to be used as a singleton, so its
+    """SystemEntityRecognizer is the external parsing service used to extract
+    system entities. It is intended to be used as a singleton, so it's
     initialized only once during NLP object construction.
 
     TODO: Abstract this class into an interface and implement the duckling
