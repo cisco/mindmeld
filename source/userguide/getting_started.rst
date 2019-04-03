@@ -1,7 +1,7 @@
 Getting Started
 ===============
 
-These instructions explain how to install MindMeld Workbench on Mac OS X and set up your first Workbench project. Platforms other than Mac OS may work too but are not currently supported.
+These instructions explain how to install MindMeld Workbench on a Unix-based system and set up your first Workbench project. Users of other operating systems like Windows can use Docker to get started.
 
 .. note::
 
@@ -166,13 +166,13 @@ Install with virtualenv
 1. Install prerequisites
 """"""""""""""""""""""""
 
-On a Mac OS machine, you can install the dependencies for MindMeld Workbench and set up the necessary configuration files with the `mmworkbench_init.sh script <https://devcenter.mindmeld.com/scripts/mmworkbench_init.sh>`_.
+On a macOS or Ubuntu 16/18 machine, you can install the dependencies for MindMeld Workbench and set up the necessary configuration files with the `mmworkbench_init.sh script <https://devcenter.mindmeld.com/scripts/mmworkbench_init.sh>`_.
 
 .. note::
 
    A few things to note before you run the script:
 
-   - The script installs the following components after a confirmation prompt: ``brew``, ``python``, ``pip``, ``virtualenv``, Java 8 and Elasticsearch.
+   - The script installs the following components after a confirmation prompt: ``brew``, ``python3``, ``pip``, ``virtualenv``, Java 8 and Elasticsearch.
    - Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. **Previous files are overwritten.**
 
 When you're ready to go, open a terminal (shell) and run this command:
@@ -183,14 +183,15 @@ When you're ready to go, open a terminal (shell) and run this command:
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
-Here are the commands run by the script to install the required components:
+Here are the commands run by the script to install the required components depending on your operating system:
 
+macOS:
 +---------------+--------------------------------------------------------------------------------------------------------+
 |    Component  |    Command                                                                                             |
 +===============+========================================================================================================+
 | brew          |  ``/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"``|
 +---------------+--------------------------------------------------------------------------------------------------------+
-| python        |  ``brew install python``                                                                               |
+| python3        |  ``brew install python3``                                                                             |
 +---------------+--------------------------------------------------------------------------------------------------------+
 | pip           |  ``sudo -H easy_install pip``                                                                          |
 +---------------+--------------------------------------------------------------------------------------------------------+
@@ -201,6 +202,26 @@ Here are the commands run by the script to install the required components:
 | Elasticsearch |  ``brew install elasticsearch && brew services start elasticsearch``                                   |
 +---------------+--------------------------------------------------------------------------------------------------------+
 
+Ubuntu:
++---------------+--------------------------------------------------------------------------------------------------------+
+|    Component  |    Command                                                                                             |
++===============+========================================================================================================+
+| python3        |  ``sudo apt-get install python3.6``                                                                   |
++---------------+--------------------------------------------------------------------------------------------------------+
+| pip           |  ``sudo apt install python-pip``                                                                       |
++---------------+--------------------------------------------------------------------------------------------------------+
+| virtualenv    |  ``sudo apt install virtualenv``                                                                       |
++---------------+--------------------------------------------------------------------------------------------------------+
+| Elasticsearch |  ``sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:6.7.0``                              |
+|               |  ``sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node"                        |
+|               |      docker.elastic.co/elasticsearch/elasticsearch:6.7.0``                                             |
++---------------+--------------------------------------------------------------------------------------------------------+
+
+
+.. note::
+
+  We use docker for Elasticsearch in Ubuntu since provisioning it for the Ubuntu OS is convoluted. See here for more details if you want to set up
+  Elasticsearch from scratch on `Linux <https://www.digitalocean.com/community/tutorials/how-to-install-elasticsearch-logstash-and-kibana-elastic-stack-on-ubuntu-18-04>`_.:
 
 2. Set up a virtual environment
 """""""""""""""""""""""""""""""
@@ -218,8 +239,7 @@ To prepare an isolated environment for Workbench installation using ``virtualenv
 
 .. code-block:: shell
 
-   virtualenv -p python3 .  # for Python 3.x (recommended)
-   virtualenv .             # for Python 2.7
+   virtualenv -p python3 .
 
 - Activate the virtual environment:
 

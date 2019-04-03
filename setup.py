@@ -35,7 +35,8 @@ requirements = [
 ]
 
 setup_requirements = [
-    'pytest-runner~=2.11'
+    'pytest-runner~=2.11',
+    'setuptools>=36'
 ]
 
 test_requirements = [
