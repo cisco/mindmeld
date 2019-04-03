@@ -124,6 +124,7 @@ class ApplicationManager:
                 'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
             params.timestamp (long, optional): A unix time stamp for the request (in seconds).
+            frame (dict, optional): A dictionary specifying the frame of the conversation
             context (dict, optional): A dictionary of app-specific data
             history (list, optional): A list of previous and current responder objects \
                                       through interactions with workbench
