@@ -107,8 +107,9 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
     Returns:
         (tuple): tuple containing:
 
-            * response (list, dict): System Entity Recognizer service response that consist
-            of a list of dicts, each corresponding to a single prediction
+            * response (list, dict): Response from the System Entity Recognizer service that consists
+            of a list of dicts, each corresponding to a single prediction or just a dict, corresponding
+            to a single prediction
             * response_code (int): http status code
     """
     if sentence == '':
@@ -229,16 +230,16 @@ def resolve_system_entity(query, entity_type, span):
 
 
 def _duckling_item_to_query_entity(query, item, offset=0):
-    """Converts an item from System Entity Recognizer service into a QueryEntity
+    """Converts an item from the output of duckling into a QueryEntity
 
     Args:
-        query (Query): The query
-        item (dict): The System Entity Recognizer service item
+        query (Query): The query to construct the QueryEntity from
+        item (dict): The duckling item
         offset (int, optional): The offset into the query that the item's
             indexing begins
 
     Returns:
-        QueryEntity: The query entity described by the System Entity Recognizer service item or \
+        QueryEntity: The query entity described by the duckling item or \
             None if no item is present
     """
     if item:
@@ -251,16 +252,16 @@ def _duckling_item_to_query_entity(query, item, offset=0):
 
 
 def _duckling_item_to_entity(item):
-    """Converts an item from System Entity Recognizer service into an Entity
+    """Converts an item from the output of duckling into an Entity
 
     Args:
-        query (Query): The query
-        item (dict): The System Entity Recognizer service item
+        query (Query): The query to construct the QueryEntity from
+        item (dict): The duckling item
         offset (int, optional): The offset into the query that the item's
             indexing begins
 
     Returns:
-        Entity: The entity described by the System Entity Recognizer service item
+        Entity: The entity described by the duckling item
     """
     value = {}
     dimension = item['dim']
