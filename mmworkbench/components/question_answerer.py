@@ -59,16 +59,14 @@ class QuestionAnswerer:
 
         Examples:
 
-        ```
-            question_answerer.get(index='menu_items',
-                                  name='pork and shrimp',
-                                  restaurant_id='B01CGKGQ40',
-                                  _sort='price',
-                                  _sort_type='asc')
-        ```
+            >>> question_answerer.get(index='menu_items',
+                                      name='pork and shrimp',
+                                      restaurant_id='B01CGKGQ40',
+                                      _sort='price',
+                                      _sort_type='asc')
 
         Args:
-            index (str): The name of an index
+            index (str): The name of an index.
             id (str): The id of a particular document to retrieve.
             _sort (str): Specify the knowledge base field for custom sort.
             _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
@@ -76,7 +74,7 @@ class QuestionAnswerer:
             _sort_location (dict): The origin location to be used when sorting by distance.
 
         Returns:
-            a list of matching documents
+            list: A list of matching documents.
         """
 
         doc_id = kwargs.get('id')
@@ -418,8 +416,8 @@ class Search:
 
         Examples:
 
-        s = question_answerer.build_search(index='dish')
-        s.query(name='pad thai')
+            >>> s = question_answerer.build_search(index='dish')
+            >>> s.query(name='pad thai')
 
         In the example above the query text "pad thai" will be used to match against document field
         "name" in knowledge base index "dish".
@@ -453,15 +451,15 @@ class Search:
         Examples:
 
         add text filter:
-        s = question_answerer.build_search(index='menu_items')
-        s.filter(restaurant_id='B01CGKGQ40')
+            >>> s = question_answerer.build_search(index='menu_items')
+            >>> s.filter(restaurant_id='B01CGKGQ40')
 
         add range filter:
-        s = question_answerer.build_search(index='menu_items')
-        s.filter(field='price', gte=1, lt=10)
+                >>> s = question_answerer.build_search(index='menu_items')
+                >>> s.filter(field='price', gte=1, lt=10)
 
         Args:
-            a keyword argument to specify the filter text and the knowledge base text field.
+            kwargs: A keyword argument to specify the filter text and the knowledge base text field.
             field (str): knowledge base field name for range filter.
             gt (number or str): range filter operator for greater than.
             gte (number or str): range filter operator for greater than or equal to.
@@ -469,7 +467,7 @@ class Search:
             lte (number or str): range filter operator for less or equal to.
 
         Returns:
-            Search: a new Search object with added search criteria.
+            Search: A new Search object with added search criteria.
         """
         new_search = self._clone()
         new_search._build_clause("filter", **kwargs)

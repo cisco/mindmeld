@@ -105,12 +105,13 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
             is not also specified, this parameter is ignored.
 
     Returns:
-        (tuple): tuple containing:
+        (tuple): A tuple containing:
 
             * response (list, dict): Response from the System Entity Recognizer service that consists
             of a list of dicts, each corresponding to a single prediction or just a dict, corresponding
-            to a single prediction
-            * response_code (int): http status code
+            to a single prediction.
+
+            * response_code (int): http status code.
     """
     if sentence == '':
         return {}, SUCCESSFUL_HTTP_CODE
