@@ -5,3 +5,5 @@ sphinx-autobuild==0.6.0
 sphinx_rtd_theme==0.4.3
 pandoc==1.0.0b2
 mock==2.0.0
+flake8==3.5.0
+pylint>=2.3.1
