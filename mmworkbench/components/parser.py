@@ -122,7 +122,7 @@ class Parser:
             role_type = entity.entity.role
             if role_type:
                 # Append role type to entity type with - separator
-                entity_with_role_type = entity_type + '-' + role_type
+                entity_with_role_type = entity_type + '--' + role_type
                 if entity_with_role_type in self._configured_entities:
                     entity_type = entity_with_role_type
             if entity_type not in self._configured_entities:
