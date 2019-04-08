@@ -66,7 +66,6 @@ class Parser:
         self.config = get_parser_config(app_path, config, domain, intent) or {}
         configured_entities = set()
         for entity_type, entity_config in self.config.items():
-            # Replace . with - since . has a special meaning for the parser
             configured_entities.add(entity_type)
             configured_entities.update(entity_config.keys())
 
@@ -122,6 +121,7 @@ class Parser:
             entity_type = entity.entity.type
             role_type = entity.entity.role
             if role_type:
+                # Append role type to entity type with - separator
                 entity_with_role_type = entity_type + '-' + role_type
                 if entity_with_role_type in self._configured_entities:
                     entity_type = entity_with_role_type
