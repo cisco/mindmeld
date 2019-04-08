@@ -72,7 +72,7 @@ class RoleClassifier(Classifier):
         return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
-        """Trains a statistical model for role classification using the provided training examples
+        """Trains a statistical model for role classification using the provided training examples.
 
         Args:
             queries (list of ProcessedQuery): The labeled queries to use as training data
@@ -122,12 +122,19 @@ class RoleClassifier(Classifier):
         return {'model': self._model, 'roles': self.roles}
 
     def dump(self, model_path, incremental_model_path=None):
+        """Persists the trained role classification model to disk.
+
+        Args:
+            model_path (str): The model path.
+            incremental_model_path (str, Optional): The timestamped folder where the cached \
+                models are stored.
+        """
         logger.info('Saving role classifier: domain=%r, intent=%r, entity=%r',
                     self.domain, self.intent, self.entity_type)
         super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):
-        """Loads the trained role classification model from disk
+        """Loads the trained role classification model from disk.
 
         Args:
             model_path (str): The location on disk where the model is stored
@@ -165,7 +172,7 @@ class RoleClassifier(Classifier):
         self.dirty = False
 
     def predict(self, query, entities, entity_index):  # pylint: disable=arguments-differ
-        """Predicts a role for the given entity using the trained role classification model
+        """Predicts a role for the given entity using the trained role classification model.
 
         Args:
             query (Query): The input query
@@ -185,8 +192,8 @@ class RoleClassifier(Classifier):
         return self._model.predict([(query, entities, entity_index)])[0]
 
     def predict_proba(self, query, entities, entity_index):  # pylint: disable=arguments-differ
-        """Runs prediction on a given entity and generates multiple role hypotheses with their
-        associated probabilities using the trained role classification model
+        """Runs prediction on a given entity and generates multiple role hypotheses and
+        associated probabilities using the trained role classification model.
 
         Args:
             query (Query): The input query
@@ -212,6 +219,7 @@ class RoleClassifier(Classifier):
     def view_extracted_features(self, query, entities, entity_index):
         """
         Extracts features for a given entity for role classification.
+
         Args:
             query (Query or str): The input query
             entities (list): The entities in the query

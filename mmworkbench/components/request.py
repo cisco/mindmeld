@@ -61,6 +61,18 @@ PARAM_VALIDATORS = {
 
 @attr.s(frozen=False, kw_only=True)
 class Params:
+    """
+    A class that contains parameters that modify how the user query is parsed.
+
+    Attributes:
+        previous_params (dict): Dictionary for storing information across dialogue turns.
+        allowed_intents (list, str): A list of intents that you can set to force the language processor to choose from.
+        target_dialogue_state (str): The name of the dialogue handler that you want to reach in the next turn.
+        time_zone (str):  The name of an IANA time zone, such as 'America/Los_Angeles', or 'Asia/Kolkata'.
+        timestamp (long): A unix time stamp for the request accurate to the nearest second.
+        dynamic_resource (dict): A dictionary containing data used to influence the language classifiers by adding
+            resource data for the given turn.
+    """
     previous_params = attr.ib(default=None)
     allowed_intents = attr.ib(default=[])
     target_dialogue_state = attr.ib(default=None)
@@ -69,6 +81,15 @@ class Params:
     dynamic_resource = attr.ib(default={})
 
     def validate_param(self, name):
+        """
+        Perform validation on the value of a specific parameter in the Params object.
+
+        Args:
+            name (str): Name of the parameter to be validated.
+
+        Returns:
+            bool: True/False depending on success of the validation, None if the param name does not exist.
+        """
         validator = PARAM_VALIDATORS.get(name)
         param = vars(self).get(name)
         if param:
@@ -76,6 +97,15 @@ class Params:
         return param
 
     def dm_params(self, handler_map):
+        """
+        Check that the value of the 'target_dialogue_state' parameter is a valid dialogue state for the application.
+
+        Args:
+            handler_map (dict): Mapping from dialogue state to the function handler that gets called when in the state.
+
+        Returns:
+            dict: single item dictionary with the parameter value if valid and None if not.
+        """
         target_dialogue_state = self.validate_param('target_dialogue_state')
         if target_dialogue_state and target_dialogue_state not in handler_map:
             logger.error("Target dialogue state %s does not match any dialogue state names "
@@ -85,12 +115,30 @@ class Params:
         return {'target_dialogue_state': target_dialogue_state}
 
     def nlp_params(self):
+        """
+        Validate time zone, timestamp, and dynamic resource parameters.
+
+        Returns:
+            dict: Mapping from parameter name to bool depending on validation.
+        """
         return {param: self.validate_param(param)
                 for param in ('time_zone', 'timestamp', 'dynamic_resource')}
 
 
 @attr.s(frozen=True, kw_only=True)
 class FrozenParams(Params):
+    """
+    An immutable version of the Params object.
+
+    Attributes:
+        previous_params (dict): Dictionary for storing information across dialogue turns.
+        allowed_intents (list, str): A list of intents that you can set to force the language processor to choose from.
+        target_dialogue_state (str): The name of the dialogue handler that you want to reach in the next turn.
+        time_zone (str):  The name of an IANA time zone, such as 'America/Los_Angeles', or 'Asia/Kolkata'.
+        timestamp (long): A unix time stamp for the request accurate to the nearest second.
+        dynamic_resource (dict): A dictionary containing data used to influence the language classifiers by adding
+            resource data for the given turn.
+    """
     previous_params = attr.ib(default=None)
     allowed_intents = attr.ib(default=tuple(), converter=tuple)
     target_dialogue_state = attr.ib(default=None)
@@ -102,6 +150,27 @@ class FrozenParams(Params):
 
 @attr.s(frozen=True, kw_only=True)
 class Request:
+    """
+    The Request is an object passed in through the Dialogue Manager and contains all the information provided by the
+    application client for the dialogue handler to act on. Note: the Request object is read-only since it represents
+    the client state, which should not be mutated.
+
+    Attributes:
+        domains (str): Domain of the current query
+        intent (str): Intent of the current query
+        entities (list): A list of entities in the current query
+        history (list): List of previous and current responder objects (de-serialized) up to the current conversation
+        text (str): The query text
+        frame (): Immutables Map of stored data across multiple dialogue turns
+        params (Params): An object that modifies how Workbench process the current turn
+        context (): Immutables Map containing front-end client state that is passed to the application from the client
+            in the request
+        confidences (): Immutables Map of keys ``domains``, ``intents``, ``entities`` and ``roles`` containing
+            confidence probabilities across all labels for each classifier.
+        nbest_transcripts_text (tuple): List of alternate n-best transcripts from an ASR system
+        nbest_transcripts_entities (tuple): List of lists of extracted entities for each of the n-best transcripts
+        nbest_aligned_entities (tuple): List of lists of aligned entities for each of the n-best transcripts
+    """
     domain = attr.ib(default=None)
     intent = attr.ib(default=None)
     entities = attr.ib(default=tuple(), converter=tuple)

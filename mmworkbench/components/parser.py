@@ -380,7 +380,7 @@ def _generate_dependent_rules(dep_type, config, symbol_template, features, head_
 
 
 def generate_grammar(config, entity_types=None, relaxed=False, unique_entities=20):
-    """Generates a feature context free grammar from the provided parser config
+    """Generates a feature context free grammar from the provided parser config.
 
     Args:
         config (dict): The parser configuration

@@ -64,10 +64,10 @@ class QuestionAnswerer:
         search criteria. This API provides a simple interface for developers to specify a list of
         knowledge base field and query string pairs to find best matches in a similar way as in
         common Web search interfaces. The knowledge base fields to be used depend on the mapping
-        between NLU entity types and corresponding knowledge base objects, e.g. “cuisine” entity
-        type can be mapped to a knowledge base object or an attribute of a knowledge base object.
+        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine” entity
+        type can be mapped to either a knowledge base object or an attribute of a knowledge base object.
         The mapping is often application specific and is dependent on the data model developers
-        choose to use when building knowledge base.
+        choose to use when building the knowledge base.
 
         Examples:
 
@@ -136,7 +136,7 @@ class QuestionAnswerer:
         return results
 
     def build_search(self, index, ranking_config=None):
-        """build a search object for advanced filtered search.
+        """Build a search object for advanced filtered search.
 
         Args:
             index (str): index name of knowledge base object.
@@ -207,14 +207,14 @@ class QuestionAnswerer:
             app_namespace (str): The namespace of the app. Used to prevent
                 collisions between the indices of this app and those of other
                 apps.
-            index_name (str): The name of the new index to be created
+            index_name (str): The name of the new index to be created.
             data_file (str): The path to the data file containing the documents
                 to be imported into the knowledge base index. It could be
                 either json or jsonl file.
-            es_host (str): The Elasticsearch host server
-            es_client (Elasticsearch): The Elasticsearch client
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
             connect_timeout (int, optional): The amount of time for a
-            connection to the Elasticsearch host
+                connection to the Elasticsearch host.
         """
         def _doc_count(data_file):
             with open(data_file) as data_fp:
@@ -788,8 +788,8 @@ class Search:
                     clause = {
                         "term": {
                             "id": self.value
-                            }
                         }
+                    }
                 else:
                     clause = {
                         "match": {
@@ -917,6 +917,6 @@ class Search:
 
             # validate the sort field is number, date or location field
             if not self.field_info.is_number_field() and not self.field_info.is_date_field() and \
-                    not self.field_info.is_location_field():
+                not self.field_info.is_location_field():
                 raise ValueError('Custom sort criteria can only be defined for'
                                  + ' \'number\', \'date\' or \'location\' fields.')
