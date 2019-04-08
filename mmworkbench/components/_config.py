@@ -715,7 +715,8 @@ def _get_default_parser_config():
 
 
 def _expand_parser_config(config):
-    return {head: _expand_group_config(group) for head, group in config.items()}
+    # Replace with -- since | has a special meaning for parser
+    return {head.replace('|', '--'): _expand_group_config(group) for head, group in config.items()}
 
 
 def _expand_group_config(group_config):
@@ -803,14 +804,15 @@ def _expand_group_config(group_config):
             except (AttributeError, ValueError):
                 # simple style config -- dependent is a str
                 dep_type = dependent
-
-            expanded[dep_type] = config
+            # Replace with -- since | has a special meaning for parser
+            expanded[dep_type.replace('|', '--')] = config
     else:
         for dep_type, dep_config in group_config.items():
             config = copy.copy(DEFAULT_PARSER_DEPENDENT_CONFIG)
             dep_config.pop('type', None)
             config.update(dep_config)
-            expanded[dep_type] = config
+            # Replace with -- since | has a special meaning for parser
+            expanded[dep_type.replace('|', '--')] = config
     return expanded
 
 

@@ -75,6 +75,54 @@ class TestBasicParser:
         assert entities
 
 
+class TestRoleParser:
+    """A set of tests for a parser which has nested groups"""
+    CONFIG = {
+        'dish|beverage': ['option|beverage', 'size'],
+        'dish': ['option', 'size']
+    }
+
+    @classmethod
+    def setup_class(cls):
+        """Creates the parser for this group of tests"""
+        cls.parser = Parser(config=cls.CONFIG)
+
+    def test_generic(self):
+        """Tests groups where no roles are specified in the config"""
+        query = markup.load_query('{noodles|dish|main_course} with {tofu|option}')
+        entities = self.parser.parse_entities(query.query, query.entities)
+
+        assert len(entities) == 2
+        assert entities[0].children == (entities[1],)
+        assert entities[1].parent == entities[0]
+
+    def test_with_role(self):
+        """Tests groups when roles are explicitly specified in the config"""
+        text = '{large|size} {latte|dish|beverage} {ice|option|beverage}'
+        query = markup.load_query(text)
+        entities = self.parser.parse_entities(query.query, query.entities)
+
+        assert len(entities) == 3
+        assert entities[0].parent == entities[1]
+        assert entities[1].children == (entities[0], entities[2])
+
+        text = 'I’d like a {muffin|dish|baked_good} with {no sugar|option|beverage}'
+        query = markup.load_query(text)
+        entities = self.parser.parse_entities(query.query, query.entities)
+
+        assert len(entities) == 2
+        assert entities[0].children is None
+        assert entities[1].parent is None
+
+        text = 'I’d like a {latte|dish|beverage} with {maple syrup|option|general}'
+        query = markup.load_query(text)
+        entities = self.parser.parse_entities(query.query, query.entities)
+
+        assert len(entities) == 2
+        assert entities[0].children is None
+        assert entities[1].parent is None
+
+
 class TestNestedParser:
     """A set of tests for a parser which has nested groups"""
     CONFIG = {
