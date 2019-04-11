@@ -21,7 +21,7 @@ from pkg_resources import DistributionNotFound, VersionConflict
 
 from .exceptions import WorkbenchVersionWarning, WorkbenchVersionError
 
-current = '4.0.1'
+current = '4.0.2'
 
 logger = logging.getLogger(__name__)
 
