@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-This module contains the intent classifier component of the Workbench natural language processor.
+This module contains the intent classifier component of the MindMeld natural language processor.
 """
 import logging
 

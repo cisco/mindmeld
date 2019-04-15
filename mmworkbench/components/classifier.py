@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """
-This module contains the base class for all the machine-learned classifiers in Workbench.
+This module contains the base class for all the machine-learned classifiers in MindMeld.
 """
 from abc import ABC, abstractmethod
 import json
@@ -104,7 +104,7 @@ class ClassifierConfig:
 
 
 class Classifier(ABC):
-    """The base class for all the machine-learned classifiers in Workbench. A classifier is a \
+    """The base class for all the machine-learned classifiers in MindMeld. A classifier is a \
     machine-learned model that categorizes input examples into one of the pre-determined class \
     labels. Among other functionality, each classifier provides means by which to fit a \
     statistical model on a given training dataset and then use the trained model to make \
@@ -212,7 +212,7 @@ class Classifier(ABC):
         if not queries:
             logger.warning('Could not fit model since no relevant examples were found. '
                            'Make sure the labeled queries for training are placed in "%s" '
-                           'files in your Workbench project.', label_set)
+                           'files in your MindMeld project.', label_set)
             return
 
         if len(set(classes)) <= 1:
@@ -304,7 +304,7 @@ class Classifier(ABC):
         if not queries:
             logger.info('Could not evaluate model since no relevant examples were found. Make sure '
                         'the labeled queries for evaluation are placed in "%s" files '
-                        'in your Workbench project.', label_set)
+                        'in your MindMeld project.', label_set)
             return None
 
         evaluation = self._model.evaluate(queries, labels)
@@ -404,7 +404,7 @@ class Classifier(ABC):
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
             if not hasattr(self._model, 'mmworkbench_version'):
-                msg = "Your trained models are incompatible with this version of Workbench. " \
+                msg = "Your trained models are incompatible with this version of MindMeld. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
 

@@ -52,7 +52,7 @@ def freeze_params(params):
 class ApplicationManager:
     """The Application Manager is the core orchestrator of the MindMeld platform. It receives \
     a client request, and processes that request by passing it through all the necessary \
-    components of Workbench. Once processing is complete, the application manager returns \
+    components of MindMeld. Once processing is complete, the application manager returns \
     the final response back to the client.
 
         Attributes:
@@ -99,7 +99,7 @@ class ApplicationManager:
         return self.nlp.ready
 
     def load(self):
-        """Loads all resources required to run a Workbench application."""
+        """Loads all resources required to run a MindMeld application."""
         if self.async_mode:
             return self._load_async()
 
@@ -139,7 +139,7 @@ class ApplicationManager:
             frame (dict, optional): A dictionary specifying the frame of the conversation
             context (dict, optional): A dictionary of app-specific data
             history (list, optional): A list of previous and current responder objects \
-                                      through interactions with workbench
+                                      through interactions with MindMeld
             verbose (bool, optional): Flag to return confidence scores for domains and intents
 
         Returns:
@@ -186,7 +186,7 @@ class ApplicationManager:
             params.timestamp (long, optional): A unix time stamp for the request (in seconds).
             context (dict, optional): A dictionary of app-specific data
             history (list, optional): A list of previous and current responder objects
-                                      through interactions with workbench
+                                      through interactions with MindMeld
             verbose (bool, optional): Flag to return confidence scores for domains and intents
 
         Returns:

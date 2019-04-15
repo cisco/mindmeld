@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """
-This module contains the role classifier component of the Workbench natural language processor.
+This module contains the role classifier component of the MindMeld natural language processor.
 """
 import logging
 
@@ -153,7 +153,7 @@ class RoleClassifier(Classifier):
             # raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
             if not hasattr(self._model, 'mmworkbench_version'):
-                msg = "Your trained models are incompatible with this version of Workbench. " \
+                msg = "Your trained models are incompatible with this version of MindMeld. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
             try:

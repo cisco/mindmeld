@@ -1,25 +1,25 @@
 Key Concepts
 ============
 
-Every Workbench developer should know the terms defined in this section. It's best to read the entire section through, since later definitions build on earlier ones.
+Every MindMeld developer should know the terms defined in this section. It's best to read the entire section through, since later definitions build on earlier ones.
 
 .. glossary::
 
     app
       |
-      | A conversational application built using the MindMeld Workbench framework. Examples include voice and chat assistants deployed on messaging platforms like `Spark <https://depot.ciscospark.com/bots>`_, `Slack <https://slack.com/apps/category/At0MQP5BEF-bots>`_, `Messenger <https://messenger.fb.com>`_, or `Skype <https://bots.botframework.com>`_; or, on voice-activated devices like `Alexa <https://developer.amazon.com/alexa-skills-kit>`_ or `Google Home <https://developers.google.com/actions/>`_.
+      | A conversational application built using the MindMeld framework. Examples include voice and chat assistants deployed on messaging platforms like `Spark <https://depot.ciscospark.com/bots>`_, `Slack <https://slack.com/apps/category/At0MQP5BEF-bots>`_, `Messenger <https://messenger.fb.com>`_, or `Skype <https://bots.botframework.com>`_; or, on voice-activated devices like `Alexa <https://developer.amazon.com/alexa-skills-kit>`_ or `Google Home <https://developers.google.com/actions/>`_.
 
     project
       |
-      | A collection of all the data and code necessary to build a conversational app for a particular use case, stored in the Workbench-specified directory structure.
+      | A collection of all the data and code necessary to build a conversational app for a particular use case, stored in the MindMeld-specified directory structure.
 
     blueprint
       |
-      | A pre-configured project, distributed with Workbench as an example app. Available blueprints include :doc:`Food Ordering <../blueprints/food_ordering>`, :doc:`Video Discovery <../blueprints/video_discovery>`, and :doc:`Home Assistant <../blueprints/home_assistant>`.
+      | A pre-configured project, distributed with MindMeld as an example app. Available blueprints include :doc:`Food Ordering <../blueprints/food_ordering>`, :doc:`Video Discovery <../blueprints/video_discovery>`, and :doc:`Home Assistant <../blueprints/home_assistant>`.
 
     query / request
       |
-      | A user's spoken or typed natural language input to the conversational app. Workbench apps use statistical `natural language processing <https://en.wikipedia.org/wiki/Natural_language_processing>`_ models to understand the query and determine what the user wants.
+      | A user's spoken or typed natural language input to the conversational app. MindMeld apps use statistical `natural language processing <https://en.wikipedia.org/wiki/Natural_language_processing>`_ models to understand the query and determine what the user wants.
 
     domain
       |
@@ -39,7 +39,7 @@ Every Workbench developer should know the terms defined in this section. It's be
 
     system entity
       |
-      | An application-agnostic entity that is automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. See :ref:`system-entities`.
+      | An application-agnostic entity that is automatically detected by MindMeld. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. See :ref:`system-entities`.
 
     role
       |
@@ -55,7 +55,7 @@ Every Workbench developer should know the terms defined in this section. It's be
 
     knowledge base index
       |
-      | A collection of objects of the same type within the knowledge base. Workbench organizes the knowledge base as a set of indexes for efficient retrieval and ranking based on developer-supplied search criteria.
+      | A collection of objects of the same type within the knowledge base. MindMeld organizes the knowledge base as a set of indexes for efficient retrieval and ranking based on developer-supplied search criteria.
       |
       | For instance, a food ordering app might have a ``restaurant`` index for storing the details of its branch locations, including metadata like name, address, phone number, cuisine type, and ratings for each entry. It might also have a separate ``menu_items`` index that stores all the dishes offered at its restaurant location with details like name, price, description and add-ons.
 

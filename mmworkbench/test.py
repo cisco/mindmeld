@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains test utilities for workbench.
+"""This module contains test utilities for MindMeld.
 """
 from .components.dialogue import Conversation
 

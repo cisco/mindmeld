@@ -574,7 +574,7 @@ def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, ent
       config specified by *_MODEL_CONFIG in config.py, e.g.
       INTENT_MODEL_CONFIG.
 
-    Otherwise, use the workbench default config for the classifier type
+    Otherwise, use the MindMeld default config for the classifier type
 
 
     Args:
@@ -667,7 +667,7 @@ def get_parser_config(app_path=None, config=None, domain=None, intent=None):
     given path.
 
     Args:
-        app_path (str, optional): The location of the workbench app
+        app_path (str, optional): The location of the MindMeld app
         config (dict, optional): A config object to use. This will
             override the config specified by the app's config.py file.
             If necessary, this object will be expanded to a fully
@@ -834,7 +834,7 @@ def get_nlp_config(app_path=None, config=None):
     given path.
 
     Args:
-        app_path (str, optional): The location of the workbench app
+        app_path (str, optional): The location of the MindMeld app
         config (dict, optional): A config object to use. This will
             override the config specified by the app's config.py file.
             If necessary, this object will be expanded to a fully

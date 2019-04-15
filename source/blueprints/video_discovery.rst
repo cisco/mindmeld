@@ -1,11 +1,11 @@
 Video Discovery
 ===============
 
-In this step-by-step walkthrough, you'll build a conversational application that allows users to browse and find movies and TV shows from a large content catalog, using the Workbench blueprint for this purpose.
+In this step-by-step walkthrough, you'll build a conversational application that allows users to browse and find movies and TV shows from a large content catalog, using the MindMeld blueprint for this purpose.
 
 .. note::
 
-   Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for Workbench before continuing on with this blueprint tutorial.
+   Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for MindMeld before continuing on with this blueprint tutorial.
 
 1. The Use Case
 ^^^^^^^^^^^^^^^
@@ -87,7 +87,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
    python -c "import mmworkbench as wb; wb.blueprint('video_discovery');"
 
-This should create a Workbench project folder called ``video_discovery`` in your current directory with the following structure:
+This should create a MindMeld project folder called ``video_discovery`` in your current directory with the following structure:
 
 .. image:: /images/directory_video_discovery.png
     :width: 250px
@@ -367,7 +367,7 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. tip::
 
-  During active development, it helps to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+  During active development, it helps to increase the :doc:`MindMeld logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
 
 To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
 
@@ -474,7 +474,7 @@ For example, you can change the feature extraction settings to use bag of trigra
    Selecting hyperparameters using k-fold cross-validation with 5 splits
    Best accuracy: 98.36%, params: {'C': 10, 'class_weight': {0: 0.5805006811989102, 1: 3.431368821292776, 2: 0.9903185247275775, 3: 5.1444117647058825, 4: 2.906170886075949, 5: 0.6776020174232005}, 'fit_intercept': False}
 
-You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various Workbench classifiers.
+You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various MindMeld classifiers.
 
 .. admonition:: Exercise
 
@@ -492,7 +492,7 @@ Since we do not have entity groups in the video discovery app, we do not need a 
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top ten entries in our ``videos`` index and present them as suggestions to the user. For that, we sort the videos by popularity when using the :doc:`Question Answerer <../userguide/kb>`:
+The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top ten entries in our ``videos`` index and present them as suggestions to the user. For that, we sort the videos by popularity when using the :doc:`Question Answerer <../userguide/kb>`:
 
 .. code:: python
 
@@ -510,7 +510,7 @@ Look at the ``show_content`` implementation in ``__init__.py`` to better underst
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the :class:`Conversation` class in Workbench to perform an end-to-end test of your conversational app.
+Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the :class:`Conversation` class in MindMeld to perform an end-to-end test of your conversational app.
 
 For instance:
 
@@ -584,7 +584,7 @@ For instance:
        "type": "movie"
    }
 
-The :meth:`say()` method packages the input text in a user request object and passes it to the Workbench Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested movies from a particular actor, in a single query. The app responded, as expected, with an initial response acknowledging the filters used and a list of videos.
+The :meth:`say()` method packages the input text in a user request object and passes it to the MindMeld Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested movies from a particular actor, in a single query. The app responded, as expected, with an initial response acknowledging the filters used and a list of videos.
 
 You can also try out multi-turn dialogues:
 

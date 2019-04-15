@@ -8,7 +8,7 @@ The :ref:`Language Parser <arch_parser>`
  - models the `dependencies <https://en.wikipedia.org/wiki/Dependency_grammar>`_ between different entity types in an application, based on a developer-provided configuration
  - clusters the :doc:`recognized entities <entity_recognizer>` in a query together, grouping them into a meaningful hierarchy (called a :term:`entity group`) that captures how different entities relate to each other
 
-Not every Workbench app needs a parser.
+Not every MindMeld app needs a parser.
 
 .. note::
 
@@ -26,7 +26,7 @@ The main entity in an entity group is the **head** entity. The other, **dependen
 Figure out whether your app needs a parser
 ------------------------------------------
 
-Your Workbench app needs a language parser only if **both** the conditions in the table below are true.
+Your MindMeld app needs a language parser only if **both** the conditions in the table below are true.
 
  +--------------+------------------------------------------------------------------------------------+
  | Condition #1 | The app has one or more :term:`dependent (child) <dependent / child>`              |
@@ -91,11 +91,11 @@ Both conditions are true, so the app needs a parser.
 How the configuration instructs the parser
 ------------------------------------------
 
-What lets Workbench know about the head and dependent entity types for your application is the :data:`PARSER_CONFIG` dictionary in ``config.py``, your app configuration file. In :data:`PARSER_CONFIG`, the keys are the head entity types, and the values capture information about the corresponding dependent entity types.
+What lets MindMeld know about the head and dependent entity types for your application is the :data:`PARSER_CONFIG` dictionary in ``config.py``, your app configuration file. In :data:`PARSER_CONFIG`, the keys are the head entity types, and the values capture information about the corresponding dependent entity types.
 
 Using the head-dependent relationships defined in the configuration, the parser analyzes the detected entities in a query and hypothesizes different potential ways of grouping the entities together. Each such grouping is called a candidate **parse**. After generating these parse hypotheses, the parser uses a set of linguistically-motivated heuristics to pick the most likely candidate.
 
-Workbench supports both simple and advanced forms of parser configuration. Recommended practice is to get the parser up and running with the simple configuration. If the app achieves satisfactory accuracy, you do not need to move on to the advanced configuration. If, however, you want to experiment with fine-tuned parsing, the advanced configuration makes that possible.
+MindMeld supports both simple and advanced forms of parser configuration. Recommended practice is to get the parser up and running with the simple configuration. If the app achieves satisfactory accuracy, you do not need to move on to the advanced configuration. If, however, you want to experiment with fine-tuned parsing, the advanced configuration makes that possible.
 
 Think about whether your app must support queries where (1) there are multiple head entities of the same type, and (2) those head entities have many potential dependents. For example, "Get me a pepperoni pizza with extra cheese, a calzone, and two diet cokes." Such a query is inherently ambiguous because there is more than one way to group its entities that satisfies the head-dependent relationships a simple configuration can define. For apps that deal with queries like this, fine-tuning the settings available in the advanced configuration is highly recommended. :ref:`Later in this chapter <food_parser_advanced_config>`, we explore this issue in detail.
 
@@ -319,7 +319,7 @@ Your app should exhibit decent baseline parsing accuracy out-of-the-box using d
 Learn how to create an advanced parser configuration (optional)
 ---------------------------------------------------------------
 
-Workbench offers an advanced parser configuration format to provide fine-grained control over parser behavior. While both the simple and the advanced configurations define head-dependent relationships, in the advanced configuration you can specify that *only a dependent entity that satisfies certain constraints* can be attached to a compatible head entity. If chosen well, these constraints can help eliminate potentially incorrect parse hypotheses, resulting in significantly improved parsing accuracy.
+MindMeld offers an advanced parser configuration format to provide fine-grained control over parser behavior. While both the simple and the advanced configurations define head-dependent relationships, in the advanced configuration you can specify that *only a dependent entity that satisfies certain constraints* can be attached to a compatible head entity. If chosen well, these constraints can help eliminate potentially incorrect parse hypotheses, resulting in significantly improved parsing accuracy.
 
 Advanced configuration structure
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

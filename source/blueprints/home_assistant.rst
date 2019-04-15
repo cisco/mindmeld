@@ -13,7 +13,7 @@ Working through this blueprint will teach you how to
 
 .. note::
 
-   Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for Workbench before continuing on with this blueprint tutorial.
+   Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for MindMeld before continuing on with this blueprint tutorial.
 
 1. The Use Case
 ^^^^^^^^^^^^^^^
@@ -46,7 +46,7 @@ The full list of intents for all domains is illustrated below.
 
 .. image:: /images/hierarchy_home_assistant.png
 
-There are two types of entities in Workbench: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined in Workbench. Examples include ``sys_temperature``, ``sys_time``, and ``sys_interval``. Custom entities are defined by the developers of each application. Within each entity folder, the file ``gazetteer.txt`` contains the full list of values for each custom entity.
+There are two types of entities in MindMeld: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined in MindMeld. Examples include ``sys_temperature``, ``sys_time``, and ``sys_interval``. Custom entities are defined by the developers of each application. Within each entity folder, the file ``gazetteer.txt`` contains the full list of values for each custom entity.
 
 Home assistant defines and uses the following custom entities, which are grouped by domains below:
 
@@ -66,7 +66,7 @@ Home assistant defines and uses the following custom entities, which are grouped
 
 Home assistant uses three system entities: ``sys_time`` (time), ``sys_interval`` (interval) and ``sys_temperature`` (temperature). Some examples for annotation with system entities: "set my thermostat to turn on at {6 am|sys_time}" and "turn the heat off at {76 degrees|sys_temperature}".
 
-Queries can include more than one entity of the same type. In "change my alarm from 7 am to 6 am", for example, both "7 am" and "6 am" are ``sys_time`` entities. Just labeling both entities with the same type does not give Workbench enough information to understand the meaning of the query. We need to show the different *roles* that these two ``sys_time`` entities play in creating meaning. One is an "old time" that the alarm was set to, and the other is a "new time" that the user wants as a new setting for the alarm. We annotate the example as "change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}." This way, Workbench can interpret each entity correctly. See :doc:`Role Classifier <../userguide/role_classifier>`.
+Queries can include more than one entity of the same type. In "change my alarm from 7 am to 6 am", for example, both "7 am" and "6 am" are ``sys_time`` entities. Just labeling both entities with the same type does not give MindMeld enough information to understand the meaning of the query. We need to show the different *roles* that these two ``sys_time`` entities play in creating meaning. One is an "old time" that the alarm was set to, and the other is a "new time" that the user wants as a new setting for the alarm. We annotate the example as "change alarm from {7 am|sys_time|old_time} to {6 am|sys_time|new_time}." This way, MindMeld can interpret each entity correctly. See :doc:`Role Classifier <../userguide/role_classifier>`.
 
 .. admonition:: Exercise
 
@@ -78,7 +78,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
     python -c "import mmworkbench as wb; wb.blueprint('home_assistant');"
 
-This should create a Workbench project folder called ``home_assistant`` in your current directory with the following structure:
+This should create a MindMeld project folder called ``home_assistant`` in your current directory with the following structure:
 
 .. image:: /images/home_assistant_directory.png
     :width: 250px
@@ -90,7 +90,7 @@ This should create a Workbench project folder called ``home_assistant`` in your 
 
 Dialogue state logic can be arbitrarily complex. Simple dialogue state handlers just return a canned text response, while sophisticated ones can call third party APIs, calculate state transitions, and return complex responses.
 
-Workbench supports two ways to organize dialogue states in the Dialogue Manager:
+MindMeld supports two ways to organize dialogue states in the Dialogue Manager:
 
 #. Define **one dialogue state for each intent**, as seen in the Kwik-E-Mart blueprint. This is the simplest approach, but can lead to duplicated code.
 #. Define **one dialogue state for multiple intents**. This requires more work up front, but helps you consolidate duplicated dialogue state logic.
@@ -316,7 +316,7 @@ The ``domains`` directory contains the training data for intent classification a
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, applies Workbench's default machine learning settings.
+Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, applies MindMeld's default machine learning settings.
 
 .. code:: python
 
@@ -351,7 +351,7 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. tip::
 
-  During active development, it helps to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what is happening behind the scenes. All code snippets here assume that logging level is set to verbose.
+  During active development, it helps to increase the :doc:`MindMeld logging level <../userguide/getting_started>` to better understand what is happening behind the scenes. All code snippets here assume that logging level is set to verbose.
 
 To see how the trained NLP pipeline performs on a test query, use the :meth:`process` method.
 
@@ -463,7 +463,7 @@ We can also change the model for the intent classifier to Support Vector Machine
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 98.27%, params: {'C': 5000, 'kernel': 'rbf'}
 
-Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the :doc:`NaturalLanguageProcessor <../userguide/nlp>` in the user guide for more about training, tuning, and evaluating the various Workbench classifiers.
+Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the :doc:`NaturalLanguageProcessor <../userguide/nlp>` in the user guide for more about training, tuning, and evaluating the various MindMeld classifiers.
 
 Inspect the role classifiers
 """"""""""""""""""""""""""""
@@ -485,7 +485,7 @@ In the above case, the role classifier was able to correctly distinguish between
 Inspect the configuration
 """""""""""""""""""""""""
 
-The application configuration file, ``config.py``, at the top level of the home assistant folder, contains custom intent and domain classifier model configurations. These are defined as dictionaries named ``DOMAIN_CLASSIFIER_CONFIG`` and ``INTENT_CLASSIFIER_CONFIG``, respectively; other dictionaries include ``ENTITY_RECOGNIZER_CONFIG`` and ``ROLE_CLASSIFIER_CONFIG``. If no custom model configuration is added to ``config.py`` file, Workbench uses its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
+The application configuration file, ``config.py``, at the top level of the home assistant folder, contains custom intent and domain classifier model configurations. These are defined as dictionaries named ``DOMAIN_CLASSIFIER_CONFIG`` and ``INTENT_CLASSIFIER_CONFIG``, respectively; other dictionaries include ``ENTITY_RECOGNIZER_CONFIG`` and ``ROLE_CLASSIFIER_CONFIG``. If no custom model configuration is added to ``config.py`` file, MindMeld uses its default classifier configurations for training and evaluation. Here is an example of an intent configuration:
 
 .. code:: python
 
@@ -532,7 +532,7 @@ Since we do not have entity groups in the home assistant app, we do not need a p
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. Since the home assistant app has no knowledge base, no question answerer is not needed.
+The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. Since the home assistant app has no knowledge base, no question answerer is not needed.
 
 
 10. Testing and Deployment
@@ -553,7 +553,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
 The :meth:`say` method:
 
  - packages the input text in a user request object
- - passes the object to the Workbench Application Manager to a simulate an external user interaction with the app, and
+ - passes the object to the MindMeld Application Manager to a simulate an external user interaction with the app, and
  - outputs the textual part of the response sent by the dialogue manager.
 
 In the above example, we requested to set an alarm for 6 AM and the app responded, as expected, by confirming that the alarm was set.

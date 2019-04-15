@@ -9,8 +9,8 @@ The MindMeld Conversational AI Platform provides a robust end-to-end pipeline fo
 
 .. note::
 
-    The Application Manager, while part of Workbench, orchestrates behind the scenes and never needs developer attention.
-..    The Gateway, while part of the platform, is outside of Workbench.
+    The Application Manager, while part of MindMeld, orchestrates behind the scenes and never needs developer attention.
+..    The Gateway, while part of the platform, is outside of MindMeld.
 
 We will now explore the platform component by component.
 
@@ -52,7 +52,7 @@ The vocabularies for setting a thermostat and for interacting with a television 
 
 On the opposite end of the spectrum are apps with just one domain. Usually, all the functions that such apps provide are conceptually related and span a single realm of knowledge. For instance, a "Food Ordering" app could potentially handle multiple tasks like searching for restaurants, getting more information about a particular restaurant, placing an order, etc. But the vocabulary used for accomplishing all of these tasks is almost entirely shared, and hence could be modeled as one single domain called ``food``. The number of domains thus depends on the scope of the application.
 
-To learn how to train a machine-learned domain classification model in Workbench see the :doc:`Domain Classifier <domain_classifier>` section of this guide.
+To learn how to train a machine-learned domain classification model in MindMeld see the :doc:`Domain Classifier <domain_classifier>` section of this guide.
 
 
 .. _arch_intent_model:
@@ -78,7 +78,7 @@ Most domains in conversational apps have multiple intents. By convention, intent
 
 Every domain has its own separate intent classifier for categorizing the query into one of the intents defined within that domain. The app chooses the appropriate intent model at runtime, based on the predicted domain for the input query.
 
-To learn how to train intent classification models in Workbench, see the :doc:`Intent Classifier <intent_classifier>` section of this guide.
+To learn how to train intent classification models in MindMeld, see the :doc:`Intent Classifier <intent_classifier>` section of this guide.
 
 .. _arch_entity_model:
 
@@ -103,7 +103,7 @@ Most intents have multiple entities. By convention, entity names are nouns that 
 
 Since the set of relevant entity types might differ for each intent (even within the same domain), every intent has its own entity recognizer. Once the app establishes the domain and intent for a given query, the app then uses the appropriate entity model to detect entities in the query that are specific to the predicted intent.
 
-To learn how to build machine-learned entity recognition models in Workbench, see the :doc:`Entity Recognizer <entity_recognizer>` section of this guide.
+To learn how to build machine-learned entity recognition models in MindMeld, see the :doc:`Entity Recognizer <entity_recognizer>` section of this guide.
 
 .. _arch_role_model:
 
@@ -128,7 +128,7 @@ Here are examples of some entity types that might require role classification wh
 | banking | transfer_funds   | account_num | sender, recipient    |
 +---------+------------------+-------------+----------------------+
 
-To learn how to build role classification models in Workbench, see the :doc:`Role Classifier <role_classifier>` section of this guide.
+To learn how to build role classification models in MindMeld, see the :doc:`Role Classifier <role_classifier>` section of this guide.
 
 .. _arch_resolver:
 
@@ -137,9 +137,9 @@ Entity Resolver
 
 The Entity Resolver was introduced in Steps :ref:`6 <entity-mapping-files>` and :ref:`7 <entity_resolution>` of the Step-By-Step Guide. Entity resolution entails mapping each identified entity to a canonical value that can be looked up in an official catalog or database. For instance, the extracted entity "lemon bread" could resolve to "Iced Lemon Pound Cake (Product ID: 470)" and "SF" could resolve to "San Francisco, CA."
 
-Robust entity resolution is key to a seamless conversational experience because users generally refer to entities informally, using abbreviations, nicknames, and other aliases, rather than by official standardized names. The Entity Resolver in Workbench ensures high resolution accuracy by applying text relevance algorithms similar to those used in state-of-the-art information retrieval systems. Each entity has its own resolver trained to capture all plausible names for the entity, and variants on those names.
+Robust entity resolution is key to a seamless conversational experience because users generally refer to entities informally, using abbreviations, nicknames, and other aliases, rather than by official standardized names. The Entity Resolver in MindMeld ensures high resolution accuracy by applying text relevance algorithms similar to those used in state-of-the-art information retrieval systems. Each entity has its own resolver trained to capture all plausible names for the entity, and variants on those names.
 
-To learn how to build entity resolvers in Workbench, see the :doc:`Entity Resolver <entity_resolver>` section of this guide.
+To learn how to build entity resolvers in MindMeld, see the :doc:`Entity Resolver <entity_resolver>` section of this guide.
 
 
 .. _arch_parser:
@@ -156,9 +156,9 @@ The parser arranges the resolved entities in the :ref:`example <nlp_output>` abo
 
 The first two groups represent products to be ordered, whereas the last group contains store information. We call the main entity at the top in each group the *parent* or the `head <https://en.wikipedia.org/wiki/Head_(linguistics)>`_ whose *children* or `dependents <https://en.wikipedia.org/wiki/Dependent_(grammar)>`_ are the other entities in the group. The app can interpret this structured representation of the user's natural language input to decide on the next action and/or response. In the example, the next action might be to submit the order to a point-of-sale system, thus completing the user's order.
 
-Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The Language Parser in Workbench, by contrast, is a configuration-driven rule-based parser which works out-of-the-box with no need for training.
+Most natural language parsers used in NLP academic research need to be trained using expensive `treebank <https://en.wikipedia.org/wiki/Treebank>`_ data, which is hard to find and annotate for custom conversational domains. The Language Parser in MindMeld, by contrast, is a configuration-driven rule-based parser which works out-of-the-box with no need for training.
 
-To learn how to configure the Workbench parser for optimum performance in a specific app, see the :doc:`Language Parser <parser>` section of this guide.
+To learn how to configure the MindMeld parser for optimum performance in a specific app, see the :doc:`Language Parser <parser>` section of this guide.
 
 Now we have seen how the Natural Language Processor understands what the user wants. That is half of the job at hand. Responsibility for the other half — to respond appropriately to the user and advance the conversation — falls to the Question Answerer and the Dialogue Manager, respectively.
 
@@ -171,7 +171,7 @@ Most conversational apps today rely on a Knowledge Base to understand user reque
 
 The question answerer retrieves information from the knowledge base to identify the best answer candidates that satisfy a given set of constraints. For example, the question answerer for a restaurant app might rely on a knowledge base containing a detailed menu of all the available items, in order to identify dishes the user requests and to answer questions about them. Similarly, the question answerer for a voice-activated multimedia device might have a knowledge base containing detailed information about every song or album in a music library.
 
-The Workbench Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches.
+The MindMeld Question Answerer provides a flexible mechanism for retrieving and ranking relevant results from the knowledge base, with convenient interfaces for both simple and highly advanced searches.
 
 For documentation and examples, see the :doc:`Question Answerer<kb>` section of this guide.
 
@@ -183,9 +183,9 @@ Dialogue Manager
 
 The Dialogue Manager directs the flow of the conversation. It is a stateful component which analyzes each incoming query, then assigns the query to a dialogue state handler which in turn executes appropriate logic and returns a response to the user.
 
-Architecting the dialogue manager correctly is often one of the most challenging software engineering tasks when building a conversational app for a non-trivial use case. Workbench abstracts away many underlying complexities of dialogue management to offer a simple but powerful mechanism for defining application logic. Workbench provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. It also allows dialogue state handlers to invoke any arbitrary code for taking a specific action, completing a transaction, or obtaining the information necessary to formulate a response.
+Architecting the dialogue manager correctly is often one of the most challenging software engineering tasks when building a conversational app for a non-trivial use case. MindMeld abstracts away many underlying complexities of dialogue management to offer a simple but powerful mechanism for defining application logic. MindMeld provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. It also allows dialogue state handlers to invoke any arbitrary code for taking a specific action, completing a transaction, or obtaining the information necessary to formulate a response.
 
-For a practical introduction to dialogue state tracking in Workbench, see :doc:`Step 4 <../quickstart/04_define_the_dialogue_handlers>`. The :doc:`Dialogue Manager <dm>` section of this guide provides further examples.
+For a practical introduction to dialogue state tracking in MindMeld, see :doc:`Step 4 <../quickstart/04_define_the_dialogue_handlers>`. The :doc:`Dialogue Manager <dm>` section of this guide provides further examples.
 
 .. .. _arch_gateway:
 

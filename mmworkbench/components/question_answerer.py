@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """
-This module contains the question answerer component of Workbench.
+This module contains the question answerer component of MindMeld.
 """
 from abc import ABC, abstractmethod
 
@@ -445,7 +445,7 @@ class Search:
         return new_search
 
     def filter(self, **kwargs):
-        """Specify filter condition to be applied to specified knowledge base field. In Workbench
+        """Specify filter condition to be applied to specified knowledge base field. In MindMeld
         two types of filters are supported: text filter and range filters.
 
         Text filters are used to apply hard filters on specified knowledge base text fields.

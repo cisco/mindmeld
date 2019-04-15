@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains a collection of the core data structures used in workbench."""
+"""This module contains a collection of the core data structures used in MindMeld."""
 import logging
 
 
@@ -624,7 +624,7 @@ class Entity:
 
     @staticmethod
     def is_system_entity(entity_type):  # pylint: disable=method-hidden
-        """Checks whether the provided entity type is a Workbench-recognized system entity.
+        """Checks whether the provided entity type is a MindMeld-recognized system entity.
 
         Args:
             entity_type (str): An entity type

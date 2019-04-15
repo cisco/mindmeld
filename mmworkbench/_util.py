@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A module containing various utility functions for Workbench.
+"""A module containing various utility functions for MindMeld.
 These are capabilities that do not have an obvious home within the existing
 project structure.
 """
@@ -63,7 +63,7 @@ class Blueprint:
           |-kb.tar.gz
 
 
-    Within each blueprint directory `app.tar.gz` contains the workbench
+    Within each blueprint directory `app.tar.gz` contains the MindMeld
     application data (`app.py`, `domains`, `entities`, etc.) and `kb.tar.gz`
     contains the a JSON file for each index in the knowledge base.
 

@@ -13,7 +13,7 @@
 
 
 """
-This module is responsible for locating various Workbench app files.
+This module is responsible for locating various MindMeld app files.
 """
 import os
 import re
@@ -515,10 +515,10 @@ def get_cached_blueprint_path(name):
 
 
 def get_user_config_path():
-    """Gets the path to the current configuration file used by Workbench.
+    """Gets the path to the current configuration file used by MindMeld.
 
     Returns:
-        str: The path to the current user's workbench configuration file.
+        str: The path to the current user's MindMeld configuration file.
     """
     return USER_CONFIG_PATH
 
@@ -530,7 +530,7 @@ def get_app(app_path):
         app_path (str): The path to an application on disk
 
     Returns:
-        mmworkbench.app.Application: the workbench application
+        mmworkbench.app.Application: the MindMeld application
 
     Raises:
         WorkbenchImportError: when the application can not be found
