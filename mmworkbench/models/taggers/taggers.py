@@ -39,7 +39,7 @@ END_TAG = 'END'
 class Tagger:
     """A class for all sequence tagger models implemented in house.
     It is importent to follow this interface exactly when implementing a new model so that your
-    model is configured and trained as expected in the Workbench pipeline. Note that this follows
+    model is configured and trained as expected in the MindMeld pipeline. Note that this follows
     the sklearn estimator interface so that GridSearchCV can be used on our sequence models.
     """
     def __init__(self, **parameters):
@@ -69,7 +69,7 @@ class Tagger:
 
         Args:
             X (list): Generally a list of feature vectors, one for each training example
-            y (list): A list of classification labels (encoded by the label_encoder, NOT Workbench
+            y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld
                       entity objects)
         Returns:
             self
@@ -112,19 +112,19 @@ class Tagger:
     def setup_model(self, config):
         """Does any setup that should be run only once. Will be called before the first call
         to extract_features. This is often used to initialize model options based on what is
-        passed in through the Workbench config. For example, it could be used to initialize which
+        passed in through the MindMeld config. For example, it could be used to initialize which
         dimensionality reduction method to use in extract_features given the user provided model
         settings.
 
         Args:
-            config (ModelConfig): A Workbench model config object. This contains information such as
+            config (ModelConfig): A MindMeld model config object. This contains information such as
                                   model settings that can be used to setup the model.
         """
         return None
 
     def extract_features(self, examples, config, resources):
-        """Extracts all features from a list of Workbench examples. Processes the data and returns the
-        features in the format that is expected as an input to fit(). Note that the Workbench config
+        """Extracts all features from a list of MindMeld examples. Processes the data and returns the
+        features in the format that is expected as an input to fit(). Note that the MindMeld config
         and resources are passed in each time to make the underlying model implementation stateless.
 
         Args:
@@ -146,7 +146,7 @@ class Tagger:
     def extract_and_predict(self, examples, config, resources):
         """Does both feature extraction and prediction. Often necessary for sequence models when the
         prediction of the previous example is used as a feature for the next example. If this is
-        not the case, extract is simply called before predict here. Note that the Workbench config
+        not the case, extract is simply called before predict here. Note that the MindMeld config
         and resources are passed in each time to make the underlying model implementation stateless.
 
         Args:

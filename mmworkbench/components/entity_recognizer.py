@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """
-This module contains the entity recognizer component of the Workbench natural language processor.
+This module contains the entity recognizer component of the MindMeld natural language processor.
 """
 import logging
 
@@ -162,7 +162,7 @@ class EntityRecognizer(Classifier):
 
         if self._model is not None:
             if not hasattr(self._model, 'mmworkbench_version'):
-                msg = "Your trained models are incompatible with this version of Workbench. " \
+                msg = "Your trained models are incompatible with this version of MindMeld. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)
 

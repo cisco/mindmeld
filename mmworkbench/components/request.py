@@ -162,7 +162,7 @@ class Request:
         history (list): List of previous and current responder objects (de-serialized) up to the current conversation
         text (str): The query text
         frame (): Immutables Map of stored data across multiple dialogue turns
-        params (Params): An object that modifies how Workbench process the current turn
+        params (Params): An object that modifies how MindMeld process the current turn
         context (): Immutables Map containing front-end client state that is passed to the application from the client
             in the request
         confidences (): Immutables Map of keys ``domains``, ``intents``, ``entities`` and ``roles`` containing

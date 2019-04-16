@@ -1,11 +1,11 @@
 Food Ordering
 =============
 
-In this step-by-step walkthrough, you'll build a conversational application that allows users to order food for delivery from nearby restaurants, using the Workbench blueprint for this purpose.
+In this step-by-step walkthrough, you'll build a conversational application that allows users to order food for delivery from nearby restaurants, using the MindMeld blueprint for this purpose.
 
 .. note::
 
-   Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for Workbench before continuing on with this blueprint tutorial.
+   Please make sure to install and run all of the :ref:`pre-requisites <getting_started_virtualenv_setup>` for MindMeld before continuing on with this blueprint tutorial.
 
 
 1. The Use Case
@@ -76,7 +76,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
    python -c "import mmworkbench as wb; wb.blueprint('food_ordering');"
 
-This should create a Workbench project folder called ``food_ordering`` in your current directory with the following structure:
+This should create a MindMeld project folder called ``food_ordering`` in your current directory with the following structure:
 
 .. image:: /images/food_ordering_directory.png
     :width: 250px
@@ -374,7 +374,7 @@ The ``domains`` directory contains the training data for intent classification a
 7. Training the NLP Classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, applies Workbench's default machine learning settings.
+Train a baseline NLP system for the blueprint app. The :meth:`build()` method of the :class:`NaturalLanguageProcessor` class, used as shown below, applies MindMeld's default machine learning settings.
 
 .. code:: python
 
@@ -408,7 +408,7 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. tip::
 
-  During active development, it's helpful to increase the :doc:`Workbench logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
+  During active development, it's helpful to increase the :doc:`MindMeld logging level <../userguide/getting_started>` to better understand what's happening behind the scenes. All code snippets here assume that logging level has been set to verbose.
 
 To see how the trained NLP pipeline performs on a test query, use the :meth:`process()` method.
 
@@ -587,7 +587,7 @@ Change the classification model to random forest instead of the default logistic
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 94.12%, params: {'class_weight': {0: 1.0, 1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0}}
 
-You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various Workbench classifiers.
+You can use similar options to inspect and experiment with the Entity Recognizer and the other NLP classifiers. Finding the optimal machine learning settings is a highly iterative process involving several rounds of model training (with varying configurations), testing, and error analysis. See the User Guide for more about training, tuning, and evaluating the various MindMeld classifiers.
 
 .. admonition:: Exercise
 
@@ -599,7 +599,7 @@ You can use similar options to inspect and experiment with the Entity Recognizer
 8. Parser Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Once the NLP classification models are trained, you can configure and run the Workbench :doc:`Language Parser <../userguide/parser>` to link related entities into meaningful entity groups. The application configuration file, ``config.py``, at the top level of the blueprint folder, contains the following parser configuration:
+Once the NLP classification models are trained, you can configure and run the MindMeld :doc:`Language Parser <../userguide/parser>` to link related entities into meaningful entity groups. The application configuration file, ``config.py``, at the top level of the blueprint folder, contains the following parser configuration:
 
 .. code:: javascript
 
@@ -808,7 +808,7 @@ When extending the blueprint to your custom application data, the parser should 
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :doc:`Question Answerer <../userguide/kb>` component in Workbench is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top three entries in our ``restaurants`` index and present their names as suggestions to the user.
+The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. For example, in our ``welcome`` dialogue state handler, we use the Question Answerer to retrieve the top three entries in our ``restaurants`` index and present their names as suggestions to the user.
 
 .. code:: python
 
@@ -847,7 +847,7 @@ Look at the ``build_order`` implementation in ``__init__.py`` to better understa
 10. Testing and Deployment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the :class:`Conversation` class in Workbench to perform an end-to-end test of your conversational app.
+Once all the individual pieces (NLP, Question Answererer, Dialogue State Handlers) have been trained, configured, or implemented, use the :class:`Conversation` class in MindMeld to perform an end-to-end test of your conversational app.
 
 For instance:
 
@@ -861,7 +861,7 @@ For instance:
 
    ['Sure, I have 1 order of 62. Pad Thai and 1 order of 66. Pineapple Fried Rice from Thep Phanom Thai Restaurant for a total price of $34.00. Would you like to place the order?']
 
-The :meth:`say()` method packages the input text in a user request object and passes it to the Workbench Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested dishes from a restaurant, in a single query. The app responded, as expected, with a preview of the order details and a confirmation prompt.
+The :meth:`say()` method packages the input text in a user request object and passes it to the MindMeld Application Manager to simulate a user interacting with the application. The method then outputs the textual part of the response sent by the app's Dialogue Manager. In the above example, we requested dishes from a restaurant, in a single query. The app responded, as expected, with a preview of the order details and a confirmation prompt.
 
 You can also try out multi-turn dialogues:
 

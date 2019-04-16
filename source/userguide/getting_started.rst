@@ -1,22 +1,22 @@
 Getting Started
 ===============
 
-These instructions explain how to install MindMeld Workbench on a Unix-based system and set up your first Workbench project. Users of other operating systems like Windows can use Docker to get started.
+These instructions explain how to install MindMeld on a Unix-based system and set up your first MindMeld project. Users of other operating systems like Windows can use Docker to get started.
 
 .. note::
 
-  MindMeld Workbench requires Python 3.4, 3.5, or 3.6.
+  MindMeld requires Python 3.4, 3.5, or 3.6.
 
 
-Install Workbench
+Install MindMeld
 -----------------
 
-You must choose the mechanism by which you install Workbench. The supported choices are:
+You must choose the mechanism by which you install MindMeld. The supported choices are:
 
   - :ref:`Docker <getting_started_docker_setup>`
   - :ref:`virtualenv <getting_started_virtualenv_setup>`
 
-If you're going to be using Workbench often, **we recommend you do the virtualenv installation** and setup all dependencies locally. That will provide the optimal performance and experience. But if you want to get a taste of Workbench with minimal effort, you can get started quickly using Docker.
+If you're going to be using MindMeld often, **we recommend you do the virtualenv installation** and setup all dependencies locally. That will provide the optimal performance and experience. But if you want to get a taste of MindMeld with minimal effort, you can get started quickly using Docker.
 
 
 .. _getting_started_docker_setup:
@@ -24,7 +24,7 @@ If you're going to be using Workbench often, **we recommend you do the virtualen
 Install with Docker
 ^^^^^^^^^^^^^^^^^^^
 
-The ``Dockerfile`` provided by MindMeld contains Workbench and all its dependencies. Follow these steps to get started using Docker:
+The ``Dockerfile`` provided by MindMeld contains MindMeld and all its dependencies. Follow these steps to get started using Docker:
 
 #. First, `install Docker <https://www.docker.com/community-edition#/download>`_, and run it.
 #. Then, open a terminal (shell) and run this command:
@@ -34,7 +34,7 @@ The ``Dockerfile`` provided by MindMeld contains Workbench and all its dependenc
    docker pull mindmeldworkbench/workbench
    docker run -p 7150:7150 mindmeldworkbench/workbench -ti -d
 
-The Docker container contains Elasticsearch, the numerical parsing service, the Workbench library and the Home Assistant application for you to test. The container will build and serve the application on port 7150 which is exposed to the external environment.
+The Docker container contains Elasticsearch, the numerical parsing service, the MindMeld library and the Home Assistant application for you to test. The container will build and serve the application on port 7150 which is exposed to the external environment.
 
 The application code and data is located at directory ``/root/home_assistant`` on the docker container.
 
@@ -93,7 +93,7 @@ Now, open the ``home_assistant/greeting.py`` file in a text editor to make a cha
 
    # -*- coding: utf-8 -*-
    """This module contains the dialogue states for the 'greeting' domain
-   in the Workbench home assistant blueprint application
+   in the MindMeld home assistant blueprint application
    """
    from .root import app
 
@@ -166,7 +166,7 @@ Install with virtualenv
 1. Install prerequisites
 """"""""""""""""""""""""
 
-On a macOS or Ubuntu 16/18 machine, you can install the dependencies for MindMeld Workbench and set up the necessary configuration files with the `mmworkbench_init.sh script <https://devcenter.mindmeld.com/scripts/mmworkbench_init.sh>`_.
+On a macOS or Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the `mmworkbench_init.sh script <https://devcenter.mindmeld.com/scripts/mmworkbench_init.sh>`_.
 
 .. note::
 
@@ -226,9 +226,9 @@ Ubuntu:
 2. Set up a virtual environment
 """""""""""""""""""""""""""""""
 
-To prepare an isolated environment for Workbench installation using ``virtualenv``, follow the following steps.
+To prepare an isolated environment for MindMeld installation using ``virtualenv``, follow the following steps.
 
-- Create a folder for containing all your Workbench projects, and navigate to it:
+- Create a folder for containing all your MindMeld projects, and navigate to it:
 
 .. code-block:: shell
 
@@ -248,17 +248,17 @@ To prepare an isolated environment for Workbench installation using ``virtualenv
   source bin/activate
 
 
-Later, when you're done working with MindMeld Workbench, you can deactivate the virtual environment with the ``deactivate`` command.
+Later, when you're done working with MindMeld, you can deactivate the virtual environment with the ``deactivate`` command.
 
 .. code-block:: shell
 
   deactivate
 
 
-3. Install the Workbench package
-""""""""""""""""""""""""""""""""
+3. Install the MindMeld package
+"""""""""""""""""""""""""""""""
 
-Now that your environment is set up, you can install MindMeld Workbench just as you would any other Python package. This may take a few minutes.
+Now that your environment is set up, you can install MindMeld just as you would any other Python package. This may take a few minutes.
 
 .. code-block:: shell
 
@@ -278,7 +278,7 @@ To verify your setup is good, run this command. If there is no error, the instal
 4. Start the numerical parser
 """""""""""""""""""""""""""""
 
-Workbench uses a Haskell-based numerical parser for detecting certain numeric expressions like times, dates, and quantities in user queries. Start the numerical parser with this command:
+MindMeld uses a Haskell-based numerical parser for detecting certain numeric expressions like times, dates, and quantities in user queries. Start the numerical parser with this command:
 
 .. code-block:: shell
 
@@ -286,7 +286,7 @@ Workbench uses a Haskell-based numerical parser for detecting certain numeric ex
 
 If you encounter an error like ``OS is incompatible with duckling executable``, it means that
 your operating system is not compatible with the pre-compiled numerical parser binary distributed
-with Workbench. You instead need to run the numerical parser using Docker as shown below.
+with MindMeld. You instead need to run the numerical parser using Docker as shown below.
 
 .. code-block:: shell
 
@@ -295,7 +295,7 @@ with Workbench. You instead need to run the numerical parser using Docker as sho
 
 .. warning::
 
-   The numerical parser is a critical component that Workbench relies on. **Do not skip this step**
+   The numerical parser is a critical component that MindMeld relies on. **Do not skip this step**
    .
 
 
@@ -306,11 +306,11 @@ Begin New Project
 
 With the setup out of the way, you are now ready to get your feet wet. You can proceed in one of two ways:
 
-#. Try out a :ref:`blueprint application <getting_started_blueprint>`. This is the **recommended approach** for beginners to familiarize themselves with Workbench. This is also a good starting point if your use case matches one of the :doc:`blueprint scenarios <../blueprints/overview>`.
+#. Try out a :ref:`blueprint application <getting_started_blueprint>`. This is the **recommended approach** for beginners to familiarize themselves with MindMeld. This is also a good starting point if your use case matches one of the :doc:`blueprint scenarios <../blueprints/overview>`.
 
 #. Start a :ref:`brand new project <getting_started_template>`. This is the approach to take if your specific use case isn't covered by an existing blueprint, or if you prefer to build out your app from scratch.
 
-MindMeld Workbench is designed so you can keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in your command-line shell using the ``mmworkbench`` command. But to really take advantage of the power of Workbench, the Python shell is where all the action is at. The examples in this section are accompanied by code samples from both shells.
+MindMeld is designed so you can keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in your command-line shell using the ``mmworkbench`` command. But to really take advantage of the power of MindMeld, the Python shell is where all the action is at. The examples in this section are accompanied by code samples from both shells.
 
 
 .. _getting_started_blueprint:
@@ -365,8 +365,8 @@ To try out the :doc:`Home Assistant blueprint<../blueprints/home_assistant>`, ru
     conv.say('Hello!')
 
 
-Workbench provides several different blueprint applications to support many common use cases for
-conversational applications. See :doc:`Workbench Blueprints<../blueprints/overview>` for more usage examples.
+MindMeld provides several different blueprint applications to support many common use cases for
+conversational applications. See :doc:`MindMeld Blueprints<../blueprints/overview>` for more usage examples.
 
 
 .. _getting_started_template:
@@ -393,21 +393,21 @@ Using the Python shell
   wb.configure_logs()
   wb.blueprint('template', 'my_app')
 
-The :doc:`Step-By-Step guide <../quickstart/00_overview>` walks through the methodology for building conversational apps using Workbench.
+The :doc:`Step-By-Step guide <../quickstart/00_overview>` walks through the methodology for building conversational apps using MindMeld.
 
 
-Upgrade Workbench
------------------
+Upgrade Mindmeld
+----------------
 
-To upgrade to the latest version of Workbench, run ``pip install mmworkbench --upgrade``
+To upgrade to the latest version of MindMeld, run ``pip install mmworkbench --upgrade``
 
 Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
 
 .. note::
 
-   - As of version 3.3, we have moved the Workbench package from the MindMeld-hosted PyPI to Cisco’s PyPI server. If you are using the old ``~/.pip/pip.conf``, please re-run :ref:`Step 1 <getting_started_virtualenv_setup>` to update your installation path.
+   - As of version 3.3, we have moved the MindMeld package from the MindMeld-hosted PyPI to Cisco’s PyPI server. If you are using the old ``~/.pip/pip.conf``, please re-run :ref:`Step 1 <getting_started_virtualenv_setup>` to update your installation path.
 
-   - Before re-downloading a :doc:`blueprint <../blueprints/overview>` using an upgraded version of Workbench, please remove the blueprint cache by running this command: ``rm -r ~/.mmworkbench/blueprints/*``
+   - Before re-downloading a :doc:`blueprint <../blueprints/overview>` using an upgraded version of MindMeld, please remove the blueprint cache by running this command: ``rm -r ~/.mmworkbench/blueprints/*``
 
 
 .. _cli:
@@ -415,7 +415,7 @@ Make sure to run this regularly to stay on top of the latest bug fixes and featu
 Command-Line Interfaces
 -----------------------
 
-MindMeld Workbench has two command-line interfaces for some of the common workflow tasks you'll be doing often:
+MindMeld has two command-line interfaces for some of the common workflow tasks you'll be doing often:
 
 #. ``mmworkbench``
 #. ``python -m <app_name>``

@@ -85,7 +85,7 @@ def subproc_call_instance_function(instance_id, func_name, *args, **kwargs):
 
 
 class Processor(ABC):
-    """A generic base class for processing queries through the workbench NLP
+    """A generic base class for processing queries through the MindMeld NLP
     components.
 
     Attributes:
@@ -329,7 +329,7 @@ class Processor(ABC):
 
 
 class NaturalLanguageProcessor(Processor):
-    """The natural language processor is the Workbench component responsible for understanding
+    """The natural language processor is the MindMeld component responsible for understanding
     the user input using a hierarchy of natural language processing models.
 
     Attributes:

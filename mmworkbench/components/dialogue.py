@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains the dialogue manager component of Workbench"""
+"""This module contains the dialogue manager component of MindMeld"""
 import asyncio
 from functools import cmp_to_key, partial
 import copy
@@ -694,7 +694,7 @@ class DialogueResponder:
 
 
 class Conversation:
-    """The conversation object is a very basic workbench client.
+    """The conversation object is a very basic MindMeld client.
 
     It can be useful for testing out dialogue flows in python.
 

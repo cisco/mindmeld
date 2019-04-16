@@ -1023,7 +1023,7 @@ class LabelEncoder:
     """The label encoder is responsible for converting between rich label
     objects such as a ProcessedQuery and basic formats a model can interpret.
 
-    A workbench model use its label encoder at fit time to encode labels into a
+    A MindMeld model uses its label encoder at fit time to encode labels into a
     form it can deal with, and at predict time to decode predictions into
     objects
     """

@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains the components of the workbench platform"""
+"""This module contains the components of the MindMeld platform"""
 from .dialogue import Conversation, DialogueManager, DialogueResponder
 from .nlp import NaturalLanguageProcessor
 from .question_answerer import QuestionAnswerer

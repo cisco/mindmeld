@@ -1,16 +1,16 @@
-Workbench Blueprints
+MindMeld Blueprints
 ====================
 
-MindMeld Workbench provides example applications, called *Workbench blueprints*, that cover common conversational use cases. Each blueprint comes with a pre-configured application structure and a pre-built set of code samples and data sets.
+MindMeld provides example applications, called *MindMeld blueprints*, that cover common conversational use cases. Each blueprint comes with a pre-configured application structure and a pre-built set of code samples and data sets.
 
 The blueprint allows you to quickly build and test a fully working conversational app without writing code or collecting training data. If desired, you can then treat the blueprint app as a baseline for improvement and customization by adding data and logic specific to your business or application needs.
 
 Blueprints are also ideal when you want to:
 
-  - work through a tutorial on building practical applications using the Workbench toolkit, or
-  - bootstrap your app on Workbench (assuming your app fits one of the Workbench blueprint use cases)
+  - work through a tutorial on building practical applications using the MindMeld toolkit, or
+  - bootstrap your app on MindMeld (assuming your app fits one of the MindMeld blueprint use cases)
 
-Workbench provides four blueprints:
+MindMeld provides four blueprints:
 
 +-------------------------------------------------+-----------------------------------------+------------------------------+
 | | Blueprint                                     | |  Use Case                             | | Blueprint Name             |
@@ -36,7 +36,7 @@ Each of the sections beyond the Quick Start covers one blueprint in depth, with 
 You'll be guided through the following steps:
 
   - define the app scope clearly in terms of domains, intents, entities and roles
-  - set up a Workbench project by creating the app directory structure
+  - set up a MindMeld project by creating the app directory structure
   - create the knowledge base for the app
   - acquire and annotate training data for the statistical NLP models
   - train, tune and test the NLP models
@@ -47,9 +47,9 @@ You'll be guided through the following steps:
 Before you Continue
 -------------------
 
-All blueprints require you to install Workbench and its required dependencies before you begin.
+All blueprints require you to install MindMeld and its required dependencies before you begin.
 
-See the :doc:`Getting Started <../userguide/getting_started>` page for instructions on acquiring and installing the Workbench toolkit on your system.
+See the :doc:`Getting Started <../userguide/getting_started>` page for instructions on acquiring and installing the MindMeld toolkit on your system.
 
 The Home Assistant blueprint requires you to register for an `Open Weather Map <https://openweathermap.org/appid>`_ API key, and then set an environment variable with the command ``export OPEN_WEATHER_KEY=[YOUR-KEY]``. If you skip this step, the app can run but cannot retrieve weather forecasts.
 

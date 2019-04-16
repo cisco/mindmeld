@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """
-This module contains the entity resolver component of the Workbench natural language processor.
+This module contains the entity resolver component of the MindMeld natural language processor.
 """
 import copy
 import logging

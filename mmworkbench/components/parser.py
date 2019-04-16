@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """
-This module contains the language parser component of the Workbench natural language processor
+This module contains the language parser component of the MindMeld natural language processor
 """
 from collections import defaultdict, namedtuple, OrderedDict
 import logging

@@ -55,10 +55,10 @@ DUCKLING_PORT = '7151'
 
 
 def _version_msg():
-    """Returns the Workbench version, location and Python powering it."""
+    """Returns the MindMeld version, location and Python powering it."""
     python_version = sys.version[:3]
     location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    message = 'Workbench %(version)s from {} (Python {})'
+    message = 'MindMeld %(version)s from {} (Python {})'
     return message.format(location, python_version)
 
 
@@ -68,7 +68,7 @@ def _version_msg():
 
 @click.group()
 def _app_cli(ctx):
-    """Command line interface for mmworkbench apps."""
+    """Command line interface for MindMeld apps."""
 
     # configure logger settings for dependent libraries
     urllib3_logger = logging.getLogger('urllib3')
@@ -88,7 +88,7 @@ def _app_cli(ctx):
 @click.option('-r', '--reloader', is_flag=True,
               help='starts the service with the reloader enabled')
 def run_server(ctx, port, no_debug, reloader):
-    """Starts the workbench service."""
+    """Starts the MindMeld service."""
     app = ctx.obj.get('app')
     if app is None:
         raise ValueError("No app was given. Run 'python app.py run' from your app folder.")

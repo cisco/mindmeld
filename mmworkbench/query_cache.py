@@ -53,7 +53,7 @@ class QueryCache:
 
     @property
     def versioned_data(self):
-        """A dictionary containing the workbench version in addition to any cached queries."""
+        """A dictionary containing the MindMeld version in addition to any cached queries."""
         return {'wb_version': _get_wb_version(), 'cached_queries': self.cached_queries}
 
     def set_value(self, domain, intent, query_text, processed_query):

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """
-    This module contains the class which serves the workbench API.
+    This module contains the class which serves the MindMeld API.
 """
 import logging
 import json
@@ -54,7 +54,7 @@ class WorkbenchServer:
         self._app_manager = app_manager
         self._request_logger = logger.getChild('requests')
 
-        server = Flask('workbench')
+        server = Flask('mindmeld')
         CORS(server)
 
         server.request_class = WorkbenchRequest
@@ -78,7 +78,7 @@ class WorkbenchServer:
         # pylint: disable=unused-variable
         @server.route('/parse', methods=['POST'])
         def parse():
-            """The main endpoint for the workbench API"""
+            """The main endpoint for the MindMeld API"""
             request_json = request.get_json()
             if request_json is None:
                 msg = "Invalid Content-Type: Only 'application/json' is supported."
