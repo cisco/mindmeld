@@ -95,6 +95,12 @@ Contents
    blueprints/video_discovery
    blueprints/home_assistant
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Integrations
+   :name: integrations
+
+   integrations/webex_teams
 
 .. toctree::
    :maxdepth: 2
