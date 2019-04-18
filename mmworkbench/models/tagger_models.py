@@ -13,9 +13,9 @@
 
 """This module contains the Memm entity recognizer."""
 import logging
+import os
 import random
 from sklearn.externals import joblib
-import os
 
 from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
                       get_seq_tag_accuracy_scorer, ingest_dynamic_gazetteer)
@@ -113,12 +113,12 @@ class TaggerModel(Model):
         return attributes
 
     def fit(self, examples, labels, params=None):
-        """Trains the model
+        """Trains the model.
 
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries to train on
-            labels (list of tuples of mmworkbench.core.QueryEntity): a list of expected labels
-            params (dict): Parameters of the classifier
+            examples (list of mmworkbench.core.Query): A list of queries to train on.
+            labels (list of tuples of mmworkbench.core.QueryEntity): A list of expected labels.
+            params (dict): Parameters of the classifier.
         """
         skip_param_selection = params is not None or self.config.param_selection is None
         params = params or self.config.params
@@ -175,7 +175,7 @@ class TaggerModel(Model):
             self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
         return self._clf.extract_example_features(query, self.config, workspace_resource)
 
-    def _fit(self, X, y, params):
+    def _fit(self, examples, labels, params=None):
         """Trains a classifier without cross-validation.
 
         Args:
@@ -184,7 +184,7 @@ class TaggerModel(Model):
             params (dict): Parameters of the classifier
         """
         self._clf.set_params(**params)
-        return self._clf.fit(X, y)
+        return self._clf.fit(examples, labels)
 
     def _convert_params(self, param_grid, y, is_grid=True):
         """
@@ -270,7 +270,7 @@ class TaggerModel(Model):
         if scorer == SEQ_ACCURACY_SCORING:
             if classifier_type not in SEQUENCE_MODELS:
                 logger.error("Sequence accuracy is only available for the following models: "
-                             "{}. Using tag level accuracy instead...".format(str(SEQUENCE_MODELS)))
+                             "%s. Using tag level accuracy instead...", str(SEQUENCE_MODELS))
                 return ACCURACY_SCORING
             return get_seq_accuracy_scorer()
         elif scorer == ACCURACY_SCORING and classifier_type in SEQUENCE_MODELS:
@@ -355,6 +355,12 @@ class TaggerModel(Model):
         self._current_params = variables_to_load['current_params']
         self._label_encoder = variables_to_load['label_encoder']
         self._no_entities = variables_to_load['no_entities']
+
+    def get_feature_matrix(self, examples, y=None, fit=False):
+        raise NotImplementedError
+
+    def select_params(self, examples, labels, selection_settings=None):
+        raise NotImplementedError
 
 
 register_model('tagger', TaggerModel)

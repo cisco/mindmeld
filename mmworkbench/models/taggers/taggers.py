@@ -14,13 +14,13 @@
 """
 This module contains all code required to perform sequence tagging.
 """
+import logging
+import copy
+
 from ...core import QueryEntity, Span, TEXT_FORM_RAW, \
     TEXT_FORM_NORMALIZED, _sort_by_lowest_time_grain
 from ...ser import resolve_system_entity, SystemEntityResolutionError
 from ..helpers import get_feature_extractor, ENABLE_STEMMING
-
-import logging
-import copy
 
 logger = logging.getLogger(__name__)
 
@@ -110,17 +110,8 @@ class Tagger:
         raise NotImplementedError
 
     def setup_model(self, config):
-        """Does any setup that should be run only once. Will be called before the first call
-        to extract_features. This is often used to initialize model options based on what is
-        passed in through the MindMeld config. For example, it could be used to initialize which
-        dimensionality reduction method to use in extract_features given the user provided model
-        settings.
-
-        Args:
-            config (ModelConfig): A MindMeld model config object. This contains information such as
-                                  model settings that can be used to setup the model.
-        """
-        return None
+        """"Not implemented."""
+        raise NotImplementedError
 
     def extract_features(self, examples, config, resources):
         """Extracts all features from a list of MindMeld examples. Processes the data and returns the
@@ -178,7 +169,13 @@ class Tagger:
         X, _, _ = self.extract_features(examples, config, resources)
         return self._predict_proba(X)
 
-    def dump(self, model_path, config):
+    @staticmethod
+    def _predict_proba(X):
+        del X
+        pass
+
+    @staticmethod
+    def dump(model_path, config):
         """
         Since traditional SKLearn models are easily serializable, we can
         use JobLib to serialize them. So we alter the context object to make
@@ -190,10 +187,12 @@ class Tagger:
         Returns:
             config (dict): The altered config object
         """
+        del model_path
         config['serializable'] = True
         return config
 
-    def load(self, model_path):
+    @staticmethod
+    def load(model_path):
         """
         Load the model state to memory. This is a no-op since we do not
         have to do anything special to load default serializable models
@@ -202,12 +201,8 @@ class Tagger:
         Args:
             model_path (str): The path to dump the model to
         """
-        return
-
-
-"""
-Helpers for taggers
-"""
+        del model_path
+        pass
 
 
 def get_tags_from_entities(query, entities, scheme='IOB'):
@@ -256,7 +251,7 @@ def _get_tags_from_entities(query, entities, scheme='IOB'):
     return iobs, types
 
 
-def get_entities_from_tags(query, tags, scheme='IOB'):
+def get_entities_from_tags(query, tags):
     """From a set of joint IOB tags, parse the app and system entities.
 
     This performs the reverse operation of get_tags_from_entities.
@@ -287,11 +282,11 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         norm_span = Span(start, end)
         entity = QueryEntity.from_query(query, normalized_span=norm_span, entity_type=entity_type)
         entities.append(entity)
-        logger.debug("Appended {}".format(entity))
+        logger.debug("Appended %s.", entity)
 
     def _append_system_entity(token_start, token_end, entity_type):
-        msg = "Looking for '{}' between {} and {}"
-        logger.debug(msg.format(entity_type, token_start, token_end))
+        msg = "Looking for '%s' between %s and %s."
+        logger.debug(msg, entity_type, token_start, token_end)
         prefix = ' '.join(normalized_tokens[:token_start])
         # If there is a prefix, we have to add one for the whitespace
         start = len(prefix) + 1 if len(prefix) else 0
@@ -304,10 +299,11 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         try:
             entity = resolve_system_entity(query, entity_type, span)
             entities.append(entity)
-            logger.debug("Appended system entity {}".format(entity))
+            logger.debug("Appended system entity %s.", entity)
         except SystemEntityResolutionError:
-            msg = "Found no matching system entity {}-{}, {!r}"
-            logger.debug(msg.format(token_start, token_end, entity_type))
+            msg = "Found no matching system entity {}-{}, {!r}".format(
+                token_start, token_end, entity_type)
+            logger.debug(msg)
 
     entity_tokens = []
     entity_start = None
@@ -382,7 +378,7 @@ def get_entities_from_tags(query, tags, scheme='IOB'):
         else:
             _append_entity(entity_start, prev_ent_type, entity_tokens)
     else:
-        logger.debug("Entity did not end: {}".format(entity_start))
+        logger.debug("Entity did not end: %s.", entity_start)
 
     return tuple(entities)
 

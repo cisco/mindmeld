@@ -162,5 +162,5 @@ class Application:
 
     def cli(self):
         """Initialize the application's command line interface."""
-        # pylint:
+        # pylint: disable=unexpected-keyword-arg,no-value-for-parameter
         app_cli(obj={'app': self})

@@ -14,10 +14,10 @@ import os
 import zipfile
 import logging
 import pickle
+from urllib.request import urlretrieve
 import numpy as np
 
 from tqdm import tqdm
-from six.moves.urllib.request import urlretrieve
 
 from ...path import EMBEDDINGS_FILE_PATH, \
     EMBEDDINGS_FOLDER_PATH, PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, \
@@ -35,11 +35,11 @@ class TqdmUpTo(tqdm):
     """Provides `update_to(n)` which uses `tqdm.update(delta_n)`."""
 
     def update_to(self, b=1, bsize=1, tsize=None):
-        """Reports update statistics on the download progress
+        """Reports update statistics on the download progress.
 
         Args:
-            b (int): Number of blocks transferred so far [default: 1]
-            bsize (int): Size of each block (in tqdm units) [default: 1]
+            b (int): Number of blocks transferred so far [default: 1].
+            bsize (int): Size of each block (in tqdm units) [default: 1].
             tsize (int): Total size (in tqdm units). If [default: None] remains unchanged.
         """
         if tsize is not None:
@@ -49,7 +49,7 @@ class TqdmUpTo(tqdm):
 
 class GloVeEmbeddingsContainer:
     """This class is responsible for the downloading, extraction and storing of
-    word embeddings based on the GloVe format"""
+    word embeddings based on the GloVe format."""
 
     def __init__(self, token_dimension=300, token_pretrained_embedding_filepath=None):
 
@@ -59,26 +59,26 @@ class GloVeEmbeddingsContainer:
         self.token_dimension = token_dimension
 
         if self.token_dimension not in ALLOWED_WORD_EMBEDDING_DIMENSIONS:
-            logger.info("Token dimension {} not supported, "
-                        "chose from these dimensions: {}. "
-                        "Selected 300 by default".format(token_dimension,
-                                                         str(ALLOWED_WORD_EMBEDDING_DIMENSIONS)))
+            logger.info("Token dimension %s not supported, "
+                        "chose from these dimensions: %s. "
+                        "Selected 300 by default", token_dimension,
+                        str(ALLOWED_WORD_EMBEDDING_DIMENSIONS))
             self.token_dimension = 300
 
         self.word_to_embedding = {}
         self._extract_embeddings()
 
     def get_pretrained_word_to_embeddings_dict(self):
-        """Returns the word to embedding dict
+        """Returns the word to embedding dict.
 
         Returns:
-            (dict): word to embedding mapping
+            (dict): word to embedding mapping.
         """
         return self.word_to_embedding
 
     def _download_embeddings_and_return_zip_handle(self):
 
-        logger.info("Downloading embedding from {}".format(GLOVE_DOWNLOAD_LINK))
+        logger.info("Downloading embedding from %s", GLOVE_DOWNLOAD_LINK)
 
         # Make the folder that will contain the embeddings
         if not os.path.exists(EMBEDDINGS_FOLDER_PATH):
@@ -90,18 +90,18 @@ class GloVeEmbeddingsContainer:
             try:
                 urlretrieve(GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to)
 
-            except Exception as e:
+            except ConnectionError as e:
                 logger.error("There was an issue downloading from this "
-                             "link {} with the following error: "
-                             "{}".format(GLOVE_DOWNLOAD_LINK, e))
+                             "link %s with the following error: "
+                             "%s", GLOVE_DOWNLOAD_LINK, e)
                 return
 
             file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
             zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
 
             if file_name not in zip_file_object.namelist():
-                logger.info("Embedding file with {} dimensions "
-                            "not found".format(self.token_dimension))
+                logger.info("Embedding file with %s dimensions "
+                            "not found", self.token_dimension)
                 return
 
             return zip_file_object
@@ -118,40 +118,40 @@ class GloVeEmbeddingsContainer:
 
         if file_location and os.path.isfile(file_location):
             logger.info("Extracting embeddings from provided "
-                        "file location {}".format(str(file_location)))
+                        "file location %s.", str(file_location))
             with open(file_location, 'r') as embedding_file:
                 self._extract_and_map(embedding_file)
             return
 
-        logger.info("Provided file location {} does not exist".format(str(file_location)))
+        logger.info("Provided file location %s does not exist.", str(file_location))
 
         file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
 
         if os.path.isfile(EMBEDDINGS_FILE_PATH):
             logger.info("Extracting embeddings from default folder "
-                        "location {}".format(EMBEDDINGS_FILE_PATH))
+                        "location %s.", EMBEDDINGS_FILE_PATH)
 
             try:
                 zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
                 with zip_file_object.open(file_name) as embedding_file:
                     self._extract_and_map(embedding_file)
             except zipfile.BadZipFile:
-                logger.warning("{} is corrupt. Deleting the zip file and attempting to"
-                               " download the embedding file again".format(EMBEDDINGS_FILE_PATH))
+                logger.warning("%s is corrupt. Deleting the zip file and attempting to"
+                               " download the embedding file again", EMBEDDINGS_FILE_PATH)
                 os.remove(EMBEDDINGS_FILE_PATH)
                 self._extract_embeddings()
-            except Exception:
-                logger.error("An error occurred when reading {} zip file. The file might"
+            except IOError:
+                logger.error("An error occurred when reading %s zip file. The file might"
                              " be corrupt, so try deleting the file and running the program "
-                             "again".format(EMBEDDINGS_FILE_PATH))
+                             "again", EMBEDDINGS_FILE_PATH)
             return
 
-        logger.info("Default folder location {} does not exist".format(EMBEDDINGS_FILE_PATH))
+        logger.info("Default folder location %s does not exist.", EMBEDDINGS_FILE_PATH)
 
         zip_file_object = self._download_embeddings_and_return_zip_handle()
 
         if not zip_file_object:
-            raise EmbeddingDownloadError("Failed to download embeddings")
+            raise EmbeddingDownloadError("Failed to download embeddings.")
 
         with zip_file_object.open(file_name) as embedding_file:
             self._extract_and_map(embedding_file)
@@ -186,13 +186,13 @@ class WordSequenceEmbedding:
         self._add_historic_embeddings()
 
     def encode_sequence_of_tokens(self, token_sequence):
-        """Encodes a sequence of tokens into real value vectors
+        """Encodes a sequence of tokens into real value vectors.
 
         Args:
-            token_sequence (list): A sequence of tokens
+            token_sequence (list): A sequence of tokens.
 
         Returns:
-            (list): Encoded sequence of tokens
+            (list): Encoded sequence of tokens.
         """
         default_encoding = np.zeros(self.token_embedding_dimension)
         encoded_query = [default_encoding] * self.sequence_padding_length
@@ -232,7 +232,7 @@ class WordSequenceEmbedding:
                 self.token_to_embedding_mapping[word] = historic_word_embeddings.get(word)
 
     def save_embeddings(self):
-        """Save extracted embeddings to historic pickle file
+        """Save extracted embeddings to historic pickle file.
         """
         output = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, 'wb')
         pickle.dump(self.token_to_embedding_mapping, output)
@@ -263,13 +263,13 @@ class CharacterSequenceEmbedding:
         self._add_historic_embeddings()
 
     def encode_sequence_of_tokens(self, token_sequence):
-        """Encodes a sequence of tokens into real value vectors
+        """Encodes a sequence of tokens into real value vectors.
 
         Args:
-            token_sequence (list): A sequence of tokens
+            token_sequence (list): A sequence of tokens.
 
         Returns:
-            (list): Encoded sequence of tokens
+            (list): Encoded sequence of tokens.
         """
         default_encoding = np.zeros(self.token_embedding_dimension)
         default_char_word = [default_encoding] * self.max_char_per_word
@@ -317,7 +317,7 @@ class CharacterSequenceEmbedding:
             self.token_to_embedding_mapping[char] = historic_char_embeddings.get(char)
 
     def save_embeddings(self):
-        """Save extracted embeddings to historic pickle file
+        """Save extracted embeddings to historic pickle file.
         """
         output = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, 'wb')
         pickle.dump(self.token_to_embedding_mapping, output)

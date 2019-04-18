@@ -21,7 +21,6 @@ import random
 
 import numpy as np
 import pandas as pd
-from numpy import bincount
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
@@ -172,19 +171,19 @@ class TextModel(Model):
         self._clf = clf
         return params
 
-    def _fit(self, X, y, params):
+    def _fit(self, examples, labels, params=None):
         """Trains a classifier without cross-validation.
 
         Args:
-            X (numpy.matrix): The feature matrix for a dataset.
-            y (numpy.array): The target output values.
+            examples (numpy.matrix): The feature matrix for a dataset.
+            labels (numpy.array): The target output values.
             params (dict): Parameters of the classifier
 
         """
-        params = self._convert_params(params, y, is_grid=False)
+        params = self._convert_params(params, labels, is_grid=False)
         model_class = self._get_model_constructor()
         params = self._clean_params(model_class, params)
-        return model_class(**params).fit(X, y)
+        return model_class(**params).fit(examples, labels)
 
     def predict(self, examples, dynamic_resource=None):
         X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
@@ -253,7 +252,7 @@ class TextModel(Model):
         try:
             gold_class = self._class_encoder.transform([gold_label])
         except ValueError:
-            logger.warning('Unable to decode label `{0}`'.format(gold_label))
+            logger.warning('Unable to decode label `%s`', gold_label)
             gold_class = None
 
         pred_label = self.predict([example], dynamic_resource=dynamic_resource)[0]
@@ -262,14 +261,14 @@ class TextModel(Model):
         features = self._extract_features(
             example, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
 
-        logging.info("Predicted: " + pred_label)
+        logging.info("Predicted: %s.", pred_label)
 
         if gold_class is None:
             columns = ['Feature', 'Value', 'Pred_W({0})'.format(pred_label), 'Pred_P']
         else:
             columns = ['Feature', 'Value', 'Pred_W({0})'.format(pred_label), 'Pred_P',
                        'Gold_W({0})'.format(gold_label), 'Gold_P', 'Diff']
-            logging.info("Gold: " + gold_label)
+            logging.info("Gold: %s.", gold_label)
 
         df = pd.DataFrame(data=None, columns=columns)
 
@@ -288,6 +287,7 @@ class TextModel(Model):
             product = feat_value * weight
 
             if gold_class is None:
+                # pylint: disable=no-member
                 row = pd.DataFrame(
                     data=[[feat_name, round(feat_value, 4), weight.round(4), product.round(4)]],
                     columns=columns, index=[feat_name])
@@ -295,6 +295,7 @@ class TextModel(Model):
                 gold_w = self._get_feature_weight(feat_name, gold_class)
                 gold_p = feat_value * gold_w
                 diff = gold_p - product
+                # pylint: disable=no-member
                 row = pd.DataFrame(
                     data=[[feat_name, round(feat_value, 4), weight.round(4), product.round(4),
                            gold_w.round(4), gold_p.round(4), diff.round(4)]],
@@ -377,7 +378,7 @@ class TextModel(Model):
         elif 'class_bias' in param_grid:
             # interpolate between class_bias=0 => class_weight=None
             # and class_bias=1 => class_weight='balanced'
-            class_count = bincount(y)
+            class_count = np.bincount(y)
             classes = self._class_encoder.classes_
             weights = []
             raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]

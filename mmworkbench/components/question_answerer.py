@@ -64,10 +64,10 @@ class QuestionAnswerer:
         search criteria. This API provides a simple interface for developers to specify a list of
         knowledge base field and query string pairs to find best matches in a similar way as in
         common Web search interfaces. The knowledge base fields to be used depend on the mapping
-        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine” entity
-        type can be mapped to either a knowledge base object or an attribute of a knowledge base object.
-        The mapping is often application specific and is dependent on the data model developers
-        choose to use when building the knowledge base.
+        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”
+        entity type can be mapped to either a knowledge base object or an attribute of a knowledge
+        base object. The mapping is often application specific and is dependent on the data model
+        developers choose to use when building the knowledge base.
 
         Examples:
 
@@ -916,7 +916,7 @@ class Search:
                 raise ValueError('Sort by distance is only supported using \'location\' field.')
 
             # validate the sort field is number, date or location field
-            if not self.field_info.is_number_field() and not self.field_info.is_date_field() and \
-                not self.field_info.is_location_field():
+            if not (self.field_info.is_number_field() or self.field_info.is_date_field() or
+                    self.field_info.is_location_field()):
                 raise ValueError('Custom sort criteria can only be defined for'
                                  + ' \'number\', \'date\' or \'location\' fields.')

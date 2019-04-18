@@ -10,10 +10,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import requests
 import logging
-import json
 import sys
+import json
+import requests
+
 from mmworkbench.components._config import get_system_entity_recognizer_config
 
 DUCKLING_URL = "http://localhost:7151"

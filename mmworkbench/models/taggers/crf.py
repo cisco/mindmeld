@@ -14,12 +14,11 @@
 """
 This module contains the CRF entity recognizer.
 """
+import logging
+import numpy as np
 from sklearn_crfsuite import CRF
 
 from .taggers import Tagger, extract_sequence_features
-
-import logging
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +27,16 @@ ZERO = 1e-20
 
 class ConditionalRandomFields(Tagger):
     """A Conditional Random Fields model."""
+
+    @staticmethod
+    def _predict_proba(X):
+        del X
+        pass
+
+    @staticmethod
+    def load(model_path):
+        del model_path
+        pass
 
     def fit(self, X, y):
         self._clf.fit(X, y)
@@ -81,22 +90,23 @@ class ConditionalRandomFields(Tagger):
         """
         # Extract features and classes
         feats = []
-        for idx, example in enumerate(examples):
+        for _, example in enumerate(examples):
             feats.append(self.extract_example_features(example, config, resources))
         X = self._preprocess_data(feats, fit)
         return X, y, None
 
-    def extract_example_features(self, example, config, resources):
+    @staticmethod
+    def extract_example_features(example, config, resources):
         """Extracts feature dicts for each token in an example.
 
         Args:
-            example (mmworkbench.core.Query): a query
-            config (ModelConfig): The ModelConfig which may contain information used for feature
-                                  extraction
-            resources (dict): Resources which may be used for this model's feature extraction
+            example (mmworkbench.core.Query): A query.
+            config (ModelConfig): The ModelConfig which may contain information used for feature \
+                                  extraction.
+            resources (dict): Resources which may be used for this model's feature extraction.
 
         Returns:
-            (list of dict): features
+            list[dict]: Features.
         """
         return extract_sequence_features(example, config.example_type,
                                          config.features, resources)
@@ -211,7 +221,7 @@ class FeatureBinner:
                 for feat_name, feat_value in word.items():
                     self._collect_feature(feat_name, feat_value)
 
-        for feat, mapper in self.features.items():
+        for mapper in self.features.values():
             mapper.fit()
 
     def transform(self, X_train):
@@ -254,7 +264,7 @@ class FeatureBinner:
         """
         try:
             feat_value = float(feat_value)
-        except Exception:
+        except ValueError:
             # Skip collection of non numerical features
             return
         mapper = self.features.get(feat_name, FeatureMapper())
@@ -273,7 +283,7 @@ class FeatureBinner:
         """
         try:
             feat_value = float(feat_value)
-        except Exception:
+        except ValueError:
             # Don't do bucketing of non numerical features
             return {feat_name: feat_value}
         if feat_name not in self.features:

@@ -14,6 +14,7 @@
 """
 This module contains the Memm entity recognizer.
 """
+import logging
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
@@ -21,12 +22,21 @@ from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, 
 import numpy as np
 from .taggers import Tagger, START_TAG, extract_sequence_features
 
-import logging
 logger = logging.getLogger(__name__)
 
 
 class MemmModel(Tagger):
     """A maximum-entropy Markov model."""
+    @staticmethod
+    def _predict_proba(X):
+        del X
+        pass
+
+    @staticmethod
+    def load(model_path):
+        del model_path
+        pass
+
     def fit(self, X, y):
         self._clf.fit(X, y)
         return self
@@ -42,17 +52,18 @@ class MemmModel(Tagger):
     def predict(self, X, dynamic_resource=None):
         return self._clf.predict(X)
 
-    def extract_example_features(self, example, config, resources):
+    @staticmethod
+    def extract_example_features(example, config, resources):
         """Extracts feature dicts for each token in an example.
 
         Args:
-            example (mmworkbench.core.Query): a query
-            config (ModelConfig): The ModelConfig which may contain information used for feature
-                                  extraction
-            resources (dict): Resources which may be used for this model's feature extraction
+            example (mmworkbench.core.Query): A query.
+            config (ModelConfig): The ModelConfig which may contain information used for feature \
+                                  extraction.
+            resources (dict): Resources which may be used for this model's feature extraction.
 
         Returns:
-            (list of dict): features
+            (list[dict]): Features.
         """
         return extract_sequence_features(example, config.example_type, config.features, resources)
 
@@ -132,19 +143,21 @@ class MemmModel(Tagger):
             seq_log_probs.append([prev_tag, prediction[predicted_tag]])
         return seq_log_probs
 
-    def _get_feature_selector(self, selector_type):
+    @staticmethod
+    def _get_feature_selector(selector_type):
         """Get a feature selector instance based on the feature_selector model
-        parameter
+        parameter.
 
         Returns:
-            (Object): a feature selector which returns a reduced feature matrix, \
-                given the full feature matrix, X and the class labels, y
+            (Object): A feature selector which returns a reduced feature matrix, \
+                given the full feature matrix, X and the class labels, y.
         """
         selector = {'l1': SelectFromModel(LogisticRegression(penalty='l1', C=1)),
                     'f': SelectPercentile()}.get(selector_type)
         return selector
 
-    def _get_feature_scaler(self, scale_type):
+    @staticmethod
+    def _get_feature_scaler(scale_type):
         """Get a feature value scaler based on the model settings"""
         scaler = {'std-dev': StandardScaler(with_mean=False),
                   'max-abs': MaxAbsScaler()}.get(scale_type)

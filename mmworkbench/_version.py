@@ -27,8 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_wb_version():
-    import mmworkbench as wb
-    return wb.__version__
+    return current
 
 
 def validate_workbench_version(app_path, raise_exception=False):

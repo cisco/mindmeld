@@ -142,5 +142,6 @@ class QueryFactory:
         Returns:
             QueryFactory: A QueryFactory object that is used to create Query objects.
         """
-        tokenizer = tokenizer or Tokenizer.create_tokenizer(app_path)
+        del app_path
+        tokenizer = tokenizer or Tokenizer.create_tokenizer()
         return QueryFactory(tokenizer, preprocessor)

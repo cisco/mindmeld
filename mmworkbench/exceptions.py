@@ -78,9 +78,7 @@ class SystemEntityResolutionError(WorkbenchError):
 
 class KnowledgeBaseError(WorkbenchError):
     """An exception for unexpected error from knowledge base."""
-    def __init__(self, message):
-
-        super().__init__(message)
+    pass
 
 
 class KnowledgeBaseConnectionError(KnowledgeBaseError):
@@ -100,9 +98,7 @@ class KnowledgeBaseConnectionError(KnowledgeBaseError):
 
 class EntityResolverError(WorkbenchError):
     """An exception for unexpected error from entity resolver."""
-    def __init__(self, message):
-
-        super().__init__(message)
+    pass
 
 
 class EntityResolverConnectionError(EntityResolverError):
