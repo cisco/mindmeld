@@ -44,7 +44,7 @@ MindMeld has been used for applications in dozens of different domains by some o
 
 Assuming you have pyenv installed.
 ```
-cd mindmeld/  # go to the root of the workbench repo
+cd mindmeld/  # go to the root of the mindmeld repo
 pyenv install 3.6.0  # install an appropriate version of python
 pyenv virtualenv 3.6.0 mindmeld-env  # create a virtualenv
 pyenv local mindmeld-env  # set the virtualenv for the repo
