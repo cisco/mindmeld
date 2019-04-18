@@ -1,8 +1,8 @@
-# MindMeld NLP toolkit
+# MindMeld Conversational AI Platform
 
 [![CircleCI](https://circleci.com/gh/expectlabs/mindmeld-workbench.svg?style=svg&circle-token=437cf905895688ac1b58b60fe79144c180893372)](https://circleci.com/gh/expectlabs/mindmeld-workbench)
 
-This repository contains MindMeld NLP toolkit. 
+This repository contains the MindMeld Conversational AI Platform.
 
 ## Introducing MindMeld
 
