@@ -74,7 +74,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 .. code-block:: console
 
-   python -c "import mmworkbench as wb; wb.blueprint('food_ordering');"
+   python -c "import mindmeld as wb; wb.blueprint('food_ordering');"
 
 This should create a MindMeld project folder called ``food_ordering`` in your current directory with the following structure:
 
@@ -283,7 +283,7 @@ Assuming that you have Elasticsearch installed, running the :func:`blueprint()` 
 
 .. code:: python
 
-   from mmworkbench.components.question_answerer import QuestionAnswerer
+   from mindmeld.components.question_answerer import QuestionAnswerer
    qa = QuestionAnswerer(app_path='food_ordering')
    qa.get(index='menu_items')[0]
 
@@ -378,8 +378,8 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. code:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
-   import mmworkbench as wb
+   from mindmeld.components.nlp import NaturalLanguageProcessor
+   import mindmeld as wb
    wb.configure_logs()
    nlp = NaturalLanguageProcessor(app_path='food_ordering')
    nlp.build()
@@ -812,7 +812,7 @@ The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly u
 
 .. code:: python
 
-   from mmworkbench.components.question_answerer import QuestionAnswerer
+   from mindmeld.components.question_answerer import QuestionAnswerer
    qa = QuestionAnswerer(app_path='food_ordering')
    restaurants = qa.get(index='restaurants')[0:3]
    [restaurant['name'] for restaurant in restaurants]
@@ -853,7 +853,7 @@ For instance:
 
 .. code:: python
 
-   from mmworkbench.components.dialogue import Conversation
+   from mindmeld.components.dialogue import Conversation
    conv = Conversation(nlp=nlp, app_path='food_ordering')
    conv.say("Get me a pad thai and pinapple fried rice from thep phanom thai")
 

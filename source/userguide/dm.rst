@@ -31,7 +31,7 @@ To better understand dialogue state rules, let's jump into the skeleton of a dia
 
 .. code:: python
 
-  from mmworkbench import Application
+  from mindmeld import Application
 
   app = Application(__name__)
 
@@ -596,7 +596,7 @@ The response from the previous example would be:
 
 .. code:: python
 
-   from mmworkbench import Conversation
+   from mindmeld import Conversation
    convo = Conversation(app_path='/path/to/my/app')
    convo.say('hello')
 
@@ -650,7 +650,7 @@ Asynchronous dialogue state handlers can be enabled with the following steps:
 
 .. code:: python
 
-    from mmworkbench import Application
+    from mindmeld import Application
 
     app = Application(__name__, async_mode=True)
 
@@ -687,7 +687,7 @@ Asynchronous dialogue state handlers can be enabled with the following steps:
     .. code:: python
 
        import asyncio
-       from mmworkbench.components.dialogue import Conversation
+       from mindmeld.components.dialogue import Conversation
        # use force_sync at creation time
        convo = Conversation(nlp=nlp, app_path='/path/to/kwik_e_mart', force_sync=True)
        convo.say('hello')

@@ -11,9 +11,9 @@ Tests for NaturalLanguageProcessor module.
 import pytest
 import math
 
-from mmworkbench.exceptions import ProcessorError, AllowedNlpClassesKeyError
-from mmworkbench.components import NaturalLanguageProcessor
-from mmworkbench.query_factory import QueryFactory
+from mindmeld.exceptions import ProcessorError, AllowedNlpClassesKeyError
+from mindmeld.components import NaturalLanguageProcessor
+from mindmeld.query_factory import QueryFactory
 
 
 @pytest.fixture
@@ -422,7 +422,7 @@ def test_process_empty_nbest_unspecified_intent(kwik_e_mart_nlp, queries):
 
 def test_parallel_processing(kwik_e_mart_nlp):
     nlp = kwik_e_mart_nlp
-    import mmworkbench.components.nlp as nlp_module
+    import mindmeld.components.nlp as nlp_module
     import os
     import time
     if nlp_module.executor:

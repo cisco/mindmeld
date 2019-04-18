@@ -14,8 +14,7 @@ import logging
 import sys
 import json
 import requests
-
-from mmworkbench.components._config import get_system_entity_recognizer_config
+from mindmeld.components._config import get_system_entity_recognizer_config
 
 DUCKLING_URL = "http://localhost:7151"
 DUCKLING_ENDPOINT = "parse"
@@ -88,7 +87,7 @@ class SystemEntityRecognizer:
 
         except requests.ConnectionError:
             logger.error("Unable to connect to the system entity recognizer. Make sure it's "
-                         "running by typing 'mmworkbench num-parse' at the command line.")
+                         "running by typing 'mindmeld num-parse' at the command line.")
             return [], NO_RESPONSE_CODE
 
         except Exception as ex:  # pylint: disable=broad-except
@@ -98,4 +97,4 @@ class SystemEntityRecognizer:
                      'error:\n' + str(ex) + '\nURL: ' + url + '\nRaw data: ' + str(data) +
                      "\nPlease check your data and ensure Numerical parsing service is running. "
                      "Make sure it's running by typing "
-                     "'mmworkbench num-parse' at the command line.")
+                     "'mindmeld num-parse' at the command line.")

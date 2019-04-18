@@ -12,8 +12,8 @@ Tests the generated model cache has to correct key value types.
 import shutil
 import os
 
-from mmworkbench.path import MODEL_CACHE_PATH
-from mmworkbench.components import NaturalLanguageProcessor
+from mindmeld.path import MODEL_CACHE_PATH
+from mindmeld.components import NaturalLanguageProcessor
 
 
 def test_model_accuracies_are_similar_before_and_after_caching(kwik_e_mart_app_path):

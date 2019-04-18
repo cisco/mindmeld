@@ -12,7 +12,7 @@ Every Workbench app has one entity recognizer for every intent that requires ent
 .. note::
 
    - This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Entity Recognition <entity_recognition>` section.
-   - This section requires the :doc:`Home Assistant <../blueprints/home_assistant>` blueprint application. To get the app, open a terminal and run ``mmworkbench blueprint home_assistant``.
+   - This section requires the :doc:`Home Assistant <../blueprints/home_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint home_assistant``.
 
 
 System entities and custom entities
@@ -40,7 +40,7 @@ When you are ready to begin experimenting, import the :class:`NaturalLanguagePro
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp
 
@@ -123,7 +123,7 @@ Use the :meth:`EntityRecognizer.fit` method to train an entity recognition model
 
 .. code-block:: python
 
-   from mmworkbench import configure_logs; configure_logs()
+   from mindmeld import configure_logs; configure_logs()
    er = nlp.domains['weather'].intents['check_weather'].entity_recognizer
    er.fit()
 
@@ -1175,7 +1175,7 @@ To see which token spans in a query are detected as system entities, and what sy
 
 .. code-block:: python
 
-    from mmworkbench.ser import parse_numerics
+    from mindmeld.ser import parse_numerics
     parse_numerics("tomorrow morning at 9am")
 
 .. code-block:: console

@@ -3,8 +3,8 @@ import pytest
 import os
 import shutil
 
-from mmworkbench.path import MODEL_CACHE_PATH, get_role_model_paths, get_entity_model_paths
-from mmworkbench.components import NaturalLanguageProcessor
+from mindmeld.path import MODEL_CACHE_PATH, get_role_model_paths, get_entity_model_paths
+from mindmeld.components import NaturalLanguageProcessor
 
 
 test_data_7 = [

@@ -14,7 +14,7 @@
 try:
     # register test module for assertion rewrite
     import pytest
-    pytest.register_assert_rewrite('mmworkbench.test')
+    pytest.register_assert_rewrite('mindmeld.test')
 except ImportError:
     pass  # no worries
 

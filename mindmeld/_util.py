@@ -35,7 +35,7 @@ from .constants import DEVCENTER_URL
 
 logger = logging.getLogger(__name__)
 
-CONFIG_FILE_NAME = 'mmworkbench.cfg'
+CONFIG_FILE_NAME = 'mindmeld.cfg'
 BLUEPRINT_URL = '{mindmeld_url}/bp/{blueprint}/{filename}'
 
 BLUEPRINT_APP_ARCHIVE = 'app.tar.gz'
@@ -69,7 +69,7 @@ class Blueprint:
 
     The blueprint method will check the MindMeld website for when the blueprint
     files were last updated and compare that with any files in a local
-    blueprint cache at ~/.mmworkbench/blueprints. If the cache is out of date,
+    blueprint cache at ~/.mindmeld/blueprints. If the cache is out of date,
     the updated archive is downloaded. The archive is then extracted into a
     directory named for the blueprint.
     """
@@ -261,7 +261,7 @@ def configure_logs(**kwargs):
 
 
 def load_global_configuration():
-    """Loads the global configuration file (~/.mmworkbench/config)
+    """Loads the global configuration file (~/.mindmeld/config)
 
     Returns:
         dict: An object containing configuration values.
@@ -278,11 +278,11 @@ def load_global_configuration():
         return _filter_bad_keys(config)
 
     try:
-        logging.info('loading info from mmworkbench config file.')
+        logging.info('loading info from mindmeld config file.')
         config_file = path.get_user_config_path()
         iniconfig = py.iniconfig.IniConfig(config_file)  # pylint: disable=no-member
         config = {
-            'mindmeld_url': iniconfig.get('mmworkbench', 'mindmeld_url'),
+            'mindmeld_url': iniconfig.get('mindmeld', 'mindmeld_url'),
         }
         return _filter_bad_keys(config)
     except OSError:
@@ -291,7 +291,7 @@ def load_global_configuration():
 
 
 def load_configuration():
-    """Loads a configuration file (mmworkbench.cfg) for the current app. The
+    """Loads a configuration file (mindmeld.cfg) for the current app. The
     file is located by searching first in the current directory, and in parent
     directories.
     """
@@ -301,10 +301,10 @@ def load_configuration():
         # Do the thing
         iniconfig = py.iniconfig.IniConfig(config_file)  # pylint: disable=no-member
         config = {}
-        config['app_name'] = iniconfig.get('mmworkbench', 'app_name')
-        config['app_path'] = iniconfig.get('mmworkbench', 'app_path')
-        config['use_quarry'] = iniconfig.get('mmworkbench', 'use_quarry')
-        config['input_method'] = iniconfig.get('mmworkbench', 'input_method')
+        config['app_name'] = iniconfig.get('mindmeld', 'app_name')
+        config['app_path'] = iniconfig.get('mindmeld', 'app_path')
+        config['use_quarry'] = iniconfig.get('mindmeld', 'use_quarry')
+        config['input_method'] = iniconfig.get('mindmeld', 'input_method')
         # resolve path if necessary
         if config['app_path'] and not os.path.isabs(config['app_path']):
             config_dir = os.path.dirname(config_file)

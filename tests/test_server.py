@@ -1,8 +1,8 @@
 import pytest
 import json
 
-from mmworkbench.server import WorkbenchServer
-from mmworkbench.app_manager import ApplicationManager
+from mindmeld.server import MindMeldServer
+from mindmeld.app_manager import ApplicationManager
 
 
 @pytest.fixture
@@ -12,7 +12,7 @@ def app_manager(kwik_e_mart_app_path, kwik_e_mart_nlp):
 
 @pytest.fixture
 def client(app_manager):
-    server = WorkbenchServer(app_manager)._server.test_client()
+    server = MindMeldServer(app_manager)._server.test_client()
     yield server
 
 

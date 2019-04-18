@@ -31,7 +31,7 @@ from .helpers import (get_feature_extractor, get_label_encoder, register_label, 
                       ingest_dynamic_gazetteer)
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
-from .._version import _get_wb_version
+from .._version import _get_mm_version
 logger = logging.getLogger(__name__)
 
 # model scoring type
@@ -694,7 +694,7 @@ class Model:
     """
     def __init__(self, config):
         self.config = config
-        self.mmworkbench_version = _get_wb_version()
+        self.mindmeld_version = _get_mm_version()
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
         self._resources = {}
@@ -854,10 +854,10 @@ class Model:
         associated probabilities using the trained classification model
 
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries to train on
+            examples (list of mindmeld.core.Query): a list of queries to train on
 
         Returns:
-            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels \
+            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
                 with confidence scores
         """
         raise NotImplementedError

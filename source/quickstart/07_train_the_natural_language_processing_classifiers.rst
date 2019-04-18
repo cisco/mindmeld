@@ -30,7 +30,7 @@ In the Python shell, the quickest way to train all the NLP classifiers together 
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
    nlp.build()
 
@@ -109,7 +109,7 @@ To see the domain classifier in action, you can download and try out the ``home_
 
 .. code-block:: python
 
-   import mmworkbench as wb
+   import mindmeld as wb
    wb.configure_logs()
    wb.blueprint('home_assistant')
 
@@ -122,7 +122,7 @@ The :class:`NaturalLanguageProcessor` class in Workbench exposes methods for tra
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('home_assistant')
    nlp.domain_classifier.fit(model_settings={'classifier_type': 'logreg'})
 
@@ -172,7 +172,7 @@ We demonstrate intent classification using the simpler Kwik-E-Mart application. 
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
 
 Next, we define the feature dictionary that lists all the feature types along with the feature-specific settings. Let's say we want bag-of-n-grams up to size 2 and edge-ngrams up to length 2.
@@ -277,7 +277,7 @@ Below is the code to instantiate a :class:`NaturalLanguageProcessor` object, def
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
    feature_dict = {
      'in-gaz-span-seq': {},
@@ -340,7 +340,7 @@ Let's walk through the process of using Workbench to train a role classifier for
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
    get_hours_intent = nlp.domains['store_info'].intents['get_store_hours']
    # Workbench doesn't know about entities until the training queries have been loaded.
@@ -373,7 +373,7 @@ First, we train the role classifier.
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    change_alarm_intent = nlp.domains['times_and_dates'].intents['change_alarm']
    change_alarm_intent.build()
@@ -414,7 +414,7 @@ MindMeld Workbench provides advanced capabilities for building a state-of-the-ar
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
    nlp.build()
    nlp.process("When does the one on elm open?")
@@ -440,7 +440,7 @@ If an entity mapping file is specified, as illustrated in :doc:`Step 6 <06_gener
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
    nlp.build()
    nlp.process("When does the one on elm open?")

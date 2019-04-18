@@ -17,7 +17,7 @@ RUN apt-get update && \
     apt-get -y install software-properties-common curl vim
 
 # Create directories
-RUN mkdir /root/.pip /root/.mmworkbench /data
+RUN mkdir /root/.pip /root/.mindmeld /data
 
 # Install python pip
 RUN apt-get -y install python-pip python3-pip python-dev build-essential && \
@@ -47,16 +47,16 @@ RUN \
     rm -f $ES_PKG_NAME.tar.gz && \
     mv /$ES_PKG_NAME /elasticsearch
 
-RUN useradd -ms /bin/bash mmworkbench
+RUN useradd -ms /bin/bash mindmeld
 RUN mkdir /elasticsearch/log
-RUN chown -R mmworkbench:mmworkbench /elasticsearch /data /var/log
+RUN chown -R mindmeld:mindmeld /elasticsearch /data /var/log
 
 
 # Add Config Files
 COPY ./conf/elasticsearch.yml /elasticsearch/config/elasticsearch.yml
 
 COPY ./conf/pip.conf /root/.pip/pip.conf
-COPY ./conf/config.cfg /root/.mmworkbench/config
+COPY ./conf/config.cfg /root/.mindmeld/config
 
 WORKDIR /root
 
@@ -80,9 +80,9 @@ RUN echo alias pip=pip3  >> /root/.bashrc
 
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
-    pip3 install -U mmworkbench && \
-    pip3 install click-log==0.1.8 mmworkbench && \
-    su mmworkbench -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
-    mmworkbench num-parse --start && \
+    pip3 install -U mindmeld && \
+    pip3 install click-log==0.1.8 mindmeld && \
+    su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
+    mindmeld num-parse --start && \
     python3 -m home_assistant build && \
     python3 -m home_assistant run

@@ -178,7 +178,7 @@ Import the Data into the Knowledge Base
 
    .. code:: python
 
-      import mmworkbench as wb
+      import mindmeld as wb
       wb.configure_logs()
       wb.blueprint('food_ordering')
 
@@ -188,7 +188,7 @@ Use :meth:`load_kb()` to load a data file from a path and create an index for th
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	qa.load_kb(app_namespace='food_ordering', index_name='restaurants', data_file='food_ordering/data/restaurants.json')
 
@@ -261,7 +261,7 @@ Use :meth:`get()` to retrieve a knowledge base object whose ID is already known:
 
 .. code:: python
 
-   from mmworkbench.components import QuestionAnswerer
+   from mindmeld.components import QuestionAnswerer
    qa = QuestionAnswerer(app_path='food_ordering')
    qa.get(index='menu_items', id='B01N97KQNJ')
 
@@ -285,7 +285,7 @@ Use :meth:`get()` to search the knowledge base for objects that best match all o
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	results = qa.get(index='menu_items', name='fish and chips', restaurant_id='B01N97KQNJ')
 
@@ -337,7 +337,7 @@ Use :meth:`get()` to search the knowledge base for objects that best match all o
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	qa.get(index='menu_items', name='fish and chips', restaurant_id='B01CGKGQ40', _sort='price', _sort_type='asc')
 
@@ -373,7 +373,7 @@ Use :meth:`get()` to search the knowledge base for objects that best match all o
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	qa.get(index='restaurants', _sort='location', _sort_type='distance', _sort_location='37.77,122.41')
 
@@ -438,7 +438,7 @@ Use the :meth:`build_search()` API to create a Search object.
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	s = qa.build_search(index='menu_items')
 
@@ -451,7 +451,7 @@ In the following example, the question answerer returns the dishes that best mat
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	s = qa.build_search(index='menu_items')
 	s.query(name='fish and chips').execute()
@@ -496,7 +496,7 @@ In the example below we try to find dishes (that is, items in the ``menu_items``
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	s = qa.build_search(index='menu_items')
 	s.query(name='fish and chips').filter(restaurant_id='B01DEEGQBK').execute()
@@ -534,7 +534,7 @@ In the example below we filter on price range to find dishes priced below five d
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	s = qa.build_search(index='menu_items')
 	s.filter(field='price', lte=5).execute()
@@ -591,7 +591,7 @@ In the example below, we search for ``menu_item`` objects that best match the te
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	s = qa.build_search(index='menu_items')
 	s.query(name='fish and chips').sort(field='price', sort_type='asc').execute()
@@ -632,7 +632,7 @@ In the example below, we search for restaurants whose names best match ``firetra
 
 .. code:: python
 
-	from mmworkbench.components import QuestionAnswerer
+	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='food_ordering')
 	s = qa.build_search(index='restaurants')
 	s.query(name='firetrail').sort(field='location', sort_type='distance', location='37.77,122.41').execute()

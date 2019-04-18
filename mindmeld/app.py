@@ -20,7 +20,7 @@ import sys
 
 from .app_manager import ApplicationManager
 from .cli import app_cli
-from .server import WorkbenchServer
+from .server import MindMeldServer
 from .components.dialogue import DialogueResponder, DialogueFlow
 from .components.request import Request
 
@@ -77,7 +77,7 @@ class Application:
             self.app_path, nlp, responder_class=self.responder_class,
             request_class=self.request_class, preprocessor=self.preprocessor,
             async_mode=self.async_mode)
-        self._server = WorkbenchServer(self.app_manager)
+        self._server = MindMeldServer(self.app_manager)
 
         # Add any pending dialogue rules
         for rule in self._dialogue_rules:

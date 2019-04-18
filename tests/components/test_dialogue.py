@@ -12,9 +12,9 @@ These tests apply regardless of async/await support.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mmworkbench.components import Conversation, DialogueManager, DialogueResponder
-from mmworkbench.components.request import Request, Params, FrozenParams
-from mmworkbench.components.dialogue import DialogueStateRule
+from mindmeld.components import Conversation, DialogueManager, DialogueResponder
+from mindmeld.components.request import Request, Params, FrozenParams
+from mindmeld.components.dialogue import DialogueStateRule
 
 
 def create_request(domain, intent, entities=None):
@@ -241,7 +241,7 @@ class TestDialogueManager:
 
 
 def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
-    """Tests that the params are cleared in one trip from app to wb."""
+    """Tests that the params are cleared in one trip from app to mm."""
     convo = Conversation(nlp=kwik_e_mart_nlp, app_path=kwik_e_mart_app_path)
     convo.params = Params(allowed_intents=['store_info.find_nearest_store'],
                           target_dialogue_state='greeting')

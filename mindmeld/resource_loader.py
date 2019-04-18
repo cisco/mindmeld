@@ -26,7 +26,7 @@ import re
 
 from . import markup, path
 from .query_cache import QueryCache
-from .exceptions import WorkbenchError
+from .exceptions import MindMeldError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
 from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
@@ -229,8 +229,8 @@ class ResourceLoader:
                 with open(file_path, 'r') as json_file:
                     json_data = json.load(json_file)
             except json.JSONDecodeError:
-                raise WorkbenchError('Could not load entity map (Invalid JSON): {!r}'.
-                                     format(file_path))
+                raise MindMeldError('Could not load entity map (Invalid JSON): {!r}'.
+                                    format(file_path))
 
         self._entity_files[entity_type]['mapping']['data'] = json_data
         self._entity_files[entity_type]['mapping']['loaded'] = time.time()
@@ -410,7 +410,7 @@ class ResourceLoader:
                                              is_gold=True, query_cache=self.query_cache)
             try:
                 self._check_query_entities(queries)
-            except WorkbenchError as exc:
+            except MindMeldError as exc:
                 logger.warning(exc.message)
             file_data['queries'] = queries
             file_data['loaded'] = time.time()
@@ -422,7 +422,7 @@ class ResourceLoader:
                 if (entity.entity.type not in entity_types and
                         not entity.entity.is_system_entity):
                     msg = 'Unknown entity {!r} found in query {!r}'
-                    raise WorkbenchError(msg.format(entity.entity.type, query.query.text))
+                    raise MindMeldError(msg.format(entity.entity.type, query.query.text))
 
     def _update_query_file_dates(self, query_tree):
         # We can just use this if it this is the first check

@@ -35,7 +35,7 @@ import requests
 from tqdm import tqdm
 from . import markup, path
 from .components import Conversation, QuestionAnswerer
-from .exceptions import (KnowledgeBaseConnectionError, KnowledgeBaseError, WorkbenchError)
+from .exceptions import (KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError)
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
 from ._util import blueprint
@@ -130,7 +130,7 @@ def converse(ctx, context):
             for index, response in enumerate(responses):
                 prefix = 'App: ' if index == 0 else '...  '
                 click.secho(prefix + response, fg='blue', bg='white')
-    except WorkbenchError as ex:
+    except MindMeldError as ex:
         logger.error(ex.message)
         ctx.exit(1)
 
@@ -164,7 +164,7 @@ def build(ctx, incremental):
         nlp = app.app_manager.nlp
         nlp.build(incremental=incremental)
         nlp.dump()
-    except WorkbenchError as ex:
+    except MindMeldError as ex:
         logger.error(ex.message)
         ctx.exit(1)
     except RuntimeError as ex:
@@ -190,12 +190,12 @@ def evaluate(ctx, verbose):
         nlp = app.app_manager.nlp
         try:
             nlp.load()
-        except WorkbenchError:
+        except MindMeldError:
             logger.error("You must build the app before running evaluate. "
                          "Try 'python app.py build'.")
             ctx.exit(1)
         nlp.evaluate(verbose)
-    except WorkbenchError as ex:
+    except MindMeldError as ex:
         logger.error(ex.message)
         ctx.exit(1)
     except RuntimeError as ex:
@@ -233,7 +233,7 @@ def predict(ctx, input_file, output, confidence, no_domain, no_intent, no_entity
     nlp = app.app_manager.nlp
     try:
         nlp.load()
-    except WorkbenchError:
+    except MindMeldError:
         logger.error("You must build the app before running predict. "
                      "Try 'python app.py build'.")
         ctx.exit(1)
@@ -318,7 +318,7 @@ def clean(ctx, query_cache, model_cache, days):
 
 @click.group()
 def shared_cli():
-    """Commands for mmworkbench module and apps"""
+    """Commands for MindMeld module and apps"""
     pass
 
 
@@ -430,7 +430,7 @@ def _get_duckling_pid():
 
 @click.group()
 def module_cli():
-    """Commands for mmworkbench module only"""
+    """Commands for MindMeld module only"""
     pass
 
 
@@ -463,7 +463,7 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
 @click_log.simple_verbosity_option()
 @click_log.init(__package__)
 def cli(ctx):
-    """Command line interface for mmworkbench."""
+    """Command line interface for MindMeld."""
 
     # configure logger settings for dependent libraries
     urllib3_logger = logging.getLogger('urllib3')
@@ -483,7 +483,7 @@ def cli(ctx):
 @click_log.simple_verbosity_option()
 @click_log.init(__package__)
 def app_cli(ctx):
-    """Command line interface for mmworkbench apps."""
+    """Command line interface for MindMeld apps."""
 
     # configure logger settings for dependent libraries
     urllib3_logger = logging.getLogger('urllib3')

@@ -1,4 +1,4 @@
-from mmworkbench.models.helpers import register_query_feature
+from mindmeld.models.helpers import register_query_feature
 
 
 @register_query_feature(feature_name='average-token-length')

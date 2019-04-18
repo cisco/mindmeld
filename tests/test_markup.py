@@ -9,9 +9,9 @@ Tests for `markup` module.
 """
 import pytest
 
-from mmworkbench import markup
+from mindmeld import markup
 
-from mmworkbench.core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
+from mindmeld.core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 
 MARKED_UP_STRS = [
     'show me houses under {[600,000|sys_number] dollars|price}',

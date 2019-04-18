@@ -12,8 +12,8 @@ These tests apply only when async/await are supported.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mmworkbench.app_manager import ApplicationManager, freeze_params
-from mmworkbench.components.request import Params, FrozenParams
+from mindmeld.app_manager import ApplicationManager, freeze_params
+from mindmeld.components.request import Params, FrozenParams
 
 
 @pytest.fixture

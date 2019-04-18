@@ -32,11 +32,11 @@ echo done
 echo 
 echo Running Docker image
 echo 
-echo You will be dropped inside the container. You can run the \"mmworkbench\" command and explore.
+echo You will be dropped inside the container. You can run the \"mindmeld\" command and explore.
 echo The \"projects\" folder in the container is linked to your native \"projects\" folder so any changes made in one are visible in the other. 
 echo   So, you can use the tools and editors you\'re used to for your tasks.
 echo
-echo try: mmworkbench blueprint food_ordering
+echo try: mindmeld blueprint food_ordering
 echo See the quickstart guide: https://mindmeld.com/docs/quickstart/00_overview.html
 echo
 ./runme.sh

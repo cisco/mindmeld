@@ -36,7 +36,7 @@ Enhancements
 Bug Fixes
 ^^^^^^^^^
 
-- ``mmworkbench blueprint`` has been temporarily disabled. Blueprints can manually downloaded from https://devcenter.mindmeld.com/bp/{blueprint_name}/app.tar.gz.
+- ``mindmeld blueprint`` has been temporarily disabled. Blueprints can manually downloaded from https://devcenter.mindmeld.com/bp/{blueprint_name}/app.tar.gz.
 
 
 3.3.0 (2018-05-10)
@@ -62,7 +62,7 @@ Enhancements
 Bug Fixes
 ^^^^^^^^^
 
-- The help messages for Workbench command line tools (``python app.py`` and ``mmworkbench``) should show the correct list of compatible commands
+- The help messages for Workbench command line tools (``python app.py`` and ``mindmeld``) should show the correct list of compatible commands
 
 - Various fixes to improve the numerical parser's robustness and logging
 

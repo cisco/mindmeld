@@ -152,7 +152,7 @@ class RoleClassifier(Classifier):
             # msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
             # raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
-            if not hasattr(self._model, 'mmworkbench_version'):
+            if not hasattr(self._model, 'mindmeld_version'):
                 msg = "Your trained models are incompatible with this version of MindMeld. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)

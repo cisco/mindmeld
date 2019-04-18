@@ -1,4 +1,4 @@
-from mmworkbench.components.nlp import NaturalLanguageProcessor
+from mindmeld.components.nlp import NaturalLanguageProcessor
 
 
 def test_custom_features_loaded(home_assistant_app_path):

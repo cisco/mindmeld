@@ -25,7 +25,7 @@ When you are ready to begin experimenting, import the :class:`NaturalLanguagePro
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp
 
@@ -116,8 +116,8 @@ Use the :meth:`RoleClassifier.fit` method to train a role classification model. 
 
 .. code-block:: python
 
-   from mmworkbench import configure_logs; configure_logs()
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld import configure_logs; configure_logs()
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp.domains['times_and_dates'].intents['change_alarm'].build()
 

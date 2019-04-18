@@ -32,7 +32,7 @@ You will need to install the NLTK package to try out the example below. Add the 
 .. code:: python
   :caption: stem_processor.py
 
-    from mmworkbench.components import Preprocessor
+    from mindmeld.components import Preprocessor
     from nltk.stem import PorterStemmer
 
 
@@ -101,7 +101,7 @@ To use your custom preprocessing logic within your Workbench application, pass i
 .. code:: python
   :caption: __init__.py
 
-  from mmworkbench import Application
+  from mindmeld import Application
   from .stem_processor import StemProcessor
 
   preprocessor = StemProcessor()

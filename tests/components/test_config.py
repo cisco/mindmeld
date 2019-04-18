@@ -9,7 +9,7 @@ Tests for config module.
 """
 # pylint: disable=locally-disabled,redefined-outer-name
 
-from mmworkbench.components._config import _expand_parser_config, get_classifier_config
+from mindmeld.components._config import _expand_parser_config, get_classifier_config
 
 import os
 APP_PATH = os.path.dirname(os.path.abspath(__file__))

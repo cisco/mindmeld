@@ -7,7 +7,7 @@ To leverage the Workbench question answerer in your application, you must first 
 
 .. code:: python
 
-  from mmworkbench import Application
+  from mindmeld import Application
 
   app = Application(__name__)
 
@@ -37,7 +37,7 @@ Assuming you have already created an index, such as ``stores``, and uploaded the
 
 .. code:: python
 
-   from mmworkbench.components import QuestionAnswerer
+   from mindmeld.components import QuestionAnswerer
    qa = QuestionAnswerer('.')
    stores = qa.get(index='stores')
    stores[0]

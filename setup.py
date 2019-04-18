@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""This module contains the specification of the mmworkbench package"""
+"""This module contains the specification of the mindmeld package"""
 # pylint: disable=locally-disabled,invalid-name
 from setuptools import setup
 
@@ -48,7 +48,7 @@ test_requirements = [
 ]
 
 setup(
-    name='mmworkbench',
+    name='mindmeld',
     version='4.0.2',
     description="A Python module for building natural language processing models.",
     long_description=history,
@@ -56,11 +56,11 @@ setup(
     author_email='contact@mindmeld.com',
     url='https://github.com/mindmeld/mindmeld-workbench3',
     packages=[
-        'mmworkbench',
+        'mindmeld',
     ],
-    package_dir={'mmworkbench': 'mmworkbench'},
+    package_dir={'mindmeld': 'mindmeld'},
     entry_points={
-        'console_scripts': ['mmworkbench=mmworkbench.cli:cli']
+        'console_scripts': ['mindmeld=mindmeld.cli:cli']
     },
     include_package_data=True,
     install_requires=requirements,

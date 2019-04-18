@@ -25,14 +25,14 @@ from flask import Flask, Request, request, jsonify, g
 from flask_cors import CORS
 
 from ._version import current as __version__
-from .exceptions import BadWorkbenchRequestError
+from .exceptions import BadMindMeldRequestError
 from .components.dialogue import DialogueResponder
 
 logger = logging.getLogger(__name__)
 
 
-class WorkbenchRequest(Request):  # pylint: disable=too-many-ancestors
-    """This class represents requests to the WorkbenchServer. It extends
+class MindMeldRequest(Request):  # pylint: disable=too-many-ancestors
+    """This class represents requests to the MindMeldServer. It extends
     flask.Request to provide
     custom handling of certain exceptions.
     """
@@ -44,10 +44,10 @@ class WorkbenchRequest(Request):  # pylint: disable=too-many-ancestors
         occurred. The default implementation just raises a BadRequest exception.
         """
         del exc
-        raise BadWorkbenchRequestError("Malformed request body: {0:s}".format(sys.exc_info()[1]))
+        raise BadMindMeldRequestError("Malformed request body: {0:s}".format(sys.exc_info()[1]))
 
 
-class WorkbenchServer:
+class MindMeldServer:
     """This class sets up a Flask web server."""
 
     def __init__(self, app_manager):
@@ -57,7 +57,7 @@ class WorkbenchServer:
         server = Flask('mindmeld')
         CORS(server)
 
-        server.request_class = WorkbenchRequest
+        server.request_class = MindMeldRequest
 
         server.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 16
 
@@ -82,7 +82,7 @@ class WorkbenchServer:
             request_json = request.get_json()
             if request_json is None:
                 msg = "Invalid Content-Type: Only 'application/json' is supported."
-                raise BadWorkbenchRequestError(msg, status_code=415)
+                raise BadMindMeldRequestError(msg, status_code=415)
 
             safe_request = {}
             for key in ['text', 'params', 'context', 'frame', 'history', 'verbose']:
@@ -123,7 +123,7 @@ class WorkbenchServer:
                 self._log_request(request, response)
 
         # handle exceptions
-        @server.errorhandler(BadWorkbenchRequestError)
+        @server.errorhandler(BadMindMeldRequestError)
         def handle_bad_request(error):
             response = jsonify(error.to_dict())
             response.status_code = error.status_code

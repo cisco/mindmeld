@@ -56,13 +56,13 @@ class ConditionalRandomFields(Tagger):
     def predict_proba(self, examples, config, resources):
         """
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries to predict on
+            examples (list of mindmeld.core.Query): a list of queries to predict on
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
 
         Returns:
-            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels \
+            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
              with confidence scores
         """
         X, _, _ = self.extract_features(examples, config, resources)
@@ -80,7 +80,7 @@ class ConditionalRandomFields(Tagger):
         """Transforms a list of examples into a feature matrix.
 
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries
+            examples (list of mindmeld.core.Query): a list of queries
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
@@ -100,7 +100,7 @@ class ConditionalRandomFields(Tagger):
         """Extracts feature dicts for each token in an example.
 
         Args:
-            example (mmworkbench.core.Query): A query.
+            example (mindmeld.core.Query): A query.
             config (ModelConfig): The ModelConfig which may contain information used for feature \
                                   extraction.
             resources (dict): Resources which may be used for this model's feature extraction.

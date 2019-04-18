@@ -79,7 +79,7 @@ python setup.py bdist_wheel --universal
 You can publish to pypi by pushing the .whl to `s3://mindmeld-pypi/<develop||staging||master>/` (the trailing forward slash is important!).
 
 ```
-aws s3 cp dist/mmworkbench-{new-version}-py2.py3-none-any.whl s3://mindmeld-pypi/<develop||staging||master>/
+aws s3 cp dist/mindmeld-{new-version}-py2.py3-none-any.whl s3://mindmeld-pypi/<develop||staging||master>/
 ```
 
 Currently we do not have a deployment process that takes a package from `dev` to `staging` to `master`.
@@ -97,11 +97,7 @@ This repository contains documentation for MindMeld Workbench.
 
 Assuming you have pyenv installed.
 ```
-cd mindmeld-workbench-docs/  # go to the root of the workbench repo
-pyenv install 3.5.3  # install an appropriate version of python
-pyenv virtualenv 3.5.3 wb-doc  # create a virtualenv
-pyenv local wb-doc  # set the virtualenv for the repo
-pip install -r requirements.txt  # install development dependencies
+pip install -r docs-requirements.txt  # install development dependencies
 ```
 
 ### Building Docs

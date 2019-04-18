@@ -13,10 +13,10 @@ import mock
 
 from mock import PropertyMock
 
-from mmworkbench.core import Entity
+from mindmeld.core import Entity
 
-from mmworkbench.components.entity_resolver import EntityResolver
-from mmworkbench.components._elasticsearch_helpers import create_es_client
+from mindmeld.components.entity_resolver import EntityResolver
+from mindmeld.components._elasticsearch_helpers import create_es_client
 
 ENTITY_TYPE = 'store_name'
 APP_PATH = '../kwik_e_mart'
@@ -41,7 +41,7 @@ def resolver(resource_loader, es_client):
 def resolver_text_rel(resource_loader, es_client):
     """An entity resolver for 'location' on the Kwik-E-Mart app"""
     resolver = EntityResolver(APP_PATH, resource_loader, ENTITY_TYPE, es_client=es_client)
-    with mock.patch('mmworkbench.components.entity_resolver.EntityResolver._use_text_rel',
+    with mock.patch('mindmeld.components.entity_resolver.EntityResolver._use_text_rel',
                     new_callable=PropertyMock) as _use_text_rel:
         _use_text_rel.return_value = False
         resolver.fit()

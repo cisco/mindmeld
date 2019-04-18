@@ -78,7 +78,7 @@ definitions:
             # upgrade pip to latest
             pip install -U pip
 
-            # install mmworkbench and test requirements
+            # install mindmeld and test requirements
             pip install -e .
             pip install -r test-requirements.txt
             python setup.py install
@@ -103,7 +103,7 @@ definitions:
             pip install -U pip
             pip install awscli
 
-            # install mmworkbench and requirements
+            # install mindmeld and requirements
             mkdir ~/packages -p
             RTD_WHEEL="sphinx_rtd_theme-0.1.10mm9.tar.gz"
             if [ -f "~/packages/$RTD_WHEEL" ]; then
@@ -188,13 +188,13 @@ definitions:
           command: |
             # run tests
             mkdir ~/test-reports
-            pytest --junitxml=~/test-reports/junit.xml --cov-report html:/home/circleci/test-reports/cov_html --cov=mmworkbench
+            pytest --junitxml=~/test-reports/junit.xml --cov-report html:/home/circleci/test-reports/cov_html --cov=mindmeld
 
       - run:
           name: Food ordering blueprint kb setup
           # run this even when linting fails
           when: always
-          command: python -c "from mmworkbench._util import Blueprint; Blueprint.setup_kb(name='food_ordering', app_path='./food_ordering')"
+          command: python -c "from mindmeld._util import Blueprint; Blueprint.setup_kb(name='food_ordering', app_path='./food_ordering')"
 
       - store_test_results:
           path: /home/circleci/test-reports

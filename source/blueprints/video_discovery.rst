@@ -85,7 +85,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 .. code-block:: shell
 
-   python -c "import mmworkbench as wb; wb.blueprint('video_discovery');"
+   python -c "import mindmeld as wb; wb.blueprint('video_discovery');"
 
 This should create a MindMeld project folder called ``video_discovery`` in your current directory with the following structure:
 
@@ -243,7 +243,7 @@ Assuming that you have Elasticsearch installed, running the :func:`blueprint()` 
 
 .. code:: python
 
-   from mmworkbench.components.question_answerer import QuestionAnswerer
+   from mindmeld.components.question_answerer import QuestionAnswerer
    qa = QuestionAnswerer(app_path='video_discovery')
    qa.get(index='videos', _sort='popularity', _sort_type='desc')[0]
 
@@ -319,8 +319,8 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. code:: python
 
-   from mmworkbench import configure_logs; configure_logs()
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld import configure_logs; configure_logs()
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='video_discovery')
    nlp.build()
 
@@ -516,7 +516,7 @@ For instance:
 
 .. code:: python
 
-   from mmworkbench.components.dialogue import Conversation
+   from mindmeld.components.dialogue import Conversation
    conv = Conversation(nlp=nlp, app_path='video_discovery')
    res = conv.say("Show me movies with Tom Hanks")
    print(res[1])

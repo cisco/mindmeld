@@ -29,7 +29,7 @@ from .. import path
 from ..core import ProcessedQuery, Bunch
 from ..exceptions import ProcessorError
 from ..resource_loader import ResourceLoader
-from .._version import validate_workbench_version
+from .._version import validate_mindmeld_version
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
@@ -38,7 +38,7 @@ from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
 from ..path import get_app
-from ..exceptions import AllowedNlpClassesKeyError, WorkbenchImportError
+from ..exceptions import AllowedNlpClassesKeyError, MindMeldImportError
 from ..markup import process_markup, TIME_FORMAT
 from ..query_factory import QueryFactory
 from ._config import get_nlp_config
@@ -347,7 +347,7 @@ class NaturalLanguageProcessor(Processor):
         """
         super().__init__(app_path, resource_loader, config)
         self._app_path = app_path
-        validate_workbench_version(self._app_path)
+        validate_mindmeld_version(self._app_path)
 
         # initialize the system entity recognizer singleton
         SystemEntityRecognizer.get_instance(app_path)
@@ -373,7 +373,7 @@ class NaturalLanguageProcessor(Processor):
         # Load __init__.py so nlp object recognizes custom features in python console
         try:
             get_app(self._app_path)
-        except WorkbenchImportError:
+        except MindMeldImportError:
             pass
 
     @property

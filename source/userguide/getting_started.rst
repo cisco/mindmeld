@@ -9,7 +9,7 @@ These instructions explain how to install MindMeld on a Unix-based system and se
 
 
 Install MindMeld
------------------
+----------------
 
 You must choose the mechanism by which you install MindMeld. The supported choices are:
 
@@ -166,26 +166,27 @@ Install with virtualenv
 1. Install prerequisites
 """"""""""""""""""""""""
 
-On a macOS or Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the `mmworkbench_init.sh script <https://devcenter.mindmeld.com/scripts/mmworkbench_init.sh>`_.
+On a macOS or Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the `mindmeld_init.sh script <https://devcenter.mindmeld.com/scripts/mindmeld_init.sh>`_.
 
 .. note::
 
    A few things to note before you run the script:
 
    - The script installs the following components after a confirmation prompt: ``brew``, ``python3``, ``pip``, ``virtualenv``, Java 8 and Elasticsearch.
-   - Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mmworkbench/config``. **Previous files are overwritten.**
+   - Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mindmeld/config``. **Previous files are overwritten.**
 
 When you're ready to go, open a terminal (shell) and run this command:
 
 .. code-block:: shell
 
-  bash -c "$(curl -s  https://devcenter.mindmeld.com/scripts/mmworkbench_init.sh)"
+  bash -c "$(curl -s  https://devcenter.mindmeld.com/scripts/mindmeld_init.sh)"
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
 Here are the commands run by the script to install the required components depending on your operating system:
 
 macOS:
+
 +---------------+--------------------------------------------------------------------------------------------------------+
 |    Component  |    Command                                                                                             |
 +===============+========================================================================================================+
@@ -203,6 +204,7 @@ macOS:
 +---------------+--------------------------------------------------------------------------------------------------------+
 
 Ubuntu:
+
 +---------------+--------------------------------------------------------------------------------------------------------+
 |    Component  |    Command                                                                                             |
 +===============+========================================================================================================+
@@ -262,7 +264,7 @@ Now that your environment is set up, you can install MindMeld just as you would 
 
 .. code-block:: shell
 
-  pip install mmworkbench
+  pip install mindmeld
 
 If you see errors here, you likely entered incorrect credentials during :ref:`Setup <getting_started_virtualenv_setup>`. Make sure you use your credentials for the MindMeld Learning Center.
 
@@ -270,7 +272,7 @@ To verify your setup is good, run this command. If there is no error, the instal
 
 .. code-block:: shell
 
-  mmworkbench
+  mindmeld
 
 
 .. _duckling:
@@ -282,7 +284,7 @@ MindMeld uses a Haskell-based numerical parser for detecting certain numeric exp
 
 .. code-block:: shell
 
-  mmworkbench num-parse --start
+  mindmeld num-parse --start
 
 If you encounter an error like ``OS is incompatible with duckling executable``, it means that
 your operating system is not compatible with the pre-compiled numerical parser binary distributed
@@ -310,7 +312,7 @@ With the setup out of the way, you are now ready to get your feet wet. You can p
 
 #. Start a :ref:`brand new project <getting_started_template>`. This is the approach to take if your specific use case isn't covered by an existing blueprint, or if you prefer to build out your app from scratch.
 
-MindMeld is designed so you can keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in your command-line shell using the ``mmworkbench`` command. But to really take advantage of the power of MindMeld, the Python shell is where all the action is at. The examples in this section are accompanied by code samples from both shells.
+MindMeld is designed so you can keep using the tools and coding patterns that are familiar to you. Some of the very basic operations can be performed in your command-line shell using the ``mindmeld`` command. But to really take advantage of the power of MindMeld, the Python shell is where all the action is at. The examples in this section are accompanied by code samples from both shells.
 
 
 .. _getting_started_blueprint:
@@ -330,7 +332,7 @@ To try out the :doc:`Food Ordering blueprint<../blueprints/food_ordering>`, run 
 
 .. code-block:: shell
 
-  mmworkbench blueprint food_ordering
+  mindmeld blueprint food_ordering
   python -m food_ordering build   # this will take a few minutes
   python -m food_ordering converse
 
@@ -351,16 +353,16 @@ To try out the :doc:`Home Assistant blueprint<../blueprints/home_assistant>`, ru
 
 .. code-block:: python
 
-    import mmworkbench as wb
+    import mindmeld as wb
     wb.configure_logs()
     blueprint = 'home_assistant'
     wb.blueprint(blueprint)
 
-    from mmworkbench.components import NaturalLanguageProcessor
+    from mindmeld.components import NaturalLanguageProcessor
     nlp = NaturalLanguageProcessor(blueprint)
     nlp.build()
 
-    from mmworkbench.components.dialogue import Conversation
+    from mindmeld.components.dialogue import Conversation
     conv = Conversation(nlp=nlp, app_path=blueprint)
     conv.say('Hello!')
 
@@ -381,7 +383,7 @@ Using the command-line
 
 .. code-block:: shell
 
-  mmworkbench blueprint template myapp
+  mindmeld blueprint template myapp
 
 
 Using the Python shell
@@ -389,7 +391,7 @@ Using the Python shell
 
 .. code-block:: python
 
-  import mmworkbench as wb
+  import mindmeld as wb
   wb.configure_logs()
   wb.blueprint('template', 'my_app')
 
@@ -399,7 +401,7 @@ The :doc:`Step-By-Step guide <../quickstart/00_overview>` walks through the meth
 Upgrade Mindmeld
 ----------------
 
-To upgrade to the latest version of MindMeld, run ``pip install mmworkbench --upgrade``
+To upgrade to the latest version of MindMeld, run ``pip install mindmeld --upgrade``
 
 Make sure to run this regularly to stay on top of the latest bug fixes and feature releases.
 
@@ -407,7 +409,7 @@ Make sure to run this regularly to stay on top of the latest bug fixes and featu
 
    - As of version 3.3, we have moved the MindMeld package from the MindMeld-hosted PyPI to Cisco’s PyPI server. If you are using the old ``~/.pip/pip.conf``, please re-run :ref:`Step 1 <getting_started_virtualenv_setup>` to update your installation path.
 
-   - Before re-downloading a :doc:`blueprint <../blueprints/overview>` using an upgraded version of MindMeld, please remove the blueprint cache by running this command: ``rm -r ~/.mmworkbench/blueprints/*``
+   - Before re-downloading a :doc:`blueprint <../blueprints/overview>` using an upgraded version of MindMeld, please remove the blueprint cache by running this command: ``rm -r ~/.mindmeld/blueprints/*``
 
 
 .. _cli:
@@ -417,15 +419,15 @@ Command-Line Interfaces
 
 MindMeld has two command-line interfaces for some of the common workflow tasks you'll be doing often:
 
-#. ``mmworkbench``
+#. ``mindmeld``
 #. ``python -m <app_name>``
 
 Built-in help is available with the standard :option:`-h` flag.
 
-mmworkbench
-^^^^^^^^^^^
+mindmeld
+^^^^^^^^
 
-The command-line interface (CLI) for MindMeld Workbench can be accessed with the ``mmworkbench`` command.
+The command-line interface (CLI) for MindMeld Workbench can be accessed with the ``mindmeld`` command.
 This is most suitable for use in an app-agnostic context.
 
 The commands available are:
@@ -451,7 +453,7 @@ The commands available are:
 
 
 Configure Logging
-------------------
+-----------------
 
 Workbench adheres to the standard `Python logging mechanism <https://docs.python.org/3/howto/logging.html>`_.
 The default logging level is ``WARNING``, which can be overridden with a config file or from code.
@@ -460,7 +462,7 @@ The ``INFO`` logging level can be useful to see what's going on:
 .. code-block:: python
 
   import logging
-  logging.getLogger('mmworkbench').setLevel(logging.INFO)
+  logging.getLogger('mindmeld').setLevel(logging.INFO)
 
 There is a handy ``configure_logs()`` function available that wraps this and accepts 2 parameters:
 
@@ -471,7 +473,7 @@ Here's an example usage:
 
 .. code-block:: python
 
-  import mmworkbench as wb
+  import mindmeld as wb
   wb.configure_logs()
 
 
@@ -485,10 +487,10 @@ Troubleshooting
 +===============+=============================================+===============================================+
 | pip install   | Could not find a version                    | Verify your credentials for the               |
 |               | that satisfies the                          | MindMeld Learning Center.                     |
-|               | requirement mmworkbench                     |                                               |
+|               | requirement mindmeld                        |                                               |
 +---------------+---------------------------------------------+-----------------------------------------------+
 | any           | Code issue                                  | Upgrade to latest build:                      |
-|               |                                             | ``pip install mmworkbench -U``                |
+|               |                                             | ``pip install mindmeld -U``                   |
 +---------------+---------------------------------------------+-----------------------------------------------+
 | Elasticsearch | ``KnowledgeBaseConnectionError``            | Run ``curl localhost:9200`` to                |
 |               |                                             | verify that Elasticsearch is                  |
@@ -501,12 +503,12 @@ Troubleshooting
 | Parser        |                                             | Docker.                                       |
 |               |                                             | :ref:`More details <duckling>`.               |
 +---------------+---------------------------------------------+-----------------------------------------------+
-| Blueprints    | ``ValueError: Unknown                       | Run the mmworkbench_init.sh found             |
+| Blueprints    | ``ValueError: Unknown                       | Run the mindmeld_init.sh found                |
 |               | error fetching archive`` when running       | :ref:`here <getting_started_virtualenv_setup>`|
 |               | ``wb.blueprint(bp_name)``                   |                                               |
 +---------------+---------------------------------------------+-----------------------------------------------+
 | Blueprints    | ``JSONDecodeError: Expecting value: line 1  | Remove the cached version of the app:         |
-|               | column 1 (char 0)``                         | ``rm ~/.mmworkbench/blueprints/bp_name`` and  |
+|               | column 1 (char 0)``                         | ``rm ~/.mindmeld/blueprints/bp_name`` and     |
 |               |                                             | re-download the blueprint.                    |
 +---------------+---------------------------------------------+-----------------------------------------------+
 

@@ -48,7 +48,7 @@ In MindMeld Workbench, every project is also a Python package and therefore must
 .. code:: python
   :caption: __init__.py
 
-  from mmworkbench import Application
+  from mindmeld import Application
 
   app = Application(__name__)
 
@@ -83,7 +83,7 @@ The patterns and associated handlers which you enumerate using this straighforwa
    :caption: __init__.py
    :emphasize-lines: 5-6
 
-   from mmworkbench import Application
+   from mindmeld import Application
 
    app = Application(__name__)
 
@@ -118,7 +118,7 @@ The patterns and associated handlers which you enumerate using this straighforwa
    .. code:: python
      :caption: root.py
 
-     from mmworkbench import Application
+     from mindmeld import Application
 
      app = Application(__name__)
 
@@ -144,7 +144,7 @@ First, consider the handler for the ``welcome`` dialogue state.
 
 .. code:: python
 
-  from mmworkbench import Application
+  from mindmeld import Application
 
   app = Application(__name__)
 
@@ -169,7 +169,7 @@ Let's follow this same approach to define handlers for the dialogue states ``sen
 
 .. code:: python
 
-  from mmworkbench import Application
+  from mindmeld import Application
 
   app = Application(__name__)
 

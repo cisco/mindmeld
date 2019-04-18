@@ -182,7 +182,7 @@ class LstmModel(Tagger):
         deep learning model.
 
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries
+            examples (list of mindmeld.core.Query): a list of queries
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
@@ -607,7 +607,7 @@ class LstmModel(Tagger):
         """Extracts the word and gazetteer embeddings from the input examples
 
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries
+            examples (list of mindmeld.core.Query): a list of queries
 
         Returns:
             (tuple): Word embeddings and Gazetteer one-hot embeddings
@@ -655,7 +655,7 @@ class LstmModel(Tagger):
         """Extracts feature dicts for each token in an example.
 
         Args:
-            example (mmworkbench.core.Query): an query
+            example (mindmeld.core.Query): an query
 
         Returns:
             (list of dict): features

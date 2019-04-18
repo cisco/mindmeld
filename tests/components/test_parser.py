@@ -10,9 +10,9 @@ Tests for parser module.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mmworkbench import markup
-from mmworkbench.components.parser import Parser
-from mmworkbench.exceptions import ParserTimeout
+from mindmeld import markup
+from mindmeld.components.parser import Parser
+from mindmeld.exceptions import ParserTimeout
 
 
 class TestBasicParser:

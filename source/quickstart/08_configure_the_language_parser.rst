@@ -36,7 +36,7 @@ With the parser configuration in place, we train the NLP models and then test th
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
    nlp.build()
    nlp.process('Order one large squishee and a dozen donuts from the Elm Street Kwik-E-Mart.')

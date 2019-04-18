@@ -19,7 +19,7 @@ import shutil
 import logging
 from sklearn.externals import joblib
 
-from ._version import _get_wb_version
+from ._version import _get_mm_version
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, GEN_FOLDER
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class QueryCache:
     @property
     def versioned_data(self):
         """A dictionary containing the MindMeld version in addition to any cached queries."""
-        return {'wb_version': _get_wb_version(), 'cached_queries': self.cached_queries}
+        return {'mm_version': _get_mm_version(), 'cached_queries': self.cached_queries}
 
     def set_value(self, domain, intent, query_text, processed_query):
         """

@@ -11,21 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains exceptions used by the mmworkbench package."""
+"""This module contains exceptions used by the mindmeld package."""
 
 
-class WorkbenchVersionWarning(UserWarning):
+class MindMeldVersionWarning(UserWarning):
     pass
 
 
-class WorkbenchError(Exception):
+class MindMeldError(Exception):
 
     def __init__(self, *args):
         super().__init__(*args)
         self.message = args[0] if len(args) > 0 else None
 
 
-class BadWorkbenchRequestError(WorkbenchError):
+class BadMindMeldRequestError(MindMeldError):
     status_code = 400
 
     def __init__(self, message, status_code=None, payload=None):
@@ -41,29 +41,29 @@ class BadWorkbenchRequestError(WorkbenchError):
         return obj
 
 
-class EmbeddingDownloadError(WorkbenchError):
+class EmbeddingDownloadError(MindMeldError):
     pass
 
 
-class AllowedNlpClassesKeyError(WorkbenchError):
+class AllowedNlpClassesKeyError(MindMeldError):
     pass
 
 
-class ClassifierLoadError(WorkbenchError):
+class ClassifierLoadError(MindMeldError):
     pass
 
 
-class ProcessorError(WorkbenchError):
+class ProcessorError(MindMeldError):
     """An exception which indicates an error with a processor."""
     pass
 
 
-class ParserTimeout(WorkbenchError):
+class ParserTimeout(MindMeldError):
     """An exception for when parsing takes an unexpected length of time"""
     pass
 
 
-class MarkupError(WorkbenchError):
+class MarkupError(MindMeldError):
     pass
 
 
@@ -71,12 +71,12 @@ class SystemEntityMarkupError(MarkupError):
     pass
 
 
-class SystemEntityResolutionError(WorkbenchError):
+class SystemEntityResolutionError(MindMeldError):
     """An exception representing an error resolving a system entity"""
     pass
 
 
-class KnowledgeBaseError(WorkbenchError):
+class KnowledgeBaseError(MindMeldError):
     """An exception for unexpected error from knowledge base."""
     pass
 
@@ -96,7 +96,7 @@ class KnowledgeBaseConnectionError(KnowledgeBaseError):
         super().__init__(self.message)
 
 
-class EntityResolverError(WorkbenchError):
+class EntityResolverError(MindMeldError):
     """An exception for unexpected error from entity resolver."""
     pass
 
@@ -115,13 +115,13 @@ class EntityResolverConnectionError(EntityResolverError):
                             hosts=', '.join(es_host))
 
 
-class AuthNotFoundError(WorkbenchError):
+class AuthNotFoundError(MindMeldError):
     pass
 
 
-class WorkbenchVersionError(WorkbenchError):
+class MindMeldVersionError(MindMeldError):
     pass
 
 
-class WorkbenchImportError(WorkbenchError):
+class MindMeldImportError(MindMeldError):
     pass

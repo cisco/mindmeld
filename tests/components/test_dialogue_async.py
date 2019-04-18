@@ -13,9 +13,9 @@ These tests apply only when async/await are supported.
 import asyncio
 
 import pytest
-from mmworkbench.components import Conversation, DialogueManager
-from mmworkbench.components.dialogue import DialogueResponder
-from mmworkbench.components.request import Params, FrozenParams
+from mindmeld.components import Conversation, DialogueManager
+from mindmeld.components.dialogue import DialogueResponder
+from mindmeld.components.request import Params, FrozenParams
 
 from .test_dialogue import create_request, create_responder
 
@@ -244,7 +244,7 @@ async def test_async_middleware(dm):
 @pytest.mark.conversation
 @pytest.mark.asyncio
 async def test_convo_params_are_cleared(async_kwik_e_mart_app, kwik_e_mart_app_path):
-    """Tests that the params are cleared in one trip from app to wb."""
+    """Tests that the params are cleared in one trip from app to mm."""
     convo = Conversation(app=async_kwik_e_mart_app, app_path=kwik_e_mart_app_path)
     convo.params = Params(
         allowed_intents=['store_info.find_nearest_store'],

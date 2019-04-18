@@ -10,7 +10,7 @@ Tests for `tagger` module.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mmworkbench.models.taggers import taggers
+from mindmeld.models.taggers import taggers
 
 # This index is the start index of when the time section of the full time format. For example:
 # 2013-02-12T11:30:00.000-02:00, index 8 onwards slices 11:30:00.000-02:00 from the full time

@@ -119,7 +119,7 @@ class Tagger:
         and resources are passed in each time to make the underlying model implementation stateless.
 
         Args:
-            examples (list of mmworkbench.core.Query): A list of queries to extract features for
+            examples (list of mindmeld.core.Query): A list of queries to extract features for
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
             resources (dict): Resources which may be used for this model's feature extraction
@@ -141,7 +141,7 @@ class Tagger:
         and resources are passed in each time to make the underlying model implementation stateless.
 
         Args:
-            examples (list of mmworkbench.core.Query): A list of queries to extract features for and
+            examples (list of mindmeld.core.Query): A list of queries to extract features for and
                                                        predict
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
@@ -157,7 +157,7 @@ class Tagger:
     def predict_proba(self, examples, config, resources):
         """
         Args:
-            examples (list of mmworkbench.core.Query): A list of queries to extract features for and
+            examples (list of mindmeld.core.Query): A list of queries to extract features for and
                                                        predict
             config (ModelConfig): The ModelConfig which may contain information used for feature
                                   extraction
@@ -546,7 +546,7 @@ def extract_sequence_features(example, example_type, feature_config, resources):
     """Extracts feature dicts for each token in an example.
 
     Args:
-        example (mmworkbench.core.Query): a query
+        example (mindmeld.core.Query): a query
         example_type (str): The type of example
         feature_config (dict): The config for features
         resources (dict): Resources of this model

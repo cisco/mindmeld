@@ -10,7 +10,7 @@ Tests for `path` module.
 
 import os
 
-from mmworkbench import path
+from mindmeld import path
 
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)

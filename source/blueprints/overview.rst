@@ -67,7 +67,7 @@ Open a Python shell and type the following commands to download and set up the b
 
 .. code:: python
 
-   import mmworkbench as wb
+   import mindmeld as wb
    wb.configure_logs()
    bp_name = 'food_ordering'
    wb.blueprint(bp_name)
@@ -79,7 +79,7 @@ Build the Natural Language Processing models that power the app.
 
 .. code:: python
 
-   from mmworkbench.components import NaturalLanguageProcessor
+   from mindmeld.components import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(bp_name)
    nlp.build()
 
@@ -93,7 +93,7 @@ Interact with the app in the Python shell using the commands below. Try the quer
 
 .. code:: python
 
-   from mmworkbench.components.dialogue import Conversation
+   from mindmeld.components.dialogue import Conversation
    conv = Conversation(nlp=nlp, app_path=bp_name)
    conv.say('Hello!')
 
@@ -121,7 +121,7 @@ Interact with the app in the Python shell using the commands below. Try the quer
 
 .. code:: python
 
-    >>> from mmworkbench.components.dialogue import Conversation
+    >>> from mindmeld.components.dialogue import Conversation
     >>> conv = Conversation(nlp=nlp, app_path=bp_name)
     >>> conv.say('Hi')
     ['Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances.']
@@ -134,7 +134,7 @@ Interact with the app in the Python shell using the commands below. Try the quer
 
 .. code:: python
 
-    >>> from mmworkbench.components.dialogue import Conversation
+    >>> from mindmeld.components.dialogue import Conversation
     >>> conv = Conversation(nlp=nlp, app_path='video_discovery')
     >>> conv.say('Hi')
     ['Hello.', 'I can help you find movies and TV shows. What do you feel like watching today?', "Unsupported response: {'videos': [{'type': 'movie', 'title': 'Wonder Woman', 'release_year': 2017}, {'type': 'movie', 'title': 'Beauty and the Beast', 'release_year': 2017}, {'type': 'movie', 'title': 'Transformers: The Last Knight', 'release_year': 2017}, {'type': 'movie', 'title': 'Logan', 'release_year': 2017}, {'type': 'movie', 'title': 'The Mummy', 'release_year': 2017}, {'type': 'movie', 'title': 'Kong: Skull Island', 'release_year': 2017}, {'type': 'tv-show', 'title': 'Doctor Who', 'release_year': 2005}, {'type': 'tv-show', 'title': 'Game of Thrones', 'release_year': 2011}, {'type': 'tv-show', 'title': 'The Walking Dead', 'release_year': 2010}, {'type': 'movie', 'title': 'Pirates of the Caribbean: Dead Men Tell No Tales', 'release_year': 2017}]}", "Suggestions: 'Most popular', 'Most recent', 'Movies', 'TV Shows', 'Action', 'Dramas', 'Sci-Fi'"]

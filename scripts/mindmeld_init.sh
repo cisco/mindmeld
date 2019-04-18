@@ -254,16 +254,16 @@ check_service elasticsearch
 echo done
 
 ###
-# .mmworkbench/config
+# .mindmeld/config
 ###
 
-mkdir -p ~/.mmworkbench
-cat >~/.mmworkbench/config <<EOL
-[mmworkbench]
+mkdir -p ~/.mindmeld
+cat >~/.mindmeld/config <<EOL
+[mindmeld]
 mindmeld_url = https://devcenter.mindmeld.com
 EOL
 
-echo ~/.mmworkbench/config created.
+echo ~/.mindmeld/config created.
 
 ####
 # pip.conf

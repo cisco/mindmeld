@@ -1,4 +1,4 @@
-from mmworkbench.models.taggers.embeddings import GloVeEmbeddingsContainer
+from mindmeld.models.taggers.embeddings import GloVeEmbeddingsContainer
 from numpy import ndarray
 
 

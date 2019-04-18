@@ -74,7 +74,7 @@ endif
 
 apidoc: ## generate Sphinx HTML documentation, including API docs
 	rm -rf source/apidoc/
-	sphinx-apidoc --module-first --separate -o source/apidoc mmworkbench mmworkbench/constants.py mmworkbench/cli.py mmworkbench/test.py
+	sphinx-apidoc --module-first --separate -o source/apidoc mindmeld mindmeld/constants.py mindmeld/cli.py mindmeld/test.py
 	$(MAKE) docs
 
 servedocs: ## compile the docs watching for changes

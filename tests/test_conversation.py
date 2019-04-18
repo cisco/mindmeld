@@ -1,4 +1,4 @@
-from mmworkbench.test import TestConversation
+from mindmeld.test import TestConversation
 
 
 def test_conversation(kwik_e_mart_app_path):

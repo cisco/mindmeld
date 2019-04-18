@@ -6,7 +6,7 @@ We have seen how the :ref:`Natural Language Processor (NLP) <arch_nlp>` uses a p
 .. note::
 
    - This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`.
-   - This section requires the :doc:`Home Assistant <../blueprints/home_assistant>` blueprint application. To get the app, open a terminal and run ``mmworkbench blueprint home_assistant``.
+   - This section requires the :doc:`Home Assistant <../blueprints/home_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint home_assistant``.
 
 .. _instantiate_nlp:
 
@@ -22,7 +22,7 @@ When you are ready to begin experimenting, import the :class:`NaturalLanguagePro
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp
 
@@ -134,8 +134,8 @@ As described in :doc:`Step 7 <../quickstart/07_train_the_natural_language_proces
 
 .. code-block:: python
 
-   from mmworkbench import configure_logs; configure_logs()
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld import configure_logs; configure_logs()
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='food_ordering')
    nlp.build()
 
@@ -231,8 +231,8 @@ For instance, the code below rebuilds the NLP models for one selected domain onl
 
 .. code-block:: python
 
-   from mmworkbench import configure_logs; configure_logs()
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld import configure_logs; configure_logs()
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp.domains['times_and_dates'].build()
 

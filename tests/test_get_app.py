@@ -12,13 +12,13 @@ import tempfile
 
 import pytest
 
-from mmworkbench import Application
-from mmworkbench.path import get_app
-from mmworkbench.exceptions import WorkbenchImportError
+from mindmeld import Application
+from mindmeld.path import get_app
+from mindmeld.exceptions import MindMeldImportError
 
 
 GOOD_APP_FILE = """
-from mmworkbench import Application
+from mindmeld import Application
 
 app = Application(__name__)
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 """
 
 BAD_APP_FILE = """
-from mmworkbench import Application
+from mindmeld import Application
 
 """
 
@@ -52,7 +52,7 @@ def app_dir():
     global app_counter
     with tempfile.TemporaryDirectory() as temp_dir:
 
-        temp_app_dir = os.path.join(temp_dir, 'wb_app_' + str(app_counter))
+        temp_app_dir = os.path.join(temp_dir, 'mm_app_' + str(app_counter))
         os.mkdir(temp_app_dir)
         yield temp_app_dir
 
@@ -80,21 +80,21 @@ def test_module_app(app_dir):
 
 
 def test_no_files(app_dir):
-    with pytest.raises(WorkbenchImportError):
+    with pytest.raises(MindMeldImportError):
         get_app(app_dir)
 
 
 def test_bad_package(app_dir):
     dump_to_file(os.path.join(app_dir, '__init__.py'), BAD_APP_FILE)
 
-    with pytest.raises(WorkbenchImportError):
+    with pytest.raises(MindMeldImportError):
         get_app(app_dir)
 
 
 def test_bad_module(app_dir):
     dump_to_file(os.path.join(app_dir, 'app.py'), BAD_APP_FILE)
 
-    with pytest.raises(WorkbenchImportError):
+    with pytest.raises(MindMeldImportError):
         get_app(app_dir)
 
 

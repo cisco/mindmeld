@@ -7,6 +7,6 @@ if [[ -z "$EXCLUDE_ASYNC" ]]; then
   OPTIONS="--exclude=*_async.py"
 fi
 
-flake8 mmworkbench tests $OPTIONS
-cd mmworkbench
-pylint mmworkbench
+flake8 mindmeld tests $OPTIONS
+cd mindmeld
+pylint mindmeld

@@ -10,7 +10,7 @@ Tests for `markup` module.
 # pylint: disable=I0011,W0621
 import pytest
 
-from mmworkbench.tokenizer import Tokenizer
+from mindmeld.tokenizer import Tokenizer
 
 
 @pytest.fixture

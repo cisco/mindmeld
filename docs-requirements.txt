@@ -1,4 +1,4 @@
-mmworkbench
+mindmeld
 Sphinx==1.6.3
 nbsphinx==0.2.11
 sphinx-autobuild==0.6.0

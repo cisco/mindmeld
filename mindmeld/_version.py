@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines mmworkbench version information"""
+"""Defines mindmeld version information"""
 from __future__ import absolute_import, unicode_literals
 import logging
 import warnings
@@ -19,19 +19,19 @@ import warnings
 import pkg_resources
 from pkg_resources import DistributionNotFound, VersionConflict
 
-from .exceptions import WorkbenchVersionWarning, WorkbenchVersionError
+from .exceptions import MindMeldVersionWarning, MindMeldVersionError
 
 current = '4.0.2'
 
 logger = logging.getLogger(__name__)
 
 
-def _get_wb_version():
+def _get_mm_version():
     return current
 
 
-def validate_workbench_version(app_path, raise_exception=False):
-    """ Validate the application's mmworkbench requirement
+def validate_mindmeld_version(app_path, raise_exception=False):
+    """ Validate the application's mindmeld requirement
     """
     requirements = app_path + "/requirements.txt"
     try:
@@ -40,27 +40,27 @@ def validate_workbench_version(app_path, raise_exception=False):
     except (OSError, IOError):
         logger.warning('requirements.txt is missing at %s.', app_path)
         return
-    wb_req = None
+    mm_req = None
     for item in pkg_resources.parse_requirements(lines):
-        if item.name == 'mmworkbench':
-            wb_req = item
-    if not wb_req:
-        logger.warning('mmworkbench is not in requirements.txt.')
+        if item.name == 'mindmeld':
+            mm_req = item
+    if not mm_req:
+        logger.warning('mindmeld is not in requirements.txt.')
         return
-    if len(wb_req.specifier) == 0:
-        logger.warning('mmworkbench version is not specified in requirements.txt.')
+    if len(mm_req.specifier) == 0:
+        logger.warning('mindmeld version is not specified in requirements.txt.')
         return
-    wb_version = _get_wb_version()
-    wb_req = [wb_req.name + str(wb_req.specifier)]
+    mm_version = _get_mm_version()
+    mm_req = [mm_req.name + str(mm_req.specifier)]
     try:
-        pkg_resources.require(wb_req)
+        pkg_resources.require(mm_req)
     except (DistributionNotFound, VersionConflict) as error:
-        error_msg = 'Current mmworkbench ({version}) does not satisfy ' \
+        error_msg = 'Current mindmeld ({version}) does not satisfy ' \
                     '{condition} in pip requirements caused by ' \
-                    '{cause}'.format(version=wb_version, condition=wb_req[0], cause=str(error))
+                    '{cause}'.format(version=mm_version, condition=mm_req[0], cause=str(error))
         if raise_exception:
-            raise WorkbenchVersionError(error_msg)
+            raise MindMeldVersionError(error_msg)
         else:
-            warnings.warn(error_msg, category=WorkbenchVersionWarning)
+            warnings.warn(error_msg, category=MindMeldVersionWarning)
             return
-    logger.debug("mmworkbench version %s satisfies app's requirements.txt.", wb_version)
+    logger.debug("mindmeld version %s satisfies app's requirements.txt.", mm_version)

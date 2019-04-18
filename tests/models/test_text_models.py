@@ -12,12 +12,12 @@ import os
 
 import pytest
 
-from mmworkbench import markup
-from mmworkbench.models import ModelConfig, CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE
-from mmworkbench.models.text_models import TextModel
-from mmworkbench.tokenizer import Tokenizer
-from mmworkbench.query_factory import QueryFactory
-from mmworkbench.resource_loader import ResourceLoader
+from mindmeld import markup
+from mindmeld.models import ModelConfig, CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE
+from mindmeld.models.text_models import TextModel
+from mindmeld.tokenizer import Tokenizer
+from mindmeld.query_factory import QueryFactory
+from mindmeld.resource_loader import ResourceLoader
 
 APP_NAME = 'kwik_e_mart'
 APP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME)

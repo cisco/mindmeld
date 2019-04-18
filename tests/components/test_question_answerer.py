@@ -11,8 +11,8 @@ Tests for `question_answerer` module.
 import pytest
 import os
 
-from mmworkbench.components.question_answerer import QuestionAnswerer
-from mmworkbench.components._elasticsearch_helpers import create_es_client
+from mindmeld.components.question_answerer import QuestionAnswerer
+from mindmeld.components._elasticsearch_helpers import create_es_client
 
 ENTITY_TYPE = 'store_name'
 STORE_DATA_FILE_PATH = os.path.dirname(__file__) + "/../kwik_e_mart/data/stores.json"

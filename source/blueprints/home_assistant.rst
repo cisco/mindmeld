@@ -76,7 +76,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 .. code-block:: shell
 
-    python -c "import mmworkbench as wb; wb.blueprint('home_assistant');"
+    python -c "import mindmeld as wb; wb.blueprint('home_assistant');"
 
 This should create a MindMeld project folder called ``home_assistant`` in your current directory with the following structure:
 
@@ -320,8 +320,8 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 
 .. code:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
-   import mmworkbench as wb
+   from mindmeld.components.nlp import NaturalLanguageProcessor
+   import mindmeld as wb
    wb.configure_logs()
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp.build()
@@ -542,7 +542,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
 
 .. code:: python
 
-   from mmworkbench.components.dialogue import Conversation
+   from mindmeld.components.dialogue import Conversation
    conv = Conversation(nlp=nlp, app_path='home_assistant')
    conv.say('set alarm for 6am')
 

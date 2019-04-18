@@ -20,10 +20,10 @@ import re
 import logging
 from functools import wraps
 
-from .exceptions import WorkbenchImportError
+from .exceptions import MindMeldImportError
 
-WORKBENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PACKAGE_ROOT = os.path.join(WORKBENCH_ROOT, 'mmworkbench')
+MINDMELD_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PACKAGE_ROOT = os.path.join(MINDMELD_ROOT, 'mindmeld')
 
 APP_PATH = '{app_path}'
 
@@ -96,7 +96,7 @@ DUCKLING_PATH_TO_MD5_MAPPINGS = {
     DUCKLING_OSX_PATH: DUCKLING_OSX_MD5
 }
 
-EMBEDDINGS_FOLDER_PATH = os.path.join(WORKBENCH_ROOT, 'data')
+EMBEDDINGS_FOLDER_PATH = os.path.join(MINDMELD_ROOT, 'data')
 EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, 'glove.6B.zip')
 PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = \
     os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_char_embeddings.pkl')
@@ -104,7 +104,7 @@ PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH = \
     os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_word_embeddings.pkl')
 
 # User specific directories
-USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mmworkbench')
+USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mindmeld')
 USER_CONFIG_PATH = os.path.join(USER_CONFIG_DIR, 'config')
 BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, 'blueprints')
 BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, '{name}')
@@ -530,10 +530,10 @@ def get_app(app_path):
         app_path (str): The path to an application on disk
 
     Returns:
-        mmworkbench.app.Application: the MindMeld application
+        mindmeld.app.Application: the MindMeld application
 
     Raises:
-        WorkbenchImportError: when the application can not be found
+        MindMeldImportError: when the application can not be found
     """
     import sys
     from importlib.machinery import SourceFileLoader
@@ -570,4 +570,4 @@ def get_app(app_path):
     except (FileNotFoundError, AttributeError):
         msg = 'Could not import application at {!r}. Create a __init__.py or app.py file' \
               ' containing the application.'.format(app_path)
-        raise WorkbenchImportError(msg)
+        raise MindMeldImportError(msg)

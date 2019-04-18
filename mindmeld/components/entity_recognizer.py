@@ -147,7 +147,7 @@ class EntityRecognizer(Classifier):
             self.entity_types = er_data['entity_types']
             self._model_config = er_data.get('model_config')
 
-            # The default is True since < WB 3.2.0 models are serializable by default
+            # The default is True since < MM 3.2.0 models are serializable by default
             is_serializable = er_data.get('serializable', True)
 
             if is_serializable:
@@ -161,7 +161,7 @@ class EntityRecognizer(Classifier):
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
 
         if self._model is not None:
-            if not hasattr(self._model, 'mmworkbench_version'):
+            if not hasattr(self._model, 'mindmeld_version'):
                 msg = "Your trained models are incompatible with this version of MindMeld. " \
                       "Please run a clean build to retrain models"
                 raise ClassifierLoadError(msg)

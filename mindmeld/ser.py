@@ -196,9 +196,6 @@ def resolve_system_entity(query, entity_type, span):
     duckling_text_val_to_candidate = {}
 
     # If no matching candidate was found, try parsing only this entity
-    # Refer to this ticket for how we prioritize System Entity Recognizer service candidates:
-    # TODO: Find the contents in the link below
-    # https://mindmeldinc.atlassian.net/browse/WB3-54
     #
     # For secondary candidate picking, we prioritize candidates as follows:
     # a) candidate matches both span range and entity type

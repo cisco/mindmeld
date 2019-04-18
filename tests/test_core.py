@@ -10,9 +10,9 @@ Tests for `core` module.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mmworkbench.core import (Entity, QueryEntity, Span, NestedEntity,
-                              TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED,
-                              _sort_by_lowest_time_grain)
+from mindmeld.core import (Entity, QueryEntity, Span, NestedEntity,
+                           TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED,
+                           _sort_by_lowest_time_grain)
 
 
 @pytest.fixture

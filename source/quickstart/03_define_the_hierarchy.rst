@@ -105,7 +105,7 @@ Workbench provides a faster way to create your application structure for common 
 .. code-block:: shell
 
     cd $HOME
-    python -c "import mmworkbench as wb; wb.blueprint('kwik_e_mart', 'my_app');"
+    python -c "import mindmeld as wb; wb.blueprint('kwik_e_mart', 'my_app');"
 
 Running the :func:`blueprint()` method for our simple example application produces the root directory structure illustrated below.
 

@@ -1,1 +1,1 @@
-mmworkbench==4.0.2
+mindmeld==4.0.2

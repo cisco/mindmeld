@@ -1,4 +1,4 @@
-from mmworkbench.components.nlp import NaturalLanguageProcessor
+from mindmeld.components.nlp import NaturalLanguageProcessor
 from unittest.mock import patch
 
 

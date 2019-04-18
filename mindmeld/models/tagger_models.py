@@ -23,7 +23,7 @@ from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from .taggers.lstm import LstmModel
-from ..exceptions import WorkbenchError
+from ..exceptions import MindMeldError
 from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
@@ -116,8 +116,8 @@ class TaggerModel(Model):
         """Trains the model.
 
         Args:
-            examples (list of mmworkbench.core.Query): A list of queries to train on.
-            labels (list of tuples of mmworkbench.core.QueryEntity): A list of expected labels.
+            examples (list of mindmeld.core.Query): A list of queries to train on.
+            labels (list of tuples of mindmeld.core.QueryEntity): A list of expected labels.
             params (dict): Parameters of the classifier.
         """
         skip_param_selection = params is not None or self.config.param_selection is None
@@ -152,7 +152,7 @@ class TaggerModel(Model):
         else:
             # run cross validation to select params
             if self._clf.__class__ == LstmModel:
-                raise WorkbenchError("The LSTM model does not support cross-validation")
+                raise MindMeldError("The LSTM model does not support cross-validation")
 
             _, best_params = self._fit_cv(X, y, groups)
             self._clf = self._fit(X, y, best_params)
@@ -164,7 +164,7 @@ class TaggerModel(Model):
         """Returns a dictionary of extracted features and their weights for a given query
 
         Args:
-            query (mmworkbench.core.Query): The query to extract features from
+            query (mindmeld.core.Query): The query to extract features from
             dynamic_resource (dict): The dynamic resource used along with the query
 
         Returns:
@@ -179,8 +179,8 @@ class TaggerModel(Model):
         """Trains a classifier without cross-validation.
 
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries to train on
-            labels (list of tuples of mmworkbench.core.QueryEntity): a list of expected labels
+            examples (list of mindmeld.core.Query): a list of queries to train on
+            labels (list of tuples of mindmeld.core.QueryEntity): a list of expected labels
             params (dict): Parameters of the classifier
         """
         self._clf.set_params(**params)
@@ -202,11 +202,11 @@ class TaggerModel(Model):
     def predict(self, examples, dynamic_resource=None):
         """
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries to train on
+            examples (list of mindmeld.core.Query): a list of queries to train on
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
-            (list of tuples of mmworkbench.core.QueryEntity): a list of predicted labels
+            (list of tuples of mindmeld.core.QueryEntity): a list of predicted labels
         """
         if self._no_entities:
             return [()]
@@ -224,11 +224,11 @@ class TaggerModel(Model):
     def predict_proba(self, examples, dynamic_resource=None):
         """
         Args:
-            examples (list of mmworkbench.core.Query): a list of queries to train on
+            examples (list of mindmeld.core.Query): a list of queries to train on
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
-            list of tuples of (mmworkbench.core.QueryEntity): a list of predicted labels \
+            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
             with confidence scores
         """
         if self._no_entities:

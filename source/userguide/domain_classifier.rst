@@ -13,7 +13,7 @@ Every Workbench app has exactly one domain classifier. The name of each domain f
 .. note::
 
    - This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Domain Classification <domain_classification>` section.
-   - This section requires the :doc:`Home Assistant <../blueprints/home_assistant>` blueprint application. To get the app, open a terminal and run ``mmworkbench blueprint home_assistant``.
+   - This section requires the :doc:`Home Assistant <../blueprints/home_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint home_assistant``.
 
 Access the domain classifier
 ----------------------------
@@ -27,7 +27,7 @@ When you are ready to begin experimenting, import the :class:`NaturalLanguagePro
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp
 
@@ -56,7 +56,7 @@ Use the :meth:`DomainClassifier.fit` method to train a domain classification mod
 
 .. code-block:: python
 
-   from mmworkbench import configure_logs; configure_logs()
+   from mindmeld import configure_logs; configure_logs()
    dc.fit()
 
 .. code-block:: console

@@ -161,8 +161,8 @@ Load the configuration by calling the :meth:`build` method on the :class:`Natura
 
 .. code-block:: python
 
-   from mmworkbench import configure_logs; configure_logs()
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld import configure_logs; configure_logs()
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='food_ordering')
    nlp.build()
 

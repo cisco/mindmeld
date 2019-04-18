@@ -58,7 +58,7 @@ Assuming that this file is named ``stores.json`` and is in the ``data`` subdirec
 
 .. code:: python
 
-   from mmworkbench.components import QuestionAnswerer
+   from mindmeld.components import QuestionAnswerer
    qa = QuestionAnswerer('.')
    qa.load_kb('my_app', 'stores', './data/stores.json')
 

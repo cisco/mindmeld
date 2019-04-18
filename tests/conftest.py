@@ -14,10 +14,10 @@ import warnings
 
 import pytest
 
-from mmworkbench.components import NaturalLanguageProcessor, Preprocessor
-from mmworkbench.query_factory import QueryFactory
-from mmworkbench.resource_loader import ResourceLoader
-from mmworkbench.tokenizer import Tokenizer
+from mindmeld.components import NaturalLanguageProcessor, Preprocessor
+from mindmeld.query_factory import QueryFactory
+from mindmeld.resource_loader import ResourceLoader
+from mindmeld.tokenizer import Tokenizer
 
 warnings.filterwarnings("module", category=DeprecationWarning,
                         module="sklearn.preprocessing.label")
