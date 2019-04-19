@@ -21,7 +21,7 @@ from pkg_resources import DistributionNotFound, VersionConflict
 
 from .exceptions import MindMeldVersionWarning, MindMeldVersionError
 
-current = '4.0.4'
+current = '4.0.5'
 
 logger = logging.getLogger(__name__)
 
