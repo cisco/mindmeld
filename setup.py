@@ -4,7 +4,7 @@
 # pylint: disable=locally-disabled,invalid-name
 from setuptools import setup
 
-with open('HISTORY.rst') as history_file:
+with open('source/versions/history.rst') as history_file:
     history = history_file.read()
 
 requirements = [
@@ -50,11 +50,11 @@ test_requirements = [
 setup(
     name='mindmeld',
     version='4.0.2',
-    description="A Python module for building natural language processing models.",
+    description="A Conversational AI platform.",
     long_description=history,
-    author="MindMeld, Inc.",
+    author="Cisco System",
     author_email='contact@mindmeld.com',
-    url='https://github.com/mindmeld/mindmeld-workbench3',
+    url='https://github.com/cisco/mindmeld',
     packages=[
         'mindmeld',
     ],

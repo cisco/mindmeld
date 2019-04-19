@@ -5,7 +5,6 @@
 This repository contains the MindMeld Conversational AI Platform.
 
 ## Introducing MindMeld
-
 The MindMeld Conversational AI platform is among the most advanced AI platforms for building production-quality conversational applications. It is a Python-based machine learning framework which encompasses all of the algorithms and utilities required for this purpose. Evolved over several years of building and deploying dozens of the most advanced conversational experiences achievable, MindMeld is optimized for building advanced conversational assistants which demonstrate deep understanding of a particular use case or domain while providing highly useful and versatile conversational experiences.
 
 MindMeld is the only Conversational AI platform available today that provides tools and capabilities for every step in the workflow for a state-of-the-art conversational application. The architecture of MindMeld is illustrated below.
@@ -42,50 +41,17 @@ MindMeld has been used for applications in dozens of different domains by some o
 
 ## TLDR: Quick Start
 
-Assuming you have pyenv installed.
-```
-cd mindmeld/  # go to the root of the mindmeld repo
-pyenv install 3.6.0  # install an appropriate version of python
-pyenv virtualenv 3.6.0 mindmeld-env  # create a virtualenv
-pyenv local mindmeld-env  # set the virtualenv for the repo
-pip install -r dev-requirements.txt  # install development dependencies
-```
-
-## Releasing a Version to MindMeld
-
-**Beware! Make sure you read this guide and know what you are doing!**
-
-### Bump the Version
-
-We use a python utility for bumping the version, aptly named `bumpversion`.
-
-This utility will update the version in all the places it should, create a new commit `Bump version: {old-version} → {new-version}`, and create a tag for the new version.
-
-Our versioning format is `{major}.{minor}.{patch}{release}{revision}`. So version part should be any of `major`, `minor`, `patch` `release` or `revision`.
-
-Let's say the current version is `3.0.1dev2`. `bumpversion revision` would bump the version to `3.0.1dev3`.
-
-If this is your first release, it is recommended that you do a dry run first to confirm you are using the correct version part:
+Assuming you have pip installed with Python 3.4, Python 3.5 or Python 3.6 and Elasticsearch running in the background:
 
 ```
-bumpversion <version-part> --dry-run --verbose
+pip install mindmeld
+mindmeld blueprint home_assistant
 ```
 
-#### TLDR; Do The Thing
+## Want to learn more about MindMeld?
 
-```
-# Bump the Version
-bumpversion <version-part> --commit --tag
-git push
-git push --tags
-```
+Check out [documentation for building conversational applications.](www.mindmeld.com/docs)
 
-### Building the wheel
+## Feedback or suggestion
 
-Python wheels are the preferred binary package format for python packages. If you care to learn more, read [here](http://pythonwheels.com/) or [here](https://www.python.org/dev/peps/pep-0427/)
-
-#### TLDR; Do The Thing
-
-```
-python setup.py bdist_wheel --universal
-```
+Please contact us at [mindmeld.gen@cisco.com,](mindmeld.gen@cisco.com)
