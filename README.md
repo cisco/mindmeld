@@ -50,8 +50,8 @@ mindmeld blueprint home_assistant
 
 ## Want to learn more about MindMeld?
 
-Check out [documentation for building conversational applications.](www.mindmeld.com/docs)
+Read our [Conversational AI Playbook](www.mindmeld.com/docs).
 
 ## Feedback or suggestion
 
-Please contact us at [mindmeld.gen@cisco.com,](mindmeld.gen@cisco.com)
+Please contact us at [mindmeld.gen@cisco.com](mindmeld.gen@cisco.com)

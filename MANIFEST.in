@@ -1,8 +1,6 @@
-
 include source/versions/history.rst
 
 recursive-include mindmeld *
 recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
-
