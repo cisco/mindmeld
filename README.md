@@ -54,4 +54,4 @@ Check out [documentation for building conversational applications.](www.mindmeld
 
 ## Feedback or suggestion
 
-Please contact us at [mindmeld.gen@cisco.com,](mindmeld.gen@cisco.com)
+Please contact us at [mindmeld.gen@cisco.com](mindmeld.gen@cisco.com)
