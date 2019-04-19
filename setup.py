@@ -4,8 +4,8 @@
 # pylint: disable=locally-disabled,invalid-name
 from setuptools import setup
 
-with open('source/versions/history.rst') as history_file:
-    history = history_file.read()
+with open('README.md') as readme_file:
+    readme = readme_file.read()
 
 requirements = [
     'bleach==1.5.0',  # tensorflow -> tensorboard -> bleach, prevents conflicts with jupyter
@@ -51,7 +51,7 @@ setup(
     name='mindmeld',
     version='4.0.2',
     description="A Conversational AI platform.",
-    long_description=history,
+    long_description=readme,
     author="Cisco System",
     author_email='contact@mindmeld.com',
     url='https://github.com/cisco/mindmeld',
@@ -65,14 +65,17 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     zip_safe=False,
-    keywords='mindmeld',
+    keywords=['mindmeld', 'nlp', 'ai', 'conversational'],
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'License :: OSI Approved :: Apache Software License'
     ],
     setup_requires=setup_requirements,
     test_suite='tests',
