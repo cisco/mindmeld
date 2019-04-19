@@ -52,6 +52,7 @@ setup(
     version='4.0.3',
     description="A Conversational AI platform.",
     long_description=readme,
+    long_description_content_type='text/markdown',
     author="Cisco System",
     author_email='contact@mindmeld.com',
     url='https://github.com/cisco/mindmeld',
