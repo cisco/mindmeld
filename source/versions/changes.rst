@@ -1,6 +1,33 @@
 Recent Changes
 ==============
 
+MindMeld 4.1
+-------------
+
+.. warning::
+
+   This release includes breaking changes. See below
+   for instructions on migrating your apps from MindMeld 4.0 to MindMeld 4.1
+
+
+MindMeld 4.1 allows the package to be open-sourced by complying to the Apache 2.0 license standard.
+
+**1. De-coupled Duckling from MindMeld**
+
+Duckling, the numerical parser used to detect system entities, is now a configurable option, so an application can
+disable it if it doesn't need it. See :ref:`configuring system entities section <configuring-system-entities>` for more details.
+
+**2. Added extensive API documentation for the MindMeld library**
+
+The API reference for the MindMeld package can be found here: :doc:`../internal/api_reference`.
+
+**3. Replaced all instances of the term mmworkbench to mindmeld**
+
+All instances of the term ``mmworkbench`` in the codebase have been replaced to ``mindmeld`` to be consistent with the new open-source package name.
+Due to this change, older saved models will no longer load in 4.1. Please make sure to delete the ``.generated`` folder in
+the top level of the application and re-build the application.
+
+
 MindMeld 4.0
 -------------
 

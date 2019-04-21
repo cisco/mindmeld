@@ -95,12 +95,6 @@ Contents
    blueprints/video_discovery
    blueprints/home_assistant
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Integrations
-   :name: integrations
-
-   integrations/webex_teams
 
 .. toctree::
    :maxdepth: 2
@@ -123,14 +117,7 @@ Contents
    userguide/kb
    userguide/dm
    userguide/voice
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Versions
-   :name: versions
-
-   versions/changes
-   versions/history
+   integrations/webex_teams
 
 
 .. toctree::
@@ -139,3 +126,12 @@ Contents
    :name: internal
 
    internal/api_reference
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Versions
+   :name: versions
+
+   versions/changes
+   versions/history

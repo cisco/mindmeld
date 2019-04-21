@@ -1,6 +1,34 @@
 Package History
 ===============
 
+
+4.1.0 (2019-04-22)
+------------------
+
+Major Features and Improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- De-couple Duckling, the numerical parser, from the core MindMeld platform
+
+- Configure the MindMeld project to support Apache 2.0 open-source license
+
+
+Breaking Changes
+^^^^^^^^^^^^^^^^
+
+- Replace all instances of the term ``mmworkbench`` to ``mindmeld``. Older pickled models that refer to the old term will not load, so rebuild all classifiers.
+
+
+Bug Fixes and Other Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- The language parser component correctly handles role types
+
+- Add documentation for Webex Teams Integration for MindMeld
+
+- Add extensive documentation to all methods in the MindMeld project for API documentation viewing
+
+
 4.0.0 (2019-02-25)
 ------------------
 

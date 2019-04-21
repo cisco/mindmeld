@@ -1284,5 +1284,26 @@ Possible solutions:
 
 #. Remove all queries that contain unsupported tokens like "daily" entirely from the training data.
 
+.. _configuring-system-entities:
+
+Configuring systems entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+System entities can be configured at the application level to be turned on/off. One might want to turn off system entity detection to reduce latency or if one does not have any system entities tagged in the application.
+By default, MindMeld enables system entity recognition in all apps using the `Duckling numerical parser <https://github.com/facebook/duckling>`_:
+
+.. code-block:: python
+
+   NLP_CONFIG = {
+       'system_entity_recognizer': 'duckling'
+   }
+
+To turn it off, specify an empty value for the ``'system_entity_recognizer'`` key:
+
+.. code-block:: python
+
+   NLP_CONFIG = {
+       'system_entity_recognizer': ''
+   }
 
 
