@@ -5,7 +5,7 @@ Every one of the smartest and most useful intelligent assistants in widespread u
 
 In its most basic form, a knowledge base is simply a repository of objects of specified types. For example, a knowledge base that contains a large entertainment content catalog could include ``movie`` and ``tv_show`` among the types of its objects. A knowledge base that contains a directory of local businesses could have object types like ``restaurant``, ``hardware_store``, and so on. Objects typically have attributes which capture salient aspects of the concepts they describe. For example, a ``restaurant`` object might have attributes for ``address`` and ``phone_number``; a ``movie`` object might have attributes like ``cast_list``, ``runtime``, and ``release_date``.
 
-MindMeld Workbench makes it straightforward to leverage a custom knowledge base in any application. The Question Answerer module of Workbench provides powerful capabilities for creating a knowledge base in order to demonstrate intelligent behavior in your application. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this component and its underlying knowledge base for the four primary purposes listed below.
+MindMeld makes it straightforward to leverage a custom knowledge base in any application. The Question Answerer module of MindMeld provides powerful capabilities for creating a knowledge base in order to demonstrate intelligent behavior in your application. The Question Answerer can be used in a variety of ways, but in practice, conversational applications rely on this component and its underlying knowledge base for the four primary purposes listed below.
 
 ============================ ===
 **Answer Questions**         The primary purpose of the Question Answerer is to identify and rank candidate answers to user questions. For example, if a user asks about good, nearby Italian restaurants, a knowledge base of local restaurants provides the best options.
@@ -14,7 +14,7 @@ MindMeld Workbench makes it straightforward to leverage a custom knowledge base 
 **Suggest Alternatives**     When an exact answer cannot be found, the knowledge base can sometimes offer relevant suggestions. For example, if a user requests 'Star Wars Rogue One' and that movie is not available, the knowledge base could suggest other, available Star Wars titles.
 ============================ ===
 
-Creating the knowledge base is the first step in utilizing the Question Answerer capabilities in Workbench. The knowledge base contains one or more indexes. Each index holds a collection of objects of the same type. For example, one index may contain a collection of retail store locations and another index might contain a collection of products in a product catalog. Each index is built using data from one or more JSON files. These JSON data files can be stored either locally or remotely, for example in an `AWS S3 <https://aws.amazon.com/s3/>`_ bucket.
+Creating the knowledge base is the first step in utilizing the Question Answerer capabilities in MindMeld. The knowledge base contains one or more indexes. Each index holds a collection of objects of the same type. For example, one index may contain a collection of retail store locations and another index might contain a collection of products in a product catalog. Each index is built using data from one or more JSON files. These JSON data files can be stored either locally or remotely, for example in an `AWS S3 <https://aws.amazon.com/s3/>`_ bucket.
 
 As shown in :doc:`Step 4 <04_define_the_dialogue_handlers>`, our example application provides information about Kwik-E-Mart stores, relying on a knowledge base which contains information about all retail store locations. In our example, let's assume that each store object contains the following attributes:
 
@@ -53,7 +53,7 @@ Assuming that this file is named ``stores.json`` and is in the ``data`` subdirec
 
 .. code-block:: shell
 
-   cd $WB_APP_ROOT
+   cd $MM_APP_ROOT
    python
 
 .. code:: python
@@ -62,7 +62,7 @@ Assuming that this file is named ``stores.json`` and is in the ``data`` subdirec
    qa = QuestionAnswerer('.')
    qa.load_kb('my_app', 'stores', './data/stores.json')
 
-This code loads the Question Answerer module from Workbench, then loads the ``data/stores.json`` JSON file into the index named ``stores``. To check that your knowledge base was created successfully, use the Question Answerer to retrieve store information from your index:
+This code loads the Question Answerer module from MindMeld, then loads the ``data/stores.json`` JSON file into the index named ``stores``. To check that your knowledge base was created successfully, use the Question Answerer to retrieve store information from your index:
 
 .. code:: python
 

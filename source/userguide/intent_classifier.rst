@@ -14,7 +14,7 @@ See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for m
 .. note::
 
    - This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the :ref:`Intent Classification <intent_classification>` section.
-   - This section requires the :doc:`Home Assistant <../blueprints/home_assistant>` blueprint application. To get the app, open a terminal and run ``mmworkbench blueprint home_assistant``.
+   - This section requires the :doc:`Home Assistant <../blueprints/home_assistant>` blueprint application. To get the app, open a terminal and run ``mindmeld blueprint home_assistant``.
 
 
 Access an intent classifier
@@ -29,7 +29,7 @@ When you are ready to begin experimenting, import the :class:`NaturalLanguagePro
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp
 
@@ -86,7 +86,7 @@ Use the :meth:`IntentClassifier.fit` method to train an intent classification mo
 
 .. code-block:: python
 
-   from mmworkbench import configure_logs; configure_logs()
+   from mindmeld import configure_logs; configure_logs()
    ic = nlp.domains['times_and_dates'].intent_classifier
    ic.fit()
 

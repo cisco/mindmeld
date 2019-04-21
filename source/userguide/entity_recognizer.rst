@@ -7,7 +7,7 @@ The :ref:`Entity Recognizer <arch_entity_model>`
  - is a `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ or tagging model that detects all the relevant :term:`entities <entity>` in a given query
  - is trained per intent, using all the labeled queries for a given intent, with labels derived from the entity types annotated within the training queries
 
-Every Workbench app has one entity recognizer for every intent that requires entity detection.
+Every MindMeld app has one entity recognizer for every intent that requires entity detection.
 
 .. note::
 
@@ -18,10 +18,10 @@ Every Workbench app has one entity recognizer for every intent that requires ent
 System entities and custom entities
 -----------------------------------
 
-Entities in Workbench are categorized into two types:
+Entities in MindMeld are categorized into two types:
 
 **System Entities**
-  Generic entities that are application-agnostic and are automatically detected by Workbench. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. See :ref:`system-entities` below.
+  Generic entities that are application-agnostic and are automatically detected by MindMeld. Examples include numbers, time expressions, email addresses, URLs and measured quantities like distance, volume, currency and temperature. See :ref:`system-entities` below.
 
 **Custom Entities**
   Application-specific entities that can only be detected by an entity recognizer that uses statistical models trained with deep domain knowledge. These are generally `named entities <https://en.wikipedia.org/wiki/Named_entity>`_, like 'San Bernardino,' a proper name that could be a ``location`` entity. Custom entities that are *not* based on proper nouns (and therefore are not named entities) are also possible.
@@ -36,7 +36,7 @@ Working with any natural language processor component falls into two broad phase
  - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
  - Then, conduct experimentation in the Python shell.
 
-When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the MindMeld :mod:`nlp` module and instantiate an object with the path to your MindMeld project.
 
 .. code-block:: python
 
@@ -135,7 +135,7 @@ Use the :meth:`EntityRecognizer.fit` method to train an entity recognition model
    Selecting hyperparameters using k-fold cross validation with 5 splits
    Best accuracy: 99.14%, params: {'C': 10000, 'penalty': 'l2'}
 
-The :meth:`fit` method loads all necessary training queries and trains an entity recognition model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the Workbench preset :ref:`classifier configuration <config>`.
+The :meth:`fit` method loads all necessary training queries and trains an entity recognition model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the MindMeld preset :ref:`classifier configuration <config>`.
 
 Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.
 
@@ -294,7 +294,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   |                           |    set is 5 or greater. It also extracts all trigrams starting with the current token.                     |
   +---------------------------+------------------------------------------------------------------------------------------------------------+
   | ``'enable-stemming'``     | Stemming is the process of reducing inflected words to their word stem or base form. For example, word stem|
-  |                           | of "eating" is "eat", word stem of "backwards" is "backward". Workbench extracts word stems using a variant|
+  |                           | of "eating" is "eat", word stem of "backwards" is "backward". MindMeld extracts word stems using a variant |
   |                           | of the `Porter stemming algorithm <https://tartarus.org/martin/PorterStemmer/>`_ that only removes         |
   |                           | inflectional suffixes.                                                                                     |
   |                           |                                                                                                            |
@@ -397,7 +397,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 
   A dictionary of settings for :sk_guide:`hyperparameter selection <grid_search>`. Provides an alternative to the ``'params'`` dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.
 
-  To estimate parameters, Workbench needs two pieces of information from the developer:
+  To estimate parameters, MindMeld needs two pieces of information from the developer:
 
   #. The parameter space to search, as the value for the ``'grid'`` key
   #. The strategy for splitting the labeled data into training and validation sets, as the value for the ``'type'`` key
@@ -461,13 +461,13 @@ Let's take a look at the allowed values for each setting in an entity recognizer
 Training with custom configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To override Workbench's default entity recognizer configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
+To override MindMeld's default entity recognizer configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
 
 
 1. Application configuration file
 """""""""""""""""""""""""""""""""
 
-When you define custom classifier settings in ``config.py``, the :meth:`EntityRecognizer.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench's defaults. To do this, define a dictionary of your custom settings, named :data:`ENTITY_RECOGNIZER_CONFIG`.
+When you define custom classifier settings in ``config.py``, the :meth:`EntityRecognizer.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of MindMeld's defaults. To do this, define a dictionary of your custom settings, named :data:`ENTITY_RECOGNIZER_CONFIG`.
 
 Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the entity recognizer.
 
@@ -587,7 +587,7 @@ Suppose w\ :sub:`i` represents the word at the *ith* index in the query, where t
 
   - Bigrams: { w\ :sub:`-3`\ w\ :sub:`-2`, w\ :sub:`-2`\ w\ :sub:`-1`, w\ :sub:`-1`\ w\ :sub:`0`,  w\ :sub:`0`\ w\ :sub:`1`, w\ :sub:`1`\ w\ :sub:`2`, w\ :sub:`2`\ w\ :sub:`3` }
 
-To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This trains the entity recognition model using our new feature extraction settings, while continuing to use Workbench defaults for model type (MEMM) and hyperparameter selection.
+To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This trains the entity recognition model using our new feature extraction settings, while continuing to use MindMeld defaults for model type (MEMM) and hyperparameter selection.
 
 .. code-block:: python
 
@@ -603,7 +603,7 @@ The exact accuracy number and the selected params might be different each time w
 
 **Hyperparameter tuning**
 
-View the model's :ref:`hyperparameters <entity_tuning>`, keeping in mind the hyperparameters for the MEMM model in Workbench. These include: ``'C'``, the inverse of regularization strength; and, ``'fit_intercept'``, which determines whether to add an intercept term to the decision function. The ``'fit_intercept'`` parameter is not shown in the response but defaults to ``'True'``.
+View the model's :ref:`hyperparameters <entity_tuning>`, keeping in mind the hyperparameters for the MEMM model in MindMeld. These include: ``'C'``, the inverse of regularization strength; and, ``'fit_intercept'``, which determines whether to add an intercept term to the decision function. The ``'fit_intercept'`` parameter is not shown in the response but defaults to ``'True'``.
 
 .. code-block:: python
 
@@ -771,7 +771,7 @@ The :meth:`predict` and :meth:`predict_proba` methods take one query at a time. 
 Evaluate classifier performance
 -------------------------------
 
-Before you can evaluate the accuracy of your trained entity recognizer, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
+Before you can evaluate the accuracy of your trained entity recognizer, you must first create labeled test data and place it in your MindMeld project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
 
 Then, when you are ready, use the :meth:`EntityRecognizer.evaluate` method, which
 
@@ -923,7 +923,7 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 
   For example, the query "I’ll have an {eggplant parm|dish} and some {breadsticks|dish} please" has five segments: "I'll have an", "eggplant parm", "and some", "breadsticks", and "please".
 
-  The table below describes the segment-level statistics available in Workbench.
+  The table below describes the segment-level statistics available in MindMeld.
 
   ============  =========================  ===
   Abbreviation  Statistic                  Description
@@ -955,7 +955,7 @@ Let's decipher the statistics output by the :meth:`evaluate` method.
 **Sequence-level Statistics**
   |
 
-  In Workbench, we define *sequence-level accuracy* as the fraction of queries for which the entity recognizer successfully identified **all** the expected entities.
+  In MindMeld, we define *sequence-level accuracy* as the fraction of queries for which the entity recognizer successfully identified **all** the expected entities.
 
 Now we have a wealth of information about the performance of our classifier. Let's go further and inspect the classifier's predictions at the level of individual queries, to better understand error patterns.
 
@@ -1094,7 +1094,7 @@ You can load the saved model anytime using the :meth:`EntityRecognizer.load` met
 More about system entities
 --------------------------
 
-System entities are generic application-agnostic entities that all Workbench applications detect automatically. There is no need to train models to learn system entities; they just work.
+System entities are generic application-agnostic entities that all MindMeld applications detect automatically. There is no need to train models to learn system entities; they just work.
 
 Supported system entities are enumerated in the table below.
 
@@ -1130,10 +1130,10 @@ Supported system entities are enumerated in the table below.
 |                          | ext 900"                                                   |
 +--------------------------+------------------------------------------------------------+
 
-Workbench does not assume that any of the system entities are needed in your app. It is the system entities *that you annotate in your training data* that Workbench knows are needed.
+MindMeld does not assume that any of the system entities are needed in your app. It is the system entities *that you annotate in your training data* that MindMeld knows are needed.
 
 .. note::
-   Workbench defines ``sys_time`` and ``sys_interval`` as subtly different entities.
+   MindMeld defines ``sys_time`` and ``sys_interval`` as subtly different entities.
 
   |
    The ``sys_time`` entity connotes a *value of a single unit of time*, where the unit can be a date, an hour, a week, and so on. For example, "tomorrow" is a ``sys_time`` entity because it corresponds to a single (unit) date, like "2017-07-08."
@@ -1144,7 +1144,7 @@ Workbench does not assume that any of the system entities are needed in your app
 Custom entities, system entities, and training set size
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Any application's training set must focus on capturing all the entity variations and language patterns for the *custom entities* that the app uses. By contrast, the part of the training set concerned with *system entities* can be relatively minimal, because Workbench does not need to train an entity recognition model to recognize system entities.
+Any application's training set must focus on capturing all the entity variations and language patterns for the *custom entities* that the app uses. By contrast, the part of the training set concerned with *system entities* can be relatively minimal, because MindMeld does not need to train an entity recognition model to recognize system entities.
 
 Annotating system entities
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1168,10 +1168,10 @@ These examples of annotated system entities come from the Home Assistant bluepri
 
 For more examples, see the training data for any of the blueprint apps.
 
-Inspecting how Workbench detects system entities
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Inspecting how MindMeld detects system entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To see which token spans in a query are detected as system entities, and what system entities Workbench thinks they are, use the :func:`parse_numerics` function:
+To see which token spans in a query are detected as system entities, and what system entities MindMeld thinks they are, use the :func:`parse_numerics` function:
 
 .. code-block:: python
 
@@ -1205,7 +1205,7 @@ To see which token spans in a query are detected as system entities, and what sy
 
 The :func:`parse_numerics` function returns a tuple where the first item is a list of dictionaries
 with each one representing an extracted entity and the second item is an HTTP status code.
-Each dictionary in this list represents a token span that Workbench has detected as a system entity.
+Each dictionary in this list represents a token span that MindMeld has detected as a system entity.
 Dictionaries can have overlapping spans if text could correspond to multiple system entities.
 
 Significant keys and values within these inner dictionaries are shown in the table below.
@@ -1237,10 +1237,10 @@ Significant keys and values within these inner dictionaries are shown in the tab
 
 This output is especially useful when debugging system entity behavior.
 
-When Workbench is unable to resolve a system entity
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When MindMeld is unable to resolve a system entity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Two common mistakes when working with system entities are: annotating an entity as the wrong type, and, labeling an unsupported token as an entity. In these cases, Workbench will be unable to resolve the system entity.
+Two common mistakes when working with system entities are: annotating an entity as the wrong type, and, labeling an unsupported token as an entity. In these cases, MindMeld will be unable to resolve the system entity.
 
 **Annotating a system entity as the wrong type**
 
@@ -1252,7 +1252,7 @@ In the example below, both entities should be annotated as ``sys_time``, but one
 
     change my {6:45|sys_interval|old_time} alarm to {7 am|sys_time|new_time}
 
-Workbench prints the following error during training:
+MindMeld prints the following error during training:
 
 .. code-block:: text
 
@@ -1262,7 +1262,7 @@ The solution is to change the first entity to ``{6:45|sys_time|old_time}``.
 
 **Unsupported tokens in system entities**
 
-Not all reasonable-sounding tokens are actually supported by a Workbench system entity.
+Not all reasonable-sounding tokens are actually supported by a MindMeld system entity.
 
 In the example below, the token "daily" is annotated as a ``sys_time`` entity:
 
@@ -1270,7 +1270,7 @@ In the example below, the token "daily" is annotated as a ``sys_time`` entity:
 
     set my alarm {daily|sys_time}
 
-Workbench prints the following error during training:
+MindMeld prints the following error during training:
 
 .. code-block:: text
 

@@ -76,7 +76,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 .. code-block:: shell
 
-    python -c "import mindmeld as wb; wb.blueprint('home_assistant');"
+    python -c "import mindmeld as mm; mm.blueprint('home_assistant');"
 
 This should create a MindMeld project folder called ``home_assistant`` in your current directory with the following structure:
 
@@ -321,8 +321,8 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 .. code:: python
 
    from mindmeld.components.nlp import NaturalLanguageProcessor
-   import mindmeld as wb
-   wb.configure_logs()
+   import mindmeld as mm
+   mm.configure_logs()
    nlp = NaturalLanguageProcessor(app_path='home_assistant')
    nlp.build()
 

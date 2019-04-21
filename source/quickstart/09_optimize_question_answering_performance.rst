@@ -32,7 +32,7 @@ Assuming you have already created an index, such as ``stores``, and uploaded the
 
 .. code-block:: shell
 
-   cd $WB_APP_ROOT
+   cd $MM_APP_ROOT
    python
 
 .. code:: python

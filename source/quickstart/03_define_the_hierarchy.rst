@@ -15,7 +15,7 @@ Next, the *entity recognizers* discern the words and phrases that must be identi
 
 A fourth and final classification step, called role classification, is required when entities of the same type need to be interpreted differently to understand the request. For example, "9 AM" and "5 PM" could both be classified as `time` entities, but one might need to be interpreted as playing the role of an `opening time` and the other as playing the role of a `closing time`. The *role classifiers* label such entities with the appropriate roles.
 
-:doc:`Step 7 <07_train_the_natural_language_processing_classifiers>` and the :doc:`User Guide <../userguide/nlp>` provide more details on the NLP classifier hierarchy utilized by MindMeld Workbench.
+:doc:`Step 7 <07_train_the_natural_language_processing_classifiers>` and the :doc:`User Guide <../userguide/nlp>` provide more details on the NLP classifier hierarchy utilized by MindMeld.
 
 .. _model_hierarchy:
 
@@ -53,20 +53,20 @@ Neither of these entity types require role classification.
 
 Having completed the design of the domain, intent, entity and role hierarchy for our example application, we can begin implementing the application using MindMeld Workbench.
 
-Begin Implementation with MindMeld Workbench
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Begin Implementation with MindMeld
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
 
-   Please :doc:`install Workbench <../userguide/getting_started>` before proceeding with the instructions below.
+   Please :doc:`install MindMeld <../userguide/getting_started>` before proceeding with the instructions below.
 
-Every Workbench application begins with a *root folder* to contain all of the application's training data files, configuration files and custom code. For our example, let's define a root folder called ``my_app``.
+Every MindMeld application begins with a *root folder* to contain all of the application's training data files, configuration files and custom code. For our example, let's define a root folder called ``my_app``.
 
 .. code-block:: shell
 
-    export WB_APP_ROOT="$HOME/my_app"
-    mkdir -p $WB_APP_ROOT
-    cd $WB_APP_ROOT
+    export MM_APP_ROOT="$HOME/my_app"
+    mkdir -p $MM_APP_ROOT
+    cd $MM_APP_ROOT
 
 The folder structure inside the root folder defines the domain and intent hierarchy for your application. Create it according to the following procedure:
 
@@ -91,12 +91,12 @@ This folder structure organizes the training data for the machine learning model
 
 .. code-block:: shell
 
-    cd $WB_APP_ROOT
+    cd $MM_APP_ROOT
     mkdir entities
     cd entities
     mkdir store_name
 
-Workbench provides a faster way to create your application structure for common use cases. These are called application *blueprints*. A blueprint is a pre-configured application structure. Starting with an empty root directory, you can set up your initial application structure using the :func:`blueprint()` method, as shown below.
+MindMeld provides a faster way to create your application structure for common use cases. These are called application *blueprints*. A blueprint is a pre-configured application structure. Starting with an empty root directory, you can set up your initial application structure using the :func:`blueprint()` method, as shown below.
 
 .. warning::
 
@@ -105,7 +105,7 @@ Workbench provides a faster way to create your application structure for common 
 .. code-block:: shell
 
     cd $HOME
-    python -c "import mindmeld as wb; wb.blueprint('kwik_e_mart', 'my_app');"
+    python -c "import mindmeld as mm; mm.blueprint('kwik_e_mart', 'my_app');"
 
 Running the :func:`blueprint()` method for our simple example application produces the root directory structure illustrated below.
 
@@ -116,7 +116,7 @@ Running the :func:`blueprint()` method for our simple example application produc
 See the :doc:`User Guide <../userguide/getting_started>` for more about blueprints, and root folder organization and structure.
 
 
-Notice that there is no folder for the ``date`` entity. None is needed, because we can use the Workbench *system entity* for time expressions, ``sys_time``, to capture the date information. A system entity is one that it is already built into the Workbench platform. Workbench provides several different system entity types for common, domain-independent entities; see the Workbench :ref:`User Guide <system-entities>` for details.
+Notice that there is no folder for the ``date`` entity. None is needed, because we can use the MindMeld *system entity* for time expressions, ``sys_time``, to capture the date information. A system entity is one that it is already built into the MindMeld platform. MindMeld provides several different system entity types for common, domain-independent entities; see the MindMeld :ref:`User Guide <system-entities>` for details.
 
 Given the simple interaction proposed in the preceding section and hierarchy we have now defined, we would expect our trained natural language processing models to yield the results illustrated below.
 

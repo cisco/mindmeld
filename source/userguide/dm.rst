@@ -3,22 +3,22 @@ Working with the Dialogue Manager
 
 The Dialogue Manager
 
- - manages the conversational aspect of a Workbench application
+ - manages the conversational aspect of a mindmeld application
  - uses pattern-based rules to determine the dialogue state for each incoming request
  - implements handlers which execute business logic and return a natural language response to the user
 
-Developing a dialogue manager can be a daunting task for all but the simplest conversational apps. Workbench mitigates the challenge by providing a pattern-matching system and helpers for generating responses.
+Developing a dialogue manager can be a daunting task for all but the simplest conversational apps. MindMeld mitigates the challenge by providing a pattern-matching system and helpers for generating responses.
 
 .. note::
 
     This is an in-depth tutorial to work through from start to finish. Before you begin, read the :ref:`Step-by-Step Guide <quickstart>`, paying special attention to the section about defining the :ref:`Dialogue State Handlers <define_dialogue_state_handlers>`.
 
-Let's explore the main concepts you'll apply when you develop a dialogue manager in Workbench: *dialogue states*, *dialogue state rules*, *dialogue state handlers*, *targeted dialogue state handling*, *dialogue flows*, and *dialogue middleware*.
+Let's explore the main concepts you'll apply when you develop a dialogue manager in MindMeld: *dialogue states*, *dialogue state rules*, *dialogue state handlers*, *targeted dialogue state handling*, *dialogue flows*, and *dialogue middleware*.
 
 Dialogue States
 ---------------
 
-For every incoming request, the dialogue manager (DM) determines which dialogue state applies. When developing your application, you set up a system of rules to match requests to dialogue states, using a flexible syntax that Workbench provides. Each dialogue state represents a task that the conversational agent can complete. Usually, you name the dialogue state for the task it represents, for example `welcome` or `send_store_hours`. Name the dialogue states from the conversational agent's perspective. (By contrast, you name intents from the user's perspective).
+For every incoming request, the dialogue manager (DM) determines which dialogue state applies. When developing your application, you set up a system of rules to match requests to dialogue states, using a flexible syntax that MindMeld provides. Each dialogue state represents a task that the conversational agent can complete. Usually, you name the dialogue state for the task it represents, for example `welcome` or `send_store_hours`. Name the dialogue states from the conversational agent's perspective. (By contrast, you name intents from the user's perspective).
 
 Each dialogue state has a handler which contains logic to fulfill a user's request or gather more information if necessary, and to generate a natural language response. Dialogue state rules and handlers are implemented in the :ref:`application container <app_container>`.
 
@@ -99,7 +99,7 @@ When a single request satisfies multiple rules, the DM chooses the most specific
 Dialogue State Handlers
 -----------------------
 
-Dialogue state handlers are the functions invoked when a request matches a rule for the handler's corresponding dialogue state. Workbench places no restrictions on the code within a handler. This is important because requirements differ for different applications, and developers must have the flexibility to organize code as they wish.
+Dialogue state handlers are the functions invoked when a request matches a rule for the handler's corresponding dialogue state. MindMeld places no restrictions on the code within a handler. This is important because requirements differ for different applications, and developers must have the flexibility to organize code as they wish.
 
 Dialogue state handlers take two arguments: ``request`` and ``responder``.
 
@@ -116,7 +116,7 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 |                                   | (not for use by front-end clients)                                              |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`params`                    | An immutable :class:`FrozenParams` object containing parameters which modify    |
-|                                   | the way workbench processed the current turn. See schema of the ``params``      |
+|                                   | the way MindMeld processed the current turn. See schema of the ``params``       |
 |                                   | object below.                                                                   |
 +-----------------------------------+---------------------------------------------------------------------------------+
 | :data:`domain`                    | Domain of the current message as classified by the natural                      |
@@ -154,7 +154,7 @@ Dialogue state handlers take two arguments: ``request`` and ``responder``.
 ``params``
 ^^^^^^^^^^
 
-The ``params`` attribute of the ``request`` object is an immutable :class:`FrozenParams` object that contains state information of how workbench processed the current turn.
+The ``params`` attribute of the ``request`` object is an immutable :class:`FrozenParams` object that contains state information of how MindMeld processed the current turn.
 
 +------------------------------+-----------------------------------------------------------------------------------+
 | Attribute                    | Description                                                                       |
@@ -190,7 +190,7 @@ The ``params`` attribute of the ``request`` object is an immutable :class:`Froze
 ``responder``
 ^^^^^^^^^^^^^
 
-The ``responder`` is a mutable object used to send actions, like templated natural language responses, to the client. The ``responder`` can also carry output state from the current handler's processing to Workbench for next-turn's handling. It has attributes and methods listed below:
+The ``responder`` is a mutable object used to send actions, like templated natural language responses, to the client. The ``responder`` can also carry output state from the current handler's processing to MindMeld for next-turn's handling. It has attributes and methods listed below:
 
 +-----------------------+--------------------------------------------------------------------------------+
 | Attribute             | Description                                                                    |
@@ -200,7 +200,7 @@ The ``responder`` is a mutable object used to send actions, like templated natur
 |                       | (not for use by front-end clients)                                             |
 +-----------------------+--------------------------------------------------------------------------------+
 | :data:`params`        | A mutable :class:`Params` object containing attributes which modify the way    |
-|                       | Workbench processes the next turn. Note that the :class:`Params` class has the |
+|                       | MindMeld processes the next turn. Note that the :class:`Params` class has the  |
 |                       | exact same attributes as the :class:`FrozenParams` class, except all the       |
 |                       | attribute types are mutable compared to the frozen params (e.g. list vs tuple) |
 +-----------------------+--------------------------------------------------------------------------------+
@@ -274,7 +274,7 @@ Targeted Dialogue State Handling
 
 Any query that contains enough information to determine and fulfill an intent can also occur as a multi-query sequence.
 
-For example, `Close the door to the bedroom` could occur as a sequence of two queries with a prompt from the Workbench app in between:
+For example, `Close the door to the bedroom` could occur as a sequence of two queries with a prompt from the MindMeld app in between:
 
 .. image:: /images/deterministic_dialog_1.png
     :width: 400px
@@ -290,7 +290,7 @@ This is a common pattern. Here is another example:
 
 To support this pattern, the app needs to "remember" the intent it detects in the first query, and then interpret entities detected in subsequent queries as belonging to that intent.
 
-In Workbench, you do this by adding information to the params object of the responder to specify either (a) a target dialogue state, or (b) allowed domains and intents, for the next conversational turn. The first approach is simpler; the second is more flexible.
+In MindMeld, you do this by adding information to the params object of the responder to specify either (a) a target dialogue state, or (b) allowed domains and intents, for the next conversational turn. The first approach is simpler; the second is more flexible.
 
 Specifying a target dialogue state
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -377,7 +377,7 @@ This example comes from the Home Assistant blueprint. It is simplistic in that i
 
 .. note::
    |
-    If the ``params`` object specifies *both* ``target_dialogue_state`` and ``allowed_intents``, Workbench gives ``target_dialogue_state`` precedence.
+    If the ``params`` object specifies *both* ``target_dialogue_state`` and ``allowed_intents``, MindMeld gives ``target_dialogue_state`` precedence.
    |
    |
     Like other settings in ``params``, ``allowed_intents`` and ``target_dialogue_state`` are one-turn operations, so you must re-assign them, if needed, in each subsequent turn.
@@ -398,7 +398,7 @@ While it is difficult to enumerate every single possible entity in the gazetteer
 
 In this conversation flow, the application retrieves places that serve pizza from its knowledge base and lists them in its response to the user. It is possible that word "Firetrail" has not been seen by the NLP models as part of their training data before and it is also absent from the "restaurant" gazetteer. This may result in the entity recognizer failing to recognize the word as the name of a restaurant in the next user query.
 
-In such a scenario, we can use information from the previous turn to help the NLP classification in the next turn. From the app's response, we know the names of restaurants that the user is most likely to choose from in the follow-up turn. Workbench allows you to dynamically inject these new entities into the gazetteer at prediction time, providing useful signals to the NLP models.
+In such a scenario, we can use information from the previous turn to help the NLP classification in the next turn. From the app's response, we know the names of restaurants that the user is most likely to choose from in the follow-up turn. MindMeld allows you to dynamically inject these new entities into the gazetteer at prediction time, providing useful signals to the NLP models.
 
 You can pass the entities, along with their popularity information as a ``dynamic_resource`` to the responder object as shown below. This will allow the entity recognizer to boost n-grams associated with the entity data listed in the dynamic_resource. Currently, we only support the ``'gazetteer'`` key in the ``dynamic_resource`` attribute of the responder.
 
@@ -546,7 +546,7 @@ As shown here, you can use the dialog flow functionality to effectively craft co
 Dialogue Middleware
 -------------------
 
-Workbench provides a useful mechanism for changing the behavior of many or all dialogue states via middleware. Dialogue middleware are like dialogue state handlers that get called for every request before the matched dialogue state handler. In addition to the ``request`` and ``responder`` arguments dialogue state handlers receive, dialogue middleware functions take a third argument: ``handler``. The ``handler`` argument is a function containing either the next middleware or the dialogue state handler for the current request.
+MindMeld provides a useful mechanism for changing the behavior of many or all dialogue states via middleware. Dialogue middleware are like dialogue state handlers that get called for every request before the matched dialogue state handler. In addition to the ``request`` and ``responder`` arguments dialogue state handlers receive, dialogue middleware functions take a third argument: ``handler``. The ``handler`` argument is a function containing either the next middleware or the dialogue state handler for the current request.
 
 .. note::
 
@@ -711,7 +711,7 @@ Asynchronous dialogue state handlers can be enabled with the following steps:
 Next Steps
 ----------
 
-The concepts and techniques described above are exactly what you will use in coding the dialogue handlers you defined in :ref:`Step 4 <define_dialogue_state_handlers>` of the Step-By-Step Guide. Before you begin, study how Workbench blueprint apps implement the dialogue managers:
+The concepts and techniques described above are exactly what you will use in coding the dialogue handlers you defined in :ref:`Step 4 <define_dialogue_state_handlers>` of the Step-By-Step Guide. Before you begin, study how MindMeld blueprint apps implement the dialogue managers:
 
  - :doc:`Food Ordering <../blueprints/food_ordering>`
  - :doc:`Video Discovery <../blueprints/video_discovery>`

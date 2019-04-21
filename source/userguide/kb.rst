@@ -12,7 +12,7 @@ The question answerer
  - answers and validates questions, disambiguates entities, and suggests alternatives
  - is designed to work with custom knowledge bases derived from large content catalogs, for production-grade applications
 
-Not every Workbench application needs these two components. An app always has either both or neither one.
+Not every MindMeld application needs these two components. An app always has either both or neither one.
 
 .. note::
 
@@ -36,9 +36,9 @@ In its most basic form, a knowledge base is just a repository of objects of spec
 Decide How to Use Question Answering in your Application
 --------------------------------------------------------
 
-The purpose of the Workbench question answerer is to map natural language queries to a query which is then run over a structured database. (This is called *knowledge-based question answering*.) The question answerer is designed to work with custom knowledge bases derived from large content catalogs, for production-grade applications.
+The purpose of the MindMeld question answerer is to map natural language queries to a query which is then run over a structured database. (This is called *knowledge-based question answering*.) The question answerer is designed to work with custom knowledge bases derived from large content catalogs, for production-grade applications.
 
-Catalogs containing even up to hundreds of millions of unique, domain-specific entity objects can easily be handled by Workbench in production. The number of unique entities typical scales up to tens of thousands for restaurant menus processed by food delivery services, millions for product retail catalogs, and tens or hundreds of millions for media entertainment libraries. The Workbench knowledge base and question answering systems have been successfully applied to all of the above use cases.
+Catalogs containing even up to hundreds of millions of unique, domain-specific entity objects can easily be handled by MindMeld in production. The number of unique entities typical scales up to tens of thousands for restaurant menus processed by food delivery services, millions for product retail catalogs, and tens or hundreds of millions for media entertainment libraries. The MindMeld knowledge base and question answering systems have been successfully applied to all of the above use cases.
 
 The question answerer can be used in a variety of ways, but in practice, conversational applications rely on this module and its underlying knowledge base for the four primary purposes listed below. Decide which purposes are most important to your use case and incorporate those priorities into the way you code your dialogue state handlers.
 
@@ -74,7 +74,7 @@ In such cases, you would use the question answerer to formulate knowledge base s
 Prepare your Data for the Knowledge Base
 ----------------------------------------
 
-Building a custom knowledge base using application content data is straightforward in Workbench. The content data can be restaurant menus, retailing product catalogs, or any custom data that users would like to interact with through conversational interfaces. This data is often stored in large-scale databases with application-specific data models. The question answerer can build a knowledge base using either (1) data dumps from a database, or (2) the output of a data pipeline which handles more complex data transformations.
+Building a custom knowledge base using application content data is straightforward in MindMeld. The content data can be restaurant menus, retailing product catalogs, or any custom data that users would like to interact with through conversational interfaces. This data is often stored in large-scale databases with application-specific data models. The question answerer can build a knowledge base using either (1) data dumps from a database, or (2) the output of a data pipeline which handles more complex data transformations.
 
 The question answerer takes in data files that contain knowledge base objects, which are the basic unit of information in knowledge base indexes. Each data file contains objects of a specified type.
 
@@ -165,7 +165,7 @@ The JSON data file for a ``menu_item`` object of this kind would look like the f
 Verify that the Data is Clean
 -----------------------------
 
-For the question answerer to achieve the best possible performance, it's critical to have clean data in the knowledge base. You should not assume that the generic text processing and normalization that the Workbench knowledge base performs is sufficient. Domain- or application-specific normalizations are often necessary. For example, in a food ordering app, menus from different restaurants could differ in format and the conventions they use.
+For the question answerer to achieve the best possible performance, it's critical to have clean data in the knowledge base. You should not assume that the generic text processing and normalization that the MindMeld knowledge base performs is sufficient. Domain- or application-specific normalizations are often necessary. For example, in a food ordering app, menus from different restaurants could differ in format and the conventions they use.
 
 Good practice dictates that you inspect the data to identify noise and inconsistency in the dataset, then clean up and normalize the data as needed. In order for your app to achieve high accuracy, it's important to do this as a pre-processing task.
 
@@ -178,9 +178,9 @@ Import the Data into the Knowledge Base
 
    .. code:: python
 
-      import mindmeld as wb
-      wb.configure_logs()
-      wb.blueprint('food_ordering')
+      import mindmeld as mm
+      mm.configure_logs()
+      mm.blueprint('food_ordering')
 
 The :meth:`load_kb()` API loads data into the knowledge base from JSON-formatted data files. If the index of specified objects is already present in the knowledge base, the new objects are imported into the existing index. If no index for the specified objects exists, the question answerer creates one.
 
@@ -192,7 +192,7 @@ Use :meth:`load_kb()` to load a data file from a path and create an index for th
 	qa = QuestionAnswerer(app_path='food_ordering')
 	qa.load_kb(app_namespace='food_ordering', index_name='restaurants', data_file='food_ordering/data/restaurants.json')
 
-Alternatively, use the Workbench command line tool to perform the same operation.
+Alternatively, use the MindMeld command line tool to perform the same operation.
 
 .. code-block:: console
 

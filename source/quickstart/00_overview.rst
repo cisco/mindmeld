@@ -18,4 +18,4 @@ Taking a conversational application from conception to production typically enta
 10 Deploy trained models to production
 == ===
 
-Taking a simple use case as an example, this Guide walks through the methodology, highlighting the key design decisions and technology components which underpin any great conversational experience. Along the way, the Guide explains how MindMeld Workbench can streamline the task of building and deploying conversational interfaces.
+Taking a simple use case as an example, this Guide walks through the methodology, highlighting the key design decisions and technology components which underpin any great conversational experience. Along the way, the Guide explains how MindMeld can streamline the task of building and deploying conversational interfaces.

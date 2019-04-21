@@ -60,6 +60,9 @@ COPY ./conf/config.cfg /root/.mindmeld/config
 
 WORKDIR /root
 
+RUN pip3 install -U mindmeld
+RUN pip3 install click-log==0.1.8
+
 RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
 RUN python3 /tmp/get-pip.py
 # Get home_assistant blueprint
@@ -80,8 +83,6 @@ RUN echo alias pip=pip3  >> /root/.bashrc
 
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
-    pip3 install -U mindmeld && \
-    pip3 install click-log==0.1.8 mindmeld && \
     su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
     mindmeld num-parse --start && \
     python3 -m home_assistant build && \

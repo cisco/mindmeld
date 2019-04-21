@@ -3,7 +3,7 @@ Working with the Preprocessor
 
 The Preprocessor
 
- - is an optional module that is run before any component in the Workbench pipeline
+ - is an optional module that is run before any component in the MindMeld pipeline
  - uses app-specific logic defined by the developer to perform arbitrary text modifications on the user query before it is sent to the :doc:`natural language processor <nlp>`
 
 Examples of some common preprocessing tasks include spelling correction, punctuation removal, handling special characters, sentence segmentation, and other kinds of application-specific text normalization.
@@ -12,7 +12,7 @@ Examples of some common preprocessing tasks include spelling correction, punctua
 Implement the preprocessor
 --------------------------
 
-You can use the :class:`Preprocessor` abstract class provided by Workbench as a template for defining your own custom preprocessing logic.
+You can use the :class:`Preprocessor` abstract class provided by MindMeld as a template for defining your own custom preprocessing logic.
 
 The base class contains two methods:
 
@@ -96,7 +96,7 @@ You will need to install the NLTK package to try out the example below. Add the 
 Use the preprocessor
 --------------------
 
-To use your custom preprocessing logic within your Workbench application, pass in an instance of your implemented preprocessor class when initializing the :class:`Application` object in the application container file, ``__init__.py``.
+To use your custom preprocessing logic within your MindMeld application, pass in an instance of your implemented preprocessor class when initializing the :class:`Application` object in the application container file, ``__init__.py``.
 
 .. code:: python
   :caption: __init__.py

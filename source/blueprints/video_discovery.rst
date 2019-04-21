@@ -85,7 +85,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 .. code-block:: shell
 
-   python -c "import mindmeld as wb; wb.blueprint('video_discovery');"
+   python -c "import mindmeld as mm; mm.blueprint('video_discovery');"
 
 This should create a MindMeld project folder called ``video_discovery`` in your current directory with the following structure:
 

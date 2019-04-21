@@ -1,13 +1,13 @@
 Using LSTM for Entity Recognition
 =================================
 
-Entity recognition is the one task within the NLP pipeline where deep learning models are among the available classification models. In particular, Workbench provides a `Bi-Directional Long Short-Term Memory (LSTM) Network <https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks>`_, which has been shown to perform well on sequence labeling tasks such as entity recognition. The model is implemented in `TensorFlow <https://www.tensorflow.org/get_started/>`_.
+Entity recognition is the one task within the NLP pipeline where deep learning models are among the available classification models. In particular, MindMeld provides a `Bi-Directional Long Short-Term Memory (LSTM) Network <https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks>`_, which has been shown to perform well on sequence labeling tasks such as entity recognition. The model is implemented in `TensorFlow <https://www.tensorflow.org/get_started/>`_.
 
 
 LSTM network overview
 ^^^^^^^^^^^^^^^^^^^^^
 
-The Workbench Bi-Directional LSTM network
+The MindMeld Bi-Directional LSTM network
 
  - encodes words as pre-trained word embeddings using Stanford's `GloVe representation <https://nlp.stanford.edu/projects/glove/>`_
  - encodes characters using a convolutional network trained on the training data
@@ -28,7 +28,7 @@ This design has these possible advantages:
 
 - Deep neural networks (DNNs) outperform traditional machine learning models on training sets with about 1,000 or more queries, according to many research papers.
 - DNNs require less feature engineering work than traditional machine learning models, because they use only two input features (word embeddings and gazetteers) compared to several hundred (n-grams, system entities, and so on).
-- On GPU-enabled devices, the network can achieve training time comparable to some of the traditional models in Workbench.
+- On GPU-enabled devices, the network can achieve training time comparable to some of the traditional models in MindMeld.
 
 The possible disadvantages are:
 

@@ -74,7 +74,7 @@ To train the different machine learning models in the NLP pipeline for this app,
 
 .. code-block:: console
 
-   python -c "import mindmeld as wb; wb.blueprint('food_ordering');"
+   python -c "import mindmeld as mm; mm.blueprint('food_ordering');"
 
 This should create a MindMeld project folder called ``food_ordering`` in your current directory with the following structure:
 
@@ -379,8 +379,8 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
 .. code:: python
 
    from mindmeld.components.nlp import NaturalLanguageProcessor
-   import mindmeld as wb
-   wb.configure_logs()
+   import mindmeld as mm
+   mm.configure_logs()
    nlp = NaturalLanguageProcessor(app_path='food_ordering')
    nlp.build()
 

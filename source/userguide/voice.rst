@@ -97,9 +97,9 @@ for the span "mellow Kerrie" without using phonetic matching.
 .. code-block:: python
    :emphasize-lines: 7-8
 
-   from mmworkbench import configure_logs; configure_logs()
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
-   from mmworkbench.core import Entity
+   from mindmeld import configure_logs; configure_logs()
+   from mindmeld.components.nlp import NaturalLanguageProcessor
+   from mindmeld.core import Entity
    nlp = NaturalLanguageProcessor(app_path='food_ordering')
    nlp.build()
    nlp.dump()
@@ -163,9 +163,9 @@ config.
    :emphasize-lines: 7-9
 
    # After updating app config and restarting the Python shell
-   from mmworkbench import configure_logs; configure_logs()
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
-   from mmworkbench.core import Entity
+   from mindmeld import configure_logs; configure_logs()
+   from mindmeld.components.nlp import NaturalLanguageProcessor
+   from mindmeld.core import Entity
    nlp = NaturalLanguageProcessor(app_path='food_ordering')
    nlp.load()
    er = nlp.domains['ordering'].intents['build_order'].entities['dish'].entity_resolver

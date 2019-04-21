@@ -23,7 +23,7 @@ To train the NLP classifiers for our Kwik-E-Mart store information app, we must 
 
 .. code-block:: shell
 
-   cd $WB_APP_ROOT
+   cd $MM_APP_ROOT
    python
 
 In the Python shell, the quickest way to train all the NLP classifiers together is to use the :meth:`nlp.build()` method.
@@ -109,9 +109,9 @@ To see the domain classifier in action, you can download and try out the ``home_
 
 .. code-block:: python
 
-   import mindmeld as wb
-   wb.configure_logs()
-   wb.blueprint('home_assistant')
+   import mindmeld as mm
+   mm.configure_logs()
+   mm.blueprint('home_assistant')
 
 The :class:`NaturalLanguageProcessor` class in Workbench exposes methods for training, testing, and saving all the models in our classifier hierarchy, including the domain model. For example, suppose we want to build a `logistic regression classifier <https://en.wikipedia.org/wiki/Logistic_regression>`_ that does domain classification. In our Python shell, we start off by instantiating an object of the :class:`NaturalLanguageProcessor` class. We then train the :attr:`domain_classifier` model by calling its :meth:`fit()` method.
 
@@ -167,7 +167,7 @@ We demonstrate intent classification using the simpler Kwik-E-Mart application. 
 
 .. code-block:: shell
 
-   cd $WB_APP_ROOT
+   cd $MM_APP_ROOT
    python
 
 .. code-block:: python
@@ -468,7 +468,7 @@ The code below illustrates how to train and evaluate the entity resolver model f
 
 .. code-block:: python
 
-   from mmworkbench.components.nlp import NaturalLanguageProcessor
+   from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
    # Workbench doesn't know about entities until the training queries have been loaded.
    # Load queries for the relevant intent by calling build().

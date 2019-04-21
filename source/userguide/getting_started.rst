@@ -31,8 +31,8 @@ The ``Dockerfile`` provided by MindMeld contains MindMeld and all its dependenci
 
 .. code-block:: shell
 
-   docker pull mindmeldworkbench/workbench
-   docker run -p 7150:7150 mindmeldworkbench/workbench -ti -d
+   docker pull mindmeldworkbench/
+   docker run -p 7150:7150 mindmeldworkbench/mindmeld -ti -d
 
 The Docker container contains Elasticsearch, the numerical parsing service, the MindMeld library and the Home Assistant application for you to test. The container will build and serve the application on port 7150 which is exposed to the external environment.
 
@@ -78,7 +78,7 @@ Find the container id of the docker image running Home Assistant.
 .. code-block:: console
 
    CONTAINER ID        IMAGE                         COMMAND                  CREATED             STATUS              PORTS                                        NAMES
-   d696c64e9924        mindmeldworkbench/workbench   "/bin/sh -c 'export …"   7 minutes ago       Up 7 minutes        9200/tcp, 0.0.0.0:7150->7150/tcp, 9300/tcp   nervous_panini
+   d696c64e9924        mindmeldworkbench/mindmeld    "/bin/sh -c 'export …"   7 minutes ago       Up 7 minutes        9200/tcp, 0.0.0.0:7150->7150/tcp, 9300/tcp   nervous_panini
 
 With the container's ID as d696c64e9924, we connect to the docker's bash environment.
 
@@ -118,9 +118,9 @@ Commit the edited docker file system, stop the existing running container and re
 
 .. code-block:: shell
 
-   docker commit d696c64e9924 mindmeldworkbench/workbench:edited
+   docker commit d696c64e9924 mindmeldworkbench/mindmeld:edited
    docker stop d696c64e9924
-   docker run -p 7150:7150 mindmeldworkbench/workbench:edited -ti -d
+   docker run -p 7150:7150 mindmeldworkbench/mindmeld:edited -ti -d
 
 Now issue the curl request again.
 
@@ -232,8 +232,8 @@ To prepare an isolated environment for MindMeld installation using ``virtualenv`
 
 .. code-block:: shell
 
-  mkdir my_wb_workspace
-  cd my_wb_workspace
+  mkdir my_mm_workspace
+  cd my_mm_workspace
 
 - Setup a virtual environment by running one of the following commands:
 
@@ -351,10 +351,10 @@ To try out the :doc:`Home Assistant blueprint<../blueprints/home_assistant>`, ru
 
 .. code-block:: python
 
-    import mindmeld as wb
-    wb.configure_logs()
+    import mindmeld as mm
+    mm.configure_logs()
     blueprint = 'home_assistant'
-    wb.blueprint(blueprint)
+    mm.blueprint(blueprint)
 
     from mindmeld.components import NaturalLanguageProcessor
     nlp = NaturalLanguageProcessor(blueprint)
@@ -389,9 +389,9 @@ Using the Python shell
 
 .. code-block:: python
 
-  import mindmeld as wb
-  wb.configure_logs()
-  wb.blueprint('template', 'my_app')
+  import mindmeld as mm
+  mm.configure_logs()
+  mm.blueprint('template', 'my_app')
 
 The :doc:`Step-By-Step guide <../quickstart/00_overview>` walks through the methodology for building conversational apps using MindMeld.
 
@@ -425,7 +425,7 @@ Built-in help is available with the standard :option:`-h` flag.
 mindmeld
 ^^^^^^^^
 
-The command-line interface (CLI) for MindMeld Workbench can be accessed with the ``mindmeld`` command.
+The command-line interface (CLI) for MindMeld can be accessed with the ``mindmeld`` command.
 This is most suitable for use in an app-agnostic context.
 
 The commands available are:
@@ -447,13 +447,13 @@ The commands available are:
 #. ``evaluate`` : Evaluates each of the classifiers in the NLP pipeline against the test set.
 #. ``load-kb`` : Populates the knowledge base.
 #. ``predict`` : Runs model predictions on queries from a given file.
-#. ``run`` : Starts the Workbench service as a REST API.
+#. ``run`` : Starts the MindMeld service as a REST API.
 
 
 Configure Logging
 -----------------
 
-Workbench adheres to the standard `Python logging mechanism <https://docs.python.org/3/howto/logging.html>`_.
+MindMeld adheres to the standard `Python logging mechanism <https://docs.python.org/3/howto/logging.html>`_.
 The default logging level is ``WARNING``, which can be overridden with a config file or from code.
 The ``INFO`` logging level can be useful to see what's going on:
 
@@ -471,8 +471,8 @@ Here's an example usage:
 
 .. code-block:: python
 
-  import mindmeld as wb
-  wb.configure_logs()
+  import mindmeld as mm
+  mm.configure_logs()
 
 
 .. _getting_started_troubleshooting:
@@ -499,7 +499,7 @@ Troubleshooting
 +---------------+---------------------------------------------+-----------------------------------------------+
 | Blueprints    | ``ValueError: Unknown                       | Run the mindmeld_init.sh found                |
 |               | error fetching archive`` when running       | :ref:`here <getting_started_virtualenv_setup>`|
-|               | ``wb.blueprint(bp_name)``                   |                                               |
+|               | ``mm.blueprint(bp_name)``                   |                                               |
 +---------------+---------------------------------------------+-----------------------------------------------+
 | Blueprints    | ``JSONDecodeError: Expecting value: line 1  | Remove the cached version of the app:         |
 |               | column 1 (char 0)``                         | ``rm ~/.mindmeld/blueprints/bp_name`` and     |
@@ -513,4 +513,4 @@ Environment Variables
 
 MM_SUBPROCESS_COUNT
 ^^^^^^^^^^^^^^^^^^^
-Workbench supports parallel processing via process forking when the input is a list of queries, as is the case when :ref:`leveraging n-best ASR transcripts for entity resolution <nbest_lists>`. Set this variable to an integer value to adjust the number of subprocesses. The default is ``4``. Setting it to ``0`` will turn off the feature.
+MindMeld supports parallel processing via process forking when the input is a list of queries, as is the case when :ref:`leveraging n-best ASR transcripts for entity resolution <nbest_lists>`. Set this variable to an integer value to adjust the number of subprocesses. The default is ``4``. Setting it to ``0`` will turn off the feature.

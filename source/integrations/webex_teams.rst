@@ -51,10 +51,10 @@ Download the food ordering blueprint.
 
 .. code:: python
 
-   import mmworkbench as wb
-   wb.configure_logs()
+   import mindmeld as mm
+   mm.configure_logs()
    bp_name = 'food_ordering'
-   wb.blueprint(bp_name)
+   mm.blueprint(bp_name)
 
 
 5. Start the food ordering server

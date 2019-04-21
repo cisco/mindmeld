@@ -7,7 +7,7 @@ The :ref:`Role Classifier <arch_role_model>`
  - is a machine-learned `classification <https://en.wikipedia.org/wiki/Statistical_classification>`_ model that determines the target roles for entities in a given query
  - is trained per entity type, using all the labeled queries for a given intent, with labels derived from the role types annotated within the training queries
 
-Every Workbench app has one role classifier for every entity type with associated roles.
+Every MindMeld app has one role classifier for every entity type with associated roles.
 
 .. note::
 
@@ -21,7 +21,7 @@ Working with the natural language processor falls into two broad phases:
  - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
  - Then, conduct experimentation in the Python shell.
 
-When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` (NLP) class from the Workbench :mod:`nlp` module and :ref:`instantiate an object <instantiate_nlp>` with the path to your Workbench project.
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` (NLP) class from the MindMeld :mod:`nlp` module and :ref:`instantiate an object <instantiate_nlp>` with the path to your MindMeld project.
 
 .. code-block:: python
 

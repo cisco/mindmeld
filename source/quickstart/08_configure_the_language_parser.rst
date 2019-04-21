@@ -17,7 +17,7 @@ The example query above contains three main pieces of information: the name of t
 
 `Natural language parsing <https://en.wikipedia.org/wiki/Natural_language_parsing>`_ is a long-studied problem in computer science and the approaches used depend on the end goal and the depth of linguistic analysis required. Methods range from simple ones like rule-based and regex-based parsing to more sophisticated techniques like `syntactic parsing <http://spark-public.s3.amazonaws.com/nlp/slides/Parsing-Intro.pdf>`_ and `semantic parsing <https://web.stanford.edu/class/cs224u/materials/cs224u-2016-intro-semparse.pdf>`_. While parsing remains an active area of research, commercial applications like Siri, Cortana, Alexa, and Google Assistant rely on approaches that work well in practice and are easy to build, debug, and maintain. Such systems almost always leverage a good rule-based parser, optionally augmented by a statistical parser if enough human-annotated parsed data is available for training.
 
-The language parser in Workbench supports everything from the simplest rule-based systems to state-of-the-art syntactic and semantic parsers. Out of the box, Workbench comes with a configuration-driven `dependency parser <http://spark-public.s3.amazonaws.com/nlp/slides/Parsing-Dependency.pdf>`_ (a kind of Syntactic Parser), similar to what's used in most commercial conversational applications today.
+The language parser in MindMeld supports everything from the simplest rule-based systems to state-of-the-art syntactic and semantic parsers. Out of the box, MindMeld comes with a configuration-driven `dependency parser <http://spark-public.s3.amazonaws.com/nlp/slides/Parsing-Dependency.pdf>`_ (a kind of Syntactic Parser), similar to what's used in most commercial conversational applications today.
 
 Getting started with the parser merely requires specifying a parser configuration which defines the entity hierarchy in your application. For the simple example above, the parser configuration can be defined as follows.
 
@@ -31,7 +31,7 @@ With the parser configuration in place, we train the NLP models and then test th
 
 .. code-block:: shell
 
-   cd $WB_APP_ROOT
+   cd $MM_APP_ROOT
    python
 
 .. code-block:: python

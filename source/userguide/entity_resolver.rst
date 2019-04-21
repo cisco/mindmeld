@@ -7,7 +7,7 @@ The :ref:`Entity Resolver <arch_entity_model>`
  - uses information retrieval techniques to perform entity resolution (also called entity linking)
  - is trained per entity type, using an entity mapping file that contains synonyms for all possible entity instantiations
 
-Every Workbench app has one entity resolver for every entity type. The mapping files are found in their respective entity folders.
+Every MindMeld app has one entity resolver for every entity type. The mapping files are found in their respective entity folders.
 
 .. note::
 
@@ -18,7 +18,7 @@ Understanding the entity resolver
 
 In NLP literature, entity resolution or `entity linking <https://en.wikipedia.org/wiki/Entity_linking>`_ is the problem of identifying all terms that refer to the same real-world entity.
 
-In Workbench, two different kinds of entities require resolution:
+In MindMeld, two different kinds of entities require resolution:
 
   - *entities that refer to an object* in the knowledge base — these resolve to an *id, canonical name* pair consisting of the unique ID of the object in the knowledge base, and the :term:`canonical name` for the object, respectively
   - *entities that refer to a property* of an object in the knowledge base — these resolve to a *id, canonical name* pair consisting of an optional user-specified ID and the :term:`canonical name` for the property respectively
@@ -34,11 +34,11 @@ The Entity Resolver has two main tools at its disposal:
 
 1. **Synonym lists**
 
-    Even entities of the same type and with the same canonical name can differ in their properties. For example, there could be two dishes whose canonical name is 'House Salad,' but they are from different restaurants, and while one is a 'spinach salad,' the other is a 'tropical fruit salad.' For these two entities, then, the ``restaurant`` and ``salad_type`` properties would differ. Workbench captures these differences in *synonym lists* (described in the next section) which the entity resolver uses to select the most appropriate result for a given query.
+    Even entities of the same type and with the same canonical name can differ in their properties. For example, there could be two dishes whose canonical name is 'House Salad,' but they are from different restaurants, and while one is a 'spinach salad,' the other is a 'tropical fruit salad.' For these two entities, then, the ``restaurant`` and ``salad_type`` properties would differ. MindMeld captures these differences in *synonym lists* (described in the next section) which the entity resolver uses to select the most appropriate result for a given query.
 
 2. **A numeric sort factor**
 
-    Textual similarity is the primary factor in entity resolution. When many entities are highly similar textually, Workbench uses a numeric value called the *sort factor* to boost the likelier ones. The sort factor means different things in different applications. A food ordering application might use restaurant ratings, while a music discovery application might use number of listens for an album, and so on.
+    Textual similarity is the primary factor in entity resolution. When many entities are highly similar textually, MindMeld uses a numeric value called the *sort factor* to boost the likelier ones. The sort factor means different things in different applications. A food ordering application might use restaurant ratings, while a music discovery application might use number of listens for an album, and so on.
 
     For music discovery, the sort factor could help the app choose between two different songs, sung by different artists, that have the same song title. For food ordering application, the sort factor could help the app choose between multiple 'Pad Thai' dishes, each from a different restaurant, and each with a different ID in the Knowledge Base.
 
@@ -57,7 +57,7 @@ The entity resolver is trained using *entity mapping files*, described in the ne
 Prepare data for the Entity Resolver
 ------------------------------------
 
-The most important task when you are developing a production-quality entity resolver is to collect a high-quality and comprehensive set of synonyms, and place those synonyms into entity mapping files, which is where Workbench can use them.
+The most important task when you are developing a production-quality entity resolver is to collect a high-quality and comprehensive set of synonyms, and place those synonyms into entity mapping files, which is where MindMeld can use them.
 
 This section explains how entity mapping files and synonym files are structured, and how they work. Each sub-section concludes with instructions for generating the files.
 
@@ -66,7 +66,7 @@ Entity mapping files come first, since they provide the framework into which the
 Generate entity mapping files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Every Workbench app has an entity mapping file for each entity type. 
+Every MindMeld app has an entity mapping file for each entity type.
 
 An entity mapping file is a JSON file containing a dictionary whose purpose is to provide information about entities of the given type, and, where applicable, about how the entity type corresponds to a knowledge base object type. Entity mapping files are used to train the entity resolver.
 
@@ -155,7 +155,7 @@ To ensure that you get high-quality synonyms, observe the following guidelines:
 
 5. Don’t worry about generating exhaustive lists of possible misspellings or pluralization. The resolver will handle those cases.
 
-Create the synonyms and make them available to your Workbench app, going entity type by entity type. The general process to follow (subject to refinement and even some automation) is this:
+Create the synonyms and make them available to your MindMeld app, going entity type by entity type. The general process to follow (subject to refinement and even some automation) is this:
 
 #. Choose an entity type
 
@@ -177,11 +177,11 @@ Create the synonyms and make them available to your Workbench app, going entity 
 Train the entity resolver
 -------------------------
 
-The Entity Resolver uses the `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ full-text search and analytics engine for information retrieval. This is required by the advanced text similarity model Workbench uses by default. Once Elasticsearch is up and running, no configuration needed is needed within Workbench. To learn how to set up Elasticsearch, see the :doc:`Getting Started guide <getting_started>`.
+The Entity Resolver uses the `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ full-text search and analytics engine for information retrieval. This is required by the advanced text similarity model MindMeld uses by default. Once Elasticsearch is up and running, no configuration needed is needed within MindMeld. To learn how to set up Elasticsearch, see the :doc:`Getting Started guide <getting_started>`.
 
 .. note::
 
-   If you choose not to use Elasticsearch (not recommended), Workbench provides a simple baseline version of entity resolution as a fallback. See :ref:`About the Exact Match text similarity model <exact_match>`.
+   If you choose not to use Elasticsearch (not recommended), MindMeld provides a simple baseline version of entity resolution as a fallback. See :ref:`About the Exact Match text similarity model <exact_match>`.
 
 Once all of the entity mapping files are generated, you can either (1) train the resolver as a standalone component, or (2) build the whole NLP pipeline, which trains the resolver along with the other components.
 
@@ -192,8 +192,8 @@ To train the resolver as a standalone component, adapt the following snippet to 
 
 .. code-block:: python
 
-  from mmworkbench import configure_logs; configure_logs()
-  from mmworkbench.components.nlp import NaturalLanguageProcessor
+  from mindmeld import configure_logs; configure_logs()
+  from mindmeld.components.nlp import NaturalLanguageProcessor
   nlp = NaturalLanguageProcessor(app_path='food_ordering')
   nlp.domains['ordering'].intents['build_order'].build()
   er = nlp.domains['ordering'].intents['build_order'].entities['dish'].entity_resolver
@@ -224,7 +224,7 @@ Once the resolver has been fit, test the entity resolver by passing ``Entity`` o
 
 .. code-block:: python
 
-  from mmworkbench.core import Entity
+  from mindmeld.core import Entity
   er.predict(Entity(text='gluten free pepperoni pizza', entity_type='dish'))
 
 
@@ -303,7 +303,7 @@ While the Entity Resolver finds the best-matching canonical values based on text
 
 These scenarios are examples of *context-aware resolution*. Deciding whether context-aware resolution is required, and if so under what circumstances, is important aspect of designing your app.
 
-There are two ways to accomplish context-aware resolution in Workbench:
+There are two ways to accomplish context-aware resolution in MindMeld:
 
  - In your :doc:`dialogue state handlers <../quickstart/04_define_the_dialogue_handlers>`, iterate through the ranked list to find the first entry that satisfies the constraints.
  - Use the :doc:`Question Answerer <kb>` to do a filtered search against the knowledge base to disambiguate entities with contextual constraints.
@@ -313,7 +313,7 @@ There are two ways to accomplish context-aware resolution in Workbench:
 About the Exact Match text similarity model
 -------------------------------------------
 
-If you choose not to use Elasticsearch, Workbench provides a simple baseline version of entity resolution. This Exact Match Model only resolves to an object when the text exactly matches a canonical name or synonym. To use the Exact Match Model, add the following to your app config (``config.py``) located in the top level of your app folder:
+If you choose not to use Elasticsearch, MindMeld provides a simple baseline version of entity resolution. This Exact Match Model only resolves to an object when the text exactly matches a canonical name or synonym. To use the Exact Match Model, add the following to your app config (``config.py``) located in the top level of your app folder:
 
 .. code-block:: python
 

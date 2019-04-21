@@ -1,7 +1,7 @@
 Working with the Natural Language Processor
 ===========================================
 
-We have seen how the :ref:`Natural Language Processor (NLP) <arch_nlp>` uses a pipeline of components to analyze the query. Workbench encapsulates this pipeline in a higher-level abstraction, in the form of the :class:`NaturalLanguageProcessor` Python class, or NLP class. This chapter focuses on the NLP class,  while subsequent chapters examine each individual component of the pipeline.
+We have seen how the :ref:`Natural Language Processor (NLP) <arch_nlp>` uses a pipeline of components to analyze the query. MindMeld encapsulates this pipeline in a higher-level abstraction, in the form of the :class:`NaturalLanguageProcessor` Python class, or NLP class. This chapter focuses on the NLP class,  while subsequent chapters examine each individual component of the pipeline.
 
 .. note::
 
@@ -18,7 +18,7 @@ Working with the natural language processor falls into two broad phases:
  - First, generate the training data for your app. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
  - Then, conduct experimentation in the Python shell.
 
-When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the MindMeld :mod:`nlp` module and instantiate an object with the path to your MindMeld project.
 
 .. code-block:: python
 
@@ -130,7 +130,7 @@ So far in our tutorial, the NLP object has been initialized but has not yet been
 Train the NLP pipeline
 ----------------------
 
-As described in :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`, the :meth:`NaturalLanguageProcessor.build` method is the fastest way to train a baseline natural language processor. Depending on the complexity of your Workbench project and the size of its training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracies for the classifiers.
+As described in :doc:`Step 7 <../quickstart/07_train_the_natural_language_processing_classifiers>`, the :meth:`NaturalLanguageProcessor.build` method is the fastest way to train a baseline natural language processor. Depending on the complexity of your MindMeld project and the size of its training data, this can take anywhere from a few seconds to several minutes. With logging level set to ``INFO`` or below, you should see the build progress in the console along with cross-validation accuracies for the classifiers.
 
 .. code-block:: python
 
@@ -157,7 +157,7 @@ As described in :doc:`Step 7 <../quickstart/07_train_the_natural_language_proces
    Best accuracy: 92.82%, params: {'C': 100, 'penalty': 'l1'}
    ...
 
-The :meth:`build` method loads all the training queries, checks them for annotation errors, then proceeds to build all the necessary NLP components using the machine learning settings defined in ``config.py``, the app's configuration file. The method applies Workbench's preset configuration for any component whose settings have not been specified.
+The :meth:`build` method loads all the training queries, checks them for annotation errors, then proceeds to build all the necessary NLP components using the machine learning settings defined in ``config.py``, the app's configuration file. The method applies MindMeld's preset configuration for any component whose settings have not been specified.
 
 In so doing, the :meth:`build` method:
 
@@ -171,7 +171,7 @@ In so doing, the :meth:`build` method:
 
 These steps are described further in upcoming chapters, along with default settings for each component, and methods to override them with your own custom configurations.
 
-To identify the optimal configuration for each classifier, you should experiment by training, tuning and testing. Then, store the best machine learning settings in ``config.py``, for the :meth:`build` method to use instead of the Workbench defaults.
+To identify the optimal configuration for each classifier, you should experiment by training, tuning and testing. Then, store the best machine learning settings in ``config.py``, for the :meth:`build` method to use instead of the MindMeld defaults.
 
 Here's an example of a ``config.py`` file where custom settings optimized for the app override the default configurations for the domain and intent classifiers.
 
@@ -286,7 +286,7 @@ More about fine-grained access to individual classifiers appears in the subseque
 Building models incrementally
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :meth:`NaturalLanguageProcessor.build` method by default retrains all NLP models from scratch. In most cases, however, you may just be modifying the configuration, training data, or resources (like gazetteers) of certain specific models within the NLP pipeline. In such cases, Workbench can intelligently retrain only those models whose dependencies have changed and simply reuse the previous models for the ones that haven't. To do so, set the :data:`incremental` parameter of the :meth:`build` method to ``True``.
+The :meth:`NaturalLanguageProcessor.build` method by default retrains all NLP models from scratch. In most cases, however, you may just be modifying the configuration, training data, or resources (like gazetteers) of certain specific models within the NLP pipeline. In such cases, MindMeld can intelligently retrain only those models whose dependencies have changed and simply reuse the previous models for the ones that haven't. To do so, set the :data:`incremental` parameter of the :meth:`build` method to ``True``.
 
 .. code:: python
 
@@ -316,7 +316,7 @@ We have seen how the natural language processor's :meth:`build` method and the i
 
 To be more precise, a classifier configuration defines the `machine learning algorithm <https://en.wikipedia.org/wiki/Supervised_learning#Approaches_and_algorithms>`_ to use, the `features <https://en.wikipedia.org/wiki/Feature_(machine_learning)>`_ to be extracted from the input data, and the methodology to use for `hyperparameter selection <https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)>`_.
 
-Workbench domain, intent, entity, and role classifiers all use a *configuration dictionary* to define the machine learning settings for model training.
+MindMeld domain, intent, entity, and role classifiers all use a *configuration dictionary* to define the machine learning settings for model training.
 
 This section describes the structure and format of the configuration dictionary. Detailed explanation of configurable options for each type of classifier appears in subsequent chapters.
 
@@ -363,7 +363,7 @@ These feature extraction settings are from a domain classifier configuration.
    }
    ...
 
-The above configuration instructs Workbench to extract four different groups of features for each input query:
+The above configuration instructs MindMeld to extract four different groups of features for each input query:
 
   a. ':sk_guide:`Bag of n-grams <feature_extraction#the-bag-of-words-representation>`' of length 1 (also called 'bag of words')
   b. `Gazetteer <https://gate.ac.uk/sale/tao/splitch13.html#x18-32600013.1>`_-derived features
@@ -382,7 +382,7 @@ This role classifier configuration defines hyperparameters for its `maximum entr
       'penalty': 'l1'
    }
 
-You can also provide a hyperparameter grid instead of exact values and let Workbench search for optimal settings. This type of configuration must specify both the hyperparameter search grid and settings for the selection methodology, as shown below.
+You can also provide a hyperparameter grid instead of exact values and let MindMeld search for optimal settings. This type of configuration must specify both the hyperparameter search grid and settings for the selection methodology, as shown below.
 
 .. code:: python
 
@@ -403,7 +403,7 @@ The above configuration defines a grid with five potential values for the 'C' pa
 Using custom configurations
 """""""""""""""""""""""""""
 
-There are two ways to override Workbench's preset configurations for NLP classifiers.
+There are two ways to override MindMeld's preset configurations for NLP classifiers.
 
 The first method, as described :ref:`earlier <build_nlp_with_config>`, is to define the classifier settings in your application configuration file, ``config.py``. The classifier configuration must be defined as a dictionary with one of the following names to override the corresponding classifier's default settings.
 
@@ -414,7 +414,7 @@ The first method, as described :ref:`earlier <build_nlp_with_config>`, is to def
 
 These classifier configurations apply globally to every domain, intent, entity and role model trained as part of your NLP pipeline. There are certain situations where you might want a finer-grained control over the classifier settings for every individual model. For instance, you may find that an LSTM-powered entity recognizer is the optimal choice for detecting entities within one intent, but a MEMM model works better for a different intent. Similarly, you may want a decision tree-based intent model for one domain but a logistic regression model for another. Or you may want to specify that certain data files be included or excluded while training a particular intent or entity model. You can define such specialized configurations based on the domain, intent, and entity type through the :meth:`get_intent_classifier_config`, :meth:`get_entity_recognizer_config`, and :meth:`get_role_classifier_config`. Examples on how to use these methods are shown in the sections for the individual classifiers.
 
-Alternatively, you could pass configuration settings (like model type, features, and so on) as arguments to the :meth:`fit` method of the appropriate classifier. Arguments passed to :meth:`fit` take precedence over both Workbench defaults and settings defined in ``config.py``. See individual classifier chapters for more about the :meth:`fit` method.
+Alternatively, you could pass configuration settings (like model type, features, and so on) as arguments to the :meth:`fit` method of the appropriate classifier. Arguments passed to :meth:`fit` take precedence over both MindMeld defaults and settings defined in ``config.py``. See individual classifier chapters for more about the :meth:`fit` method.
 
 Configuring rest of the pipeline
 """"""""""""""""""""""""""""""""
@@ -513,7 +513,7 @@ For more about the above steps, including outputs and methods for batch testing 
 Specifying request timestamp and time zone
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For applications dealing with temporal events, you can specify the timestamp and time zone for each query to modify the default behavior of the NLP pipeline. This information affects how certain :ref:`system entities <system-entities>` get resolved in Workbench.
+For applications dealing with temporal events, you can specify the timestamp and time zone for each query to modify the default behavior of the NLP pipeline. This information affects how certain :ref:`system entities <system-entities>` get resolved in MindMeld.
 
 To pass in this information, use these two optional parameters of the :meth:`process` method:
 
@@ -521,7 +521,7 @@ To pass in this information, use these two optional parameters of the :meth:`pro
 
   - :data:`timestamp`: A valid `unix timestamp <https://en.wikipedia.org/wiki/Unix_time>`_ for the current query
 
-We illustrate the use of these parameters below with some examples from the :doc:`home assistant <../blueprints/home_assistant>` blueprint. By default, the natural language processor infers time-related system entities using the timestamp at which the :meth:`process` method was invoked and the time zone of the server where the Workbench app is running.
+We illustrate the use of these parameters below with some examples from the :doc:`home assistant <../blueprints/home_assistant>` blueprint. By default, the natural language processor infers time-related system entities using the timestamp at which the :meth:`process` method was invoked and the time zone of the server where the MindMeld app is running.
 
 The following code snippet was executed on the morning of May 11th, 2018 in the PDT (UTC-7:00) time zone.
 
@@ -722,11 +722,11 @@ In practice, optimizing the NLP models to production-level accuracies demands se
 Select data for experiments
 ---------------------------
 
-During the course of experimentation, it is common to have multiple datasets for training and testing as you iterate on building the most optimal models for your NLP pipeline. Multiple training datasets allow you to try out different versions of training data for fitting your models and identifying the best performing one. They are also useful for building and deploying different variants of your models trained on different datasets from the same Workbench project.
+During the course of experimentation, it is common to have multiple datasets for training and testing as you iterate on building the most optimal models for your NLP pipeline. Multiple training datasets allow you to try out different versions of training data for fitting your models and identifying the best performing one. They are also useful for building and deploying different variants of your models trained on different datasets from the same MindMeld project.
 
 Multiple testing datasets (or test sets) allow you to compute evaluation numbers on different versions of test data. A recommended practice is to have at least two different test sets in your project - a development set and a blind set. You should use the development set for frequent evaluation and error analysis to fine-tune your model's parameters and improve its performance. The blind set, on the other hand, should merely be used for computing the final evaluation metrics without being open for detailed investigation.
 
-In Workbench, a dataset is a collection of labeled query files that share the same filename prefix and are distributed across the different intent folders consistent with the Workbench project structure. Each dataset is identified by a label which is the same as the common prefix shared by its constituent data files. By default, Workbench uses all files within your intent folders that match the ``'train*.txt'`` pattern for training and the ``'test*.txt'`` pattern for testing. In other words, the :meth:`NaturalLanguageProcessor.build` and :meth:`NaturalLanguageProcessor.evaluate` methods use the datasets named ``'train'`` and ``'test'`` by default, respectively. To instead train or evaluate on a specific subset of files within your intent folders, use the :data:`label_set` parameter of the :meth:`build` and :meth:`evaluate` methods to identify the desired dataset.
+In MindMeld, a dataset is a collection of labeled query files that share the same filename prefix and are distributed across the different intent folders consistent with the MindMeld project structure. Each dataset is identified by a label which is the same as the common prefix shared by its constituent data files. By default, MindMeld uses all files within your intent folders that match the ``'train*.txt'`` pattern for training and the ``'test*.txt'`` pattern for testing. In other words, the :meth:`NaturalLanguageProcessor.build` and :meth:`NaturalLanguageProcessor.evaluate` methods use the datasets named ``'train'`` and ``'test'`` by default, respectively. To instead train or evaluate on a specific subset of files within your intent folders, use the :data:`label_set` parameter of the :meth:`build` and :meth:`evaluate` methods to identify the desired dataset.
 
 The code snippet below demonstrates how to train the NLP classifiers only using the ``'custom_train'`` dataset (i.e., the subset of data that matches the ``'custom_train*.txt'`` filename pattern):
 
@@ -765,7 +765,7 @@ Similarly, the following code snippet shows how to evaluate the NLP classifiers 
 Save models for future use
 --------------------------
 
-Once you have trained an NLP pipeline and are satisfied with its accuracy, you can save it to disk using the :meth:`NaturalLanguageProcessor.dump` method. The :meth:`dump` method saves all the trained models to a cache folder within your Workbench project.
+Once you have trained an NLP pipeline and are satisfied with its accuracy, you can save it to disk using the :meth:`NaturalLanguageProcessor.dump` method. The :meth:`dump` method saves all the trained models to a cache folder within your MindMeld project.
 
 .. code:: python
 

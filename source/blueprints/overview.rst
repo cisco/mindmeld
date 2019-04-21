@@ -67,10 +67,10 @@ Open a Python shell and type the following commands to download and set up the b
 
 .. code:: python
 
-   import mindmeld as wb
-   wb.configure_logs()
+   import mindmeld as mm
+   mm.configure_logs()
    bp_name = 'food_ordering'
-   wb.blueprint(bp_name)
+   mm.blueprint(bp_name)
 
 2. Build
 ^^^^^^^^

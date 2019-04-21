@@ -1,7 +1,7 @@
 Step 10: Deploy Trained Models
 ==============================
 
-Once your application has been built, Workbench makes it easy to test locally. In :doc:`Step 4 <04_define_the_dialogue_handlers>`, we created an application container for your dialogue state handler logic. This was in the ``__init__.py`` file in the application root directory. To provide the necessary interface to manage deployment, we now create the ``__main__.py`` file with the following three lines of code.
+Once your application has been built, MindMeld makes it easy to test locally. In :doc:`Step 4 <04_define_the_dialogue_handlers>`, we created an application container for your dialogue state handler logic. This was in the ``__init__.py`` file in the application root directory. To provide the necessary interface to manage deployment, we now create the ``__main__.py`` file with the following three lines of code.
 
 .. code:: python
 
@@ -173,9 +173,9 @@ To test using any REST client (such as Postman or Advanced Rest Client), send `P
     "version": "2.0"
   }
 
-The web service responds with a JSON data structure containing the application response along with the detailed output for all of the machine learning components of the Workbench platform.
+The web service responds with a JSON data structure containing the application response along with the detailed output for all of the machine learning components of the MindMeld platform.
 
-.. See the :ref:`User Guide <userguide>` for more about the Workbench request and response interface format.
+.. See the :ref:`User Guide <userguide>` for more about the MindMeld request and response interface format.
 
 .. Cloud Deployment
 .. ~~~~~~~~~~~~~~~~~~~~~~~~~
