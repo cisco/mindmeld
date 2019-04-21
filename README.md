@@ -1,111 +1,61 @@
-# MindMeld Workbench
+# MindMeld Conversational AI Platform
 
 [![CircleCI](https://circleci.com/gh/expectlabs/mindmeld-workbench.svg?style=svg&circle-token=437cf905895688ac1b58b60fe79144c180893372)](https://circleci.com/gh/expectlabs/mindmeld-workbench)
 
-This repository contains MindMeld Workbench.  This repository was renamed to https://github.com/expectlabs/mindmeld-workbench/ from https://github.com/expectlabs/mindmeld-workbench3/ to avoid confusion in relation to the upcoming 4.0.0 release.  Please update any configuration that is still pointed to the mindmeld-workbench3 repo.
+This repository contains the MindMeld Conversational AI Platform.
 
-## TLDR: Quick Start
+## Introducing MindMeld
+The MindMeld Conversational AI platform is among the most advanced AI platforms for building production-quality conversational applications. It is a Python-based machine learning framework which encompasses all of the algorithms and utilities required for this purpose. Evolved over several years of building and deploying dozens of the most advanced conversational experiences achievable, MindMeld is optimized for building advanced conversational assistants which demonstrate deep understanding of a particular use case or domain while providing highly useful and versatile conversational experiences.
 
-Assuming you have pyenv installed.
-```
-cd mindmeld-workbench3/  # go to the root of the workbench repo
-pyenv install 3.5.3  # install an appropriate version of python
-pyenv virtualenv 3.5.3 workbench3  # create a virtualenv
-pyenv local workbench3  # set the virtualenv for the repo
-pip install -r dev-requirements.txt  # install development dependencies
-```
+MindMeld is the only Conversational AI platform available today that provides tools and capabilities for every step in the workflow for a state-of-the-art conversational application. The architecture of MindMeld is illustrated below.
 
-## Getting Started
+![MindMeld architecture](http://www.mindmeld.com/_images/architecture1.png)
 
-Workbench 3.x is developed primarily in Python 3.4+, but has support for Python 2.7 as well. Best practice is to set up a virtualenv using the latest stable version of Python for Workbench development. Steps below describe how to do this, assuming pyenv is installed on your system. If not see (pyenv on the eng-wiki)[https://github.com/expectlabs/eng-wiki/wiki/pyenv].
+To summarize, the functionality available in MindMeld includes:
 
-Make sure you're in the root of the repo
-`cd mindmeld-workbench3/`
+  - advanced **Natural Language Processing**, consisting of
 
-Install an appropriate version of Python, 3.5.3 or 3.6.0
-`pyenv install 3.5.3`
+    - **Domain Classification**
+    - **Intent Classification**
+    - **Entity Recognition**
+    - **Entity Role Labeling**
+    - **Entity Resolution**
+    - **Language Parsing**
+  - versatile **dialogue management**
+  - custom **knowledge base creation**
+  - advanced **question answering**
+  - **training data collection and management** support
+  - **large-scale data analytics**
 
-Create virtualenv with that Python for Workbench 3
-`pyenv virtualenv 3.5.3 workbench3`
+## The MindMeld Philosophy
 
-Set that virtualenv to be automatically activated for the repo.
-`pyenv local workbench3`
+MindMeld has been used for applications in dozens of different domains by some of the largest global organizations. Over the course of these production deployments, MindMeld has evolved to be ideally suited for building production-quality, large-vocabulary language understanding capabilities for any custom application domain. This has been achieved by following the architectural philosophy whose guiding principles are expressed in the table below.
 
-Install the development dependencies.
-`pip install -r dev-requirements.txt`
+|Concept|Description|
+|---|---|
+|**Power and Versatility**        |Unlike GUI-based tools typically too rigid to accommodate the functionality required by many applications, MindMeld provides powerful command-line utilities with the flexibility to accommodate nearly any product requirements.|
+|**Algorithms and Data**          |In contrast to machine learning toolkits which offer algorithms but little data, MindMeld provides not only state-of-the-art algorithms, but also functionality which streamlines the collection and management of large sets of custom training data.|
+|**NLP plus QA and DM**           |While conversational AI platforms available today typically provide natural language processing (NLP) support, few assist with question answering (QA) or dialogue management (DM). MindMeld provides end-to-end functionality including advanced NLP, QA, and DM, all three of which are required for production applications today.|
+|**Knowledge-Driven Learning**    |Nearly all production conversational applications rely on a comprehensive knowlege base to enhance intelligence and utility. MindMeld is the only Conversational AI platform available today which supports custom knowledge base creation. This makes MindMeld ideally suited for applications which must demonstrate deep understanding of a large product catalog, content library, or FAQ database, for example.|
+|**You Own Your Data**            |Differently from cloud-based NLP services, which require that you forfeit your data, MindMeld was designed from the start to ensure that proprietary training data and models always remain within the control and ownership of your application.|
 
-## Releasing a Version to MindMeld's PyPI
+## Quick Start
 
-**Beware! Make sure you read this guide and know what you are doing!**
-
-### Bump the Version
-
-We use a python utility for bumping the version, aptly named `bumpversion`.
-
-This utility will update the version in all the places it should, create a new commit `Bump version: {old-version} → {new-version}`, and create a tag for the new version.
-
-Our versioning format is `{major}.{minor}.{patch}{release}{revision}`. So version part should be any of `major`, `minor`, `patch` `release` or `revision`.
-
-Let's say the current version is `3.0.1dev2`. `bumpversion revision` would bump the version to `3.0.1dev3`.
-
-If this is your first release, it is recommended that you do a dry run first to confirm you are using the correct version part:
+Assuming you have pip installed with Python 3.4, Python 3.5 or Python 3.6 and Elasticsearch running in the background:
 
 ```
-bumpversion <version-part> --dry-run --verbose
+pip install mindmeld
+mindmeld blueprint home_assistant
+python -m home_assistant build
+python -m home_assistant converse
 ```
 
-#### TLDR; Do The Thing
+For detailed installation instructions, see [Getting Started](http://www.mindmeld.com/userguide/getting_started.html). To start with pre-built sample applications, see [MindMeld Blueprints](http://www.mindmeld.com/blueprints/overview.html).
 
-```
-# Bump the Version
-bumpversion <version-part> --commit --tag
-git push
-git push --tags
-```
+## Want to learn more about MindMeld?
 
-### Building the wheel
+Read our [Conversational AI Playbook](https://www.mindmeld.com/docs).
 
-Python wheels are the preferred binary package format for python packages. If you care to learn more, read [here](http://pythonwheels.com/) or [here](https://www.python.org/dev/peps/pep-0427/)
+## Feedback or Support Questions
 
-#### TLDR; Do The Thing
-
-```
-python setup.py bdist_wheel --universal
-```
-
-
-### Publishing to PyPI
-
-You can publish to pypi by pushing the .whl to `s3://mindmeld-pypi/<develop||staging||master>/` (the trailing forward slash is important!).
-
-```
-aws s3 cp dist/mindmeld-{new-version}-py2.py3-none-any.whl s3://mindmeld-pypi/<develop||staging||master>/
-```
-
-Currently we do not have a deployment process that takes a package from `dev` to `staging` to `master`.
-
-Hence you should deploy to all three environments.
-
-Usually it takes about 5 - 10 minutes to for the PyPI server to update, and you can check at `https://mindmeld.com/packages/`.
-
-## MindMeld Workbench Documentation
-
-
-This repository contains documentation for MindMeld Workbench.
-
-### TLDR: Quick Start
-
-Assuming you have pyenv installed.
-```
-pip install -r docs-requirements.txt  # install development dependencies
-```
-
-### Building Docs
-
-```
-make apidoc
-```
-
-### Viewing Docs
-
-`open build/html/index.html`
+Please contact us at mindmeld-support@cisco.com.

@@ -195,4 +195,4 @@ Compatibility Notes
 3.0.0 (2017-08-14)
 ------------------
 
-* First release of the MindMeld MindMeld conversational AI toolkit
+* First release of the MindMeld conversational AI toolkit
