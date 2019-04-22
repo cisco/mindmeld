@@ -51,7 +51,7 @@ Neither of these entity types require role classification.
 
   By convention, entity names are nouns that describe the entity type.
 
-Having completed the design of the domain, intent, entity and role hierarchy for our example application, we can begin implementing the application using MindMeld Workbench.
+Having completed the design of the domain, intent, entity and role hierarchy for our example application, we can begin implementing the application using MindMeld.
 
 Begin Implementation with MindMeld
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

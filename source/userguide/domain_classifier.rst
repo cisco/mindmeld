@@ -8,7 +8,7 @@ The Domain Classifier
  - is trained using all of the labeled queries across all the domains in an application
  - can be trained only when the labeled data contains more than one domain
 
-Every Workbench app has exactly one domain classifier. The name of each domain folder serves as the label for the training queries contained within that folder.
+Every MindMeld app has exactly one domain classifier. The name of each domain folder serves as the label for the training queries contained within that folder.
 
 .. note::
 
@@ -23,7 +23,7 @@ Working with any natural language processor component falls into two broad phase
  - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
  - Then, conduct experimentation in the Python shell.
 
-When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the Workbench :mod:`nlp` module and instantiate an object with the path to your Workbench project.
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` class from the MindMeld :mod:`nlp` module and instantiate an object with the path to your MindMeld project.
 
 .. code-block:: python
 
@@ -88,7 +88,7 @@ Use the :meth:`DomainClassifier.fit` method to train a domain classification mod
    Selecting hyperparameters using k-fold cross-validation with 10 splits
    Best accuracy: 99.50%, params: {'C': 10, 'fit_intercept': True}
 
-The :meth:`fit` method loads all necessary training queries and trains a domain classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If no custom settings for domain classification are defined in ``config.py``, the method uses the Workbench preset :ref:`classifier configuration <config>`.
+The :meth:`fit` method loads all necessary training queries and trains a domain classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If no custom settings for domain classification are defined in ``config.py``, the method uses the MindMeld preset :ref:`classifier configuration <config>`.
 
 Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.
 
@@ -222,7 +222,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
   |                       |  - quantizes the vocabulary frequency into 5 bins                                                          |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'enable-stemming'`` | Stemming is the process of reducing inflected words to their word stem or base form. For example, word stem|
-  |                       | of "eating" is "eat", word stem of "backwards" is "backward". Workbench extracts word stems using a variant|
+  |                       | of "eating" is "eat", word stem of "backwards" is "backward". MindMeld extracts word stems using a variant |
   |                       | of the `Porter stemming algorithm <https://tartarus.org/martin/PorterStemmer/>`_ that only removes         |
   |                       | inflectional suffixes.                                                                                     |
   |                       |                                                                                                            |
@@ -370,7 +370,7 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 
   A dictionary of settings for :sk_guide:`hyperparameter selection <grid_search>`. Provides an alternative to the ``'params'`` dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.
 
-  To estimate parameters, Workbench needs two pieces of information from the developer:
+  To estimate parameters, MindMeld needs two pieces of information from the developer:
 
   #. The parameter space to search, as the value for the ``'grid'`` key
   #. The strategy for splitting the labeled data into training and validation sets, as the value for the ``'type'`` key
@@ -426,13 +426,13 @@ Let's take a look at the allowed values for each setting in a domain classifier 
 Training with custom configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To override Workbench's default domain classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
+To override MindMeld's default domain classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
 
 
 1. Application configuration file
 """""""""""""""""""""""""""""""""
 
-When you define custom classifier settings in ``config.py``, the :meth:`DomainClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench's defaults. To do this, define a dictionary of your custom settings, named :data:`DOMAIN_CLASSIFIER_CONFIG`.
+When you define custom classifier settings in ``config.py``, the :meth:`DomainClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of MindMeld's defaults. To do this, define a dictionary of your custom settings, named :data:`DOMAIN_CLASSIFIER_CONFIG`.
 
 Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the domain classifier.
 
@@ -517,7 +517,7 @@ We can also add more :ref:`supported features <domain_features>`. Suppose that o
     'in-gaz': {}
    }
 
-To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This trains the domain classification model with our new feature extraction settings, while continuing to use Workbench defaults for model type (logistic regression) and hyperparameter selection.
+To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This trains the domain classification model with our new feature extraction settings, while continuing to use MindMeld defaults for model type (logistic regression) and hyperparameter selection.
 
 .. code-block:: python
 
@@ -533,7 +533,7 @@ To retrain the classifier with the updated feature set, pass in the :data:`my_fe
 
 **Hyperparameter tuning**
 
-View the model's hyperparameters, keeping in mind the hyperparameters for logistic regression, the default model for domain classification in Workbench. These include: ``'C'``, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to ``'l2'``.
+View the model's hyperparameters, keeping in mind the hyperparameters for logistic regression, the default model for domain classification in MindMeld. These include: ``'C'``, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to ``'l2'``.
 
 .. code-block:: python
 
@@ -711,7 +711,7 @@ The :meth:`predict` and :meth:`predict_proba` methods take one query at a time. 
 Evaluate classifier performance
 -------------------------------
 
-Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
+Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your MindMeld project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
 
 Then, when you are ready, use the :meth:`DomainClassifier.evaluate` method, which
 

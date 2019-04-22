@@ -1,7 +1,7 @@
 Dealing with Voice Inputs
 =========================
 
-MindMeld Workbench provides all the functionality required to build a text-based natural language
+MindMeld provides all the functionality required to build a text-based natural language
 chat interface. However, you might also want to support voice interactions with your application
 or build for a platform where voice is the only input modality. For such applications, you can
 leverage a third party
@@ -10,7 +10,7 @@ convert the input speech into text. There are multiple third party speech recogn
 `Hound <https://soundhound.com/houndify>`_,
 `Nuance <https://www.nuance.com/mobile/speech-recognition-solutions.html>`_, and
 `Microsoft <https://azure.microsoft.com/en-us/services/cognitive-services/speech/?v=18.05>`_.
-The converted text transcript can then be processed by your Workbench application to return an
+The converted text transcript can then be processed by your MindMeld application to return an
 appropriate text response. Finally, you can send this text response to a third party
 `Text to Speech <https://en.wikipedia.org/wiki/Speech_synthesis>`_ (TTS) system to synthesize an
 audio response that can be "spoken" back to the user.  Similar to speech recognition, there are multiple third party TTS systems available for use, including but not limited to the services
@@ -23,7 +23,7 @@ Challenges with speech recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 It's important to note that speech recognition is not perfect, especially for domain-specific
-vocabulary and proper nouns. ASR errors may cause the text input to your Workbench application to
+vocabulary and proper nouns. ASR errors may cause the text input to your MindMeld application to
 be something different than what the user intended, which can lead to an unexpected response that
 makes the app appear unintelligent. The part of the pipeline that is most susceptible to a drop in
 accuracy due to ASR errors is the entity resolution step. This is because domain and intent
@@ -40,14 +40,14 @@ there are a variety of open source models available as a starting point includin
 `CMUSphinx <https://cmusphinx.github.io/>`_, and `Kaldi <https://github.com/kaldi-asr/kaldi>`_.
 However, given the cost and effort associated with building ASR models from scratch, the most
 common scenario is to use an out-of-the-box ASR. In the following sections, we will describe a
-couple of techniques you can leverage in Workbench to maintain a high entity resolution accuracy
+couple of techniques you can leverage in MindMeld to maintain a high entity resolution accuracy
 despite speech recognition errors.
 
 
 Phonetic matching in entity resolution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The Workbench Entity Resolver is optimized for typed inputs by default. It can handle text
+The MindMeld Entity Resolver is optimized for typed inputs by default. It can handle text
 variations like typos and misspellings, and it leverages synonym lists to resolve terms that are
 semantically similar. In addition to these variations, for voice inputs, there is a large category
 of entity variations that are phonetically similar but textually different from the canonical form.
@@ -243,7 +243,7 @@ the phonemes in the audio file. For uncommon terms, the correct transcription ma
 transcript or not in the list at all. However, using the phonetic information from the n-best list
 and app-specific context, we can resolve entities to their intended values with a high accuracy.
 
-Workbench provides the option to pass in the n-best list of ASR transcripts for extracting
+MindMeld provides the option to pass in the n-best list of ASR transcripts for extracting
 multiple candidate entities to improve entity resolution.
 
 To leverage this functionality add an ``NLP_CONFIG`` dictionary to your application configuration
@@ -260,7 +260,7 @@ corresponding to the ``resolve_entities_using_nbest_transcripts`` key. The forma
 ``<domain>.<intent>``, and an asterisk ('*') wildcard denotes *all* intents within the specified
 domain.
 
-Workbench will limit running the n-best enhanced entity resolution to the domains and intents you
+MindMeld will limit running the n-best enhanced entity resolution to the domains and intents you
 have specified. This is an optimization to avoid unnecessary processing of a factor of 
 `n` for queries without entities of interest. While the code is parallelized for minimal latency
 increase, there will be an increase in memory usage from the domains and intents for which n-best
@@ -354,7 +354,7 @@ Let us see the results of n-best enhanced entity resolution for the above exampl
 
 You can see that the query was classified as the ``video_content`` domain and the ``browse``
 intent. Since all intents in the ``video_content`` domain were specified in the
-``NLP_CONFIG`` above, Workbench ran n-best entity processing for this query. This involves running
+``NLP_CONFIG`` above, MindMeld ran n-best entity processing for this query. This involves running
 entity recognition on all the n-best transcripts and using information from the all of the
 extracted entities for entity resolution.
 
@@ -403,7 +403,7 @@ For example, you can build an app-specific entity resolver that is called from t
 manager which uses all the n-best entity spans along with phonetic matching to resolve to the
 correct term. To derive phonetic representations for your extracted entities, you can leverage the
 `double metaphone <https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone>`_ algorithm (used by
-the Workbench entity resolver) or a more advanced machine-learned model like
+the MindMeld entity resolver) or a more advanced machine-learned model like
 `grapheme to phoneme <https://github.com/cmusphinx/g2p-seq2seq>`_.
 
 .. note::

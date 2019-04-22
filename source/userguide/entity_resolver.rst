@@ -207,7 +207,7 @@ Build the NLP pipeline using :meth:`NaturalLanguageProcessor.build()`. Among its
 About the `EntityResolver.fit()` method
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When :meth:`EntityResolver.fit()` method is run for the first time, Workbench creates the Elasticsearch index and uploads all the objects. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine.
+When :meth:`EntityResolver.fit()` method is run for the first time, MindMeld creates the Elasticsearch index and uploads all the objects. How long this takes depends on the size of your data, your network speed, and whether your code and Elasticsearch server are running on the same machine.
 
 For the sake of speed, subsequent calls to :meth:`EntityResolver.fit()` update the existing index rather than creating a new one from scratch. This means that new objects are added, and objects with existing IDs are updated, but no objects are deleted. If you wish to delete objects, fully recreate the index from scratch by running a clean fit as follows.
 

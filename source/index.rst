@@ -6,17 +6,17 @@ This playbook represents a first step toward defining the governing principles a
 
 The :ref:`intro` provides an overview of the state of the art in building conversational applications and discusses tradeoffs associated with different implementation approaches.
 
-The :ref:`quickstart` illustrates how to build an end-to-end conversational application using Workbench, the MindMeld Conversational AI toolkit. You can apply it directly while building a conversational application, or just read it to learn the essentials of Workbench.
+The :ref:`quickstart` illustrates how to build an end-to-end conversational application using MindMeld, the MindMeld Conversational AI toolkit. You can apply it directly while building a conversational application, or just read it to learn the essentials of MindMeld.
 
-The :ref:`blueprints` section explains how to use Workbench to quickly build and test a fully working conversational application without writing code or collecting training data. You can bootstrap a Blueprint app into a more specialized and powerful conversational application, or just use the Blueprint app as a demo or research tool.
+The :ref:`blueprints` section explains how to use MindMeld to quickly build and test a fully working conversational application without writing code or collecting training data. You can bootstrap a Blueprint app into a more specialized and powerful conversational application, or just use the Blueprint app as a demo or research tool.
 
-The :ref:`userguide` covers each component of the MindMeld platform in depth and explains how to use Workbench to build and configure each component for optimal performance. It functions as a technical supplement that details how to improve an application built following either the :ref:`quickstart` or the :ref:`blueprints`. The :ref:`userguide` highlights many common techniques and best practices that contribute to successful conversational experiences today.
+The :ref:`userguide` covers each component of the MindMeld platform in depth and explains how to use MindMeld to build and configure each component for optimal performance. It functions as a technical supplement that details how to improve an application built following either the :ref:`quickstart` or the :ref:`blueprints`. The :ref:`userguide` highlights many common techniques and best practices that contribute to successful conversational experiences today.
 
-The :ref:`versions` section contains a Recent Changes section which you should always consult before installing or upgrading Workbench.
+The :ref:`versions` section contains a Recent Changes section which you should always consult before installing or upgrading MindMeld.
 
 Readers should be familiar with `Machine Learning <https://www.coursera.org/learn/machine-learning>`_ and the `Python <https://www.python.org/>`_ programming language, including functional knowledge of the `scikit-learn <http://scikit-learn.org/>`_ python package.
 
-For those who wish to use the deep learning models included in Workbench, familiarity with the `TensorFlow <https://www.tensorflow.org/>`_ library is recommended.
+For those who wish to use the deep learning models included in MindMeld, familiarity with the `TensorFlow <https://www.tensorflow.org/>`_ library is recommended.
 
 How to Use these Docs
 ---------------------
@@ -25,29 +25,29 @@ The questions and answers below explain how to use this Conversational AI Playbo
 
 ----
 
-**Q:** What is Conversational AI? Why does MindMeld Workbench exist and what does it do?
+**Q:** What is Conversational AI? Why does MindMeld exist and what does it do?
 
-**A:** Read the :ref:`intro`. This explains what Workbench does differently from other platforms and toolkits.
-
-----
-
-**Q:** What is the methodology for building Conversational AI applications with Workbench?
-
-**A:** Read the :ref:`quickstart`. This and the :ref:`userguide` together form the main body of knowledge for MindMeld Workbench developers.
+**A:** Read the :ref:`intro`. This explains what MindMeld does differently from other platforms and toolkits.
 
 ----
 
-**Q:** How do I quickly get a pre-built Workbench app running, either as a learning exercise or as a baseline for my own application?
+**Q:** What is the methodology for building Conversational AI applications with MindMeld?
+
+**A:** Read the :ref:`quickstart`. This and the :ref:`userguide` together form the main body of knowledge for MindMeld developers.
+
+----
+
+**Q:** How do I quickly get a pre-built MindMeld app running, either as a learning exercise or as a baseline for my own application?
 
 **A:** Follow the instructions in :ref:`blueprints`.
 
 ----
 
-**Q:** How do I apply the Step-by-Step methodology to my own Workbench app, either building from scratch or extending a Blueprint app?
+**Q:** How do I apply the Step-by-Step methodology to my own MindMeld app, either building from scratch or extending a Blueprint app?
 
 **A:** Work through either the :ref:`quickstart` or the section of :ref:`blueprints` that’s appropriate for your use case. Where those docs refer you to the :ref:`userguide`, apply the in-depth material in the :ref:`userguide` to improve your application’s performance or increase its sophistication, as needed.
 
-The :ref:`userguide` and the :ref:`quickstart` together form the main body of knowledge for MindMeld Workbench developers.
+The :ref:`userguide` and the :ref:`quickstart` together form the main body of knowledge for MindMeld developers.
 
 ----
 

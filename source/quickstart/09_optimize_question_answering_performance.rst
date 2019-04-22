@@ -1,9 +1,9 @@
 Step 9: Optimize Question Answering Performance
 ===============================================
 
-The Workbench question answerer is a powerful component which streamlines the development of applications that need to answer questions in addition to understanding user requests. The question answerer relies on a knowledge base which encompasses all of the important world knowledge for a given application use case. For example, the question answerer might rely on a knowledge base which knows details about every product in a product catalog. Alternately, the question answerer might have a knowledge base containing detailed information about every song or album in a music library.
+The MindMeld question answerer is a powerful component which streamlines the development of applications that need to answer questions in addition to understanding user requests. The question answerer relies on a knowledge base which encompasses all of the important world knowledge for a given application use case. For example, the question answerer might rely on a knowledge base which knows details about every product in a product catalog. Alternately, the question answerer might have a knowledge base containing detailed information about every song or album in a music library.
 
-To leverage the Workbench question answerer in your application, you must first create your knowledge base, as described in :doc:`Step 5 <05_create_the_knowledge_base>`. With the knowledge base created, your dialogue state handlers can invoke the question answerer, as illustrated in :doc:`Step 4 <04_define_the_dialogue_handlers>`, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which finds nearby Kwik-E-Mart store locations might resemble the snippet below. Notice that the application imports the :class:`QuestionAnswerer` component.
+To leverage the MindMeld question answerer in your application, you must first create your knowledge base, as described in :doc:`Step 5 <05_create_the_knowledge_base>`. With the knowledge base created, your dialogue state handlers can invoke the question answerer, as illustrated in :doc:`Step 4 <04_define_the_dialogue_handlers>`, to find answers, validate questions, and suggest alternatives.  For example, a simple dialogue handler which finds nearby Kwik-E-Mart store locations might resemble the snippet below. Notice that the application imports the :class:`QuestionAnswerer` component.
 
 .. code:: python
 
@@ -74,7 +74,7 @@ By default, the :meth:`get()` method uses a baseline ranking algorithm which dis
 Proximity-Based Ranking
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Location-based ranking is fairly common in mobile applications. We have already seen an intent designed to provide the nearest retail locations for a given user in our Kwik-E-Mart example. Going further, to support proximity-based ranking, is straightforward to accomplish using the Workbench question answerer.
+Location-based ranking is fairly common in mobile applications. We have already seen an intent designed to provide the nearest retail locations for a given user in our Kwik-E-Mart example. Going further, to support proximity-based ranking, is straightforward to accomplish using the MindMeld question answerer.
 
 First, let's assume that you have created a knowledge base for the ``stores`` index, which contains every retail location. Each store object also has a ``location`` field which contains latitude and longitude coordinates for each store.
 

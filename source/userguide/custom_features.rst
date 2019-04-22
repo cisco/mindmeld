@@ -1,9 +1,9 @@
 Working with User-Defined Features
 ==================================
 
-In addition to the features available for each NLP classifier in Workbench,
+In addition to the features available for each NLP classifier in MindMeld,
 you can also define your own custom feature extractors that are relevant to your application.
-User-defined features must follow the same format as Workbench's in-built features.
+User-defined features must follow the same format as MindMeld's in-built features.
 In this section, we will examine the components of a feature extractor function and
 explain how to write your own custom features.
 
@@ -12,10 +12,10 @@ Custom Features File
 --------------------
 
 Start by creating a new Python file, say ``custom_features.py``, that will contain the definitions
-of all your custom feature extractors. If your Workbench project was created using the "template"
+of all your custom feature extractors. If your MindMeld project was created using the "template"
 blueprint or adapted from an existing blueprint application, you should already have this file at
 the root level of your project directory. If you created your
-Workbench project from scratch, you can refer to any of the blueprints for an example of the
+MindMeld project from scratch, you can refer to any of the blueprints for an example of the
 custom features file.
 
 In order to use your custom features, the custom features file must be imported in the
@@ -74,7 +74,7 @@ an input query.
 
 Let's take a closer look at the salient parts of a feature extractor.
 
-1. The ``@register_query_feature`` decorator at the top registers the feature with Workbench.
+1. The ``@register_query_feature`` decorator at the top registers the feature with MindMeld.
 
 .. code-block:: python
 

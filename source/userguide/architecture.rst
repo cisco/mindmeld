@@ -192,7 +192,7 @@ For a practical introduction to dialogue state tracking in MindMeld, see :doc:`S
 .. Gateway
 .. -------
 
-.. The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that Workbench-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with Workbench components with the aid of the Application Manager, as described below.
+.. The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that MindMeld-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with MindMeld components with the aid of the Application Manager, as described below.
 
 .. Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
 
@@ -205,9 +205,9 @@ Application Manager
 As the core orchestrator of the MindMeld platform, the Application Manager:
 
 	- Receives the client request from a supported endpoint
-	- Processes the request by passing it through all the Workbench-trained components of the MindMeld platform
+	- Processes the request by passing it through all the MindMeld-trained components of the MindMeld platform
 	- Returns the final response to the endpoint once processing is complete
 
-The application manager works behind the scenes, hidden from the Workbench developer.
+The application manager works behind the scenes, hidden from the MindMeld developer.
 
-That concludes our quick tour of the MindMeld Conversational AI platform. The rest of this guide consists of hands-on tutorials focusing on using Workbench to build data-driven conversational apps that run on the MindMeld platform.
+That concludes our quick tour of the MindMeld Conversational AI platform. The rest of this guide consists of hands-on tutorials focusing on using MindMeld to build data-driven conversational apps that run on the MindMeld platform.

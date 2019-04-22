@@ -1,9 +1,9 @@
 Step 7: Train the Natural Language Processing Classifiers
 =========================================================
 
-The Natural Language Processor (NLP) in Workbench is tasked with understanding the user's natural language input. It analyzes the input using a hierarchy of classification models. Each model assists the next tier of models by narrowing the problem scope, or in other words successively narrowing down the 'solution space.'
+The Natural Language Processor (NLP) in MindMeld is tasked with understanding the user's natural language input. It analyzes the input using a hierarchy of classification models. Each model assists the next tier of models by narrowing the problem scope, or in other words successively narrowing down the 'solution space.'
 
-As introduced in :doc:`Step 3 <03_define_the_hierarchy>`, Workbench applies four layers of classifiers in the following order:
+As introduced in :doc:`Step 3 <03_define_the_hierarchy>`, MindMeld applies four layers of classifiers in the following order:
 
 #. **Domain Classifier** classifies input into one of a pre-defined set of conversational domains. Only necessary for apps that handle conversations across varied topics, each with its own specialized vocabulary.
 
@@ -96,7 +96,7 @@ To run all of the trained models in the NLP pipeline, use the :meth:`nlp.process
 
 The :meth:`nlp.process()` command returns detailed information about the output of each of the trained NLP models. See the :doc:`User Guide <../userguide/nlp>` for details.
 
-By default, the :meth:`build()` method shown above uses the baseline machine learning settings for all classifiers, which should train reasonable models in most cases. To further improve model performance, Workbench provides extensive capabilities for optimizing individual model parameters and measuring results. We'll next explore how to experiment with different settings for each NLP component individually.
+By default, the :meth:`build()` method shown above uses the baseline machine learning settings for all classifiers, which should train reasonable models in most cases. To further improve model performance, MindMeld provides extensive capabilities for optimizing individual model parameters and measuring results. We'll next explore how to experiment with different settings for each NLP component individually.
 
 .. _domain_classification:
 
@@ -113,7 +113,7 @@ To see the domain classifier in action, you can download and try out the ``home_
    mm.configure_logs()
    mm.blueprint('home_assistant')
 
-The :class:`NaturalLanguageProcessor` class in Workbench exposes methods for training, testing, and saving all the models in our classifier hierarchy, including the domain model. For example, suppose we want to build a `logistic regression classifier <https://en.wikipedia.org/wiki/Logistic_regression>`_ that does domain classification. In our Python shell, we start off by instantiating an object of the :class:`NaturalLanguageProcessor` class. We then train the :attr:`domain_classifier` model by calling its :meth:`fit()` method.
+The :class:`NaturalLanguageProcessor` class in MindMeld exposes methods for training, testing, and saving all the models in our classifier hierarchy, including the domain model. For example, suppose we want to build a `logistic regression classifier <https://en.wikipedia.org/wiki/Logistic_regression>`_ that does domain classification. In our Python shell, we start off by instantiating an object of the :class:`NaturalLanguageProcessor` class. We then train the :attr:`domain_classifier` model by calling its :meth:`fit()` method.
 
 .. note::
 
@@ -250,9 +250,9 @@ Entity Recognition
 
 Entity recognizers (also called entity models) are `sequence labeling <https://en.wikipedia.org/wiki/Sequence_labeling>`_ models that are trained per intent using all the annotated queries in a particular intent folder in the ``domains`` directory. The entity recognizer detects the entities within a query, and labels them as one of the pre-defined entity types.
 
-From the model hierarchy we defined for our Kwik-E-Mart app in :ref:`Step 3 <model_hierarchy>`, we can see that the ``get_store_hours`` intent depends on two types of entities. Of these, ``sys_time`` is a system entity that Workbench recognizes automatically. The ``store_name`` entity, on the other hand, requires custom training data and a trained entity model. Let's look at how to use the :class:`NaturalLanguageProcessor` class to train entity recognizers for detecting custom entities in user queries.
+From the model hierarchy we defined for our Kwik-E-Mart app in :ref:`Step 3 <model_hierarchy>`, we can see that the ``get_store_hours`` intent depends on two types of entities. Of these, ``sys_time`` is a system entity that MindMeld recognizes automatically. The ``store_name`` entity, on the other hand, requires custom training data and a trained entity model. Let's look at how to use the :class:`NaturalLanguageProcessor` class to train entity recognizers for detecting custom entities in user queries.
 
-In this example we use a `Maximum Entropy Markov Model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_, which is a good choice for sequence labeling tasks like entity recognition. The features we use include a *gazetteer* , which is a comprehensive list of popular entity names. `Gazetteers <https://gate.ac.uk/sale/tao/splitch13.html#x18-32600013.1>`_ are among the most powerful and commonly used sources of information in entity recognition models. Our example gazetteer for the ``store_name`` entity type is a list of all the Kwik-E-Mart store names in our catalog, stored in a text file called ``gazetteer.txt`` and located in the appropriate subdirectory of the ``entities`` folder. Workbench automatically utilizes any gazetteer named ``gazetteer.txt`` that is located within an entity folder. The example gazetteer file looks like this:
+In this example we use a `Maximum Entropy Markov Model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_, which is a good choice for sequence labeling tasks like entity recognition. The features we use include a *gazetteer* , which is a comprehensive list of popular entity names. `Gazetteers <https://gate.ac.uk/sale/tao/splitch13.html#x18-32600013.1>`_ are among the most powerful and commonly used sources of information in entity recognition models. Our example gazetteer for the ``store_name`` entity type is a list of all the Kwik-E-Mart store names in our catalog, stored in a text file called ``gazetteer.txt`` and located in the appropriate subdirectory of the ``entities`` folder. MindMeld automatically utilizes any gazetteer named ``gazetteer.txt`` that is located within an entity folder. The example gazetteer file looks like this:
 
 .. code-block:: text
 
@@ -327,11 +327,11 @@ Role Classification
 
 Role classifiers (also called role models) are trained per entity using all the annotated queries in a particular intent folder. Roles offer a way to assign an additional distinguishing label to entities of the same type. Our simple Kwik-E-Mart application does not need a role classification layer. However, consider a possible extension to our app, where users can search for stores that open and close at specific times. As we saw in the example in :ref:`Step 6 <roles_example>`, this would require us to differentiate between the two ``sys_time`` entities by recognizing one as an ``open_time`` and the other as a ``close_time``. This can be accomplished by training an entity-specific role classifier that assigns the correct role label for each such ``sys_time`` entity detected by the Entity Recognizer.
 
-Let's walk through the process of using Workbench to train a role classifier for the ``sys_time`` entity type. The workflow is just like the previous classifiers: instantiate a :class:`NaturalLanguageProcessor` object; access the classifier of interest (in this case, the :attr:`role_classifier` for the ``sys_time`` entity); define the machine learning settings; and, call the :meth:`fit()` method of the classifier. For this example, we will just use Workbench's default configuration (Logistic Regression) to train a baseline role classifier without specifying any additional training settings. For the sake of code readability, we retrieve the classifier of interest in two steps: first get the object representing the current intent, then fetch the :attr:`role_classifier` object of the appropriate entity under that intent.
+Let's walk through the process of using MindMeld to train a role classifier for the ``sys_time`` entity type. The workflow is just like the previous classifiers: instantiate a :class:`NaturalLanguageProcessor` object; access the classifier of interest (in this case, the :attr:`role_classifier` for the ``sys_time`` entity); define the machine learning settings; and, call the :meth:`fit()` method of the classifier. For this example, we will just use MindMeld's default configuration (Logistic Regression) to train a baseline role classifier without specifying any additional training settings. For the sake of code readability, we retrieve the classifier of interest in two steps: first get the object representing the current intent, then fetch the :attr:`role_classifier` object of the appropriate entity under that intent.
 
 .. note::
 
-   The Kwik-E-Mart blueprint distributed with Workbench does not use role classification. The code
+   The Kwik-E-Mart blueprint distributed with MindMeld does not use role classification. The code
    snippet below shows a possible extension to the app where the ``sys_time`` entity is further
    classified into two different roles.
 
@@ -343,7 +343,7 @@ Let's walk through the process of using Workbench to train a role classifier for
    from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
    get_hours_intent = nlp.domains['store_info'].intents['get_store_hours']
-   # Workbench doesn't know about entities until the training queries have been loaded.
+   # MindMeld doesn't know about entities until the training queries have been loaded.
    # Load queries for the relevant intent by calling build().
    get_hours_intent.build()
    # Get the role classifier for the 'sys_time' entity
@@ -408,9 +408,9 @@ We can further optimize our baseline role classifier using the training and eval
 Entity Resolution
 ~~~~~~~~~~~~~~~~~
 
-The entity resolver component of MindMeld Workbench maps each identified entity to a canonical value. For example, if your application is used for browsing TV shows, you may want to map both entity strings `funny` and `hilarious` to a pre-defined genre code like `Comedy`. Similarly, in a music app, you may want to resolve both `Elvis` and `The King` to the artist `Elvis Presley (ID=20192)`, while making sure not to get confused by `Elvis Costello (ID=139028)`. Entity resolution can be straightforward for some classes of entities. For others, it can be complex enough to constitute the dominant factor limiting the overall accuracy of your application.
+The entity resolver component of MindMeld maps each identified entity to a canonical value. For example, if your application is used for browsing TV shows, you may want to map both entity strings `funny` and `hilarious` to a pre-defined genre code like `Comedy`. Similarly, in a music app, you may want to resolve both `Elvis` and `The King` to the artist `Elvis Presley (ID=20192)`, while making sure not to get confused by `Elvis Costello (ID=139028)`. Entity resolution can be straightforward for some classes of entities. For others, it can be complex enough to constitute the dominant factor limiting the overall accuracy of your application.
 
-MindMeld Workbench provides advanced capabilities for building a state-of-the-art entity resolver. As discussed in :doc:`Step 6 <06_generate_representative_training_data>`, each entity type can be associated with an optional entity mapping file. This file specifies, for each canonical concept, the alternate names or synonyms with which a user may refer to this concept. In the absence of an entity mapping file, the entity resolver cannot resolve the entity. Instead, it logs a warning and skips adding a :attr:`value` attribute to the entity. For example, the following code illustrates the output of the natural language processor when an entity mapping data file is absent for the ``store_name`` entity:
+MindMeld provides advanced capabilities for building a state-of-the-art entity resolver. As discussed in :doc:`Step 6 <06_generate_representative_training_data>`, each entity type can be associated with an optional entity mapping file. This file specifies, for each canonical concept, the alternate names or synonyms with which a user may refer to this concept. In the absence of an entity mapping file, the entity resolver cannot resolve the entity. Instead, it logs a warning and skips adding a :attr:`value` attribute to the entity. For example, the following code illustrates the output of the natural language processor when an entity mapping data file is absent for the ``store_name`` entity:
 
 .. code-block:: python
 
@@ -462,7 +462,7 @@ If an entity mapping file is specified, as illustrated in :doc:`Step 6 <06_gener
      'text': 'When does the one on elm open?'
    }
 
-As with the other NLP components in Workbench, you can access the individual resolvers for each entity type.
+As with the other NLP components in MindMeld, you can access the individual resolvers for each entity type.
 
 The code below illustrates how to train and evaluate the entity resolver model for the ``store_name`` entity.
 
@@ -470,7 +470,7 @@ The code below illustrates how to train and evaluate the entity resolver model f
 
    from mindmeld.components.nlp import NaturalLanguageProcessor
    nlp = NaturalLanguageProcessor('.')
-   # Workbench doesn't know about entities until the training queries have been loaded.
+   # MindMeld doesn't know about entities until the training queries have been loaded.
    # Load queries for the relevant intent by calling build().
    nlp.domains['store_info'].intents['get_store_hours'].build()
    # Get the entity resolver for the entity type of interest.

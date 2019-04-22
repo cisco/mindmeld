@@ -9,7 +9,7 @@ A *dialogue manager* is at the core of every conversational application. The dia
 
 For most use cases, the procedures described in this section suffice to configure the dialogue manager, which you need not deal with directly.
 
-MindMeld Workbench provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. And because Workbench is fully extensible, you can supplement MindMeld's built-in pattern matching capabilities with whatever custom logic you need.
+MindMeld provides advanced capabilities for dialogue state tracking, beginning with a flexible syntax for defining rules and patterns for mapping requests to dialogue states. And because MindMeld is fully extensible, you can supplement MindMeld's built-in pattern matching capabilities with whatever custom logic you need.
 
 Specify the Superset of Dialogue States
 ---------------------------------------
@@ -43,7 +43,7 @@ As the diagram illustrates, each dialogue state prescribes a natural language te
 Create the Application Container
 --------------------------------
 
-In MindMeld Workbench, every project is also a Python package and therefore must have an ``__init.py__`` file at the root level. This package must contain an *application container* -- a container for all of the logic and functionality for your application. This application container enumerates all of the dialogue states and their associated handlers, and should be defined as ``app`` in the application's Python package. If you based your application structure on a blueprint, you will see two python files in the root directory: ``__init__.py`` and ``__main__.py``. If not, you need to create these files with the following minimal implementation.
+In MindMeld, every project is also a Python package and therefore must have an ``__init.py__`` file at the root level. This package must contain an *application container* -- a container for all of the logic and functionality for your application. This application container enumerates all of the dialogue states and their associated handlers, and should be defined as ``app`` in the application's Python package. If you based your application structure on a blueprint, you will see two python files in the root directory: ``__init__.py`` and ``__main__.py``. If not, you need to create these files with the following minimal implementation.
 
 .. code:: python
   :caption: __init__.py
@@ -70,9 +70,9 @@ Your directory structure should now resemble the following.
     :width: 400px
     :align: center
 
-The above code snippet illustrates the conventions for implementing dialogue state tracking and dialogue state handling logic in Workbench. The code is written to perform four steps:
+The above code snippet illustrates the conventions for implementing dialogue state tracking and dialogue state handling logic in MindMeld. The code is written to perform four steps:
 
-1. Import the ``Application`` class from the MindMeld Workbench package.
+1. Import the ``Application`` class from the MindMeld package.
 2. Define an ``Application`` instance to serve as the parent container for the application.
 3. Using the ``@app.handle()`` decorator, define a pattern which, when matched, invokes the associated handler function.
 4. Specify the handler function :func:`welcome()` to define the ``welcome`` dialogue state and return the desired response. We decided that ``welcome`` would be one of our dialogue states based on the scripting exercise in :doc:`Step 2 <02_script_interactions>`. For now, we are responding with a simple "Hello".
@@ -138,7 +138,7 @@ Implement the Dialogue State Handlers
 
 We have already defined the dialogue handlers that the interaction in :doc:`Step 2 <02_script_interactions>` requires.
 
-Now, to finish implementing the dialogue handlers, we need to add the desired response for each dialogue state. As we do so, we will learn about capabilities of Workbench which are explained further in the :doc:`User Guide <../userguide/dm>`.
+Now, to finish implementing the dialogue handlers, we need to add the desired response for each dialogue state. As we do so, we will learn about capabilities of MindMeld which are explained further in the :doc:`User Guide <../userguide/dm>`.
 
 First, consider the handler for the ``welcome`` dialogue state.
 
@@ -159,9 +159,9 @@ Following convention, we use the dialogue state name, ``welcome``, as the method
 
 The ``@app.handle()`` decorator specifies the pattern which must be matched to invoke the handler method. Here, the pattern specified is simply ``intent='greet'``. In other words, if the natural language processor predicts that the intent of the incoming request is ``greet``, the :func:`welcome()` handler is invoked.
 
-Every dialogue handler uses the ``responder`` object to specify the natural language text and any other data to be returned in the response. Text strings contained in this response can use templated expressions in standard Python string formatting syntax, like ``'Hello, {name}.'`` in our example. Templated expressions are populated with real values before the response is returned to the client. Workbench uses the ``responder``'s :data:`slots` attribute to store the named string values which populate the templates.
+Every dialogue handler uses the ``responder`` object to specify the natural language text and any other data to be returned in the response. Text strings contained in this response can use templated expressions in standard Python string formatting syntax, like ``'Hello, {name}.'`` in our example. Templated expressions are populated with real values before the response is returned to the client. MindMeld uses the ``responder``'s :data:`slots` attribute to store the named string values which populate the templates.
 
-The code snippet also introduces the :data:`request` object, which stores all data passed in by the client to the application in the form of a dictionary attribute called :data:`context`, as well as application logic state that Workbench uses to process the conversational interaction. The application logic state can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information.
+The code snippet also introduces the :data:`request` object, which stores all data passed in by the client to the application in the form of a dictionary attribute called :data:`context`, as well as application logic state that MindMeld uses to process the conversational interaction. The application logic state can include output data from the natural language processing models, aggregated state from multiple previous interactions, and user and session information.
 The :data:`request` object is immutable to the dialogue handler since it's the source of truth for all conversational information up to that point in the handler, so you cannot write to it. Instead, use the :data:`responder` object to store any state information for future turns, resulting from operations in the current handler. See the :doc:`User Guide <../userguide/dm>` for details.
 
 
@@ -243,7 +243,7 @@ Let's follow this same approach to define handlers for the dialogue states ``sen
       responder.listen()
 
 
-This code snippet introduces the `QuestionAnswerer` class. In Workbench, `QuestionAnswerer` is the module that creates and searches across a knowledge base of information relevant to your application. In this example, the ``send_nearest_store`` dialogue state relies on the `QuestionAnswerer` component to retrieve the closest retail store location from the knowledge base. The `QuestionAnswerer` is discussed further in the next section.
+This code snippet introduces the `QuestionAnswerer` class. In MindMeld, `QuestionAnswerer` is the module that creates and searches across a knowledge base of information relevant to your application. In this example, the ``send_nearest_store`` dialogue state relies on the `QuestionAnswerer` component to retrieve the closest retail store location from the knowledge base. The `QuestionAnswerer` is discussed further in the next section.
 
 The snippet also demonstrates the use of a default handler. The ``@app.handle()`` decorator serves as a 'catchall' pattern that returns a default response if no other specified patterns are matched.
 

@@ -78,7 +78,7 @@ Verify that the NLP has correctly identified all the domains and intents for you
 
 .. note::
 
-   Until the labeled training queries have been loaded, Workbench is not aware of the different entity types for your app.
+   Until the labeled training queries have been loaded, MindMeld is not aware of the different entity types for your app.
 
 Use the :meth:`build` method to load the training queries for an intent of your choice. This can take several minutes for intents with a large number of training queries. Once the build is complete, inspect the entity types.
 
@@ -129,7 +129,7 @@ Use the :meth:`RoleClassifier.fit` method to train a role classification model. 
    Fitting role classifier: domain='times_and_dates', intent='change_alarm', entity_type='sys_time'
    No role model configuration set. Using default.
 
-The :meth:`fit` method loads all necessary training queries and trains a role classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the Workbench preset :ref:`classifier configuration <config>`.
+The :meth:`fit` method loads all necessary training queries and trains a role classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the MindMeld preset :ref:`classifier configuration <config>`.
 
 Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.
 
@@ -268,7 +268,7 @@ Let's take a look at the allowed values for each setting in a role classifier co
 
   Is a dictionary containing the settings for :sk_guide:`hyperparameter selection <grid_search>`. This is used as an alternative to the ``'params'`` dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.
 
-  Workbench needs two pieces of information from the developer to do parameter estimation:
+  MindMeld needs two pieces of information from the developer to do parameter estimation:
 
   #. The parameter space to search, captured by the value for the ``'grid'`` key
   #. The strategy for splitting the labeled data into training and validation sets, specified by the ``'type'`` key
@@ -323,13 +323,13 @@ Let's take a look at the allowed values for each setting in a role classifier co
 Training with custom configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To override Workbench's default role classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
+To override MindMeld's default role classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
 
 
 1. Application configuration file
 """""""""""""""""""""""""""""""""
 
-When you define custom classifier settings in ``config.py``, the :meth:`RoleClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench's defaults. To do this, define a dictionary of your custom settings, named :data:`ROLE_CLASSIFIER_CONFIG`.
+When you define custom classifier settings in ``config.py``, the :meth:`RoleClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of MindMeld's defaults. To do this, define a dictionary of your custom settings, named :data:`ROLE_CLASSIFIER_CONFIG`.
 
 Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the role classifier.
 
@@ -426,7 +426,7 @@ Suppose w\ :sub:`i` represents the word at the *ith* index in the query, where t
 
   - Bigrams: { w\ :sub:`-3`\ w\ :sub:`-2`, w\ :sub:`-2`\ w\ :sub:`-1`, w\ :sub:`-1`\ w\ :sub:`0`,  w\ :sub:`0`\ w\ :sub:`1`, w\ :sub:`1`\ w\ :sub:`2`, w\ :sub:`2`\ w\ :sub:`3` }
 
-Retrain the classifier with the updated feature set by passing in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This applies our new feature extraction settings, while retaining the Workbench defaults for model and classifier types (logreg) and hyperparameter selection.
+Retrain the classifier with the updated feature set by passing in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method. This applies our new feature extraction settings, while retaining the MindMeld defaults for model and classifier types (logreg) and hyperparameter selection.
 
 .. code-block:: python
 
@@ -439,7 +439,7 @@ Retrain the classifier with the updated feature set by passing in the :data:`my_
 
 **Hyperparameter tuning**
 
-View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <model_settings>` for logistic regression, the default model for role classification in Workbench. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
+View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <model_settings>` for logistic regression, the default model for role classification in MindMeld. These include inverse of regularization strength as 'C', and the norm used in penalization as 'penalty'.
 
 .. code-block:: python
 
@@ -450,7 +450,7 @@ View the model's hyperparameters, keeping in mind the :ref:`hyperparameters <mod
 
    {'C': 100, 'penalty': 'l1'}
 
-Instead of relying on the default preset values for ``'C'`` and ``'penalty'``, let's specify a parameter search grid to let Workbench select ideal values for the dataset. We'll also specify a cross-validation strategy. Update the parameter selection settings such that the hyperparameter estimation process chooses the ideal ``'C'`` and ``'penalty'`` parameters using 10-fold cross-validation:
+Instead of relying on the default preset values for ``'C'`` and ``'penalty'``, let's specify a parameter search grid to let MindMeld select ideal values for the dataset. We'll also specify a cross-validation strategy. Update the parameter selection settings such that the hyperparameter estimation process chooses the ideal ``'C'`` and ``'penalty'`` parameters using 10-fold cross-validation:
 
 .. code-block:: python
 
@@ -579,9 +579,9 @@ The :meth:`predict` and :meth:`predict_proba` methods operate on one entity at a
 Evaluate classifier performance
 -------------------------------
 
-To evaluate the accuracy of your trained role classifier, you first need to create labeled test data, as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter. Once you have the test data files in the right place in your Workbench project, you can measure your model's performance using the :meth:`RoleClassifier.evaluate` method.
+To evaluate the accuracy of your trained role classifier, you first need to create labeled test data, as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter. Once you have the test data files in the right place in your MindMeld project, you can measure your model's performance using the :meth:`RoleClassifier.evaluate` method.
 
-Before you can evaluate the accuracy of your trained role classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
+Before you can evaluate the accuracy of your trained role classifier, you must first create labeled test data and place it in your MindMeld project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
 
 Then, when you are ready, use the :meth:`RoleClassifier.evaluate` method, which
 

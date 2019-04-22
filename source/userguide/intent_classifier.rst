@@ -7,7 +7,7 @@ The :ref:`Intent Classifier <arch_intent_model>`
  - is a `text classification <https://en.wikipedia.org/wiki/Text_classification>`_ model that determines the target intent for a given query
  - is trained using all of the labeled queries across all the intents in a given domain
 
-Every Workbench app has one intent classifier for every domain with multiple intents. The name of each intent folder serves as the label for the training queries contained within that folder.
+Every MindMeld app has one intent classifier for every domain with multiple intents. The name of each intent folder serves as the label for the training queries contained within that folder.
 
 See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>` for more details on training data preparation.
 
@@ -25,7 +25,7 @@ Working with the natural language processor falls into two broad phases:
  - First, generate the training data for your app. App performance largely depends on having sufficient quantity and quality of training data. See :doc:`Step 6 <../quickstart/06_generate_representative_training_data>`.
  - Then, conduct experimentation in the Python shell.
 
-When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` (NLP) class from the Workbench :mod:`nlp` module and :ref:`instantiate an object <instantiate_nlp>` with the path to your Workbench project.
+When you are ready to begin experimenting, import the :class:`NaturalLanguageProcessor` (NLP) class from the MindMeld :mod:`nlp` module and :ref:`instantiate an object <instantiate_nlp>` with the path to your MindMeld project.
 
 .. code-block:: python
 
@@ -103,7 +103,7 @@ Use the :meth:`IntentClassifier.fit` method to train an intent classification mo
    Best accuracy: 97.68%, params: {'C': 100, 'class_weight': {0: 2.3033333333333332, 1: 1.066358024691358, 2: 0.68145956607495073, 3: 0.54068857589984354, 4:    0.98433048433048431, 5: 3.3872549019607843}, 'fit_intercept': True}
 
 
-The :meth:`fit` method loads all the necessary training queries and trains an intent classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the Workbench preset :ref:`classifier configuration <config>`.
+The :meth:`fit` method loads all the necessary training queries and trains an intent classification model. When called with no arguments (as in the example above), the method uses the settings from ``config.py``, the :ref:`app's configuration file <build_nlp_with_config>`. If ``config.py`` is not defined, the method uses the MindMeld preset :ref:`classifier configuration <config>`.
 
 Using default settings is the recommended (and quickest) way to get started with any of the NLP classifiers. The resulting baseline classifier should provide a reasonable starting point from which to bootstrap your machine learning experimentation. You can then try alternate settings as you seek to identify the optimal classifier configuration for your app.
 
@@ -245,7 +245,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       |  - quantizes the vocabulary frequency into 5 bins                                                          |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
   | ``'enable-stemming'`` | Stemming is the process of reducing inflected words to their word stem or base form. For example, word stem|
-  |                       | of "eating" is "eat", word stem of "backwards" is "backward". Workbench extracts word stems using a variant|
+  |                       | of "eating" is "eat", word stem of "backwards" is "backward". MindMeld extracts word stems using a variant |
   |                       | of the `Porter stemming algorithm <https://tartarus.org/martin/PorterStemmer/>`_ that only removes         |
   |                       | inflectional suffixes.                                                                                     |
   |                       |                                                                                                            |
@@ -393,7 +393,7 @@ Let's take a look at the allowed values for each setting in an intent classifier
 
   A dictionary of settings for :sk_guide:`hyperparameter selection <grid_search>`. Provides an alternative to the ``'params'`` dictionary above if the ideal hyperparameters for the model are not already known and need to be estimated.
 
-  To estimate parameters, Workbench needs two pieces of information from the developer:
+  To estimate parameters, MindMeld needs two pieces of information from the developer:
 
   #. The parameter space to search, as the value for the ``'grid'`` key
   #. The strategy for splitting the labeled data into training and validation sets, as the value for the ``'type'`` key
@@ -449,13 +449,13 @@ Let's take a look at the allowed values for each setting in an intent classifier
 Training with custom configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To override Workbench’s default intent classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
+To override MindMeld’s default intent classifier configuration with custom settings, you can either edit the app configuration file, or, you can call the :meth:`fit` method with appropriate arguments.
 
 
 1. Application configuration file
 """""""""""""""""""""""""""""""""
 
-When you define custom classifier settings in  ``config.py``, the :meth:`IntentClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of Workbench’s defaults. To do this, define a dictionary of your custom settings, named :data:`INTENT_CLASSIFIER_CONFIG`.
+When you define custom classifier settings in  ``config.py``, the :meth:`IntentClassifier.fit` and :meth:`NaturalLanguageProcessor.build` methods use those settings instead of MindMeld’s defaults. To do this, define a dictionary of your custom settings, named :data:`INTENT_CLASSIFIER_CONFIG`.
 
 Here's an example of a ``config.py`` file where custom settings optimized for the app override the preset configuration for the intent classifier.
 
@@ -552,7 +552,7 @@ If ``'edge-ngrams'`` feature already exists in :data:`my_features` dictionary th
     'length': {}
    }
 
-To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method.  This trains the intent classification model with our new feature extraction settings, while continuing to use Workbench defaults for model type (logistic regression) and hyperparameter selection.
+To retrain the classifier with the updated feature set, pass in the :data:`my_features` dictionary as an argument to the :data:`features` parameter of the :meth:`fit` method.  This trains the intent classification model with our new feature extraction settings, while continuing to use MindMeld defaults for model type (logistic regression) and hyperparameter selection.
 
 .. code-block:: python
 
@@ -568,7 +568,7 @@ The exact accuracy number and the selected params might be different each time w
 
 **Hyperparameter tuning**
 
-View the model’s :ref:`hyperparameters <intent_tuning>`, keeping in mind the hyperparameters for logistic regression, the default model in Workbench. These include: ``'C'``, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to ``'l2'``.
+View the model’s :ref:`hyperparameters <intent_tuning>`, keeping in mind the hyperparameters for logistic regression, the default model in MindMeld. These include: ``'C'``, the inverse of regularization strength; and, penalization, which is not shown in the response but defaults to ``'l2'``.
 
 .. code-block:: python
 
@@ -751,7 +751,7 @@ The :meth:`predict` and :meth:`predict_proba` methods take one query at a time. 
 Evaluate classifier performance
 -------------------------------
 
-Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your Workbench project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
+Before you can evaluate the accuracy of your trained domain classifier, you must first create labeled test data and place it in your MindMeld project as described in the :ref:`Natural Language Processor <evaluate_nlp>` chapter.
 
 Then, when you are ready, use the :meth:`IntentClassifier.evaluate` method, which
 
