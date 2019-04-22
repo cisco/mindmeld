@@ -101,7 +101,6 @@ Contents
    :caption: User Guide
    :name: userguide
 
-   userguide/about
    userguide/getting_started
    userguide/architecture
    userguide/preprocessor
