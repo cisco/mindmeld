@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Workbench documentation build configuration file, created by
+# MindMeld documentation build configuration file, created by
 # sphinx-quickstart on Tue Nov 15 15:14:52 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -195,7 +195,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = u'Workbench v1.0.0'
+# html_title = u'MindMeld v1.0.0'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
@@ -295,7 +295,7 @@ html_search_language = 'en'
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Workbenchdoc'
+htmlhelp_basename = 'MindMelddoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -322,8 +322,8 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc,
-     'Workbench.tex',
-     u'Workbench Documentation',
+     'MindMeld.tex',
+     u'MindMeld Documentation',
      u'Cisco Systems.', 'manual'),
 ]
 
@@ -365,7 +365,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'workbench', u'Workbench Documentation',
+    (master_doc, 'MindMeld', u'MindMeld Documentation',
      [author], 1)
 ]
 
@@ -380,8 +380,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Workbench', u'Workbench Documentation',
-     author, 'Workbench', 'One line description of project.',
+    (master_doc, 'MindMeld', u'MindMeld Documentation',
+     author, 'MindMeld', 'One line description of project.',
      'Miscellaneous'),
 ]
 

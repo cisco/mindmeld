@@ -243,7 +243,7 @@ function check_os_and_execute_deps() {
 
 # Gather Info
 echo
-echo The MindMeld Workbench Installer checks dependencies and installs them.
+echo The MindMeld Installer checks dependencies and installs them.
 echo
 
 check_os_and_execute_deps

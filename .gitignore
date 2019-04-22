@@ -62,8 +62,8 @@ target/
 .idea/
 .iml
 
-# Workbench Models
+# MindMeld Models
 .generated/
 
-# Workbench Data
+# MindMeld Data
 data/

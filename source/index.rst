@@ -63,7 +63,7 @@ Contents
    intro/introduction_to_conversational_applications
    intro/approaches_for_building_conversational_applications
    intro/anatomy_of_a_conversational_ai_interaction
-   intro/introducing_mindmeld_workbench
+   intro/introducing_mindmeld
    intro/key_concepts
 
 

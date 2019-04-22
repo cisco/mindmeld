@@ -58,4 +58,4 @@ Read our [Conversational AI Playbook](https://www.mindmeld.com/docs).
 
 ## Feedback or Support Questions
 
-Please contact us at mindmeld-support@cisco.com.
+Please contact us at mindmeld@cisco.com.

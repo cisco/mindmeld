@@ -1,9 +1,9 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Cisco Spark - Cognitive Collaboration Group                       #
 #                                                                   #
-# Dockerfile for local dev environment to work with Workbench.      #
+# Dockerfile for local dev environment to work with MindMeld.       #
 #                                                                   #
-# __author_email__ = "ktick@cisco.com"                              #
+# __author_email__ = "mindmeld@cisco.com"                           #
 #                                                                   #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -24,20 +24,17 @@ RUN apt-get -y install python-pip python3-pip python-dev build-essential && \
     apt-get -y install python-software-properties
 
 # Install Java
-RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 \
-    select true | debconf-set-selections && \
-    add-apt-repository -y ppa:webupd8team/java && \
-    apt-get update && \
-    apt-get install -y oracle-java8-installer && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/oracle-jdk8-installer
+RUN apt update
+RUN apt-get update
+RUN apt-get install -y wget
+RUN apt install openjdk-8-jdk -y
 
 # Install duckling dependency
 RUN apt-get -y update && \
     apt-get -y upgrade tzdata
 
 # set JAVA_HOME
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 # Install Elasticsearch.
 RUN \
@@ -55,20 +52,20 @@ RUN chown -R mindmeld:mindmeld /elasticsearch /data /var/log
 # Add Config Files
 COPY ./conf/elasticsearch.yml /elasticsearch/config/elasticsearch.yml
 
-COPY ./conf/pip.conf /root/.pip/pip.conf
 COPY ./conf/config.cfg /root/.mindmeld/config
 
 WORKDIR /root
 
-RUN pip3 install -U mindmeld
-RUN pip3 install click-log==0.1.8
-
 RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
 RUN python3 /tmp/get-pip.py
-# Get home_assistant blueprint
-RUN wget https://devcenter.mindmeld.com/bp/home_assistant/app.tar.gz -P /root/projects/
-RUN mkdir home_assistant
-RUN tar -xvf /root/projects/app.tar.gz -C ./home_assistant
+
+# system as both 2 and 3, make 3 the default
+RUN echo alias python=python3  >> /root/.bashrc
+RUN echo alias pip=pip3  >> /root/.bashrc
+
+RUN pip3 install --upgrade pip
+RUN pip3 install -U mindmeld
+RUN pip3 install click-log==0.1.8
 
 # Expose ports.
 #   - 9200: HTTP
@@ -77,13 +74,12 @@ EXPOSE 9200
 EXPOSE 9300
 EXPOSE 7150
 
-# system as both 2 and 3, make 3 the default
-RUN echo alias python=python3  >> /root/.bashrc
-RUN echo alias pip=pip3  >> /root/.bashrc
-
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
     su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
     mindmeld num-parse --start && \
+    mkdir home_assistant && \
+    wget https://devcenter.mindmeld.com/bp/home_assistant/app.tar.gz -P /root/projects/ && \
+    tar -xvf /root/projects/app.tar.gz -C ./home_assistant && \
     python3 -m home_assistant build && \
     python3 -m home_assistant run

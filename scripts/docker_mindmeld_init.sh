@@ -14,7 +14,7 @@
 set -e
 
 echo
-echo The MindMeld Workbench Docker Installer downloads a Docker image and runs it.
+echo The MindMeld Docker Installer downloads a Docker image and runs it.
 echo
 
 echo Downloading Dockerfile and dependencies

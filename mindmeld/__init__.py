@@ -27,6 +27,6 @@ from ._version import current
 __all__ = ['blueprint', 'configure_logs', 'Application', 'Conversation', 'DialogueResponder',
            'NaturalLanguageProcessor', 'QuestionAnswerer']
 
-__author__ = 'Cisco, Inc.'
-__email__ = 'ktick@cisco.com'
+__author__ = 'Cisco Systems, Inc.'
+__email__ = 'mindmeld@cisco.com'
 __version__ = current
