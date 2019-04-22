@@ -1,1 +1,1 @@
-mindmeld==4.0.2
+mindmeld==4.1.0rc3

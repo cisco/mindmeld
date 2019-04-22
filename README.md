@@ -54,7 +54,7 @@ For detailed installation instructions, see [Getting Started](http://www.mindmel
 
 ## Want to learn more about MindMeld?
 
-Read our [Conversational AI Playbook](https://www.mindmeld.com/docs).
+Read our [Conversational AI Playbook](https://www.mindmeld.com/).
 
 ## Feedback or Support Questions
 
