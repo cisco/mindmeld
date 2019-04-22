@@ -31,8 +31,8 @@ The ``Dockerfile`` provided by MindMeld contains MindMeld and all its dependenci
 
 .. code-block:: shell
 
-   docker pull mindmeldworkbench/
-   docker run -p 7150:7150 mindmeldworkbench/mindmeld -ti -d
+   docker pull mindmeldworkbench/mindmeld
+   docker run -p 0.0.0.0:7150:7150 mindmeldworkbench/mindmeld -ti -d
 
 The Docker container contains Elasticsearch, the numerical parsing service, the MindMeld library and the Home Assistant application for you to test. The container will build and serve the application on port 7150 which is exposed to the external environment.
 
@@ -44,7 +44,7 @@ To test the application inside docker, you can make a request:
 
 .. code-block:: shell
 
-   curl -X POST http://127.0.0.1:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}'
+   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}'
 
 The output should be as follows:
 
@@ -126,7 +126,7 @@ Now issue the curl request again.
 
 .. code-block:: shell
 
-   curl -X POST http://127.0.0.1:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}'
+   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}'
 
 
 In the output json, notice the payload reflect the ``Alice`` text change we made:
