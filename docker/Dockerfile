@@ -1,5 +1,5 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Cisco Spark - Cognitive Collaboration Group                       #
+# Cisco Cognitive Collaboration Group                               #
 #                                                                   #
 # Dockerfile for local dev environment to work with MindMeld.       #
 #                                                                   #

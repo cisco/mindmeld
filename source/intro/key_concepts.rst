@@ -7,7 +7,7 @@ Every MindMeld developer should know the terms defined in this section. It's bes
 
     app
       |
-      | A conversational application built using the MindMeld framework. Examples include voice and chat assistants deployed on messaging platforms like `Spark <https://depot.ciscospark.com/bots>`_, `Slack <https://slack.com/apps/category/At0MQP5BEF-bots>`_, `Messenger <https://messenger.fb.com>`_, or `Skype <https://bots.botframework.com>`_; or, on voice-activated devices like `Alexa <https://developer.amazon.com/alexa-skills-kit>`_ or `Google Home <https://developers.google.com/actions/>`_.
+      | A conversational application built using the MindMeld framework. Examples include voice and chat assistants deployed on messaging platforms like `Webex Teams <https://apphub.webex.com/bots>`_, `Slack <https://slack.com/apps/category/At0MQP5BEF-bots>`_, `Messenger <https://messenger.fb.com>`_, or `Skype <https://bots.botframework.com>`_; or, on voice-activated devices like `Alexa <https://developer.amazon.com/alexa-skills-kit>`_ or `Google Home <https://developers.google.com/actions/>`_.
 
     project
       |

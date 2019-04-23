@@ -187,15 +187,6 @@ Architecting the dialogue manager correctly is often one of the most challenging
 
 For a practical introduction to dialogue state tracking in MindMeld, see :doc:`Step 4 <../quickstart/04_define_the_dialogue_handlers>`. The :doc:`Dialogue Manager <dm>` section of this guide provides further examples.
 
-.. .. _arch_gateway:
-
-.. Gateway
-.. -------
-
-.. The Gateway processes requests as they come in through Cisco Spark or other endpoints, while persisting user state. It can identify a user, load the user's context, and convert requests into a format that MindMeld-trained components can consume. After requests are processed, the gateway converts the responses to the appropriate client format and sends them back through the endpoint. The gateway communicates with MindMeld components with the aid of the Application Manager, as described below.
-
-.. Supported endpoints include messaging platforms like Cisco Spark and Facebook Messenger, intelligent assistants like Google Assistant or Amazon Alexa, and custom endpoints on the web, in mobile apps, or on custom hardware.
-
 
 .. _arch_app_manager:
 
