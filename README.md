@@ -54,7 +54,7 @@ For detailed installation instructions, see [Getting Started](http://www.mindmel
 
 ## Want to learn more about MindMeld?
 
-Read the [MindMeld website](https://www.mindmeld.com/).
+Visit the [MindMeld website](https://www.mindmeld.com/).
 
 ## Feedback or Support Questions
 
