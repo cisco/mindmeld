@@ -79,9 +79,8 @@ definitions:
             pip install -U pip
 
             # install mindmeld and test requirements
-            pip install -e .
             pip install -r test-requirements.txt
-            python setup.py install
+            pip install -e .
 
     # Make docs
     docs-steps: &docs-steps
@@ -145,12 +144,6 @@ definitions:
     test-steps: &test-steps
 
       - checkout
-
-      - run:
-          name: Install OpenJDK JRE
-          command: |
-            sudo apt-get update
-            sudo apt-get install openjdk-8-jre
 
       - restore_cache:
           key: v1-py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
