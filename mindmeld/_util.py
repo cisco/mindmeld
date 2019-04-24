@@ -204,10 +204,7 @@ class Blueprint:
         filename = {'app': BLUEPRINT_APP_ARCHIVE, 'kb': BLUEPRINT_KB_ARCHIVE}.get(archive_type)
 
         local_archive = os.path.join(cache_dir, filename)
-
-        config = load_global_configuration()
-        mindmeld_url = config.get('mindmeld_url', DEVCENTER_URL)
-        remote_url = BLUEPRINT_URL.format(mindmeld_url=mindmeld_url, blueprint=name,
+        remote_url = BLUEPRINT_URL.format(mindmeld_url=DEVCENTER_URL, blueprint=name,
                                           filename=filename)
 
         res = requests.head(remote_url)
@@ -258,36 +255,6 @@ def configure_logs(**kwargs):
     logging.basicConfig(stream=sys.stdout, format=log_format)
     package_logger = logging.getLogger(__package__)
     package_logger.setLevel(level)
-
-
-def load_global_configuration():
-    """Loads the global configuration file (~/.mindmeld/config)
-
-    Returns:
-        dict: An object containing configuration values.
-    """
-    def _filter_bad_keys(config):
-        return {key: config[key] for key in config if key is not None}
-
-    mindmeld_url = os.environ.get('MM_URL', None)
-
-    if mindmeld_url:
-        config = {
-            'mindmeld_url': mindmeld_url
-        }
-        return _filter_bad_keys(config)
-
-    try:
-        logging.info('loading info from mindmeld config file.')
-        config_file = path.get_user_config_path()
-        iniconfig = py.iniconfig.IniConfig(config_file)  # pylint: disable=no-member
-        config = {
-            'mindmeld_url': iniconfig.get('mindmeld', 'mindmeld_url'),
-        }
-        return _filter_bad_keys(config)
-    except OSError:
-        raise AuthNotFoundError(
-            'Cannot load auth from either the environment or the config file.')
 
 
 def load_configuration():
