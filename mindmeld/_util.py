@@ -28,7 +28,7 @@ import requests
 
 from . import path
 from .components import QuestionAnswerer
-from .exceptions import AuthNotFoundError, KnowledgeBaseConnectionError
+from .exceptions import KnowledgeBaseConnectionError
 from .components._config import get_app_namespace
 from .constants import DEVCENTER_URL
 
