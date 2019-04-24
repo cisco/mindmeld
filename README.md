@@ -58,4 +58,4 @@ Visit the [MindMeld website](https://www.mindmeld.com/).
 
 ## Feedback or Support Questions
 
-Please contact us at mindmeld@cisco.com.
+Please contact us at [mindmeld@cisco.com](mailto:mindmeld@cisco.com).
