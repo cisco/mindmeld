@@ -252,39 +252,4 @@ echo
 echo Checking dependent services already started
 check_service elasticsearch
 echo done
-
-###
-# .mindmeld/config
-###
-
-mkdir -p ~/.mindmeld
-cat >~/.mindmeld/config <<EOL
-[mindmeld]
-mindmeld_url = https://devcenter.mindmeld.com
-EOL
-
-echo ~/.mindmeld/config created.
-
-####
-# pip.conf
-###
-
-# create folder if not exists
-mkdir -p ~/.pip
-
-# if file already exists, make a backup
-if test -f ~/.pip/pip.conf; then
-	cp ~/.pip/pip.conf ~/.pip/pip.conf.backup
-fi
-
-# create file if not exists
-touch ~/.pip/pip.conf
-
-# this will wipe out your existing pip.conf
-cat >~/.pip/pip.conf <<EOL
-[global]
-extra-index-url = https://engci-maven.cisco.com/artifactory/api/pypi/mm_workbench-pypi-group/simple
-EOL
-
-echo ~/.pip/pip.conf created.
 echo
