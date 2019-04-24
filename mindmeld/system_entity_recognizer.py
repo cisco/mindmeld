@@ -84,12 +84,9 @@ class SystemEntityRecognizer:
                     del response_json[i]['value']['values']
 
             return response_json, response.status_code
-
         except requests.ConnectionError:
-            logger.error("Unable to connect to the system entity recognizer. Make sure it's "
-                         "running by typing 'mindmeld num-parse' at the command line.")
-            return [], NO_RESPONSE_CODE
-
+            sys.exit("Unable to connect to the system entity recognizer. Make sure it's "
+                     "running by typing 'mindmeld num-parse' at the command line.")
         except Exception as ex:  # pylint: disable=broad-except
             logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
                          json.dumps(data))
