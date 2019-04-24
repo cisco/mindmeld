@@ -120,7 +120,7 @@ Commit the edited docker file system, stop the existing running container and re
 
    docker commit d696c64e9924 mindmeldworkbench/mindmeld:edited
    docker stop d696c64e9924
-   docker run -p 7150:7150 mindmeldworkbench/mindmeld:edited -ti -d
+   docker run -p 0.0.0.0:7150:7150 mindmeldworkbench/mindmeld:edited -ti -d
 
 Now issue the curl request again.
 
@@ -166,16 +166,13 @@ Install with virtualenv
 1. Install prerequisites
 """"""""""""""""""""""""
 
-On a macOS or Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the `mindmeld_init.sh script <https://devcenter.mindmeld.com/scripts/mindmeld_init.sh>`_.
+On a Ubuntu 16/18 machine, you can install the dependencies for MindMeld and set up the necessary configuration files with the `mindmeld_init.sh script <https://devcenter.mindmeld.com/scripts/mindmeld_init.sh>`_.
 
 .. note::
 
-   A few things to note before you run the script:
+   The script installs the following components after a confirmation prompt: ``docker``, ``python3.6``, ``python-pip``, ``virtualenv`` and Elasticsearch 6.7.
 
-   - The script installs the following components after a confirmation prompt: ``brew``, ``python3``, ``pip``, ``virtualenv``, Java 8 and Elasticsearch.
-   - Two configuration files will be created: ``~/.pip/pip.conf`` and ``~/.mindmeld/config``. **Previous files are overwritten.**
-
-When you're ready to go, open a terminal (shell) and run this command:
+If you are using a Ubuntu 16/18 machine, when you're ready to go, open a terminal (shell) and run this command:
 
 .. code-block:: shell
 
@@ -183,7 +180,7 @@ When you're ready to go, open a terminal (shell) and run this command:
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
-Here are the commands run by the script to install the required components depending on your operating system:
+For macOS users, a recent (April 16th 2019) change in licensing policy of Java prevents us from creating an automatic script to download and run it. Java is necessary for Elasticsearch 6.7 to run. Assuming you have Oracle Java or OpenJDK installed, please download the following libraries:
 
 macOS:
 
@@ -198,10 +195,16 @@ macOS:
 +---------------+--------------------------------------------------------------------------------------------------------+
 | virtualenv    |  ``sudo -H pip install --upgrade virtualenv``                                                          |
 +---------------+--------------------------------------------------------------------------------------------------------+
-| Java 8        |  ``brew tap caskroom/cask && brew cask install homebrew/cask-versions/java8``                          |
+| Elasticsearch |  See instructions below to download Elasticsearch 6.7                                                  |
 +---------------+--------------------------------------------------------------------------------------------------------+
-| Elasticsearch |  ``brew install elasticsearch && brew services start elasticsearch``                                   |
-+---------------+--------------------------------------------------------------------------------------------------------+
+
+.. code-block:: shell
+
+   curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.7.0.tar.gz -o elasticsearch-6.7.0.tar.gz
+   tar -zxvf elasticsearch-6.7.0.tar.gz
+   cd elasticsearch-6.7.0/bin
+   ./elasticsearch-6.7.0/bin/elasticsearch
+
 
 Ubuntu:
 

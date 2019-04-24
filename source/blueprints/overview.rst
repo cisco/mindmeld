@@ -99,15 +99,15 @@ Interact with the app in the Python shell using the commands below. Try the quer
 
 .. code-block:: console
 
-   ['Hello. Some nearby popular restaurants you can order delivery from are Curry Up Now, Ganim's Deli, Firetrail Pizza.]
+   ["Hello. Some nearby popular restaurants you can order delivery from are Firetrail Pizza, Grandma's Deli & Cafe, The Salad Place"]
 
 .. code-block:: python
 
-   conv.say("Get me a saag paneer and garlic naan from urban curry")
+   conv.say("Get me a pepperoni pizza from firetrail pizza")
 
 .. code-block:: console
 
-   ['Sure, I got Saag Paneer, Garlic Naan from Urban Curry for a total price of $14.70. Would you like to place the order?']
+   ['Sure, I have 1 order of Pepperoni Pizza from Firetrail Pizza for a total price of $11.00. Would you like to place the order?', 'Listening...']
 
 .. code-block:: python
 
