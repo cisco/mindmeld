@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/expectlabs/mindmeld-workbench.svg?style=svg&circle-token=437cf905895688ac1b58b60fe79144c180893372)](https://circleci.com/gh/expectlabs/mindmeld-workbench)
 
-This repository contains the MindMeld Conversational AI Platform.
+This repository contains the [MindMeld Conversational AI Platform](https://www.mindmeld.com).
 
 ## Introducing MindMeld
 The MindMeld Conversational AI platform is among the most advanced AI platforms for building production-quality conversational applications. It is a Python-based machine learning framework which encompasses all of the algorithms and utilities required for this purpose. Evolved over several years of building and deploying dozens of the most advanced conversational experiences achievable, MindMeld is optimized for building advanced conversational assistants which demonstrate deep understanding of a particular use case or domain while providing highly useful and versatile conversational experiences.
@@ -50,7 +50,7 @@ python -m home_assistant build
 python -m home_assistant converse
 ```
 
-For detailed installation instructions, see [Getting Started](http://www.mindmeld.com/userguide/getting_started.html). To start with pre-built sample applications, see [MindMeld Blueprints](http://www.mindmeld.com/blueprints/overview.html).
+For detailed installation instructions, see [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html). To start with pre-built sample applications, see [MindMeld Blueprints](http://www.mindmeld.com/docs/blueprints/overview.html).
 
 ## Want to learn more about MindMeld?
 
