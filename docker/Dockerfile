@@ -67,6 +67,17 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -U mindmeld
 RUN pip3 install click-log==0.1.8
 
+RUN mkdir -p home_assistant && \
+    wget https://devcenter.mindmeld.com/bp/home_assistant/app.tar.gz -P /root/projects/ && \
+    tar -xvf /root/projects/app.tar.gz -C ./home_assistant
+
+RUN export LC_ALL=C.UTF-8 && \
+    export LANG=C.UTF-8 && \
+    pip3 install mindmeld --upgrade && \
+    su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
+    mindmeld num-parse --start && \
+    python3 -m home_assistant build
+
 # Expose ports.
 #   - 9200: HTTP
 #   - 9300: transport
@@ -76,10 +87,7 @@ EXPOSE 7150
 
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
+    pip3 install mindmeld --upgrade && \
     su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
     mindmeld num-parse --start && \
-    mkdir home_assistant && \
-    wget https://devcenter.mindmeld.com/bp/home_assistant/app.tar.gz -P /root/projects/ && \
-    tar -xvf /root/projects/app.tar.gz -C ./home_assistant && \
-    python3 -m home_assistant build && \
     python3 -m home_assistant run

@@ -16,7 +16,7 @@ Major Features and Improvements
 Breaking Changes
 ^^^^^^^^^^^^^^^^
 
-- Replace all instances of the term ``mmworkbench`` to ``mindmeld``. Older pickled models that refer to the old term will not load, so rebuild all classifiers.
+- Replace all instances of the term ``mmworkbench`` to ``mindmeld``. Older pickled models that refer to the old term will not load, so delete the ``.generated`` folder in application folder, and rebuild all classifiers.
 
 
 Bug Fixes and Other Changes
