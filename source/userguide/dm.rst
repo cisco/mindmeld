@@ -159,10 +159,6 @@ The ``params`` attribute of the ``request`` object is an immutable :class:`Froze
 +------------------------------+-----------------------------------------------------------------------------------+
 | Attribute                    | Description                                                                       |
 +==============================+===================================================================================+
-|:data:`previous_params`       | Dictionary for storing information across dialogue turns. You can set custom      |
-|                              | key,value pairs that can be tracked across multiple dialogue turns                |
-|                              | (not for use by front-end clients)                                                |
-+------------------------------+-----------------------------------------------------------------------------------+
 | :data:`allowed_intents`      | A list of intents that you can set to force the language processor to choose      |
 |                              | from                                                                              |
 +------------------------------+-----------------------------------------------------------------------------------+

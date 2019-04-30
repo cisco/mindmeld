@@ -41,137 +41,517 @@ To test using any REST client (such as Postman or Advanced Rest Client), send `P
 
 .. code-block:: console
 
-  curl -X POST -H 'Content-Type: application/json' -d '{"text": "hello world"}' "http://localhost:7150/parse" | jq .
+  curl -X POST -H 'Content-Type: application/json' -d '{"text": "order from firetrail"}' "http://localhost:7150/parse" | jq .
+
+.. note:: The MindMeld flask server is stateless, so in order to perform multi-turn dialogues with the server, copy the response returned from the server in the first turn and use that in the data parameter of the curl request in the next turn, along with the new ``text`` key, value.
 
 .. code-block:: console
 
-  {
-    "dialogue_state": "welcome",
-    "directives": [
-      {
-        "name": "reply",
-        "payload": {
-          "text": "Hello. I can help you find store hours for your local Kwik-E-Mart. How can I help?"
-        },
-        "type": "view"
-      },
-      {
-        "name": "listen",
-        "type": "action"
-      }
-    ],
-    "frame": {},
-    "history": [
-      {
-        "dialogue_state": "welcome",
-        "directives": [
-          {
-            "name": "reply",
-            "payload": {
-              "text": "Hello. I can help you find store hours for your local Kwik-E-Mart. How can I help?"
-            },
-            "type": "view"
-          },
-          {
-            "name": "listen",
-            "type": "action"
-          }
-        ],
-        "frame": {},
-        "params": {
-          "allowed_intents": [],
-          "dynamic_resource": {},
-          "previous_params": {
-            "allowed_intents": [],
-            "dynamic_resource": {},
-            "previous_params": null,
-            "target_dialogue_state": null,
-            "time_zone": null,
-            "timestamp": 0
-          },
-          "target_dialogue_state": null,
-          "time_zone": null,
-          "timestamp": 0
-        },
-        "request": {
-          "confidences": {},
-          "context": {},
-          "domain": "store_info",
-          "entities": [],
-          "frame": {},
-          "history": [],
-          "intent": "greet",
-          "nbest_aligned_entities": [],
-          "nbest_transcripts_entities": [],
-          "nbest_transcripts_text": [],
-          "params": {
-            "allowed_intents": [],
-            "dynamic_resource": {},
-            "previous_params": {
-              "allowed_intents": [],
-              "dynamic_resource": {},
-              "previous_params": null,
-              "target_dialogue_state": null,
-              "time_zone": null,
-              "timestamp": 0
-            },
-            "target_dialogue_state": null,
-            "time_zone": null,
-            "timestamp": 0
-          },
-          "text": "hello world"
-        },
-        "slots": {}
-      }
-    ],
-    "params": {
-      "allowed_intents": [],
-      "dynamic_resource": {},
-      "previous_params": {
-        "allowed_intents": [],
-        "dynamic_resource": {},
-        "previous_params": null,
-        "target_dialogue_state": null,
-        "time_zone": null,
-        "timestamp": 0
-      },
-      "target_dialogue_state": null,
-      "time_zone": null,
-      "timestamp": 0
-    },
-    "request": {
-      "confidences": {},
-      "context": {},
-      "domain": "store_info",
-      "entities": [],
-      "frame": {},
-      "history": [],
-      "intent": "greet",
-      "nbest_aligned_entities": [],
-      "nbest_transcripts_entities": [],
-      "nbest_transcripts_text": [],
-      "params": {
-        "allowed_intents": [],
-        "dynamic_resource": {},
-        "previous_params": {
-          "allowed_intents": [],
-          "dynamic_resource": {},
-          "previous_params": null,
-          "target_dialogue_state": null,
-          "time_zone": null,
-          "timestamp": 0
-        },
-        "target_dialogue_state": null,
-        "time_zone": null,
-        "timestamp": 0
-      },
-      "text": "hello world"
-    },
-    "request_id": "38dd4c17-1440-492c-8d4b-eeacd7e108e6",
-    "slots": {},
-    "response_time": 0.018073081970214844,
-    "version": "2.0"
-  }
+   {
+     "dialogue_state": "build_order",
+     "directives": [
+       {
+         "name": "reply",
+         "payload": {
+           "text": "Great, what would you like to order from Firetrail Pizza?"
+         },
+         "type": "view"
+       },
+       {
+         "name": "listen",
+         "type": "action"
+       }
+     ],
+     "frame": {
+       "dishes": [],
+       "restaurant": {
+         "categories": [
+           "Beverages",
+           "Pizzas",
+           "Sides",
+           "Popular Dishes"
+         ],
+         "cuisine_types": [
+           "Pizza"
+         ],
+         "id": "B01CT54GYE",
+         "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png",
+         "menus": [
+           {
+             "id": "127c097e-2d9d-4880-99ac-f1688909af07",
+             "option_groups": [
+               {
+                 "id": "ToppingsGF",
+                 "max_selected": 9,
+                 "min_selected": 0,
+                 "name": "Add Some Extra Toppings",
+                 "options": [
+                   {
+                     "description": null,
+                     "id": "B01D8TDFV0",
+                     "name": "Goat Cheese",
+                     "price": 2
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TCH3M",
+                     "name": "Olives",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TD8VC",
+                     "name": "Garlic",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TD4YI",
+                     "name": "Sausage",
+                     "price": 2
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TD5J2",
+                     "name": "Onions",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TDHAY",
+                     "name": "Bruno Nippy Peppers",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TDALK",
+                     "name": "Pepperoni",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TCT7G",
+                     "name": "Roasted Red Peppers",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TCWXC",
+                     "name": "Mushrooms",
+                     "price": 1
+                   }
+                 ]
+               },
+               {
+                 "id": "Toppings",
+                 "max_selected": 12,
+                 "min_selected": 0,
+                 "name": "Add Some Extra Toppings",
+                 "options": [
+                   {
+                     "description": null,
+                     "id": "B01D8TCVYC",
+                     "name": "Roasted Red Peppers",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TDF9M",
+                     "name": "Garlic",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TCWM8",
+                     "name": "Olives",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TC930",
+                     "name": "Basil",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TDBFK",
+                     "name": "Goat Cheese",
+                     "price": 2
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TCKHU",
+                     "name": "Sausage",
+                     "price": 2
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TCSNG",
+                     "name": "Onions",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TCO2G",
+                     "name": "Bruno Nippy Peppers",
+                     "price": 1
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TC8AE",
+                     "name": "Pepperoni",
+                     "price": 2
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TCJRQ",
+                     "name": "Mushrooms",
+                     "price": 2
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TC8PE",
+                     "name": "Shredded Parmesan",
+                     "price": 2
+                   },
+                   {
+                     "description": null,
+                     "id": "B01D8TD560",
+                     "name": "Shredded Mozzarella",
+                     "price": 2
+                   }
+                 ]
+               }
+             ],
+             "size_groups": [
+               {
+                 "description": null,
+                 "id": "Pizzasize",
+                 "name": "Choose Your Pizza Size",
+                 "sizes": [
+                   {
+                     "alt_name": "10\" Pizza",
+                     "name": "10\" Pizza"
+                   },
+                   {
+                     "alt_name": "14\" Pizza",
+                     "name": "14\" Pizza"
+                   }
+                 ]
+               }
+             ]
+           }
+         ],
+         "name": "Firetrail Pizza",
+         "num_reviews": 13,
+         "price_range": 2,
+         "rating": 4.1
+       }
+     },
+     "history": [
+       {
+         "dialogue_state": "build_order",
+         "directives": [
+           {
+             "name": "reply",
+             "payload": {
+               "text": "Great, what would you like to order from Firetrail Pizza?"
+             },
+             "type": "view"
+           },
+           {
+             "name": "listen",
+             "type": "action"
+           }
+         ],
+         "frame": {
+           "dishes": [],
+           "restaurant": {
+             "categories": [
+               "Beverages",
+               "Pizzas",
+               "Sides",
+               "Popular Dishes"
+             ],
+             "cuisine_types": [
+               "Pizza"
+             ],
+             "id": "B01CT54GYE",
+             "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/ember/restaurants/SanFrancisco/FiretrailPizza/logo_232x174._CB295435423_SX600_QL70_.png",
+             "menus": [
+               {
+                 "id": "127c097e-2d9d-4880-99ac-f1688909af07",
+                 "option_groups": [
+                   {
+                     "id": "ToppingsGF",
+                     "max_selected": 9,
+                     "min_selected": 0,
+                     "name": "Add Some Extra Toppings",
+                     "options": [
+                       {
+                         "description": null,
+                         "id": "B01D8TDFV0",
+                         "name": "Goat Cheese",
+                         "price": 2
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TCH3M",
+                         "name": "Olives",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TD8VC",
+                         "name": "Garlic",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TD4YI",
+                         "name": "Sausage",
+                         "price": 2
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TD5J2",
+                         "name": "Onions",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TDHAY",
+                         "name": "Bruno Nippy Peppers",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TDALK",
+                         "name": "Pepperoni",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TCT7G",
+                         "name": "Roasted Red Peppers",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TCWXC",
+                         "name": "Mushrooms",
+                         "price": 1
+                       }
+                     ]
+                   },
+                   {
+                     "id": "Toppings",
+                     "max_selected": 12,
+                     "min_selected": 0,
+                     "name": "Add Some Extra Toppings",
+                     "options": [
+                       {
+                         "description": null,
+                         "id": "B01D8TCVYC",
+                         "name": "Roasted Red Peppers",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TDF9M",
+                         "name": "Garlic",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TCWM8",
+                         "name": "Olives",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TC930",
+                         "name": "Basil",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TDBFK",
+                         "name": "Goat Cheese",
+                         "price": 2
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TCKHU",
+                         "name": "Sausage",
+                         "price": 2
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TCSNG",
+                         "name": "Onions",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TCO2G",
+                         "name": "Bruno Nippy Peppers",
+                         "price": 1
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TC8AE",
+                         "name": "Pepperoni",
+                         "price": 2
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TCJRQ",
+                         "name": "Mushrooms",
+                         "price": 2
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TC8PE",
+                         "name": "Shredded Parmesan",
+                         "price": 2
+                       },
+                       {
+                         "description": null,
+                         "id": "B01D8TD560",
+                         "name": "Shredded Mozzarella",
+                         "price": 2
+                       }
+                     ]
+                   }
+                 ],
+                 "size_groups": [
+                   {
+                     "description": null,
+                     "id": "Pizzasize",
+                     "name": "Choose Your Pizza Size",
+                     "sizes": [
+                       {
+                         "alt_name": "10\" Pizza",
+                         "name": "10\" Pizza"
+                       },
+                       {
+                         "alt_name": "14\" Pizza",
+                         "name": "14\" Pizza"
+                       }
+                     ]
+                   }
+                 ]
+               }
+             ],
+             "name": "Firetrail Pizza",
+             "num_reviews": 13,
+             "price_range": 2,
+             "rating": 4.1
+           }
+         },
+         "params": {
+           "allowed_intents": [],
+           "dynamic_resource": {},
+           "target_dialogue_state": null,
+           "time_zone": null,
+           "timestamp": 0
+         },
+         "request": {
+           "confidences": {},
+           "context": {},
+           "domain": "ordering",
+           "entities": [
+             {
+               "role": null,
+               "span": {
+                 "end": 19,
+                 "start": 11
+               },
+               "text": "firetrail",
+               "type": "restaurant",
+               "value": [
+                 {
+                   "cname": "Firetrail Pizza",
+                   "id": "B01CT54GYE",
+                   "score": 27.906038,
+                   "top_synonym": "Firetrail"
+                 }
+               ]
+             }
+           ],
+           "frame": {},
+           "history": [],
+           "intent": "build_order",
+           "nbest_aligned_entities": [],
+           "nbest_transcripts_entities": [],
+           "nbest_transcripts_text": [],
+           "params": {
+             "allowed_intents": [],
+             "dynamic_resource": {},
+             "target_dialogue_state": null,
+             "time_zone": null,
+             "timestamp": 0
+           },
+           "text": "order from firetrail"
+         },
+         "slots": {
+           "restaurant_name": "Firetrail Pizza"
+         }
+       }
+     ],
+     "params": {
+       "allowed_intents": [],
+       "dynamic_resource": {},
+       "target_dialogue_state": null,
+       "time_zone": null,
+       "timestamp": 0
+     },
+     "request": {
+       "confidences": {},
+       "context": {},
+       "domain": "ordering",
+       "entities": [
+         {
+           "role": null,
+           "span": {
+             "end": 19,
+             "start": 11
+           },
+           "text": "firetrail",
+           "type": "restaurant",
+           "value": [
+             {
+               "cname": "Firetrail Pizza",
+               "id": "B01CT54GYE",
+               "score": 27.906038,
+               "top_synonym": "Firetrail"
+             }
+           ]
+         }
+       ],
+       "frame": {},
+       "history": [],
+       "intent": "build_order",
+       "nbest_aligned_entities": [],
+       "nbest_transcripts_entities": [],
+       "nbest_transcripts_text": [],
+       "params": {
+         "allowed_intents": [],
+         "dynamic_resource": {},
+         "target_dialogue_state": null,
+         "time_zone": null,
+         "timestamp": 0
+       },
+       "text": "order from firetrail"
+     },
+     "request_id": "21473eb8-14c2-438a-9102-d8178104501f",
+     "slots": {
+       "restaurant_name": "Firetrail Pizza"
+     },
+     "response_time": 2.535576820373535,
+     "version": "2.0"
+   }
 
 The web service responds with a JSON data structure containing the application response along with the detailed output for all of the machine learning components of the MindMeld platform.
 

@@ -250,9 +250,7 @@ async def test_convo_params_are_cleared(async_kwik_e_mart_app, kwik_e_mart_app_p
         allowed_intents=['store_info.find_nearest_store'],
         target_dialogue_state='welcome')
     await convo.say('close door')
-    assert convo.params == Params(
-        previous_params=FrozenParams(allowed_intents=['store_info.find_nearest_store'],
-                                     target_dialogue_state='welcome'))
+    assert convo.params == Params()
 
 
 @pytest.mark.conversation

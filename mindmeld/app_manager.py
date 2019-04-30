@@ -116,9 +116,11 @@ class ApplicationManager:
         self.nlp.load()
 
     def _pre_dm(self, processed_query, context, params, frame, history):
+        # We pass in the previous turn's responder's params to the current request
         request = self.request_class(context=context, history=history, frame=frame,
                                      params=params, **processed_query)
 
+        # We reset the current turn's responder's params
         response = self.responder_class(frame=frame, params=Params(),
                                         slots={}, history=history, request=request,
                                         directives=[])

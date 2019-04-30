@@ -56,7 +56,6 @@ PARAM_VALIDATORS = {
     'time_zone': _validate_time_zone,
     'timestamp': _validate_generic('timestamp', int),
     'dynamic_resource': _validate_generic('dynamic_resource', immutables.Map)
-    'user_state': _validate_generic('user_state', immutables.Map)
 }
 
 
@@ -75,14 +74,12 @@ class Params:
         timestamp (long): A unix time stamp for the request accurate to the nearest second.
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
-       user_state (dict): User defined key-value pair state.
     """
-    allowed_intents = attr.ib(default=tuple())
+    allowed_intents = attr.ib(default=attr.Factory(tuple))
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
-    dynamic_resource = attr.ib(default={})
-    user_state = attr.ib(default={})
+    dynamic_resource = attr.ib(default=attr.Factory(dict))
 
     def validate_param(self, name):
         """
@@ -148,7 +145,8 @@ class FrozenParams(Params):
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
     """
-    allowed_intents = attr.ib(default=tuple(), converter=tuple)
+    allowed_intents = attr.ib(default=attr.Factory(tuple),
+                              converter=tuple)
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
@@ -184,8 +182,10 @@ class Request:
     """
     domain = attr.ib(default=None)
     intent = attr.ib(default=None)
-    entities = attr.ib(default=tuple(), converter=tuple)
-    history = attr.ib(default=tuple(), converter=tuple)
+    entities = attr.ib(default=attr.Factory(tuple),
+                       converter=tuple)
+    history = attr.ib(default=attr.Factory(tuple),
+                      converter=tuple)
     text = attr.ib(default=None)
     frame = attr.ib(default=immutables.Map(),
                     converter=immutables.Map)
@@ -194,6 +194,9 @@ class Request:
                       converter=immutables.Map)
     confidences = attr.ib(default=immutables.Map(),
                           converter=immutables.Map)
-    nbest_transcripts_text = attr.ib(default=tuple(), converter=tuple)
-    nbest_transcripts_entities = attr.ib(default=tuple(), converter=tuple)
-    nbest_aligned_entities = attr.ib(default=tuple(), converter=tuple)
+    nbest_transcripts_text = attr.ib(default=attr.Factory(tuple),
+                                     converter=tuple)
+    nbest_transcripts_entities = attr.ib(default=attr.Factory(tuple),
+                                         converter=tuple)
+    nbest_aligned_entities = attr.ib(default=attr.Factory(tuple),
+                                     converter=tuple)
