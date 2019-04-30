@@ -51,11 +51,12 @@ def _validate_generic(name, ptype):
 
 
 PARAM_VALIDATORS = {
-    'allowed_intents': _validate_generic('allowed_intents', list),
+    'allowed_intents': _validate_generic('allowed_intents', tuple),
     'target_dialogue_state': _validate_generic('target_dialogue_state', str),
     'time_zone': _validate_time_zone,
     'timestamp': _validate_generic('timestamp', int),
-    'dynamic_resource': _validate_generic('dynamic_resource', dict)
+    'dynamic_resource': _validate_generic('dynamic_resource', immutables.Map)
+    'user_state': _validate_generic('user_state', immutables.Map)
 }
 
 
@@ -65,7 +66,6 @@ class Params:
     A class that contains parameters that modify how the user query is parsed.
 
     Attributes:
-        previous_params (dict): Dictionary for storing information across dialogue turns.
         allowed_intents (list, str): A list of intents that you can set to force the language
             processor to choose from.
         target_dialogue_state (str): The name of the dialogue handler that you want to reach in
@@ -75,13 +75,14 @@ class Params:
         timestamp (long): A unix time stamp for the request accurate to the nearest second.
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
+       user_state (dict): User defined key-value pair state.
     """
-    previous_params = attr.ib(default=None)
-    allowed_intents = attr.ib(default=[])
+    allowed_intents = attr.ib(default=tuple())
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
     dynamic_resource = attr.ib(default={})
+    user_state = attr.ib(default={})
 
     def validate_param(self, name):
         """
@@ -137,7 +138,6 @@ class FrozenParams(Params):
     An immutable version of the Params object.
 
     Attributes:
-        previous_params (dict): Dictionary for storing information across dialogue turns.
         allowed_intents (list, str): A list of intents that you can set to force the language
             processor to choose from.
         target_dialogue_state (str): The name of the dialogue handler that you want to reach in
@@ -148,7 +148,6 @@ class FrozenParams(Params):
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
     """
-    previous_params = attr.ib(default=None)
     allowed_intents = attr.ib(default=tuple(), converter=tuple)
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
