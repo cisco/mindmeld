@@ -522,7 +522,7 @@ class Search:
         return {'min_value': res['aggregations'][field + '_min']['value'],
                 'max_value': res['aggregations'][field + '_max']['value']}
 
-    def _build_es_query(self):
+    def _build_es_query(self, size=10):
         """Build knowledge base search syntax based on provided search criteria.
 
         Returns:
@@ -539,7 +539,8 @@ class Search:
             },
             "_source": {
                 "excludes": ["*" + self.SYN_FIELD_SUFFIX]
-            }
+            },
+            "size": size
         }
 
         if not self._clauses['query'] and not self._clauses['filter']:
@@ -586,7 +587,7 @@ class Search:
         logger.debug("ES query syntax: %s.", es_query)
         return es_query
 
-    def execute(self):
+    def execute(self, size=10):
         """Executes the knowledge base search with provided criteria and returns matching documents.
 
         Returns:
@@ -594,7 +595,7 @@ class Search:
         """
         try:
             # TODO: move the ES API call logic to ES helper
-            es_query = self._build_es_query()
+            es_query = self._build_es_query(size=size)
             response = self.client.search(index=self.index, body=es_query)
             results = [hit['_source'] for hit in response['hits']['hits']]
             return results
