@@ -59,7 +59,7 @@ class QuestionAnswerer:
             self.__es_client = create_es_client(self._es_host)
         return self.__es_client
 
-    def get(self, index, **kwargs):
+    def get(self, index, size=10, **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided
         search criteria. This API provides a simple interface for developers to specify a list of
         knowledge base field and query string pairs to find best matches in a similar way as in
@@ -79,6 +79,7 @@ class QuestionAnswerer:
 
         Args:
             index (str): The name of an index.
+            size (int): The maximum number of records, default to 10.
             id (str): The id of a particular document to retrieve.
             _sort (str): Specify the knowledge base field for custom sort.
             _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
@@ -96,7 +97,7 @@ class QuestionAnswerer:
             logger.info("Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id)
             s = self.build_search(index)
             s = s.filter(id=doc_id)
-            results = s.execute()
+            results = s.execute(size=size)
             return results
 
         sort_clause = {}
@@ -132,7 +133,7 @@ class QuestionAnswerer:
                        sort_type=sort_clause.get('type'),
                        location=sort_clause.get('location'))
 
-        results = s.execute()
+        results = s.execute(size=size)
         return results
 
     def build_search(self, index, ranking_config=None):
@@ -522,8 +523,11 @@ class Search:
         return {'min_value': res['aggregations'][field + '_min']['value'],
                 'max_value': res['aggregations'][field + '_max']['value']}
 
-    def _build_es_query(self):
+    def _build_es_query(self, size=10):
         """Build knowledge base search syntax based on provided search criteria.
+
+        Args:
+            size (int): The maximum number of records to fetch, default to 10.
 
         Returns:
             str: knowledge base search syntax for the current search object.
@@ -539,7 +543,8 @@ class Search:
             },
             "_source": {
                 "excludes": ["*" + self.SYN_FIELD_SUFFIX]
-            }
+            },
+            "size": size
         }
 
         if not self._clauses['query'] and not self._clauses['filter']:
@@ -586,15 +591,18 @@ class Search:
         logger.debug("ES query syntax: %s.", es_query)
         return es_query
 
-    def execute(self):
+    def execute(self, size=10):
         """Executes the knowledge base search with provided criteria and returns matching documents.
+
+        Args:
+            size (int): The maximum number of records to fetch, default to 10.
 
         Returns:
             a list of matching documents.
         """
         try:
             # TODO: move the ES API call logic to ES helper
-            es_query = self._build_es_query()
+            es_query = self._build_es_query(size=size)
             response = self.client.search(index=self.index, body=es_query)
             results = [hit['_source'] for hit in response['hits']['hits']]
             return results

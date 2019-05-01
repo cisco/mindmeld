@@ -364,8 +364,8 @@ def num_parser(start):
         exec_path = _find_duckling_os_executable()
 
         if not exec_path:
-            logger.error('OS is incompatible with duckling executable. '
-                         'Use docker to install duckling.')
+            logger.warning('OS is incompatible with duckling executable. '
+                           'Use docker to install duckling.')
             return
 
         # Download the binary from the cloud if the binary does not already exist OR
