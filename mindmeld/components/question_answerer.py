@@ -59,7 +59,7 @@ class QuestionAnswerer:
             self.__es_client = create_es_client(self._es_host)
         return self.__es_client
 
-    def get(self, index, **kwargs):
+    def get(self, index, size=10, **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided
         search criteria. This API provides a simple interface for developers to specify a list of
         knowledge base field and query string pairs to find best matches in a similar way as in
@@ -79,6 +79,7 @@ class QuestionAnswerer:
 
         Args:
             index (str): The name of an index.
+            size (int): The maximum number of records, default to 10.
             id (str): The id of a particular document to retrieve.
             _sort (str): Specify the knowledge base field for custom sort.
             _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
@@ -96,7 +97,7 @@ class QuestionAnswerer:
             logger.info("Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id)
             s = self.build_search(index)
             s = s.filter(id=doc_id)
-            results = s.execute()
+            results = s.execute(size=size)
             return results
 
         sort_clause = {}
@@ -132,7 +133,7 @@ class QuestionAnswerer:
                        sort_type=sort_clause.get('type'),
                        location=sort_clause.get('location'))
 
-        results = s.execute()
+        results = s.execute(size=size)
         return results
 
     def build_search(self, index, ranking_config=None):
