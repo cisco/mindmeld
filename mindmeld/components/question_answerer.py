@@ -525,6 +525,9 @@ class Search:
     def _build_es_query(self, size=10):
         """Build knowledge base search syntax based on provided search criteria.
 
+        Args:
+            size (int): The maximum number of records to fetch, default to 10.
+
         Returns:
             str: knowledge base search syntax for the current search object.
         """
@@ -589,6 +592,9 @@ class Search:
 
     def execute(self, size=10):
         """Executes the knowledge base search with provided criteria and returns matching documents.
+
+        Args:
+            size (int): The maximum number of records to fetch, default to 10.
 
         Returns:
             a list of matching documents.
