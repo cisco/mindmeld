@@ -13,6 +13,7 @@ async def welcome(request, responder):
         prefix = 'Hello, {name}. '
     except KeyError:
         prefix = 'Hello. '
+
     responder.reply(prefix + 'I can help you find store hours '
                              'for your local Kwik-E-Mart. How can I help?')
     responder.listen()

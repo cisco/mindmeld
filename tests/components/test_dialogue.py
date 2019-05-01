@@ -246,6 +246,4 @@ def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
     convo.params = Params(allowed_intents=['store_info.find_nearest_store'],
                           target_dialogue_state='greeting')
     convo.say('close door')
-    assert convo.params == Params(previous_params=FrozenParams(
-        allowed_intents=('store_info.find_nearest_store',), target_dialogue_state='greeting'),
-        target_dialogue_state='send_store_hours_flow')
+    assert convo.params == Params()

@@ -116,10 +116,12 @@ class ApplicationManager:
         self.nlp.load()
 
     def _pre_dm(self, processed_query, context, params, frame, history):
+        # We pass in the previous turn's responder's params to the current request
         request = self.request_class(context=context, history=history, frame=frame,
-                                     params=FrozenParams(previous_params=params), **processed_query)
+                                     params=params, **processed_query)
 
-        response = self.responder_class(frame=frame, params=Params(previous_params=params),
+        # We reset the current turn's responder's params
+        response = self.responder_class(frame=frame, params=Params(),
                                         slots={}, history=history, request=request,
                                         directives=[])
         return request, response
@@ -167,6 +169,7 @@ class ApplicationManager:
         request, response = self._pre_dm(processed_query=processed_query,
                                          context=context, history=history,
                                          frame=frame, params=params)
+
         dm_response = self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
         return response
@@ -212,6 +215,7 @@ class ApplicationManager:
         request, response = self._pre_dm(processed_query=processed_query,
                                          context=context, history=history,
                                          frame=frame, params=params)
+
         dm_response = await self.dialogue_manager.apply_handler(request, response, **dm_params)
         response = self._post_dm(request, dm_response)
 
