@@ -413,13 +413,8 @@ def num_parser(start):
 
 
 def _get_duckling_pid():
-    os_path = _find_duckling_os_executable()
-    if not os_path:
-        return
-
-    _, filename = os.path.split(os_path)
     pid = []
-    for line in os.popen('ps ax | grep %s | grep -v grep' % filename):
+    for line in os.popen('ps ax | grep duckling | grep -v grep'):
         pid.append(line.split()[0])
     return pid
 

@@ -52,8 +52,6 @@ RUN chown -R mindmeld:mindmeld /elasticsearch /data /var/log
 # Add Config Files
 COPY ./conf/elasticsearch.yml /elasticsearch/config/elasticsearch.yml
 
-COPY ./conf/config.cfg /root/.mindmeld/config
-
 WORKDIR /root
 
 RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
@@ -67,6 +65,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -U mindmeld
 RUN pip3 install click-log==0.1.8
 
+ARG REBUILD_BLUEPRINT=unknown
 RUN mkdir -p home_assistant && \
     wget https://devcenter.mindmeld.com/bp/home_assistant/app.tar.gz -P /root/projects/ && \
     tar -xvf /root/projects/app.tar.gz -C ./home_assistant
