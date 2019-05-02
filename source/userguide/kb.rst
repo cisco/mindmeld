@@ -497,7 +497,7 @@ In the following example, the question answerer returns the dishes that best mat
 	  'size_prices': []},
 	  ...
 
-Similarly to the :meth:`get()` method, the :meth:`query()` will return a default size of 10 records after execution. we can set the ``size`` field of the :meth:`execute()` method to return variable number of records.
+Similarly to the :meth:`get()` method, the :meth:`query()` will return a list of default maximum size of 10 records after execution. We can set the ``size`` field of the :meth:`execute()` method to return a variable number of records.
 
 .. code:: python
 
@@ -600,7 +600,7 @@ In the example below we filter on price range to find dishes priced below five d
 
    Range filters are only valid for number and date knowledge base fields.
 
-   We can use the ``size`` field to return variable number of records.
+   We can use the ``size`` field to return a variable number of records.
 
 Sort
 ^^^^
@@ -700,4 +700,4 @@ In the example below, we search for restaurants whose names best match ``firetra
 
 .. note::
 
-   We can use the ``size`` field to return variable number of records.
+   We can use the ``size`` field to return a variable number of records.
