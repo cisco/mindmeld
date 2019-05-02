@@ -423,6 +423,19 @@ Use :meth:`get()` to search the knowledge base for objects that best match all o
 	    ...
 	  ]
 
+By default the :meth:`get()` method will return a maximum list of 10 records per search. We can change the number of records per search by setting the ``size`` field.
+
+.. code:: python
+
+	from mindmeld.components import QuestionAnswerer
+	qa = QuestionAnswerer(app_path='food_ordering')
+	results = qa.get(index='restaurants', size=20, _sort='location', _sort_type='distance', _sort_location='37.77,122.41')
+	len(results)
+
+.. code-block:: console
+
+	20
+
 Perform Advanced Searches with the ``build_search()`` API
 ---------------------------------------------------------
 
@@ -484,6 +497,20 @@ In the following example, the question answerer returns the dishes that best mat
 	  'size_prices': []},
 	  ...
 
+Similarly to the :meth:`get()` method, the :meth:`query()` will return a default size of 10 records after execution. we can set the ``size`` field of the :meth:`execute()` method to return variable number of records.
+
+.. code:: python
+
+	from mindmeld.components import QuestionAnswerer
+	qa = QuestionAnswerer(app_path='food_ordering')
+	s = qa.build_search(index='menu_items')
+	results = s.query(name='fish and chips').execute(size=20)
+	len(results)
+
+
+.. code-block:: console
+
+	20
 
 Filter
 ^^^^^^
@@ -572,6 +599,8 @@ In the example below we filter on price range to find dishes priced below five d
 .. note::
 
    Range filters are only valid for number and date knowledge base fields.
+
+   We can use the ``size`` field to return variable number of records.
 
 Sort
 ^^^^
@@ -668,3 +697,7 @@ In the example below, we search for restaurants whose names best match ``firetra
 		},
 	  	...
 	  ]
+
+.. note::
+
+   We can use the ``size`` field to return variable number of records.
