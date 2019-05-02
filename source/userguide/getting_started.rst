@@ -293,7 +293,7 @@ with MindMeld. You instead need to run the numerical parser using Docker as show
 
 .. code-block:: shell
 
-   docker pull mindmeldworkbench/duckling:master && docker run mindmeldworkbench/duckling:master
+   docker pull mindmeldworkbench/duckling:master && docker run -p 0.0.0.0:7151:7151 mindmeldworkbench/duckling -ti -d
 
 
 .. warning::
