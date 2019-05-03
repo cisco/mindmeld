@@ -44,7 +44,7 @@ To test the application inside docker, you can make a request:
 
 .. code-block:: shell
 
-   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}'
+   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}' | python -m json.tool
 
 The output should be as follows:
 
@@ -126,7 +126,7 @@ Now issue the curl request again.
 
 .. code-block:: shell
 
-   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}'
+   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}' | python -m json.tool
 
 
 In the output json, notice the payload reflect the ``Alice`` text change we made:
