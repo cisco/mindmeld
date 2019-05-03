@@ -111,6 +111,13 @@ async def exit_handler(context, responder):
     responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
 
 
+@get_store_hours_entry.handle(intent='find_nearest_store')
+async def transition_flows(context, responder):
+    del context
+    del responder
+    get_store_hours_entry.reprocess()
+
+
 @get_store_hours_entry.handle(intent='get_store_hours')
 async def get_store_hours_handler(context, responder):
     return await get_store_hours_entry(context, responder)

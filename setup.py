@@ -21,11 +21,11 @@ requirements = [
     'py~=1.4',
     'python-dateutil~=2.6',
     'pytz>=2017.2',
+    'urllib3==1.23',
     'requests~=2.19',
     'scipy~=0.9',
     'scikit-learn>=0.18.1,<0.20',
     'tqdm~=4.15',
-    'urllib3~=1.23',
     'python-crfsuite~=0.9',
     'sklearn-crfsuite>=0.3.6,<1.0',
     'tensorflow~=1.2',
@@ -33,7 +33,8 @@ requirements = [
 ]
 
 setup_requirements = [
-    'pytest-runner~=2.11'
+    'pytest-runner~=2.11',
+    'setuptools>=36',
 ]
 
 test_requirements = [

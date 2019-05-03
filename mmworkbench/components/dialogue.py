@@ -45,6 +45,12 @@ class DirectiveTypes:
     ACTION = 'action'
 
 
+class DialogueStateException(Exception):
+    def __init__(self, message=None, target_dialogue_state=None):
+        super().__init__(message)
+        self.target_dialogue_state = target_dialogue_state
+
+
 class DialogueStateRule:
     """A rule that determines a dialogue state. Each rule represents a pattern that must match in
     order to invoke a particular dialogue state.
@@ -306,16 +312,60 @@ class DialogueManager:
         Args:
             context (dict): The context object from the DM
             target_dialogue_state (str, optional): The target dialogue state
-
         Returns:
             dict: A dict containing the dialogue state and directives
         """
         if self.async_mode:
             return self._apply_handler_async(context, target_dialogue_state=target_dialogue_state)
+
+        return self._apply_handler_sync(context, target_dialogue_state=target_dialogue_state)
+
+    def _apply_handler_sync(self, context, target_dialogue_state=None):
+        """Applies the dialogue state handler for the most complex matching rule
+
+        Args:
+            context (dict): The context object from the DM
+            target_dialogue_state (str, optional): The target dialogue state
+        Returns:
+            dict: A dict containing the dialogue state and directives
+        """
+        for _ in range(3):
+            try:
+                return self._attempt_handler_sync(
+                    context, target_dialogue_state=target_dialogue_state
+                )
+            except DialogueStateException as e:
+                if e.target_dialogue_state and e.target_dialogue_state != target_dialogue_state:
+                    target_dialogue_state = e.target_dialogue_state
+                else:
+                    self.logger.warning(
+                        "Ignoring target dialogue state '{}'".format(e.target_dialogue_state)
+                    )
+                    target_dialogue_state = None
+
+        if target_dialogue_state:
+            self.logger.warning(
+                "Ignoring target dialogue state '{}'".format(target_dialogue_state)
+            )
+        return self._attempt_handler_sync(context)
+
+    def _attempt_handler_sync(self, context, target_dialogue_state=None):
+        """Tries to apply the dialogue state handler for the most complex matching rule
+
+        Args:
+            context (dict): The context object from the DM
+            target_dialogue_state (str, optional): The target dialogue state
+        Returns:
+            dict: A dict containing the dialogue state and directives
+        """
         dialogue_state = self._get_dialogue_state(context, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder = self._create_responder()
-        handler(context, responder)
+        res = handler(context, responder)
+
+        if res and 'dialogue_state' in res:
+            # Add dialogue flow's sub-dialogue_state if provided
+            dialogue_state = '.'.join([dialogue_state, res["dialogue_state"]])
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
     async def _apply_handler_async(self, context, target_dialogue_state=None):
@@ -324,17 +374,58 @@ class DialogueManager:
         Args:
             context (dict): The context object from the DM
             target_dialogue_state (str, optional): The target dialogue state
+        Returns:
+            dict: A dict containing the dialogue state and directives
+        """
+        for _ in range(3):
+            try:
+                return await self._attempt_handler_async(
+                    context, target_dialogue_state=target_dialogue_state
+                )
+            except DialogueStateException as e:
+                if e.target_dialogue_state != target_dialogue_state:
+                    target_dialogue_state = e.target_dialogue_state
+                else:
+                    self.logger.warning(
+                        "Ignoring target dialogue state '{}'".format(e.target_dialogue_state)
+                    )
+                    target_dialogue_state = None
 
+        if target_dialogue_state:
+            self.logger.warning(
+                "Ignoring target dialogue state '{}'".format(target_dialogue_state)
+            )
+        return await self._attempt_handler_async(context)
+
+    async def _attempt_handler_async(self, context, target_dialogue_state=None):
+        """Tries to apply the dialogue state handler for the most complex matching rule
+
+        Args:
+            context (dict): The context object from the DM
+            target_dialogue_state (str, optional): The target dialogue state
         Returns:
             dict: A dict containing the dialogue state and directives
         """
         dialogue_state = self._get_dialogue_state(context, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder = self._create_responder()
+        res = await handler(context, responder)
 
-        await handler(context, responder)
-
+        if res and 'dialogue_state' in res:
+            # Add dialogue flow's sub-dialogue_state if provided
+            dialogue_state = '.'.join([dialogue_state, res["dialogue_state"]])
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+
+    def reprocess(self, target_dialogue_state=None):
+        """Forces the dialogue manager to back out of the flow based on the initial target
+        dialogue state setting and reselect a handler, following a new target dialogue state
+
+        Args:
+            target_dialogue_state (str, optional): a dialogue_state name to push system into
+        """
+        raise DialogueStateException(
+            message="reprocess", target_dialogue_state=target_dialogue_state
+        )
 
     def _get_dialogue_state(self, context, target_dialogue_state=None):
         dialogue_state = None
@@ -400,7 +491,7 @@ class DialogueFlow(DialogueManager):
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
         app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
-        handler = self.apply_handler_async if self.async_mode else self.apply_handler
+        handler = self._apply_handler_async if self.async_mode else self._apply_handler_sync
         app.add_dialogue_rule(self.flow_state, handler, targeted_only=True)
 
     @property
@@ -451,7 +542,7 @@ class DialogueFlow(DialogueManager):
 
         return _decorator
 
-    def apply_handler(self, context, responder=None):  # pylint: disable=arguments-differ
+    def _apply_handler_sync(self, context, responder=None):  # pylint: disable=arguments-differ
         """Applies the dialogue state handler for the dialogue flow and set the target dialogue
         state to the flow state
 
@@ -462,18 +553,26 @@ class DialogueFlow(DialogueManager):
         Returns:
             dict: A dict containing the dialogue state and directives
         """
-        if self.async_mode:
-            return self.apply_handler_async(context, responder)
-
         context.dialogue_flow = self.name
         dialogue_state = self._get_dialogue_state(context)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
             context.set_target_dialogue_state(self.flow_state)
         handler(context, responder)
+
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
-    async def apply_handler_async(self, context, responder):
+    async def _apply_handler_async(self, context, responder):  # pylint: disable=arguments-differ
+        """Applies the dialogue state handler for the dialogue flow and set the target dialogue
+        state to the flow state
+
+        Args:
+            context (DialogueContext)
+            responder (DialogueResponder)
+
+        Returns:
+            dict: A dict containing the dialogue state and directives
+        """
         context.dialogue_flow = self.name
         dialogue_state = self._get_dialogue_state(context)
         handler = self._get_dialogue_handler(dialogue_state)
@@ -482,6 +581,7 @@ class DialogueFlow(DialogueManager):
         res = handler(context, responder)
         if asyncio.iscoroutine(res):
             await res
+
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
     def _get_dialogue_handler(self, dialogue_state):

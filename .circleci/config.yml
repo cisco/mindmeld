@@ -56,21 +56,15 @@ definitions:
             # upgrade pip to latest
             pip install -U pip
 
-            # install mmworkbench and test requirements
-            pip install -e .
+            # install mindmeld and test requirements
             pip install -r test-requirements.txt
+            pip install -e .
 
     # Step Sequences
 
     test-steps: &test-steps
 
       - checkout
-
-      - run:
-          name: Install OpenJDK JRE
-          command: |
-            sudo apt-get update
-            sudo apt-get install openjdk-8-jre
 
       - restore_cache:
           key: v1-py-cache-{{ .Environment.PYTHON_VERSION }}-{{ checksum "test-requirements.txt" }}-{{ checksum "setup.py" }}
