@@ -423,7 +423,7 @@ Use :meth:`get()` to search the knowledge base for objects that best match all o
 	    ...
 	  ]
 
-By default the :meth:`get()` method will return a maximum list of 10 records per search. We can change the number of records per search by setting the ``size`` field.
+By default, the :meth:`get()` method will return a maximum list of 10 records per search. We can change the number of records per search by setting the ``size`` field.
 
 .. code:: python
 
