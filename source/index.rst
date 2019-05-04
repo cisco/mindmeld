@@ -6,7 +6,7 @@ This playbook represents a first step toward defining the governing principles a
 
 The :ref:`intro` provides an overview of the state of the art in building conversational applications and discusses tradeoffs associated with different implementation approaches.
 
-The :ref:`quickstart` illustrates how to build an end-to-end conversational application using MindMeld, the MindMeld Conversational AI toolkit. You can apply it directly while building a conversational application, or just read it to learn the essentials of MindMeld.
+The :ref:`quickstart` illustrates how to build an end-to-end conversational application using MindMeld, the Conversational AI toolkit. You can apply it directly while building a conversational application, or just read it to learn the essentials of MindMeld.
 
 The :ref:`blueprints` section explains how to use MindMeld to quickly build and test a fully working conversational application without writing code or collecting training data. You can bootstrap a Blueprint app into a more specialized and powerful conversational application, or just use the Blueprint app as a demo or research tool.
 
