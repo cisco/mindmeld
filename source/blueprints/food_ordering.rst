@@ -869,7 +869,7 @@ You can also try out multi-turn dialogues:
 
    >>> conv = Conversation(nlp=nlp, app_path='food_ordering')
    >>> conv.say('Hi there!')
-   ['Hello. Some nearby popular restaurants you can order delivery from are Curry Up Now, Ganim's Deli, Firetrail Pizza.]
+   ['Hello. Some nearby popular restaurants you can order delivery from are Firetrail Pizza, Grandma's Deli & Cafe, The Salad Place']
    >>> conv.say("I'd like to order from Saffron 685 today")
    ['Great, what would you like to order from Saffron 685?', 'Listening...']
    >>> conv.say("I would like two dolmas and a meza appetizer plate")

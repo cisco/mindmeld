@@ -41,7 +41,7 @@ To test using any REST client (such as Postman or Advanced Rest Client), send `P
 
 .. code-block:: console
 
-  curl -X POST -H 'Content-Type: application/json' -d '{"text": "order from firetrail"}' "http://localhost:7150/parse" | jq .
+  curl -X POST -H 'Content-Type: application/json' -d '{"text": "order from firetrail"}' "http://localhost:7150/parse" | python -m json.tool
 
 .. note:: The MindMeld flask server is stateless, so in order to perform multi-turn dialogues with the server, copy the response returned from the server in the first turn and use that in the data parameter of the curl request in the next turn, along with the new ``text`` key, value.
 
