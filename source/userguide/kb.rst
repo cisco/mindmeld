@@ -423,7 +423,7 @@ Use :meth:`get()` to search the knowledge base for objects that best match all o
 	    ...
 	  ]
 
-By default, the :meth:`get()` method will return a maximum list of 10 records per search. We can change the number of records per search by setting the ``size`` field.
+By default, the :meth:`get()` method will return a maximum list of 10 records per search. We can change the number of records per search by setting the ``size`` parameter.
 
 .. code:: python
 
@@ -497,7 +497,7 @@ In the following example, the question answerer returns the dishes that best mat
 	  'size_prices': []},
 	  ...
 
-Similarly to the :meth:`get()` method, the :meth:`query()` will return a list of default maximum size of 10 records after execution. We can set the ``size`` field of the :meth:`execute()` method to return a variable number of records.
+Similarly to the :meth:`get()` method, the :meth:`query()` method by default will return a list of up to 10 records. We can set the ``size`` parameter of the :meth:`execute()` method to specify a different maximum number of records.
 
 .. code:: python
 
@@ -600,7 +600,7 @@ In the example below we filter on price range to find dishes priced below five d
 
    Range filters are only valid for number and date knowledge base fields.
 
-   We can use the ``size`` field to return a variable number of records.
+   We can set the ``size`` parameter of the :meth:`execute()` method to specify the maximum number of records.
 
 Sort
 ^^^^
@@ -700,4 +700,4 @@ In the example below, we search for restaurants whose names best match ``firetra
 
 .. note::
 
-   We can use the ``size`` field to return a variable number of records.
+   We can set the ``size`` parameter of the :meth:`execute()` method to specify the maximum number of records.
