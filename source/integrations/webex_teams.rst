@@ -19,22 +19,10 @@ Create a `new Webex Bot integration <https://developer.webex.com/my-apps/new/bot
     :width: 700px
     :align: center
 
-
-2. Use Ngrok to point your local server port as a public URL
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-We use `ngrok <https://ngrok.com/>`_ to set up a publicly accessible tunnel to the local food ordering flask server at port 8080.
-
-.. code:: console
-
-  ./ngrok http 8080
-
-.. image:: /images/ngrok.png
-    :width: 700px
-    :align: center
+Next, make sure you make the local server endpoint for port 8080 publicly accessible. This could be done through a system like Nginx.
 
 
-3. Register Webex Webhook
+2. Register Webex Webhook
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Register a `new webhook <https://developer.webex.com/docs/api/v1/webhooks/create-a-webhook>`_. Set the ``targetUrl`` as ngrok's public URL, set ``resource`` to ``messages``, and set ``event`` to ``created``. Once you click `Run`, store the ``id`` field in the response. This will be your webhook ID.
@@ -44,7 +32,7 @@ Register a `new webhook <https://developer.webex.com/docs/api/v1/webhooks/create
     :align: center
 
 
-4. Download
+3. Download
 ^^^^^^^^^^^
 
 Download the food ordering blueprint.
@@ -57,7 +45,7 @@ Download the food ordering blueprint.
    mm.blueprint(bp_name)
 
 
-5. Start the food ordering server
+4. Start the food ordering server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the following environment variables and start the flask server.
@@ -70,7 +58,7 @@ Set the following environment variables and start the flask server.
    python webex_bot_server.py
 
 
-6. Test the integration
+5. Test the integration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Create a Webex Teams space and add the bot to the space. To trigger the webhook, simply @mention the bot and converse with it.
