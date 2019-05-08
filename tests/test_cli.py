@@ -16,7 +16,7 @@ def test_num_parse_already_running(mocker):
 
 def test_num_parse_not_running(mocker):
     runner = CliRunner()
-    with patch('logging.Logger.error') as mocking:
+    with patch('logging.Logger.warning') as mocking:
         mocker.patch.object(cli, '_get_duckling_pid', return_value=None)
         mocker.patch.object(cli, '_find_duckling_os_executable', return_value=None)
         runner.invoke(num_parser, ['--start'])
