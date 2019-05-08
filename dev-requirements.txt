@@ -2,7 +2,6 @@
 -r test-requirements.txt
 bleach==1.5.0
 bumpversion==0.5.3
-wheel==0.29.0
 watchdog==0.8.3
 
 jupyter>=1.0.0

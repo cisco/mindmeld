@@ -11,7 +11,6 @@ import copy
 from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
                                      does_index_exist)
-from .._version import validate_workbench_version
 from elasticsearch5 import TransportError, ElasticsearchException, ConnectionError
 
 from ..resource_loader import ResourceLoader
@@ -32,7 +31,6 @@ class QuestionAnswerer:
             resource_loader (ResourceLoader): An object which can load resources for the answerer
             es_host (str): The Elasticsearch host server
         """
-        validate_workbench_version(app_path)
         self._resource_loader = resource_loader or ResourceLoader.create_resource_loader(app_path)
         self._es_host = es_host
         self.__es_client = None
