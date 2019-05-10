@@ -2,7 +2,7 @@
 """Defines mmworkbench version information"""
 from __future__ import absolute_import, unicode_literals
 
-current = '4.0.0anlp2'
+current = '4.0.0anlp3'
 
 
 def _get_wb_version():
