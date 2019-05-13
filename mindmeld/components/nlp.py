@@ -29,7 +29,6 @@ from .. import path
 from ..core import ProcessedQuery, Bunch
 from ..exceptions import ProcessorError
 from ..resource_loader import ResourceLoader
-from .._version import validate_mindmeld_version
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
@@ -347,7 +346,6 @@ class NaturalLanguageProcessor(Processor):
         """
         super().__init__(app_path, resource_loader, config)
         self._app_path = app_path
-        validate_mindmeld_version(self._app_path)
 
         # initialize the system entity recognizer singleton
         SystemEntityRecognizer.get_instance(app_path)
