@@ -267,7 +267,7 @@ Now that your environment is set up, you can install MindMeld just as you would 
 
   pip install mindmeld
 
-If you see errors here, make sure that your ``pip`` package is up to date and your connection is active. The error is a dependency error (tensorflow, scikitlearn, ...) you can try to install/reinstall the specific dependency before installing MindMeld.
+If you see errors here, make sure that your ``pip`` package is up to date and your connection is active. If the error is a dependency error (tensorflow, scikitlearn, etc), you can try to install/reinstall the specific dependency before installing MindMeld.
 
 To verify your setup is good, run this command. If there is no error, the installation was successful:
 
