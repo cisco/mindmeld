@@ -48,6 +48,8 @@ class DirectiveNames:
     SUGGESTIONS = 'suggestions'
     """A view for a list of suggestions."""
 
+    SLEEP = 'sleep'
+    """A directive to sleep."""
 
 class DirectiveTypes:
     """A constants object for directive types."""
@@ -655,6 +657,10 @@ class DialogueResponder:
         """
         self._logger.warning('prompt() is deprecated. Please use reply() and listen() instead')
         self.reply(text)
+
+    def sleep(self):
+        """Adds a 'sleep' directive."""
+        self.act(DirectiveNames.SLEEP)
 
     @staticmethod
     def _choose(items):
