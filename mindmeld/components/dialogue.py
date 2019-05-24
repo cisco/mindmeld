@@ -658,9 +658,9 @@ class DialogueResponder:
         self._logger.warning('prompt() is deprecated. Please use reply() and listen() instead')
         self.reply(text)
 
-    def sleep(self):
+    def sleep(self, delay=0):
         """Adds a 'sleep' directive."""
-        self.act(DirectiveNames.SLEEP)
+        self.act(DirectiveNames.SLEEP, payload={'delay': delay})
 
     @staticmethod
     def _choose(items):
