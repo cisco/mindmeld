@@ -659,7 +659,11 @@ class DialogueResponder:
         self.reply(text)
 
     def sleep(self, delay=0):
-        """Adds a 'sleep' directive."""
+        """Adds a 'sleep' directive.
+        
+        Args:
+            delay (int): The amount of milliseconds to wait before putting the client to sleep.
+        """
         self.act(DirectiveNames.SLEEP, payload={'delay': delay})
 
     @staticmethod
