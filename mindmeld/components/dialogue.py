@@ -49,7 +49,7 @@ class DirectiveNames:
     """A view for a list of suggestions."""
 
     SLEEP = 'sleep'
-    """A directive to sleep."""
+    """A directive to put the client to sleep after a specified number of milliseconds."""
 
 class DirectiveTypes:
     """A constants object for directive types."""
