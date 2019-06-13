@@ -8,14 +8,13 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'bleach==1.5.0',  # tensorflow -> tensorboard -> bleach, prevents conflicts with jupyter
     'Click~=6.0',
-    'click-log==0.1.8',  # check WB3-191
+    'click-log==0.1.8',
     'elasticsearch5~=5.5',
     'Flask~=0.12',
     'Flask-Cors~=3.0',
     'nltk~=3.2',
-    'numpy>=1.14,<=1.14.5',  # tensorflow not working with latest version of numpy
+    'numpy~=1.14',
     'pandas~=0.22',
     'pip>=9.0.1',
     'py~=1.4',

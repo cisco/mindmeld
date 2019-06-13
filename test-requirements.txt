@@ -6,3 +6,4 @@ pytest-cov==2.4.0
 tox==2.6.0
 mock==2.0.0
 pytest-mock>=1.6.2
+pytest-asyncio>=0.8.0

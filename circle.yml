@@ -9,7 +9,6 @@ dependencies:
   cache_directories:
     - ~/mindmeld-workbench3/.tox
   override:
-    - pip install bleach==1.5.0
     - pip install -r dev-requirements.txt --extra-index-url=https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi -U
     - PIP_EXTRA_INDEX_URL=https://$PYPI_USER:$PYPI_PASSWORD@mindmeld.com/pypi tox --notest
   post:
