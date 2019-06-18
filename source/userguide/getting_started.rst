@@ -44,7 +44,7 @@ To test the application inside docker, you can make a request:
 
 .. code-block:: shell
 
-   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}'
+   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}' | python -m json.tool
 
 The output should be as follows:
 
@@ -126,7 +126,7 @@ Now issue the curl request again.
 
 .. code-block:: shell
 
-   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}'
+   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}' | python -m json.tool
 
 
 In the output json, notice the payload reflect the ``Alice`` text change we made:
@@ -267,7 +267,7 @@ Now that your environment is set up, you can install MindMeld just as you would 
 
   pip install mindmeld
 
-If you see errors here, you likely entered incorrect credentials during :ref:`Setup <getting_started_virtualenv_setup>`. Make sure you use your credentials for the MindMeld Learning Center.
+If you see errors here, make sure that your ``pip`` package is up to date and your connection is active. If the error is a dependency error (tensorflow, scikitlearn, etc), you can try to install/reinstall the specific dependency before installing MindMeld.
 
 To verify your setup is good, run this command. If there is no error, the installation was successful:
 

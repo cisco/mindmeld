@@ -25,10 +25,10 @@ requirements = [
     'py~=1.4',
     'python-dateutil~=2.6',
     'pytz>=2018.5',
-    'requests~=2.19',
     'scipy>=0.9,<2.0',
     'scikit-learn>=0.18.1,<0.20; python_version < "3.7"',
     'scikit-learn>=0.19.2,<0.20; python_version >= "3.7"',
+    'requests~=2.20',
     'tqdm~=4.15',
     'urllib3==1.25.3',
     'python-crfsuite~=0.9; python_version < "3.7"',
@@ -36,7 +36,7 @@ requirements = [
     'sklearn-crfsuite>=0.3.6,<1.0',
     'immutables~=0.9',
     'tensorflow~=1.2; python_version < "3.7"',
-    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
+    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"'
 ]
 
 setup_requirements = [
