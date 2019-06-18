@@ -48,6 +48,8 @@ class DirectiveNames:
     SUGGESTIONS = 'suggestions'
     """A view for a list of suggestions."""
 
+    SLEEP = 'sleep'
+    """A directive to put the client to sleep after a specified number of milliseconds."""
 
 class DirectiveTypes:
     """A constants object for directive types."""
@@ -655,6 +657,14 @@ class DialogueResponder:
         """
         self._logger.warning('prompt() is deprecated. Please use reply() and listen() instead')
         self.reply(text)
+
+    def sleep(self, delay=0):
+        """Adds a 'sleep' directive.
+        
+        Args:
+            delay (int): The amount of milliseconds to wait before putting the client to sleep.
+        """
+        self.act(DirectiveNames.SLEEP, payload={'delay': delay})
 
     @staticmethod
     def _choose(items):
