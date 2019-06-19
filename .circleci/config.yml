@@ -6,6 +6,11 @@ workflows:
   version: 2
   test-and-deploy:
     jobs:
+      - test-py3.7:
+          filters:
+            branches:
+              ignore:
+                - /.*docs.*/
       - test-py3.6:
           filters:
             branches:
@@ -32,6 +37,7 @@ workflows:
                 - docs/master
       - deploy-blueprint:
           requires:
+            - test-py3.7
             - test-py3.6
             - test-py3.5
           filters:
@@ -199,6 +205,16 @@ definitions:
 # Jobs
 
 jobs:
+  test-py3.7:
+    docker:
+      - image: circleci/python:3.7.0
+        environment:
+          PYTHON_VERSION: "3.7.0"
+          _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+      - *es-image
+      - *duckling-image
+    steps: *test-steps
+
   test-py3.6:
     docker:
       - image: circleci/python:3.6.6

@@ -15,7 +15,7 @@ import asyncio
 import pytest
 from mindmeld.components import Conversation, DialogueManager
 from mindmeld.components.dialogue import DialogueResponder
-from mindmeld.components.request import Params, FrozenParams
+from mindmeld.components.request import Params
 
 from .test_dialogue import create_request, create_responder
 
