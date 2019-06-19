@@ -8,30 +8,35 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 requirements = [
+    'attrs~=18.2',
     'bleach==1.5.0',  # tensorflow -> tensorboard -> bleach, prevents conflicts with jupyter
     'Click~=6.0',
     'click-log==0.1.8',  # check WB3-191
+    'distro~=1.3',
     'elasticsearch5~=5.5',
     'Flask~=0.12',
     'Flask-Cors~=3.0',
+    'future~=0.16.0',
     'nltk~=3.2',
-    'numpy~=1.14',
+    'numpy>=1.14,<=1.14.5; python_version < "3.7"',
+    'numpy~=1.15.0; python_version >= "3.7"',
     'pandas~=0.22',
     'pip>=9.0.1',
     'py~=1.4',
     'python-dateutil~=2.6',
-    'pytz>=2017.2',
-    'urllib3~=1.24.3',
+    'pytz>=2018.5',
+    'scipy>=0.9,<2.0',
+    'scikit-learn>=0.18.1,<0.20; python_version < "3.7"',
+    'scikit-learn>=0.19.2,<0.20; python_version >= "3.7"',
     'requests~=2.20',
-    'scipy~=0.9',
-    'scikit-learn>=0.18.1,<0.20',
     'tqdm~=4.15',
-    'python-crfsuite~=0.9',
+    'urllib3==1.25.3',
+    'python-crfsuite~=0.9; python_version < "3.7"',
+    'python-crfsuite>=0.9.6,<1.0; python_version >= "3.7"',
     'sklearn-crfsuite>=0.3.6,<1.0',
-    'tensorflow~=1.2',
-    'attrs~=18.2',
-    'distro~=1.3',
-    'immutables~=0.9'
+    'immutables~=0.9',
+    'tensorflow~=1.2; python_version < "3.7"',
+    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"'
 ]
 
 setup_requirements = [
@@ -74,6 +79,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
         'License :: OSI Approved :: Apache Software License'

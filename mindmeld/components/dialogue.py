@@ -51,6 +51,7 @@ class DirectiveNames:
     SLEEP = 'sleep'
     """A directive to put the client to sleep after a specified number of milliseconds."""
 
+
 class DirectiveTypes:
     """A constants object for directive types."""
 
@@ -660,7 +661,7 @@ class DialogueResponder:
 
     def sleep(self, delay=0):
         """Adds a 'sleep' directive.
-        
+
         Args:
             delay (int): The amount of milliseconds to wait before putting the client to sleep.
         """
