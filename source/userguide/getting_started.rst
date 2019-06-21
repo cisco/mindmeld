@@ -5,7 +5,7 @@ These instructions explain how to install MindMeld on a Unix-based system and se
 
 .. note::
 
-  MindMeld requires Python 3.4, 3.5, or 3.6.
+  MindMeld requires Python 3.4, 3.5, 3.6 or 3.7.
 
 
 Install MindMeld
@@ -281,15 +281,16 @@ To verify your setup is good, run this command. If there is no error, the instal
 4. Start the numerical parser
 """""""""""""""""""""""""""""
 
-MindMeld uses a Haskell-based numerical parser for detecting certain numeric expressions like times, dates, and quantities in user queries. Start the numerical parser with this command:
+MindMeld uses a Haskell-based numerical parser for detecting certain numeric expressions like times, dates, and quantities in user queries. The numerical parser is locally started on default port 7151 with this command:
 
 .. code-block:: shell
 
   mindmeld num-parse --start
 
-If you encounter an error like ``OS is incompatible with duckling executable``, it means that
-your operating system is not compatible with the pre-compiled numerical parser binary distributed
-with MindMeld. You instead need to run the numerical parser using Docker as shown below.
+You can start the numerical parser on a different port using the ``-p`` command-line flag, for example, ``mindmeld num-parse --start -p 9000`` starts the service on port 9000.
+If you encounter an error like ``OS is incompatible with duckling executable``, it means that your operating system is
+not compatible with the pre-compiled numerical parser binary distributed with MindMeld. You instead need to run the
+numerical parser using Docker as shown below.
 
 .. code-block:: shell
 
