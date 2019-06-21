@@ -386,7 +386,8 @@ class DialogueManager:
         if res and 'dialogue_state' in res:
             # Add dialogue flow's sub-dialogue_state if provided
             dialogue_state = '.'.join([dialogue_state, res["dialogue_state"]])
-        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+        responder.dialogue_state = dialogue_state
+        return responder
 
     async def _apply_handler_async(self, request, responder, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule
@@ -438,7 +439,8 @@ class DialogueManager:
         if res and 'dialogue_state' in res:
             # Add dialogue flow's sub-dialogue_state if provided
             dialogue_state = '.'.join([dialogue_state, res["dialogue_state"]])
-        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+        responder.dialogue_state = dialogue_state
+        return responder
 
     def reprocess(self, target_dialogue_state=None):
         """Forces the dialogue manager to back out of the flow based on the initial target
