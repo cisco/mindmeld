@@ -17,7 +17,7 @@ requirements = [
     'Flask-Cors~=3.0',
     'future~=0.16.0',
     'nltk~=3.2',
-    'numpy~=1.14',
+    'numpy~=1.14; python_version < "3.7"',
     'numpy~=1.15.0; python_version >= "3.7"',
     'pandas~=0.22',
     'pip>=9.0.1',
