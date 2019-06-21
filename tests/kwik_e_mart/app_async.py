@@ -112,8 +112,8 @@ async def exit_handler(request, responder):
 
 
 @send_store_hours.handle(intent='find_nearest_store')
-async def transition_flows(context, responder):
-    del context
+async def transition_flows(request, responder):
+    del request
     del responder
     send_store_hours.reprocess()
 
