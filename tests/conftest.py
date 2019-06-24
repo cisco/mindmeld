@@ -78,6 +78,15 @@ def kwik_e_mart_nlp(kwik_e_mart_app_path):
     return nlp
 
 
+@pytest.fixture(scope='session')
+def food_ordering_nlp(food_ordering_app_path):
+    """Provides a built processor instance"""
+    nlp = NaturalLanguageProcessor(app_path=food_ordering_app_path)
+    nlp.build()
+    nlp.dump()
+    return nlp
+
+
 @pytest.fixture
 def home_assistant_nlp(home_assistant_app_path):
     """Provides a built processor instance"""

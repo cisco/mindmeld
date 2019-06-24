@@ -14,10 +14,7 @@ import logging
 import sys
 import json
 import requests
-from mindmeld.components._config import get_system_entity_recognizer_config
-
-DUCKLING_URL = "http://localhost:7151"
-DUCKLING_ENDPOINT = "parse"
+from mindmeld.components._config import is_duckling_configured, get_system_entity_url_config
 
 NO_RESPONSE_CODE = -1
 
@@ -48,10 +45,12 @@ class SystemEntityRecognizer:
         else:
             if not app_path:
                 # The service is turned on by default
-                self.is_service_alive = True
+                self._use_duckling_api = True
             else:
-                self.is_service_alive = get_system_entity_recognizer_config(app_path)
-            SystemEntityRecognizer._instance = self
+                self._use_duckling_api = is_duckling_configured(app_path)
+
+        self.app_path = app_path
+        SystemEntityRecognizer._instance = self
 
     @staticmethod
     def get_instance(app_path=None):
@@ -69,10 +68,10 @@ class SystemEntityRecognizer:
 
     def get_response(self, data):
 
-        if not self.is_service_alive:
+        if not self._use_duckling_api:
             return [], NO_RESPONSE_CODE
 
-        url = '/'.join([DUCKLING_URL, DUCKLING_ENDPOINT])
+        url = get_system_entity_url_config(app_path=self.app_path)
 
         try:
             response = requests.request('POST', url, data=data)

@@ -51,8 +51,6 @@ CONTEXT_SETTINGS = {
     'auto_envvar_prefix': 'MM'
 }
 
-DUCKLING_PORT = '7151'
-
 
 def _version_msg():
     """Returns the MindMeld version, location and Python powering it."""
@@ -349,8 +347,9 @@ def _find_duckling_os_executable():
 
 @shared_cli.command('num-parse', context_settings=CONTEXT_SETTINGS)
 @click.option('--start/--stop', default=True, help='Start or stop numerical parser')
-def num_parser(start):
-    """Starts or stops the numerical parser service."""
+@click.option('-p', '--port', required=False, default='7151')
+def num_parser(start, port):
+    """Starts or stops the local numerical parser service."""
     if start:
         pid = _get_duckling_pid()
 
@@ -397,8 +396,7 @@ def num_parser(start):
         os.chmod(exec_path, st.st_mode | stat.S_IEXEC)
 
         # run duckling
-        duckling_service = subprocess.Popen([exec_path, '--port',
-                                             DUCKLING_PORT], stderr=subprocess.STDOUT)
+        duckling_service = subprocess.Popen([exec_path, '--port', port], stderr=subprocess.STDOUT)
 
         # duckling takes some time to start so sleep for a bit
         for _ in range(50):
