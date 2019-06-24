@@ -1290,20 +1290,23 @@ Configuring systems entities
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 System entities can be configured at the application level to be turned on/off. One might want to turn off system entity detection to reduce latency or if one does not have any system entities tagged in the application.
-By default, MindMeld enables system entity recognition in all apps using the `Duckling numerical parser <https://github.com/facebook/duckling>`_:
+By default, MindMeld enables system entity recognition in all apps using the `Duckling numerical parser <https://github.com/facebook/duckling>`_ locally on port 7151:
 
 .. code-block:: python
 
    NLP_CONFIG = {
-       'system_entity_recognizer': 'duckling'
+       'system_entity_recognizer': {
+          'type': 'duckling',
+          'url': 'http://localhost:7151/parse'
+       }
    }
 
-To turn it off, specify an empty value for the ``'system_entity_recognizer'`` key:
+To switch off system entity detection, specify an empty dictionary for the ``'system_entity_recognizer'`` key:
 
 .. code-block:: python
 
    NLP_CONFIG = {
-       'system_entity_recognizer': ''
+       'system_entity_recognizer': {}
    }
 
 

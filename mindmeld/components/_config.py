@@ -24,6 +24,7 @@ from .. import path
 logger = logging.getLogger(__name__)
 
 DUCKLING_SERVICE_NAME = 'duckling'
+DEFAULT_DUCKLING_URL = 'http://localhost:7151/parse'
 
 CONFIG_DEPRECATION_MAPPING = {
     'DOMAIN_CLASSIFIER_CONFIG': 'DOMAIN_MODEL_CONFIG',
@@ -521,7 +522,7 @@ DEFAULT_RANKING_CONFIG = {
 
 DEFAULT_NLP_CONFIG = {
     'resolve_entities_using_nbest_transcripts': [],
-    'system_entity_recognizer': 'duckling'
+    'system_entity_recognizer': {'type': DUCKLING_SERVICE_NAME, 'url': DEFAULT_DUCKLING_URL}
 }
 
 
@@ -547,9 +548,9 @@ def get_app_namespace(app_path):
     return _app_namespace
 
 
-def get_system_entity_recognizer_config(app_path):
-    """Returns True if the app config specifies that the system entity recognition
-        service should be run
+def is_duckling_configured(app_path):
+    """Returns True if the app config specifies that duckling should be run
+    as a system entity recognizer
 
     Args:
         app_path (str): A application path
@@ -558,8 +559,21 @@ def get_system_entity_recognizer_config(app_path):
         (bool): True if the app config specifies that the numerical parsing
             should be run
     """
+    config = get_nlp_config(app_path).get('system_entity_recognizer')
+
+    if type(config) == dict:
+        # We get into this conditional when the app has specified the system_entity_recognizer
+        # nlp config
+        return config.get('type') == DUCKLING_SERVICE_NAME
+    else:
+        # We get into this conditional when the app has not specified the system_entity_recognizer
+        # nlp config, in which case, we default to the duckling API
+        return True
+
+
+def get_system_entity_url_config(app_path):
     return get_nlp_config(app_path).get(
-        'system_entity_recognizer', 'duckling') == DUCKLING_SERVICE_NAME
+        'system_entity_recognizer', {}).get('url', DEFAULT_DUCKLING_URL)
 
 
 def get_classifier_config(clf_type, app_path=None, domain=None, intent=None, entity=None):
@@ -848,7 +862,7 @@ def get_nlp_config(app_path=None, config=None):
     try:
         module_conf = _get_config_module(app_path)
     except (OSError, IOError):
-        logger.info('No app configuration file found. Not configuring nbest inference.')
+        logger.info('No app configuration file found.')
         return _get_default_nlp_config()
 
     # Try provider first

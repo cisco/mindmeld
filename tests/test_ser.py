@@ -9,6 +9,7 @@ Tests for `ser` module (Duckling)
 """
 import pytest
 import requests
+from mindmeld import system_entity_recognizer
 
 NOW_TIMESTAMP = 1544706000000
 SECONDS_IN_HOUR = 3600
@@ -270,3 +271,25 @@ def test_time(query, predicted_texts, predicted_values):
         assert p in response_texts
     for p in predicted_values:
         assert p in response_values
+
+
+def test_system_entity_recognizer_component_no_config(kwik_e_mart_app_path):
+    # If the app has no config, then we need to default to duckling
+    result = system_entity_recognizer.SystemEntityRecognizer.get_instance(
+        app_path=kwik_e_mart_app_path).get_response({'text': 'test'})
+    assert result[1] == 200
+
+
+def test_system_entity_recognizer_component_empty_config(food_ordering_app_path):
+    # If the app has an empty config (ie. {}), then it should not run system entity
+    # detection
+
+    old_instance = system_entity_recognizer.SystemEntityRecognizer._instance
+    system_entity_recognizer.SystemEntityRecognizer._instance = None
+
+    result = system_entity_recognizer.SystemEntityRecognizer.get_instance(
+        app_path=food_ordering_app_path).get_response({'text': 'test'})
+
+    # reset system_entity_recognizer singleton
+    system_entity_recognizer.SystemEntityRecognizer._instance = old_instance
+    assert result[1] == -1

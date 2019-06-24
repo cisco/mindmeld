@@ -41,7 +41,7 @@ MindMeld has been used for applications in dozens of different domains by some o
 
 ## Quick Start
 
-Assuming you have pip installed with Python 3.4, Python 3.5 or Python 3.6 and Elasticsearch running in the background:
+Assuming you have pip installed with Python 3.4, Python 3.5, Python 3.6 or Python 3.7 and Elasticsearch running in the background:
 
 ```
 pip install mindmeld
