@@ -337,7 +337,8 @@ class DialogueManager:
             request, responder, target_dialogue_state=target_dialogue_state)
 
     def _apply_handler_sync(self, request, responder, target_dialogue_state=None):
-        """Applies the dialogue state handler for the most complex matching rule
+        """Applies the dialogue state handler for the most complex matching rule.
+        After three tries we backout and reset the target dialogue state.
 
          Args:
             request (Request): The request object.
@@ -523,7 +524,7 @@ class DialogueFlow(DialogueManager):
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
         app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
-        handler = self._apply_handler_async if self.async_mode else self._apply_handler_sync
+        handler = self._apply_flow_handler_async if self.async_mode else self._apply_flow_handler_sync
         app.add_dialogue_rule(self.flow_state, handler, targeted_only=True)
 
     @property
@@ -579,7 +580,7 @@ class DialogueFlow(DialogueManager):
 
         return _decorator
 
-    def _apply_handler_sync(self, request, responder=None):  # pylint: disable=arguments-differ
+    def _apply_flow_handler_sync(self, request, responder=None):  # pylint: disable=arguments-differ
         """Applies the dialogue state handler for the dialogue flow and set the target dialogue
         state to the flow state.
 
@@ -599,7 +600,7 @@ class DialogueFlow(DialogueManager):
 
         return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
-    async def _apply_handler_async(self, request, responder):
+    async def _apply_flow_handler_async(self, request, responder):
         """Applies the dialogue state handler for the dialogue flow and sets the target dialogue
        state to the flow state asynchronously.
 
