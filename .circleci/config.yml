@@ -82,7 +82,7 @@ definitions:
             source $BASH_ENV
 
             # upgrade pip to latest
-            pip install -U pip setuptools
+            pip install -U pip
 
             # install mindmeld and test requirements
             pip install -r test-requirements.txt
