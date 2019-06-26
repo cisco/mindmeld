@@ -327,7 +327,7 @@ class DialogueManager:
             target_dialogue_state (str, optional): The target dialogue state.
 
         Returns:
-            (dict): A dict containing the dialogue state and directives.
+            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.
         """
         if self.async_mode:
             return self._apply_handler_async(
@@ -346,7 +346,7 @@ class DialogueManager:
             target_dialogue_state (str, optional): The target dialogue state.
 
         Returns:
-            (dict): A dict containing the dialogue state and directives.
+            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.
         """
         for _ in range(3):
             try:
@@ -377,15 +377,15 @@ class DialogueManager:
             target_dialogue_state (str, optional): The target dialogue state.
 
         Returns:
-            (dict): A dict containing the dialogue state and directives.
+            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.
         """
         dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder.dialogue_state = dialogue_state
         res = handler(request, responder)
 
+        # Add dialogue flow's sub-dialogue_state if provided
         if res and 'dialogue_state' in res:
-            # Add dialogue flow's sub-dialogue_state if provided
             dialogue_state = '.'.join([dialogue_state, res["dialogue_state"]])
         responder.dialogue_state = dialogue_state
         return responder
@@ -399,7 +399,7 @@ class DialogueManager:
             target_dialogue_state (str, optional): The target dialogue state
 
         Returns:
-            dict: A dict containing the dialogue state and directives
+            DialogueResponder: A DialogueResponder containing the dialogue state and directives
         """
         for _ in range(3):
             try:
@@ -430,15 +430,15 @@ class DialogueManager:
             target_dialogue_state (str, optional): The target dialogue state
 
         Returns:
-            dict: A dict containing the dialogue state and directives
+            DialogueResponder: A DialogueResponder containing the dialogue state and directives
         """
         dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder.dialogue_state = dialogue_state
         res = await handler(request, responder)
 
+        # Add dialogue flow's sub-dialogue_state if provided
         if res and 'dialogue_state' in res:
-            # Add dialogue flow's sub-dialogue_state if provided
             dialogue_state = '.'.join([dialogue_state, res["dialogue_state"]])
         responder.dialogue_state = dialogue_state
         return responder
@@ -580,7 +580,7 @@ class DialogueFlow(DialogueManager):
 
         return _decorator
 
-    def _apply_flow_handler_sync(self, request, responder=None):  # pylint: disable=arguments-differ
+    def _apply_flow_handler_sync(self, request, responder):
         """Applies the dialogue state handler for the dialogue flow and set the target dialogue
         state to the flow state.
 
@@ -615,6 +615,7 @@ class DialogueFlow(DialogueManager):
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
             responder.params.target_dialogue_state = self.flow_state
+
         res = handler(request, responder)
         if asyncio.iscoroutine(res):
             await res
