@@ -41,7 +41,7 @@ def test_reprocess_handler(async_kwik_e_mart_app, kwik_e_mart_app_path):
 
 @pytest.mark.conversation
 def test_default_handler(async_kwik_e_mart_app, kwik_e_mart_app_path):
-    """Tests that the params are cleared in one trip from app to mindmeld."""
+    """Tests that the params are cleared in one trip from app to mm."""
     convo = Conversation(app=async_kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True)
     convo.process('When does that open?')
     assert_target_dialogue_state(convo, 'send_store_hours_flow')
@@ -49,18 +49,6 @@ def test_default_handler(async_kwik_e_mart_app, kwik_e_mart_app_path):
     assert_target_dialogue_state(convo, 'send_store_hours_flow')
     assert_reply(directives,
                  templates='Sorry, I did not get you. Which store would you like to know about?')
-
-
-@pytest.mark.conversation
-def test_reprocess_handler(async_kwik_e_mart_app, kwik_e_mart_app_path):
-    """Tests that the params are cleared in one trip from app to mindmeld."""
-    convo = Conversation(app=async_kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True)
-    convo.process('When does that open?')
-    assert_target_dialogue_state(convo, 'send_store_hours_flow')
-    directives = convo.process('Where is my nearest Kwik-E-Mart store?').directives
-    assert_target_dialogue_state(convo, 'send_store_hours_flow')
-    assert_reply(directives,
-                 templates="I'm not sure. You haven't told me where you are!")
 
 
 @pytest.mark.conversation
