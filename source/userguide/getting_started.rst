@@ -24,138 +24,78 @@ If you're going to be using MindMeld often, **we recommend you do the virtualenv
 Install with Docker
 ^^^^^^^^^^^^^^^^^^^
 
-The ``Dockerfile`` provided by MindMeld contains MindMeld and all its dependencies. Follow these steps to get started using Docker:
+In the Docker setup, we use Docker only for running MindMeld dependencies, namely, Elasticsearch and the Numerical Parser service. The developer will then use their local machine to run the MindMeld project.
+
+1. Pull and run Docker container
+""""""""""""""""""""""""""""""""
 
 #. First, `install Docker <https://www.docker.com/community-edition#/download>`_, and run it.
-#. Then, open a terminal (shell) and run this command:
+#. Then, open a terminal (shell) and run these commands:
 
 .. code-block:: shell
 
-   docker pull mindmeldworkbench/mindmeld
-   docker run -p 0.0.0.0:7150:7150 mindmeldworkbench/mindmeld -ti -d
+   docker pull mindmeldworkbench/dep:latest
+   docker run -p 0.0.0.0:9200:9200 -p 0.0.0.0:7151:7151 -p 0.0.0.0:9300:9300 mindmeldworkbench/dep -ti -d
 
-The Docker container contains Elasticsearch, the numerical parsing service, the MindMeld library and the Home Assistant application for you to test. The container will build and serve the application on port 7150 which is exposed to the external environment.
+2. Install prerequisites
+""""""""""""""""""""""""
 
-The application code and data is located at directory ``/root/home_assistant`` on the docker container.
-
-For more information on the Home Assistant application, see :ref:`Home Assistant <home_assistant>` blueprint application.
-
-To test the application inside docker, you can make a request:
+Next, we install ``python``, ``pip`` and ``virtualenv`` on the local machine using a script we made. These are pre-requisite libraries needed for most python projects. Currently, the script works for Mac and Ubuntu 16/18 operating systems:
 
 .. code-block:: shell
 
-   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}' | python -m json.tool
-
-The output should be as follows:
-
-.. code-block:: console
-
-   {
-     "directives": [
-       {
-         "name": "reply",
-         "payload": {
-           "text": "Hi, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances."
-         },
-         "type": "view"
-       }
-     ],
-     .
-     .
-     .
-
-Editing application with Docker
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If you want to make edits to the Home Assistant application in the running docker container, we can enter the docker container, modify the files, commit the changes and spin off a new container with the changes. Here is an example code snippet on how do do it:
-
-Find the container id of the docker image running Home Assistant.
-
-.. code-block:: shell
-
-   docker ps
-
-.. code-block:: console
-
-   CONTAINER ID        IMAGE                         COMMAND                  CREATED             STATUS              PORTS                                        NAMES
-   d696c64e9924        mindmeldworkbench/mindmeld    "/bin/sh -c 'export …"   7 minutes ago       Up 7 minutes        9200/tcp, 0.0.0.0:7150->7150/tcp, 9300/tcp   nervous_panini
-
-With the container's ID as d696c64e9924, we connect to the docker's bash environment.
-
-.. code-block:: shell
-
-   docker exec -it d696c64e9924 bash
-
-
-Now, open the ``home_assistant/greeting.py`` file in a text editor to make a change to one of the natural language responses. Instead of the agent replying ``Hi, I am your home assistant..``, we will replace the text to ``Hi Alice, I am your home assistant..``. Here is what the edited ``home_assistant/greeting.py`` file would look like:
-
-.. code-block:: shell
-
-   # -*- coding: utf-8 -*-
-   """This module contains the dialogue states for the 'greeting' domain
-   in the MindMeld home assistant blueprint application
-   """
-   from .root import app
-
-
-   @app.handle(intent='greet')
-   def greet(request, responder):
-       responder.reply('Hi Alice, I am your home assistant. I can help you to check weather, set temperature'
-                       ' and control the lights and other appliances.')
-
-   @app.handle(intent='exit')
-   def exit(request, responder):
-       responder.reply('Bye!')
-
-
-Make sure you save the file and quit the docker shell.
-
-.. code-block:: shell
-
-   exit
-
-Commit the edited docker file system, stop the existing running container and restart the edited docker container.
-
-.. code-block:: shell
-
-   docker commit d696c64e9924 mindmeldworkbench/mindmeld:edited
-   docker stop d696c64e9924
-   docker run -p 0.0.0.0:7150:7150 mindmeldworkbench/mindmeld:edited -ti -d
-
-Now issue the curl request again.
-
-.. code-block:: shell
-
-   curl -X POST http://localhost:7150/parse -H 'Content-Type: application/json' -d '{"text":"good morning"}' | python -m json.tool
-
-
-In the output json, notice the payload reflect the ``Alice`` text change we made:
-
-.. code-block:: console
-
-   {
-     "directives": [
-       {
-         "name": "reply",
-         "payload": {
-           "text": "Hi Alice, I am your home assistant. I can help you to check weather, set temperature and control the lights and other appliances."
-         },
-         "type": "view"
-       }
-     ],
-     .
-     .
-     .
-
-
-.. note::
-
-  Using ``docker commit`` makes a copy of the existing docker container, adding several gigabytes to your file system. Consider pruning your docker containers on regular intervals using the command ``docker system prune``.
-
+  bash -c "$(curl -s  https://devcenter.mindmeld.com/scripts/mindmeld_lite_init.sh)"
 
 If you encounter any issues, see :ref:`Troubleshooting <getting_started_troubleshooting>`.
 
-Proceed to :ref:`Begin New Project <getting_started_begin_new_project>`.
+3. Set up a virtual environment
+"""""""""""""""""""""""""""""""
+
+To prepare an isolated environment for MindMeld installation using ``virtualenv``, follow the following steps.
+
+- Create a folder for containing all your MindMeld projects, and navigate to it:
+
+.. code-block:: shell
+
+  mkdir my_mm_workspace
+  cd my_mm_workspace
+
+- Setup a virtual environment by running one of the following commands:
+
+.. code-block:: shell
+
+   virtualenv -p python3 .
+
+- Activate the virtual environment:
+
+.. code-block:: shell
+
+  source bin/activate
+
+
+Later, when you're done working with MindMeld, you can deactivate the virtual environment with the ``deactivate`` command.
+
+.. code-block:: shell
+
+  deactivate
+
+
+4. Install the MindMeld package
+"""""""""""""""""""""""""""""""
+
+Now that your environment is set up, you can install MindMeld just as you would any other Python package. This may take a few minutes.
+
+.. code-block:: shell
+
+  pip install mindmeld
+
+If you see errors here, make sure that your ``pip`` package is up to date and your connection is active. If the error is a dependency error (tensorflow, scikitlearn, etc), you can try to install/reinstall the specific dependency before installing MindMeld.
+
+To verify your setup is good, run this command. If there is no error, the installation was successful:
+
+.. code-block:: shell
+
+  mindmeld
 
 
 .. _getting_started_virtualenv_setup:
