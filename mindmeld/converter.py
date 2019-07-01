@@ -31,7 +31,7 @@ class Converter(ABC):
         pass
 
     @abstractmethod
-    def create_test_data(self):
+    def create_training_data(self):
         pass
 
     @abstractmethod
