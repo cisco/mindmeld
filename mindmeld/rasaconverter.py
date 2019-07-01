@@ -34,9 +34,10 @@ class Rasaconverter(Converter):
     def __create_entities_directories(mindmeld_project_directory, entities):
         for entity in entities:
             Converter.create_directory(mindmeld_project_directory + "/entities/" + entity)
-            with open("mindmeld_project/entities/" + entity + "/gazetteer.txt", "w") as f:
+            print(mindmeld_project_directory + "/entities/" + entity)
+            with open(mindmeld_project_directory + "/entities/" + entity + "/gazetteer.txt", "w") as f:
                 f.close()
-            with open("mindmeld_project/entities/" + entity + "/mapping.json", "w") as f:
+            with open(mindmeld_project_directory + "/entities/" + entity + "/mapping.json", "w") as f:
                 #HAVE TO DOCUMENT WHAT USER HAS TO DO
                 f.write("{\n  \"entities\":[]\n}")
                 f.close()
@@ -252,7 +253,7 @@ class Rasaconverter(Converter):
         # create intents subdirectories
         Rasaconverter.__create_intents_directories(mindmeld_project_directory, intents)
 
-         # read entities i domain.yml
+         # read entities in domain.yml
         entities = self.__read_entities()
 
         # create entities subdirectories
@@ -412,7 +413,8 @@ __all__ = ['app']
         with open(mindmeld_project_directory + "/__init__.py", "w") as f:
             f.writelines(file_lines)
     
-    def create_main(self, mindmeld_project_directory):
+    @staticmethod
+    def create_main(mindmeld_project_directory):
         string = '''# -*- coding: utf-8 -*-
 """This module defines the command line interface for this app. Use
 `python -m <app_name>` to see available commands.
@@ -425,7 +427,8 @@ if __name__ == '__main__':
             f.write(string)
             f.close()
     
-    def create_config(self, mindmeld_project_directory):
+    @staticmethod
+    def create_config(mindmeld_project_directory):
         string = '''# -*- coding: utf-8 -*-
 """This module contains a template MindMeld app configuration"""
 
@@ -476,7 +479,8 @@ PARSER_CONFIG = {
         with open(mindmeld_project_directory + "/config.py", "w") as f:
             f.write(string)
 
-    def create_custom_features(self, mindmeld_project_directory):
+    @staticmethod
+    def create_custom_features(mindmeld_project_directory):
         string = '''from mindmeld.models.helpers import register_query_feature, register_entity_feature
 
 
@@ -524,7 +528,8 @@ def extract_entity_span_start(**args):
         Rasaconverter.create_mindmeld_directory(self.mindmeld_project_directory)
         # Transfer over test data from Rasa project and reformat to Mindmeld project
         self.create_training_data(self.rasa_project_directory, self.mindmeld_project_directory)
-        self.create_main(self.mindmeld_project_directory)
+        Rasaconverter.create_main(self.mindmeld_project_directory)
         self.create_init(self.mindmeld_project_directory)
-        self.create_config(self.mindmeld_project_directory)
+        Rasaconverter.create_config(self.mindmeld_project_directory)
+        Rasaconverter.create_custom_features(self.mindmeld_project_directory)
         
