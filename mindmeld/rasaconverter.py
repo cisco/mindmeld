@@ -31,6 +31,17 @@ class Rasaconverter(Converter):
             Converter.create_directory(mindmeld_project_directory + "/domains/default/" + intent) 
 
     @staticmethod
+    def __create_entities_directories(mindmeld_project_directory, entities):
+        for entity in entities:
+            Converter.create_directory(mindmeld_project_directory + "/entities/" + entity)
+            with open("mindmeld_project/entities/" + entity + "/gazetteer.txt", "w") as f:
+                f.close()
+            with open("mindmeld_project/entities/" + entity + "/mapping.json", "w") as f:
+                #HAVE TO DOCUMENT WHAT USER HAS TO DO
+                f.write("{\n  \"entities\":[]\n}")
+                f.close()
+
+    @staticmethod
     def __is_line_intent_definiton(line):
         return (line[0:10] == "## intent:")
 
@@ -55,6 +66,8 @@ class Rasaconverter(Converter):
             mindmeld_entity = match.replace("[","{").replace("]","|").replace("(","").replace(")","}")
             mindmend_intent_example = mindmend_intent_example.replace(match, mindmeld_entity)
             intent_f.write(mindmend_intent_example)
+            # add this to the respective entity gazetteer file as well
+            Rasaconverter.create_entity_files(mindmeld_entity)
 
     @staticmethod
     def __remove_comments_from_line(line):
@@ -114,6 +127,13 @@ class Rasaconverter(Converter):
     def __read_templates(self):
         domain_file = self.__read_domain_file()
         return domain_file['templates']
+    
+    @staticmethod
+    def create_entity_files(mm_entry):
+        entity = mm_entry.strip('{}').split("|")
+        with open("mindmeld_project/entities/" + entity[1] + "/gazetteer.txt", "a") as f:
+            f.write(entity[0] + "\n")
+            f.close()
 
     @staticmethod
     def __is_valid_function_name(name):
@@ -232,6 +252,12 @@ class Rasaconverter(Converter):
         # create intents subdirectories
         Rasaconverter.__create_intents_directories(mindmeld_project_directory, intents)
 
+         # read entities i domain.yml
+        entities = self.__read_entities()
+
+        # create entities subdirectories
+        Rasaconverter.__create_entities_directories(mindmeld_project_directory, entities)
+        
         # try and open data files from rasa project
         nlu_data_loc = rasa_project_directory + "/data/nlu_data.md"
         try:
