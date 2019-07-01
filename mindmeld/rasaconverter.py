@@ -14,9 +14,9 @@
 """This module contains the Rasacoverter class used to convert Rasa projects
 into Mindmeld projects"""
 
+from keyword import iskeyword
 import re, os, yaml, copy
 from converter import Converter
-from keyword import iskeyword
 
 
 class Rasaconverter(Converter):
@@ -41,7 +41,7 @@ class Rasaconverter(Converter):
     @staticmethod
     def __create_intent_training_file(intent_directory):
         Converter.create_directory(intent_directory)
-        with open(intent_directory + "/test.txt", "w") as f:
+        with open(intent_directory + "/train.txt", "w") as f:
                 f.close()
 
     @staticmethod
@@ -66,7 +66,7 @@ class Rasaconverter(Converter):
 
     @staticmethod
     def __add_example_to_training_file(current_intent_path, line):
-        with open(current_intent_path + "/test.txt", "a") as intent_f:
+        with open(current_intent_path + "/train.txt", "a") as intent_f:
             intent_example = line[2:]
             intent_example = Rasaconverter.__remove_comments_from_line(intent_example) + "\n"
             if Rasaconverter.__does_intent_ex_contain_entity(intent_example):
@@ -223,8 +223,8 @@ class Rasaconverter(Converter):
         Converter.create_directory(mindmeld_project_path + "/domains/default")
         Converter.create_directory(mindmeld_project_path + "/entities")
 
-    def create_test_data(self, rasa_project_directory, mindmeld_project_directory):
-        """Method to transfer and reformat the test data in a Rasa Project
+    def create_training_data(self, rasa_project_directory, mindmeld_project_directory):
+        """Method to transfer and reformat the training data in a Rasa Project
         """
         # read intents listed in domain.yml
         intents = self.__read_intents()
@@ -399,14 +399,106 @@ if __name__ == '__main__':
             f.write(string)
             f.close()
     
-    def create_config(self):
-        pass
+    def create_config(self, mindmeld_project_directory):
+        string = '''# -*- coding: utf-8 -*-
+"""This module contains a template MindMeld app configuration"""
+
+# The namespace of the application. Used to prevent collisions in supporting services across
+# applications. If not set here, the app's enclosing directory name is used.
+# APP_NAMESPACE = 'app-name'
+
+# Dictionaries for the various NLP classifier configurations
+
+# An example decision tree model for intent classification
+INTENT_CLASSIFIER_CONFIG = {
+    'model_type': 'text',
+    'model_settings': {
+        'classifier_type': 'dtree'
+    },
+    'param_selection': {
+        'type': 'k-fold',
+        'k': 10,
+        'grid': {
+            'max_features': ['log2', 'sqrt', 0.01, 0.1]
+        },
+    },
+    "features": {
+        "exact": {},
+    }
+}
+
+"""
+# Fill in the other model configurations if necessary
+# DOMAIN_CLASSIFIER_CONFIG = {}
+# ENTITY_RECOGNIZER_CONFIG = {}
+# ROLE_CLASSIFIER_CONFIG = {}
+"""
+
+# A example configuration for the parser
+"""
+# *** Note: these are place holder entity types ***
+PARSER_CONFIG = {
+    'grandparent': {
+        'parent': {},
+        'child': {'max_instances': 1}
+    },
+    'parent': {
+        'child': {'max_instances': 1}
+    }
+}
+"""'''
+        with open(mindmeld_project_directory + "/config.py", "w") as f:
+            f.write(string)
+
+    def create_custom_features(self, mindmeld_project_directory):
+        string = '''from mindmeld.models.helpers import register_query_feature, register_entity_feature
+
+
+@register_query_feature(feature_name='average-token-length')
+def extract_average_token_length(**args):
+    """
+    Example query feature that gets the average length of normalized tokens in the query
+
+    Returns:
+        (function) A feature extraction function that takes a query and
+            returns the average normalized token length
+    """
+    def _extractor(query, resources):
+        tokens = query.normalized_tokens
+        average_token_length = sum([len(t) for t in tokens]) / len(tokens)
+        return {'average_token_length': average_token_length}
+
+    return _extractor
+
+
+@register_entity_feature(feature_name='entity-span-start')
+def extract_entity_span_start(**args):
+    """
+    Example entity feature that gets the start span for each entity
+
+    Returns:
+        (function) A feature extraction function that returns the start span of the entity
+    """
+    def _extractor(example, resources):
+        query, entities, entity_index = example
+        features = {}
+
+        current_entity = entities[entity_index]
+        current_entity_token_start = current_entity.token_span.start
+
+        features['entity_span_start'] = current_entity_token_start
+        return features
+
+    return _extractor'''
+        with open(mindmeld_project_directory + "/custom_features.py", "w") as f:
+            f.write(string)
 
     def convert_project(self):
         # Create project directory with sub folders
         Rasaconverter.create_mindmeld_directory(self.mindmeld_project_directory)
         # Transfer over test data from Rasa project and reformat to Mindmeld project
-        self.create_test_data(self.rasa_project_directory, self.mindmeld_project_directory)
+        self.create_training_data(self.rasa_project_directory, self.mindmeld_project_directory)
         self.create_main(self.mindmeld_project_directory)
         self.create_init(self.mindmeld_project_directory)
+        self.create_config(self.mindmeld_project_directory)
         

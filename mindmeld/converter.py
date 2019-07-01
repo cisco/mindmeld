@@ -27,6 +27,10 @@ class Converter(ABC):
         pass
 
     @abstractmethod
+    def create_mindmeld_directory(self):
+        pass
+
+    @abstractmethod
     def create_test_data(self):
         pass
 
@@ -50,4 +54,3 @@ class Converter(ABC):
             except OSError as e:
                 print("Cannot create directory at %s" % directory)
                 print(e)
-
