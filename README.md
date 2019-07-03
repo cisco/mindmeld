@@ -52,6 +52,11 @@ python -m home_assistant converse
 
 For detailed installation instructions, see [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html). To start with pre-built sample applications, see [MindMeld Blueprints](http://www.mindmeld.com/docs/blueprints/overview.html).
 
+## Citation
+
+Please cite [this paper](https://www.aclweb.org/anthology/D18-2027) if you use MindMeld in your work:
+>Raghuvanshi, A., Carroll, L. and Raghunathan, K., 2018, November. Developing Production-Level Conversational Interfaces with Shallow Semantic Parsing. In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing: System Demonstrations (pp. 157-162) [[bib]](https://scholar.googleusercontent.com/scholar.bib?q=info:P9u26XbK87wJ:scholar.google.com/&output=citation&scisdr=CgUsWBhHEMa91_rocCg:AAGBfm0AAAAAXRztaCgjOD3cGG7MGlyFymFf12ipgDqe&scisig=AAGBfm0AAAAAXRztaOGRSBZn4fwfVHtE-_BgfZExQJnL&scisf=4&ct=citation&cd=-1&hl=en)
+
 ## Want to learn more about MindMeld?
 
 Visit the [MindMeld website](https://www.mindmeld.com/).
