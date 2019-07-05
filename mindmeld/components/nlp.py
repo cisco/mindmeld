@@ -666,7 +666,7 @@ class DomainProcessor(Processor):
         if len(self.intents) > 1:
             intent_eval = self.intent_classifier.evaluate(label_set=label_set)
             if intent_eval:
-                print("Intent classification accuracy for the '%s' domain: %s".format(
+                print("Intent classification accuracy for the {} domain: {}".format(
                     self.name, intent_eval.get_accuracy()))
                 if print_stats:
                     intent_eval.print_stats()
