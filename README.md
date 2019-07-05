@@ -55,7 +55,17 @@ For detailed installation instructions, see [Getting Started](http://www.mindmel
 ## Citation
 
 Please cite [this paper](https://www.aclweb.org/anthology/D18-2027) if you use MindMeld in your work:
->Raghuvanshi, A., Carroll, L. and Raghunathan, K., 2018, November. Developing Production-Level Conversational Interfaces with Shallow Semantic Parsing. In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing: System Demonstrations (pp. 157-162)[[bib]](images/bibtex.txt)
+>Raghuvanshi, A., Carroll, L. and Raghunathan, K., 2018, November. Developing Production-Level Conversational Interfaces with Shallow Semantic Parsing. In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing: System Demonstrations (pp. 157-162)
+```
+@inproceedings{raghuvanshi2018developing,
+  title={Developing Production-Level Conversational Interfaces with Shallow Semantic Parsing},
+  author={Raghuvanshi, Arushi and Carroll, Lucien and Raghunathan, Karthik},
+  booktitle={Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing:
+             System Demonstrations},
+  pages={157--162},
+  year={2018}
+}
+```
 
 ## Want to learn more about MindMeld?
 

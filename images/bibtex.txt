@@ -1,7 +1,0 @@
-@inproceedings{raghuvanshi2018developing,
-  title={Developing Production-Level Conversational Interfaces with Shallow Semantic Parsing},
-  author={Raghuvanshi, Arushi and Carroll, Lucien and Raghunathan, Karthik},
-  booktitle={Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing: System Demonstrations},
-  pages={157--162},
-  year={2018}
-}
