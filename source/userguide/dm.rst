@@ -519,7 +519,13 @@ Similar to the ``@app.handle`` decorator for regular dialogue state handlers, we
           responder.reply('Sorry I cannot help you. Please try again.')
           responder.exit_flow()
 
-We can designate an exit state handler by setting ``exit_flow=True``. After the dialogue manager enters this state, subsequent turns will no longer be bound to the flow. We can also exit the flow by invoking the :meth:`Responder.exit_flow` method as shown in the previous code snippets.
+There are three ways to exit a Dialogue Flow:
+
+1. We can exit the flow by invoking the :meth:`Responder.exit_flow` method as shown in the above code snippet.
+
+2. We can designate an exit state handler by setting ``exit_flow=True``. After the dialogue manager enters this state, subsequent turns will no longer be bound to the flow.
+
+3. We can force the current flow to exit and return to the main dialogue manager flow by invoking :meth:`Responder.exit_flow` method as shown in the code snippet below.
 
 .. code:: python
   :emphasize-lines: 1
@@ -527,6 +533,15 @@ We can designate an exit state handler by setting ``exit_flow=True``. After the 
   @send_store_hours.handle(intent='exit', exit_flow=True)
   def exit_handler(request, responder):
       responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
+
+.. code:: python
+  :emphasize-lines: 1
+
+  @send_store_hours.handle(intent='find_nearest_store')
+  def transition_flows(request, responder):
+      del request
+      del responder
+      send_store_hours.reprocess()
 
 An important caveat to note is that we also need to add a flow-specific handler for `the original entry intent` (in this case, ``get_store_hours``).
 
