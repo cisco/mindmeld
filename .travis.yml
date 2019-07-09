@@ -13,7 +13,7 @@ services:
 # command to install dependencies
 before_install:
   - docker pull mindmeldworkbench/duckling:master
-  - docker run mindmeldworkbench/duckling:master --port 7151
+  - docker run mindmeldworkbench/duckling:master --port 7151 -d
 install:
   - pip install --upgrade pip
   - pip install -e .
