@@ -4,6 +4,8 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+jdk:
+  - openjdk8
 # command to install dependencies
 install:
   - pip install --upgrade pip
