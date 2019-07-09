@@ -15,7 +15,8 @@
 projects into mindmeld projects"""
 
 from abc import ABC, abstractmethod
-import sys, os, re, yaml
+import os
+
 
 class Converter(ABC):
 
@@ -37,7 +38,7 @@ class Converter(ABC):
     @abstractmethod
     def create_main(self):
         pass
-    
+
     @abstractmethod
     def create_init(self):
         pass
@@ -45,12 +46,11 @@ class Converter(ABC):
     @abstractmethod
     def create_config(self):
         pass
-    
+
     @staticmethod
     def create_directory(directory):
         if not os.path.isdir(directory):
             try:
                 os.mkdir(directory)
-            except OSError as e:
+            except OSError:
                 print("Cannot create directory at %s" % directory)
-                print(e)
