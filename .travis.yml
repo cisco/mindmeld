@@ -9,6 +9,11 @@ install:
   - pip install --upgrade pip
   - pip install -e .
   - pip install -r test-requirements.txt
+# command to install services
+services:
+  - elasticsearch
+before_script:
+  - sleep 10
 # command to run tests
 script:
   - ./lintme
