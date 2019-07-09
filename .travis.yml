@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+# command to install dependencies
+install:
+  - pip install --upgrade pip
+  - pip install -e .
+  - pip instlal -r test-requirements.txt
+# command to run tests
+script:
+  - ./lintme
