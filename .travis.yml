@@ -24,4 +24,4 @@ before_script:
 script:
   - ./lintme
   - mkdir ~/test-reports
-  - pytest --junitxml=~/test-reports/junit.xml --cov-report html:/home/circleci/test-reports/cov_html --cov=mindmeld
+  - pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld
