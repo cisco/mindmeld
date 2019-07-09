@@ -6,19 +6,22 @@ python:
   - "3.7"
 jdk:
   - openjdk8
+# command to install services
+services:
+  - elasticsearch
+  - docker
 # command to install dependencies
+before_install:
+  - docker pull mindmeldworkbench/duckling:master
+  - docker run mindmeldworkbench/duckling:master --port 7151
 install:
   - pip install --upgrade pip
   - pip install -e .
   - pip install -r test-requirements.txt
-# command to install services
-services:
-  - elasticsearch
 before_script:
   - sleep 10
 # command to run tests
 script:
   - ./lintme
-  - mindmeld num-parse
   - mkdir ~/test-reports
   - pytest --junitxml=~/test-reports/junit.xml --cov-report html:/home/circleci/test-reports/cov_html --cov=mindmeld
