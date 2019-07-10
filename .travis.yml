@@ -1,7 +1,9 @@
 dist: xenial
 language: python
 python:
+  - "3.5"
   - "3.6"
+  - "3.7"
 jdk:
   - openjdk8
 # command to install services
@@ -10,7 +12,7 @@ services:
 # command to install dependencies
 install:
   - pip install --upgrade pip
-  - pip install -e .
+  - pip install .
   - pip install -r test-requirements.txt
 before_script:
   - sleep 10
