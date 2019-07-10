@@ -1,0 +1,23 @@
+dist: xenial
+language: python
+python:
+  - "3.5"
+  - "3.6"
+jdk:
+  - openjdk8
+# command to install services
+services:
+  - elasticsearch
+# command to install dependencies
+install:
+  - pip install --upgrade pip
+  - pip install .
+  - pip install -r test-requirements.txt
+before_script:
+  - sleep 10
+# command to run tests
+script:
+  - mindmeld num-parse
+  - ./lintme
+  - mkdir ~/test-reports
+  - pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld
