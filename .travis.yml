@@ -9,11 +9,7 @@ jdk:
 # command to install services
 services:
   - elasticsearch
-  - docker
 # command to install dependencies
-before_install:
-  - docker pull mindmeldworkbench/duckling:master
-  - docker run -d mindmeldworkbench/duckling:master --port 7151
 install:
   - pip install --upgrade pip
   - pip install -e .
@@ -22,6 +18,7 @@ before_script:
   - sleep 10
 # command to run tests
 script:
+  - mindmeld num-parse
   - ./lintme
   - mkdir ~/test-reports
   - pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld
