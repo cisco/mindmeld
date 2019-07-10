@@ -14,9 +14,12 @@
 """This module contains the DialogFlowconverter class used to convert DialogFlow projects
 into Mindmeld projects"""
 
-from keyword import iskeyword
-import re, os, yaml, copy, json
+import re
+import os
+import json
+
 from converter import Converter
+
 
 class DialogFlowconverter(Converter):
     def __init__(self, dialogflow_project_directory, mindmeld_project_directory):
@@ -34,20 +37,21 @@ class DialogFlowconverter(Converter):
     def __create_entities_directories(dialogflow_project_directory, mindmeld_project_directory, entities):
         """ Creates directories + files for english entities. """
         for entity in entities:
-            dialogflow_entity_file = dialogflow_project_directory + "/entities/" + entity + "_entries_en.json" #TODO: make this work for non-english, multiple entries
+            dialogflow_entity_file = dialogflow_project_directory + "/entities/" \
+                    + entity + "_entries_en.json" #TODO: make this work for non-english, multiple entries
 
             if os.path.exists(dialogflow_entity_file):
                 mindmeld_entity_directory = mindmeld_project_directory + "/entities/" + entity
                 Converter.create_directory(mindmeld_entity_directory)
-                DialogFlowconverter.__create_entity_file(dialogflow_entity_file, mindmeld_entity_directory, entity)
+                DialogFlowconverter.__create_entity_file(dialogflow_entity_file, mindmeld_entity_directory)
             else:
                 print("cannot find en entity file.")
 
     @staticmethod
-    def __create_entity_file(dialogflow_entity_file, mindmeld_entity_directory, entity):
+    def __create_entity_file(dialogflow_entity_file, mindmeld_entity_directory):
         source_en        = open(dialogflow_entity_file, 'r')
-        target_gazetteer = open(mindmeld_entity_directory + "/gazetteer.txt"  , 'w')
-        target_mapping   = open(mindmeld_entity_directory + "/mapping.json"   , 'w')
+        target_gazetteer = open(mindmeld_entity_directory + "/gazetteer.txt", 'w')
+        target_mapping   = open(mindmeld_entity_directory + "/mapping.json" , 'w')
 
         datastore = json.load(source_en)
         mapping_dict = {"entities" : []}
@@ -68,7 +72,6 @@ class DialogFlowconverter(Converter):
         target_gazetteer.close()
         target_mapping.close()
 
-    @staticmethod
     def __read_entities(self):
         """ Gets the names of the entities from DialogFlow as a list"""
         dialogflow_entities_directory = os.path.join(self.dialogflow_project_directory, "entities")
@@ -86,7 +89,7 @@ class DialogFlowconverter(Converter):
         return list(entities)
 
     def create_training_data(self, dialogflow_project_directory, mindmeld_project_directory):
-        entities = self.__read_entities(self)
+        entities = self.__read_entities()
         DialogFlowconverter.__create_entities_directories(dialogflow_project_directory, mindmeld_project_directory, entities)
 
     def create_main(self):
