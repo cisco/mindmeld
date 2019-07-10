@@ -9,17 +9,15 @@ with open('README.md') as readme_file:
 
 requirements = [
     'attrs~=18.2',
-    'bleach==1.5.0',  # tensorflow -> tensorboard -> bleach, prevents conflicts with jupyter
     'Click~=6.0',
-    'click-log==0.1.8',  # check WB3-191
+    'click-log==0.1.8',
     'distro~=1.3',
     'elasticsearch5~=5.5',
     'Flask~=0.12',
     'Flask-Cors~=3.0',
     'future~=0.16.0',
     'nltk~=3.2',
-    'numpy>=1.14,<=1.14.5; python_version < "3.7"',
-    'numpy~=1.15.0; python_version >= "3.7"',
+    'numpy~=1.15',
     'pandas~=0.22',
     'pip>=9.0.1',
     'py~=1.4',
@@ -28,9 +26,9 @@ requirements = [
     'scipy>=0.9,<2.0',
     'scikit-learn>=0.18.1,<0.20; python_version < "3.7"',
     'scikit-learn>=0.19.2,<0.20; python_version >= "3.7"',
-    'requests~=2.20',
+    'requests~=2.20.1',
     'tqdm~=4.15',
-    'urllib3==1.25.3',
+    'urllib3==1.24.3',
     'python-crfsuite~=0.9; python_version < "3.7"',
     'python-crfsuite>=0.9.6,<1.0; python_version >= "3.7"',
     'sklearn-crfsuite>=0.3.6,<1.0',
@@ -54,7 +52,7 @@ test_requirements = [
 
 setup(
     name='mindmeld',
-    version='4.1.0',
+    version='4.1.4',
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type='text/markdown',

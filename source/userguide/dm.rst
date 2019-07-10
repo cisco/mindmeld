@@ -241,7 +241,7 @@ The table below details the ``responder`` methods to send actions, also termed `
 +-------------------------------+----------------------------------------------------------------+
 | :py:meth:`responder.direct`   | Used to send an arbitrary directive object                     |
 +-------------------------------+----------------------------------------------------------------+
-| :py:meth:`responder.sleep`    | Used to put the client to sleep after a specified number of   |
+| :py:meth:`responder.sleep`    | Used to put the client to sleep after a specified number of    |
 |                               | milliseconds                                                   |
 +-------------------------------+----------------------------------------------------------------+
 

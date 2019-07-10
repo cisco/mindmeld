@@ -41,7 +41,7 @@ MindMeld has been used for applications in dozens of different domains by some o
 
 ## Quick Start
 
-Assuming you have pip installed with Python 3.4, Python 3.5 or Python 3.6 and Elasticsearch running in the background:
+Assuming you have pip installed with Python 3.4, Python 3.5, Python 3.6 or Python 3.7 and Elasticsearch running in the background:
 
 ```
 pip install mindmeld
@@ -51,6 +51,21 @@ python -m home_assistant converse
 ```
 
 For detailed installation instructions, see [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html). To start with pre-built sample applications, see [MindMeld Blueprints](http://www.mindmeld.com/docs/blueprints/overview.html).
+
+## Citation
+
+Please cite [this paper](https://www.aclweb.org/anthology/D18-2027) if you use MindMeld in your work:
+>Raghuvanshi, A., Carroll, L. and Raghunathan, K., 2018, November. Developing Production-Level Conversational Interfaces with Shallow Semantic Parsing. In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing: System Demonstrations (pp. 157-162)
+```
+@inproceedings{raghuvanshi2018developing,
+  title={Developing Production-Level Conversational Interfaces with Shallow Semantic Parsing},
+  author={Raghuvanshi, Arushi and Carroll, Lucien and Raghunathan, Karthik},
+  booktitle={Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing:
+             System Demonstrations},
+  pages={157--162},
+  year={2018}
+}
+```
 
 ## Want to learn more about MindMeld?
 
