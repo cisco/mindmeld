@@ -565,7 +565,7 @@ def is_duckling_configured(app_path):
     """
     config = get_nlp_config(app_path).get('system_entity_recognizer')
 
-    if type(config) == dict:
+    if isinstance(config, dict):
         # We get into this conditional when the app has specified the system_entity_recognizer
         # nlp config
         return config.get('type') == DUCKLING_SERVICE_NAME
