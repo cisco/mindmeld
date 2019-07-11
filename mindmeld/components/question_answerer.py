@@ -78,7 +78,7 @@ class QuestionAnswerer:
         Args:
             index (str): The name of an index.
             size (int): The maximum number of records, default to 10.
-            query_type (str): Whether the search is over structured or unstructured text
+            query_type (str): Whether the search is over structured or unstructured text.
             id (str): The id of a particular document to retrieve.
             _sort (str): Specify the knowledge base field for custom sort.
             _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
@@ -475,7 +475,7 @@ class Search:
                 >>> s.filter(field='price', gte=1, lt=10)
 
         Args:
-            query_type (str): Whether the filter is over structured or unstructured text
+            query_type (str): Whether the filter is over structured or unstructured text.
             kwargs: A keyword argument to specify the filter text and the knowledge base text field.
             field (str): knowledge base field name for range filter.
             gt (number or str): range filter operator for greater than.
@@ -802,7 +802,7 @@ class Search:
             self.field = field
             self.field_info = field_info
             self.value = value
-            self.query_type=query_type
+            self.query_type = query_type
             self.range_gt = range_gt
             self.range_gte = range_gte
             self.range_lt = range_lt
