@@ -16,6 +16,9 @@ projects into mindmeld projects"""
 
 from abc import ABC, abstractmethod
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Converter(ABC):
@@ -53,4 +56,4 @@ class Converter(ABC):
             try:
                 os.mkdir(directory)
             except OSError:
-                print("Cannot create directory at %s" % directory)
+                logger.error("Cannot create directory at %s", directory)
