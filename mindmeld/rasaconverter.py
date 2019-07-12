@@ -18,22 +18,24 @@ from keyword import iskeyword
 import re
 import os
 import copy
+import logging
 import yaml
 
 from converter import Converter
 
+logger = logging.getLogger(__name__)
 
-class Rasaconverter(Converter):
+
+class RasaConverter(Converter):
 
     def __init__(self, rasa_project_directory, mindmeld_project_directory):
-        if not os.path.exists(os.path.dirname(rasa_project_directory)):
+        if os.path.exists(os.path.dirname(rasa_project_directory)):
             self.rasa_project_directory = rasa_project_directory
             self.mindmeld_project_directory = mindmeld_project_directory
 
-    @staticmethod
-    def __create_intents_directories(mindmeld_project_directory, intents):
+    def __create_intents_directories(self, mindmeld_project_directory, intents):
         for intent in intents:
-            Converter.create_directory(mindmeld_project_directory + "/domains/default/" + intent)
+            self.create_directory(mindmeld_project_directory + "/domains/default/" + intent)
 
     @staticmethod
     def __create_entities_directories(mindmeld_project_directory, entities):
@@ -74,7 +76,7 @@ class Rasaconverter(Converter):
             mindmend_intent_example = mindmend_intent_example.replace(match, mindmeld_entity)
             intent_f.write(mindmend_intent_example)
             # add this to the respective entity gazetteer file as well
-            Rasaconverter.create_entity_files(mindmeld_entity)
+            RasaConverter.create_entity_files(mindmeld_entity)
 
     @staticmethod
     def __remove_comments_from_line(line):
@@ -88,34 +90,26 @@ class Rasaconverter(Converter):
     def __add_example_to_training_file(current_intent_path, line):
         with open(current_intent_path + "/train.txt", "a") as intent_f:
             intent_example = line[2:]
-            intent_example = Rasaconverter.__remove_comments_from_line(intent_example) + "\n"
-            if Rasaconverter.__does_intent_ex_contain_entity(intent_example):
-                Rasaconverter.__write_intent_with_extinty(intent_f, intent_example)
+            intent_example = RasaConverter.__remove_comments_from_line(intent_example) + "\n"
+            if RasaConverter.__does_intent_ex_contain_entity(intent_example):
+                RasaConverter.__write_intent_with_extinty(intent_f, intent_example)
             else:
                 intent_f.write(intent_example)
 
     def __read_domain_file(self):
-        if os.path.isfile(self.rasa_project_directory + "/domain.yml"):
-            try:
-                with open(self.rasa_project_directory + "/domain.yml", "r") as stream:
-                    domain_data_loaded = yaml.safe_load(stream)
-                    return domain_data_loaded
-            except IOError as e:
-                print("Can not open domain.yml file at %s"
-                      % self.rasa_project_directory + "/domain.yml")
-                print(e)
-        elif os.path.isfile(self.rasa_project_directory + "/domain.yaml"):
-            try:
-                with open(self.rasa_project_directory + "/domain.yml", "r") as stream:
-                    domain_data_loaded = yaml.safe_load(stream)
-                    return domain_data_loaded
-            except IOError as e:
-                print("Can not open domain.yml file at %s"
-                      % self.rasa_project_directory + "/domain.yaml")
-                print(e)
-        else:
-            print("Could not find domain.yml file in project directory")
-            raise FileNotFoundError
+        for file_ending in ["yaml","yml"]:
+            file_name = self.rasa_project_directory + "/domain." + file_ending
+            if os.path.isfile(file_name):
+                try:
+                    with open(file_name, "r") as stream:
+                        domain_data_loaded = yaml.safe_load(stream)
+                        return domain_data_loaded
+                except IOError as e:
+                    logger.error("Can not open domain.yml file at %s",
+                          file_name)
+                    logger.error(e)
+        logger.error("Could not find domain.yml file in project directory")
+        raise FileNotFoundError
 
     def __read_entities(self):
         domain_file = self.__read_domain_file()
@@ -155,7 +149,7 @@ class Rasaconverter(Converter):
     @staticmethod
     def __get_story_name(stories_line):
         if "<!--" in stories_line:
-            return Rasaconverter.__remove_comments_from_line(
+            return RasaConverter.__remove_comments_from_line(
                     stories_line.replace("## ", "")).rstrip()
         else:
             return stories_line.replace("## ", "").rstrip()
@@ -185,16 +179,16 @@ class Rasaconverter(Converter):
 
     @staticmethod
     def __get_intent_with_entity(stories_line):
-        if Rasaconverter.__does_intent_have_entity(stories_line):
+        if RasaConverter.__does_intent_have_entity(stories_line):
             entities_with_values = re.search(r"\{.*\}", stories_line)
             entities_with_values = entities_with_values.group(0)
-            entities_list = Rasaconverter.__clean_up_entities_list(entities_with_values)
+            entities_list = RasaConverter.__clean_up_entities_list(entities_with_values)
             start_of_entity = stories_line.find(entities_with_values)
-            intent = Rasaconverter.__remove_comments_from_line(
+            intent = RasaConverter.__remove_comments_from_line(
                 stories_line[2:start_of_entity]).rstrip()
             return intent, entities_list
         else:
-            intent = Rasaconverter.__remove_comments_from_line(stories_line[2:]).rstrip()
+            intent = RasaConverter.__remove_comments_from_line(stories_line[2:]).rstrip()
             entities_list = []
             return intent, entities_list
 
@@ -211,19 +205,19 @@ class Rasaconverter(Converter):
                     stories_lines = f.readlines()
                     max_lines = len(stories_lines)
                     for line_num, line in enumerate(stories_lines):
-                        if Rasaconverter.__is_story_name(line):
-                            current_story_name = Rasaconverter.__get_story_name(line)
+                        if RasaConverter.__is_story_name(line):
+                            current_story_name = RasaConverter.__get_story_name(line)
                             continue
-                        elif Rasaconverter.__is_intent(line):
-                            current_intent, current_entities = Rasaconverter \
+                        elif RasaConverter.__is_intent(line):
+                            current_intent, current_entities = RasaConverter \
                                 .__get_intent_with_entity(line)
                             current_step["intent"] = copy.deepcopy(current_intent)
                             current_step["entities"] = copy.deepcopy(current_entities)
                             continue
-                        elif Rasaconverter.__is_action(line):
+                        elif RasaConverter.__is_action(line):
                             current_actions.append(
-                                Rasaconverter.__remove_comments_from_line(line[3:]).rstrip())
-                            if ((line_num + 1) < max_lines) and Rasaconverter.__is_action(
+                                RasaConverter.__remove_comments_from_line(line[3:]).rstrip())
+                            if ((line_num + 1) < max_lines) and RasaConverter.__is_action(
                                                                     stories_lines[line_num + 1]):
                                 continue
                             else:
@@ -266,13 +260,13 @@ class Rasaconverter(Converter):
         intents = self.__read_intents()
 
         # create intents subdirectories
-        Rasaconverter.__create_intents_directories(mindmeld_project_directory, intents)
+        RasaConverter.__create_intents_directories(mindmeld_project_directory, intents)
 
         # read entities in domain.yml
         entities = self.__read_entities()
 
         # create entities subdirectories
-        Rasaconverter.__create_entities_directories(mindmeld_project_directory, entities)
+        RasaConverter.__create_entities_directories(mindmeld_project_directory, entities)
 
         # try and open data files from rasa project
         nlu_data_loc = rasa_project_directory + "/data/nlu_data.md"
@@ -285,15 +279,15 @@ class Rasaconverter(Converter):
         current_intent = ''
         current_intent_path = ''
         for line in nlu_data_lines:
-            if (Rasaconverter.__is_line_intent_definiton(line)):
-                current_intent = Rasaconverter.__get_intent_from_line(line)
+            if (RasaConverter.__is_line_intent_definiton(line)):
+                current_intent = RasaConverter.__get_intent_from_line(line)
                 current_intent_path = mindmeld_project_directory \
                     + "/domains/default/" + current_intent
                 # create data text file for intent examples`
-                Rasaconverter.__create_intent_training_file(current_intent_path)
+                RasaConverter.__create_intent_training_file(current_intent_path)
             else:
                 if (line[0] == '-'):
-                    Rasaconverter.__add_example_to_training_file(current_intent_path, line)
+                    RasaConverter.__add_example_to_training_file(current_intent_path, line)
 
     def __write_init_header(self):
         string = '''from mindmeld import Application
@@ -323,7 +317,7 @@ __all__ = ['app']
 
     @staticmethod
     def __write_function_declaration(action, f):
-        if Rasaconverter.__is_valid_function_name(action):
+        if RasaConverter.__is_valid_function_name(action):
             function_declartion_string = "def {}(request, responder):\n".format(action)
             f.write(function_declartion_string)
         else:
@@ -364,13 +358,13 @@ __all__ = ['app']
     @staticmethod
     def __write_functions(actions, templates, f):
         for action in actions:
-            Rasaconverter.__write_function_declaration(action, f)
+            RasaConverter.__write_function_declaration(action, f)
             if action in templates:
                 # Get list of templates per action
                 action_templates = templates[action]
-                prompts_list = Rasaconverter.__get_text_prompts_list(action_templates)
-                Rasaconverter.__write_function_body_prompt(prompts_list, f)
-                Rasaconverter.__write_responder_lines(f)
+                prompts_list = RasaConverter.__get_text_prompts_list(action_templates)
+                RasaConverter.__write_function_body_prompt(prompts_list, f)
+                RasaConverter.__write_responder_lines(f)
             f.write('\n')
 
     @staticmethod
@@ -401,7 +395,7 @@ __all__ = ['app']
         actions = self.__read_actions()
         templates = self.__read_templates()
         # Write all functions for each action
-        Rasaconverter.__write_functions(actions, templates, f)
+        RasaConverter.__write_functions(actions, templates, f)
         f.close()
         # Read contents of current file
         file_lines = self.__read_file_lines()
@@ -415,11 +409,11 @@ __all__ = ['app']
                 entities = step['entities']
                 actions = step['actions']
                 # attach handle to correct function
-                app_handle_string = Rasaconverter.__get_app_handle(intent, entities)
-                Rasaconverter.__attach_handle_to_function(app_handle_string, actions[0], file_lines)
+                app_handle_string = RasaConverter.__get_app_handle(intent, entities)
+                RasaConverter.__attach_handle_to_function(app_handle_string, actions[0], file_lines)
                 # check if more than 1 action per intent
                 if len(actions) > 1:
-                    Rasaconverter.__attach_actions_to_function(actions[0], actions[1:], file_lines)
+                    RasaConverter.__attach_actions_to_function(actions[0], actions[1:], file_lines)
         # write all lines back to file
         with open(mindmeld_project_directory + "/__init__.py", "w") as f:
             f.writelines(file_lines)
@@ -536,10 +530,10 @@ def extract_entity_span_start(**args):
 
     def convert_project(self):
         # Create project directory with sub folders
-        Rasaconverter.create_mindmeld_directory(self.mindmeld_project_directory)
+        self.create_mindmeld_directory(self.mindmeld_project_directory)
         # Transfer over test data from Rasa project and reformat to Mindmeld project
         self.create_training_data(self.rasa_project_directory, self.mindmeld_project_directory)
-        Rasaconverter.create_main(self.mindmeld_project_directory)
+        self.create_main(self.mindmeld_project_directory)
         self.create_init(self.mindmeld_project_directory)
-        Rasaconverter.create_config(self.mindmeld_project_directory)
-        Rasaconverter.create_custom_features(self.mindmeld_project_directory)
+        self.create_config(self.mindmeld_project_directory)
+        self.create_custom_features(self.mindmeld_project_directory)
