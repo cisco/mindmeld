@@ -405,14 +405,15 @@ class NaturalLanguageProcessor(Processor):
                 if verbose:
                     # predict_proba() returns sorted list of tuples
                     # ie, [(<class1>, <confidence>), (<class2>, <confidence>),...]
-                    domain_proba = self.domain_classifier.predict_proba(query)
+                    domain_proba = self.domain_classifier.predict_proba(
+                        query, dynamic_resource=dynamic_resource)
                     # Since domain_proba is sorted by class with highest confidence,
                     # get that as the predicted class
-                    domain = domain_proba[0][0]
+                    return domain_proba[0][0], domain_proba
                 else:
-                    domain = self.domain_classifier.predict(query,
-                                                            dynamic_resource=dynamic_resource)
-                return domain, domain_proba
+                    domain = self.domain_classifier.predict(
+                        query, dynamic_resource=dynamic_resource)
+                    return domain, None
             else:
                 if len(allowed_nlp_classes) == 1:
                     domain = list(allowed_nlp_classes.keys())[0]
@@ -420,7 +421,8 @@ class NaturalLanguageProcessor(Processor):
                         domain_proba = [(domain, 1.0)]
                     return domain, domain_proba
                 else:
-                    sorted_domains = self.domain_classifier.predict_proba(query)
+                    sorted_domains = self.domain_classifier.predict_proba(
+                        query, dynamic_resource=dynamic_resource)
                     if verbose:
                         domain_proba = sorted_domains
                     for ordered_domain, _ in sorted_domains:
@@ -695,7 +697,8 @@ class DomainProcessor(Processor):
                     if verbose:
                         intent_proba = [(intent, 1.0)]
                 else:
-                    sorted_intents = self.intent_classifier.predict_proba(top_query)
+                    sorted_intents = self.intent_classifier.predict_proba(
+                        top_query, dynamic_resource=dynamic_resource)
                     intent = None
                     if verbose:
                         intent_proba = sorted_intents
