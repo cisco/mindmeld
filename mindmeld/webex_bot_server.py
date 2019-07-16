@@ -28,6 +28,35 @@ class WebexBotServer:
         self.ACCESS_TOKEN_WITH_BEARER = 'Bearer ' + self.ACCESS_TOKEN
         self.CISCO_API_URL = 'https://api.ciscospark.com/v1'
 
+        @self.app.route('/', methods=['POST'])
+        def handle_message(self):
+            me = self.spark_api.people.me()
+            data = request.get_json()
+
+            for key in ['personId', 'id', 'roomId']:
+                if key not in data['data'].keys():
+                    return 'OK'
+
+            if data['id'] != self.WEBHOOK_ID:
+                self.logger.debug("Retrieved Webhook_id {} doesn't match".format(data['id']))
+                return 'OK'
+
+            person_id = data['data']['personId']
+            msg_id = data['data']['id']
+            txt = self._get_message(msg_id)
+            room_id = data['data']['roomId']
+
+            if 'text' not in txt:
+                return 'OK'
+
+            message = str(txt['text']).lower()
+
+            # Ignore the bot's own responses, else it would go into an infinite loop
+            # of answering it's own questions.
+            if person_id != me.id:
+                self._post_message(room_id, self.conv.say(message)[0])
+            return 'OK'
+
     def run(self, host='localhost', port=7150):
         self.app.run(host=host, port=port)
 
@@ -48,32 +77,3 @@ class WebexBotServer:
         response = json.loads(resp.text)
         response['status_code'] = str(resp.status_code)
         return response
-
-    @self.app.route('/', methods=['POST'])
-    def handle_message(self):
-        me = self.spark_api.people.me()
-        data = request.get_json()
-
-        for key in ['personId', 'id', 'roomId']:
-            if key not in data['data'].keys():
-                return 'OK'
-
-        if data['id'] != self.WEBHOOK_ID:
-            self.logger.debug("Retrieved Webhook_id {} doesn't match".format(data['id']))
-            return 'OK'
-
-        person_id = data['data']['personId']
-        msg_id = data['data']['id']
-        txt = self._get_message(msg_id)
-        room_id = data['data']['roomId']
-
-        if 'text' not in txt:
-            return 'OK'
-
-        message = str(txt['text']).lower()
-
-        # Ignore the bot's own responses, else it would go into an infinite loop
-        # of answering it's own questions.
-        if person_id != me.id:
-            self._post_message(room_id, self.conv.say(message)[0])
-        return 'OK'
