@@ -11,7 +11,7 @@ import requests
 from ciscosparkapi import CiscoSparkAPI
 
 
-class WebexBotServer():
+class WebexBotServer:
 
     def __init__(self, app, WEBHOOK_ID, ACCESS_TOKEN, conv):
         self.app = app
