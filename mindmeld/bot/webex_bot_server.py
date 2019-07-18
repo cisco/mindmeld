@@ -74,7 +74,8 @@ class WebexBotServer:
         return response
 
     def _post_message(self, room_id, text):
-        headers = {'Authorization': self.ACCESS_TOKEN_WITH_BEARER, 'content-type': 'application/json'}
+        headers = {'Authorization': self.ACCESS_TOKEN_WITH_BEARER,
+                   'content-type': 'application/json'}
         payload = {'roomId': room_id, 'text': text}
         resp = requests.post(url=self._url('/messages'), json=payload, headers=headers)
         response = json.loads(resp.text)
