@@ -12,20 +12,23 @@ from ciscosparkapi import CiscoSparkAPI
 
 
 class WebexBotServer:
+    """
+    A sample server class for Webex Teams integration with any MindMeld application
+    """
 
-    def __init__(self, app, WEBHOOK_ID, ACCESS_TOKEN, conv):
+    def __init__(self, app, webhook_id, access_token, conv):
         self.app = app
-        self.WEBHOOK_ID = WEBHOOK_ID
-        self.ACCESS_TOKEN = ACCESS_TOKEN
+        self.webhook_id = webhook_id
+        self.access_token = access_token
         self.conv = conv
 
         self.logger = logging.getLogger(__name__)
 
-        if not self.WEBHOOK_ID or not self.ACCESS_TOKEN:
-            raise Exception('WEBHOOK_ID and BOT_ACCESS_TOKEN are not set')
+        if not self.webhook_id or not self.access_token:
+            raise Exception('webhook_id and bot_access_token are not set')
 
-        self.spark_api = CiscoSparkAPI(self.ACCESS_TOKEN)
-        self.ACCESS_TOKEN_WITH_BEARER = 'Bearer ' + self.ACCESS_TOKEN
+        self.spark_api = CiscoSparkAPI(self.access_token)
+        self.ACCESS_TOKEN_WITH_BEARER = 'Bearer ' + self.access_token
         self.CISCO_API_URL = 'https://api.ciscospark.com/v1'
 
         @self.app.route('/', methods=['POST'])
@@ -37,8 +40,8 @@ class WebexBotServer:
                 if key not in data['data'].keys():
                     return 'OK'
 
-            if data['id'] != self.WEBHOOK_ID:
-                self.logger.debug("Retrieved Webhook_id {} doesn't match".format(data['id']))
+            if data['id'] != self.webhook_id:
+                self.logger.debug("Retrieved webhook_id {} doesn't match".format(data['id']))
                 return 'OK'
 
             person_id = data['data']['personId']

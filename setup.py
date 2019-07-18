@@ -34,7 +34,8 @@ requirements = [
     'sklearn-crfsuite>=0.3.6,<1.0',
     'immutables~=0.9',
     'tensorflow~=1.2; python_version < "3.7"',
-    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"'
+    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
+    'ciscosparkapi'
 ]
 
 setup_requirements = [
