@@ -20,11 +20,11 @@ def utter_thanks(request, responder):
     responder.listen()
 
 
-@app.handle(intent='name')
-@app.handle(intent='fullname', has_entities=['firstname', 'lastname'])
+@app.handle(intent='name', has_entity='name')
+@app.handle(intent='fullname', has_entities=['name', 'lastname'])
 def utter_greet(request, responder):
     name = request.context['name']
-    prompts = ['Nice to you meet you {}. How can I help?'.format(name)]
+    prompts = ['Nice to you meet you {name}. How can I help?']
     responder.reply(prompts)
     responder.listen()
 

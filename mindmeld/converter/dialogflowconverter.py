@@ -11,17 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains the DialogFlowconverter class used to convert DialogFlow projects
+"""This module contains the DialogFlowConverter class used to convert DialogFlow projects
 into Mindmeld projects"""
 
 import re
 import os
 import json
+import logging
 
-from converter import Converter
+from mindmeld.converter.converter import Converter
+
+logger = logging.getLogger(__name__)
 
 
-class DialogFlowconverter(Converter):
+class DialogFlowConverter(Converter):
     def __init__(self, dialogflow_project_directory, mindmeld_project_directory):
         self.dialogflow_project_directory = dialogflow_project_directory
         self.mindmeld_project_directory = mindmeld_project_directory
@@ -45,10 +48,10 @@ class DialogFlowconverter(Converter):
             if os.path.exists(dialogflow_entity_file):
                 mindmeld_entity_directory = mindmeld_project_directory + "/entities/" + entity
                 Converter.create_directory(mindmeld_entity_directory)
-                DialogFlowconverter.__create_entity_file(dialogflow_entity_file,
+                DialogFlowConverter.__create_entity_file(dialogflow_entity_file,
                                                          mindmeld_entity_directory)
             else:
-                print("cannot find en entity file.")
+                logger.error("cannot find en entity file.")
 
     @staticmethod
     def __create_entity_file(dialogflow_entity_file, mindmeld_entity_directory):
@@ -93,7 +96,7 @@ class DialogFlowconverter(Converter):
 
     def create_training_data(self, dialogflow_project_directory, mindmeld_project_directory):
         entities = self.__read_entities()
-        DialogFlowconverter.__create_entities_directories(dialogflow_project_directory,
+        DialogFlowConverter.__create_entities_directories(dialogflow_project_directory,
                                                           mindmeld_project_directory, entities)
 
     def create_main(self):
@@ -107,7 +110,7 @@ class DialogFlowconverter(Converter):
 
     def convert_project(self):
         # Create project directory with sub folders
-        DialogFlowconverter.create_mindmeld_directory(self.mindmeld_project_directory)
+        DialogFlowConverter.create_mindmeld_directory(self.mindmeld_project_directory)
         # Transfer over test data from Rasa project and reformat to Mindmeld project
 
         self.create_training_data(self.dialogflow_project_directory,

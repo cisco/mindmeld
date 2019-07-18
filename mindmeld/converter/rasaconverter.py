@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains the RasaCoverter class used to convert Rasa projects
+"""This module contains the Rasacoverter class used to convert Rasa projects
 into Mindmeld projects"""
 
 from keyword import iskeyword
@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class RasaConverter(Converter):
+
     def __init__(self, rasa_project_directory, mindmeld_project_directory):
         if os.path.exists(os.path.dirname(rasa_project_directory)):
             self.rasa_project_directory = rasa_project_directory
@@ -312,8 +313,17 @@ __all__ = ['app']
     @staticmethod
     def _get_app_handle(intent, entities):
         has_entity_string = ', has_entity='
+        has_entities_string = ', has_entities=['
         entities_string = ""
-        if len(entities) > 0:
+        if len(entities) > 1:
+            entities_string = has_entities_string
+            for entity_value in entities:
+                entity_string = entity_value.split(":")[0]
+                if entity_value == entities[-1]:
+                    entities_string += "'" + entity_string + "']"
+                else:
+                    entities_string += "'" + entity_string + "', "
+        elif len(entities) == 1:
             for entity_value in entities:
                 entity_string = entity_value.split(":")[0]
                 entities_string += has_entity_string + "'" + entity_string + "'"
@@ -378,8 +388,9 @@ __all__ = ['app']
                     # If no templates, write a blank function
                     f.write("    # No templates were provided for action\n")
                     f.write("    pass\n")
-            f.write('\n')
-            f.write('\n')
+            if action != actions[-1]:
+                f.write('\n')
+                f.write('\n')
 
     @staticmethod
     def _attach_handle_to_function(handle, action, file_lines):
@@ -458,7 +469,8 @@ __all__ = ['app']
         self.create_mindmeld_directory(self.mindmeld_project_directory)
         # Transfer over test data from Rasa project and reformat to Mindmeld project
         self.create_training_data(self.rasa_project_directory, self.mindmeld_project_directory)
-        self.create_main(self.mindmeld_project_directory, os.getcwd())
+        file_loc = os.path.dirname(os.path.realpath(__file__))
+        self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_init(self.mindmeld_project_directory)
-        self.create_config(self.mindmeld_project_directory, os.getcwd())
-        self.create_custom_features(self.mindmeld_project_directory, os.getcwd())
+        self.create_config(self.mindmeld_project_directory, file_loc)
+        self.create_custom_features(self.mindmeld_project_directory, file_loc)
