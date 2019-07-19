@@ -1134,7 +1134,7 @@ class EntityProcessor(Processor):
             self.role_classifier.load(incremental_model_path if incremental_timestamp else model_path)
             self.entity_resolver.load()
         except EntityResolverConnectionError:
-            logger.warning('Cannot connect to ES; Entity Resolver is not loaded.')
+            logger.warning('Cannot connect to ES, so Entity Resolver is not loaded.')
 
     def _evaluate(self, print_stats, label_set="test"):
         if len(self.role_classifier.roles) > 1:
