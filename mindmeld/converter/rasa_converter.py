@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 
 
 class RasaConverter(Converter):
-
+    """The class is a sub class of the abstract Converter class. This class 
+    contains the methods required to convert a Rasa project into a Mindmeld project
+    """
     def __init__(self, rasa_project_directory, mindmeld_project_directory):
         if os.path.exists(os.path.dirname(rasa_project_directory)):
             self.rasa_project_directory = rasa_project_directory
@@ -464,7 +466,26 @@ __all__ = ['app']
             f.write(string)
 
     def convert_project(self):
-        """Main function that will convert a Rasa project into a Mindmeld project
+        """Main function that will convert a Rasa project into a Mindmeld project.
+
+        The Rasa project consists of three major files that contain much of data
+            that is converted into the Mindmeld project:
+        /domain.yml - Contains all of the intents, entities, actions, and templates
+            used in the rasa project
+        /data/stories.md - Contains the stories which are used to match intents and
+            actions together
+        /data/nlu_data.md - Contains the training data for each intent. Some of the
+            training data may contain entities
+
+        limitations:
+        - Rasa has the ability to have custom actions, which is not supported by
+        the converter.
+        - Rasa has the ability to handle multiple intents per query, while Mindmeld 
+        does not.
+        - Rasa training data may be json format, which is not currently supported.
+        - Rasa has a feature called Rasa forms which is not currently supported.
+        - Rasa's configuration files are not transfered, instead generic Mindmeld
+        configuration files are copied over.
         """
         # Create project directory with sub folders
         self.create_mindmeld_directory(self.mindmeld_project_directory)
@@ -475,4 +496,3 @@ __all__ = ['app']
         self.create_init(self.mindmeld_project_directory)
         self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_custom_features(self.mindmeld_project_directory, file_loc)
-        quit()
