@@ -30,6 +30,8 @@ HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)
 AENEID_FILE = 'aeneid.txt'
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
 HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'home_assistant')
+RASA_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter_test/rasa_sample_project')
+MINDMELD_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter_test/mindmeld_project')
 
 
 @pytest.fixture
@@ -67,6 +69,16 @@ def food_ordering_app_path():
 @pytest.fixture(scope='session')
 def home_assistant_app_path():
     return HOME_ASSISTANT_APP_PATH
+
+
+@pytest.fixture(scope='session')
+def rasa_project_path():
+    return RASA_PROJECT_PATH
+
+
+@pytest.fixture(scope='session')
+def mindmeld_project_path():
+    return MINDMELD_PROJECT_PATH
 
 
 @pytest.fixture(scope='session')

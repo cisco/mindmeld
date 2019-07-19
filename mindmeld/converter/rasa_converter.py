@@ -32,6 +32,8 @@ class RasaConverter(Converter):
         if os.path.exists(os.path.dirname(rasa_project_directory)):
             self.rasa_project_directory = rasa_project_directory
             self.mindmeld_project_directory = mindmeld_project_directory
+        else:
+            raise FileNotFoundError
 
     def _create_intents_directories(self, mindmeld_project_directory, intents):
         for intent in intents:
@@ -211,16 +213,16 @@ class RasaConverter(Converter):
                     stories_lines = f.readlines()
                     max_lines = len(stories_lines)
                     for line_num, line in enumerate(stories_lines):
-                        if RasaConverter._is_story_name(line):
+                        if self._is_story_name(line):
                             current_story_name = RasaConverter._get_story_name(line)
                             continue
-                        elif RasaConverter._is_intent(line):
-                            current_intent, current_entities = RasaConverter \
+                        elif self._is_intent(line):
+                            current_intent, current_entities = self \
                                 ._get_intent_with_entity(line)
                             current_step["intent"] = copy.deepcopy(current_intent)
                             current_step["entities"] = copy.deepcopy(current_entities)
                             continue
-                        elif RasaConverter._is_action(line):
+                        elif self._is_action(line):
                             current_actions.append(
                                 RasaConverter._remove_comments_from_line(line[3:]).rstrip())
                             if ((line_num + 1) < max_lines) and RasaConverter._is_action(
@@ -251,13 +253,12 @@ class RasaConverter(Converter):
                          self.rasa_project_directory + "/data/stories.md")
             raise FileNotFoundError
 
-    @staticmethod
-    def create_mindmeld_directory(mindmeld_project_path):
-        Converter.create_directory(mindmeld_project_path)
-        Converter.create_directory(mindmeld_project_path + "/data")
-        Converter.create_directory(mindmeld_project_path + "/domains")
-        Converter.create_directory(mindmeld_project_path + "/domains/default")
-        Converter.create_directory(mindmeld_project_path + "/entities")
+    def create_mindmeld_directory(self, mindmeld_project_path):
+        self.create_directory(mindmeld_project_path)
+        self.create_directory(mindmeld_project_path + "/data")
+        self.create_directory(mindmeld_project_path + "/domains")
+        self.create_directory(mindmeld_project_path + "/domains/default")
+        self.create_directory(mindmeld_project_path + "/entities")
 
     def create_training_data(self, rasa_project_directory, mindmeld_project_directory):
         """Method to transfer and reformat the training data in a Rasa Project
@@ -278,20 +279,20 @@ class RasaConverter(Converter):
         # try and open data files from rasa project
         nlu_data_loc = rasa_project_directory + "/data/nlu_data.md"
         try:
-            nlu_data_md_file = open(nlu_data_loc, "r")
+            with open(nlu_data_loc, "r") as nlu_data_md_file:
+                nlu_data_lines = nlu_data_md_file.readlines()
         except FileNotFoundError:
-            logger.error("Can not open nlu_data.md file at %s", nlu_data_loc)
-        nlu_data_lines = nlu_data_md_file.readlines()
+            logger.error("Cannot open nlu_data.md file at %s", nlu_data_loc)
         # iterate through each line
         current_intent = ''
         current_intent_path = ''
         for line in nlu_data_lines:
-            if (RasaConverter._is_line_intent_definiton(line)):
+            if (self._is_line_intent_definiton(line)):
                 current_intent = RasaConverter._get_intent_from_line(line)
                 current_intent_path = mindmeld_project_directory \
                     + "/domains/default/" + current_intent
                 # create data text file for intent examples`
-                RasaConverter._create_intent_training_file(current_intent_path)
+                self._create_intent_training_file(current_intent_path)
             else:
                 if (line[0] == '-'):
                     self._add_example_to_training_file(current_intent_path, line)
@@ -330,9 +331,8 @@ __all__ = ['app']
         handle_string = "@app.handle(intent='" + intent + "'" + entities_string + ")\n"
         return handle_string
 
-    @staticmethod
-    def _write_function_declaration(action, f):
-        if RasaConverter._is_valid_function_name(action):
+    def _write_function_declaration(self, action, f):
+        if self._is_valid_function_name(action):
             function_declartion_string = "def {}(request, responder):\n".format(action)
             f.write(function_declartion_string)
         else:
@@ -370,16 +370,15 @@ __all__ = ['app']
         with open(self.mindmeld_project_directory + "/__init__.py", "r+") as f:
             return f.readlines()
 
-    @staticmethod
-    def _write_functions(actions, templates, f):
+    def _write_functions(self, actions, templates, f):
         for action in actions:
-            RasaConverter._write_function_declaration(action, f)
+            self._write_function_declaration(action, f)
             if action in templates:
                 # Get list of templates per action
                 action_templates = templates[action]
                 prompts_list = RasaConverter._get_text_prompts_list(action_templates)
-                RasaConverter._write_function_body_prompt(prompts_list, f)
-                RasaConverter._write_responder_lines(f)
+                self._write_function_body_prompt(prompts_list, f)
+                self._write_responder_lines(f)
             else:
                 if (action[0:6] == 'action'):
                     f.write("    # This is a custom action from rasa\n")
@@ -420,7 +419,7 @@ __all__ = ['app']
         actions = self._read_actions()
         templates = self._read_templates()
         # Write all functions for each action
-        RasaConverter._write_functions(actions, templates, f)
+        self._write_functions(actions, templates, f)
         f.close()
         # Read contents of current file
         file_lines = self._read_file_lines()
@@ -465,6 +464,8 @@ __all__ = ['app']
             f.write(string)
 
     def convert_project(self):
+        """Main function that will convert a Rasa project into a Mindmeld project
+        """
         # Create project directory with sub folders
         self.create_mindmeld_directory(self.mindmeld_project_directory)
         # Transfer over test data from Rasa project and reformat to Mindmeld project
@@ -474,3 +475,4 @@ __all__ = ['app']
         self.create_init(self.mindmeld_project_directory)
         self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_custom_features(self.mindmeld_project_directory, file_loc)
+        quit()
