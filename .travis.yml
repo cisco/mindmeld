@@ -20,4 +20,4 @@ script:
   - mindmeld num-parse
   - ./lintme
   - mkdir ~/test-reports
-  - pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld
+  - travis_wait 20 pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld
