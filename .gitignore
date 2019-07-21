@@ -67,3 +67,4 @@ target/
 
 # MindMeld Data
 data/
+mindmeld/converter/test_run.py

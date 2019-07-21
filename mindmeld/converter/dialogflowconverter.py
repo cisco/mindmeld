@@ -19,7 +19,7 @@ import os
 import json
 import logging
 
-from mindmeld.converter.converter import Converter
+from converter import Converter  # from mindmeld.converter.converter import Converter
 
 logger = logging.getLogger(__name__)
 
@@ -29,24 +29,24 @@ class DialogFlowConverter(Converter):
         self.dialogflow_project_directory = dialogflow_project_directory
         self.mindmeld_project_directory = mindmeld_project_directory
 
-    @staticmethod
-    def create_mindmeld_directory(mindmeld_project_path):
-        Converter.create_directory(mindmeld_project_path)
-        Converter.create_directory(mindmeld_project_path + "/data")
-        Converter.create_directory(mindmeld_project_path + "/domains")
-        Converter.create_directory(mindmeld_project_path + "/entities")
+    def create_mindmeld_directory(self):
+        Converter.create_directory(self.mindmeld_project_directory)
+        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "data"))
+        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "domains"))
+        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
 
-    @staticmethod
-    def __create_entities_directories(dialogflow_project_directory,
-                                      mindmeld_project_directory, entities):
-        """ Creates directories + files for english entities. """
+    def __create_entities_directories(self, entities):
+        """ Creates directories + files. Must have an english file for every entity.
+            TODO: make this work for files not en, maybe different category in mm?
+        """
+
         for entity in entities:
-            dialogflow_entity_file = dialogflow_project_directory + "/entities/" + \
-                                     entity + "_entries_en.json"
-            # TODO: make this work for non-english, multiple entries
+            dialogflow_entity_file = os.path.join(self.dialogflow_project_directory,
+                                                 "entities", entity + "_entries_en.json")
 
             if os.path.exists(dialogflow_entity_file):
-                mindmeld_entity_directory = mindmeld_project_directory + "/entities/" + entity
+                mindmeld_entity_directory = os.path.join(self.mindmeld_project_directory,
+                                                         "entities", entity)
                 Converter.create_directory(mindmeld_entity_directory)
                 DialogFlowConverter.__create_entity_file(dialogflow_entity_file,
                                                          mindmeld_entity_directory)
@@ -56,8 +56,8 @@ class DialogFlowConverter(Converter):
     @staticmethod
     def __create_entity_file(dialogflow_entity_file, mindmeld_entity_directory):
         source_en = open(dialogflow_entity_file, 'r')
-        target_gazetteer = open(mindmeld_entity_directory + "/gazetteer.txt", 'w')
-        target_mapping = open(mindmeld_entity_directory + "/mapping.json", 'w')
+        target_gazetteer = open(os.path.join(mindmeld_entity_directory, "gazetteer.txt"), 'w')
+        target_mapping = open(os.path.join(mindmeld_entity_directory, "mapping.json"), 'w')
 
         datastore = json.load(source_en)
         mapping_dict = {"entities": []}
@@ -80,7 +80,8 @@ class DialogFlowConverter(Converter):
 
     def __read_entities(self):
         """ Gets the names of the entities from DialogFlow as a list"""
-        dialogflow_entities_directory = os.path.join(self.dialogflow_project_directory, "entities")
+        dialogflow_entities_directory = os.path.join(self.dialogflow_project_directory,
+                                                     "entities")
         dialogflow_entities_files = os.listdir(dialogflow_entities_directory)
 
         exp = r"^.*(?=(_entries_.+\.json))"  # matches everything before '_entries_??.json'
@@ -94,10 +95,9 @@ class DialogFlowConverter(Converter):
 
         return list(entities)
 
-    def create_training_data(self, dialogflow_project_directory, mindmeld_project_directory):
+    def create_training_data(self):
         entities = self.__read_entities()
-        DialogFlowConverter.__create_entities_directories(dialogflow_project_directory,
-                                                          mindmeld_project_directory, entities)
+        self.__create_entities_directories(entities)
 
     def create_main(self):
         pass
@@ -110,11 +110,9 @@ class DialogFlowConverter(Converter):
 
     def convert_project(self):
         # Create project directory with sub folders
-        DialogFlowConverter.create_mindmeld_directory(self.mindmeld_project_directory)
+        self.create_mindmeld_directory()
         # Transfer over test data from Rasa project and reformat to Mindmeld project
-
-        self.create_training_data(self.dialogflow_project_directory,
-                                  self.mindmeld_project_directory)
+        self.create_training_data()
         # self.create_main(self.mindmeld_project_directory)
         # self.create_init(self.mindmeld_project_directory)
         # self.create_config(self.mindmeld_project_directory)
