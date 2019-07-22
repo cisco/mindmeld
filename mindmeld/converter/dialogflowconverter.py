@@ -36,22 +36,20 @@ class DialogFlowConverter(Converter):
         Converter.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
 
     def __create_entities_directories(self, entities):
-        """ Creates directories + files. Must have an english file for every entity.
-            TODO: make this work for files not en, maybe different category in mm?
-        """
+        """ Creates directories + files for all languages/files. All file paths should be valid."""
 
-        for entity in entities:
-            dialogflow_entity_file = os.path.join(self.dialogflow_project_directory,
-                                                 "entities", entity + "_entries_en.json")
+        for main, languages in entities.items():
+            for language, sub in languages.items():
+                dialogflow_entity_file = os.path.join(self.dialogflow_project_directory,
+                                                        "entities", sub + ".json")
 
-            if os.path.exists(dialogflow_entity_file):
                 mindmeld_entity_directory = os.path.join(self.mindmeld_project_directory,
-                                                         "entities", entity)
+                                                         "entities", main)
+
                 Converter.create_directory(mindmeld_entity_directory)
+
                 DialogFlowConverter.__create_entity_file(dialogflow_entity_file,
                                                          mindmeld_entity_directory)
-            else:
-                logger.error("cannot find en entity file.")
 
     @staticmethod
     def __create_entity_file(dialogflow_entity_file, mindmeld_entity_directory):
@@ -78,25 +76,44 @@ class DialogFlowConverter(Converter):
         target_gazetteer.close()
         target_mapping.close()
 
-    def __read_entities(self):
-        """ Gets the names of the entities from DialogFlow as a list"""
-        dialogflow_entities_directory = os.path.join(self.dialogflow_project_directory,
-                                                     "entities")
-        dialogflow_entities_files = os.listdir(dialogflow_entities_directory)
 
-        exp = r"^.*(?=(_entries_.+\.json))"  # matches everything before '_entries_??.json'
-        # exp = '.*(_entries).*' # matches everything containing 'entries'
+    def _get_file_names(self, type):
+        """ Gets the names of the entities from DialogFlow as a dictionary.
+        ex. if we had the following files in our entities directory:
+            ["test.json", "test_entries_en.json", "test_entries_de.json"]
+        return:
+            {'test': {'en': 'test_entries_en', 'de': 'test_entries_de'}} """
 
-        entities = set()
-        for name in dialogflow_entities_files:
-            match = re.match(exp, name)
+        dir = os.path.join(self.dialogflow_project_directory, type)
+        files = os.listdir(dir)
+
+        w = {"entities": "entries", "intents": "usersays"}
+        p = r".+(?<=(_" + w[type] + "_))(.*)(?=(.json))"
+
+        info = {}
+        for name in files:
+            filePath = os.path.join(dir, name)
+
+            match = re.match(p, name)
+
             if match:
-                entities.add(match.group(0))
+                isbase = False
+                base = name[:match.start(1)]
+                language = match.group(2)
+            else:
+                isbase = True
+                base = name[:-5]
 
-        return list(entities)
+            if base not in info:
+                info[base] = {}
+
+            if not isbase:
+                info[base][language] = name[:-5]
+
+        return info
 
     def create_training_data(self):
-        entities = self.__read_entities()
+        entities = self.____get_file_names("entities")
         self.__create_entities_directories(entities)
 
     def create_main(self):
