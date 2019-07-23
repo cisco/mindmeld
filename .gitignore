@@ -67,3 +67,6 @@ target/
 
 # MindMeld Data
 data/
+
+# duckling
+mindmeld/resources/duckling-*
