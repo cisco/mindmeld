@@ -125,7 +125,7 @@ class DialogFlowConverter(Converter):
             sentence = ""
             for texts in usersay["data"]:
                 df_text = texts["text"]
-                if "meta" in texts:
+                if "meta" in texts and texts["meta"] != "@sys.ignore":
                     df_meta = texts["meta"]
 
                     if re.match("(@sys.).+", df_meta):  # if text is a dialogflow sys entity
