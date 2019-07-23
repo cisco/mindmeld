@@ -44,6 +44,7 @@ class DialogFlowConverter(Converter):
     def __init__(self, dialogflow_project_directory, mindmeld_project_directory):
         self.dialogflow_project_directory = dialogflow_project_directory
         self.mindmeld_project_directory = mindmeld_project_directory
+        self.directory = os.path.dirname(os.path.realpath(__file__))
 
     def create_mindmeld_directory(self):
         Converter.create_directory(self.mindmeld_project_directory)
@@ -94,11 +95,11 @@ class DialogFlowConverter(Converter):
         target_gazetteer.close()
         target_mapping.close()
 
-    def _create_intents_directories(self, entities):
+    def _create_intents_directories(self, intents):
         """ Creates directories + files for all languages/files. All file paths should be valid.
         TODO: consider main files"""
 
-        for main, languages in entities.items():
+        for main, languages in intents.items():
             for language, sub in languages.items():
                 dialogflow_intent_file = os.path.join(self.dialogflow_project_directory,
                                                       "intents", sub + ".json")
@@ -195,10 +196,63 @@ class DialogFlowConverter(Converter):
         intents = self._get_file_names("intents")
         self._create_intents_directories(intents)
 
-    def create_main(self):
-        pass
+    # ^ create training data
+
+    def create_handle(params):
+        return "@app.handle(" + params + ")"
+
+    def create_header(function_name):
+        return "def " + function_name + "(request, responder):"
+
+    def create_function(handles, function_name, replies):
+        assert type(handles) == list
+
+        result = ""
+        for handle in handles:
+            result += DialogFlowConverter.create_handle(handle) + "\n"
+        result += DialogFlowConverter.create_header(function_name) + "\n"
+        result += "\t" + "replies = {}".format(replies) + "\n"
+        result += "\t" "responder.reply(replies)"
+        return result
 
     def create_init(self):
+        with open(os.path.join(self.mindmeld_project_directory, "__init__.py"), 'w') as target:
+            begin_info = ["\"\"\"This module contains the MindMeld application\"\"\"",
+            "from mindmeld import Application",
+            "app = Application(__name__)",
+            "__all__ = ['app']"]
+
+            for info in begin_info:
+                target.write(info + "\n\n")
+
+            intents = self._get_file_names("intents")
+
+            # iterate over all the intents
+            for i, (main, languages) in enumerate(intents.items()):
+                df_main = os.path.join(self.dialogflow_project_directory,
+                                                      "intents", main + ".json")
+
+                with open(df_main) as source:
+                    datastore = json.load(source)
+
+                    replies = []
+                    for response in datastore["responses"]:
+                        for message in response["messages"]:
+                            data = message["speech"]
+                            replies.extend(data if type(data) == list else [data])
+
+                    if datastore["fallbackIntent"]:
+                        function_name = "default"
+                        handles = ["default=True", "intent='unsupported'"]
+                    else:
+                        function_name = "renameMe" + str(i)
+                        handles = ["intent=" + "'" + datastore["name"] + "''"]
+
+                    target.write(DialogFlowConverter.create_function(function_name=function_name,
+                                                                handles=handles,
+                                                                replies=replies) + "\n\n")
+
+    def create_main(self):
         pass
 
     def create_config(self):
@@ -207,8 +261,10 @@ class DialogFlowConverter(Converter):
     def convert_project(self):
         # Create project directory with sub folders
         self.create_mindmeld_directory()
-        # Transfer over test data from Rasa project and reformat to Mindmeld project
+        # Transfer over test data from DialogFlow project and reformat to Mindmeld project
         self.create_training_data()
-        # self.create_main(self.mindmeld_project_directory)
-        # self.create_init(self.mindmeld_project_directory)
-        # self.create_config(self.mindmeld_project_directory)
+
+        # self.create_main()
+        # self.create_config()
+
+        self.create_init()
