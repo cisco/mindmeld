@@ -32,7 +32,7 @@ from ..resource_loader import ResourceLoader
 
 from .domain_classifier import DomainClassifier
 from .intent_classifier import IntentClassifier
-from .entity_resolver import EntityResolver
+from .entity_resolver import EntityResolver, EntityResolverConnectionError
 from .entity_recognizer import EntityRecognizer
 from .parser import Parser
 from .role_classifier import RoleClassifier
@@ -1128,10 +1128,13 @@ class EntityProcessor(Processor):
         self.role_classifier.dump(model_path, incremental_model_path=incremental_model_path)
 
     def _load(self, incremental_timestamp=None):
-        model_path, incremental_model_path = path.get_role_model_paths(
-            self._app_path, self.domain, self.intent, self.type, timestamp=incremental_timestamp)
-        self.role_classifier.load(incremental_model_path if incremental_timestamp else model_path)
-        self.entity_resolver.load()
+        try:
+            model_path, incremental_model_path = path.get_role_model_paths(
+                self._app_path, self.domain, self.intent, self.type, timestamp=incremental_timestamp)
+            self.role_classifier.load(incremental_model_path if incremental_timestamp else model_path)
+            self.entity_resolver.load()
+        except EntityResolverConnectionError:
+            logger.warning('Cannot connect to ES, so Entity Resolver is not loaded.')
 
     def _evaluate(self, print_stats, label_set="test"):
         if len(self.role_classifier.roles) > 1:
