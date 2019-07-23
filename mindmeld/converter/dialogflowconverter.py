@@ -127,20 +127,19 @@ class DialogFlowConverter(Converter):
                 df_text = texts["text"]
                 if "meta" in texts:
                     df_meta = texts["meta"]
-                    df_alias = texts["alias"]
 
                     if re.match("(@sys.).+", df_meta):  # if text is a dialogflow sys entity
                         if df_meta in DialogFlowConverter.sys_entity_map:
                             mm_meta = DialogFlowConverter.sys_entity_map[df_meta]
                         else:
-                            mm_meta = "[DNE: " + df_alias + "]"
+                            mm_meta = "[DNE: " + df_meta[1:] + "]"
                             logger.info("Unfortunately mindmeld does not currently support"
-                                        + df_alias + "as a sys entity."
+                                        + df_meta[1:] + "as a sys entity."
                                         + "Please create an entity for this.")
 
                         part = "{" + df_text + "|" + mm_meta + "}"
                     else:
-                        part = "{" + df_text + "|" + df_alias + "}"
+                        part = "{" + df_text + "|" + df_meta[1:] + "}"
                 else:
                     part = df_text
 
