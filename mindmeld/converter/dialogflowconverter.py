@@ -105,7 +105,7 @@ class DialogFlowConverter(Converter):
                                                       "intents", sub + ".json")
 
                 mindmeld_intent_directory = os.path.join(self.mindmeld_project_directory,
-                                                         "domains", "all", main)
+                                                         "domains", "all", sub)
 
                 Converter.create_directory(mindmeld_intent_directory)
 
@@ -238,18 +238,18 @@ class DialogFlowConverter(Converter):
                     for response in datastore["responses"]:
                         for message in response["messages"]:
                             data = message["speech"]
-                            replies.extend(data if type(data) == list else [data])
+                            replies = data if type(data) == list else [data]
 
-                    if datastore["fallbackIntent"]:
-                        function_name = "default"
-                        handles = ["default=True", "intent='unsupported'"]
-                    else:
-                        function_name = "renameMe" + str(i)
-                        handles = ["intent=" + "'" + datastore["name"] + "''"]
+                            if datastore["fallbackIntent"]:
+                                function_name = "default"
+                                handles = ["default=True", "intent='unsupported'"]
+                            else:
+                                function_name = "renameMe" + str(i)
+                                handles = ["intent=" + "'" + datastore["name"] + "''"]
 
-                    target.write(DialogFlowConverter.create_function(function_name=function_name,
-                                                                handles=handles,
-                                                                replies=replies) + "\n\n")
+                            target.write(DialogFlowConverter.create_function(function_name=function_name,
+                                                                        handles=handles,
+                                                                        replies=replies) + "\n\n")
 
     def create_main(self):
         pass
