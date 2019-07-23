@@ -65,5 +65,4 @@ target/
 # MindMeld Models
 .generated/
 
-# MindMeld Data
-data/
+
