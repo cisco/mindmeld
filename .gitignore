@@ -65,4 +65,10 @@ target/
 # MindMeld Models
 .generated/
 
+# MindMeld Data
+mindmeld/converter/test_run.py
+mindmeld/converter/map system entities.csv
+mindmeld/converter/map system entities.ipynb
+mindmeld/converter/map_sys_entities.csv
+mindmeld/converter/.ipynb_checkpoints/map system entities-checkpoint.ipynb
 
