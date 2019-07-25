@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class RasaConverter(Converter):
-    """The class is a sub class of the abstract Converter class. This class 
+    """The class is a sub class of the abstract Converter class. This class
     contains the methods required to convert a Rasa project into a Mindmeld project
     """
     def __init__(self, rasa_project_directory, mindmeld_project_directory):
@@ -39,7 +39,7 @@ class RasaConverter(Converter):
 
     def _create_intents_directories(self, mindmeld_project_directory, intents):
         for intent in intents:
-            self.create_directory(mindmeld_project_directory + "/domains/default/" + intent)
+            self.create_directory(mindmeld_project_directory + "/domains/general/" + intent)
 
     def _create_entities_directories(self, mindmeld_project_directory, entities):
         for entity in entities:
@@ -60,9 +60,8 @@ class RasaConverter(Converter):
     def _get_intent_from_line(line):
         return line.split(' ')[1].split(':')[1].rstrip()
 
-    @staticmethod
-    def _create_intent_training_file(intent_directory):
-        Converter.create_directory(intent_directory)
+    def _create_intent_training_file(self, intent_directory):
+        self.create_directory(intent_directory)
         with open(intent_directory + "/train.txt", "w") as f:
             f.close()
 
@@ -156,10 +155,9 @@ class RasaConverter(Converter):
     def _is_story_name(stories_line):
         return stories_line[0:3] == '## '
 
-    @staticmethod
-    def _get_story_name(stories_line):
+    def _get_story_name(self, stories_line):
         if "<!--" in stories_line:
-            return RasaConverter._remove_comments_from_line(
+            return self._remove_comments_from_line(
                     stories_line.replace("## ", "")).rstrip()
         else:
             return stories_line.replace("## ", "").rstrip()
@@ -187,18 +185,17 @@ class RasaConverter(Converter):
             entities_list[i] = entities_list[i].lstrip()
         return entities_list
 
-    @staticmethod
-    def _get_intent_with_entity(stories_line):
+    def _get_intent_with_entity(self, stories_line):
         if RasaConverter._does_intent_have_entity(stories_line):
             entities_with_values = re.search(r"\{.*\}", stories_line)
             entities_with_values = entities_with_values.group(0)
-            entities_list = RasaConverter._clean_up_entities_list(entities_with_values)
+            entities_list = self._clean_up_entities_list(entities_with_values)
             start_of_entity = stories_line.find(entities_with_values)
-            intent = RasaConverter._remove_comments_from_line(
+            intent = self._remove_comments_from_line(
                 stories_line[2:start_of_entity]).rstrip()
             return intent, entities_list
         else:
-            intent = RasaConverter._remove_comments_from_line(stories_line[2:]).rstrip()
+            intent = self._remove_comments_from_line(stories_line[2:]).rstrip()
             entities_list = []
             return intent, entities_list
 
@@ -216,7 +213,7 @@ class RasaConverter(Converter):
                     max_lines = len(stories_lines)
                     for line_num, line in enumerate(stories_lines):
                         if self._is_story_name(line):
-                            current_story_name = RasaConverter._get_story_name(line)
+                            current_story_name = self._get_story_name(line)
                             continue
                         elif self._is_intent(line):
                             current_intent, current_entities = self \
@@ -259,7 +256,7 @@ class RasaConverter(Converter):
         self.create_directory(mindmeld_project_path)
         self.create_directory(mindmeld_project_path + "/data")
         self.create_directory(mindmeld_project_path + "/domains")
-        self.create_directory(mindmeld_project_path + "/domains/default")
+        self.create_directory(mindmeld_project_path + "/domains/general")
         self.create_directory(mindmeld_project_path + "/entities")
 
     def create_training_data(self, rasa_project_directory, mindmeld_project_directory):
@@ -292,7 +289,7 @@ class RasaConverter(Converter):
             if (self._is_line_intent_definiton(line)):
                 current_intent = RasaConverter._get_intent_from_line(line)
                 current_intent_path = mindmeld_project_directory \
-                    + "/domains/default/" + current_intent
+                    + "/domains/general/" + current_intent
                 # create data text file for intent examples`
                 self._create_intent_training_file(current_intent_path)
             else:
@@ -350,10 +347,18 @@ __all__ = ['app']
             entities_list += entities
         for entity in entities_list:
             newentity = entity.replace("{", "").replace("}", "")
-            entity_string = "    {0} = request.context['{0}']\n".format(newentity)
+            entities_string = f"    {newentity}_s = [e['text'] for e in request.entities if e['type'] == '{newentity}']\n"
+            entity_string = f"    {newentity} = {newentity}_s[0]\n"
+            f.write(entities_string)
             f.write(entity_string)
-        prompts_string = "    prompts = {}\n".format(prompts)
+        prompts_list = []
+        prompts_list[:] = ['f"' + x + '"' for x in prompts]
+        prompts_string = "    prompts = [{}]\n".format(', '.join(prompts_list))
         f.write(prompts_string)
+
+    @staticmethod
+    def _write_default_function():
+        pass
 
     @staticmethod
     def _get_text_prompts_list(action_templates):
@@ -436,10 +441,10 @@ __all__ = ['app']
                 actions = step['actions']
                 # attach handle to correct function
                 app_handle_string = RasaConverter._get_app_handle(intent, entities)
-                RasaConverter._attach_handle_to_function(app_handle_string, actions[0], file_lines)
+                self._attach_handle_to_function(app_handle_string, actions[0], file_lines)
                 # check if more than 1 action per intent
                 if len(actions) > 1:
-                    RasaConverter._attach_actions_to_function(actions[1:], file_lines)
+                    self._attach_actions_to_function(actions[1:], file_lines)
         # write all lines back to file
         with open(mindmeld_project_directory + "/__init__.py", "w") as f:
             f.writelines(file_lines)
@@ -480,7 +485,7 @@ __all__ = ['app']
         limitations:
         - Rasa has the ability to have custom actions, which is not supported by
         the converter.
-        - Rasa has the ability to handle multiple intents per query, while Mindmeld 
+        - Rasa has the ability to handle multiple intents per query, while Mindmeld
         does not.
         - Rasa training data may be json format, which is not currently supported.
         - Rasa has a feature called Rasa forms which is not currently supported.
