@@ -1,0 +1,419 @@
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+  font-family: 'Open Sans Condensed', sans-serif;
+  text-shadow: 1px 1px 0 #ffffff;
+  background: linear-gradient(#fdfdff, #e4e4e4);
+  background-attachment: fixed;
+}
+h1 {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 28pt;
+  font-weight: bold;
+}
+.app {
+  height: 100%;
+}
+.main {
+  min-width: 1650px;
+  height: 100%;
+}
+.sub-header {
+  color: #aaa;
+  font-size: 17pt;
+  font-weight: 300;
+}
+.main-content {
+  height: calc(100% - 220px);
+}
+.nav {
+  flex-wrap: nowrap;
+  border-bottom: none;
+  z-index: 100;
+}
+.nav .nav-item {
+  flex-grow: 1;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 14pt;
+  font-weight: bold;
+  line-height: 1.2;
+  text-shadow: none;
+}
+.nav .nav-item.arrow {
+  flex-grow: 0;
+}
+.nav .nav-item a {
+  border: 1px solid rgba(234, 134, 0, 0.3);
+  color: #dadada;
+  background: #ffffff;
+  border-radius: 0;
+}
+.nav .nav-item a:hover {
+  border: 1px solid #ea8600;
+  color: #ea8600;
+}
+.nav .nav-item a.active {
+  border: 1px solid #ea8600;
+  color: #ffffff;
+  background: #ea8600;
+}
+.nav img {
+  margin: 5px 0;
+}
+.queries-container {
+  border: 1px solid #dadada;
+}
+.queries-container .query {
+  font-size: 14pt;
+  text-align: right;
+  color: rgba(234, 134, 0, 0.3);
+  cursor: pointer;
+}
+.queries-container .query:hover,
+.queries-container .query.active {
+  color: #ea8600;
+}
+.content-container {
+  padding: 0 26px;
+}
+.content-container .content .section {
+  border: 1px solid #dadada;
+  padding: 40px;
+  font-size: 16pt;
+  background: #ffffff;
+}
+.content-container .content .section.default {
+  border: none;
+  padding: 40px 0 0 0;
+  color: #aaaaaa;
+  font-size: 17pt;
+  font-weight: 300;
+  background: none;
+}
+.content-container .content .section.dialogue-manager .reply {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  border: 2px solid #005596;
+  border-radius: 10px;
+  font-size: 12pt;
+  font-weight: bold;
+  color: #005596;
+}
+.conversation-container {
+  height: 100%;
+}
+.conversation-container .conversation {
+  height: 100%;
+  overflow-y: auto;
+}
+.conversation-container .conversation::-webkit-scrollbar {
+  width: 10px;
+}
+.conversation-container .conversation::-webkit-scrollbar-track {
+  border-radius: 10px;
+}
+.conversation-container .conversation::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(234, 134, 0, 0.3);
+}
+.conversation-container .conversation .logo {
+  flex-grow: 0;
+  padding: 0 8px;
+}
+.conversation-container .conversation .logo-space {
+  width: 24px;
+  height: 24px;
+}
+.conversation-container .conversation .bubble {
+  color: #ea8600;
+  text-align: left;
+  padding: 6px 12px 8px 12px;
+  border: 1px solid rgba(234, 134, 0, 0.3);
+  background: #fcfcfc;
+  border-radius: 10px;
+}
+.conversation-container .conversation .bubble.user {
+  color: #aaaaaa;
+  border-color: #ccc;
+}
+.conversation-container .conversation .suggestions .bubble {
+  display: inline-block;
+  cursor: pointer;
+}
+.conversation-container .conversation .list {
+  height: 90px;
+  overflow: hidden;
+}
+.conversation-container .conversation .list .item {
+  position: relative;
+  display: inline-block;
+  margin: 0 2px 0 0;
+  width: 82px;
+  height: 82px;
+  border: 1px solid #aaaaaa;
+  cursor: pointer;
+  text-align: center;
+  background: #ffffff;
+}
+.conversation-container .conversation .list .item .text {
+  width: 82px;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  line-height: 1.2em;
+  max-height: 3.6em;
+}
+.tag {
+  display: inline-block;
+  margin-right: 10px;
+  height: 34px;
+}
+.tag .label {
+  display: inline-block;
+  height: 34px;
+  margin-right: 10px;
+  overflow: hidden;
+}
+.tag .body {
+  display: inline-block;
+  max-width: 220px;
+  height: 34px;
+  padding: 0 12px 0 30px;
+  border: 2px solid #005596;
+  border-radius: 50px;
+  overflow: hidden;
+  color: #005596;
+  font-size: 12pt;
+  line-height: 32px;
+  font-weight: bold;
+  white-space: nowrap;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  background-color: white;
+  background-image: url('assets/images/bluedot.png');
+  background-size: contain;
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+.tag .body.uncapped {
+  text-transform: none;
+}
+.tag .body.full {
+  max-width: none;
+}
+.tag.disabled .body {
+  color: #aaaaaa;
+}
+.fill-bar {
+  line-height: 18px;
+  margin-bottom: 5px;
+}
+.fill-bar .label {
+  display: inline-block;
+  height: 18px;
+  width: 34%;
+  margin-right: 1%;
+  line-height: 18px;
+  text-align: right;
+  overflow: hidden;
+}
+.fill-bar .fill-container {
+  display: inline-block;
+  width: 65%;
+  height: 18px;
+  border: 1px solid #005596;
+  background: #dadada;
+}
+.fill-bar .fill-container .fill {
+  height: 16px;
+  background: #005596;
+  width: 50%;
+}
+.entity {
+  height: 34px;
+  margin-bottom: 5px;
+}
+.entity .name-container {
+  position: relative;
+  display: inline-block;
+  width: 40%;
+  height: 34px;
+  font-size: 14pt;
+  line-height: 36px;
+  font-weight: bold;
+  color: #005596;
+  overflow: hidden;
+}
+.entity .name-container .line {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  right: 0;
+  border-bottom: 2px solid #005596;
+}
+.entity .name-container .name {
+  position: relative;
+  display: inline-block;
+  padding-right: 6px;
+  background: #ffffff;
+}
+.entity .confidence {
+  display: inline-block;
+  height: 34px;
+  margin-right: 10px;
+  font-size: 12pt;
+  line-height: 36px;
+  font-weight: bold;
+  color: #dadada;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+.resolved-entity {
+  height: 34px;
+  margin-bottom: 5px;
+}
+.resolved-entity .entity-container {
+  position: relative;
+  display: inline-block;
+  width: 50%;
+  height: 34px;
+}
+.resolved-entity .entity-container > .line {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  right: 4px;
+  border-bottom: 2px dashed #005596;
+}
+.resolved-entity .entity-container .arrowhead {
+  position: absolute;
+  top: calc(50% - 6px);
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 15px solid #005596;
+}
+.resolved-entity .entity-container .entity {
+  position: relative;
+  margin-bottom: 0;
+}
+.resolved-entity .entity-container .entity .name-container {
+  width: 50%;
+}
+.resolved-entity .entity-container .entity .name-container,
+.resolved-entity .entity-container .entity .tag {
+  background: white;
+}
+.resolved-entity .tag .body {
+  max-width: 300px;
+}
+.query-input {
+  position: relative;
+  display: block;
+  padding: 5px 35px 5px 15px;
+  height: 44px;
+  border: 2px solid #005596;
+  border-radius: 18px;
+  background-color: #ffffff;
+}
+.query-input .text {
+  width: 100%;
+  height: 100%;
+  border: none;
+  font-size: 15pt;
+  line-height: 30px;
+  font-weight: bold;
+  color: #005596;
+}
+.query-input .mic {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  width: 18px;
+  height: 42px;
+  background-image: url('assets/images/bluemic.png');
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.query-input:hover {
+  border-color: #ea8600;
+}
+.query-input:hover .mic {
+  background-image: url('assets/images/orangemic.png');
+}
+.tree .label {
+  margin: 0 5px;
+  font-size: 12pt;
+}
+.tree .label + ul {
+  margin-top: -5px;
+}
+.tree ul {
+  position: relative;
+  margin: -10px 0 0 20px;
+  padding: 10px 0 0 20px;
+  list-style-type: none;
+}
+.tree ul li {
+  position: relative;
+}
+.tree ul li:before {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 25px;
+  top: 20px;
+  left: -25px;
+  border-bottom: 2px solid #005596;
+}
+.tree ul li:after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -20px;
+  left: -25px;
+  height: 40px;
+  border-left: 2px solid #005596;
+}
+.tree ul li:first-child:after {
+  top: -7px;
+  height: 27px;
+}
+.semantic-structure > .container {
+  margin: -5px;
+}
+.semantic-structure .group {
+  padding: 5px;
+}
+.semantic-structure .group > .tree {
+  padding: 5px;
+  border: 2px dotted #005596;
+}
+.semantic-structure .group .tag .body {
+  max-width: 300px;
+}
+.label {
+  font-size: 14pt;
+  line-height: 36px;
+  font-weight: bold;
+  color: #aaaaaa;
+  text-transform: uppercase;
+}
+.clear-context {
+  margin-bottom: 5px;
+  text-align: right;
+}
+.clear-context .btn {
+  background-color: #ea8600;
+  border: none;
+}
