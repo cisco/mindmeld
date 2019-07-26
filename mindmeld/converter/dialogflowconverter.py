@@ -22,6 +22,7 @@ from sklearn.model_selection import train_test_split
 
 from converter import Converter  # from mindmeld.converter.converter import Converter
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -58,7 +59,8 @@ class DialogFlowConverter(Converter):
         TODO: consider main files"""
 
         for main, languages in entities.items():
-            for language, sub in languages.items():
+            # for language, sub in languages.items():
+            for sub in languages.values():
                 dialogflow_entity_file = os.path.join(self.dialogflow_project_directory,
                                                       "entities", sub + ".json")
 
@@ -99,8 +101,10 @@ class DialogFlowConverter(Converter):
         """ Creates directories + files for all languages/files. All file paths should be valid.
         TODO: consider main files"""
 
-        for main, languages in intents.items():
-            for language, sub in languages.items():
+        # for main, languages in intents.items():
+        for languages in intents.values():
+            # for language, sub in languages.items():
+            for sub in languages.values():
                 dialogflow_intent_file = os.path.join(self.dialogflow_project_directory,
                                                       "intents", sub + ".json")
 
@@ -134,8 +138,8 @@ class DialogFlowConverter(Converter):
                         else:
                             mm_meta = "[DNE: " + df_meta[1:] + "]"
                             logger.info("Unfortunately mindmeld does not currently support"
-                                        + df_meta[1:] + "as a sys entity."
-                                        + "Please create an entity for this.")
+                                        "%s as a sys entity."
+                                        "Please create an entity for this.", df_meta[1:])
 
                         part = "{" + df_text + "|" + mm_meta + "}"
                     else:
@@ -155,19 +159,19 @@ class DialogFlowConverter(Converter):
         target_test.close()
         target_train.close()
 
-    def _get_file_names(self, type):
+    def _get_file_names(self, level):
         """ Gets the names of the entities from DialogFlow as a dictionary.
         ex. if we had the following files in our entities directory:
             ["test.json", "test_entries_en.json", "test_entries_de.json"]
         return:
             {'test': {'en': 'test_entries_en', 'de': 'test_entries_de'}} """
 
-        dir = os.path.join(self.dialogflow_project_directory, type)
-        files = os.listdir(dir)
+        directory = os.path.join(self.dialogflow_project_directory, level)
+        files = os.listdir(directory)
 
         w = {"entities": "entries", "intents": "usersays"}
-        p = r".+(?<=(_" + w[type] + "_))(.*)(?=(.json))"
-
+        p = r".+(?<=(_" + w[level] + "_))(.*)(?=(.json))"
+        
         info = {}
         for name in files:
             match = re.match(p, name)
@@ -196,15 +200,18 @@ class DialogFlowConverter(Converter):
         self._create_intents_directories(intents)
 
     # ^ create training data
-
+    
+    @staticmethod
     def create_handle(params):
         return "@app.handle(" + params + ")"
 
+    @staticmethod
     def create_header(function_name):
         return "def " + function_name + "(request, responder):"
 
-    def create_function(handles, function_name, replies):
-        assert type(handles) == list
+    @staticmethod
+    def create_function(function_name, handles, replies):
+        assert isinstance(handles, list)
 
         result = ""
         for handle in handles:
@@ -227,7 +234,8 @@ class DialogFlowConverter(Converter):
             intents = self._get_file_names("intents")
 
             # iterate over all the intents
-            for i, (main, languages) in enumerate(intents.items()):
+            # for i, (main, languages) in enumerate(intents.items()):
+            for i, main in enumerate(intents.values()):
                 df_main = os.path.join(self.dialogflow_project_directory,
                                        "intents", main + ".json")
 
@@ -238,7 +246,8 @@ class DialogFlowConverter(Converter):
                     for response in datastore["responses"]:
                         for message in response["messages"]:
                             data = message["speech"]
-                            replies = data if type(data) == list else [data]
+                            
+                            replies = data if isinstance(data, list) else [data]
 
                             if datastore["fallbackIntent"]:
                                 function_name = "default"
@@ -247,9 +256,10 @@ class DialogFlowConverter(Converter):
                                 function_name = "renameMe" + str(i)
                                 handles = ["intent=" + "'" + datastore["name"] + "''"]
 
-                            target.write(DialogFlowConverter.create_function(function_name,
-                                                                             handles,
-                                                                             replies) + "\n\n")
+                            target.write(DialogFlowConverter.create_function(
+                                                                function_name=function_name,
+                                                                handles=handles,
+                                                                replies=replies) + "\n\n")
 
     def create_main(self):
         pass
