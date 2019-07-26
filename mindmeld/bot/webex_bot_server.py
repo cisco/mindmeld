@@ -42,11 +42,11 @@ class WebexBotServer:
 
             for key in ['personId', 'id', 'roomId']:
                 if key not in data['data'].keys():
-                    return 'Bad Request', 400, {'message': 'personId/id/roomID key not found'}
+                    return 'BAD REQUEST', 400, {'message': 'personId/id/roomID key not found'}
 
             if data['id'] != self.webhook_id:
                 self.logger.debug("Retrieved webhook_id {} doesn't match".format(data['id']))
-                return 'Bad Request', 400, {'message': 'WEBHOOK_ID mismatch'}
+                return 'BAD REQUEST', 400, {'message': 'WEBHOOK_ID mismatch'}
 
             person_id = data['data']['personId']
             msg_id = data['data']['id']
@@ -54,7 +54,7 @@ class WebexBotServer:
             room_id = data['data']['roomId']
 
             if 'text' not in txt:
-                return 'Bad Request', 400, {'message': 'Query not found'}
+                return 'BAD REQUEST', 400, {'message': 'Query not found'}
 
             message = str(txt['text']).lower()
 
@@ -63,7 +63,7 @@ class WebexBotServer:
             if person_id == me.id:
                 return 'OK', 200, {'message': 'Query replicating bot response'}
 
-            return 'OK', self._post_message(room_id, self.conv.say(message)[0])
+            return 'OK', 200, self._post_message(room_id, self.conv.say(message)[0])
 
     def run(self, host='localhost', port=7150):
         self.app.run(host=host, port=port)
