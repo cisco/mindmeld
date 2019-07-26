@@ -13,6 +13,7 @@ from ciscosparkapi import CiscoSparkAPI
 CISCO_API_URL = 'https://api.ciscospark.com/v1'
 ACCESS_TOKEN_WITH_BEARER = 'Bearer '
 
+
 class WebexBotServer:
     """
     A sample server class for Webex Teams integration with any MindMeld application
@@ -41,11 +42,11 @@ class WebexBotServer:
 
             for key in ['personId', 'id', 'roomId']:
                 if key not in data['data'].keys():
-                    return 400, {'error': 'Bad Request: personId/id/roomID key not found'}
+                    return 'Bad Request', 400, {'message': 'personId/id/roomID key not found'}
 
             if data['id'] != self.webhook_id:
                 self.logger.debug("Retrieved webhook_id {} doesn't match".format(data['id']))
-                return 400, {'error': 'Bad Request: WEBHOOK_ID mismatch'}
+                return 'Bad Request', 400, {'message': 'WEBHOOK_ID mismatch'}
 
             person_id = data['data']['personId']
             msg_id = data['data']['id']
@@ -53,15 +54,16 @@ class WebexBotServer:
             room_id = data['data']['roomId']
 
             if 'text' not in txt:
-                return 400, {'error': 'Bad Request: Query not found'}
+                return 'Bad Request', 400, {'message': 'Query not found'}
 
             message = str(txt['text']).lower()
 
             # Ignore the bot's own responses, else it would go into an infinite loop
             # of answering it's own questions.
-            if person_id != me.id:
-                self._post_message(room_id, self.conv.say(message)[0])
-            return 'OK'
+            if person_id == me.id:
+                return 'OK', 200, {'message': 'Query replicating bot response'}
+
+            return 'OK', self._post_message(room_id, self.conv.say(message)[0])
 
     def run(self, host='localhost', port=7150):
         self.app.run(host=host, port=port)
