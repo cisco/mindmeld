@@ -10,6 +10,8 @@ from flask import request
 import requests
 from ciscosparkapi import CiscoSparkAPI
 
+CISCO_API_URL = 'https://api.ciscospark.com/v1'
+ACCESS_TOKEN_WITH_BEARER = 'Bearer '
 
 class WebexBotServer:
     """
@@ -24,25 +26,26 @@ class WebexBotServer:
 
         self.logger = logging.getLogger(__name__)
 
-        if not self.webhook_id or not self.access_token:
-            raise Exception('webhook_id and bot_access_token are not set')
+        if not self.webhook_id:
+            raise Exception('WEBHOOK_ID not set')
+        if not self.access_token:
+            raise Exception('BOT_ACCESS_TOKEN not set')
 
         self.spark_api = CiscoSparkAPI(self.access_token)
-        self.ACCESS_TOKEN_WITH_BEARER = 'Bearer ' + self.access_token
-        self.CISCO_API_URL = 'https://api.ciscospark.com/v1'
+        self.access_token_with_bearer = ACCESS_TOKEN_WITH_BEARER + self.access_token
 
         @self.app.route('/', methods=['POST'])
-        def handle_message(self):
+        def handle_message():
             me = self.spark_api.people.me()
             data = request.get_json()
 
             for key in ['personId', 'id', 'roomId']:
                 if key not in data['data'].keys():
-                    return 'OK'
+                    return 400, {'error': 'Bad Request: personId/id/roomID key not found'}
 
             if data['id'] != self.webhook_id:
                 self.logger.debug("Retrieved webhook_id {} doesn't match".format(data['id']))
-                return 'OK'
+                return 400, {'error': 'Bad Request: WEBHOOK_ID mismatch'}
 
             person_id = data['data']['personId']
             msg_id = data['data']['id']
@@ -50,7 +53,7 @@ class WebexBotServer:
             room_id = data['data']['roomId']
 
             if 'text' not in txt:
-                return 'OK'
+                return 400, {'error': 'Bad Request: Query not found'}
 
             message = str(txt['text']).lower()
 
@@ -64,17 +67,17 @@ class WebexBotServer:
         self.app.run(host=host, port=port)
 
     def _url(self, path):
-        return self.CISCO_API_URL + path
+        return "{0}{1}".format(CISCO_API_URL, path)
 
     def _get_message(self, msg_id):
-        headers = {'Authorization': self.ACCESS_TOKEN_WITH_BEARER}
+        headers = {'Authorization': self.access_token_with_bearer}
         resp = requests.get(self._url('/messages/{0}'.format(msg_id)), headers=headers)
         response = json.loads(resp.text)
         response['status_code'] = str(resp.status_code)
         return response
 
     def _post_message(self, room_id, text):
-        headers = {'Authorization': self.ACCESS_TOKEN_WITH_BEARER,
+        headers = {'Authorization': self.access_token_with_bearer,
                    'content-type': 'application/json'}
         payload = {'roomId': room_id, 'text': text}
         resp = requests.post(url=self._url('/messages'), json=payload, headers=headers)
