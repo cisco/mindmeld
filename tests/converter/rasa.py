@@ -48,3 +48,10 @@ def test_nlp_lastname(mindmeld_project_path):
     entity = nlp.process(query1)['entities']
     assert entity[0]['text'] == 'Josh'
     assert entity[1]['text'] == 'Williams'
+
+
+def test_nlp_deny(mindmeld_project_path):
+    nlp = NaturalLanguageProcessor(mindmeld_project_path)
+    nlp.build()
+    query1 = 'No, I don\'t want that'
+    assert nlp.process(query1)['intent'] == 'deny'
