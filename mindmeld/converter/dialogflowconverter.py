@@ -50,7 +50,7 @@ class DialogFlowConverter(Converter):
         Converter.create_directory(self.mindmeld_project_directory)
         Converter.create_directory(os.path.join(self.mindmeld_project_directory, "data"))
         Converter.create_directory(os.path.join(self.mindmeld_project_directory, "domains"))
-        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "domains", "all"))
+        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "domains", "general"))
         Converter.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
 
     def _create_entities_directories(self, entities):
@@ -105,7 +105,7 @@ class DialogFlowConverter(Converter):
                                                       "intents", sub + ".json")
 
                 mindmeld_intent_directory = os.path.join(self.mindmeld_project_directory,
-                                                         "domains", "all", sub)
+                                                         "domains", "general", sub)
 
                 Converter.create_directory(mindmeld_intent_directory)
 
