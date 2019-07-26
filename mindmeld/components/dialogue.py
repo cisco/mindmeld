@@ -338,7 +338,8 @@ class DialogueManager:
 
     def _apply_handler_sync(self, request, responder, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule.
-        After three tries we backout and reset the target dialogue state.
+        After three tries we backout and reset the target dialogue state. For example we can
+        try to reprocess a query in multiple flows a couple of times.
 
          Args:
             request (Request): The request object.
@@ -391,7 +392,9 @@ class DialogueManager:
         return responder
 
     async def _apply_handler_async(self, request, responder, target_dialogue_state=None):
-        """Applies the dialogue state handler for the most complex matching rule
+        """Applies the dialogue state handler for the most complex matching rule.
+        After three tries we backout and reset the target dialogue state. For example we can
+        try to reprocess a query in multiple flows a couple of times.
 
         Args:
             request (Request): The request object from the DM
@@ -524,7 +527,8 @@ class DialogueFlow(DialogueManager):
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
         app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
-        handler = self._apply_flow_handler_async if self.async_mode else self._apply_flow_handler_sync
+        handler = self._apply_flow_handler_async if self.async_mode else \
+            self._apply_flow_handler_sync
         app.add_dialogue_rule(self.flow_state, handler, targeted_only=True)
 
     @property
