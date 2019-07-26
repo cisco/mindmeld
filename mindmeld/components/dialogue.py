@@ -338,8 +338,6 @@ class DialogueManager:
 
     def _apply_handler_sync(self, request, responder, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule.
-        After three tries we backout and reset the target dialogue state. For example we can
-        try to reprocess a query in multiple flows a couple of times.
 
          Args:
             request (Request): The request object.
@@ -349,19 +347,18 @@ class DialogueManager:
         Returns:
             (DialogueResponder): A DialogueResponder containing the dialogue state and directives.
         """
-        for _ in range(3):
-            try:
-                return self._attempt_handler_sync(
-                    request, responder, target_dialogue_state=target_dialogue_state
+        try:
+            return self._attempt_handler_sync(
+                request, responder, target_dialogue_state=target_dialogue_state
+            )
+        except DialogueStateException as e:
+            if e.target_dialogue_state and e.target_dialogue_state != target_dialogue_state:
+                target_dialogue_state = e.target_dialogue_state
+            else:
+                self.logger.warning(
+                    "Ignoring target dialogue state '{}'".format(e.target_dialogue_state)
                 )
-            except DialogueStateException as e:
-                if e.target_dialogue_state and e.target_dialogue_state != target_dialogue_state:
-                    target_dialogue_state = e.target_dialogue_state
-                else:
-                    self.logger.warning(
-                        "Ignoring target dialogue state '{}'".format(e.target_dialogue_state)
-                    )
-                    target_dialogue_state = None
+                target_dialogue_state = None
 
         if target_dialogue_state:
             self.logger.warning(
@@ -393,8 +390,6 @@ class DialogueManager:
 
     async def _apply_handler_async(self, request, responder, target_dialogue_state=None):
         """Applies the dialogue state handler for the most complex matching rule.
-        After three tries we backout and reset the target dialogue state. For example we can
-        try to reprocess a query in multiple flows a couple of times.
 
         Args:
             request (Request): The request object from the DM
@@ -404,19 +399,18 @@ class DialogueManager:
         Returns:
             DialogueResponder: A DialogueResponder containing the dialogue state and directives
         """
-        for _ in range(3):
-            try:
-                return await self._attempt_handler_async(
-                    request, responder, target_dialogue_state=target_dialogue_state
+        try:
+            return await self._attempt_handler_async(
+                request, responder, target_dialogue_state=target_dialogue_state
+            )
+        except DialogueStateException as e:
+            if e.target_dialogue_state != target_dialogue_state:
+                target_dialogue_state = e.target_dialogue_state
+            else:
+                self.logger.warning(
+                    "Ignoring target dialogue state '{}'".format(e.target_dialogue_state)
                 )
-            except DialogueStateException as e:
-                if e.target_dialogue_state != target_dialogue_state:
-                    target_dialogue_state = e.target_dialogue_state
-                else:
-                    self.logger.warning(
-                        "Ignoring target dialogue state '{}'".format(e.target_dialogue_state)
-                    )
-                    target_dialogue_state = None
+                target_dialogue_state = None
 
         if target_dialogue_state:
             self.logger.warning(
