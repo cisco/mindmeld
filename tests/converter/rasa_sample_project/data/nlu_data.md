@@ -59,6 +59,25 @@
 - yes yes yes
 - definitely
 
+## intent:lastname
+- My name is [Justin](name) [Andrews](lastname)  <!--- Square brackets contain the value of entity while the text in parentheses is a a label of the entity --> 
+- I am [David](name) [Williams](lastname)
+- I'm [Lacy](name) [Smith](lastname)
+- People call me [Greg](name) [Harrding](lastname)
+- It's [Brian](name) [Alley](lastname)
+- Usually people call me [Amy](name) [Ardoin](lastname)
+- My name is [Jacob](name) [Adams](lastname)
+- You can call me [Mike](name) [Ellington](lastname)
+- Please call me [Mary](name) [Ann](lastname)
+- Name name is [Robert](name) [Goodman](lastname)
+- I am [Richy](name) [Johnson](lastname)
+- I'm [Tracy](name) [Jones](lastname)
+- Call me [Sally](name) [Miller](lastname)
+- I am [Philipp](name) [Wilson](lastname)
+- I am [Charles](name) [Bennet](lastname)
+- I am [Charles](name) [Brown](lastname)
+- I am [Robby](name) [Clark](lastname)
+- Call me [Susy](name) [Foster](lastname)
 
 ## intent:name
 - My name is [Juste](name)  <!--- Square brackets contain the value of entity while the text in parentheses is a a label of the entity --> 
@@ -110,7 +129,6 @@
 - name is [Pari](name)
 - name [Sanjay](name)
 
-
 ## intent:joke
 - Can you tell me a joke?
 - I would like to hear a joke
@@ -122,3 +140,14 @@
 - Can you tell jokes?
 - Please tell me a joke
 - I need to hear a joke
+
+## intent:deny
+- No
+- Not right now
+- No thanks
+- No thank you
+- Don't do that
+- Absolutely not
+- No way
+- definitely not
+- Not in million years
