@@ -71,13 +71,14 @@ class RasaConverter(Converter):
 
     def _write_intent_with_extinty(self, intent_f, intent_example):
         mindmend_intent_example = intent_example
-        for match in re.findall(r"\[.*\]\(.*\)", intent_example):
+        pattern = re.compile(r'\[\w*\]\(\w*\)')
+        for match in pattern.findall(intent_example):
             mindmeld_entity = match.replace("[", "{").replace("]", "|") \
                 .replace("(", "").replace(")", "}")
             mindmend_intent_example = mindmend_intent_example.replace(match, mindmeld_entity)
-            intent_f.write(mindmend_intent_example)
             # add this to the respective entity gazetteer file as well
             self.create_entity_files(mindmeld_entity)
+        intent_f.write(mindmend_intent_example)
 
     @staticmethod
     def _remove_comments_from_line(line):
@@ -142,10 +143,19 @@ class RasaConverter(Converter):
 
     def create_entity_files(self, mm_entry):
         entity = mm_entry.strip('{}').split("|")
-        with open(self.mindmeld_project_directory + "/entities/"
-                  + entity[1] + "/gazetteer.txt", "a") as f:
-            f.write(entity[0] + "\n")
-            f.close()
+        gazetteer_location = self.mindmeld_project_directory + "/entities/" + \
+            entity[1] + "/gazetteer.txt"
+        try:
+            with open(gazetteer_location, "a") as f:
+                f.write(entity[0] + "\n")
+                f.close()
+        except FileNotFoundError as e:
+            self._create_entities_directories(self.mindmeld_project_directory, [entity[1]])
+            with open(gazetteer_location, "a") as f:
+                f.write(entity[0] + "\n")
+                f.close()
+            logger.error("Domain file may not contain entity %s", entity[1])
+            logger.error(e)
 
     @staticmethod
     def _is_valid_function_name(name):
@@ -347,7 +357,8 @@ __all__ = ['app']
             entities_list += entities
         for entity in entities_list:
             newentity = entity.replace("{", "").replace("}", "")
-            entities_string = f"    {newentity}_s = [e['text'] for e in request.entities if e['type'] == '{newentity}']\n"
+            entities_string = f"    {newentity}_s = [e['text'] for e in " + \
+                f"request.entities if e['type'] == '{newentity}']\n"
             entity_string = f"    {newentity} = {newentity}_s[0]\n"
             f.write(entities_string)
             f.write(entity_string)

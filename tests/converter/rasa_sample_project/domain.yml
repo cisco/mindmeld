@@ -10,7 +10,7 @@ intents:
 
 entities:
 - name
-
+- lastname
 
 slots:
   name:

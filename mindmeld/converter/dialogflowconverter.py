@@ -22,6 +22,7 @@ from sklearn.model_selection import train_test_split
 
 from mindmeld.converter.converter import Converter
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -246,6 +247,7 @@ class DialogFlowConverter(Converter):
                     for response in datastore["responses"]:
                         for message in response["messages"]:
                             data = message["speech"]
+
                             replies = data if isinstance(data, list) else [data]
 
                             if datastore["fallbackIntent"]:

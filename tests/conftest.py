@@ -35,6 +35,7 @@ MINDMELD_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 DIALOGFLOW_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter/ASLRoma')
 MINDMELD_PROJECT_PATH2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter/mindmeld_project2')
 
+
 @pytest.fixture
 def lstm_entity_config():
     return {
