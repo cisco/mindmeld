@@ -440,7 +440,8 @@ class DialogueManager:
         responder.dialogue_state = dialogue_state
         return responder
 
-    def reprocess(self, target_dialogue_state=None):
+    @staticmethod
+    def reprocess(target_dialogue_state=None):
         """Forces the dialogue manager to back out of the flow based on the initial target
         dialogue state setting and reselect a handler, following a new target dialogue state
 
@@ -521,8 +522,10 @@ class DialogueFlow(DialogueManager):
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
         app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
-        handler = self._apply_flow_handler_async if self.async_mode else \
-            self._apply_flow_handler_sync
+        if self.async_mode:
+            handler = self._apply_flow_handler_async
+        else:
+            handler = self._apply_flow_handler_sync
         app.add_dialogue_rule(self.flow_state, handler, targeted_only=True)
 
     @property
