@@ -22,7 +22,6 @@ from sklearn.model_selection import train_test_split
 
 from mindmeld.converter.converter import Converter
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -46,6 +45,8 @@ class DialogFlowConverter(Converter):
         self.dialogflow_project_directory = dialogflow_project_directory
         self.mindmeld_project_directory = mindmeld_project_directory
         self.directory = os.path.dirname(os.path.realpath(__file__))
+        self.entities_list = set()
+        self.intents_list = set()
 
     def create_mindmeld_directory(self):
         Converter.create_directory(self.mindmeld_project_directory)
@@ -54,6 +55,10 @@ class DialogFlowConverter(Converter):
         Converter.create_directory(os.path.join(self.mindmeld_project_directory, "domains",
                                                 "general"))
         Converter.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
+
+    # =========================
+    # create training data (entities, intents)
+    # =========================
 
     def _create_entities_directories(self, entities):
         """ Creates directories + files for all languages/files. All file paths should be valid.
@@ -66,7 +71,9 @@ class DialogFlowConverter(Converter):
                                                       "entities", sub + ".json")
 
                 mindmeld_entity_directory = os.path.join(self.mindmeld_project_directory,
-                                                         "entities", main)
+                                                         "entities",
+                                                         DialogFlowConverter.clean_check(
+                                                                    main, self.entities_list))
 
                 Converter.create_directory(mindmeld_entity_directory)
 
@@ -87,7 +94,7 @@ class DialogFlowConverter(Converter):
             item['synonyms'].remove(item['value'])
             newDict['whitelist'] = item['synonyms']
             newDict['cname'] = item['value']
-            # newDict['id'] = "n/a" # TODO: when do you need an ID?
+            # newDict['id'] = "n/a"  # TODO: when do you need an ID?
             mapping_dict["entities"].append(newDict)
 
             target_gazetteer.write(item['value'] + "\n")
@@ -110,7 +117,9 @@ class DialogFlowConverter(Converter):
                                                       "intents", sub + ".json")
 
                 mindmeld_intent_directory = os.path.join(self.mindmeld_project_directory,
-                                                         "domains", "general", sub)
+                                                         "domains", "general",
+                                                         DialogFlowConverter.clean_check(
+                                                                    sub, self.intents_list))
 
                 Converter.create_directory(mindmeld_intent_directory)
 
@@ -137,7 +146,7 @@ class DialogFlowConverter(Converter):
                         if df_meta in DialogFlowConverter.sys_entity_map:
                             mm_meta = DialogFlowConverter.sys_entity_map[df_meta]
                         else:
-                            mm_meta = "[DNE: " + df_meta[1:] + "]"
+                            mm_meta = "[DNE: {sysEntity}]".format(sysEntity=df_meta[1:])
                             logger.info("Unfortunately mindmeld does not currently support"
                                         "%s as a sys entity."
                                         "Please create an entity for this.", df_meta[1:])
@@ -200,7 +209,9 @@ class DialogFlowConverter(Converter):
         intents = self._get_file_names("intents")
         self._create_intents_directories(intents)
 
-    # ^ create training data
+    # =========================
+    # create init
+    # =========================
 
     @staticmethod
     def create_handle(params):
@@ -222,6 +233,28 @@ class DialogFlowConverter(Converter):
         result += "\t" "responder.reply(replies)"
         return result
 
+    @staticmethod
+    def clean_name(name):
+        """ Takes in a string and returns a valid folder name."""
+        name = re.sub(r'[^\w\s-]', '', name).strip().lower()
+        name = re.sub(r'[-\s]+', '_', name)
+        return name
+
+    @staticmethod
+    def clean_check(name, lst):
+        """ Takes in a list of strings and a name.
+        returns name cleaned if cleaned not found in lst."""
+        cleaned = DialogFlowConverter.clean_name(name)
+
+        if cleaned not in lst:
+            lst.add(cleaned)
+            return cleaned
+        else:
+            logger.error("%s name has been created twice. Please ensure there "
+                         "are no duplicate names in the dialogflow files and "
+                         "filenames are valid (no spaces or special characters)",
+                         cleaned)
+
     def create_init(self):
         with open(os.path.join(self.mindmeld_project_directory, "__init__.py"), 'w') as target:
             begin_info = ["\"\"\"This module contains the MindMeld application\"\"\"",
@@ -234,9 +267,9 @@ class DialogFlowConverter(Converter):
 
             intents = self._get_file_names("intents")
 
-            # iterate over all the intents
             # for i, (main, languages) in enumerate(intents.items()):
             for i, main in enumerate(intents.keys()):
+
                 df_main = os.path.join(self.dialogflow_project_directory,
                                        "intents", main + ".json")
 
@@ -262,13 +295,23 @@ class DialogFlowConverter(Converter):
                                                                 function_name=function_name,
                                                                 replies=replies) + "\n\n")
 
+    # =========================
+    # create main, config
+    # =========================
+
     def create_main(self):
         pass
 
     def create_config(self):
         pass
 
+    # =========================
+    # convert project
+    # =========================
+
     def convert_project(self):
+        """ Notes:
+        at the moment not all system entities are translated over"""
         # Create project directory with sub folders
         self.create_mindmeld_directory()
         # Transfer over test data from DialogFlow project and reformat to Mindmeld project
