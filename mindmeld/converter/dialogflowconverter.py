@@ -280,6 +280,8 @@ class DialogFlowConverter(Converter):
                     replies = []
                     for response in datastore["responses"]:
                         for message in response["messages"]:
+                            language = message["lang"]
+
                             if 'speech' in message:
                                 data = message["speech"]
 
@@ -290,7 +292,7 @@ class DialogFlowConverter(Converter):
                                     handles = ["default=True", "intent='unsupported'"]
                                 else:
                                     function_name = "renameMe" + str(i)
-                                    handles = ["intent=" + "'" + datastore["name"] + "'"]
+                                    handles = ["intent=" + "'" + DialogFlowConverter.clean_name(datastore["name"]) + "_usersays_" + language + "'"]
 
                                 target.write(DialogFlowConverter.create_function(
                                                                     handles=handles,
