@@ -1,0 +1,56 @@
+[
+  {
+    "value": "@venue-accomodation-chain",
+    "synonyms": [
+      "@venue-accomodation-chain"
+    ]
+  },
+  {
+    "value": "@venue-automotive-chain",
+    "synonyms": [
+      "@venue-automotive-chain"
+    ]
+  },
+  {
+    "value": "@venue-beauty-chain",
+    "synonyms": [
+      "@venue-beauty-chain"
+    ]
+  },
+  {
+    "value": "@venue-eating-out-chain",
+    "synonyms": [
+      "@venue-eating-out-chain"
+    ]
+  },
+  {
+    "value": "@venue-medical-chain",
+    "synonyms": [
+      "@venue-medical-chain"
+    ]
+  },
+  {
+    "value": "@venue-nightlife-chain",
+    "synonyms": [
+      "@venue-nightlife-chain"
+    ]
+  },
+  {
+    "value": "@venue-shopping-chain",
+    "synonyms": [
+      "@venue-shopping-chain"
+    ]
+  },
+  {
+    "value": "@venue-sport-chain",
+    "synonyms": [
+      "@venue-sport-chain"
+    ]
+  },
+  {
+    "value": "@venue-travel-chain",
+    "synonyms": [
+      "@venue-travel-chain"
+    ]
+  }
+]

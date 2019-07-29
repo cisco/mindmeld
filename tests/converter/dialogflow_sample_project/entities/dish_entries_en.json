@@ -1,0 +1,1453 @@
+[
+  {
+    "value": "apfelstrudel",
+    "synonyms": [
+      "apfelstrudel"
+    ]
+  },
+  {
+    "value": "apple pie",
+    "synonyms": [
+      "apple pie"
+    ]
+  },
+  {
+    "value": "baati",
+    "synonyms": [
+      "baati"
+    ]
+  },
+  {
+    "value": "bagel",
+    "synonyms": [
+      "bagel",
+      "bagels"
+    ]
+  },
+  {
+    "value": "baguette",
+    "synonyms": [
+      "baguette"
+    ]
+  },
+  {
+    "value": "barbecue",
+    "synonyms": [
+      "barbecue",
+      "barbeque"
+    ]
+  },
+  {
+    "value": "barfi",
+    "synonyms": [
+      "barfi",
+      "borfee",
+      "burfee",
+      "burfi"
+    ]
+  },
+  {
+    "value": "beef bourguignon",
+    "synonyms": [
+      "beef bourguignon",
+      "beef burgundy"
+    ]
+  },
+  {
+    "value": "beef stroganov",
+    "synonyms": [
+      "beef stroganov"
+    ]
+  },
+  {
+    "value": "bigmac",
+    "synonyms": [
+      "bigmac"
+    ]
+  },
+  {
+    "value": "blini",
+    "synonyms": [
+      "blini",
+      "bliny"
+    ]
+  },
+  {
+    "value": "blueberry muffins",
+    "synonyms": [
+      "blueberry muffins"
+    ]
+  },
+  {
+    "value": "borshch",
+    "synonyms": [
+      "beet soup",
+      "borscht",
+      "borshch"
+    ]
+  },
+  {
+    "value": "bratwurst",
+    "synonyms": [
+      "bratwurst"
+    ]
+  },
+  {
+    "value": "bread sticks",
+    "synonyms": [
+      "breadsticks",
+      "bread sticks"
+    ]
+  },
+  {
+    "value": "brezel",
+    "synonyms": [
+      "brezel"
+    ]
+  },
+  {
+    "value": "brownie",
+    "synonyms": [
+      "brownie"
+    ]
+  },
+  {
+    "value": "bull testicle",
+    "synonyms": [
+      "bull testicle",
+      "bull testicles"
+    ]
+  },
+  {
+    "value": "burger",
+    "synonyms": [
+      "burger",
+      "burgers",
+      "cheeseburger",
+      "hamburger"
+    ]
+  },
+  {
+    "value": "burrito",
+    "synonyms": [
+      "burrito",
+      "burritos"
+    ]
+  },
+  {
+    "value": "business lunch",
+    "synonyms": [
+      "business lunch"
+    ]
+  },
+  {
+    "value": "cake",
+    "synonyms": [
+      "cake",
+      "cakes"
+    ]
+  },
+  {
+    "value": "caparrones",
+    "synonyms": [
+      "caparrones"
+    ]
+  },
+  {
+    "value": "carne asada",
+    "synonyms": [
+      "carne asada"
+    ]
+  },
+  {
+    "value": "carnitas",
+    "synonyms": [
+      "carnitas"
+    ]
+  },
+  {
+    "value": "carnitas burrito",
+    "synonyms": [
+      "carnitas currito"
+    ]
+  },
+  {
+    "value": "cemita",
+    "synonyms": [
+      "cemita",
+      "cemitas"
+    ]
+  },
+  {
+    "value": "century eggs",
+    "synonyms": [
+      "century eggs",
+      "millenium eggs"
+    ]
+  },
+  {
+    "value": "chana masala",
+    "synonyms": [
+      "chana masala"
+    ]
+  },
+  {
+    "value": "cheescake",
+    "synonyms": [
+      "cheescake"
+    ]
+  },
+  {
+    "value": "cheese souffle",
+    "synonyms": [
+      "cheese souffle"
+    ]
+  },
+  {
+    "value": "cheese steaks",
+    "synonyms": [
+      "cheese steaks",
+      "cheesesteaks"
+    ]
+  },
+  {
+    "value": "cheesecake",
+    "synonyms": [
+      "cheesecake"
+    ]
+  },
+  {
+    "value": "chicken curry",
+    "synonyms": [
+      "chicken curry"
+    ]
+  },
+  {
+    "value": "chicken feet",
+    "synonyms": [
+      "chicken feet"
+    ]
+  },
+  {
+    "value": "chicken tikka masala",
+    "synonyms": [
+      "chicken tikka masala"
+    ]
+  },
+  {
+    "value": "chicken wings",
+    "synonyms": [
+      "chicken wings"
+    ]
+  },
+  {
+    "value": "chicken steak",
+    "synonyms": [
+      "chicken steak"
+    ]
+  },
+  {
+    "value": "chilli paneer",
+    "synonyms": [
+      "chilli paneer"
+    ]
+  },
+  {
+    "value": "chips",
+    "synonyms": [
+      "chips"
+    ]
+  },
+  {
+    "value": "chocolate",
+    "synonyms": [
+      "chocolate",
+      "chocolates"
+    ]
+  },
+  {
+    "value": "chocolate mousse",
+    "synonyms": [
+      "chocolate mousse"
+    ]
+  },
+  {
+    "value": "chorizo",
+    "synonyms": [
+      "chorizo"
+    ]
+  },
+  {
+    "value": "chow fun",
+    "synonyms": [
+      "chow fun"
+    ]
+  },
+  {
+    "value": "chow mein",
+    "synonyms": [
+      "chow mein"
+    ]
+  },
+  {
+    "value": "churro",
+    "synonyms": [
+      "churro"
+    ]
+  },
+  {
+    "value": "coca",
+    "synonyms": [
+      "coca"
+    ]
+  },
+  {
+    "value": "corn chowder",
+    "synonyms": [
+      "corn chowder"
+    ]
+  },
+  {
+    "value": "cream soup",
+    "synonyms": [
+      "cream soup"
+    ]
+  },
+  {
+    "value": "creme brulee",
+    "synonyms": [
+      "creme brulee"
+    ]
+  },
+  {
+    "value": "crepe",
+    "synonyms": [
+      "crepe"
+    ]
+  },
+  {
+    "value": "croissant",
+    "synonyms": [
+      "croissant"
+    ]
+  },
+  {
+    "value": "cupcake",
+    "synonyms": [
+      "cupcake"
+    ]
+  },
+  {
+    "value": "curry",
+    "synonyms": [
+      "curry"
+    ]
+  },
+  {
+    "value": "curry bread",
+    "synonyms": [
+      "curry bread"
+    ]
+  },
+  {
+    "value": "dal",
+    "synonyms": [
+      "dal"
+    ]
+  },
+  {
+    "value": "desserts",
+    "synonyms": [
+      "desserts"
+    ]
+  },
+  {
+    "value": "dim sum",
+    "synonyms": [
+      "dim sum"
+    ]
+  },
+  {
+    "value": "donburi",
+    "synonyms": [
+      "donburi"
+    ]
+  },
+  {
+    "value": "donut",
+    "synonyms": [
+      "donut",
+      "donuts"
+    ]
+  },
+  {
+    "value": "dressed herring",
+    "synonyms": [
+      "dressed herring"
+    ]
+  },
+  {
+    "value": "dumplings",
+    "synonyms": [
+      "dumplings"
+    ]
+  },
+  {
+    "value": "eintopf",
+    "synonyms": [
+      "eintopf"
+    ]
+  },
+  {
+    "value": "empanada",
+    "synonyms": [
+      "empanada"
+    ]
+  },
+  {
+    "value": "enchilada",
+    "synonyms": [
+      "enchilada"
+    ]
+  },
+  {
+    "value": "escargots",
+    "synonyms": [
+      "escargots"
+    ]
+  },
+  {
+    "value": "escudella",
+    "synonyms": [
+      "escudella"
+    ]
+  },
+  {
+    "value": "fajitas",
+    "synonyms": [
+      "fajitas"
+    ]
+  },
+  {
+    "value": "falafel",
+    "synonyms": [
+      "falafel"
+    ]
+  },
+  {
+    "value": "fish chips",
+    "synonyms": [
+      "fish and chips",
+      "fish chips",
+      "fish n chips"
+    ]
+  },
+  {
+    "value": "flan",
+    "synonyms": [
+      "caramel custard",
+      "creme caramel",
+      "flan"
+    ]
+  },
+  {
+    "value": "flauta",
+    "synonyms": [
+      "flauta"
+    ]
+  },
+  {
+    "value": "fondue",
+    "synonyms": [
+      "fondue"
+    ]
+  },
+  {
+    "value": "french fries",
+    "synonyms": [
+      "french fries",
+      "fries"
+    ]
+  },
+  {
+    "value": "fried eggs",
+    "synonyms": [
+      "fried eggs"
+    ]
+  },
+  {
+    "value": "fromage blanc",
+    "synonyms": [
+      "fromage blanc"
+    ]
+  },
+  {
+    "value": "frozen yogurt",
+    "synonyms": [
+      "frozen yogurt"
+    ]
+  },
+  {
+    "value": "funnel cakes",
+    "synonyms": [
+      "funnel cakes"
+    ]
+  },
+  {
+    "value": "gazpacho",
+    "synonyms": [
+      "gaspacho",
+      "gazpacho"
+    ]
+  },
+  {
+    "value": "gelato",
+    "synonyms": [
+      "gelato"
+    ]
+  },
+  {
+    "value": "goulash",
+    "synonyms": [
+      "goulash"
+    ]
+  },
+  {
+    "value": "gratin dauphinois",
+    "synonyms": [
+      "gratin dauphinois"
+    ]
+  },
+  {
+    "value": "green curry",
+    "synonyms": [
+      "green curry"
+    ]
+  },
+  {
+    "value": "grilled chicken",
+    "synonyms": [
+      "grilled chicken"
+    ]
+  },
+  {
+    "value": "guacamole",
+    "synonyms": [
+      "guacamole"
+    ]
+  },
+  {
+    "value": "hamburgers",
+    "synonyms": [
+      "hamburgers"
+    ]
+  },
+  {
+    "value": "hawaiian pizza",
+    "synonyms": [
+      "hawaiian pizza"
+    ]
+  },
+  {
+    "value": "hot and sour soup",
+    "synonyms": [
+      "hot and sour soup"
+    ]
+  },
+  {
+    "value": "hot dogs",
+    "synonyms": [
+      "hot dogs"
+    ]
+  },
+  {
+    "value": "hot pot",
+    "synonyms": [
+      "hot pot"
+    ]
+  },
+  {
+    "value": "hot pots",
+    "synonyms": [
+      "hot pots"
+    ]
+  },
+  {
+    "value": "hotdog",
+    "synonyms": [
+      "hotdog"
+    ]
+  },
+  {
+    "value": "ice cream",
+    "synonyms": [
+      "ice cream"
+    ]
+  },
+  {
+    "value": "ice cream frozen yogurt",
+    "synonyms": [
+      "ice cream and frozen yogurt",
+      "ice cream frozen yogurt",
+      "ice cream n frozen yogurt"
+    ]
+  },
+  {
+    "value": "ikra",
+    "synonyms": [
+      "ikra"
+    ]
+  },
+  {
+    "value": "jamon",
+    "synonyms": [
+      "jamon"
+    ]
+  },
+  {
+    "value": "kasespatzle",
+    "synonyms": [
+      "kasespatzle"
+    ]
+  },
+  {
+    "value": "kasha",
+    "synonyms": [
+      "kasha"
+    ]
+  },
+  {
+    "value": "katsudon",
+    "synonyms": [
+      "katsudon"
+    ]
+  },
+  {
+    "value": "kholodets",
+    "synonyms": [
+      "kholodets"
+    ]
+  },
+  {
+    "value": "kissel",
+    "synonyms": [
+      "kissel"
+    ]
+  },
+  {
+    "value": "klopse",
+    "synonyms": [
+      "klopse"
+    ]
+  },
+  {
+    "value": "knodel",
+    "synonyms": [
+      "knodel"
+    ]
+  },
+  {
+    "value": "kofta",
+    "synonyms": [
+      "kofta"
+    ]
+  },
+  {
+    "value": "korokke",
+    "synonyms": [
+      "korokke"
+    ]
+  },
+  {
+    "value": "kvass",
+    "synonyms": [
+      "kvass"
+    ]
+  },
+  {
+    "value": "large pepperoni pizza with thin crust, sausage and onions",
+    "synonyms": [
+      "large pepperoni pizza with thin crust, sausage and onions"
+    ]
+  },
+  {
+    "value": "lasagna",
+    "synonyms": [
+      "lasagna"
+    ]
+  },
+  {
+    "value": "lentil soup",
+    "synonyms": [
+      "lentil soup"
+    ]
+  },
+  {
+    "value": "lentil soup",
+    "synonyms": [
+      "lentil soup"
+    ]
+  },
+  {
+    "value": "madeleines",
+    "synonyms": [
+      "madeleines"
+    ]
+  },
+  {
+    "value": "melonpan",
+    "synonyms": [
+      "melon bread",
+      "melonpan"
+    ]
+  },
+  {
+    "value": "mille-feuille",
+    "synonyms": [
+      "mille-feuille"
+    ]
+  },
+  {
+    "value": "mini wheats",
+    "synonyms": [
+      "mini wheats"
+    ]
+  },
+  {
+    "value": "miso",
+    "synonyms": [
+      "miso",
+      "miso soup"
+    ]
+  },
+  {
+    "value": "mooncake",
+    "synonyms": [
+      "mooncake"
+    ]
+  },
+  {
+    "value": "morning bun",
+    "synonyms": [
+      "morning bun"
+    ]
+  },
+  {
+    "value": "mortadella",
+    "synonyms": [
+      "mortadella"
+    ]
+  },
+  {
+    "value": "mozzarella",
+    "synonyms": [
+      "mozzarella"
+    ]
+  },
+  {
+    "value": "naan",
+    "synonyms": [
+      "naan"
+    ]
+  },
+  {
+    "value": "nacho",
+    "synonyms": [
+      "nacho",
+      "nachos"
+    ]
+  },
+  {
+    "value": "noodle soup",
+    "synonyms": [
+      "noodle soup"
+    ]
+  },
+  {
+    "value": "noodles",
+    "synonyms": [
+      "noodles"
+    ]
+  },
+  {
+    "value": "oatmeal",
+    "synonyms": [
+      "oatmeal"
+    ]
+  },
+  {
+    "value": "okonomiyaki",
+    "synonyms": [
+      "okonomiyaki"
+    ]
+  },
+  {
+    "value": "okroshka",
+    "synonyms": [
+      "okroshka"
+    ]
+  },
+  {
+    "value": "olivier salad",
+    "synonyms": [
+      "olivier salad",
+      "salad olivier"
+    ]
+  },
+  {
+    "value": "omelette",
+    "synonyms": [
+      "omelette"
+    ]
+  },
+  {
+    "value": "omurice",
+    "synonyms": [
+      "omurice"
+    ]
+  },
+  {
+    "value": "onion soup",
+    "synonyms": [
+      "onion soup"
+    ]
+  },
+  {
+    "value": "oyakodon",
+    "synonyms": [
+      "oyakodon"
+    ]
+  },
+  {
+    "value": "paella",
+    "synonyms": [
+      "paella"
+    ]
+  },
+  {
+    "value": "pancake",
+    "synonyms": [
+      "pancake"
+    ]
+  },
+  {
+    "value": "paneer tikka masala",
+    "synonyms": [
+      "paneer tikka masala"
+    ]
+  },
+  {
+    "value": "panna cotta",
+    "synonyms": [
+      "panna cotta"
+    ]
+  },
+  {
+    "value": "paratha",
+    "synonyms": [
+      "paratha"
+    ]
+  },
+  {
+    "value": "pasta",
+    "synonyms": [
+      "pasta"
+    ]
+  },
+  {
+    "value": "patatas bravas",
+    "synonyms": [
+      "patatas bravas"
+    ]
+  },
+  {
+    "value": "peanut cupcake",
+    "synonyms": [
+      "peanut cupcake"
+    ]
+  },
+  {
+    "value": "peking duck",
+    "synonyms": [
+      "peking duck"
+    ]
+  },
+  {
+    "value": "pelmeni",
+    "synonyms": [
+      "pelmeni"
+    ]
+  },
+  {
+    "value": "pepperoni pizza",
+    "synonyms": [
+      "pepperoni pizza"
+    ]
+  },
+  {
+    "value": "pie",
+    "synonyms": [
+      "pie",
+      "pies"
+    ]
+  },
+  {
+    "value": "pincho",
+    "synonyms": [
+      "pincho"
+    ]
+  },
+  {
+    "value": "pirog",
+    "synonyms": [
+      "pirog"
+    ]
+  },
+  {
+    "value": "pirozhki",
+    "synonyms": [
+      "piroshki",
+      "pirozhki"
+    ]
+  },
+  {
+    "value": "pisto",
+    "synonyms": [
+      "pisto"
+    ]
+  },
+  {
+    "value": "pizza",
+    "synonyms": [
+      "pizza",
+      "pizzas"
+    ]
+  },
+  {
+    "value": "poached eggs",
+    "synonyms": [
+      "poached eggs"
+    ]
+  },
+  {
+    "value": "potage",
+    "synonyms": [
+      "potage"
+    ]
+  },
+  {
+    "value": "pretzel",
+    "synonyms": [
+      "pretzel",
+      "pretzels"
+    ]
+  },
+  {
+    "value": "quiche",
+    "synonyms": [
+      "quiche"
+    ]
+  },
+  {
+    "value": "quiche lorraine",
+    "synonyms": [
+      "quiche lorraine"
+    ]
+  },
+  {
+    "value": "ramen",
+    "synonyms": [
+      "ramen"
+    ]
+  },
+  {
+    "value": "rassolnik",
+    "synonyms": [
+      "rassolnik"
+    ]
+  },
+  {
+    "value": "ratatouille",
+    "synonyms": [
+      "ratatouille"
+    ]
+  },
+  {
+    "value": "red curry",
+    "synonyms": [
+      "red curry"
+    ]
+  },
+  {
+    "value": "religieuse",
+    "synonyms": [
+      "religieuse"
+    ]
+  },
+  {
+    "value": "rice and beans",
+    "synonyms": [
+      "rice and beans",
+      "rice beans",
+      "rice n beans"
+    ]
+  },
+  {
+    "value": "rice and chicken",
+    "synonyms": [
+      "rice and chicken"
+    ]
+  },
+  {
+    "value": "rice and red beans",
+    "synonyms": [
+      "rice and red beans",
+      "rice n red beans",
+      "rice red beans"
+    ]
+  },
+  {
+    "value": "rice cakes",
+    "synonyms": [
+      "rice cakes"
+    ]
+  },
+  {
+    "value": "risotto",
+    "synonyms": [
+      "risotto"
+    ]
+  },
+  {
+    "value": "rolled taco",
+    "synonyms": [
+      "rolled taco"
+    ]
+  },
+  {
+    "value": "russian salad",
+    "synonyms": [
+      "russian salad"
+    ]
+  },
+  {
+    "value": "sachertorte",
+    "synonyms": [
+      "sacher torte",
+      "sachertorte"
+    ]
+  },
+  {
+    "value": "salad",
+    "synonyms": [
+      "salad"
+    ]
+  },
+  {
+    "value": "salami pizza",
+    "synonyms": [
+      "salami pizza"
+    ]
+  },
+  {
+    "value": "salchichon",
+    "synonyms": [
+      "salchichon"
+    ]
+  },
+  {
+    "value": "salsa",
+    "synonyms": [
+      "salsa",
+      "salsa sauce"
+    ]
+  },
+  {
+    "value": "samosa",
+    "synonyms": [
+      "samosa"
+    ]
+  },
+  {
+    "value": "sandwich",
+    "synonyms": [
+      "sandwich",
+      "sandwiches"
+    ]
+  },
+  {
+    "value": "sangria",
+    "synonyms": [
+      "sangria"
+    ]
+  },
+  {
+    "value": "sashimi",
+    "synonyms": [
+      "sashimi"
+    ]
+  },
+  {
+    "value": "sauerbraten",
+    "synonyms": [
+      "sauerbraten"
+    ]
+  },
+  {
+    "value": "sauerkraut",
+    "synonyms": [
+      "sauerkraut"
+    ]
+  },
+  {
+    "value": "sbiten",
+    "synonyms": [
+      "sbiten"
+    ]
+  },
+  {
+    "value": "schnitzel",
+    "synonyms": [
+      "schnitzel"
+    ]
+  },
+  {
+    "value": "schwarzwalder kirschtorte",
+    "synonyms": [
+      "black forest cake",
+      "black forest cherry cake",
+      "schwarzwalder kirschtorte"
+    ]
+  },
+  {
+    "value": "sea cucumbers",
+    "synonyms": [
+      "sea cucumbers"
+    ]
+  },
+  {
+    "value": "seafood",
+    "synonyms": [
+      "seafood"
+    ]
+  },
+  {
+    "value": "shashlik",
+    "synonyms": [
+      "shashlik",
+      "shashlyk"
+    ]
+  },
+  {
+    "value": "shchi",
+    "synonyms": [
+      "shchi"
+    ]
+  },
+  {
+    "value": "soba",
+    "synonyms": [
+      "soba"
+    ]
+  },
+  {
+    "value": "solyanka",
+    "synonyms": [
+      "solyanka"
+    ]
+  },
+  {
+    "value": "soup",
+    "synonyms": [
+      "soup"
+    ]
+  },
+  {
+    "value": "spaghetti",
+    "synonyms": [
+      "spaghetti"
+    ]
+  },
+  {
+    "value": "spanish tortilla",
+    "synonyms": [
+      "spanish tortilla"
+    ]
+  },
+  {
+    "value": "spicy tofu",
+    "synonyms": [
+      "mapo dofu",
+      "mapo tofu",
+      "spicy tofu"
+    ]
+  },
+  {
+    "value": "spotted dick",
+    "synonyms": [
+      "spotted dick"
+    ]
+  },
+  {
+    "value": "spring rolls",
+    "synonyms": [
+      "spring rolls",
+      "springrolls"
+    ]
+  },
+  {
+    "value": "spumoni",
+    "synonyms": [
+      "spumoni"
+    ]
+  },
+  {
+    "value": "steak tartare",
+    "synonyms": [
+      "steak tartare"
+    ]
+  },
+  {
+    "value": "stollen",
+    "synonyms": [
+      "stollen"
+    ]
+  },
+  {
+    "value": "strudel",
+    "synonyms": [
+      "strudel"
+    ]
+  },
+  {
+    "value": "sukiyaki",
+    "synonyms": [
+      "sukiyaki"
+    ]
+  },
+  {
+    "value": "sushi",
+    "synonyms": [
+      "sushi"
+    ]
+  },
+  {
+    "value": "sweet and sour pork",
+    "synonyms": [
+      "sweet and sour pork"
+    ]
+  },
+  {
+    "value": "syrniki",
+    "synonyms": [
+      "syrniki"
+    ]
+  },
+  {
+    "value": "taco",
+    "synonyms": [
+      "taco",
+      "tacos"
+    ]
+  },
+  {
+    "value": "takoyaki",
+    "synonyms": [
+      "takoyaki"
+    ]
+  },
+  {
+    "value": "tamales",
+    "synonyms": [
+      "tamales"
+    ]
+  },
+  {
+    "value": "tandoori chicken",
+    "synonyms": [
+      "tandoori chicken"
+    ]
+  },
+  {
+    "value": "tapas",
+    "synonyms": [
+      "tapas"
+    ]
+  },
+  {
+    "value": "taquito",
+    "synonyms": [
+      "taquito"
+    ]
+  },
+  {
+    "value": "tart",
+    "synonyms": [
+      "tart"
+    ]
+  },
+  {
+    "value": "tarte tatin",
+    "synonyms": [
+      "tarte tatin"
+    ]
+  },
+  {
+    "value": "tartlet",
+    "synonyms": [
+      "tartlet"
+    ]
+  },
+  {
+    "value": "tempura",
+    "synonyms": [
+      "tempura"
+    ]
+  },
+  {
+    "value": "teriyaki",
+    "synonyms": [
+      "teriyaki"
+    ]
+  },
+  {
+    "value": "terrine",
+    "synonyms": [
+      "terrine"
+    ]
+  },
+  {
+    "value": "the hot dog",
+    "synonyms": [
+      "the hot dog"
+    ]
+  },
+  {
+    "value": "tiramisu",
+    "synonyms": [
+      "tiramisu"
+    ]
+  },
+  {
+    "value": "tonkatsu",
+    "synonyms": [
+      "tonkatsu"
+    ]
+  },
+  {
+    "value": "tortas",
+    "synonyms": [
+      "tortas"
+    ]
+  },
+  {
+    "value": "tortilla",
+    "synonyms": [
+      "tortilla",
+      "tortillas"
+    ]
+  },
+  {
+    "value": "tortilla espaniola",
+    "synonyms": [
+      "tortilla espaniola"
+    ]
+  },
+  {
+    "value": "turkey leg",
+    "synonyms": [
+      "turkey leg"
+    ]
+  },
+  {
+    "value": "tushonka",
+    "synonyms": [
+      "tushonka"
+    ]
+  },
+  {
+    "value": "udon",
+    "synonyms": [
+      "udon"
+    ]
+  },
+  {
+    "value": "ukha",
+    "synonyms": [
+      "ukha"
+    ]
+  },
+  {
+    "value": "vatrushka",
+    "synonyms": [
+      "vatrushka"
+    ]
+  },
+  {
+    "value": "victoria sponge cake",
+    "synonyms": [
+      "victoria sponge cake"
+    ]
+  },
+  {
+    "value": "vinegret",
+    "synonyms": [
+      "vinegret"
+    ]
+  },
+  {
+    "value": "weisswurst",
+    "synonyms": [
+      "weisswurst",
+      "white sausage"
+    ]
+  },
+  {
+    "value": "whopper",
+    "synonyms": [
+      "whopper"
+    ]
+  },
+  {
+    "value": "wok",
+    "synonyms": [
+      "wok"
+    ]
+  },
+  {
+    "value": "wonton noodle soup",
+    "synonyms": [
+      "wonton noodle soup"
+    ]
+  },
+  {
+    "value": "wurst",
+    "synonyms": [
+      "wurst"
+    ]
+  },
+  {
+    "value": "yakisoba",
+    "synonyms": [
+      "yakisoba"
+    ]
+  },
+  {
+    "value": "yakitori",
+    "synonyms": [
+      "yakitori"
+    ]
+  },
+  {
+    "value": "yellow curry",
+    "synonyms": [
+      "yellow curry"
+    ]
+  },
+  {
+    "value": "yogurt",
+    "synonyms": [
+      "yogurt"
+    ]
+  }
+]

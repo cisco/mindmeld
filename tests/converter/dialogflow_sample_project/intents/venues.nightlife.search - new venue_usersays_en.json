@@ -1,0 +1,142 @@
+[
+  {
+    "id": "adfeb35d-69f2-40b7-b3d4-c853985c251c",
+    "data": [
+      {
+        "text": "bar",
+        "alias": "venue-type",
+        "meta": "@venue-nightlife-type",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "ea09e909-64d1-44dc-bcfc-de4e0dd75d61",
+    "data": [
+      {
+        "text": "gay bar",
+        "alias": "venue-type",
+        "meta": "@venue-nightlife-type",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "50da2d60-e584-48bc-ac0c-8e3d29dea7b0",
+    "data": [
+      {
+        "text": "search for a ",
+        "userDefined": false
+      },
+      {
+        "text": "night club",
+        "alias": "venue-type",
+        "meta": "@venue-nightlife-type",
+        "userDefined": false
+      },
+      {
+        "text": " now",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "5d8f0dd0-6f32-4a2a-b853-5760c66f8043",
+    "data": [
+      {
+        "text": "I also need a ",
+        "userDefined": false
+      },
+      {
+        "text": "wine bar",
+        "alias": "venue-type",
+        "meta": "@venue-nightlife-type",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "9b62d6f5-b096-4a06-80d2-e8f413181bbc",
+    "data": [
+      {
+        "text": "and a ",
+        "userDefined": false
+      },
+      {
+        "text": "bar",
+        "alias": "venue-type",
+        "meta": "@venue-nightlife-type",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "e305a5c5-49f0-40e9-a869-9c04a238e116",
+    "data": [
+      {
+        "text": "now a ",
+        "userDefined": false
+      },
+      {
+        "text": "pub",
+        "alias": "venue-type",
+        "meta": "@venue-nightlife-type",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "145bbe45-a60e-4653-af33-5b13b107dd7e",
+    "data": [
+      {
+        "text": "what about a ",
+        "userDefined": false
+      },
+      {
+        "text": "strip club",
+        "alias": "venue-type",
+        "meta": "@venue-nightlife-type",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "e2dfdf82-23b4-42b7-9a67-e4fafa0206c3",
+    "data": [
+      {
+        "text": "how about a ",
+        "userDefined": false
+      },
+      {
+        "text": "bar",
+        "alias": "venue-type",
+        "meta": "@venue-nightlife-type",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

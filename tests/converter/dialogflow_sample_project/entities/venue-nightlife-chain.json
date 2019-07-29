@@ -1,0 +1,9 @@
+{
+  "id": "17eb1ec3-548a-4e7f-9d6b-36b3f8732fb2",
+  "name": "venue-nightlife-chain",
+  "isOverridable": true,
+  "isEnum": false,
+  "isRegexp": false,
+  "automatedExpansion": true,
+  "allowFuzzyExtraction": false
+}

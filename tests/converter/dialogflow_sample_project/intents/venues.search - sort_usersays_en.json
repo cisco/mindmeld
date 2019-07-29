@@ -1,0 +1,306 @@
+[
+  {
+    "id": "a57ac067-3d17-4086-91c5-c21f575b465c",
+    "data": [
+      {
+        "text": "I need the ",
+        "userDefined": false
+      },
+      {
+        "text": "cheapest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "db768a29-a442-495e-a81f-c93662d4c32c",
+    "data": [
+      {
+        "text": "which one is the ",
+        "userDefined": false
+      },
+      {
+        "text": "best",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "eaea89bc-a938-4c68-be6d-fe70d219a998",
+    "data": [
+      {
+        "text": "closest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      },
+      {
+        "text": " only",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "3963d46d-4b42-4064-8dfb-6449cd16465e",
+    "data": [
+      {
+        "text": "nearest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      },
+      {
+        "text": " and ",
+        "userDefined": false
+      },
+      {
+        "text": "cheapest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "0b1066ad-bb89-4e56-b441-8e2973557dff",
+    "data": [
+      {
+        "text": "choose the ",
+        "userDefined": false
+      },
+      {
+        "text": "best",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      },
+      {
+        "text": " ",
+        "userDefined": false
+      },
+      {
+        "text": "nearest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "d1a2f141-71a1-44fd-ab90-c1a7cbb5af3a",
+    "data": [
+      {
+        "text": "find the ",
+        "userDefined": false
+      },
+      {
+        "text": "best",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      },
+      {
+        "text": " for me",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "a35e42e3-add8-42d5-aad0-e6e150ddde8d",
+    "data": [
+      {
+        "text": "the ",
+        "userDefined": false
+      },
+      {
+        "text": "closest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      },
+      {
+        "text": " only",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "4a4f7523-8cd1-4b5d-9c1e-24af5d131f41",
+    "data": [
+      {
+        "text": "near me",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "0078112e-1685-41a5-a28c-8bc8c4681b75",
+    "data": [
+      {
+        "text": "closest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      },
+      {
+        "text": " to me",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "c3535c39-8a72-4135-85e0-352138a15e0e",
+    "data": [
+      {
+        "text": "where is the ",
+        "userDefined": false
+      },
+      {
+        "text": "closest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "f52c76a8-f6e9-48a4-aeaa-e26d60770eec",
+    "data": [
+      {
+        "text": "show only ",
+        "userDefined": false
+      },
+      {
+        "text": "cheap",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      },
+      {
+        "text": " and ",
+        "userDefined": false
+      },
+      {
+        "text": "nearest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "53ad19ff-d688-4407-861b-e32b95c8e083",
+    "data": [
+      {
+        "text": "only ",
+        "userDefined": false
+      },
+      {
+        "text": "closest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 1,
+    "updated": 0
+  },
+  {
+    "id": "0e4bf9b3-e3c7-431b-9117-2d8ccf1d81f2",
+    "data": [
+      {
+        "text": "the ",
+        "userDefined": false
+      },
+      {
+        "text": "closest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "c1a248ba-191e-4bb3-ac44-48c0bf423cd6",
+    "data": [
+      {
+        "text": "the ",
+        "userDefined": false
+      },
+      {
+        "text": "closest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      },
+      {
+        "text": " one",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "b062e2f7-1a4f-4f5c-acda-28a4c6e8940c",
+    "data": [
+      {
+        "text": "show the ",
+        "userDefined": false
+      },
+      {
+        "text": "nearest",
+        "alias": "sort",
+        "meta": "@map-sort",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "value": "\u003c 5",
+    "synonyms": [
+      "bad raiting",
+      "bad reviews"
+    ]
+  },
+  {
+    "value": "\u003e 5",
+    "synonyms": [
+      "good rating",
+      "good reviews",
+      "nice reviews"
+    ]
+  },
+  {
+    "value": "\u003e 8",
+    "synonyms": [
+      "advice",
+      "advise",
+      "best rated",
+      "best reviews",
+      "high rank",
+      "high rating",
+      "highest rank",
+      "highest rated",
+      "recommend",
+      "recommendation",
+      "top rated",
+      "top-rated"
+    ]
+  }
+]

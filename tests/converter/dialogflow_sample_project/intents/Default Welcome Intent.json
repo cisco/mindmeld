@@ -1,0 +1,55 @@
+{
+  "id": "1b99ae57-0df8-4cc8-a7e6-95f5f14aba92",
+  "name": "Default Welcome Intent",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "input.welcome",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": "suggestion_chips",
+          "platform": "google",
+          "lang": "en",
+          "suggestions": [
+            {
+              "title": "Restaurants"
+            },
+            {
+              "title": "Cafes"
+            },
+            {
+              "title": "Bars"
+            }
+          ]
+        },
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": [
+            "Hi! I can help you to find a nice place to eat. Tell me what are you looking for?",
+            "Hello! I can help you to find a nice place to eat. Tell me what are you looking for?",
+            "Good day! I can help you to find a nice place to eat. Tell me what are you looking for?",
+            "Greetings! I can help you to find a nice place to eat. Tell me what are you looking for?"
+          ]
+        }
+      ],
+      "defaultResponsePlatforms": {
+        "google": true
+      },
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [
+    {
+      "name": "WELCOME"
+    }
+  ]
+}

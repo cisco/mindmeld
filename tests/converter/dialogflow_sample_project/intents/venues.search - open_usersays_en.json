@@ -1,0 +1,245 @@
+[
+  {
+    "id": "040f3502-431b-4c62-a880-77e8da37ab62",
+    "data": [
+      {
+        "text": "find ",
+        "userDefined": false
+      },
+      {
+        "text": "open",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      },
+      {
+        "text": " only",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "3bfd8dbd-4932-47f9-b422-0234e2baa283",
+    "data": [
+      {
+        "text": "show ",
+        "userDefined": false
+      },
+      {
+        "text": "opened",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "1a2e92f3-a34e-45fa-86dc-d2b68b0e7809",
+    "data": [
+      {
+        "text": "only ",
+        "userDefined": false
+      },
+      {
+        "text": "opened",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      },
+      {
+        "text": " ",
+        "userDefined": false
+      },
+      {
+        "text": "ones",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "2f9f25d6-686f-4f7a-90a9-b7768a999e89",
+    "data": [
+      {
+        "text": "open now",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "d92a29be-f96c-4c91-9adc-0edf66f7704b",
+    "data": [
+      {
+        "text": "show ",
+        "userDefined": false
+      },
+      {
+        "text": "opened",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      },
+      {
+        "text": " one",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "e28de311-9d07-484d-ad86-eb16f16b8b3d",
+    "data": [
+      {
+        "text": "which one is ",
+        "userDefined": false
+      },
+      {
+        "text": "open now",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "27fd59f7-e887-42bd-abae-ae04ed97cc10",
+    "data": [
+      {
+        "text": "show the ",
+        "userDefined": false
+      },
+      {
+        "text": "opened",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      },
+      {
+        "text": " please",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "f10ed51d-be6c-4247-9cad-82d759cc7816",
+    "data": [
+      {
+        "text": "opened",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      },
+      {
+        "text": " ",
+        "userDefined": false
+      },
+      {
+        "text": "right now",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "eebf85f2-2e4f-4ab8-b300-7b391b04eccc",
+    "data": [
+      {
+        "text": "open",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      },
+      {
+        "text": " at this ",
+        "userDefined": false
+      },
+      {
+        "text": "time",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "dc78f765-652b-4060-89ff-fcc6ae757702",
+    "data": [
+      {
+        "text": "that is ",
+        "userDefined": false
+      },
+      {
+        "text": "opened now",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "f08a310e-99c0-4940-b464-e4d16dcd9636",
+    "data": [
+      {
+        "text": "show only ",
+        "userDefined": false
+      },
+      {
+        "text": "opened now",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "423417a8-5fde-4a93-83db-a8e9926edc27",
+    "data": [
+      {
+        "text": "that are ",
+        "userDefined": false
+      },
+      {
+        "text": "opened now",
+        "alias": "open",
+        "meta": "@open",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

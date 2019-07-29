@@ -1,0 +1,206 @@
+{
+  "id": "8773737e-a724-4aab-9f90-c7fc49afa93b",
+  "name": "venues.eating_out.search",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "venues.eating_out.search",
+      "affectedContexts": [
+        {
+          "name": "venues-eatingout",
+          "parameters": {},
+          "lifespan": 3
+        },
+        {
+          "name": "venues",
+          "parameters": {},
+          "lifespan": 3
+        },
+        {
+          "name": "venueseating_outsearch-followup",
+          "parameters": {},
+          "lifespan": 2
+        }
+      ],
+      "parameters": [
+        {
+          "id": "af43ad4b-5bae-43bd-ae63-82d5f7d5a78e",
+          "required": false,
+          "dataType": "@dish",
+          "name": "dish",
+          "value": "$dish",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "7abe9e07-74ce-4389-888c-99d9b9754ec2",
+          "required": false,
+          "dataType": "@beverage-soft-drinks",
+          "name": "beverage",
+          "value": "$beverage",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "044adc92-7443-47c7-866c-f91c58928a99",
+          "required": false,
+          "dataType": "@sys.location",
+          "name": "location",
+          "value": "$location",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "f02ae4a6-6469-4841-985d-7f45df56addf",
+          "required": false,
+          "dataType": "@cuisine",
+          "name": "cuisine",
+          "value": "$cuisine",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "5d224440-bb9b-4ba1-94cf-39fe204f609b",
+          "required": false,
+          "dataType": "@venue-eating-out-type",
+          "name": "venue-type",
+          "value": "$venue-type",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "87de603b-a733-4404-b9fe-ff0d40b6fbdf",
+          "required": false,
+          "dataType": "@venue-eating-out-title",
+          "name": "venue-title",
+          "value": "$venue-title",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "4e7c8dc3-c523-4a0b-953c-109c65b967f7",
+          "required": false,
+          "dataType": "@venue-eating-out-chain",
+          "name": "venue-chain",
+          "value": "$venue-chain",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "ffe835f4-9fe5-43fb-9b4c-c2d15ef1436b",
+          "required": false,
+          "dataType": "@venue-facility",
+          "name": "venue-facility",
+          "value": "$venue-facility",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "38ed0cea-99a2-4706-9e6f-3f00cd895d7d",
+          "required": false,
+          "dataType": "@map-sort",
+          "name": "sort",
+          "value": "$sort",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "b7751007-cb69-41ec-8073-6f02179208d7",
+          "required": false,
+          "dataType": "@meal",
+          "name": "meal",
+          "value": "$meal",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "91ec1adb-7474-4c88-a294-9eb974b32df7",
+          "required": false,
+          "dataType": "@rating",
+          "name": "rating",
+          "value": "$rating",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "5c7a216d-5b39-401d-a015-b4313e0de475",
+          "required": false,
+          "dataType": "@open",
+          "name": "open",
+          "value": "$open",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "44bd0365-25d3-4eb8-8b77-9c2e699e9ed3",
+          "required": false,
+          "dataType": "@sys.number",
+          "name": "stars",
+          "value": "$stars",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": "suggestion_chips",
+          "platform": "google",
+          "lang": "en",
+          "suggestions": [
+            {
+              "title": "Nearest"
+            },
+            {
+              "title": "Best"
+            },
+            {
+              "title": "Open"
+            }
+          ]
+        },
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {
+        "google": true
+      },
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": []
+}

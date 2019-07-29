@@ -1,0 +1,9 @@
+{
+  "id": "6748f3e7-a808-4a73-b284-59cbf8e39ca5",
+  "name": "venue-nightlife-type",
+  "isOverridable": true,
+  "isEnum": false,
+  "isRegexp": false,
+  "automatedExpansion": false,
+  "allowFuzzyExtraction": false
+}

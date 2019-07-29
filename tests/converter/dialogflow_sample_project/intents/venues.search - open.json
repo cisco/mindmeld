@@ -1,0 +1,163 @@
+{
+  "id": "93f809d1-796c-4844-830d-54f6b2b249b8",
+  "name": "venues.search - open",
+  "auto": true,
+  "contexts": [
+    "venues"
+  ],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "#venues.intent_action",
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "5597c14f-021c-4ac0-9287-38bcb3bac5f4",
+          "required": false,
+          "dataType": "@open",
+          "name": "open",
+          "value": "$open",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "2d6b7eb9-7b6d-482b-87ff-ad6c1ad427ee",
+          "required": false,
+          "dataType": "",
+          "name": "location",
+          "value": "#venues.location",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "1d4a374b-9276-4f17-bb35-7a7b57115854",
+          "required": false,
+          "dataType": "",
+          "name": "dish",
+          "value": "#venues.dish",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "8153d09a-8fbc-4e53-84c5-53e9179de0b3",
+          "required": false,
+          "dataType": "",
+          "name": "beverage",
+          "value": "#venues.beverage",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "edfde58d-7cbf-4fcc-8a7e-683ab5ab1cb1",
+          "required": false,
+          "dataType": "",
+          "name": "venue-type",
+          "value": "#venues.venue-type",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "2a8e2783-ccbe-44a1-9bd6-3d891e078282",
+          "required": false,
+          "dataType": "",
+          "name": "venue-title",
+          "value": "#venues.venue-title",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "f07afc73-c757-4df0-9c97-324c57378389",
+          "required": false,
+          "dataType": "",
+          "name": "venue-chain",
+          "value": "#venues.venue-chain",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "33b46e30-ecd4-494a-80cc-7d52b7d6b6e6",
+          "required": false,
+          "dataType": "",
+          "name": "sort",
+          "value": "#venues.sort",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "73059c43-5ea8-4a70-b2f1-44249738eadd",
+          "required": false,
+          "dataType": "",
+          "name": "meal",
+          "value": "#venues.meal",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "55e9a415-766a-4220-af95-3ad2d4566eaa",
+          "required": false,
+          "dataType": "",
+          "name": "cuisine",
+          "value": "#venues.cuisine",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "544e461c-bcba-4ecf-8564-752176bfdbdc",
+          "required": false,
+          "dataType": "",
+          "name": "venue-facility",
+          "value": "#venues.venue-facility",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "9fa1d81c-4339-406a-8ea4-dd647fd8890a",
+          "required": false,
+          "dataType": "",
+          "name": "rating",
+          "value": "#venues.rating",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": []
+}

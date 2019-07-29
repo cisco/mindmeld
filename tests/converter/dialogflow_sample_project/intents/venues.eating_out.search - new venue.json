@@ -1,0 +1,165 @@
+{
+  "id": "345aca5e-1c8c-4caa-b8ef-08e9c387ea44",
+  "parentId": "8773737e-a724-4aab-9f90-c7fc49afa93b",
+  "rootParentId": "8773737e-a724-4aab-9f90-c7fc49afa93b",
+  "name": "venues.eating_out.search - new venue",
+  "auto": true,
+  "contexts": [
+    "venueseating_outsearch-followup"
+  ],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "venues.eating_out.search",
+      "affectedContexts": [
+        {
+          "name": "venues",
+          "parameters": {},
+          "lifespan": 3
+        },
+        {
+          "name": "venues-eatingout",
+          "parameters": {},
+          "lifespan": 3
+        }
+      ],
+      "parameters": [
+        {
+          "id": "17add026-cded-484d-88d3-11ff3ddd2e75",
+          "required": false,
+          "dataType": "@venue-eating-out-type",
+          "name": "venue-type",
+          "value": "$venue-type",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "c2479ba0-5a4d-4fb8-9863-e491b3805caf",
+          "required": false,
+          "dataType": "",
+          "name": "location",
+          "value": "#venueseating_outsearch-followup.location",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "1cd75a3b-e010-45a7-8193-af76c5a28f51",
+          "required": false,
+          "dataType": "",
+          "name": "dish",
+          "value": "#venueseating_outsearch-followup.dish",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "f475b024-812c-41e8-90d9-1bbd22e5f2b0",
+          "required": false,
+          "dataType": "",
+          "name": "beverage",
+          "value": "#venueseating_outsearch-followup.beverage",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "4002eba0-8e43-4443-a8b3-83b57ce73d57",
+          "required": false,
+          "dataType": "",
+          "name": "venue-title",
+          "value": "#venueseating_outsearch-followup.venue-title",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "5b7a6b81-e3f2-488f-bab2-9f9a5335d92b",
+          "required": false,
+          "dataType": "",
+          "name": "venue-chain",
+          "value": "#venueseating_outsearch-followup.venue-chain",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "64946966-67bc-4890-aa32-a811acecf76b",
+          "required": false,
+          "dataType": "",
+          "name": "venue-facility",
+          "value": "#venueseating_outsearch-followup.venue-facility",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "eab07519-f910-472d-84e1-4352d6b449f5",
+          "required": false,
+          "dataType": "",
+          "name": "sort",
+          "value": "#venueseating_outsearch-followup.sort",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": true
+        },
+        {
+          "id": "479296bb-c638-4c42-8d90-acd2d2c529e2",
+          "required": false,
+          "dataType": "",
+          "name": "cuisine",
+          "value": "#venueseating_outsearch-followup.cuisine",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "c5eba86d-beb5-4208-869b-b78f7854059b",
+          "required": false,
+          "dataType": "",
+          "name": "rating",
+          "value": "#venueseating_outsearch-followup.rating",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        },
+        {
+          "id": "f472f6be-dab0-443f-a458-3dc8ccee02e9",
+          "required": false,
+          "dataType": "",
+          "name": "open",
+          "value": "#venueseating_outsearch-followup.open",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": []
+}

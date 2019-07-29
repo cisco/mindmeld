@@ -1,0 +1,82 @@
+[
+  {
+    "value": "best",
+    "synonyms": [
+      "best",
+      "cool",
+      "fine",
+      "good",
+      "great",
+      "interesting",
+      "nice",
+      "top"
+    ]
+  },
+  {
+    "value": "best matched",
+    "synonyms": [
+      "best matched"
+    ]
+  },
+  {
+    "value": "cheapest",
+    "synonyms": [
+      "best priced",
+      "cheap",
+      "cheapest",
+      "less expensive"
+    ]
+  },
+  {
+    "value": "expensive",
+    "synonyms": [
+      "expensive",
+      "most expensive"
+    ]
+  },
+  {
+    "value": "free",
+    "synonyms": [
+      "free"
+    ]
+  },
+  {
+    "value": "nearest",
+    "synonyms": [
+      "along my route",
+      "around",
+      "around here",
+      "around me",
+      "around my area",
+      "at my destination",
+      "close by",
+      "close to me",
+      "close to my area",
+      "closest",
+      "closest to me",
+      "here",
+      "immediate",
+      "in my area",
+      "in my city",
+      "in my location",
+      "in my neighborhood",
+      "in the area",
+      "in this area",
+      "in this district",
+      "local",
+      "near",
+      "near by",
+      "near me",
+      "near my house",
+      "near this area",
+      "nearby",
+      "nearbys",
+      "nearest",
+      "not far from here",
+      "not far from me",
+      "on my way",
+      "this area",
+      "very close"
+    ]
+  }
+]

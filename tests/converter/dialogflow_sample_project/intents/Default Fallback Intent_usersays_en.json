@@ -1,0 +1,86 @@
+[
+  {
+    "id": "48f43331-e455-447a-80e8-8771632005e7",
+    "data": [
+      {
+        "text": "keep the door opened",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "e1ae2567-8f6a-4316-9e30-85b6d3e5a787",
+    "data": [
+      {
+        "text": "not in Berlin",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "77d0521f-6af6-4de2-a71c-a55a702c5907",
+    "data": [
+      {
+        "text": "I would like to have a vacation",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "da5bf32d-11b9-4aa0-bcdc-97c5c124d98d",
+    "data": [
+      {
+        "text": "I don\u0027t want to get drunk",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "aa235407-a4ad-4adc-8301-08a1ebec9f4c",
+    "data": [
+      {
+        "text": "can you find cinema in the area",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "99cc3c72-470a-4f52-8a27-0463c16cf092",
+    "data": [
+      {
+        "text": "I don\u0027t want to drink coffee",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "1f1c40ac-0bb6-4164-80b5-a64f726fd066",
+    "data": [
+      {
+        "text": "where can I find Mexican hats",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

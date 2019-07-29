@@ -1,0 +1,9 @@
+{
+  "id": "83d8b79b-4582-4c11-9b31-4382d9b7a337",
+  "name": "venue-facility",
+  "isOverridable": true,
+  "isEnum": false,
+  "isRegexp": false,
+  "automatedExpansion": false,
+  "allowFuzzyExtraction": false
+}

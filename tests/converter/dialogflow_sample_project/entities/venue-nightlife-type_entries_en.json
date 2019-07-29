@@ -1,0 +1,112 @@
+[
+  {
+    "value": "bar",
+    "synonyms": [
+      "bar",
+      "bars",
+      "drink"
+    ]
+  },
+  {
+    "value": "bowling alley",
+    "synonyms": [
+      "bowling alley"
+    ]
+  },
+  {
+    "value": "champagne bar",
+    "synonyms": [
+      "champagne bar",
+      "champagne bars"
+    ]
+  },
+  {
+    "value": "club",
+    "synonyms": [
+      "club",
+      "clubs"
+    ]
+  },
+  {
+    "value": "comedy club",
+    "synonyms": [
+      "comedy club",
+      "comedy clubs",
+      "comedyclub",
+      "comedyclubs"
+    ]
+  },
+  {
+    "value": "dive bar",
+    "synonyms": [
+      "dive bar",
+      "dive bars"
+    ]
+  },
+  {
+    "value": "gay bar",
+    "synonyms": [
+      "gay bar",
+      "gay bars"
+    ]
+  },
+  {
+    "value": "karaoke",
+    "synonyms": [
+      "karaoke"
+    ]
+  },
+  {
+    "value": "karaoke bar",
+    "synonyms": [
+      "karaoke bar",
+      "karaoke bars"
+    ]
+  },
+  {
+    "value": "night club",
+    "synonyms": [
+      "night club",
+      "night clubs",
+      "nightclub",
+      "nightclubs"
+    ]
+  },
+  {
+    "value": "piano bar",
+    "synonyms": [
+      "piano bar",
+      "piano bars"
+    ]
+  },
+  {
+    "value": "pub",
+    "synonyms": [
+      "pub",
+      "pubs"
+    ]
+  },
+  {
+    "value": "sports bar",
+    "synonyms": [
+      "sports bar",
+      "sports bars"
+    ]
+  },
+  {
+    "value": "strip club",
+    "synonyms": [
+      "strip club",
+      "strip clubs",
+      "stripclub",
+      "stripclubs"
+    ]
+  },
+  {
+    "value": "wine bar",
+    "synonyms": [
+      "wine bar",
+      "wine bars"
+    ]
+  }
+]
