@@ -57,3 +57,17 @@ class Converter(ABC):
                 os.mkdir(directory)
             except OSError:
                 logger.error("Cannot create directory at %s", directory)
+
+    @staticmethod
+    def create_config(mindmeld_project_directory, main_file_loc):
+        with open(main_file_loc + '/generic_config.txt', 'r') as f:
+            string = f.read()
+        with open(mindmeld_project_directory + "/config.py", "w") as f:
+            f.write(string)
+
+        @staticmethod
+    def create_main(mindmeld_project_directory, main_file_loc):
+        with open(main_file_loc + '/generic_main.txt', 'r') as f:
+            string = f.read()
+        with open(mindmeld_project_directory + "/__main__.py", "w") as f:
+            f.write(string)

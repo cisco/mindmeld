@@ -295,15 +295,6 @@ class DialogFlowConverter(Converter):
                                                                 function_name=function_name,
                                                                 replies=replies) + "\n\n")
 
-    # =========================
-    # create main, config
-    # =========================
-
-    def create_main(self):
-        pass
-
-    def create_config(self):
-        pass
 
     # =========================
     # convert project
@@ -316,8 +307,8 @@ class DialogFlowConverter(Converter):
         self.create_mindmeld_directory()
         # Transfer over test data from DialogFlow project and reformat to Mindmeld project
         self.create_training_data()
-
-        # self.create_main()
-        # self.create_config()
+        file_loc = os.path.dirname(os.path.realpath(__file__))
+        self.create_config(self.mindmeld_project_directory, file_loc)
+        self.create_main(self.mindmeld_project_directory, file_loc)
 
         self.create_init()
