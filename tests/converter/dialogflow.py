@@ -6,7 +6,7 @@ from mindmeld.converter.dialogflowconverter import DialogFlowConverter
 
 
 def test_dialogflow_converter(dialogflow_project_path, mindmeld_project_path):
-    converter = DialogflowConverter(dialogflow_project_path, mindmeld_project_path)
+    converter = DialogFlowConverter(dialogflow_project_path, mindmeld_project_path)
     converter.convert_project()
 
 

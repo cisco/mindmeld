@@ -39,15 +39,7 @@ class Converter(ABC):
         pass
 
     @abstractmethod
-    def create_main(self):
-        pass
-
-    @abstractmethod
     def create_init(self):
-        pass
-
-    @abstractmethod
-    def create_config(self):
         pass
 
     @staticmethod
@@ -65,7 +57,7 @@ class Converter(ABC):
         with open(mindmeld_project_directory + "/config.py", "w") as f:
             f.write(string)
 
-        @staticmethod
+    @staticmethod
     def create_main(mindmeld_project_directory, main_file_loc):
         with open(main_file_loc + '/generic_main.txt', 'r') as f:
             string = f.read()
