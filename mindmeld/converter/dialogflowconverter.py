@@ -280,21 +280,22 @@ class DialogFlowConverter(Converter):
                     replies = []
                     for response in datastore["responses"]:
                         for message in response["messages"]:
-                            data = message["speech"]
+                            if 'speech' in message:
+                                data = message["speech"]
 
-                            replies = data if isinstance(data, list) else [data]
+                                replies = data if isinstance(data, list) else [data]
 
-                            if datastore["fallbackIntent"]:
-                                function_name = "default"
-                                handles = ["default=True", "intent='unsupported'"]
-                            else:
-                                function_name = "renameMe" + str(i)
-                                handles = ["intent=" + "'" + datastore["name"] + "'"]
+                                if datastore["fallbackIntent"]:
+                                    function_name = "default"
+                                    handles = ["default=True", "intent='unsupported'"]
+                                else:
+                                    function_name = "renameMe" + str(i)
+                                    handles = ["intent=" + "'" + datastore["name"] + "'"]
 
-                            target.write(DialogFlowConverter.create_function(
-                                                                handles=handles,
-                                                                function_name=function_name,
-                                                                replies=replies) + "\n\n")
+                                target.write(DialogFlowConverter.create_function(
+                                                                    handles=handles,
+                                                                    function_name=function_name,
+                                                                    replies=replies) + "\n\n")
 
 
     # =========================
