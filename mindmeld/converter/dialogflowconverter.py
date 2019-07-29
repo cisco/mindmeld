@@ -91,7 +91,7 @@ class DialogFlowConverter(Converter):
 
         for item in datastore:
             newDict = {}
-            while ("value" in item) and (item['value'] in item['synonyms']):
+            while ('value' in item) and (item['value'] in item['synonyms']):
                 item['synonyms'].remove(item['value'])
             newDict['whitelist'] = item['synonyms']
             newDict['cname'] = item['value']
