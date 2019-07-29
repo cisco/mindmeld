@@ -30,10 +30,14 @@ HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)
 AENEID_FILE = 'aeneid.txt'
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
 HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'home_assistant')
-RASA_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter/rasa_sample_project')
-MINDMELD_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter/mindmeld_project')
-DIALOGFLOW_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter/ASLRoma')
-MINDMELD_PROJECT_PATH2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter/mindmeld_project2')
+RASA_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 'converter/rasa_sample_project')
+MINDMELD_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                     'converter/mindmeld_project')
+DIALOGFLOW_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                       'converter/dialogflow_sample_project')
+MINDMELD_PROJECT_PATH2 = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                      'converter/mindmeld_project2')
 
 
 @pytest.fixture
@@ -81,6 +85,16 @@ def rasa_project_path():
 @pytest.fixture(scope='session')
 def mindmeld_project_path():
     return MINDMELD_PROJECT_PATH
+
+
+@pytest.fixture(scope='session')
+def mindmeld_project_path2():
+    return MINDMELD_PROJECT_PATH2
+
+
+@pytest.fixture(scope='session')
+def dialogflow_project_path():
+    return DIALOGFLOW_PROJECT_PATH
 
 
 @pytest.fixture(scope='session')
