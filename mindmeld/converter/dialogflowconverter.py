@@ -90,7 +90,7 @@ class DialogFlowConverter(Converter):
         mapping_dict = {"entities": []}
 
         for item in datastore:
-            newDict = {}
+            new_dict = {}
             while ('value' in item) and (item['value'] in item['synonyms']):
                 item['synonyms'].remove(item['value'])
             newDict['whitelist'] = item['synonyms']
