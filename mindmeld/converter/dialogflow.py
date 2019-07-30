@@ -77,8 +77,7 @@ class DialogFlowConverter(Converter):
 
                 self.create_directory(mindmeld_entity_directory)
 
-                self._create_entity_file(dialogflow_entity_file,
-                                                        mindmeld_entity_directory)
+                self._create_entity_file(dialogflow_entity_file, mindmeld_entity_directory)
 
     @staticmethod
     def _create_entity_file(dialogflow_entity_file, mindmeld_entity_directory):
@@ -124,8 +123,7 @@ class DialogFlowConverter(Converter):
 
                 self.create_directory(mindmeld_intent_directory)
 
-                self._create_intent_file(dialogflow_intent_file,
-                                                        mindmeld_intent_directory)
+                self._create_intent_file(dialogflow_intent_file, mindmeld_intent_directory)
 
     @staticmethod
     def _create_intent_file(dialogflow_intent_file, mindmeld_intent_directory):
@@ -276,8 +274,7 @@ class DialogFlowConverter(Converter):
 
                 with open(df_main) as source:
                     if "usersays" in df_main:
-                        break
-                        #get rid of the leading and trailing '[' ']' so that it reads it as a dictionary
+                        logger.error("Please check if your intent is ")
 
                     datastore = json.load(source)
                     replies = []
