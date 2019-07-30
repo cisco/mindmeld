@@ -2,7 +2,7 @@
 project into a mindmeld project"""
 
 from mindmeld import NaturalLanguageProcessor
-from mindmeld.converter.dialogflowconverter import DialogFlowConverter
+from mindmeld.converter.dialogflow import DialogFlowConverter
 
 
 def test_dialogflow_converter(dialogflow_project_path, mindmeld_project_path2):
