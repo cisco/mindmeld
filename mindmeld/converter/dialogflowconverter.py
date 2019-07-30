@@ -75,7 +75,7 @@ class DialogFlowConverter(Converter):
                                                          self.clean_check(
                                                                     main, self.entities_list))
 
-                Converter.create_directory(mindmeld_entity_directory)
+                self.create_directory(mindmeld_entity_directory)
 
                 DialogFlowConverter._create_entity_file(dialogflow_entity_file,
                                                         mindmeld_entity_directory)
