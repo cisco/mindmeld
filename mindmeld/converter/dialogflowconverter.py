@@ -292,13 +292,14 @@ class DialogFlowConverter(Converter):
                                     handles = ["default=True", "intent='unsupported'"]
                                 else:
                                     function_name = "renameMe" + str(i)
-                                    handles = ["intent=" + "'" + DialogFlowConverter.clean_name(datastore["name"]) + "_usersays_" + language + "'"]
+                                    handles = ["intent=" + "'" +
+                                               DialogFlowConverter.clean_name(datastore["name"]) +
+                                               "_usersays_" + language + "'"]
 
                                 target.write(DialogFlowConverter.create_function(
                                                                     handles=handles,
                                                                     function_name=function_name,
                                                                     replies=replies) + "\n\n")
-
 
     # =========================
     # convert project
@@ -309,10 +310,11 @@ class DialogFlowConverter(Converter):
         at the moment not all system entities are translated over"""
         # Create project directory with sub folders
         self.create_mindmeld_directory()
+
         # Transfer over test data from DialogFlow project and reformat to Mindmeld project
         self.create_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
+
         self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_main(self.mindmeld_project_directory, file_loc)
-
         self.create_init()
