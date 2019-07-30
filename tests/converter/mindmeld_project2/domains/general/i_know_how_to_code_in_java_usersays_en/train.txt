@@ -1,1 +1,1 @@
-I know how to code in {Java|ProgrammingLanguage}
+I know {javascript|ProgrammingLanguage}

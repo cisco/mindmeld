@@ -93,10 +93,10 @@ class DialogFlowConverter(Converter):
             new_dict = {}
             while ('value' in item) and (item['value'] in item['synonyms']):
                 item['synonyms'].remove(item['value'])
-            newDict['whitelist'] = item['synonyms']
-            newDict['cname'] = item['value']
+            new_dict['whitelist'] = item['synonyms']
+            new_dict['cname'] = item['value']
             # newDict['id'] = "n/a"  # TODO: when do you need an ID?
-            mapping_dict["entities"].append(newDict)
+            mapping_dict["entities"].append(new_dict)
 
             target_gazetteer.write(item['value'] + "\n")
 
@@ -144,8 +144,8 @@ class DialogFlowConverter(Converter):
                     df_meta = texts["meta"]
 
                     if re.match("(@sys.).+", df_meta):  # if text is a dialogflow sys entity
-                        if df_meta in self.sys_entity_map:
-                            mm_meta = self.sys_entity_map[df_meta]
+                        if df_meta in DialogFlowConverter.sys_entity_map:
+                            mm_meta = DialogFlowConverter.sys_entity_map[df_meta]
                         else:
                             mm_meta = "[DNE: {sysEntity}]".format(sysEntity=df_meta[1:])
                             logger.info("Unfortunately mindmeld does not currently support"
@@ -161,7 +161,7 @@ class DialogFlowConverter(Converter):
                 sentence += part
             all_text.append(sentence)
 
-        train, test = train_test_split(allText, test_size=0.2)
+        train, test = train_test_split(all_text, test_size=0.2)
 
         target_test.write("\n".join(test))
         target_train.write("\n".join(train))
@@ -228,8 +228,8 @@ class DialogFlowConverter(Converter):
 
         result = ""
         for handle in handles:
-            result += self.create_handle(handle) + "\n"
-        result += self.create_header(function_name) + "\n"
+            result += DialogFlowConverter.create_handle(handle) + "\n"
+        result += DialogFlowConverter.create_header(function_name) + "\n"
         result += "\t" + "replies = {}".format(replies) + "\n"
         result += "\t" "responder.reply(replies)"
         return result
@@ -245,7 +245,7 @@ class DialogFlowConverter(Converter):
     def clean_check(name, lst):
         """ Takes in a list of strings and a name.
         returns name cleaned if cleaned not found in lst."""
-        cleaned = self.clean_name(name)
+        cleaned = DialogFlowConverter.clean_name(name)
 
         if cleaned not in lst:
             lst.add(cleaned)
@@ -274,14 +274,14 @@ class DialogFlowConverter(Converter):
                 df_main = os.path.join(self.dialogflow_project_directory,
                                        "intents", main + ".json")
 
-
                 with open(df_main) as source:
                     if "usersays" in df_main:
-                        print("IS A LIST")
+                        break
                         #get rid of the leading and trailing '[' ']' so that it reads it as a dictionary
 
                     datastore = json.load(source)
                     replies = []
+
                     for response in datastore["responses"]:
                         for message in response["messages"]:
                             language = message["lang"]
