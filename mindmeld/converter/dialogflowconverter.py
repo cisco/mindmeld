@@ -70,10 +70,10 @@ class DialogFlowConverter(Converter):
                 dialogflow_entity_file = os.path.join(self.dialogflow_project_directory,
                                                       "entities", sub + ".json")
 
+                mindmeld_entity_directory_name = self.clean_check(main, self.entities_list)
                 mindmeld_entity_directory = os.path.join(self.mindmeld_project_directory,
                                                          "entities",
-                                                         self.clean_check(
-                                                                    main, self.entities_list))
+                                                         mindmeld_entity_directory_name))
 
                 self.create_directory(mindmeld_entity_directory)
 
@@ -117,10 +117,10 @@ class DialogFlowConverter(Converter):
                 dialogflow_intent_file = os.path.join(self.dialogflow_project_directory,
                                                       "intents", sub + ".json")
 
+                mindmeld_intent_directory_name = self.clean_check(sub, self.intents_list)
                 mindmeld_intent_directory = os.path.join(self.mindmeld_project_directory,
                                                          "domains", "general",
-                                                         DialogFlowConverter.clean_check(
-                                                                    sub, self.intents_list))
+                                                         mindmeld_intent_directory_name)
 
                 self.create_directory(mindmeld_intent_directory)
 
