@@ -159,7 +159,7 @@ class DialogFlowConverter(Converter):
                     part = df_text
 
                 sentence += part
-            allText.append(sentence)
+            all_text.append(sentence)
 
         train, test = train_test_split(allText, test_size=0.2)
 
