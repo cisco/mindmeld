@@ -77,7 +77,7 @@ class DialogFlowConverter(Converter):
 
                 self.create_directory(mindmeld_entity_directory)
 
-                DialogFlowConverter._create_entity_file(dialogflow_entity_file,
+                self._create_entity_file(dialogflow_entity_file,
                                                         mindmeld_entity_directory)
 
     @staticmethod
