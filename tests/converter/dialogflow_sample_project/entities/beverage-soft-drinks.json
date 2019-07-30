@@ -1,9 +1,0 @@
-{
-  "id": "e8fb66b6-615c-467c-bb28-2fe5cbfbbf35",
-  "name": "beverage-soft-drinks",
-  "isOverridable": true,
-  "isEnum": false,
-  "isRegexp": false,
-  "automatedExpansion": true,
-  "allowFuzzyExtraction": false
-}

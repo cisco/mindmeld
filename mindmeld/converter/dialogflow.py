@@ -70,15 +70,14 @@ class DialogFlowConverter(Converter):
                 dialogflow_entity_file = os.path.join(self.dialogflow_project_directory,
                                                       "entities", sub + ".json")
 
+                mindmeld_entity_directory_name = self.clean_check(main, self.entities_list)
                 mindmeld_entity_directory = os.path.join(self.mindmeld_project_directory,
                                                          "entities",
-                                                         DialogFlowConverter.clean_check(
-                                                                    main, self.entities_list))
+                                                         mindmeld_entity_directory_name)
 
-                Converter.create_directory(mindmeld_entity_directory)
+                self.create_directory(mindmeld_entity_directory)
 
-                DialogFlowConverter._create_entity_file(dialogflow_entity_file,
-                                                        mindmeld_entity_directory)
+                self._create_entity_file(dialogflow_entity_file, mindmeld_entity_directory)
 
     @staticmethod
     def _create_entity_file(dialogflow_entity_file, mindmeld_entity_directory):
@@ -90,13 +89,13 @@ class DialogFlowConverter(Converter):
         mapping_dict = {"entities": []}
 
         for item in datastore:
-            newDict = {}
+            new_dict = {}
             while ('value' in item) and (item['value'] in item['synonyms']):
                 item['synonyms'].remove(item['value'])
-            newDict['whitelist'] = item['synonyms']
-            newDict['cname'] = item['value']
+            new_dict['whitelist'] = item['synonyms']
+            new_dict['cname'] = item['value']
             # newDict['id'] = "n/a"  # TODO: when do you need an ID?
-            mapping_dict["entities"].append(newDict)
+            mapping_dict["entities"].append(new_dict)
 
             target_gazetteer.write(item['value'] + "\n")
 
@@ -117,15 +116,14 @@ class DialogFlowConverter(Converter):
                 dialogflow_intent_file = os.path.join(self.dialogflow_project_directory,
                                                       "intents", sub + ".json")
 
+                mindmeld_intent_directory_name = self.clean_check(sub, self.intents_list)
                 mindmeld_intent_directory = os.path.join(self.mindmeld_project_directory,
                                                          "domains", "general",
-                                                         DialogFlowConverter.clean_check(
-                                                                    sub, self.intents_list))
+                                                         mindmeld_intent_directory_name)
 
-                Converter.create_directory(mindmeld_intent_directory)
+                self.create_directory(mindmeld_intent_directory)
 
-                DialogFlowConverter._create_intent_file(dialogflow_intent_file,
-                                                        mindmeld_intent_directory)
+                self._create_intent_file(dialogflow_intent_file, mindmeld_intent_directory)
 
     @staticmethod
     def _create_intent_file(dialogflow_intent_file, mindmeld_intent_directory):
@@ -134,7 +132,7 @@ class DialogFlowConverter(Converter):
         target_train = open(os.path.join(mindmeld_intent_directory, "train.txt"), 'w')
 
         datastore = json.load(source_en)
-        allText = []
+        all_text = []
 
         for usersay in datastore:
             sentence = ""
@@ -159,9 +157,9 @@ class DialogFlowConverter(Converter):
                     part = df_text
 
                 sentence += part
-            allText.append(sentence)
+            all_text.append(sentence)
 
-        train, test = train_test_split(allText, test_size=0.2)
+        train, test = train_test_split(all_text, test_size=0.2)
 
         target_test.write("\n".join(test))
         target_train.write("\n".join(train))
@@ -171,7 +169,7 @@ class DialogFlowConverter(Converter):
         target_train.close()
 
     def _get_file_names(self, level):
-        """ Gets the names of the entities from DialogFlow as a dictionary.
+        """ Gets the names of the entities from Dialogflow as a dictionary.
         ex. if we had the following files in our entities directory:
             ["test.json", "test_entries_en.json", "test_entries_de.json"]
         return:
@@ -230,8 +228,8 @@ class DialogFlowConverter(Converter):
         for handle in handles:
             result += DialogFlowConverter.create_handle(handle) + "\n"
         result += DialogFlowConverter.create_header(function_name) + "\n"
-        result += "\t" + "replies = {}".format(replies) + "\n"
-        result += "\t" "responder.reply(replies)"
+        result += "    " + "replies = {}".format(replies) + "\n"
+        result += "    " + "responder.reply(replies)"
         return result
 
     @staticmethod
@@ -258,13 +256,14 @@ class DialogFlowConverter(Converter):
 
     def create_init(self):
         with open(os.path.join(self.mindmeld_project_directory, "__init__.py"), 'w') as target:
-            begin_info = ["\"\"\"This module contains the MindMeld application\"\"\"",
+            begin_info = ["# -*- coding: utf-8 -*-",
+                          "\"\"\"This module contains the MindMeld application\"\"\"",
                           "from mindmeld import Application",
                           "app = Application(__name__)",
                           "__all__ = ['app']"]
 
-            for info in begin_info:
-                target.write(info + "\n\n")
+            for info, spacing in zip(begin_info, [1, 2, 1, 1, 0]):
+                target.write(info + "\n" * spacing)
 
             intents = self._get_file_names("intents")
 
@@ -275,11 +274,17 @@ class DialogFlowConverter(Converter):
                                        "intents", main + ".json")
 
                 with open(df_main) as source:
-                    datastore = json.load(source)
+                    if "usersays" in df_main:
+                        logger.error("Please check if your intent file"
+                                     "names are correctly labeled.")
 
+                    datastore = json.load(source)
                     replies = []
+
                     for response in datastore["responses"]:
                         for message in response["messages"]:
+                            language = message["lang"]
+
                             if 'speech' in message:
                                 data = message["speech"]
 
@@ -290,13 +295,15 @@ class DialogFlowConverter(Converter):
                                     handles = ["default=True", "intent='unsupported'"]
                                 else:
                                     function_name = "renameMe" + str(i)
-                                    handles = ["intent=" + "'" + datastore["name"] + "'"]
+                                    handles = ["intent=" + "'" +
+                                               self.clean_name(datastore["name"]) +
+                                               "_usersays_" + language + "'"]
 
-                                target.write(DialogFlowConverter.create_function(
-                                                                    handles=handles,
-                                                                    function_name=function_name,
-                                                                    replies=replies) + "\n\n")
-
+                                target.write("\n\n\n" +
+                                             self.create_function(handles=handles,
+                                                                  function_name=function_name,
+                                                                  replies=replies))
+            target.write("\n")
 
     # =========================
     # convert project
@@ -305,12 +312,18 @@ class DialogFlowConverter(Converter):
     def convert_project(self):
         """ Notes:
         at the moment not all system entities are translated over"""
+
+        logger.info("Converting project.")
+
         # Create project directory with sub folders
         self.create_mindmeld_directory()
+
         # Transfer over test data from DialogFlow project and reformat to Mindmeld project
         self.create_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
+
         self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_main(self.mindmeld_project_directory, file_loc)
-
         self.create_init()
+
+        logger.info("Project converted.")

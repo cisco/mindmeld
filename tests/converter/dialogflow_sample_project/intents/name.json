@@ -1,24 +1,18 @@
 {
-  "id": "5ff09fd7-4c1d-40ce-9fee-d193b29b72aa",
-  "name": "Default Welcome Intent",
+  "id": "1a7fead2-c33b-455f-aa6f-d10fa756489e",
+  "name": "name",
   "auto": true,
   "contexts": [],
   "responses": [
     {
       "resetContexts": false,
-      "action": "input.welcome",
       "affectedContexts": [],
       "parameters": [],
       "messages": [
         {
           "type": 0,
           "lang": "en",
-          "speech": [
-            "Hi! How are you doing?",
-            "Hello! How can I help you?",
-            "Good day! What can I do for you today?",
-            "Greetings! How can I assist?"
-          ]
+          "speech": "My name is Dialogflow!"
         }
       ],
       "defaultResponsePlatforms": {},
@@ -29,9 +23,5 @@
   "webhookUsed": false,
   "webhookForSlotFilling": false,
   "fallbackIntent": false,
-  "events": [
-    {
-      "name": "WELCOME"
-    }
-  ]
+  "events": []
 }
