@@ -171,7 +171,7 @@ class DialogFlowConverter(Converter):
         target_train.close()
 
     def _get_file_names(self, level):
-        """ Gets the names of the entities from DialogFlow as a dictionary.
+        """ Gets the names of the entities from Dialogflow as a dictionary.
         ex. if we had the following files in our entities directory:
             ["test.json", "test_entries_en.json", "test_entries_de.json"]
         return:
