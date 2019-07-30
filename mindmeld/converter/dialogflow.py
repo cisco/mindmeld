@@ -228,8 +228,8 @@ class DialogFlowConverter(Converter):
         for handle in handles:
             result += DialogFlowConverter.create_handle(handle) + "\n"
         result += DialogFlowConverter.create_header(function_name) + "\n"
-        result += "\t" + "replies = {}".format(replies) + "\n"
-        result += "\t" "responder.reply(replies)"
+        result += "    " + "replies = {}".format(replies) + "\n"
+        result += "    " + "responder.reply(replies)"
         return result
 
     @staticmethod
@@ -256,13 +256,14 @@ class DialogFlowConverter(Converter):
 
     def create_init(self):
         with open(os.path.join(self.mindmeld_project_directory, "__init__.py"), 'w') as target:
-            begin_info = ["\"\"\"This module contains the MindMeld application\"\"\"",
+            begin_info = ["# -*- coding: utf-8 -*-",
+                          "\"\"\"This module contains the MindMeld application\"\"\"",
                           "from mindmeld import Application",
                           "app = Application(__name__)",
                           "__all__ = ['app']"]
 
-            for info in begin_info:
-                target.write(info + "\n\n")
+            for info, spacing in zip(begin_info, [1, 2, 1, 1, 0]):
+                target.write(info + "\n" * spacing)
 
             intents = self._get_file_names("intents")
 
@@ -274,7 +275,8 @@ class DialogFlowConverter(Converter):
 
                 with open(df_main) as source:
                     if "usersays" in df_main:
-                        logger.error("Please check if your intent is ")
+                        logger.error("Please check if your intent file"
+                                     "names are correctly labeled.")
 
                     datastore = json.load(source)
                     replies = []
@@ -297,10 +299,11 @@ class DialogFlowConverter(Converter):
                                                self.clean_name(datastore["name"]) +
                                                "_usersays_" + language + "'"]
 
-                                target.write(self.create_function(
-                                                                    handles=handles,
-                                                                    function_name=function_name,
-                                                                    replies=replies) + "\n\n")
+                                target.write("\n\n\n" +
+                                             self.create_function(handles=handles,
+                                                                  function_name=function_name,
+                                                                  replies=replies))
+            target.write("\n")
 
     # =========================
     # convert project
