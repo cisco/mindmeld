@@ -1,0 +1,18 @@
+{bars|venue-nightlife-type} that are {opened now|open}
+I need a {drink|venue-nightlife-type}
+help me to find some {nice|map-sort} {pubs|venue-nightlife-type} in {Bercy|[DNE: sys.location]}
+search for {open|open} {bars|venue-nightlife-type}
+show {Stingaree|venue-nightlife-title} {bar|venue-nightlife-type}
+please find the {best|map-sort} {pub|venue-nightlife-type} in {London|[DNE: sys.location]} with {free Wi-Fi|venue-facility} and {parking|venue-facility}
+seach for {night club|venue-nightlife-type} {nearby|map-sort}
+find {bar|venue-nightlife-type} with {parking|venue-facility}
+{bars|venue-nightlife-type} {nearby|map-sort}
+{pubs|venue-nightlife-type}
+is there any {bar|venue-nightlife-type} close to {Trocadero|[DNE: sys.location]}
+hi um where is the {nearest|map-sort} {bar|venue-nightlife-type}
+show {nearest|map-sort} {Playboy Club|venue-nightlife-chain}
+{LIV|venue-nightlife-title} {bar|venue-nightlife-type}
+get me a {beer|beverage-hard-drinks}
+{nightclub|venue-nightlife-type}
+{Ministry of Sound|venue-nightlife-chain} {bar|venue-nightlife-type}
+show me the {nearest|map-sort} {bar|venue-nightlife-type}

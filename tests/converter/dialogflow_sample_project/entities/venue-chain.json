@@ -1,9 +1,0 @@
-{
-  "id": "b825a974-4f59-4036-a18b-e35799bafa6a",
-  "name": "venue-chain",
-  "isOverridable": true,
-  "isEnum": true,
-  "isRegexp": false,
-  "automatedExpansion": false,
-  "allowFuzzyExtraction": false
-}

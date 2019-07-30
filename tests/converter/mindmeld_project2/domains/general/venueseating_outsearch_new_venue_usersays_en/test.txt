@@ -1,0 +1,2 @@
+I meant {vegetarian restaurant|venue-eating-out-type}
+now {cafe|venue-eating-out-type}

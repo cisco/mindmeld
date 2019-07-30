@@ -1,9 +1,0 @@
-{
-  "id": "5904f609-f216-4c77-a253-c79032cacc78",
-  "name": "beverage-hard-drinks",
-  "isOverridable": true,
-  "isEnum": false,
-  "isRegexp": false,
-  "automatedExpansion": true,
-  "allowFuzzyExtraction": false
-}

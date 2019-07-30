@@ -1,0 +1,72 @@
+find a {bar|venue-nightlife-type}
+{cheap|map-sort} {pub|venue-nightlife-type} in {London|[DNE: sys.location]}
+are there any {cool|map-sort} {pubs|venue-nightlife-type} close to {Trocadero|[DNE: sys.location]}
+{gay bar|venue-nightlife-type}
+{near|map-sort} {bar|venue-nightlife-type}
+where are {nearby|map-sort} {nightclubs|venue-nightlife-type}
+I would like some {beer|beverage-hard-drinks}
+{Playboy Club|venue-nightlife-chain}
+find {LIV|venue-nightlife-title} {bar|venue-nightlife-type}
+I want to get drunk
+is there any {bar|venue-nightlife-type} {nearby|map-sort}
+find {clubs|venue-nightlife-type}
+{bar|venue-nightlife-type} with {4|sys_number} stars
+{Pure Nightclub|venue-nightlife-title}
+I wanna go to {drink|venue-nightlife-type}
+find {good|map-sort} {whiskey|beverage-hard-drinks}
+where can I have fun tonight
+what is the {best|map-sort} {bar|venue-nightlife-type}
+is there any {bar|venue-nightlife-type} not far from {Trocadero|[DNE: sys.location]}
+can I get a {beer|beverage-hard-drinks} here
+{nightclub|venue-nightlife-type} {nearby|map-sort}
+are there any {good|map-sort} {pubs|venue-nightlife-type} {close by|map-sort}
+list of {bars|venue-nightlife-type} in {Lisbon|[DNE: sys.location]}
+where's the {nearest|map-sort} {strip club|venue-nightlife-type}
+show {expensive|map-sort} {wine bars|venue-nightlife-type} in {Venice|[DNE: sys.location]}
+list area {nightclubs|venue-nightlife-type}
+I would like to have {vodka|beverage-hard-drinks}
+find {Bar|venue-nightlife-type}
+{red wine|beverage-hard-drinks}
+find {Employees Only|venue-nightlife-title} {bar|venue-nightlife-type} in {NYC|[DNE: sys.location]}
+where is a {night club|venue-nightlife-type}
+I want to party hard
+what is the {best|map-sort} {bar|venue-nightlife-type} in {Italy|[DNE: sys.location]}
+it's whiskey time
+find a {bar|venue-nightlife-type} for me
+where is {Pure Nightclub|venue-nightlife-title}
+find {cheap|map-sort} {pubs|venue-nightlife-type} in {London|[DNE: sys.location]}
+I enjoy drinking {alcohol|beverage-hard-drinks}
+where is {nearest|map-sort} {10 Ginger Man|venue-nightlife-chain}
+I feel like {beer|beverage-hard-drinks}
+where can I get {ale|beverage-hard-drinks} {here|map-sort}
+{cheap|map-sort} {pub|venue-nightlife-type}
+find a {bar|venue-nightlife-type} in {Moscow|[DNE: sys.location]}
+are there any {great|map-sort} {pubs|venue-nightlife-type} in {Chicago|[DNE: sys.location]}
+are there any {good|map-sort} {pubs|venue-nightlife-type} {in the area|map-sort}
+ I need {bar|venue-nightlife-type} with {5|sys_number} stars
+I'm in the mood for cocktail
+is there any {bar|venue-nightlife-type} in {Bercy|[DNE: sys.location]}
+locate a {nightclub|venue-nightlife-type}
+is there any {bar|venue-nightlife-type} {in the area|map-sort}
+are there any {good|map-sort} {pubs|venue-nightlife-type} in {Palo Alto|[DNE: sys.location]}
+{bars|venue-nightlife-type}
+are there any {nice|map-sort} {pubs|venue-nightlife-type} not far from my {home|[DNE: sys.location]}
+I want to have a {drink|venue-nightlife-type}
+{wine bars|venue-nightlife-type} in {Venice|[DNE: sys.location]}
+I would like to have a {drink|venue-nightlife-type}
+search {cheap|map-sort} {pub|venue-nightlife-type}
+I feel like a {vodka|beverage-hard-drinks}
+{wine bar|venue-nightlife-type} with {WIFI|venue-facility}
+are there any {good|map-sort} {pubs|venue-nightlife-type} not far from {LA|[DNE: sys.location]}
+where can i get a {drink|venue-nightlife-type}
+find a {local|map-sort} {nightclub|venue-nightlife-type}
+find {Ministry of Sound|venue-nightlife-chain} {bar|venue-nightlife-type}
+find {whiskey|beverage-hard-drinks} for me
+find me the {nearest|map-sort} {bar|venue-nightlife-type}
+let's get a drink
+I wanna {drink|venue-nightlife-type} a little {whiskey|beverage-hard-drinks}
+{strip club|venue-nightlife-type} {nearby|map-sort}
+show {wine bars|venue-nightlife-type} in {Venice|[DNE: sys.location]}
+show me {Tricolore Bar|venue-nightlife-title}
+where can I have {cheap|map-sort} {whiskey|beverage-hard-drinks} or {vodka|beverage-hard-drinks}
+{local|map-sort} {nightclubs|venue-nightlife-type}

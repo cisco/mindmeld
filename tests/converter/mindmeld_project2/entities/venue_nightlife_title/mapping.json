@@ -1,0 +1,892 @@
+{
+  "entities": [
+    {
+      "whitelist": [],
+      "cname": "1 OAK Las Vegas"
+    },
+    {
+      "whitelist": [],
+      "cname": "1 Oak NYC"
+    },
+    {
+      "whitelist": [],
+      "cname": "1015 Folsom"
+    },
+    {
+      "whitelist": [],
+      "cname": "68 & Boston"
+    },
+    {
+      "whitelist": [],
+      "cname": "AJ s Club Bimini"
+    },
+    {
+      "whitelist": [],
+      "cname": "Altitude Sky lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Anvil Bar & Refuge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Ape & Bird"
+    },
+    {
+      "whitelist": [],
+      "cname": "Arkadia"
+    },
+    {
+      "whitelist": [],
+      "cname": "Arnaud's French 75 Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Artesian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Avalon Hollywood"
+    },
+    {
+      "whitelist": [],
+      "cname": "Avenue NYC"
+    },
+    {
+      "whitelist": [],
+      "cname": "Axis Radius"
+    },
+    {
+      "whitelist": [],
+      "cname": "B.E.D."
+    },
+    {
+      "whitelist": [],
+      "cname": "Baja Sharkeez Hermosa Beach"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bar Agricole"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bar Américain at Brasserie Zédel"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bar Anticipation"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bar Crudo"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bar HAZE"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bar Masquerade"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bar Moon"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bar Termini"
+    },
+    {
+      "whitelist": [],
+      "cname": "Barrica"
+    },
+    {
+      "whitelist": [],
+      "cname": "Beaufort Bar at The Savoy"
+    },
+    {
+      "whitelist": [],
+      "cname": "Below the Smoke"
+    },
+    {
+      "whitelist": [],
+      "cname": "Beretta"
+    },
+    {
+      "whitelist": [],
+      "cname": "Billy Bob s Texas"
+    },
+    {
+      "whitelist": [],
+      "cname": "Blind Pig"
+    },
+    {
+      "whitelist": [],
+      "cname": "Blue Moon Tavern"
+    },
+    {
+      "whitelist": [],
+      "cname": "Boulevardier"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bradley's Spanish Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Braise"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bub City"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cafe Mox"
+    },
+    {
+      "whitelist": [],
+      "cname": "Callooh Callay"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cameo"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cane & Table"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cantab Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Casa Diablo"
+    },
+    {
+      "whitelist": [],
+      "cname": "Chateau Nightclub Gardens"
+    },
+    {
+      "whitelist": [],
+      "cname": "Clevelander"
+    },
+    {
+      "whitelist": [],
+      "cname": "Clover Club"
+    },
+    {
+      "whitelist": [],
+      "cname": "Club 152"
+    },
+    {
+      "whitelist": [],
+      "cname": "Club Space"
+    },
+    {
+      "whitelist": [],
+      "cname": "Clyde Common"
+    },
+    {
+      "whitelist": [],
+      "cname": "Coach & Horses"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cocktail Trading Company"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cook & Brown Public House"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cure Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Distil"
+    },
+    {
+      "whitelist": [],
+      "cname": "Donny Dirk's Zombie Den"
+    },
+    {
+      "whitelist": [],
+      "cname": "Double Down Saloon"
+    },
+    {
+      "whitelist": [],
+      "cname": "Drais Afterhours LV"
+    },
+    {
+      "whitelist": [],
+      "cname": "Drais Hollywood"
+    },
+    {
+      "whitelist": [],
+      "cname": "Dream Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Drink Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Drink Houston"
+    },
+    {
+      "whitelist": [],
+      "cname": "Dullboy"
+    },
+    {
+      "whitelist": [],
+      "cname": "Dusk Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Editors' Pick: The Bar at Husk"
+    },
+    {
+      "whitelist": [],
+      "cname": "Element"
+    },
+    {
+      "whitelist": [],
+      "cname": "Employees Only"
+    },
+    {
+      "whitelist": [],
+      "cname": "Excalibur/Vision"
+    },
+    {
+      "whitelist": [],
+      "cname": "Exchange LA"
+    },
+    {
+      "whitelist": [],
+      "cname": "FLUXX"
+    },
+    {
+      "whitelist": [],
+      "cname": "Float"
+    },
+    {
+      "whitelist": [],
+      "cname": "Flora-Bama"
+    },
+    {
+      "whitelist": [],
+      "cname": "Founding Fathers Pub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Fur Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "G Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Gallery Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Glass Cactus Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Good Luck Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Gooski’s"
+    },
+    {
+      "whitelist": [],
+      "cname": "Gotham City Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Greystone Manor"
+    },
+    {
+      "whitelist": [],
+      "cname": "Gryphon Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "HAZE Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Harry's Country Club"
+    },
+    {
+      "whitelist": [],
+      "cname": "Havana Club"
+    },
+    {
+      "whitelist": [],
+      "cname": "Heart Attack Grill"
+    },
+    {
+      "whitelist": [],
+      "cname": "Heat Ultra Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "High West Distillery & Saloon"
+    },
+    {
+      "whitelist": [],
+      "cname": "Holeman & Finch Public House"
+    },
+    {
+      "whitelist": [],
+      "cname": "Hyde Bellagio"
+    },
+    {
+      "whitelist": [],
+      "cname": "Ivy"
+    },
+    {
+      "whitelist": [],
+      "cname": "Japp's Since 1879"
+    },
+    {
+      "whitelist": [],
+      "cname": "Jimmy's"
+    },
+    {
+      "whitelist": [],
+      "cname": "Joe's Cellar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Jumbo's Clown Room"
+    },
+    {
+      "whitelist": [],
+      "cname": "Kilroy s Sports Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Koz’s, Mini Bowl"
+    },
+    {
+      "whitelist": [],
+      "cname": "Kuma's Corner"
+    },
+    {
+      "whitelist": [],
+      "cname": "LAVO LV"
+    },
+    {
+      "whitelist": [],
+      "cname": "LAVO NY"
+    },
+    {
+      "whitelist": [],
+      "cname": "LAX Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "LIV"
+    },
+    {
+      "whitelist": [],
+      "cname": "LOVE Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "La Belle Vie"
+    },
+    {
+      "whitelist": [],
+      "cname": "Ladies & Gentlemen"
+    },
+    {
+      "whitelist": [],
+      "cname": "Lagasse s Stadium"
+    },
+    {
+      "whitelist": [],
+      "cname": "Lala's"
+    },
+    {
+      "whitelist": [],
+      "cname": "Lee Harvey's"
+    },
+    {
+      "whitelist": [],
+      "cname": "Leyenda"
+    },
+    {
+      "whitelist": [],
+      "cname": "Linger"
+    },
+    {
+      "whitelist": [],
+      "cname": "Little Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Local Edition"
+    },
+    {
+      "whitelist": [],
+      "cname": "Lolinda"
+    },
+    {
+      "whitelist": [],
+      "cname": "London Cocktail Club"
+    },
+    {
+      "whitelist": [],
+      "cname": "MIXX"
+    },
+    {
+      "whitelist": [],
+      "cname": "MOON Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mango s Tropical Cafe"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mansion Miami"
+    },
+    {
+      "whitelist": [],
+      "cname": "Marquee LV"
+    },
+    {
+      "whitelist": [],
+      "cname": "Masquerade Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mayahuel"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mr Fogg's"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mt. Royal Tavern"
+    },
+    {
+      "whitelist": [],
+      "cname": "My Brother's Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Noir Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Oak at Fourteenth"
+    },
+    {
+      "whitelist": [],
+      "cname": "Occidental"
+    },
+    {
+      "whitelist": [],
+      "cname": "Opera Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "P O V"
+    },
+    {
+      "whitelist": [],
+      "cname": "PDT"
+    },
+    {
+      "whitelist": [],
+      "cname": "PHD Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "PX Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Pacha New York"
+    },
+    {
+      "whitelist": [],
+      "cname": "Panama Joe s Cantina"
+    },
+    {
+      "whitelist": [],
+      "cname": "Passion Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Pegu Club"
+    },
+    {
+      "whitelist": [],
+      "cname": "Penca"
+    },
+    {
+      "whitelist": [],
+      "cname": "Playhouse Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Plush Alternative Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Plush Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Plush Bar and Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Porchlight"
+    },
+    {
+      "whitelist": [],
+      "cname": "Prizefighter"
+    },
+    {
+      "whitelist": [],
+      "cname": "Public House"
+    },
+    {
+      "whitelist": [],
+      "cname": "Pure Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Quarter Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "ROOF on the Wit"
+    },
+    {
+      "whitelist": [],
+      "cname": "Raven & Rose"
+    },
+    {
+      "whitelist": [],
+      "cname": "Rich Table"
+    },
+    {
+      "whitelist": [],
+      "cname": "Rivera"
+    },
+    {
+      "whitelist": [],
+      "cname": "Rolf & Daughters"
+    },
+    {
+      "whitelist": [],
+      "cname": "Rose's Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Rum Kitchen"
+    },
+    {
+      "whitelist": [],
+      "cname": "SET Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Safe House"
+    },
+    {
+      "whitelist": [],
+      "cname": "Salty Dawg"
+    },
+    {
+      "whitelist": [],
+      "cname": "Sandbar Mexican Rest Tequila Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Seacrets Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Seamstress"
+    },
+    {
+      "whitelist": [],
+      "cname": "Seven Lamps"
+    },
+    {
+      "whitelist": [],
+      "cname": "Sevilla Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Seville Quarter"
+    },
+    {
+      "whitelist": [],
+      "cname": "Shade Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Shelby's Bar & Grill"
+    },
+    {
+      "whitelist": [],
+      "cname": "Shochu Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Showtime Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Shrine Asian Kitchen Lounge Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Smuggler's Cove"
+    },
+    {
+      "whitelist": [],
+      "cname": "Snake and Jake's"
+    },
+    {
+      "whitelist": [],
+      "cname": "Sobou"
+    },
+    {
+      "whitelist": [],
+      "cname": "Standard Tap"
+    },
+    {
+      "whitelist": [],
+      "cname": "Stingaree"
+    },
+    {
+      "whitelist": [],
+      "cname": "Stone Rose"
+    },
+    {
+      "whitelist": [],
+      "cname": "Stoney s Rockin Country"
+    },
+    {
+      "whitelist": [],
+      "cname": "Sugar House"
+    },
+    {
+      "whitelist": [],
+      "cname": "Surrender Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Sutra OC"
+    },
+    {
+      "whitelist": [],
+      "cname": "Swan Market"
+    },
+    {
+      "whitelist": [],
+      "cname": "TAO LV"
+    },
+    {
+      "whitelist": [],
+      "cname": "Teardrop Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Tengo Sed Cantina"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Alley"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Aviary"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Bank Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Chandelier Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Colony"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Columbia Room"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Esquire Tavern"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Franklin Mortgage & Investment Co"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Hideaway"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Ice House"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Kalamazoo Beer Exchange"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Kingfish"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Lab Gastropub"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Mean Eyed Cat"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Old Fashioned"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Owl"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Park Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Park at Fourteenth"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Pool After Dark"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Porter Beer Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Rail Pub"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Slanted Door"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Sound Table"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Torch"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Varnish"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Violet Hour"
+    },
+    {
+      "whitelist": [],
+      "cname": "The Way Station"
+    },
+    {
+      "whitelist": [],
+      "cname": "Thrive"
+    },
+    {
+      "whitelist": [],
+      "cname": "Tricolore Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Tryst Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Turf Supper Club"
+    },
+    {
+      "whitelist": [],
+      "cname": "Twin Kegs"
+    },
+    {
+      "whitelist": [],
+      "cname": "Unicorn"
+    },
+    {
+      "whitelist": [],
+      "cname": "Vanguard"
+    },
+    {
+      "whitelist": [],
+      "cname": "Vanity Bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Villains Wicked Heroes"
+    },
+    {
+      "whitelist": [],
+      "cname": "Wall Lounge"
+    },
+    {
+      "whitelist": [],
+      "cname": "Webster Hall"
+    },
+    {
+      "whitelist": [],
+      "cname": "Whitechapel"
+    },
+    {
+      "whitelist": [],
+      "cname": "Whitey's"
+    },
+    {
+      "whitelist": [],
+      "cname": "Windsor"
+    },
+    {
+      "whitelist": [],
+      "cname": "XS Nightclub"
+    },
+    {
+      "whitelist": [],
+      "cname": "Yusho"
+    },
+    {
+      "whitelist": [],
+      "cname": "Zig Zag Cafe"
+    }
+  ]
+}

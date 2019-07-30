@@ -1,0 +1,9 @@
+@venue-accomodation-chain
+@venue-automotive-chain
+@venue-beauty-chain
+@venue-eating-out-chain
+@venue-medical-chain
+@venue-nightlife-chain
+@venue-shopping-chain
+@venue-sport-chain
+@venue-travel-chain

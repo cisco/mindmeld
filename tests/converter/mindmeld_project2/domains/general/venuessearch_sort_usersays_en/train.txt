@@ -1,0 +1,12 @@
+{nearest|map-sort} and {cheapest|map-sort}
+the {closest|map-sort} only
+{closest|map-sort} only
+show the {nearest|map-sort}
+{closest|map-sort} to me
+show only {cheap|map-sort} and {nearest|map-sort}
+{near me|map-sort}
+I need the {cheapest|map-sort}
+only {closest|map-sort}
+the {closest|map-sort}
+find the {best|map-sort} for me
+choose the {best|map-sort} {nearest|map-sort}

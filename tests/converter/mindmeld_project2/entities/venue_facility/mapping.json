@@ -1,0 +1,102 @@
+{
+  "entities": [
+    {
+      "whitelist": [
+        "hair and nail salon"
+      ],
+      "cname": "beauty salon"
+    },
+    {
+      "whitelist": [
+        "deliver"
+      ],
+      "cname": "delivery"
+    },
+    {
+      "whitelist": [],
+      "cname": "indoor"
+    },
+    {
+      "whitelist": [
+        "acceess to internet",
+        "free internet"
+      ],
+      "cname": "internet"
+    },
+    {
+      "whitelist": [
+        "non smoking room",
+        "nonsmoking room"
+      ],
+      "cname": "non-smoking room"
+    },
+    {
+      "whitelist": [
+        "outdoor seats"
+      ],
+      "cname": "outdoor seating"
+    },
+    {
+      "whitelist": [
+        "available parking",
+        "free parking",
+        "parking lot"
+      ],
+      "cname": "parking"
+    },
+    {
+      "whitelist": [
+        "cat friendly",
+        "dog friendly"
+      ],
+      "cname": "pet friendly"
+    },
+    {
+      "whitelist": [
+        "swimming pool"
+      ],
+      "cname": "pool"
+    },
+    {
+      "whitelist": [
+        "quick service",
+        "quick serving"
+      ],
+      "cname": "quick serve"
+    },
+    {
+      "whitelist": [
+        "by the sea",
+        "sea"
+      ],
+      "cname": "sea view"
+    },
+    {
+      "whitelist": [],
+      "cname": "smoking room"
+    },
+    {
+      "whitelist": [],
+      "cname": "spa"
+    },
+    {
+      "whitelist": [
+        "transfer service",
+        "transportation"
+      ],
+      "cname": "transfer"
+    },
+    {
+      "whitelist": [
+        "access to wi-fi",
+        "access to wifi",
+        "free wi-fi",
+        "free wifi",
+        "wi-fi",
+        "wi-fi connection",
+        "wifi connection"
+      ],
+      "cname": "wifi"
+    }
+  ]
+}

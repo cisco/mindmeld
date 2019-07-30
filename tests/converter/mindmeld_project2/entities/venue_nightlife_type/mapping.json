@@ -1,0 +1,97 @@
+{
+  "entities": [
+    {
+      "whitelist": [
+        "bars",
+        "drink"
+      ],
+      "cname": "bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "bowling alley"
+    },
+    {
+      "whitelist": [
+        "champagne bars"
+      ],
+      "cname": "champagne bar"
+    },
+    {
+      "whitelist": [
+        "clubs"
+      ],
+      "cname": "club"
+    },
+    {
+      "whitelist": [
+        "comedy clubs",
+        "comedyclub",
+        "comedyclubs"
+      ],
+      "cname": "comedy club"
+    },
+    {
+      "whitelist": [
+        "dive bars"
+      ],
+      "cname": "dive bar"
+    },
+    {
+      "whitelist": [
+        "gay bars"
+      ],
+      "cname": "gay bar"
+    },
+    {
+      "whitelist": [],
+      "cname": "karaoke"
+    },
+    {
+      "whitelist": [
+        "karaoke bars"
+      ],
+      "cname": "karaoke bar"
+    },
+    {
+      "whitelist": [
+        "night clubs",
+        "nightclub",
+        "nightclubs"
+      ],
+      "cname": "night club"
+    },
+    {
+      "whitelist": [
+        "piano bars"
+      ],
+      "cname": "piano bar"
+    },
+    {
+      "whitelist": [
+        "pubs"
+      ],
+      "cname": "pub"
+    },
+    {
+      "whitelist": [
+        "sports bars"
+      ],
+      "cname": "sports bar"
+    },
+    {
+      "whitelist": [
+        "strip clubs",
+        "stripclub",
+        "stripclubs"
+      ],
+      "cname": "strip club"
+    },
+    {
+      "whitelist": [
+        "wine bars"
+      ],
+      "cname": "wine bar"
+    }
+  ]
+}

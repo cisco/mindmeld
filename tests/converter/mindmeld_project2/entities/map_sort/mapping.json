@@ -1,0 +1,76 @@
+{
+  "entities": [
+    {
+      "whitelist": [
+        "cool",
+        "fine",
+        "good",
+        "great",
+        "interesting",
+        "nice",
+        "top"
+      ],
+      "cname": "best"
+    },
+    {
+      "whitelist": [],
+      "cname": "best matched"
+    },
+    {
+      "whitelist": [
+        "best priced",
+        "cheap",
+        "less expensive"
+      ],
+      "cname": "cheapest"
+    },
+    {
+      "whitelist": [
+        "most expensive"
+      ],
+      "cname": "expensive"
+    },
+    {
+      "whitelist": [],
+      "cname": "free"
+    },
+    {
+      "whitelist": [
+        "along my route",
+        "around",
+        "around here",
+        "around me",
+        "around my area",
+        "at my destination",
+        "close by",
+        "close to me",
+        "close to my area",
+        "closest",
+        "closest to me",
+        "here",
+        "immediate",
+        "in my area",
+        "in my city",
+        "in my location",
+        "in my neighborhood",
+        "in the area",
+        "in this area",
+        "in this district",
+        "local",
+        "near",
+        "near by",
+        "near me",
+        "near my house",
+        "near this area",
+        "nearby",
+        "nearbys",
+        "not far from here",
+        "not far from me",
+        "on my way",
+        "this area",
+        "very close"
+      ],
+      "cname": "nearest"
+    }
+  ]
+}

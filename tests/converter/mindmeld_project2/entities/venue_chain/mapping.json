@@ -1,0 +1,40 @@
+{
+  "entities": [
+    {
+      "whitelist": [],
+      "cname": "@venue-accomodation-chain"
+    },
+    {
+      "whitelist": [],
+      "cname": "@venue-automotive-chain"
+    },
+    {
+      "whitelist": [],
+      "cname": "@venue-beauty-chain"
+    },
+    {
+      "whitelist": [],
+      "cname": "@venue-eating-out-chain"
+    },
+    {
+      "whitelist": [],
+      "cname": "@venue-medical-chain"
+    },
+    {
+      "whitelist": [],
+      "cname": "@venue-nightlife-chain"
+    },
+    {
+      "whitelist": [],
+      "cname": "@venue-shopping-chain"
+    },
+    {
+      "whitelist": [],
+      "cname": "@venue-sport-chain"
+    },
+    {
+      "whitelist": [],
+      "cname": "@venue-travel-chain"
+    }
+  ]
+}

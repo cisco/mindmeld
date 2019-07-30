@@ -1,9 +1,0 @@
-{
-  "id": "54229f91-a946-4e0c-938a-9d1f1983a0c4",
-  "name": "rating",
-  "isOverridable": true,
-  "isEnum": false,
-  "isRegexp": false,
-  "automatedExpansion": false,
-  "allowFuzzyExtraction": false
-}

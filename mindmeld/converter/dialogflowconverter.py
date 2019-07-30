@@ -274,9 +274,13 @@ class DialogFlowConverter(Converter):
                 df_main = os.path.join(self.dialogflow_project_directory,
                                        "intents", main + ".json")
 
-                with open(df_main) as source:
-                    datastore = json.load(source)
 
+                with open(df_main) as source:
+                    if "usersays" in df_main:
+                        print("IS A LIST")
+                        #get rid of the leading and trailing '[' ']' so that it reads it as a dictionary
+
+                    datastore = json.load(source)
                     replies = []
                     for response in datastore["responses"]:
                         for message in response["messages"]:

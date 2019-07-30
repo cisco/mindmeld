@@ -1,0 +1,13 @@
+{
+  "entities": [
+    {
+      "whitelist": [
+        "open",
+        "open now",
+        "opened",
+        "opened now"
+      ],
+      "cname": "true"
+    }
+  ]
+}

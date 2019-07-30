@@ -1,0 +1,9 @@
+show the {opened|open} please
+show {opened|open}
+which one is {open now|open}
+{open now|open}
+only {opened|open} ones
+show only {opened now|open}
+show {opened|open} one
+that is {opened now|open}
+find {open|open} only

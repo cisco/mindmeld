@@ -1,0 +1,15 @@
+bakery
+buffet
+cafe
+coffeeshop
+fast food
+food court
+pizzeria
+restaurant
+salad bar
+seafood place
+steakhouse
+sushi bar
+sushi place
+teahouse
+vegetarian restaurant

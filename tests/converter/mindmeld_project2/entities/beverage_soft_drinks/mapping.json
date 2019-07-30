@@ -1,0 +1,387 @@
+{
+  "entities": [
+    {
+      "whitelist": [],
+      "cname": "almond milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "americano"
+    },
+    {
+      "whitelist": [],
+      "cname": "apple cider"
+    },
+    {
+      "whitelist": [],
+      "cname": "apple juice"
+    },
+    {
+      "whitelist": [],
+      "cname": "banana milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "black tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "brandy coffee"
+    },
+    {
+      "whitelist": [],
+      "cname": "caffè americano"
+    },
+    {
+      "whitelist": [],
+      "cname": "caffè latte"
+    },
+    {
+      "whitelist": [],
+      "cname": "café au lait"
+    },
+    {
+      "whitelist": [],
+      "cname": "café mocha"
+    },
+    {
+      "whitelist": [],
+      "cname": "camomile tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "cappuccino"
+    },
+    {
+      "whitelist": [
+        "pure carrot juice"
+      ],
+      "cname": "carrot juice"
+    },
+    {
+      "whitelist": [],
+      "cname": "chai latte"
+    },
+    {
+      "whitelist": [],
+      "cname": "chai masala"
+    },
+    {
+      "whitelist": [],
+      "cname": "chocolate milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "citrus soda"
+    },
+    {
+      "whitelist": [],
+      "cname": "coca cola"
+    },
+    {
+      "whitelist": [],
+      "cname": "coconut milk"
+    },
+    {
+      "whitelist": [
+        "to coffee"
+      ],
+      "cname": "coffee"
+    },
+    {
+      "whitelist": [
+        "coffee and tea",
+        "coffee n tea",
+        "coffee tea",
+        "tea and coffee",
+        "tea coffee",
+        "tea n coffee"
+      ],
+      "cname": "coffee & tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "coffee milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "coffee with milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "coke"
+    },
+    {
+      "whitelist": [],
+      "cname": "cola"
+    },
+    {
+      "whitelist": [],
+      "cname": "coolatta"
+    },
+    {
+      "whitelist": [],
+      "cname": "diet coke"
+    },
+    {
+      "whitelist": [],
+      "cname": "drink"
+    },
+    {
+      "whitelist": [],
+      "cname": "earl grey tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "espresso"
+    },
+    {
+      "whitelist": [],
+      "cname": "fanta"
+    },
+    {
+      "whitelist": [
+        "frappé"
+      ],
+      "cname": "frappe"
+    },
+    {
+      "whitelist": [],
+      "cname": "frappuccino"
+    },
+    {
+      "whitelist": [
+        " fruit juices"
+      ],
+      "cname": "fruit juice"
+    },
+    {
+      "whitelist": [],
+      "cname": "green iced tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "green tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "hot chocolate"
+    },
+    {
+      "whitelist": [],
+      "cname": "iced cappuccino"
+    },
+    {
+      "whitelist": [],
+      "cname": "iced coffee"
+    },
+    {
+      "whitelist": [],
+      "cname": "iced matcha green tea latte"
+    },
+    {
+      "whitelist": [],
+      "cname": "iced tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "icetea"
+    },
+    {
+      "whitelist": [],
+      "cname": "irish coffee"
+    },
+    {
+      "whitelist": [],
+      "cname": "jasmine tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "juice"
+    },
+    {
+      "whitelist": [],
+      "cname": "latte"
+    },
+    {
+      "whitelist": [],
+      "cname": "latte macchiato"
+    },
+    {
+      "whitelist": [],
+      "cname": "lemonade"
+    },
+    {
+      "whitelist": [],
+      "cname": "low alcohol beer"
+    },
+    {
+      "whitelist": [],
+      "cname": "macchiato"
+    },
+    {
+      "whitelist": [],
+      "cname": "mango smoothie"
+    },
+    {
+      "whitelist": [],
+      "cname": "masala chai latte"
+    },
+    {
+      "whitelist": [],
+      "cname": "matcha"
+    },
+    {
+      "whitelist": [
+        "buy milk",
+        "drinking milk"
+      ],
+      "cname": "milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "milkshake"
+    },
+    {
+      "whitelist": [],
+      "cname": "moccaccino"
+    },
+    {
+      "whitelist": [],
+      "cname": "mocha"
+    },
+    {
+      "whitelist": [],
+      "cname": "mocha latte"
+    },
+    {
+      "whitelist": [
+        " mocktails"
+      ],
+      "cname": "mocktail"
+    },
+    {
+      "whitelist": [],
+      "cname": "non alcoholic beer"
+    },
+    {
+      "whitelist": [
+        " non alcoholic cocktails"
+      ],
+      "cname": "non alcoholic cocktail"
+    },
+    {
+      "whitelist": [],
+      "cname": "oolong tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "orange juice"
+    },
+    {
+      "whitelist": [],
+      "cname": "peppermint tea"
+    },
+    {
+      "whitelist": [
+        "pu erh",
+        "pu-erh tea"
+      ],
+      "cname": "pu erh tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "regular diet pepsi"
+    },
+    {
+      "whitelist": [],
+      "cname": "rice milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "rooibos"
+    },
+    {
+      "whitelist": [],
+      "cname": "rooibos tea"
+    },
+    {
+      "whitelist": [
+        " schweppes soda"
+      ],
+      "cname": "schweppes"
+    },
+    {
+      "whitelist": [],
+      "cname": "shirley temple cocktail"
+    },
+    {
+      "whitelist": [],
+      "cname": "smoothie"
+    },
+    {
+      "whitelist": [],
+      "cname": "soda"
+    },
+    {
+      "whitelist": [],
+      "cname": "soda pop"
+    },
+    {
+      "whitelist": [
+        " soft drinks"
+      ],
+      "cname": "soft drink"
+    },
+    {
+      "whitelist": [],
+      "cname": "soy milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "sparkling water"
+    },
+    {
+      "whitelist": [],
+      "cname": "sprite"
+    },
+    {
+      "whitelist": [],
+      "cname": "strawberry milk"
+    },
+    {
+      "whitelist": [],
+      "cname": "tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "tomato juice"
+    },
+    {
+      "whitelist": [],
+      "cname": "turkish coffee"
+    },
+    {
+      "whitelist": [],
+      "cname": "vienna coffee"
+    },
+    {
+      "whitelist": [],
+      "cname": "vietnamese coffee"
+    },
+    {
+      "whitelist": [
+        "mineral water"
+      ],
+      "cname": "water"
+    },
+    {
+      "whitelist": [],
+      "cname": "white tea"
+    },
+    {
+      "whitelist": [],
+      "cname": "yellow tea"
+    }
+  ]
+}

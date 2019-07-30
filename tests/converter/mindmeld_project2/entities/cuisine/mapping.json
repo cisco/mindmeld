@@ -1,0 +1,466 @@
+{
+  "entities": [
+    {
+      "whitelist": [],
+      "cname": "Afghan"
+    },
+    {
+      "whitelist": [],
+      "cname": "African"
+    },
+    {
+      "whitelist": [],
+      "cname": "American"
+    },
+    {
+      "whitelist": [],
+      "cname": "American New"
+    },
+    {
+      "whitelist": [],
+      "cname": "American Traditional"
+    },
+    {
+      "whitelist": [],
+      "cname": "Arabian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Arabic"
+    },
+    {
+      "whitelist": [],
+      "cname": "Argentine"
+    },
+    {
+      "whitelist": [],
+      "cname": "Armenian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Asian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Asian Fusion"
+    },
+    {
+      "whitelist": [],
+      "cname": "Australian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Austrian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bangladeshi"
+    },
+    {
+      "whitelist": [],
+      "cname": "Basque"
+    },
+    {
+      "whitelist": [],
+      "cname": "Belgian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Brasseries"
+    },
+    {
+      "whitelist": [],
+      "cname": "Brazilian"
+    },
+    {
+      "whitelist": [],
+      "cname": "British"
+    },
+    {
+      "whitelist": [],
+      "cname": "Bulgar"
+    },
+    {
+      "whitelist": [],
+      "cname": "Burmese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cajun"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cajun Creole"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cambodian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Canadian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cantonese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Caribbean"
+    },
+    {
+      "whitelist": [],
+      "cname": "Catalan"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cethelsea"
+    },
+    {
+      "whitelist": [],
+      "cname": "Chinese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Colombian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Creole"
+    },
+    {
+      "whitelist": [],
+      "cname": "Cuban"
+    },
+    {
+      "whitelist": [],
+      "cname": "Czech"
+    },
+    {
+      "whitelist": [],
+      "cname": "Czech Slovakian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Dairy"
+    },
+    {
+      "whitelist": [
+        "Dehlis"
+      ],
+      "cname": "Delis"
+    },
+    {
+      "whitelist": [],
+      "cname": "Diners"
+    },
+    {
+      "whitelist": [],
+      "cname": "Dominican"
+    },
+    {
+      "whitelist": [],
+      "cname": "Egyptian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Ethiopian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Ethnic"
+    },
+    {
+      "whitelist": [],
+      "cname": "Filipino"
+    },
+    {
+      "whitelist": [],
+      "cname": "French"
+    },
+    {
+      "whitelist": [],
+      "cname": "Georgian"
+    },
+    {
+      "whitelist": [],
+      "cname": "German"
+    },
+    {
+      "whitelist": [
+        "Gluten-Free"
+      ],
+      "cname": "Gluten Free"
+    },
+    {
+      "whitelist": [],
+      "cname": "Greek"
+    },
+    {
+      "whitelist": [],
+      "cname": "Haitian"
+    },
+    {
+      "whitelist": [
+        "Hallal"
+      ],
+      "cname": "Halal"
+    },
+    {
+      "whitelist": [],
+      "cname": "Hawaiian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Himalayan"
+    },
+    {
+      "whitelist": [],
+      "cname": "Himalayan Nepalese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Hungarian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Iberian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Indian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Indonesian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Indpak"
+    },
+    {
+      "whitelist": [],
+      "cname": "Iranian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Irish"
+    },
+    {
+      "whitelist": [],
+      "cname": "Italian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Jamaican"
+    },
+    {
+      "whitelist": [],
+      "cname": "Japanese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Korean"
+    },
+    {
+      "whitelist": [],
+      "cname": "Kosher"
+    },
+    {
+      "whitelist": [],
+      "cname": "Laotian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Latin"
+    },
+    {
+      "whitelist": [],
+      "cname": "Latin American"
+    },
+    {
+      "whitelist": [],
+      "cname": "Lebanese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Malaysian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mediterranean"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mexican"
+    },
+    {
+      "whitelist": [
+        "Eastern"
+      ],
+      "cname": "Middle Eastern"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mideastern"
+    },
+    {
+      "whitelist": [
+        "European"
+      ],
+      "cname": "Modern European"
+    },
+    {
+      "whitelist": [],
+      "cname": "Mongolian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Moroccan"
+    },
+    {
+      "whitelist": [],
+      "cname": "Nepalese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Pakistani"
+    },
+    {
+      "whitelist": [],
+      "cname": "Persian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Persian Iranian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Peruvian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Polish"
+    },
+    {
+      "whitelist": [],
+      "cname": "Portuguese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Puerto Rican"
+    },
+    {
+      "whitelist": [],
+      "cname": "Puertorican"
+    },
+    {
+      "whitelist": [],
+      "cname": "Restaurant"
+    },
+    {
+      "whitelist": [],
+      "cname": "Rooftop"
+    },
+    {
+      "whitelist": [],
+      "cname": "Russian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Salvadoran"
+    },
+    {
+      "whitelist": [],
+      "cname": "Scandinavian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Scottish"
+    },
+    {
+      "whitelist": [],
+      "cname": "Senegalese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Shanghainese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Singaporean"
+    },
+    {
+      "whitelist": [],
+      "cname": "Slovakian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Soul Food"
+    },
+    {
+      "whitelist": [],
+      "cname": "South African"
+    },
+    {
+      "whitelist": [],
+      "cname": "Southern"
+    },
+    {
+      "whitelist": [],
+      "cname": "Spanish"
+    },
+    {
+      "whitelist": [],
+      "cname": "Swedish"
+    },
+    {
+      "whitelist": [],
+      "cname": "Szechuan"
+    },
+    {
+      "whitelist": [],
+      "cname": "Taiwanese"
+    },
+    {
+      "whitelist": [],
+      "cname": "Thai"
+    },
+    {
+      "whitelist": [],
+      "cname": "Tibetan"
+    },
+    {
+      "whitelist": [],
+      "cname": "Trinidadian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Turkish"
+    },
+    {
+      "whitelist": [],
+      "cname": "Ukrainian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Vegan"
+    },
+    {
+      "whitelist": [
+        "Veg"
+      ],
+      "cname": "Vegetarian"
+    },
+    {
+      "whitelist": [],
+      "cname": "Venezuelan"
+    },
+    {
+      "whitelist": [
+        "Vietnamese"
+      ],
+      "cname": "Vietnam"
+    }
+  ]
+}
