@@ -351,19 +351,25 @@ __all__ = ['app']
     @staticmethod
     def _write_function_body_prompt(prompts, f):
         entities_list = []
+        prompts_list = []
         # check if prompts contain any entities
         for prompt in prompts:
             entities = re.findall(r"\{.*\}", prompt)
-            entities_list += entities
-        for entity in entities_list:
-            newentity = entity.replace("{", "").replace("}", "")
-            entities_string = f"    {newentity}_s = [e['text'] for e in " + \
-                f"request.entities if e['type'] == '{newentity}']\n"
-            entity_string = f"    {newentity} = {newentity}_s[0]\n"
-            f.write(entities_string)
-            f.write(entity_string)
-        prompts_list = []
-        prompts_list[:] = ['f"' + x + '"' for x in prompts]
+            entities_list = []
+            newprompt = prompt
+            for i, entity in enumerate(entities, start=0):
+                newprompt = prompt.replace(entity,'{' + str(i) + '}')
+                entities_list.append(entity.replace("{", "").replace("}", ""))
+            entities_args = ', '.join(map(str,entities_list))
+            prompts_list.append('"' + newprompt + '".format({})'.format(entities_args))
+            for entity in entities_list:
+                newentity = entity.replace("{", "").replace("}", "")
+                entities_string = "    {}_s = [e['text'] for e in ".format(newentity) + \
+                    "request.entities if e['type'] == '{}']\n".format(newentity)
+                entity_string = "    {0} = {0}_s[0]\n".format(newentity)
+                f.write(entities_string)
+                f.write(entity_string)
+        #prompts_list[:] = ['f"' + x + '"' for x in prompts]
         prompts_string = "    prompts = [{}]\n".format(', '.join(prompts_list))
         f.write(prompts_string)
 
