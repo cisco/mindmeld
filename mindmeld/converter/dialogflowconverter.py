@@ -144,8 +144,8 @@ class DialogFlowConverter(Converter):
                     df_meta = texts["meta"]
 
                     if re.match("(@sys.).+", df_meta):  # if text is a dialogflow sys entity
-                        if df_meta in DialogFlowConverter.sys_entity_map:
-                            mm_meta = DialogFlowConverter.sys_entity_map[df_meta]
+                        if df_meta in self.sys_entity_map:
+                            mm_meta = self.sys_entity_map[df_meta]
                         else:
                             mm_meta = "[DNE: {sysEntity}]".format(sysEntity=df_meta[1:])
                             logger.info("Unfortunately mindmeld does not currently support"
@@ -228,8 +228,8 @@ class DialogFlowConverter(Converter):
 
         result = ""
         for handle in handles:
-            result += DialogFlowConverter.create_handle(handle) + "\n"
-        result += DialogFlowConverter.create_header(function_name) + "\n"
+            result += self.create_handle(handle) + "\n"
+        result += self.create_header(function_name) + "\n"
         result += "\t" + "replies = {}".format(replies) + "\n"
         result += "\t" "responder.reply(replies)"
         return result
@@ -245,7 +245,7 @@ class DialogFlowConverter(Converter):
     def clean_check(name, lst):
         """ Takes in a list of strings and a name.
         returns name cleaned if cleaned not found in lst."""
-        cleaned = DialogFlowConverter.clean_name(name)
+        cleaned = self.clean_name(name)
 
         if cleaned not in lst:
             lst.add(cleaned)
