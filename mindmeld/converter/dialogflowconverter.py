@@ -134,7 +134,7 @@ class DialogFlowConverter(Converter):
         target_train = open(os.path.join(mindmeld_intent_directory, "train.txt"), 'w')
 
         datastore = json.load(source_en)
-        allText = []
+        all_text = []
 
         for usersay in datastore:
             sentence = ""
