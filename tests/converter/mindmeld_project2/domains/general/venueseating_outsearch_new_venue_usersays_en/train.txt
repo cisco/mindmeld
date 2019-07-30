@@ -1,4 +1,0 @@
-and now I need {restaurant|venue-eating-out-type}
-how about {bakery|venue-eating-out-type}
-now I want a {pizzeria|venue-eating-out-type}
-and {cafe|venue-eating-out-type}

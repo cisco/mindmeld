@@ -1,2 +1,0 @@
-name
-What is your name?

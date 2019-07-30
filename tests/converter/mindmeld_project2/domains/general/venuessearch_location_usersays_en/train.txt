@@ -1,6 +1,0 @@
-in {Moscow|[DNE: sys.location]}
-how about {Los Angeles|[DNE: sys.location]}
-and {SF|[DNE: sys.location]}
-show in {Belgrade|[DNE: sys.location]}
-find for {LA|[DNE: sys.location]}
-find in {Berlin|[DNE: sys.location]}

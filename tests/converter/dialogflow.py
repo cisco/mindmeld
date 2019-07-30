@@ -1,7 +1,7 @@
 """This module tests the convertion tool that is used to convert a rasa or diaglogflow
 project into a mindmeld project"""
 
-from mindmeld import NaturalLanguageProcessor
+# from mindmeld import NaturalLanguageProcessor
 from mindmeld.converter.dialogflow import DialogFlowConverter
 
 

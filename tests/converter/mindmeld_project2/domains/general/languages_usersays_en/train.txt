@@ -1,2 +1,0 @@
-I know how to write in {German|[DNE: sys.language]}
-I know {English|[DNE: sys.language]}

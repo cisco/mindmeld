@@ -1,2 +1,0 @@
-{gay bar|venue-nightlife-type}
-and a {bar|venue-nightlife-type}

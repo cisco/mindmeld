@@ -1,6 +1,0 @@
-how about a {bar|venue-nightlife-type}
-now a {pub|venue-nightlife-type}
-what about a {strip club|venue-nightlife-type}
-I also need a {wine bar|venue-nightlife-type}
-{bar|venue-nightlife-type}
-search for a {night club|venue-nightlife-type} now

@@ -1,2 +1,0 @@
-what about {London|[DNE: sys.location]}
-show for {Miami|[DNE: sys.location]}

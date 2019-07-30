@@ -1,2 +1,0 @@
-{3 years|sys_duration}
-about {4 days|sys_duration}
