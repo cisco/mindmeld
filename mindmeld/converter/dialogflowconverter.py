@@ -312,6 +312,9 @@ class DialogFlowConverter(Converter):
     def convert_project(self):
         """ Notes:
         at the moment not all system entities are translated over"""
+
+        logger.info("Converting project.")
+
         # Create project directory with sub folders
         self.create_mindmeld_directory()
 
@@ -322,3 +325,5 @@ class DialogFlowConverter(Converter):
         self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_init()
+
+        logger.info("Project converted.")
