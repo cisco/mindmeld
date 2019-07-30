@@ -72,7 +72,7 @@ class DialogFlowConverter(Converter):
 
                 mindmeld_entity_directory = os.path.join(self.mindmeld_project_directory,
                                                          "entities",
-                                                         DialogFlowConverter.clean_check(
+                                                         self.clean_check(
                                                                     main, self.entities_list))
 
                 Converter.create_directory(mindmeld_entity_directory)
