@@ -124,7 +124,7 @@ class DialogFlowConverter(Converter):
 
                 self.create_directory(mindmeld_intent_directory)
 
-                DialogFlowConverter._create_intent_file(dialogflow_intent_file,
+                self._create_intent_file(dialogflow_intent_file,
                                                         mindmeld_intent_directory)
 
     @staticmethod
