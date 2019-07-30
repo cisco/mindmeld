@@ -300,7 +300,7 @@ class DialogFlowConverter(Converter):
                                                DialogFlowConverter.clean_name(datastore["name"]) +
                                                "_usersays_" + language + "'"]
 
-                                target.write(DialogFlowConverter.create_function(
+                                target.write(self.create_function(
                                                                     handles=handles,
                                                                     function_name=function_name,
                                                                     replies=replies) + "\n\n")
