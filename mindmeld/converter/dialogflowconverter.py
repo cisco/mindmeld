@@ -122,7 +122,7 @@ class DialogFlowConverter(Converter):
                                                          DialogFlowConverter.clean_check(
                                                                     sub, self.intents_list))
 
-                Converter.create_directory(mindmeld_intent_directory)
+                self.create_directory(mindmeld_intent_directory)
 
                 DialogFlowConverter._create_intent_file(dialogflow_intent_file,
                                                         mindmeld_intent_directory)
