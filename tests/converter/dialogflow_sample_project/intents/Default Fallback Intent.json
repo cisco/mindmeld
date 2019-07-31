@@ -12,6 +12,17 @@
       "messages": [
         {
           "type": 0,
+          "lang": "es",
+          "speech": [
+            "Ups, no he entendido a que te refieres.",
+            "¿Podrías repetirlo, por favor?",
+            "¿Disculpa?",
+            "¿Decías?",
+            "¿Cómo?"
+          ]
+        },
+        {
+          "type": 0,
           "lang": "en",
           "speech": [
             "I didn\u0027t get that. Can you say it again?",

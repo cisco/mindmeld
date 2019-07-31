@@ -2,7 +2,8 @@
   {
     "value": "Java",
     "synonyms": [
-      "Java"
+      "Java",
+      "Java_es"
     ]
   },
   {
@@ -10,14 +11,16 @@
     "synonyms": [
       "ECMAScript",
       "JavaScript",
-      "js"
+      "js",
+      "js_es"
     ]
   },
   {
     "value": "Python",
     "synonyms": [
       "Python",
-      "py"
+      "py",
+      "py_es"
     ]
   }
 ]

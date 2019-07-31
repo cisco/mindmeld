@@ -1,27 +1,41 @@
 {
   "description": "",
   "language": "en",
-  "activeAssistantAgents": [],
+  "shortDescription": "",
+  "examples": "",
+  "linkToDocs": "",
   "disableInteractionLogs": false,
   "disableStackdriverLogs": true,
   "googleAssistant": {
-    "googleAssistantCompatible": false,
+    "googleAssistantCompatible": true,
     "project": "test-luhxgl",
     "welcomeIntentSignInRequired": false,
     "startIntents": [],
     "systemIntents": [],
-    "endIntentIds": [],
+    "endIntentIds": [
+      "ba59edc1-eb2d-474f-9838-be505082a887"
+    ],
     "oAuthLinking": {
       "required": false,
+      "providerId": "",
+      "authorizationUrl": "",
+      "tokenUrl": "",
+      "scopes": "",
+      "privacyPolicyUrl": "",
       "grantType": "AUTH_CODE_GRANT"
     },
     "voiceType": "MALE_1",
     "capabilities": [],
+    "env": "",
     "protocolVersion": "V2",
+    "autoPreviewEnabled": false,
     "isDeviceAgent": false
   },
   "defaultTimezone": "America/Los_Angeles",
   "webhook": {
+    "url": "",
+    "username": "",
+    "headers": {},
     "available": false,
     "useForDomains": false,
     "cloudFunctionsEnabled": false,
@@ -30,10 +44,13 @@
   "isPrivate": true,
   "customClassifierMode": "use.after",
   "mlMinConfidence": 0.3,
-  "supportedLanguages": [],
+  "supportedLanguages": [
+    "es"
+  ],
   "onePlatformApiVersion": "v2",
   "analyzeQueryTextSentiment": false,
   "enabledKnowledgeBaseNames": [],
   "knowledgeServiceConfidenceAdjustment": -0.4,
-  "dialogBuilderMode": false
+  "dialogBuilderMode": false,
+  "baseActionPackagesUrl": ""
 }
