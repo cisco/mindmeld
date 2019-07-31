@@ -12,6 +12,8 @@ from ciscosparkapi import CiscoSparkAPI
 
 CISCO_API_URL = 'https://api.ciscospark.com/v1'
 ACCESS_TOKEN_WITH_BEARER = 'Bearer '
+BAD_REQUEST_NAME = 'BAD REQUEST'
+BAD_REQUEST_CODE = 400
 
 
 class WebexBotServer:
@@ -42,11 +44,13 @@ class WebexBotServer:
 
             for key in ['personId', 'id', 'roomId']:
                 if key not in data['data'].keys():
-                    return 'BAD REQUEST', 400, {'message': 'personId/id/roomID key not found'}
+                    payload = {'message': 'personId/id/roomID key not found'}
+                    return BAD_REQUEST_NAME, BAD_REQUEST_CODE, payload
 
             if data['id'] != self.webhook_id:
                 self.logger.debug("Retrieved webhook_id {} doesn't match".format(data['id']))
-                return 'BAD REQUEST', 400, {'message': 'WEBHOOK_ID mismatch'}
+                payload = {'message': 'WEBHOOK_ID mismatch'}
+                return BAD_REQUEST_NAME, BAD_REQUEST_CODE, payload
 
             person_id = data['data']['personId']
             msg_id = data['data']['id']
@@ -54,14 +58,17 @@ class WebexBotServer:
             room_id = data['data']['roomId']
 
             if 'text' not in txt:
-                return 'BAD REQUEST', 400, {'message': 'Query not found'}
-
-            message = str(txt['text']).lower()
+                payload = {'message': 'Query not found'}
+                return BAD_REQUEST_NAME, BAD_REQUEST_CODE, payload
 
             # Ignore the bot's own responses, else it would go into an infinite loop
             # of answering it's own questions.
             if person_id == me.id:
-                return 'OK', 200, {'message': 'Query replicating bot response'}
+                payload = {'message': "Input query is the bot's previous message, \
+                            so don't send it to the bot again"}
+                return 'OK', 200, payload
+
+            message = str(txt['text']).lower()
 
             return 'OK', 200, self._post_message(room_id, self.conv.say(message)[0])
 
