@@ -28,6 +28,7 @@ actions:
 templates:
   utter_name:
   - text: "Hey there! Tell me your name."
+  - text: "Howdy. What's your name."
 
   utter_greet:
   - text: "Nice to you meet you {name}. How can I help?"
