@@ -307,7 +307,7 @@ class DialogFlowConverter(Converter):
                                     function_name = "renameMe" + str(i) + "_" + language
                                     handles = ["intent=" + "'" +
                                                self.clean_name(datastore["name"]) +
-                                               "_entries_" + language + "'"]
+                                               "_usersays_" + language + "'"]
 
                                 target.write("\n\n\n" +
                                              self.create_function(handles=handles,
