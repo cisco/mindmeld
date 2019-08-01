@@ -64,13 +64,15 @@ class DialogFlowConverter(Converter):
         """ Creates directories + files for all languages/files. All file paths should be valid.
         TODO: consider main files"""
 
-        for main, languages in entities.items():
+        # for main, languages in entities.items():
+        for languages in entities.values():
             # for language, sub in languages.items():
             for sub in languages.values():
                 dialogflow_entity_file = os.path.join(self.dialogflow_project_directory,
                                                       "entities", sub + ".json")
 
-                mindmeld_entity_directory_name = self.clean_check(main, self.entities_list)
+                mindmeld_entity_directory_name = self.clean_check(sub, self.entities_list)
+
                 mindmeld_entity_directory = os.path.join(self.mindmeld_project_directory,
                                                          "entities",
                                                          mindmeld_entity_directory_name)
@@ -111,8 +113,7 @@ class DialogFlowConverter(Converter):
 
         # for main, languages in intents.items():  # TODO: use meta data from main
         for languages in intents.values():
-            # for language, sub in languages.items():
-            for sub in languages.values():
+            for language, sub in languages.items():
                 dialogflow_intent_file = os.path.join(self.dialogflow_project_directory,
                                                       "intents", sub + ".json")
 
@@ -123,10 +124,12 @@ class DialogFlowConverter(Converter):
 
                 self.create_directory(mindmeld_intent_directory)
 
-                self._create_intent_file(dialogflow_intent_file, mindmeld_intent_directory)
+                self._create_intent_file(dialogflow_intent_file,
+                                         mindmeld_intent_directory,
+                                         language)
 
     @staticmethod
-    def _create_intent_file(dialogflow_intent_file, mindmeld_intent_directory):
+    def _create_intent_file(dialogflow_intent_file, mindmeld_intent_directory, language):
         source_en = open(dialogflow_intent_file, 'r')
         target_test = open(os.path.join(mindmeld_intent_directory, "test.txt"), 'w')
         target_train = open(os.path.join(mindmeld_intent_directory, "train.txt"), 'w')
@@ -150,9 +153,12 @@ class DialogFlowConverter(Converter):
                                         "%s as a sys entity."
                                         "Please create an entity for this.", df_meta[1:])
 
-                        part = "{" + df_text + "|" + mm_meta + "}"
+                        intent = DialogFlowConverter.clean_name(mm_meta) + "_entries_" + language
+                        part = "{" + df_text + "|" + intent + "}"
                     else:
-                        part = "{" + df_text + "|" + df_meta[1:] + "}"
+                        intent = DialogFlowConverter.clean_name(df_meta[1:]) + \
+                                                        "_entries_" + language
+                        part = "{" + df_text + "|" + intent + "}"
                 else:
                     part = df_text
 
@@ -291,10 +297,14 @@ class DialogFlowConverter(Converter):
                                 replies = data if isinstance(data, list) else [data]
 
                                 if datastore["fallbackIntent"]:
-                                    function_name = "default"
-                                    handles = ["default=True", "intent='unsupported'"]
+                                    function_name = "default" + "_" + language
+                                    if language == "en":
+                                        # TODO: support multiple defaults for languages
+                                        handles = ["default=True", "intent='unsupported'"]
+                                    else:
+                                        handles = ["intent='unsupported'"]
                                 else:
-                                    function_name = "renameMe" + str(i)
+                                    function_name = "renameMe" + str(i) + "_" + language
                                     handles = ["intent=" + "'" +
                                                self.clean_name(datastore["name"]) +
                                                "_usersays_" + language + "'"]

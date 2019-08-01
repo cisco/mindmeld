@@ -1,6 +1,6 @@
 {
   "id": "ba59edc1-eb2d-474f-9838-be505082a887",
-  "name": "I know how to code in Java",
+  "name": "I can code in a language",
   "auto": true,
   "contexts": [],
   "responses": [
@@ -14,14 +14,30 @@
           "dataType": "@ProgrammingLanguage",
           "name": "ProgrammingLanguage",
           "value": "$ProgrammingLanguage",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
           "isList": false
         }
       ],
       "messages": [
         {
           "type": 0,
+          "lang": "es",
+          "speech": [
+            "¡La programación es increíble!",
+            "Es genial que sepas programar."
+          ]
+        },
+        {
+          "type": 0,
           "lang": "en",
-          "speech": "$ProgrammingLanguage is cool"
+          "speech": [
+            "You\u0027re a programmer!",
+            "I love programming!",
+            "Programming is cool. So is MindMeld."
+          ]
         }
       ],
       "defaultResponsePlatforms": {},

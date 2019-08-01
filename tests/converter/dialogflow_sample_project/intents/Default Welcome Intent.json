@@ -12,6 +12,15 @@
       "messages": [
         {
           "type": 0,
+          "lang": "es",
+          "speech": [
+            "¡Hola!",
+            "¡Hey!",
+            "¡Buenos días!"
+          ]
+        },
+        {
+          "type": 0,
           "lang": "en",
           "speech": [
             "Hi! How are you doing?",
