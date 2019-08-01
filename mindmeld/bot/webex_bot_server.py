@@ -14,6 +14,8 @@ CISCO_API_URL = 'https://api.ciscospark.com/v1'
 ACCESS_TOKEN_WITH_BEARER = 'Bearer '
 BAD_REQUEST_NAME = 'BAD REQUEST'
 BAD_REQUEST_CODE = 400
+APPROVED_REQUEST_NAME = 'OK'
+APPROVED_REQUEST_CODE = 200
 
 
 class WebexBotServer:
@@ -66,11 +68,11 @@ class WebexBotServer:
             if person_id == me.id:
                 payload = {'message': "Input query is the bot's previous message, \
                             so don't send it to the bot again"}
-                return 'OK', 200, payload
+                return APPROVED_REQUEST_NAME, APPROVED_REQUEST_CODE, payload
 
             message = str(txt['text']).lower()
-
-            return 'OK', 200, self._post_message(room_id, self.conv.say(message)[0])
+            payload = {'message': self._post_message(room_id, self.conv.say(message)[0])}
+            return APPROVED_REQUEST_NAME, APPROVED_REQUEST_CODE, payload
 
     def run(self, host='localhost', port=7150):
         self.app.run(host=host, port=port)
