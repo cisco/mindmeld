@@ -8,6 +8,13 @@ This tool will generate the basic framework of a MindMeld project, and will use 
 
 __Usage__  
 *Rasa Users:*  
+In a python script or from the command line, run the following commands
 
+```python
+import mindmeld.converter.rasa_converter
+RASA_PROJECT_PATH = <location of Rasa project>
+MINDMELD_PROJECT_PATH = <location where MindMeld project will be created>
+rasa_converter.convert_project(RASA_PROJECT_PATH, MINDMELD_PROJECT_PATH)
+```
 *Dialogflow Users:*  
 Users must first export their project out of Dialogflow. From the main console, click the __Settings__ icon next to your project name in the top left corner. From there select __Export and Import__, then __Export as Zip__. 
