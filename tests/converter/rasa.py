@@ -19,9 +19,19 @@ def rasa_nlp(mindmeld_project_path):
     return nlp
 
 
-def test_nlp_greet(rasa_nlp):
-    query1 = 'hi there'
-    assert rasa_nlp.process(query1)['intent'] == 'greet'
+intent_test_data = [
+    ('hi there', 'greet'),
+    ('My name is Josh', 'name'),
+    ('thank you', 'thanks'),
+    ('See you later', 'goodbye'),
+    ('I am Josh Williams', 'lastname'),
+    ('No, I don\'t want that', 'deny')
+]
+
+
+@pytest.mark.parametrize("query1,expected_intent", intent_test_data)
+def test_nlp_correct_intent(rasa_nlp, query1, expected_intent):
+    assert rasa_nlp.process(query1)['intent'] == '{}'.format(expected_intent)
 
 
 def test_nlp_name(rasa_nlp):
@@ -31,24 +41,9 @@ def test_nlp_name(rasa_nlp):
     assert entity[0]['text'] == 'Josh'
 
 
-def test_nlp_thanks(rasa_nlp):
-    query1 = 'thank you'
-    assert rasa_nlp.process(query1)['intent'] == 'thanks'
-
-
-def test_nlp_goodbye(rasa_nlp):
-    query1 = 'See you later'
-    assert rasa_nlp.process(query1)['intent'] == 'goodbye'
-
-
 def test_nlp_lastname(rasa_nlp):
     query1 = 'I am Josh Williams'
     assert rasa_nlp.process(query1)['intent'] == 'lastname'
     entity = rasa_nlp.process(query1)['entities']
     assert entity[0]['text'] == 'Josh'
     assert entity[1]['text'] == 'Williams'
-
-
-def test_nlp_deny(rasa_nlp):
-    query1 = 'No, I don\'t want that'
-    assert rasa_nlp.process(query1)['intent'] == 'deny'
