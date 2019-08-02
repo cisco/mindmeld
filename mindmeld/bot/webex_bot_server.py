@@ -6,7 +6,9 @@ This module contains the Webex Bot Server component.
 
 import logging
 import json
-from flask import request
+from flask import request, Flask
+from mindmeld.components import NaturalLanguageProcessor
+from mindmeld.components.dialogue import Conversation
 import requests
 from ciscosparkapi import CiscoSparkAPI
 
@@ -18,23 +20,41 @@ APPROVED_REQUEST_NAME = 'OK'
 APPROVED_REQUEST_CODE = 200
 
 
+class WebexBotServerException(Exception):
+    pass
+
+
 class WebexBotServer:
     """
     A sample server class for Webex Teams integration with any MindMeld application
     """
 
-    def __init__(self, app, webhook_id, access_token, conv):
-        self.app = app
+    def __init__(self, name, app_path, nlp=None, webhook_id=None, access_token=None):
+        """
+        Args:
+            name (str): The name of the server.
+            app_path (str): The path of the MindMeld application.
+            nlp (NaturalLanguageProcessor): MindMeld NLP component, will try to load from app path
+              if None.
+            webhook_id (str): Webex Team webhook id, will raise exception if not passed.
+            access_token (str): Webex Team bot access token, will raise exception if not passed.
+        """
+        self.app = Flask(name)
         self.webhook_id = webhook_id
         self.access_token = access_token
-        self.conv = conv
+        if not nlp:
+            self.nlp = NaturalLanguageProcessor(app_path)
+            self.nlp.load()
+        else:
+            self.nlp = nlp
+        self.conv = Conversation(self.nlp, app_path=app_path)
 
         self.logger = logging.getLogger(__name__)
 
         if not self.webhook_id:
-            raise Exception('WEBHOOK_ID not set')
+            raise WebexBotServerException('WEBHOOK_ID not set')
         if not self.access_token:
-            raise Exception('BOT_ACCESS_TOKEN not set')
+            raise WebexBotServerException('BOT_ACCESS_TOKEN not set')
 
         self.spark_api = CiscoSparkAPI(self.access_token)
         self.access_token_with_bearer = ACCESS_TOKEN_WITH_BEARER + self.access_token

@@ -35,7 +35,7 @@ Register a `new webhook <https://developer.webex.com/docs/api/v1/webhooks/create
 3. Building the bot
 ^^^^^^^^^^^^^^^^^^^
 
-You can import `WebexBotServer` to build a Webex bot application with MindMeld.
+You can import `WebexBotServer` to build a Webex bot application server with MindMeld.
 
 First, we need to install the specific dependencies for bot integration.
 
@@ -43,7 +43,7 @@ First, we need to install the specific dependencies for bot integration.
 
    pip install mindmeld[bot]
 
-After that you can import WebexBotServer from MindMeld and
+After that you can instantiate an WebexBotServer instance and pass your application logic and the Webhook ID and the Access Token into the server.
 
 .. code:: python
 
@@ -52,25 +52,23 @@ After that you can import WebexBotServer from MindMeld and
    from mindmeld import configure_logs
 
    if __name__ == '__main__':
-
-      app = Flask(__name__)
-
       # Create web hook here: https://developer.webex.com/docs/api/v1/webhooks/create-a-webhook
       WEBHOOK_ID = os.environ.get('WEBHOOK_ID')
 
       # Create bot access token here: https://developer.webex.com/my-apps/new
       ACCESS_TOKEN = os.environ.get('BOT_ACCESS_TOKEN')
 
-     configure_logs()
-     nlp = NaturalLanguageProcessor('.')
-     nlp.build()
+      configure_logs()
+      nlp = NaturalLanguageProcessor('.')
+      nlp.build()
 
-     server = WebexBotServer(app, WEBHOOK_ID, ACCESS_TOKEN, conv)
+      server = WebexBotServer(name=__name__, app_path='.', nlp=nlp, webhook_id=WEBHOOK_ID,
+                              access_token=ACCESS_TOKEN)
 
-     port_number = 8080
-     print('Running server on port {}...'.format(port_number))
+      port_number = 8080
+      print('Running server on port {}...'.format(port_number))
 
-     server.run(host='localhost', port=port_number)
+      server.run(host='localhost', port=port_number)
 
 You can download the food ordering blueprint or HR blueprint for example implementation.
 
