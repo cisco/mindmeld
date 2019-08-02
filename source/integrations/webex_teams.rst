@@ -37,7 +37,7 @@ Register a `new webhook <https://developer.webex.com/docs/api/v1/webhooks/create
 
 You can import `WebexBotServer` to build a Webex bot application server with MindMeld.
 
-First, we need to install the specific dependencies for bot integration.
+First, you need to install the specific dependencies for bot integration.
 
 .. code:: console
 
@@ -70,7 +70,7 @@ After that you can instantiate an WebexBotServer instance and pass your applicat
 
       server.run(host='localhost', port=port_number)
 
-You can download the food ordering blueprint or HR blueprint for example implementation.
+You can download the food ordering blueprint or HR blueprint for an example implementation.
 
 .. code:: python
 
