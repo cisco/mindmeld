@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class RasaConverter(Converter):
     """The class is a sub class of the abstract Converter class. This class
-    contains the methods required to convert a Rasa project into a Mindmeld project
+    contains the methods required to convert a Rasa project into a MindMeld project
     """
     def __init__(self, rasa_project_directory, mindmeld_project_directory):
         if os.path.exists(os.path.dirname(rasa_project_directory)):

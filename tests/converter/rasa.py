@@ -4,7 +4,7 @@ project into a mindmeld project"""
 import pytest
 
 from mindmeld import NaturalLanguageProcessor
-from mindmeld.converter.rasa_converter import RasaConverter
+from mindmeld.converter.rasa import RasaConverter
 
 
 def test_rasa_converter(rasa_project_path, mindmeld_project_path):

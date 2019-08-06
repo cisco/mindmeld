@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 
 
 class DialogFlowConverter(Converter):
+    """The class is a sub class of the abstract Converter class. This class
+    contains the methods required to convert a Dialogflow project into a MindMeld project
+    """
     sys_entity_map = {'@sys.date-time': 'sys_interval',
                       '@sys.date': 'sys_time',
                       '@sys.date-period': 'sys_interval',
@@ -49,12 +52,12 @@ class DialogFlowConverter(Converter):
         self.intents_list = set()
 
     def create_mindmeld_directory(self):
-        Converter.create_directory(self.mindmeld_project_directory)
-        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "data"))
-        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "domains"))
-        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "domains",
+        self.create_directory(self.mindmeld_project_directory)
+        self.create_directory(os.path.join(self.mindmeld_project_directory, "data"))
+        self.create_directory(os.path.join(self.mindmeld_project_directory, "domains"))
+        self.create_directory(os.path.join(self.mindmeld_project_directory, "domains",
                                                 "general"))
-        Converter.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
+        self.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
 
     # =========================
     # create training data (entities, intents)
@@ -128,8 +131,7 @@ class DialogFlowConverter(Converter):
                                          mindmeld_intent_directory,
                                          language)
 
-    @staticmethod
-    def _create_intent_file(dialogflow_intent_file, mindmeld_intent_directory, language):
+    def _create_intent_file(self, dialogflow_intent_file, mindmeld_intent_directory, language):
         source_en = open(dialogflow_intent_file, 'r')
         target_test = open(os.path.join(mindmeld_intent_directory, "test.txt"), 'w')
         target_train = open(os.path.join(mindmeld_intent_directory, "train.txt"), 'w')
@@ -153,10 +155,10 @@ class DialogFlowConverter(Converter):
                                         "%s as a sys entity."
                                         "Please create an entity for this.", df_meta[1:])
 
-                        intent = DialogFlowConverter.clean_name(mm_meta) + "_entries_" + language
+                        intent = self.clean_name(mm_meta) + "_entries_" + language
                         part = "{" + df_text + "|" + intent + "}"
                     else:
-                        intent = DialogFlowConverter.clean_name(df_meta[1:]) + \
+                        intent = self.clean_name(df_meta[1:]) + \
                                                         "_entries_" + language
                         part = "{" + df_text + "|" + intent + "}"
                 else:
@@ -238,8 +240,7 @@ class DialogFlowConverter(Converter):
         result += "    " + "responder.reply(replies)"
         return result
 
-    @staticmethod
-    def clean_name(name):
+    def clean_name(self, name):
         """ Takes in a string and returns a valid folder name."""
         name = re.sub(r'[^\w\s-]', '', name).strip().lower()
         name = re.sub(r'[-\s]+', '_', name)
@@ -249,7 +250,7 @@ class DialogFlowConverter(Converter):
     def clean_check(name, lst):
         """ Takes in a list of strings and a name.
         returns name cleaned if cleaned not found in lst."""
-        cleaned = DialogFlowConverter.clean_name(name)
+        cleaned = self.clean_name(name)
 
         if cleaned not in lst:
             lst.add(cleaned)
