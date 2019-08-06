@@ -52,7 +52,7 @@ test_requirements = [
 
 setup(
     name='mindmeld',
-    version='4.1.4',
+    version='4.1.5',
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type='text/markdown',
@@ -84,5 +84,8 @@ setup(
     ],
     setup_requires=setup_requirements,
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=test_requirements,
+    extras_require={
+        'bot': ['ciscosparkapi'],
+    },
 )

@@ -122,9 +122,8 @@ def test_nlp_hierarchy_using_domains_intents(kwik_e_mart_nlp, allowed_intents,
 test_data_dyn = [
     ('kadubeesanahalli', None, 'store_info', 'help', ''),
     ('45 Fifth', None, 'store_info', 'get_store_hours', '45 Fifth'),
-    ('kadubeesanahalli', {'gazetteers': {'store_name': {'kadubeesanahalli': 1}}},
-     'store_info', 'get_store_hours', 'kadubeesanahalli'),
-    ('45 Fifth', None, 'store_info', 'get_store_hours', '45 Fifth')
+    ('kadubeesanahalli', {'gazetteers': {'store_name': {'kadubeesanahalli': 10.0}}},
+     'store_info', 'get_store_hours', 'kadubeesanahalli')
 ]
 
 
@@ -533,3 +532,39 @@ def test_sys_entity_feature(kwik_e_mart_nlp):
     }
 
     assert expected_features == sys_candidate_features
+
+
+test_data_dyn = [
+    ('kadubeesanahalli', None, 'store_info', '', ''),
+    ('45 Fifth', None, 'store_info', 'get_store_hours', '45 Fifth'),
+    ('kadubeesanahalli', {'gazetteers': {'store_name': {'kadubeesanahalli': 1}}},
+     'store_info', 'get_store_hours', 'kadubeesanahalli')
+]
+
+
+@pytest.mark.parametrize("query,dyn_gaz,expected_domain,expected_intent,expected_entity",
+                         test_data_dyn)
+def test_nlp_hierarchy_using_dynamic_gazetteer_and_allowed_intents(kwik_e_mart_nlp, query, dyn_gaz,
+                                                                   expected_domain, expected_intent,
+                                                                   expected_entity):
+    """Tests user specified allowed_nlp_classes and dynamic_resource"""
+    response = kwik_e_mart_nlp.process(query, dynamic_resource=dyn_gaz,
+                                       allowed_nlp_classes={'store_info': {}})
+
+    if dyn_gaz:
+        assert query not in kwik_e_mart_nlp.resource_loader.get_gazetteer('store_name')['entities']
+        in_gaz_tokens = '45 Fifth'.lower()
+        assert in_gaz_tokens in kwik_e_mart_nlp.resource_loader.get_gazetteer(
+            'store_name')['entities']
+
+    assert response['domain'] == expected_domain
+
+    if expected_intent != 'get_store_hours':
+        assert response['intent'] != 'get_store_hours'
+    else:
+        assert response['intent'] == expected_intent
+
+    if expected_entity == '':
+        assert response['entities'] == []
+    else:
+        assert expected_entity in [entity['text'] for entity in response['entities']]

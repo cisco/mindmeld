@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class RasaConverter(Converter):
     """The class is a sub class of the abstract Converter class. This class
-    contains the methods required to convert a Rasa project into a Mindmeld project
+    contains the methods required to convert a Rasa project into a MindMeld project
     """
     def __init__(self, rasa_project_directory, mindmeld_project_directory):
         if os.path.exists(os.path.dirname(rasa_project_directory)):
@@ -358,9 +358,9 @@ __all__ = ['app']
             entities_list = []
             newprompt = prompt
             for i, entity in enumerate(entities, start=0):
-                newprompt = prompt.replace(entity,'{' + str(i) + '}')
+                newprompt = prompt.replace(entity, '{' + str(i) + '}')
                 entities_list.append(entity.replace("{", "").replace("}", ""))
-            entities_args = ', '.join(map(str,entities_list))
+            entities_args = ', '.join(map(str, entities_list))
             prompts_list.append('"' + newprompt + '".format({})'.format(entities_args))
             for entity in entities_list:
                 newentity = entity.replace("{", "").replace("}", "")
@@ -369,7 +369,6 @@ __all__ = ['app']
                 entity_string = "    {0} = {0}_s[0]\n".format(newentity)
                 f.write(entities_string)
                 f.write(entity_string)
-        #prompts_list[:] = ['f"' + x + '"' for x in prompts]
         prompts_string = "    prompts = [{}]\n".format(', '.join(prompts_list))
         f.write(prompts_string)
 
