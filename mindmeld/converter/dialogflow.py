@@ -26,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 
 class DialogFlowConverter(Converter):
+    """DialogFlowConverter is a sub class of the abstract Converter class. This class
+    contains the methods required to convert a DialogFlow project into a Mindmeld project
+    """
+
     sys_entity_map = {'@sys.date-time': 'sys_interval',
                       '@sys.date': 'sys_time',
                       '@sys.date-period': 'sys_interval',
@@ -61,12 +65,10 @@ class DialogFlowConverter(Converter):
     # =========================
 
     def _create_entities_directories(self, entities):
-        """ Creates directories + files for all languages/files. All file paths should be valid.
-        TODO: consider main files"""
-
-        # for main, languages in entities.items():
+        """ Creates directories + files for all languages/files.
+        Currently does not use meta data in entityName.json files (the keys in var entities).
+        """
         for languages in entities.values():
-            # for language, sub in languages.items():
             for sub in languages.values():
                 dialogflow_entity_file = os.path.join(self.dialogflow_project_directory,
                                                       "entities", sub + ".json")
@@ -96,7 +98,6 @@ class DialogFlowConverter(Converter):
                 item['synonyms'].remove(item['value'])
             new_dict['whitelist'] = item['synonyms']
             new_dict['cname'] = item['value']
-            # newDict['id'] = "n/a"  # TODO: when do you need an ID?
             mapping_dict["entities"].append(new_dict)
 
             target_gazetteer.write(item['value'] + "\n")
@@ -108,10 +109,8 @@ class DialogFlowConverter(Converter):
         target_mapping.close()
 
     def _create_intents_directories(self, intents):
-        """ Creates directories + files for all languages/files. All file paths should be valid.
-        TODO: consider main files"""
+        """ Creates directories + files for all languages/files."""
 
-        # for main, languages in intents.items():  # TODO: use meta data from main
         for languages in intents.values():
             for language, sub in languages.items():
                 dialogflow_intent_file = os.path.join(self.dialogflow_project_directory,
@@ -176,9 +175,11 @@ class DialogFlowConverter(Converter):
 
     def _get_file_names(self, level):
         """ Gets the names of the entities from Dialogflow as a dictionary.
+        levels (str): either "entities" or "intents"
+
         ex. if we had the following files in our entities directory:
             ["test.json", "test_entries_en.json", "test_entries_de.json"]
-        return:
+        it returns:
             {'test': {'en': 'test_entries_en', 'de': 'test_entries_de'}} """
 
         directory = os.path.join(self.dialogflow_project_directory, level)
@@ -240,7 +241,7 @@ class DialogFlowConverter(Converter):
 
     @staticmethod
     def clean_name(name):
-        """ Takes in a string and returns a valid folder name."""
+        """ Takes in a string and returns a valid folder name (no spaces, all lowercase)."""
         name = re.sub(r'[^\w\s-]', '', name).strip().lower()
         name = re.sub(r'[-\s]+', '_', name)
         return name
@@ -248,7 +249,7 @@ class DialogFlowConverter(Converter):
     @staticmethod
     def clean_check(name, lst):
         """ Takes in a list of strings and a name.
-        returns name cleaned if cleaned not found in lst."""
+        Returns name cleaned if the cleaned name is not found in lst."""
         cleaned = DialogFlowConverter.clean_name(name)
 
         if cleaned not in lst:
@@ -320,8 +321,46 @@ class DialogFlowConverter(Converter):
     # =========================
 
     def convert_project(self):
-        """ Notes:
-        at the moment not all system entities are translated over"""
+        """ Converts a DialogFlow project into a MindMeld project.
+
+        DialogFlow projects consist of entities and intents.
+            note on languages:
+                DialogFlow supports multiple languages and locales. They store their training
+                data for different languages in different files. So, the name of each training
+                file ends with a meta tag, two letters long for language, and an additional
+                two letters for dialect (if applicable). For example, a file ending in "_en-au"
+                indicates it's in English (Australia). Below we use "la" to represent this
+                meta tag.
+
+            entities folder contains:
+                entityName.json - Meta data about entityName for all languages.
+                entityName_entries_la.json - One for each language, contains entitiy mappings.
+
+            intents folder contain:
+                intentName.json - Contains rules, information about conversation flow, meta data.
+                    Contains previously mentioned information and responses for all languages.
+                intentName_usersays_la.json - one for each language,
+                    contains training data to recognize intentName
+
+        Limitations:
+        - The converter is unable to create an entity when it encounters an
+        unrecognized entity (an entity not defined under entities folder
+         or system entities), and labels such entities as DNE in training data.
+        - The converter currently does not automatically convert features like
+        slot filling, contexts, and follow-up intents. Users can still implement such
+        features and more.
+        - Information in agent.json are not copied over.
+        - There is no official support for different languages. Users can still
+        implement this. The converter is able to successfully convert dialogflow
+        bots that support multiple languages.
+
+        Mindmeld:
+        - Users can store data locally
+        - Users can build a knowledge base (currently beta in DialogFlow).
+        - Users can configure the machine learning models to best suit their needs.
+        - Users have more flexibility in defining their own features, including
+         ones like slot filling, contexts, and follow-up intents.
+        """
 
         logger.info("Converting project.")
 
