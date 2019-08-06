@@ -56,7 +56,7 @@ class DialogFlowConverter(Converter):
         self.create_directory(os.path.join(self.mindmeld_project_directory, "data"))
         self.create_directory(os.path.join(self.mindmeld_project_directory, "domains"))
         self.create_directory(os.path.join(self.mindmeld_project_directory, "domains",
-                                                "general"))
+                                           "general"))
         self.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
 
     # =========================
@@ -240,14 +240,14 @@ class DialogFlowConverter(Converter):
         result += "    " + "responder.reply(replies)"
         return result
 
-    def clean_name(self, name):
+    @staticmethod
+    def clean_name(name):
         """ Takes in a string and returns a valid folder name."""
         name = re.sub(r'[^\w\s-]', '', name).strip().lower()
         name = re.sub(r'[-\s]+', '_', name)
         return name
 
-    @staticmethod
-    def clean_check(name, lst):
+    def clean_check(self, name, lst):
         """ Takes in a list of strings and a name.
         returns name cleaned if cleaned not found in lst."""
         cleaned = self.clean_name(name)
