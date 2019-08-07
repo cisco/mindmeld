@@ -310,6 +310,10 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                                     "type": "text",
                                     "analyzer": "keyword_match_analyzer"
                                 },
+                                "processed_text": {
+                                    "type": "text",
+                                    "analyzer": "english"
+                                },
                                 "char_ngram": {
                                     "type": "text",
                                     "analyzer": "char_ngram_analyzer"
