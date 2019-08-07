@@ -689,7 +689,7 @@ class Search:
                         ]
                     }
                 }
-            else:
+            elif self.query_type == 'keyword':
                 clause = {
                     "bool": {
                         "should": [
@@ -717,6 +717,8 @@ class Search:
                         ]
                     }
                 }
+            else:
+                raise Exception('Unknown query type.')
 
             # Boost function for boosting conditions, e.g. exact match boosting
             boost_functions = [
@@ -866,6 +868,8 @@ class Search:
 
                 if upper_bound:
                     clause['range'][self.field][upper_bound[0]] = upper_bound[1]
+            else:
+                raise Exception('Unknown filter type.')
 
             return clause
 
