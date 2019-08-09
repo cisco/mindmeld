@@ -28,22 +28,31 @@ class Converter(ABC):
 
     @abstractmethod
     def convert_project(self):
+        """Converts project into MindMeld project."""
         pass
 
     @abstractmethod
     def create_mindmeld_directory(self):
+        """Creates key MindMeld folders for project."""
         pass
 
     @abstractmethod
-    def create_training_data(self):
+    def create_mindmeld_training_data(self):
+        """Converts traning data from other software into MindMeld training data."""
         pass
 
     @abstractmethod
-    def create_init(self):
+    def create_mindmeld_init(self):
+        """Creates MindMeld __init__.py file."""
         pass
 
     @staticmethod
     def create_directory(directory):
+        """Creates folder at specified location.
+
+        Args:
+            directory: Location where folder should be created.
+        """
         if not os.path.isdir(directory):
             try:
                 os.mkdir(directory)
@@ -52,6 +61,12 @@ class Converter(ABC):
 
     @staticmethod
     def create_config(mindmeld_project_directory, main_file_loc):
+        """Creates config.py file for MindMeld project.
+
+        Args:
+            mindmeld_project_directory: Location of MindMeld directory.
+            main_file_loc: Location where default config.py is stored.
+        """
         with open(main_file_loc + '/generic_config.txt', 'r') as f:
             string = f.read()
         with open(mindmeld_project_directory + "/config.py", "w") as f:
@@ -59,6 +74,12 @@ class Converter(ABC):
 
     @staticmethod
     def create_main(mindmeld_project_directory, main_file_loc):
+        """Creates __main__.py file for MindMeld project.
+
+        Args:
+            mindmeld_project_directory: Location of MindMeld directory.
+            main_file_loc: Location where default __main__.py is stored.
+        """
         with open(main_file_loc + '/generic_main.txt', 'r') as f:
             string = f.read()
         with open(mindmeld_project_directory + "/__main__.py", "w") as f:

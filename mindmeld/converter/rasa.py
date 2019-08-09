@@ -269,24 +269,24 @@ class RasaConverter(Converter):
         self.create_directory(mindmeld_project_path + "/domains/general")
         self.create_directory(mindmeld_project_path + "/entities")
 
-    def create_training_data(self, rasa_project_directory, mindmeld_project_directory):
+    def create_mindmeld_training_data(self):
         """Method to transfer and reformat the training data in a Rasa Project
         """
         # read intents listed in domain.yml
         intents = self._read_intents()
 
         # create intents subdirectories
-        self._create_intents_directories(mindmeld_project_directory, intents)
+        self._create_intents_directories(self.mindmeld_project_directory, intents)
 
         # read entities in domain.yml
         entities = self._read_entities()
 
         # create entities subdirectories if entities is not empty
         if entities:
-            self._create_entities_directories(mindmeld_project_directory, entities)
+            self._create_entities_directories(self.mindmeld_project_directory, entities)
 
         # try and open data files from rasa project
-        nlu_data_loc = rasa_project_directory + "/data/nlu_data.md"
+        nlu_data_loc = self.rasa_project_directory + "/data/nlu_data.md"
         try:
             with open(nlu_data_loc, "r") as nlu_data_md_file:
                 nlu_data_lines = nlu_data_md_file.readlines()
@@ -298,7 +298,7 @@ class RasaConverter(Converter):
         for line in nlu_data_lines:
             if (self._is_line_intent_definiton(line)):
                 current_intent = RasaConverter._get_intent_from_line(line)
-                current_intent_path = mindmeld_project_directory \
+                current_intent_path = self.mindmeld_project_directory \
                     + "/domains/general/" + current_intent
                 # create data text file for intent examples`
                 self._create_intent_training_file(current_intent_path)
@@ -437,7 +437,7 @@ __all__ = ['app']
         assert file_lines[current_line] == ""
         file_lines[current_line:current_line] = actions
 
-    def create_init(self, mindmeld_project_directory):
+    def create_mindmeld_init(self):
         f = self._write_init_header()
         actions = self._read_actions()
         templates = self._read_templates()
@@ -462,7 +462,7 @@ __all__ = ['app']
                 if len(actions) > 1:
                     self._attach_actions_to_function(actions[1:], file_lines)
         # write all lines back to file
-        with open(mindmeld_project_directory + "/__init__.py", "w") as f:
+        with open(self.mindmeld_project_directory + "/__init__.py", "w") as f:
             f.writelines(file_lines)
 
     @staticmethod
@@ -497,9 +497,9 @@ __all__ = ['app']
         # Create project directory with sub folders
         self.create_mindmeld_directory(self.mindmeld_project_directory)
         # Transfer over test data from Rasa project and reformat to Mindmeld project
-        self.create_training_data(self.rasa_project_directory, self.mindmeld_project_directory)
+        self.create_mindmeld_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
         self.create_main(self.mindmeld_project_directory, file_loc)
-        self.create_init(self.mindmeld_project_directory)
+        self.create_mindmeld_init()
         self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_custom_features(self.mindmeld_project_directory, file_loc)
