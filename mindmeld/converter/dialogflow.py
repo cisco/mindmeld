@@ -29,6 +29,7 @@ class DialogFlowConverter(Converter):
     """The class is a sub class of the abstract Converter class. This class
     contains the methods required to convert a Dialogflow project into a MindMeld project
     """
+
     sys_entity_map = {'@sys.date-time': 'sys_interval',
                       '@sys.date': 'sys_time',
                       '@sys.date-period': 'sys_interval',
@@ -43,6 +44,46 @@ class DialogFlowConverter(Converter):
                       '@sys.email': 'sys_email',
                       '@sys.phone-number': 'sys_phone-number',
                       '@sys.url': 'sys_url'}
+
+    # TODO: provide support for entities listed in sys_entity_map_todo
+    sys_entity_map_todo = ['@sys.number-integer',
+                           '@sys.number-sequence',
+                           '@sys.flight-number',
+                           '@sys.unit-area',
+                           '@sys.unit-length',
+                           '@sys.unit-speed',
+                           '@sys.unit-information',
+                           '@sys.percentage',
+                           '@sys.temperature',
+                           '@sys.duration',
+                           '@sys.age',
+                           '@sys.currency-name',
+                           '@sys.unit-area-name',
+                           '@sys.unit-length-name',
+                           '@sys.unit-speed-name',
+                           '@sys.unit-volume-name',
+                           '@sys.unit-weight-name',
+                           '@sys.unit-information-name',
+                           '@sys.address',
+                           '@sys.zip-code',
+                           '@sys.geo-capital',
+                           '@sys.geo-country',
+                           '@sys.geo-country-code',
+                           '@sys.geo-city',
+                           '@sys.geo-state',
+                           '@sys.geo-city',
+                           '@sys.geo-state',
+                           '@sys.place-attraction',
+                           '@sys.airport',
+                           '@sys.location',
+                           '@sys.given-name',
+                           '@sys.last-name',
+                           '@sys.person',
+                           '@sys.music-artist',
+                           '@sys.music-genre',
+                           '@sys.color',
+                           '@sys.language',
+                           '@sys.any']
 
     def __init__(self, dialogflow_project_directory, mindmeld_project_directory):
         self.dialogflow_project_directory = dialogflow_project_directory
