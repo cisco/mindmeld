@@ -38,8 +38,11 @@ class RasaConverter(Converter):
             raise FileNotFoundError
 
     def _create_intents_directories(self, mindmeld_project_directory, intents):
+        """Note: Because Rasa does not support multiple domains at this time. All intents
+        are placed under a domain named 'general'."""
+        GENERAL_DOMAIN_LOCATION = '/domains/general/'
         for intent in intents:
-            self.create_directory(mindmeld_project_directory + "/domains/general/" + intent)
+            self.create_directory(mindmeld_project_directory + GENERAL_DOMAIN_LOCATION + intent)
 
     def _create_entities_directories(self, mindmeld_project_directory, entities):
         for entity in entities:

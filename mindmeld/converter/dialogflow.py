@@ -271,7 +271,6 @@ class DialogFlowConverter(Converter):
 
             intents = self._get_file_names("intents")
 
-            # for i, (main, languages) in enumerate(intents.items()):
             for i, main in enumerate(intents.keys()):
 
                 df_main = os.path.join(self.dialogflow_project_directory,

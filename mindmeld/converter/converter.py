@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """This module contains the abstract Coverter class used to convert other software's
-projects into mindmeld projects"""
+projects into MindMeld projects"""
 
 from abc import ABC, abstractmethod
 import os
@@ -22,7 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 class Converter(ABC):
-
+    """Abstract class that is used to instantiate concrete converter classes.
+    The class contains the necessary functions to convert other software's projects
+    into MindMeld projects."""
     def __init__(self):
         pass
 
@@ -67,7 +69,8 @@ class Converter(ABC):
             mindmeld_project_directory: Location of MindMeld directory.
             main_file_loc: Location where default config.py is stored.
         """
-        with open(main_file_loc + '/generic_config.txt', 'r') as f:
+        MINDMELD_MODEL_CONFIG_FILE_NAME = "/generic_config.txt"
+        with open(main_file_loc + MINDMELD_MODEL_CONFIG_FILE_NAME, 'r') as f:
             string = f.read()
         with open(mindmeld_project_directory + "/config.py", "w") as f:
             f.write(string)
@@ -80,7 +83,8 @@ class Converter(ABC):
             mindmeld_project_directory: Location of MindMeld directory.
             main_file_loc: Location where default __main__.py is stored.
         """
-        with open(main_file_loc + '/generic_main.txt', 'r') as f:
+        MINDMELD_MODEL_MAIN_FILE_NAME = "/generic_main.txt"
+        with open(main_file_loc + MINDMELD_MODEL_MAIN_FILE_NAME, 'r') as f:
             string = f.read()
         with open(mindmeld_project_directory + "/__main__.py", "w") as f:
             f.write(string)
