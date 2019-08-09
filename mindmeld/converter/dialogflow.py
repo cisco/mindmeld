@@ -191,12 +191,12 @@ class DialogFlowConverter(Converter):
                                         "%s as a sys entity."
                                         "Please create an entity for this.", df_meta[1:])
 
-                        intent = self.clean_name(mm_meta) + "_entries_" + language
-                        part = "{" + df_text + "|" + intent + "}"
+                        entity_type = self.clean_name(mm_meta) + "_entries_" + language
+                        part = "{" + df_text + "|" + entity_type + "}"
                     else:
-                        intent = self.clean_name(df_meta[1:]) + \
+                        entity_type = self.clean_name(df_meta[1:]) + \
                                                         "_entries_" + language
-                        part = "{" + df_text + "|" + intent + "}"
+                        part = "{" + df_text + "|" + entity_type + "}"
                 else:
                     part = df_text
 
