@@ -17,4 +17,23 @@ MINDMELD_PROJECT_PATH = <location where MindMeld project will be created>
 rasa_converter.convert_project(RASA_PROJECT_PATH, MINDMELD_PROJECT_PATH)
 ```
 *Dialogflow Users:*  
-Users must first export their project out of Dialogflow. From the main console, click the __Settings__ icon next to your project name in the top left corner. From there select __Export and Import__, then __Export as Zip__. 
+Users must first export their project out of Dialogflow. From the main console, click the __Settings__ icon next to your project name in the top left corner. From there select __Export and Import__, then __Export as Zip__.
+
+__Limitations__
+*Rasa Users:*  
+- Rasa has the ability to have custom actions, which is not supported by
+the converter.
+- Rasa has the ability to handle multiple intents per query, while Mindmeld
+does not.
+- Rasa training data may be json format, which is not currently supported.
+- Rasa has a feature called Rasa forms which is not currently supported.
+- Rasa's configuration files are not transfered, instead generic Mindmeld
+configuration files are copied over.
+
+*Dialogflow Users:*
+- There is no official language support.
+- Some system entities are currently unsupported.
+- The converter currently does not automatically convert features like
+slot filling, contexts, and follow-up intents. Users can still implement such
+features and more.
+- Information in agent.json (such as description, timezone, etc) are not copied over.
