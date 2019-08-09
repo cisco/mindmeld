@@ -247,7 +247,7 @@ class DialogFlowConverter(Converter):
 
         return info
 
-    def create_training_data(self):
+    def create_mindmeld_training_data(self):
         entities = self._get_file_names("entities")
         self._create_entities_directories(entities)
 
@@ -299,7 +299,7 @@ class DialogFlowConverter(Converter):
                          "filenames are valid (no spaces or special characters)",
                          cleaned)
 
-    def create_init(self):
+    def create_mindmeld_init(self):
         with open(os.path.join(self.mindmeld_project_directory, "__init__.py"), 'w') as target:
             begin_info = ["# -*- coding: utf-8 -*-",
                           "\"\"\"This module contains the MindMeld application\"\"\"",
@@ -312,7 +312,6 @@ class DialogFlowConverter(Converter):
 
             intents = self._get_file_names("intents")
 
-            # for i, (main, languages) in enumerate(intents.items()):
             for i, main in enumerate(intents.keys()):
 
                 df_main = os.path.join(self.dialogflow_project_directory,
@@ -406,11 +405,11 @@ class DialogFlowConverter(Converter):
         self.create_mindmeld_directory()
 
         # Transfer over test data from DialogFlow project and reformat to Mindmeld project
-        self.create_training_data()
+        self.create_mindmeld_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
 
         self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_main(self.mindmeld_project_directory, file_loc)
-        self.create_init()
+        self.create_mindmeld_init()
 
         logger.info("Project converted.")
