@@ -42,10 +42,6 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
         es_user (str): The Elasticsearch username for http auth
         es_pass (str): The Elasticsearch password for http auth
     """
-    es_host = es_host or os.environ.get('MM_ES_HOST')
-    es_user = es_user or os.environ.get('MM_ES_USERNAME')
-    es_pass = es_pass or os.environ.get('MM_ES_PASSWORD')
-
     try:
         http_auth = (es_user, es_pass) if es_user and es_pass else None
         es_client = Elasticsearch(es_host, http_auth=http_auth)

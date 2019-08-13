@@ -43,7 +43,8 @@ class EntityResolver:
     ES_SYNONYM_INDEX_PREFIX = "synonym"
     """The prefix of the ES index."""
 
-    def __init__(self, app_path, resource_loader, entity_type, es_host=None, es_client=None):
+    def __init__(self, app_path, resource_loader, entity_type, es_host=None, es_username=None, es_password=None,
+                 es_client=None):
         """Initializes an entity resolver
 
         Args:
@@ -51,7 +52,11 @@ class EntityResolver:
             resource_loader (ResourceLoader): An object which can load resources for the resolver
             entity_type: The entity type associated with this entity resolver
             es_host (str): The Elasticsearch host server
+            es_username (str): The Elasticsearch username server
+            es_password (str): The Elasticsearch password server
+            es_client (Elasticsearch): The Elasticsearch client
         """
+        self._app_path = app_path
         self._app_namespace = get_app_namespace(app_path)
         self._resource_loader = resource_loader
         self._normalizer = resource_loader.query_factory.normalize
@@ -59,9 +64,26 @@ class EntityResolver:
         self._is_system_entity = Entity.is_system_entity(self.type)
         self._exact_match_mapping = None
         self._er_config = get_classifier_config('entity_resolution', app_path=app_path)
-        self._es_host = es_host
+        if es_host:
+            self._es_host = es_host
+            self._es_username = es_username
+            self._es_password = es_password
+        else:
+            config = self._load_es_config()
+            self._es_host = config['host']
+            self._es_username = config['username']
+            self._es_password = config['password']
         self._es_config = {'client': es_client, 'pid': os.getpid()}
 
+    def _load_es_config(self):
+        if os.environ.get('MM_ES_HOST'):
+            return {'host': os.environ.get('MM_ES_HOST'),
+                    'username': os.environ.get('MM_ES_USERNAME'),
+                    'password': os.environ.get('MM_ES_PASSWORD')}
+        else:
+            return {'host': self._es_config.get('ES_HOST'),
+                    'username': self._es_config.get('ES_USERNAME'),
+                    'password': self._es_config.get('ES_PASSWORD')}
     @property
     def _es_index_name(self):
         return EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + self.type
@@ -76,7 +98,7 @@ class EntityResolver:
 
     @property
     def _es_client(self):
-        # Lazily connect to Elasticsearch.  Make sure each subprocess gets it's own connection
+        # Lazily connect to Elasticsearch.  Make sure each subprocess gets its own connection
         if self._es_config['client'] is None or self._es_config['pid'] != os.getpid():
             self._es_config = {'pid': os.getpid(), 'client': create_es_client()}
         return self._es_config['client']
