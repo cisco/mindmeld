@@ -14,7 +14,7 @@ The converted text transcript can then be processed by your MindMeld application
 appropriate text response. Finally, you can send this text response to a third party
 `Text to Speech <https://en.wikipedia.org/wiki/Speech_synthesis>`_ (TTS) system to synthesize an
 audio response that can be "spoken" back to the user.  Similar to speech recognition, there are multiple third party TTS systems available for use, including but not limited to the services
-provided by `Amazon <https://aws.amazon.com/polly/>`_, 
+provided by `Amazon <https://aws.amazon.com/polly/>`_,
 `Google <https://cloud.google.com/text-to-speech/>`__ and
 `Microsoft <https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/>`__.
 
@@ -61,7 +61,7 @@ techniques to use for entity matching. There are a few common techniques that ar
 the phonetic representation of text, of which, one of the most optimized and efficient is the
 `Double Metaphone <https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone>`_ algorithm. Double
 Metaphone is based on a series of rules optimized for indexing the phonetic representations of
-names of various origins. Currently, ``double_metaphone`` is the only supported value for 
+names of various origins. Currently, ``double_metaphone`` is the only supported value for
 ``phonetic_match_types``. It can be specified in your application configuration file (config.py)
 as follows.
 
@@ -82,8 +82,7 @@ returned by the entity resolver as illustrated in the following example.
     - In order to utilize phonetic matching, you must install the phonetic analysis plugin for
       Elasticsearch and restart the Elasticsearch service. Refer to `Elasticsearch documentation
       <https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-phonetic.html>`_
-      for instructions. You may also have to delete the default Elasticsearch template by running
-      this command in your shell: ``curl -X DELETE "localhost:9200/_template/default"``.
+      for instructions.
 
     - After first introducing ``phonetic_match_types`` to the entity resolver config, restart your
       Python shell and rebuild the entity resolver index from scratch by running a clean fit
@@ -218,7 +217,7 @@ config.
 
 These results look more reasonable. The top result exactly matches the user's intended dish,
 "Yellow Curry" due to its high phonetic similarity to the extracted entity "mellow Kerrie". Many
-other results have also been ranked higher due to phonetic matches against the canonical name or 
+other results have also been ranked higher due to phonetic matches against the canonical name or
 the synonym list.
 
 .. _nbest_lists:
@@ -261,7 +260,7 @@ corresponding to the ``resolve_entities_using_nbest_transcripts`` key. The forma
 domain.
 
 MindMeld will limit running the n-best enhanced entity resolution to the domains and intents you
-have specified. This is an optimization to avoid unnecessary processing of a factor of 
+have specified. This is an optimization to avoid unnecessary processing of a factor of
 `n` for queries without entities of interest. While the code is parallelized for minimal latency
 increase, there will be an increase in memory usage from the domains and intents for which n-best
 entity processing is run. You can control the parallel processing behavior using the
