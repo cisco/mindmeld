@@ -282,7 +282,7 @@ DEFAULT_ROLE_CLASSIFIER_CONFIG = {
     }
 }
 
-DEFAULT_ES_INDEX_TEMPLATE_NAME = "default"
+DEFAULT_ES_INDEX_TEMPLATE_NAME = "mindmeld_default"
 
 # Default ES index template that contains the base index configuration shared across different
 # types of indices. Currently all ES indices will be created using this template.
