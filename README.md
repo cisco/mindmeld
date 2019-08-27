@@ -56,7 +56,7 @@ For detailed installation instructions, see [Getting Started](http://www.mindmel
 
 ![MindMeld UI](https://www.mindmeld.com/docs/_images/mindmeld_ui.png)
 
-You can use our sample web client project to interact with any MindMeld application. 
+You can use our sample web-based chat client interface to interact with any MindMeld application. This web UI also serves as a debugging tool to step through the various stages of query processing by the MindMeld pipeline.
 
 ```
 git clone git@github.com:cisco/mindmeld.git
