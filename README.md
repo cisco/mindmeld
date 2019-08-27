@@ -67,6 +67,8 @@ npm start
 
 For detailed installation instructions, see [Getting Started for UI](https://www.mindmeld.com/docs/mindmeld_ui/mindmeld_ui.html).
 
+Note: this web client only works on Chrome browser.
+
 ## Citation
 
 Please cite [this paper](https://www.aclweb.org/anthology/D18-2027) if you use MindMeld in your work:
