@@ -62,7 +62,7 @@ You can use our sample web-based chat client interface to interact with any Mind
 git clone git@github.com:cisco/mindmeld.git
 cd mindmeld/mindmeld-ui
 npm install
-npm started
+npm start
 ```
 
 For detailed installation instructions, see [Getting Started for UI](https://www.mindmeld.com/docs/mindmeld_ui/mindmeld_ui.html).
