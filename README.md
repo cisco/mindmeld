@@ -52,6 +52,21 @@ python -m home_assistant converse
 
 For detailed installation instructions, see [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html). To start with pre-built sample applications, see [MindMeld Blueprints](http://www.mindmeld.com/docs/blueprints/overview.html).
 
+## MindMeld UI
+
+![MindMeld UI](https://www.mindmeld.com/docs/_images/mindmeld_ui.png)
+
+You can use our sample web client project to interact with any MindMeld application. 
+
+```
+git clone git@github.com:cisco/mindmeld.git
+cd mindmeld/mindmeld-ui
+npm install
+npm started
+```
+
+For detailed installation instructions, see [Getting Started for UI](https://www.mindmeld.com/docs/mindmeld_ui/mindmeld_ui.html).
+
 ## Citation
 
 Please cite [this paper](https://www.aclweb.org/anthology/D18-2027) if you use MindMeld in your work:
