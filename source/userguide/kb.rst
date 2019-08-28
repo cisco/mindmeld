@@ -737,18 +737,16 @@ Here is an example of what the knowledge base can look like for the HR assistant
 
 The difference between the two cases is only in how MindMeld handles the search query. Internally, while the ranking algorithm remains the same for both cases, the features extracted for ranking is different and is optimized to handle long text passages rather than keyword phrases.
 
-To search the knowledge base for the answer to a policy question, we will use the :meth:`get()` API as before with one small modification. We specify that the query is against unstructured text by setting the ``query_type`` parameter to `text` (By default the ``query_type`` is set to `keyword`)
+To search the knowledge base for the answer to a policy question, we will use the :meth:`get()` API as before with one small modification. We specify that the query is against unstructured text by setting the ``query_type`` parameter to `text` (by default the ``query_type`` is set to `keyword`).
 
 .. code:: python
-
-  from mindmeld.components import QuestionAnswerer
-  qa = QuestionAnswerer(app_path='hr_assistant')
-  query = 'what is phase 2 of the review cycle'
-  qa.get(index='faq_data', query_type='text', question=query, answer=query, size=1)
+	from mindmeld.components import QuestionAnswerer
+	qa = QuestionAnswerer(app_path='hr_assistant')
+	query = 'what is phase 2 of the review cycle'
+	qa.get(index='faq_data', query_type='text', question=query, answer=query, size=1)
 
 .. code-block:: console
-
-  [
+	[
       {
           'question': 'What is the performance cycle?',
           'answer': 'The intent of the performance cycle is to identify the key parts of each employee’s job, identify what it looks like when that is done well (meets your expectations as a manager), and how both you as manager and your employee will know when that is achieved (measurements).Phase 1 - Planning:  Creating goals and expectations between the employee and manager for the current year. Phase 2 - Check-Ins:  Giving ongoing feedback throughout the year; identifying acomplishments, areas for improvement and adjusting the goals/expectations as necessary. Phase 3 - Review:  Reviewing the year at the end of the performance period.',
@@ -762,16 +760,16 @@ We can perform the same search using the :meth:`query()` API as well.
 
 .. code:: python
 
-  from mindmeld.components import QuestionAnswerer
-  qa = QuestionAnswerer(app_path='hr_assistant')
-  s = qa.build_search(index='faq_data')
+	from mindmeld.components import QuestionAnswerer
+	qa = QuestionAnswerer(app_path='hr_assistant')
+	s = qa.build_search(index='faq_data')
 
-  query = 'when do i get my w2 form'
-  s.query(query_type='text', question=query, answer=query).execute()
+	query = 'when do i get my w2 form'
+	s.query(query_type='text', question=query, answer=query).execute()
 
 .. code-block:: console
 
-  [
+	[
       {
           'question': 'When can I expect my annual form W2?',
           'answer': 'All employee W2s are mailed on or around January 31 for the prior calendar year.',
@@ -787,4 +785,4 @@ We can perform the same search using the :meth:`query()` API as well.
 
 .. note::
 
-   For knowledge bases indexed prior to MindMeld 4.2, you will have to delete and reindex all the data to use this feature.
+	For knowledge bases indexed prior to MindMeld 4.2, you will have to delete and reindex all the data to use this feature.
