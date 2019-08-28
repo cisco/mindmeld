@@ -701,3 +701,90 @@ In the example below, we search for restaurants whose names best match ``firetra
 .. note::
 
    We can set the ``size`` parameter of the :meth:`execute()` method to specify the maximum number of records.
+
+
+Dealing with unstructured text
+------------------------------
+The knowledge bases described in the previous sections are comprised of clearly defined data types whose pattern makes them easily searchable. We call them structured data.
+
+In this section we describe how to use the Question Answerer on knowledge bases with long, free-form text or unstructured data. For example, a company's Human Resource (HR) team could have documents about general policies of the company. We can use this data to develop a HR assistant that automatically answers any policy related questions.
+
+To use the question answerer on unstructured text, we would follow the same steps mentioned before to prepare, index and load the knowledge base.
+Here is an example of what the knowledge base can look like for the HR assistant usecase. It consists of frequently asked question and answer pairs.
+
+.. code:: python
+
+	from mindmeld.components import QuestionAnswerer
+	qa = QuestionAnswerer(app_path='hr_assistant')
+	qa.load_kb(app_namespace='hr_assistant', index_name='faq_data', data_file='hr_assistant/data/faq_data.json')
+  qa.get(index='faq_data')
+
+.. code-block:: console
+
+  [
+      {
+          "question": "What if I did not receive a form W2?",
+          "answer": "W2s are mailed to home addresses of employees as of a date in mid-January each year. If you did not receive a form W2, you may access it online (beginning with 2008 W2s), similar to employee Pay Statements. Search for and click on the W-2 task. Enter the year for the W-2 you are wanting to locate and the last 4 digits of your Social Security Number. You then will have access to the W-2 in a format that can be used for filing paper versions of federal and state tax returns.",
+          "id": "hrfaq6"
+      },
+      {
+          "question": "Are employers expected to hire the less qualified over the more qualified to meet affirmative action goals?',
+          "answer": "Employers are not expected to establish any hiring practices that conflict with the principles of sound personnel management. No one should be hired unless there is a basis for believing the individual is the best-qualified candidate. In fact, affirmative action calls for the hiring of qualified people.",
+          "id": "hrfaq12"
+      },
+      ...
+  ]
+
+The difference between the two cases is only in how MindMeld handles the search query. Internally, while the ranking algorithm remains the same for both cases, the features extracted for ranking is different and is optimized to handle long text passages rather than keyword phrases.
+
+To search the knowledge base for the answer to a policy question, we will use the :meth:`get()` API as before with one small modification. We specify that the query is against unstructured text by setting the ``query_type`` parameter to `text` (By default the ``query_type`` is set to `keyword`)
+
+.. code:: python
+
+  from mindmeld.components import QuestionAnswerer
+  qa = QuestionAnswerer(app_path='hr_assistant')
+  query = 'what is phase 2 of the review cycle'
+  qa.get(index='faq_data', query_type='text', question=query, answer=query, size=1)
+
+.. code-block:: console
+
+  [
+      {
+          'question': 'What is the performance cycle?',
+          'answer': 'The intent of the performance cycle is to identify the key parts of each employee’s job, identify what it looks like when that is done well (meets your expectations as a manager), and how both you as manager and your employee will know when that is achieved (measurements).Phase 1 - Planning:  Creating goals and expectations between the employee and manager for the current year. Phase 2 - Check-Ins:  Giving ongoing feedback throughout the year; identifying acomplishments, areas for improvement and adjusting the goals/expectations as necessary. Phase 3 - Review:  Reviewing the year at the end of the performance period.',
+          'id': 'hrfaq24'
+      }
+  ]
+
+In the above example, we try to find the best answer for the given user query by matching against both the `question` and `answer` field of the knowledge base. Using the `answer` field enables the question answerer to find matches even when the query does not have matches against the `question` field.
+
+We can perform the same search using the :meth:`query()` API as well.
+
+.. code:: python
+
+  from mindmeld.components import QuestionAnswerer
+  qa = QuestionAnswerer(app_path='hr_assistant')
+  s = qa.build_search(index='faq_data')
+
+  query = 'when do i get my w2 form'
+  s.query(query_type='text', question=query, answer=query).execute()
+
+.. code-block:: console
+
+  [
+      {
+          'question': 'When can I expect my annual form W2?',
+          'answer': 'All employee W2s are mailed on or around January 31 for the prior calendar year.',
+          'id': 'hrfaq5'
+      },
+      {
+          'question': 'What if I did not receive a form W2?',
+          'answer': 'W2s are mailed to home addresses of employees as of a date in mid-January each year. If you did not receive a form W2, you may access it online (beginning with 2008 W2s), similar to employee Pay Statements. Search for and click on the W-2 task. Enter the year for the W-2 you are wanting to locate and the last 4 digits of your Social Security Number. You then will have access to the W-2 in a format that can be used for filing paper versions of federal and state tax returns.',
+          'id': 'hrfaq6'
+      }
+      ...
+  ]
+
+.. note::
+
+   For knowledge bases indexed prior to MindMeld 4.2, you will have to delete and reindex all the data to use this feature.
