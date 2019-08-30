@@ -525,7 +525,7 @@ There are three ways to exit a Dialogue Flow:
 
 2. We can designate an exit state handler by setting ``exit_flow=True``. After the dialogue manager enters this state, subsequent turns will no longer be bound to the flow.
 
-3. We can force the current flow to exit and return to the main dialogue manager flow by invoking :meth:`Responder.exit_flow` method as shown in the code snippet below.
+3. We can force the current flow to exit and return to the main dialogue manager flow by invoking :meth:`Responder.reprocess` method as shown in the code snippet below.
 
 .. code:: python
   :emphasize-lines: 1
