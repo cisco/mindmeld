@@ -449,7 +449,7 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
 @module_cli.command('convert', context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option('--df', is_flag=True, help="Convert a Dialogflow project")
-@click.option('--rasa', is_flag=True, help="Convert a Rasa project")
+@click.option('--rs', is_flag=True, help="Convert a Rasa project")
 @click.argument('project_path', required=True, type=click.Path(exists=True),
                 help="Existing project path")
 @click.argument('mindmeld_path', required=False, help="MindMeld project path")
