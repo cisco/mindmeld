@@ -35,6 +35,7 @@ import requests
 from tqdm import tqdm
 from . import markup, path
 from .components import Conversation, QuestionAnswerer
+from .converter import RasaConverter, DialogFlowConverter
 from .exceptions import (KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError)
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
@@ -442,6 +443,30 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
         ctx.exit(1)
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
+        ctx.exit(1)
+
+
+@module_cli.command('convert', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+@click.option('--df', is_flag=True, help="Convert a Dialogflow project")
+@click.option('--rasa', is_flag=True, help="Convert a Rasa project")
+@click.argument('project_path', required=True, type=click.Path(exists=True),
+                help="Existing project path")
+@click.argument('mindmeld_path', required=False, help="MindMeld project path")
+def convert(ctx, df, rasa, project_path, mindmeld_path=None):
+    """Converts a Rasa or DialogueFlow project to a MindMeld project"""
+    try:
+        mindmeld_path = mindmeld_path or "./converted_app"
+        if df:
+            converter = DialogFlowConverter(project_path, mindmeld_path)
+            converter.convert_project()
+        elif rasa:
+            converter = RasaConverter(project_path, mindmeld_path)
+            converter.convert_project()
+        else:
+            logger.warning("Please specify the project's platform (Rasa/Dialogflow).")
+    except IOError as e:
+        logger.error(e)
         ctx.exit(1)
 
 
