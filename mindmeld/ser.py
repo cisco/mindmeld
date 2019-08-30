@@ -72,17 +72,18 @@ def get_candidates(query, entity_types=None, language=None, time_zone=None, time
     return []
 
 
-def get_candidates_for_text(text, entity_types=None):
+def get_candidates_for_text(text, entity_types=None, language='EN'):
     """Identifies candidate system entities in the given text.
 
     Args:
         text (str): The text to examine
         entity_types (list of str): The entity types to consider
+        language (str): Language code
     Returns:
         list of dict: The system entities found in the text
     """
     dims = _dimensions_from_entity_types(entity_types)
-    response, response_code = parse_numerics(text, dimensions=dims)
+    response, response_code = parse_numerics(text, dimensions=dims, language=language)
     if response_code == SUCCESSFUL_HTTP_CODE:
         items = []
         for item in response:

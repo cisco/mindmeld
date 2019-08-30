@@ -78,7 +78,8 @@ class QueryFactory:
         query = Query(raw_text, processed_text, normalized_tokens, char_maps,
                       language=language, time_zone=time_zone, timestamp=timestamp,
                       stemmed_tokens=stemmed_tokens)
-        query.system_entity_candidates = sys_ent_rec.get_candidates(query)
+        query.system_entity_candidates = sys_ent_rec.get_candidates(
+            query, language=language)
         return query
 
     def normalize(self, text):
