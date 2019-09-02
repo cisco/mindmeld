@@ -1,6 +1,38 @@
 Recent Changes
 ==============
 
+
+MindMeld 4.2
+-------------
+
+MindMeld 4.2 includes several new innovative features:
+
+**1. MindMeld UI**
+
+MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application. This web UI also
+serves as a debugging tool to step through the various stages of query processing by the MindMeld pipeline. See
+:ref:`MindMeld UI <mindmeled_ui> for more details.
+
+**2. Question-answering on unstructed text**
+
+MindeMeld 4.2 includes a built-in Question-Answering (QA) component using Elasticsearch. See
+:ref:`MindMeld QA <mindmeled_qa> for more details.
+
+**3. MindMeld converter for Rasa and Dialogflow**
+MindMeld 4.2 includes built-in converters for Rasa and Dialogflow projects into MindMeld projects. See
+[path] for more details.
+
+**4. WebexBotServer**
+MindMeld 4.2 includes built-in support for Webex Team integration. See
+[path] for more details.
+
+**5. Dialogflow.reprocess**
+MindMeld 4.2 includes an improvement to DialogueFlow (MindMeld feature) where the user can exist the current flow and
+return to the main flow logic.
+
+Other minor improvements include an update to the Docker image for MindMeld application and reducing the Elasticsearch requirement
+for running a MindMeld application.
+
 MindMeld 4.1
 -------------
 
