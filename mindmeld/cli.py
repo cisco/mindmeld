@@ -35,7 +35,7 @@ import requests
 from tqdm import tqdm
 from . import markup, path
 from .components import Conversation, QuestionAnswerer
-from .converter import RasaConverter, DialogFlowConverter
+from .converter import RasaConverter, DialogflowConverter
 from .exceptions import (KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError)
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
@@ -455,15 +455,22 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
 def convert(ctx, df, rs, project_path, mindmeld_path=None):
     """Converts a Rasa or DialogueFlow project to a MindMeld project"""
     try:
-        mindmeld_path = mindmeld_path or "./converted_app"
+        project_path = os.path.abspath(project_path)
+        mindmeld_path = os.path.abspath(mindmeld_path or "converted_app")
+        converter_cls = {'Rasa': RasaConverter, 'Dialogflow': DialogflowConverter}
         if df:
-            converter = DialogFlowConverter(project_path, mindmeld_path)
-            converter.convert_project()
+            framework = 'Dialogflow'
         elif rs:
-            converter = RasaConverter(project_path, mindmeld_path)
-            converter.convert_project()
+            framework = 'Rasa'
         else:
-            logger.warning("Please specify the project's platform (Rasa/Dialogflow).")
+            logger.warning("Please specify the project's platform Rasa/Dialogflow.")
+            ctx.exit(1)
+
+        converter_cls = converter_cls[framework]
+        converter = converter_cls(project_path, mindmeld_path)
+        converter.convert_project()
+        logger.info(f"Successfully converted {framework} project at {project_path} to"
+                    f" MindMeld project at {mindmeld_path}.")
     except IOError as e:
         logger.error(e)
         ctx.exit(1)
