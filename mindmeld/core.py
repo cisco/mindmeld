@@ -152,7 +152,11 @@ class Query:
             at the application level and is generally used for special characters
         normalized_tokens (tuple of str): a list of normalized tokens
         system_entity_candidates (tuple): A list of system entities extracted from the text
-        language (str): Language of the query specified using a 639-2 code
+        locale (str, optional): The locale representing the ISO 639-1 language code and \
+            ISO3166 alpha 2 country code separated by an underscore character.
+        language (str, optional): The language code representing ISO 639-1 language codes. If both
+            locale and language are provided, the locale is used. If neither are provided,
+            the EN language code is used.
         time_zone (str): The IANA id for the time zone in which the query originated
             such as 'America/Los_Angeles'
         timestamp (long, optional): A unix timestamp used as the reference time
@@ -163,8 +167,8 @@ class Query:
 
     # TODO: look into using __slots__
 
-    def __init__(self, raw_text, processed_text, normalized_tokens, char_maps,
-                 language=None, time_zone=None, timestamp=None, stemmed_tokens=None):
+    def __init__(self, raw_text, processed_text, normalized_tokens, char_maps, locale='en_US',
+                 language='en', time_zone=None, timestamp=None, stemmed_tokens=None):
         """Creates a query object
 
         Args:
@@ -180,6 +184,7 @@ class Query:
         self._texts = (raw_text, processed_text, norm_text)
         self._char_maps = char_maps
         self.system_entity_candidates = ()
+        self._locale = locale
         self._language = language
         self._time_zone = time_zone
         self._timestamp = timestamp
@@ -214,6 +219,12 @@ class Query:
     def language(self):
         """Language of the query specified using a 639-2 code."""
         return self._language
+
+    @property
+    def locale(self):
+        """The locale representing the ISO 639-1/2 language code and
+            ISO3166 alpha 2 country code separated by an underscore character."""
+        return self._locale
 
     @property
     def time_zone(self):

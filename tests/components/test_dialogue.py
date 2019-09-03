@@ -15,6 +15,7 @@ import pytest
 from mindmeld.components import Conversation, DialogueManager, DialogueResponder
 from mindmeld.components.request import Request, Params
 from mindmeld.components.dialogue import DialogueStateRule
+from mindmeld.system_entity_recognizer import SystemEntityRecognizer
 
 
 def create_request(domain, intent, entities=None):
@@ -247,3 +248,25 @@ def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
                           target_dialogue_state='greeting')
     convo.say('close door')
     assert convo.params == Params()
+
+
+@pytest.mark.parametrize(
+    "language, locale, expected_ser_call",
+    [
+        ('en', 'en_GB', {'lang': 'EN', 'latent': True, 'locale': 'en_GB'}),
+        ('es', 'en_US', {'latent': True, 'locale': 'en_US'}),
+        (None, None, {'latent': True, 'locale': 'en_US', 'lang': 'EN'}),
+        ('INVALID_LANG_CODE', 'en_GB', {'latent': True, 'locale': 'en_GB'}),
+        ('es', 'INVALID_LOCALE_CODE', {'lang': 'ES', 'latent': True}),
+        ('eng', 'en_GB', {'lang': 'EN', 'latent': True, 'locale': 'en_GB'}),
+    ]
+)
+def test_convo_language_and_locales(mocker, kwik_e_mart_nlp,
+                                    kwik_e_mart_app_path, language, locale, expected_ser_call):
+    """Tests that the params are cleared in one trip from app to mm."""
+    convo = Conversation(nlp=kwik_e_mart_nlp, app_path=kwik_e_mart_app_path)
+    convo.params = Params(language=language, locale=locale)
+    mock1 = mocker.patch.object(SystemEntityRecognizer, 'get_response', return_value=({}, 400))
+    convo.say('set alarm for 4pm tomorrow')
+    mock1.call_args_list[0][0][0].pop('text')
+    assert mock1.call_args_list[0][0][0] == expected_ser_call
