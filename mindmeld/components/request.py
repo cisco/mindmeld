@@ -13,7 +13,7 @@
 import logging
 import attr
 import immutables
-import iso639
+import pycountry
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
 
@@ -22,26 +22,74 @@ logger = logging.getLogger(__name__)
 
 def _validate_language_code(param=None):
     """Validates language code parameters
-    
+
     Args:
-        param (str, optional): The time zone parameter
+        param (str, optional): The language code parameter
 
     Returns:
-        str: The passed in time zone
+        str: A validated language code or None if unvalidated
     """
     if not param:
         return None
     if not isinstance(param, str):
-        logger.warning("Invalid %r param: %s is not of type %s.", 'language_code', param, str)
+        logger.error("Invalid %r param: %s is not of type %s.", 'language', param, str)
         return None
-    try:
-        # Make the string uppercase by default since that is the character format accepted by
-        # the system entity resolver
-        iso639.to_name(param.upper())
-    except iso639.NonExistentLanguageError:
-        logger.warning("Invalid %r param: %s is not of type %s.", 'language_code', param, str)
+
+    # The pycountry APIs need the param to be in lowercase for processing
+    param = param.lower()
+
+    if len(param) != 2 and len(param) != 3:
+        logger.error("Invalid %r param: %s is not a valid ISO 639-1 or ISO 639-2 language code.",
+                     'locale', param)
         return None
-    return param.upper()
+
+    if len(param) == 2 and not pycountry.languages.get(alpha_2=param):
+        logger.error("Invalid %r param: %s is not a valid ISO 639-1 language code. "
+                     "See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.",
+                     'locale', param)
+        return None
+
+    if len(param) == 3 and not pycountry.languages.get(alpha_3=param):
+        logger.error("Invalid %r param: %s is not a valid ISO 639-2 language code. "
+                     "See https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes for valid codes.",
+                     'locale', param)
+        return None
+
+    return param
+
+
+def _validate_locale_code(param=None):
+    """Validates the locale code parameters
+
+    Args:
+        param (str, optional): The locale code parameter
+
+    Returns:
+        str: A validated locale code or None if unvalidated
+    """
+    if not param:
+        return None
+    if not isinstance(param, str):
+        logger.error("Invalid %r param: %s is not of type %s.", 'locale', param, str)
+        return None
+
+    language_code = param.split('_')[0].lower()
+    if not _validate_language_code(language_code):
+        logger.error("Invalid %r param: %s is not a valid ISO 639-1 language code. "
+                     "See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.",
+                     'locale', language_code)
+        return None
+
+    # pycountry requires the country code to be upper-cased
+    country_code = param.split('_')[1].upper()
+    if not pycountry.countries.get(alpha_2=country_code):
+        logger.error("Invalid %r param: %s is not a valid ISO3166 alpha 2 country code. "
+                     "See https://www.iso.org/obp/ui/#search for valid codes.",
+                     'locale', country_code)
+        return None
+
+    # return the validated locale
+    return language_code + '_' + country_code
 
 
 def _validate_time_zone(param=None):
@@ -79,7 +127,8 @@ PARAM_VALIDATORS = {
     'allowed_intents': _validate_generic('allowed_intents', tuple),
     'target_dialogue_state': _validate_generic('target_dialogue_state', str),
     'time_zone': _validate_time_zone,
-    'language_code': _validate_language_code,
+    'language': _validate_language_code,
+    'locale': _validate_locale_code,
     'timestamp': _validate_generic('timestamp', int),
     'dynamic_resource': _validate_generic('dynamic_resource', immutables.Map)
 }
@@ -98,7 +147,11 @@ class Params:
         time_zone (str):  The name of an IANA time zone, such as 'America/Los_Angeles', or
             'Asia/Kolkata'.
         timestamp (long): A unix time stamp for the request accurate to the nearest second.
-        language_code (str): The language code representing ISO 639-2 language codes
+        locale (str, optional): The locale representing the ISO 639-1/2 language code and ISO3166
+            alpha 2 country code separated by an underscore character.
+        language (str, optional): The language code representing ISO 639-1/2
+            language codes. If both locale and language are provided, the locale is used.
+            If neither are provided, the EN language code is used.
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
     """
@@ -106,7 +159,8 @@ class Params:
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
-    language_code = attr.ib(default='EN')
+    language = attr.ib(default='en')
+    locale = attr.ib(default='en_US')
     dynamic_resource = attr.ib(default=attr.Factory(dict))
 
     def validate_param(self, name):
@@ -154,7 +208,7 @@ class Params:
             dict: Mapping from parameter name to bool depending on validation.
         """
         return {param: self.validate_param(param)
-                for param in ('time_zone', 'timestamp', 'dynamic_resource', 'language_code')}
+                for param in ('time_zone', 'timestamp', 'dynamic_resource', 'language', 'locale')}
 
 
 @attr.s(frozen=True, kw_only=True)
@@ -169,7 +223,9 @@ class FrozenParams(Params):
             the next turn.
         time_zone (str):  The name of an IANA time zone, such as 'America/Los_Angeles', or
             'Asia/Kolkata'.
-        language_code (str): The language code representing ISO 639-2 language codes
+        language (str): The language code representing ISO 639-1/2 language codes
+        locale (str, optional): The locale representing the ISO 639-1/2 language code and
+            ISO3166 alpha 2 country code separated by an underscore character.
         timestamp (long): A unix time stamp for the request accurate to the nearest second.
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
@@ -179,7 +235,8 @@ class FrozenParams(Params):
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
-    language_code = attr.ib(default='en')
+    language = attr.ib(default='en')
+    locale = attr.ib(default='en_US')
     dynamic_resource = attr.ib(default=immutables.Map(),
                                converter=immutables.Map)
 

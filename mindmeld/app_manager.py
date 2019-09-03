@@ -145,7 +145,8 @@ class ApplicationManager:
             verbose (bool, optional): Flag to return confidence scores for domains and intents
 
         Returns:
-            (dict): A deserialized Responder object
+            TODO: Convert to dict
+            (Responder): A Responder object
 
         .. _IANA tz database:
            https://www.iana.org/time-zones
@@ -170,9 +171,9 @@ class ApplicationManager:
                                          context=context, history=history,
                                          frame=frame, params=params)
 
-        dm_response = self.dialogue_manager.apply_handler(request, response, **dm_params)
-        response = self._post_dm(request, dm_response)
-        return response
+        dm_responder = self.dialogue_manager.apply_handler(request, response, **dm_params)
+        modified_dm_responder = self._post_dm(request, dm_responder)
+        return modified_dm_responder
 
     async def _parse_async(self, text, params=None, context=None, frame=None,
                            history=None, verbose=False):
@@ -193,7 +194,8 @@ class ApplicationManager:
             verbose (bool, optional): Flag to return confidence scores for domains and intents
 
         Returns:
-            (dict): A deserialized Responder object
+            @TODO: Convert to dict
+            (Responder): A Responder object
 
         .. _IANA tz database:
            https://www.iana.org/time-zones
@@ -216,10 +218,9 @@ class ApplicationManager:
                                          context=context, history=history,
                                          frame=frame, params=params)
 
-        dm_response = await self.dialogue_manager.apply_handler(request, response, **dm_params)
-        response = self._post_dm(request, dm_response)
-
-        return response
+        dm_responder = await self.dialogue_manager.apply_handler(request, response, **dm_params)
+        modified_dm_responder = self._post_dm(request, dm_responder)
+        return modified_dm_responder
 
     def _pre_nlp(self, params, verbose=False):
         # validate params
