@@ -20,6 +20,7 @@ import pycountry
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
 from .system_entity_recognizer import SystemEntityRecognizer
+from .components.request import _validate_language_code, _validate_locale_code
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +107,6 @@ def get_candidates_for_text(text, entity_types=None, language='en'):
 def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
                    time_zone=None, timestamp=None):
     """Calls System Entity Recognizer service API to extract numerical entities from a sentence.
-
     Args:
         sentence (str): A raw sentence.
         dimensions (None or list of str): The list of types (e.g. volume, \
@@ -120,14 +120,11 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
         timestamp (long, optional): A unix millisecond timestamp used as the reference time. \
             If not specified, the current system time is used. If `time_zone` \
             is not also specified, this parameter is ignored.
-
     Returns:
         (tuple): A tuple containing:
-
             * response (list, dict): Response from the System Entity Recognizer service that
             consists of a list of dicts, each corresponding to a single prediction or just a
             dict, corresponding to a single prediction.
-
             * response_code (int): http status code.
     """
     if sentence == '':
@@ -139,50 +136,37 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
         'latent': True,
     }
 
-    if not language:
-        language = 'EN'
+    language = _validate_language_code(language)
+    locale = _validate_locale_code(locale)
 
-    # uppercase the language code if it is not
-    language = language.upper()
-
-    if len(language) < 2 or len(language) > 3:
-        logger.error('System entity resolver only supports ISO 639-1 language codes')
-        language = None
-    elif len(language) == 3:
-        # If a ISO 639-2 code is provided, we attempt to convert it to
-        # ISO 639-1 since the dependent system entity resolver requires this
+    # If a ISO 639-2 code is provided, we attempt to convert it to
+    # ISO 639-1 since the dependent system entity resolver requires this
+    if language and len(language) == 3:
         iso639_2_code = pycountry.languages.get(alpha_3=language.lower())
         try:
             language = getattr(iso639_2_code, 'alpha_2').upper()
         except AttributeError:
             language = None
 
-    # Set the default locale to be en_us if the locale is not passed in and the langauge code
-    # is english
-    if not locale and language == 'EN':
-        locale = 'en_US'
-
-    if locale:
+    if locale and language:
         language_code_of_locale = locale.split('_')[0]
-        if language != language_code_of_locale.upper():
+        if language_code_of_locale.lower() != language.lower():
             logger.error('Language code %s and Locale code do not match %s, '
                          'using only the locale code for processing', language, locale)
             # The system entity recognizer prefers the locale code over the language code,
             # so we bias towards sending just the locale code when the codes dont match.
             language = None
 
-    if not locale and not language:
-        logger.error('System entity resolver only supports ISO 639-1 language codes '
-                     'and locales representing the ISO 639-1 language code and '
-                     'ISO3166 alpha 2 country code separated by an underscore '
-                     'character')
-        return {}, SUCCESSFUL_HTTP_CODE
+    # If the locale is invalid, we use the default
+    if not language and not locale:
+        language = 'EN'
+        locale = 'en_US'
 
     if locale:
         data['locale'] = locale
 
     if language:
-        data['lang'] = language
+        data['lang'] = language.upper()
 
     if dimensions is not None:
         data['dims'] = json.dumps(dimensions)

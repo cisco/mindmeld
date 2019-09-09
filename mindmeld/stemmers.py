@@ -1,17 +1,12 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 import nltk
 
 
 class Stemmer(ABC):
 
-    def __init__(self):
-        self._stemmer = None
-
-    def set_stemmer(self):
-        """
-        This function sets the underlying stemmer. It is lazily initialized
-        """
-        raise NotImplemented
+    @abstractproperty
+    def _stemmer(self):
+        raise NotImplementedError
 
     @abstractmethod
     def stem_word(self, word):
@@ -24,19 +19,19 @@ class Stemmer(ABC):
         Returns:
             list(str): A list of the stemmed version of a word.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class EnglishNLTKStemmer(Stemmer):
 
-    def set_stemmer(self):
-        self._stemmer = nltk.stem.PorterStemmer()
+    @property
+    def _stemmer(self):
+        # lazy init the stemmer
+        if not hasattr(self, '__stemmer'):
+            setattr(self, '__stemmer', nltk.stem.PorterStemmer())
+        return getattr(self, '__stemmer')
 
     def stem_word(self, word):
-        # lazy init the stemmer
-        if not self._stemmer:
-            self.set_stemmer()
-
         stem = word.lower()
 
         if self._stemmer.mode == self._stemmer.NLTK_EXTENSIONS and word in self._stemmer.pool:
@@ -62,14 +57,14 @@ class EnglishNLTKStemmer(Stemmer):
 
 class SpanishNLTKStemmer(Stemmer):
 
-    def set_stemmer(self):
-        self._stemmer = nltk.stem.SnowballStemmer('spanish')
+    @property
+    def _stemmer(self):
+        # lazy init the stemmer
+        if not hasattr(self, '__stemmer'):
+            setattr(self, '__stemmer', nltk.stem.SnowballStemmer('spanish'))
+        return getattr(self, '__stemmer')
 
     def stem_word(self, word):
-        # lazy init the stemmer
-        if not self._stemmer:
-            self.set_stemmer()
-
         stem = word.lower()
         stem = self._stemmer.stem(stem)
 

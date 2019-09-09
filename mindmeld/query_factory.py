@@ -16,8 +16,8 @@
 from __future__ import absolute_import, unicode_literals
 
 from . import ser as sys_ent_rec
-from .stemmers import EnglishNLTKStemmer
 from .core import Query, TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED
+from .stemmers import EnglishNLTKStemmer
 from .tokenizer import Tokenizer
 
 
@@ -28,11 +28,12 @@ class QueryFactory:
         preprocessor (Preprocessor): the object responsible for processing raw text
         tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed
             text
+        stemmer (Stemmer): the object responsible for stemming the text
     """
     def __init__(self, tokenizer, preprocessor=None, stemmer=None):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
-        self.stemmer = stemmer or EnglishNLTKStemmer()
+        self.stemmer = stemmer
 
     def create_query(self, text, time_zone=None, timestamp=None, locale='en_US', language='en'):
         """Creates a query with the given text.
@@ -119,4 +120,5 @@ class QueryFactory:
         """
         del app_path
         tokenizer = tokenizer or Tokenizer.create_tokenizer()
+        stemmer = stemmer or EnglishNLTKStemmer()
         return QueryFactory(tokenizer, preprocessor, stemmer)

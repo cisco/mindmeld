@@ -155,7 +155,7 @@ class Query:
         locale (str, optional): The locale representing the ISO 639-1 language code and \
             ISO3166 alpha 2 country code separated by an underscore character.
         language (str, optional): The language code representing ISO 639-1 language codes. If both
-            locale and language are provided, the locale is used. If both are not provided,
+            locale and language are provided, the locale is used. If neither are provided,
             the EN language code is used.
         time_zone (str): The IANA id for the time zone in which the query originated
             such as 'America/Los_Angeles'

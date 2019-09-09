@@ -229,7 +229,7 @@ class Processor(ABC):
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
             language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If both are not
+                locale and language are provided, the locale is used. If neither are
                 provided, the EN language code is used.
             time_zone (str, optional): The name of an IANA time zone, such as \
                 'America/Los_Angeles', or 'Asia/Kolkata' \
@@ -310,7 +310,7 @@ class Processor(ABC):
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
             language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If both are not
+                locale and language are provided, the locale is used. If neither are
                 provided, the EN language code is used.
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
@@ -598,7 +598,7 @@ class NaturalLanguageProcessor(Processor):
             locale (str, optional): The locale representing the ISO 639-1 language code and
                 ISO3166 alpha 2 country code separated by an underscore character.
             language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If both are not
+                locale and language are provided, the locale is used. If neither are
                 provided, the EN language code is used.
             time_zone (str, optional): The name of an IANA time zone, such as \
                 'America/Los_Angeles', or 'Asia/Kolkata' \
@@ -713,7 +713,7 @@ class DomainProcessor(Processor):
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
             language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If both are not
+                locale and language are provided, the locale is used. If neither are
                 provided, the EN language code is used.
             time_zone (str, optional): The name of an IANA time zone, such as \
                 'America/Los_Angeles', or 'Asia/Kolkata' \
@@ -915,20 +915,17 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '%s.%s' intent",
                             self.domain, self.name)
 
-    def process(self, query_text, allowed_intents=None, locale='en_US', language='en',
+    def process(self, query_text, locale='en_US', language='en',  # pylint: disable=arguments-differ
                 time_zone=None, timestamp=None, dynamic_resource=None, verbose=False):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent.
-
         Args:
             query_text (str, list, tuple): The raw user text input, or a list of the n-best query
                 transcripts from ASR.
-            allowed_intents (list, optional): A list of allowed intents to use for \
-                the NLP processing.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
             language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If both are not
+                locale and language are provided, the locale is used. If neither are
                 provided, the EN language code is used.
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
@@ -936,14 +933,10 @@ class IntentProcessor(Processor):
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
             verbose (bool, optional): If True, returns class as well as predict probabilities.
-
         Returns:
             (ProcessedQuery): A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text.
         """
-        # Deprecated parameter
-        del allowed_intents
-
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp,
                                   language=language, locale=locale)
         processed_query = self.process_query(query, dynamic_resource=dynamic_resource)

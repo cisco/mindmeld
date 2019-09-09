@@ -22,18 +22,16 @@ logger = logging.getLogger(__name__)
 
 def _validate_language_code(param=None):
     """Validates language code parameters
-
     Args:
         param (str, optional): The language code parameter
-
     Returns:
         str: A validated language code or None if unvalidated
     """
     if not param:
-        return 'en'
+        return None
     if not isinstance(param, str):
         logger.error("Invalid %r param: %s is not of type %s.", 'language', param, str)
-        return 'en'
+        return None
 
     # The pycountry APIs need the param to be in lowercase for processing
     param = param.lower()
@@ -41,29 +39,27 @@ def _validate_language_code(param=None):
     if len(param) != 2 and len(param) != 3:
         logger.error("Invalid %r param: %s is not a valid ISO 639-1 or ISO 639-2 language code.",
                      'locale', param)
-        return 'en'
+        return None
 
     if len(param) == 2 and not pycountry.languages.get(alpha_2=param):
         logger.error("Invalid %r param: %s is not a valid ISO 639-1 language code. "
                      "See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.",
                      'locale', param)
-        return 'en'
+        return None
 
     if len(param) == 3 and not pycountry.languages.get(alpha_3=param):
         logger.error("Invalid %r param: %s is not a valid ISO 639-2 language code. "
                      "See https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes for valid codes.",
                      'locale', param)
-        return 'en'
+        return None
 
     return param
 
 
 def _validate_locale_code(param=None):
     """Validates the locale code parameters
-
     Args:
         param (str, optional): The locale code parameter
-
     Returns:
         str: A validated locale code or None if unvalidated
     """
@@ -151,7 +147,7 @@ class Params:
             alpha 2 country code separated by an underscore character.
         language (str, optional): The language code representing ISO 639-1/2
             language codes. If both locale and language are provided, the locale is used.
-            If both are not provided, the EN language code is used.
+            If neither are provided, the EN language code is used.
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
     """
