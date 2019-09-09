@@ -454,23 +454,26 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
 @click.argument('mindmeld_path', required=False)
 def convert(ctx, df, rs, project_path, mindmeld_path=None):
     """Converts a Rasa or DialogueFlow project to a MindMeld project"""
+    if df:
+        framework = 'Dialogflow'
+    elif rs:
+        framework = 'Rasa'
+    else:
+        logger.warning("Please specify the project's platform Rasa/Dialogflow.")
+        ctx.exit(1)
+
     try:
         project_path = os.path.abspath(project_path)
         mindmeld_path = os.path.abspath(mindmeld_path or "converted_app")
         converter_cls = {'Rasa': RasaConverter, 'Dialogflow': DialogflowConverter}
-        if df:
-            framework = 'Dialogflow'
-        elif rs:
-            framework = 'Rasa'
-        else:
-            logger.warning("Please specify the project's platform Rasa/Dialogflow.")
-            ctx.exit(1)
-
         converter_cls = converter_cls[framework]
         converter = converter_cls(project_path, mindmeld_path)
         converter.convert_project()
-        logger.info(f"Successfully converted {framework} project at {project_path} to"
-                    f" MindMeld project at {mindmeld_path}.")
+        msg = "Successfully converted {framework} project at {project_path} to"\
+              " MindMeld project at {mindmeld_path}."
+        msg = msg.format(framework=framework, project_path=project_path,
+                         mindmeld_path=mindmeld_path)
+        logger.info(msg)
     except IOError as e:
         logger.error(e)
         ctx.exit(1)
