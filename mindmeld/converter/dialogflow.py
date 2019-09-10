@@ -93,8 +93,9 @@ class DialogflowConverter(Converter):
             self.entities_list = set()
             self.intents_list = set()
         else:
-            raise FileNotFoundError(f"`{dialogflow_project_directory}` does not exist. "
-                                    f"Please verify.")
+            msg = "`{dialogflow_project_directory}` does not exist. Please verify."
+            msg = msg.format(dialogflow_project_directory=dialogflow_project_directory)
+            raise FileNotFoundError(msg)
 
     def create_mindmeld_directory(self):
         self.create_directory(self.mindmeld_project_directory)
