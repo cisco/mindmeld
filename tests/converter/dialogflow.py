@@ -4,11 +4,11 @@ project into a mindmeld project"""
 import pytest
 
 from mindmeld import NaturalLanguageProcessor
-from mindmeld.converter.dialogflow import DialogFlowConverter
+from mindmeld.converter.dialogflow import DialogflowConverter
 
 
 def test_dialogflow_converter(dialogflow_project_path, mindmeld_project_path2):
-    converter = DialogFlowConverter(dialogflow_project_path, mindmeld_project_path2)
+    converter = DialogflowConverter(dialogflow_project_path, mindmeld_project_path2)
     converter.convert_project()
 
 

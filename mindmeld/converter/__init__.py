@@ -1,4 +1,4 @@
 from .rasa import RasaConverter
-from .dialogflow import DialogFlowConverter
+from .dialogflow import DialogflowConverter
 
-__all__ = ['RasaConverter', 'DialogFlowConverter']
+__all__ = ['RasaConverter', 'DialogflowConverter']

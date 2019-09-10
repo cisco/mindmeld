@@ -164,7 +164,7 @@ def test_unstructured_search(food_ordering_answerer):
     res = s.query(query_type='text', description='maybe a spicy roll with some salmon').filter(
                                                  query_type='text', name='spicy roll').execute()
     assert len(res) > 0
-    
+
 
 def test_advanced_search_validation(answerer):
     """Tests validation in advanced search."""
