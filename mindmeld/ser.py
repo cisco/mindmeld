@@ -15,10 +15,12 @@
 import logging
 import json
 from enum import Enum
+import pycountry
 
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
 from .system_entity_recognizer import SystemEntityRecognizer
+from .components.request import _validate_language_code, _validate_locale_code
 
 logger = logging.getLogger(__name__)
 
@@ -40,14 +42,16 @@ class DucklingDimension(Enum):
     TIME = 'time'
 
 
-def get_candidates(query, entity_types=None, language=None, time_zone=None, timestamp=None):
+def get_candidates(query, entity_types=None, locale=None,
+                   language=None, time_zone=None, timestamp=None):
     """Identifies candidate system entities in the given query.
 
     Args:
         query (Query): The query to examine
         entity_types (list of str): The entity types to consider
-        language (str, optional): Language as specified using a 639-2 code.
-            If omitted, English is assumed.
+        locale (str, optional): The locale representing the ISO 639-1 language code and \
+            ISO3166 alpha 2 country code separated by an underscore character.
+        language (str, optional): Language as specified using a 639-1/2 code.
         time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
             If not specified, the system time zone is used.
         timestamp (long, optional): A unix timestamp used as the reference time.
@@ -61,8 +65,9 @@ def get_candidates(query, entity_types=None, language=None, time_zone=None, time
     language = language or query.language
     time_zone = time_zone or query.time_zone
     timestamp = timestamp or query.timestamp
-    response, response_code = parse_numerics(query.text, dimensions=dims, language=language,
-                                             time_zone=time_zone, timestamp=timestamp)
+    response, response_code = parse_numerics(
+        query.text, dimensions=dims, locale=locale, language=language,
+        time_zone=time_zone, timestamp=timestamp)
     if response_code == SUCCESSFUL_HTTP_CODE:
         return [e for e in [_duckling_item_to_query_entity(query, item) for item in response]
                 if entity_types is None or e.entity.type in entity_types]
@@ -72,17 +77,18 @@ def get_candidates(query, entity_types=None, language=None, time_zone=None, time
     return []
 
 
-def get_candidates_for_text(text, entity_types=None):
+def get_candidates_for_text(text, entity_types=None, language='en'):
     """Identifies candidate system entities in the given text.
 
     Args:
         text (str): The text to examine
         entity_types (list of str): The entity types to consider
+        language (str): Language code
     Returns:
         list of dict: The system entities found in the text
     """
     dims = _dimensions_from_entity_types(entity_types)
-    response, response_code = parse_numerics(text, dimensions=dims)
+    response, response_code = parse_numerics(text, dimensions=dims, language=language)
     if response_code == SUCCESSFUL_HTTP_CODE:
         items = []
         for item in response:
@@ -97,7 +103,7 @@ def get_candidates_for_text(text, entity_types=None):
         return []
 
 
-def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
+def parse_numerics(sentence, dimensions=None, language=None, locale=None,
                    time_zone=None, timestamp=None):
     """Calls System Entity Recognizer service API to extract numerical entities from a sentence.
 
@@ -105,11 +111,11 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
         sentence (str): A raw sentence.
         dimensions (None or list of str): The list of types (e.g. volume, \
             temperature) to restrict the output to. If None, include all types
-        language (str, optional): Language of the sentence specified using a 639-1 code. \
-            If omitted, English is assumed.
-        locale (str, optional): The english locale being used, could be en_AU, en_BE, en_BZ, \
-            en_CA, en_CN, en_GB, en_HK, en_IE, en_IN, en_JM, en_MO, en_NZ, en_PH, en_TT, en_TW, \
-            en_US, en_ZA.
+        language (str, optional): Language of the sentence specified using a 639-1/2 code.
+            If both locale and language are provided, the locale is used. If neither are
+            provided, the EN language code is used.
+        locale (str, optional): The locale representing the ISO 639-1 language code and \
+            ISO3166 alpha 2 country code separated by an underscore character.
         time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'. \
             If not specified, the system time zone is used.
         timestamp (long, optional): A unix millisecond timestamp used as the reference time. \
@@ -126,28 +132,52 @@ def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
             * response_code (int): http status code.
     """
     if sentence == '':
+        logger.error('Empty query passed to the system entity resolver')
         return {}, SUCCESSFUL_HTTP_CODE
 
     data = {
         'text': sentence,
-        'lang': language,
         'latent': True,
     }
 
-    valid_locales = ["en_AU", "en_BE", "en_BZ", "en_CA", "en_CN", "en_GB", "en_HK", "en_IE",
-                     "en_IN", "en_JM", "en_MO", "en_NZ", "en_PH", "en_TT", "en_TW", "en_US",
-                     "en_ZA"]
+    language = _validate_language_code(language)
+    locale = _validate_locale_code(locale)
+
+    # If a ISO 639-2 code is provided, we attempt to convert it to
+    # ISO 639-1 since the dependent system entity resolver requires this
+    if language and len(language) == 3:
+        iso639_2_code = pycountry.languages.get(alpha_3=language.lower())
+        try:
+            language = getattr(iso639_2_code, 'alpha_2').upper()
+        except AttributeError:
+            language = None
+
+    if locale and language:
+        language_code_of_locale = locale.split('_')[0]
+        if language_code_of_locale.lower() != language.lower():
+            logger.error('Language code %s and Locale code do not match %s, '
+                         'using only the locale code for processing', language, locale)
+            # The system entity recognizer prefers the locale code over the language code,
+            # so we bias towards sending just the locale code when the codes dont match.
+            language = None
+
+    # If the locale is invalid, we use the default
+    if not language and not locale:
+        language = 'EN'
+        locale = 'en_US'
+
     if locale:
-        if locale in valid_locales:
-            data['locale'] = locale
-        else:
-            logger.error(
-                'Invalid locale provided, it should be from this set: %s. Ignoring argument.',
-                valid_locales)
+        data['locale'] = locale
+
+    if language:
+        data['lang'] = language.upper()
+
     if dimensions is not None:
         data['dims'] = json.dumps(dimensions)
+
     if time_zone:
         data['tz'] = time_zone
+
     if timestamp:
         if len(str(timestamp)) != 13:
             logger.debug("Warning: Possible non-millisecond unix timestamp passed in.")
