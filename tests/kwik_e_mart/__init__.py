@@ -99,7 +99,7 @@ def send_store_hours(request, responder):
 
 @send_store_hours.handle(default=True)
 def default_handler(request, responder):
-    responder.frame['count'] += 1
+    responder.frame['count'] = responder.frame.get('count', 0) + 1
     if responder.frame['count'] <= 3:
         responder.reply('Sorry, I did not get you. Which store would you like to know about?')
         responder.listen()

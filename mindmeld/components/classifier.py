@@ -331,7 +331,8 @@ class Classifier(ABC):
             logger.error('You must fit or load the model to initialize resources')
             return None
         if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query, time_zone, timestamp)
+            query = self._resource_loader.query_factory.create_query(
+                query, time_zone=time_zone, timestamp=timestamp)
         return self._model.view_extracted_features(query, dynamic_resource)
 
     @staticmethod

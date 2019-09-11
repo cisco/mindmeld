@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains the DialogFlowConverter class used to convert DialogFlow projects
+"""This module contains the DialogflowConverter class used to convert Dialogflow projects
 into Mindmeld projects"""
 
 import re
@@ -25,7 +25,7 @@ from mindmeld.converter.converter import Converter
 logger = logging.getLogger(__name__)
 
 
-class DialogFlowConverter(Converter):
+class DialogflowConverter(Converter):
     """The class is a sub class of the abstract Converter class. This class
     contains the methods required to convert a Dialogflow project into a MindMeld project
     """
@@ -86,11 +86,16 @@ class DialogFlowConverter(Converter):
                            '@sys.any']
 
     def __init__(self, dialogflow_project_directory, mindmeld_project_directory):
-        self.dialogflow_project_directory = dialogflow_project_directory
-        self.mindmeld_project_directory = mindmeld_project_directory
-        self.directory = os.path.dirname(os.path.realpath(__file__))
-        self.entities_list = set()
-        self.intents_list = set()
+        if os.path.exists(os.path.dirname(dialogflow_project_directory)):
+            self.dialogflow_project_directory = dialogflow_project_directory
+            self.mindmeld_project_directory = mindmeld_project_directory
+            self.directory = os.path.dirname(os.path.realpath(__file__))
+            self.entities_list = set()
+            self.intents_list = set()
+        else:
+            msg = "`{dialogflow_project_directory}` does not exist. Please verify."
+            msg = msg.format(dialogflow_project_directory=dialogflow_project_directory)
+            raise FileNotFoundError(msg)
 
     def create_mindmeld_directory(self):
         self.create_directory(self.mindmeld_project_directory)
@@ -183,8 +188,8 @@ class DialogFlowConverter(Converter):
                     df_meta = texts["meta"]
 
                     if re.match("(@sys.).+", df_meta):  # if text is a dialogflow sys entity
-                        if df_meta in DialogFlowConverter.sys_entity_map:
-                            mm_meta = DialogFlowConverter.sys_entity_map[df_meta]
+                        if df_meta in DialogflowConverter.sys_entity_map:
+                            mm_meta = DialogflowConverter.sys_entity_map[df_meta]
                         else:
                             mm_meta = "[DNE: {sysEntity}]".format(sysEntity=df_meta[1:])
                             logger.info("Unfortunately mindmeld does not currently support"
@@ -272,8 +277,8 @@ class DialogFlowConverter(Converter):
 
         result = ""
         for handle in handles:
-            result += DialogFlowConverter.create_handle(handle) + "\n"
-        result += DialogFlowConverter.create_header(function_name) + "\n"
+            result += DialogflowConverter.create_handle(handle) + "\n"
+        result += DialogflowConverter.create_header(function_name) + "\n"
         result += "    " + "replies = {}".format(replies) + "\n"
         result += "    " + "responder.reply(replies)"
         return result
@@ -358,11 +363,11 @@ class DialogFlowConverter(Converter):
     # =========================
 
     def convert_project(self):
-        """ Converts a DialogFlow project into a MindMeld project.
+        """ Converts a Dialogflow project into a MindMeld project.
 
-        DialogFlow projects consist of entities and intents.
+        Dialogflow projects consist of entities and intents.
             note on languages:
-                DialogFlow supports multiple languages and locales. They store their training
+                Dialogflow supports multiple languages and locales. They store their training
                 data for different languages in different files. So, the name of each training
                 file ends with a meta tag, two letters long for language, and an additional
                 two letters for dialect (if applicable). For example, a file ending in "_en-au"
@@ -393,7 +398,7 @@ class DialogFlowConverter(Converter):
 
         Mindmeld:
         - Users can store data locally
-        - Users can build a knowledge base (currently beta in DialogFlow).
+        - Users can build a knowledge base (currently beta in Dialogflow).
         - Users can configure the machine learning models to best suit their needs.
         - Users have more flexibility in defining their own features, including
          ones like slot filling, contexts, and follow-up intents.
@@ -404,7 +409,7 @@ class DialogFlowConverter(Converter):
         # Create project directory with sub folders
         self.create_mindmeld_directory()
 
-        # Transfer over test data from DialogFlow project and reformat to Mindmeld project
+        # Transfer over test data from Dialogflow project and reformat to Mindmeld project
         self.create_mindmeld_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
 
