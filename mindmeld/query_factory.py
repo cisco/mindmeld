@@ -36,7 +36,7 @@ class QueryFactory:
         self.preprocessor = preprocessor
         self.stemmer = nltk.stem.PorterStemmer()
 
-    def create_query(self, text, time_zone=None, timestamp=None, locale='en_US', language='en'):
+    def create_query(self, text, time_zone=None, timestamp=None, locale=None, language=None):
         """Creates a query with the given text.
 
         Args:
@@ -46,8 +46,7 @@ class QueryFactory:
                 in seconds.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code;
-                if omitted, English is assumed.
+            language (str, optional): Language as specified using a 639-1/2 code
 
         Returns:
             Query: A newly constructed query

@@ -119,10 +119,8 @@ def create_index(app_namespace, index_name, mapping, es_host=None, es_client=Non
 
     try:
         if not does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
-            # checks the existence of default index template, if not then creates it.
-            if not es_client.indices.exists_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME):
-                es_client.indices.put_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME,
-                                               body=DEFAULT_ES_INDEX_TEMPLATE)
+            es_client.indices.put_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME,
+                                           body=DEFAULT_ES_INDEX_TEMPLATE)
             logger.info('Creating index %r', index_name)
             es_client.indices.create(scoped_index_name, body=mapping)
         else:
