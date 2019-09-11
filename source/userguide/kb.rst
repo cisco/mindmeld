@@ -169,7 +169,6 @@ For the question answerer to achieve the best possible performance, it's critica
 
 Good practice dictates that you inspect the data to identify noise and inconsistency in the dataset, then clean up and normalize the data as needed. In order for your app to achieve high accuracy, it's important to do this as a pre-processing task.
 
-.. _import_kb:
 
 Import the Data into the Knowledge Base
 ---------------------------------------
@@ -251,6 +250,18 @@ Verify that the index was created successfully using the :meth:`get()` method of
     },
     ...
   ]
+
+.. _import_kb:
+
+To fully recreate an existing index from scratch, you can run a clean load as follows.
+
+.. code:: python
+
+  from mindmeld.components import QuestionAnswerer
+  qa = QuestionAnswerer(app_path='food_ordering')
+  qa.load_kb(app_namespace='food_ordering', index_name='restaurants', data_file='food_ordering/data/restaurants.json', clean=True)
+
+This will internally delete the existing index, create a new index and load the specified objects.
 
 Perform Simple Searches with the ``get()`` API
 ----------------------------------------------
@@ -789,4 +800,6 @@ We can perform the same search using the :meth:`query()` API as well.
 
 	For knowledge bases indexed prior to MindMeld 4.2, you will have to delete and reindex all the data to use this feature.
 
-	To delete an index you can run ``curl -XDELETE "localhost:9200/<index_name>`` and index your data following the same steps as shown :ref:`here <import_kb>`.
+	To delete and reindex your data, follow the steps mentioned :ref:`here <import_kb>`.
+
+

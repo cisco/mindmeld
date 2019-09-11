@@ -24,7 +24,7 @@ from elasticsearch5 import TransportError, ElasticsearchException,\
 
 from ._config import get_app_namespace, DOC_TYPE, DEFAULT_ES_QA_MAPPING, DEFAULT_RANKING_CONFIG
 from ._elasticsearch_helpers import (create_es_client, load_index, get_scoped_index_name,
-                                     does_index_exist)
+                                     does_index_exist, delete_index)
 
 from ..resource_loader import ResourceLoader
 from ..exceptions import KnowledgeBaseError, KnowledgeBaseConnectionError
@@ -198,7 +198,7 @@ class QuestionAnswerer:
 
     @classmethod
     def load_kb(cls, app_namespace, index_name, data_file, es_host=None, es_client=None,
-                connect_timeout=2):
+                connect_timeout=2, clean=False):
         """Loads documents from disk into the specified index in the knowledge
         base. If an index with the specified name doesn't exist, a new index
         with that name will be created in the knowledge base.
@@ -215,6 +215,8 @@ class QuestionAnswerer:
             es_client (Elasticsearch): The Elasticsearch client.
             connect_timeout (int, optional): The amount of time for a
                 connection to the Elasticsearch host.
+            clean (bool): Set to true if you want to delete an existing index
+                and reindex it
         """
         def _doc_count(data_file):
             with open(data_file) as data_fp:
@@ -251,6 +253,10 @@ class QuestionAnswerer:
 
         docs = _doc_generator(data_file)
         docs_count = _doc_count(data_file)
+
+        if clean:
+            delete_index(app_namespace, index_name, es_host, es_client)
+
         load_index(app_namespace, index_name, docs, docs_count, DEFAULT_ES_QA_MAPPING,
                    DOC_TYPE, es_host, es_client, connect_timeout=connect_timeout)
 
