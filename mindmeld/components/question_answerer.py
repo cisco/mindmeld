@@ -258,8 +258,8 @@ class QuestionAnswerer:
             try:
                 delete_index(app_namespace, index_name, es_host, es_client)
             except ValueError:
-                logger.warning('Index \'{}\' does not exist for application \'{}\', '
-                               'creating a new index'.format(index_name, app_namespace))
+                logger.warning('Index %s does not exist for app %s, creating a new index',
+                               index_name, app_namespace)
 
         load_index(app_namespace, index_name, docs, docs_count, DEFAULT_ES_QA_MAPPING,
                    DOC_TYPE, es_host, es_client, connect_timeout=connect_timeout)
