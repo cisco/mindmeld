@@ -24,6 +24,7 @@ def _validate_language_code(param=None):
     """Validates language code parameters
     Args:
         param (str, optional): The language code parameter
+
     Returns:
         str: A validated language code or None if unvalidated
     """
@@ -60,6 +61,7 @@ def _validate_locale_code(param=None):
     """Validates the locale code parameters
     Args:
         param (str, optional): The locale code parameter
+
     Returns:
         str: A validated locale code or None if unvalidated
     """
@@ -67,6 +69,10 @@ def _validate_locale_code(param=None):
         return None
     if not isinstance(param, str):
         logger.error("Invalid %r param: %s is not of type %s.", 'locale', param, str)
+        return None
+
+    if len(param.split('_')) != 2:
+        logger.error("Invalid %r param: Not a valid locale.", param)
         return None
 
     language_code = param.split('_')[0].lower()
@@ -146,8 +152,7 @@ class Params:
         locale (str, optional): The locale representing the ISO 639-1/2 language code and ISO3166
             alpha 2 country code separated by an underscore character.
         language (str, optional): The language code representing ISO 639-1/2
-            language codes. If both locale and language are provided, the locale is used.
-            If neither are provided, the EN language code is used.
+            language codes.
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
     """
@@ -155,8 +160,8 @@ class Params:
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
-    language = attr.ib(default='en')
-    locale = attr.ib(default='en_US')
+    language = attr.ib(default=None)
+    locale = attr.ib(default=None)
     dynamic_resource = attr.ib(default=attr.Factory(dict))
 
     def validate_param(self, name):
@@ -231,8 +236,8 @@ class FrozenParams(Params):
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
-    language = attr.ib(default='en')
-    locale = attr.ib(default='en_US')
+    language = attr.ib(default=None)
+    locale = attr.ib(default=None)
     dynamic_resource = attr.ib(default=immutables.Map(),
                                converter=immutables.Map)
 

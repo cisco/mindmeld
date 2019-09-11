@@ -42,8 +42,8 @@ class DucklingDimension(Enum):
     TIME = 'time'
 
 
-def get_candidates(query, entity_types=None, locale='en',
-                   language='en_US', time_zone=None, timestamp=None):
+def get_candidates(query, entity_types=None, locale=None,
+                   language=None, time_zone=None, timestamp=None):
     """Identifies candidate system entities in the given query.
 
     Args:
@@ -52,7 +52,6 @@ def get_candidates(query, entity_types=None, locale='en',
         locale (str, optional): The locale representing the ISO 639-1 language code and \
             ISO3166 alpha 2 country code separated by an underscore character.
         language (str, optional): Language as specified using a 639-1/2 code.
-            If omitted, English is assumed.
         time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
             If not specified, the system time zone is used.
         timestamp (long, optional): A unix timestamp used as the reference time.
@@ -104,15 +103,16 @@ def get_candidates_for_text(text, entity_types=None, language='en'):
         return []
 
 
-def parse_numerics(sentence, dimensions=None, language='EN', locale='en_US',
+def parse_numerics(sentence, dimensions=None, language=None, locale=None,
                    time_zone=None, timestamp=None):
     """Calls System Entity Recognizer service API to extract numerical entities from a sentence.
     Args:
         sentence (str): A raw sentence.
         dimensions (None or list of str): The list of types (e.g. volume, \
             temperature) to restrict the output to. If None, include all types
-        language (str, optional): Language of the sentence specified using a 639-1/2 code. \
-            If omitted, English is assumed.
+        language (str, optional): Language of the sentence specified using a 639-1/2 code.
+            If both locale and language are provided, the locale is used. If neither are
+            provided, the EN language code is used.
         locale (str, optional): The locale representing the ISO 639-1 language code and \
             ISO3166 alpha 2 country code separated by an underscore character.
         time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'. \

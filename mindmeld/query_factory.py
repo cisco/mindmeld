@@ -35,7 +35,7 @@ class QueryFactory:
         self.preprocessor = preprocessor
         self.stemmer = stemmer
 
-    def create_query(self, text, time_zone=None, timestamp=None, locale='en_US', language='en'):
+    def create_query(self, text, time_zone=None, timestamp=None, locale=None, language=None):
         """Creates a query with the given text.
 
         Args:
@@ -45,8 +45,7 @@ class QueryFactory:
                 in seconds.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code;
-                if omitted, English is assumed.
+            language (str, optional): Language as specified using a 639-1/2 code
 
         Returns:
             Query: A newly constructed query
@@ -69,10 +68,7 @@ class QueryFactory:
         normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
 
         # stemmed tokens
-        stemmed_tokens = []
-        for t in normalized_tokens:
-            stems = self.stemmer.stem_word(t['entity'])
-            stemmed_tokens.extend(stems)
+        stemmed_tokens = [self.stemmer.stem_word(t['entity']) for t in normalized_tokens]
 
         # create normalized maps
         maps = self.tokenizer.get_char_index_map(processed_text, normalized_text)

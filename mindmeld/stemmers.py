@@ -17,7 +17,7 @@ class Stemmer(ABC):
             word (str): The word to stem
 
         Returns:
-            list(str): A list of the stemmed version of a word.
+            stemmed word (str): A stemmed version of the word
         """
         raise NotImplementedError
 
@@ -35,24 +35,19 @@ class EnglishNLTKStemmer(Stemmer):
         stem = word.lower()
 
         if self._stemmer.mode == self._stemmer.NLTK_EXTENSIONS and word in self._stemmer.pool:
-            return [self._stemmer.pool[word]]
+            return self._stemmer.pool[word]
 
         if self._stemmer.mode != self._stemmer.ORIGINAL_ALGORITHM and len(word) <= 2:
             # With this line, strings of length 1 or 2 don't go through
             # the stemming process, although no mention is made of this
             # in the published algorithm.
-            return [word]
+            return word
 
         stem = self._stemmer._step1a(stem)
         stem = self._stemmer._step1b(stem)
         stem = self._stemmer._step1c(stem)
         stem = self._stemmer._step5b(stem)
-
-        # if the stemmed cleaves off the whole token, just return the original one
-        if stem == '':
-            return [word]
-        else:
-            return [stem]
+        return word if stem == '' else stem
 
 
 class SpanishNLTKStemmer(Stemmer):
@@ -67,10 +62,4 @@ class SpanishNLTKStemmer(Stemmer):
     def stem_word(self, word):
         stem = word.lower()
         stem = self._stemmer.stem(stem)
-
-        # if the stemmed cleaves off the whole token, just return the original one
-        if stem in (word, ''):
-            return [word]
-        else:
-            word = word.split(stem)[1]
-            return [stem + '+', '+' + word]
+        return word if stem == '' else stem

@@ -34,7 +34,8 @@ requirements = [
     'sklearn-crfsuite>=0.3.6,<1.0',
     'immutables~=0.9',
     'tensorflow~=1.2; python_version < "3.7"',
-    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"'
+    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
+    'pyyaml>=5.1.1'
 ]
 
 setup_requirements = [
@@ -52,7 +53,7 @@ test_requirements = [
 
 setup(
     name='mindmeld',
-    version='4.1.5',
+    version='4.1.6',
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type='text/markdown',

@@ -65,8 +65,5 @@ target/
 # MindMeld Models
 .generated/
 
-# MindMeld Data
-data/
-
 # duckling
 mindmeld/resources/duckling-*

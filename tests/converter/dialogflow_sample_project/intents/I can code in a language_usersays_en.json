@@ -1,0 +1,136 @@
+[
+  {
+    "id": "7bbb7de6-6aeb-4f00-80c7-4c2168a397d9",
+    "data": [
+      {
+        "text": "I use ",
+        "userDefined": false
+      },
+      {
+        "text": "Javascript",
+        "alias": "ProgrammingLanguage",
+        "meta": "@ProgrammingLanguage",
+        "userDefined": false
+      },
+      {
+        "text": " for work",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "4166e914-d262-460c-a288-89a6cf17bb69",
+    "data": [
+      {
+        "text": "I code in ",
+        "userDefined": false
+      },
+      {
+        "text": "javascript",
+        "alias": "ProgrammingLanguage",
+        "meta": "@ProgrammingLanguage",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "e53d9e82-da4b-4934-864c-996fd2634c05",
+    "data": [
+      {
+        "text": "Python",
+        "alias": "ProgrammingLanguage",
+        "meta": "@ProgrammingLanguage",
+        "userDefined": false
+      },
+      {
+        "text": " is mostly what I use",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "b2eb5778-efdb-4fe8-860d-018076d3394a",
+    "data": [
+      {
+        "text": "I love ",
+        "userDefined": false
+      },
+      {
+        "text": "python",
+        "alias": "ProgrammingLanguage",
+        "meta": "@ProgrammingLanguage",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "506f203d-b00e-49ca-84cf-c488eade85a7",
+    "data": [
+      {
+        "text": "I use ",
+        "userDefined": false
+      },
+      {
+        "text": "Python",
+        "alias": "ProgrammingLanguage",
+        "meta": "@ProgrammingLanguage",
+        "userDefined": false
+      },
+      {
+        "text": " day to day",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "34ecb801-b1ea-4f34-8a8d-d4cf45c8b6a9",
+    "data": [
+      {
+        "text": "I know how to code in ",
+        "userDefined": false
+      },
+      {
+        "text": "Java",
+        "alias": "ProgrammingLanguage",
+        "meta": "@ProgrammingLanguage",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "83adc850-7fd4-4932-accc-a9260ed27255",
+    "data": [
+      {
+        "text": "I know ",
+        "userDefined": false
+      },
+      {
+        "text": "javascript",
+        "alias": "ProgrammingLanguage",
+        "meta": "@ProgrammingLanguage",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

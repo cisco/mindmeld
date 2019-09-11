@@ -57,7 +57,7 @@ class QuestionAnswerer:
             self.__es_client = create_es_client(self._es_host)
         return self.__es_client
 
-    def get(self, index, size=10, **kwargs):
+    def get(self, index, size=10, query_type='keyword', **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided
         search criteria. This API provides a simple interface for developers to specify a list of
         knowledge base field and query string pairs to find best matches in a similar way as in
@@ -78,6 +78,7 @@ class QuestionAnswerer:
         Args:
             index (str): The name of an index.
             size (int): The maximum number of records, default to 10.
+            query_type (str): Whether the search is over structured or unstructured text.
             id (str): The id of a particular document to retrieve.
             _sort (str): Specify the knowledge base field for custom sort.
             _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
@@ -94,7 +95,7 @@ class QuestionAnswerer:
         if doc_id:
             logger.info("Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id)
             s = self.build_search(index)
-            s = s.filter(id=doc_id)
+            s = s.filter(query_type=query_type, id=doc_id)
             results = s.execute(size=size)
             return results
 
@@ -123,7 +124,7 @@ class QuestionAnswerer:
 
         # add query clauses to Search object.
         for clause in query_clauses:
-            s = s.query(**clause)
+            s = s.query(query_type=query_type, **clause)
 
         # add custom sort clause if specified.
         if sort_clause:
@@ -342,7 +343,7 @@ class Search:
 
         return s
 
-    def _build_query_clause(self, **kwargs):
+    def _build_query_clause(self, query_type='keyword', **kwargs):
         field, value = next(iter(kwargs.items()))
         field_info = self._kb_field_info.get(field)
         if not field_info:
@@ -352,11 +353,11 @@ class Search:
         # imported to "<field_name>$whitelist" field.
         synonym_field = field + self.SYN_FIELD_SUFFIX \
             if self._kb_field_info.get(field + self.SYN_FIELD_SUFFIX) else None
-        clause = Search.QueryClause(field, field_info, value, synonym_field)
+        clause = Search.QueryClause(field, field_info, value, query_type, synonym_field)
         clause.validate()
         self._clauses[clause.get_type()].append(clause)
 
-    def _build_filter_clause(self, **kwargs):
+    def _build_filter_clause(self, query_type='keyword', **kwargs):
         # set the filter type to be 'range' if any range operator is specified.
         if kwargs.get('gt') or kwargs.get('gte') or kwargs.get('lt') or kwargs.get('lte'):
             field = kwargs.get('field')
@@ -379,7 +380,7 @@ class Search:
             key, value = next(iter(kwargs.items()))
             if key not in self._kb_field_info:
                 raise ValueError('Invalid knowledge base field \'{}\''.format(key))
-            clause = Search.FilterClause(field=key, value=value)
+            clause = Search.FilterClause(field=key, value=value, query_type=query_type)
         clause.validate()
         self._clauses[clause.get_type()].append(clause)
 
@@ -405,25 +406,26 @@ class Search:
         clause.validate()
         self._clauses[clause.get_type()].append(clause)
 
-    def _build_clause(self, clause_type, **kwargs):
+    def _build_clause(self, clause_type, query_type='keyword', **kwargs):
         """Helper method to build query, filter and sort clauses.
 
         Args:
             clause_type (str): type of clause
         """
         if clause_type == "query":
-            self._build_query_clause(**kwargs)
+            self._build_query_clause(query_type, **kwargs)
         elif clause_type == "filter":
-            self._build_filter_clause(**kwargs)
+            self._build_filter_clause(query_type, **kwargs)
         elif clause_type == "sort":
             self._build_sort_clause(**kwargs)
         else:
             raise Exception('Unknown clause type.')
 
-    def query(self, **kwargs):
+    def query(self, query_type='keyword', **kwargs):
         """Specify the query text to match on a knowledge base text field. The query text is
-        normalized and processed to find matches in knowledge base using several text relevance
-        scoring factors including exact matches, phrase matches and partial matches.
+        normalized and processed (based on query_type) to find matches in knowledge base using
+        several text relevance scoring factors including exact matches, phrase matches and partial
+        matches.
 
         Examples:
 
@@ -434,16 +436,17 @@ class Search:
         "name" in knowledge base index "dish".
 
         Args:
-            a keyword argument to specify the query text and the knowledge base document field.
+            a keyword argument to specify the query text and the knowledge base document field along
+            with the query type (keyword/text).
         Returns:
             Search: a new Search object with added search criteria.
         """
         new_search = self._clone()
-        new_search._build_clause("query", **kwargs)
+        new_search._build_clause("query", query_type, **kwargs)
 
         return new_search
 
-    def filter(self, **kwargs):
+    def filter(self, query_type='keyword', **kwargs):
         """Specify filter condition to be applied to specified knowledge base field. In MindMeld
         two types of filters are supported: text filter and range filters.
 
@@ -455,6 +458,8 @@ class Search:
         For example, in food ordering domain the resolved restaurant entity can be used as a filter
         to resolve dish entities. The exact knowledge base field to apply these filters depends on
         the knowledge base data model of the application.
+        If the entity is not in the canonical form, a fuzzy filter can be applied by setting the
+        query_type to 'text'.
 
         Range filters are used to filter with a value range on specified knowledge base number or
         date fields. Example use cases include price range filters and date range filters.
@@ -470,6 +475,7 @@ class Search:
                 >>> s.filter(field='price', gte=1, lt=10)
 
         Args:
+            query_type (str): Whether the filter is over structured or unstructured text.
             kwargs: A keyword argument to specify the filter text and the knowledge base text field.
             field (str): knowledge base field name for range filter.
             gt (number or str): range filter operator for greater than.
@@ -481,7 +487,7 @@ class Search:
             Search: A new Search object with added search criteria.
         """
         new_search = self._clone()
-        new_search._build_clause("filter", **kwargs)
+        new_search._build_clause("filter", query_type, **kwargs)
 
         return new_search
 
@@ -641,11 +647,12 @@ class Search:
 
         DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT = 100
 
-        def __init__(self, field, field_info, value, synonym_field=None):
+        def __init__(self, field, field_info, value, query_type='keyword', synonym_field=None):
             """Initialize a knowledge base query clause."""
             self.field = field
             self.field_info = field_info
             self.value = value
+            self.query_type = query_type
             self.syn_field = synonym_field
 
             self.clause_type = 'query'
@@ -661,34 +668,57 @@ class Search:
             # 4. matches on synonym if available (exact, word N-gram and character N-gram):
             # for a knowledge base text field the synonym are indexed in a separate field
             # "<field name>$whitelist" if available.
-
-            clause = {
-                "bool": {
-                    "should": [
-                        {
-                            "match": {
-                                self.field: {
-                                    "query": self.value
+            if self.query_type == 'text':
+                clause = {
+                    "bool": {
+                        "should": [
+                            {
+                                "match": {
+                                    self.field: {
+                                        "query": self.value
+                                    }
+                                }
+                            },
+                            {
+                                "match": {
+                                    self.field + ".processed_text": {
+                                        "query": self.value
+                                    }
                                 }
                             }
-                        },
-                        {
-                            "match": {
-                                self.field + ".normalized_keyword": {
-                                    "query": self.value
-                                }
-                            }
-                        },
-                        {
-                            "match": {
-                                self.field + ".char_ngram": {
-                                    "query": self.value
-                                }
-                            }
-                        }
-                    ]
+                        ]
+                    }
                 }
-            }
+            elif self.query_type == 'keyword':
+                clause = {
+                    "bool": {
+                        "should": [
+                            {
+                                "match": {
+                                    self.field: {
+                                        "query": self.value
+                                    }
+                                }
+                            },
+                            {
+                                "match": {
+                                    self.field + ".normalized_keyword": {
+                                        "query": self.value
+                                    }
+                                }
+                            },
+                            {
+                                "match": {
+                                    self.field + ".char_ngram": {
+                                        "query": self.value
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            else:
+                raise Exception('Unknown query type.')
 
             # Boost function for boosting conditions, e.g. exact match boosting
             boost_functions = [
@@ -765,8 +795,8 @@ class Search:
     class FilterClause(Clause):
         """This class models a knowledge base filter clause."""
 
-        def __init__(self, field, field_info=None, value=None, range_gt=None, range_gte=None,
-                     range_lt=None, range_lte=None):
+        def __init__(self, field, field_info=None, value=None, query_type='keyword', range_gt=None,
+                     range_gte=None, range_lt=None, range_lte=None):
             """Initialize a knowledge base filter clause. The filter type is determined by whether
             the range operators or value is passed in.
             """
@@ -774,6 +804,7 @@ class Search:
             self.field = field
             self.field_info = field_info
             self.value = value
+            self.query_type = query_type
             self.range_gt = range_gt
             self.range_gte = range_gte
             self.range_lt = range_lt
@@ -797,13 +828,22 @@ class Search:
                         }
                     }
                 else:
-                    clause = {
-                        "match": {
-                            self.field + ".normalized_keyword": {
-                                "query": self.value
+                    if self.query_type == 'text':
+                        clause = {
+                            "match": {
+                                self.field + ".char_ngram": {
+                                    "query": self.value
+                                }
                             }
                         }
-                    }
+                    else:
+                        clause = {
+                            "match": {
+                                self.field + ".normalized_keyword": {
+                                    "query": self.value
+                                }
+                            }
+                        }
             elif self.filter_type == 'range':
                 lower_bound = None
                 upper_bound = None
@@ -828,6 +868,8 @@ class Search:
 
                 if upper_bound:
                     clause['range'][self.field][upper_bound[0]] = upper_bound[1]
+            else:
+                raise Exception('Unknown filter type.')
 
             return clause
 

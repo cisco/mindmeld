@@ -215,7 +215,7 @@ class Processor(ABC):
         if not self.ready:
             raise ProcessorError('Processor not ready, models must be built or loaded first.')
 
-    def process(self, query_text, allowed_nlp_classes=None, locale='en_US', language='en',
+    def process(self, query_text, allowed_nlp_classes=None, locale=None, language=None,
                 time_zone=None, timestamp=None, dynamic_resource=None, verbose=False):
         """Processes the given query using the full hierarchy of natural language processing models \
         trained for this application.
@@ -228,9 +228,7 @@ class Processor(ABC):
                 where smart_home is the domain and close_door is the intent.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If neither are
-                provided, the EN language code is used.
+            language (str, optional): Language as specified using a 639-1/2 code
             time_zone (str, optional): The name of an IANA time zone, such as \
                 'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -301,7 +299,7 @@ class Processor(ABC):
         # process the list in series
         return tuple([getattr(self, func)(itm, *args, **kwargs) for itm in items])
 
-    def create_query(self, query_text, locale='en_US', language='en', time_zone=None,
+    def create_query(self, query_text, locale=None, language=None, time_zone=None,
                      timestamp=None):
         """Creates a query with the given text.
 
@@ -309,9 +307,7 @@ class Processor(ABC):
             query_text (str, list[str]): Text or list of texts to create a query object for.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If neither are
-                provided, the EN language code is used.
+            language (str, optional): Language as specified using a 639-1/2 code.
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -578,8 +574,8 @@ class NaturalLanguageProcessor(Processor):
     def process(self, query_text,   # pylint: disable=arguments-differ
                 allowed_nlp_classes=None,
                 allowed_intents=None,
-                locale='en_US',
-                language='en',
+                locale=None,
+                language=None,
                 time_zone=None,
                 timestamp=None,
                 dynamic_resource=None,
@@ -597,9 +593,7 @@ class NaturalLanguageProcessor(Processor):
                 the NLP processing.
             locale (str, optional): The locale representing the ISO 639-1 language code and
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If neither are
-                provided, the EN language code is used.
+            language (str, optional): Language as specified using a 639-1/2 code.
             time_zone (str, optional): The name of an IANA time zone, such as \
                 'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -691,9 +685,8 @@ class DomainProcessor(Processor):
 
     def process(self, query_text,  # pylint: disable=arguments-differ
                 allowed_nlp_classes=None,
-                allowed_intents=None,
-                locale='en_US',
-                language='en',
+                locale=None,
+                language=None,
                 time_zone=None, timestamp=None, dynamic_resource=None, verbose=False):
         """Processes the given input text using the hierarchy of natural language processing models \
         trained for this domain.
@@ -708,13 +701,9 @@ class DomainProcessor(Processor):
                     } \
                 where close_door is the intent. The intent belongs to the smart_home domain. \
                 If allowed_nlp_classes is None, we use the normal model predict functionality.
-            allowed_intents (list, optional): A list of allowed intents to use for \
-                the NLP processing.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If neither are
-                provided, the EN language code is used.
+            language (str, optional): Language as specified using a 639-1/2 code.
             time_zone (str, optional): The name of an IANA time zone, such as \
                 'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -727,9 +716,6 @@ class DomainProcessor(Processor):
             (ProcessedQuery): A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text.
         """
-        # Deprecated parameter
-        del allowed_intents
-
         query = self.create_query(query_text, time_zone=time_zone, timestamp=timestamp,
                                   language=language, locale=locale)
         processed_query = self.process_query(query, allowed_nlp_classes=allowed_nlp_classes,
@@ -915,7 +901,7 @@ class IntentProcessor(Processor):
                 logger.info("Skipping entity recognizer evaluation for the '%s.%s' intent",
                             self.domain, self.name)
 
-    def process(self, query_text, locale='en_US', language='en',  # pylint: disable=arguments-differ
+    def process(self, query_text, locale=None, language=None,  # pylint: disable=arguments-differ
                 time_zone=None, timestamp=None, dynamic_resource=None, verbose=False):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent.
@@ -924,9 +910,7 @@ class IntentProcessor(Processor):
                 transcripts from ASR.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code; If both
-                locale and language are provided, the locale is used. If neither are
-                provided, the EN language code is used.
+            language (str, optional): Language as specified using a 639-1/2 code.
             time_zone (str, optional): The name of an IANA time zone, such as
                 'America/Los_Angeles', or 'Asia/Kolkata'
                 See the [tz database](https://www.iana.org/time-zones) for more information.

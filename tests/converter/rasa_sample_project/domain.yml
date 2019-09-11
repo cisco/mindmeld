@@ -1,0 +1,41 @@
+intents:
+- greet
+- goodbye
+- thanks
+- deny
+- joke
+- name
+- fullname
+
+
+entities:
+- name
+- lastname
+
+slots:
+  name:
+    type: text
+
+
+actions:
+- utter_name
+- utter_thanks
+- utter_greet
+- utter_goodbye
+- action_joke
+
+
+templates:
+  utter_name:
+  - text: "Hey there! Tell me your name."
+  - text: "Howdy. What's your name."
+
+  utter_greet:
+  - text: "Nice to you meet you {name}. How can I help?"
+
+  utter_goodbye:
+  - text: "Talk to you later!"
+  
+  utter_thanks:
+  - text: "My pleasure."
+  
