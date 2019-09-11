@@ -705,19 +705,20 @@ In the example below, we search for restaurants whose names best match ``firetra
 
 Dealing with unstructured text
 ------------------------------
-The knowledge bases described in the previous sections are comprised of clearly defined data types whose pattern makes them easily searchable. We call them structured data.
+The knowledge bases described in the previous sections are comprised of clearly defined data types that are easily searchable. This kind of data is know as `structured data`.
 
-In this section we describe how to use the Question Answerer on knowledge bases with long, free-form text or unstructured data. For example, a company's Human Resource (HR) team could have documents about general policies of the company. We can use this data to develop a HR assistant that automatically answers any policy related questions.
+In this section we describe how to use the question answerer on knowledge bases with long, free-form text or `unstructured data`. For example, a company's Human Resources (HR) team could have documents about general policies of the company. We can use this data to develop an HR assistant that automatically answers any policy-related questions.
 
 To use the question answerer on unstructured text, we would follow the same steps mentioned before to prepare, index and load the knowledge base.
-Here is an example of what the knowledge base can look like for the HR assistant usecase. It consists of frequently asked question and answer pairs.
+
+Here is an example of what the knowledge base can look like for the HR assistant use case. It consists of frequently asked question and answer pairs.
 
 .. code:: python
 
 	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='hr_assistant')
 	qa.load_kb(app_namespace='hr_assistant', index_name='faq_data', data_file='hr_assistant/data/faq_data.json')
-  qa.get(index='faq_data')
+	qa.get(index='faq_data')
 
 .. code-block:: console
 
@@ -735,7 +736,7 @@ Here is an example of what the knowledge base can look like for the HR assistant
       ...
   ]
 
-The difference between the two cases is only in how MindMeld handles the search query. Internally, while the ranking algorithm remains the same for both cases, the features extracted for ranking is different and is optimized to handle long text passages rather than keyword phrases.
+The difference between a structured knowledge base and an unstructured one is in how MindMeld handles the search query. Internally, while the ranking algorithm remains the same for both cases, the features extracted for ranking are different and are optimized to handle long text passages rather than keyword phrases.
 
 To search the knowledge base for the answer to a policy question, we will use the :meth:`get()` API as before with one small modification. We specify that the query is against unstructured text by setting the ``query_type`` parameter to `text` (by default the ``query_type`` is set to `keyword`).
 
