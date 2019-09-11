@@ -5,33 +5,111 @@ Recent Changes
 MindMeld 4.2
 -------------
 
-MindMeld 4.2 includes several new innovative features:
+MindMeld 4.2 packages several new features to allow developers to build non-english NLP applications, do unstructured Q/A searches,
+ and convert from RASA and DialogFlow applications to MindMeld.
 
 **1. MindMeld UI**
 
 MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application. This web UI also
 serves as a debugging tool to step through the various stages of query processing by the MindMeld pipeline. See
-:ref:`MindMeld UI <mindmeled_ui> for more details.
+:ref:`MindMeld UI <mindmeled_ui>` for more details.
 
-**2. Question-answering on unstructed text**
+**2. Question-answering on unstructured text**
 
-MindeMeld 4.2 includes a built-in Question-Answering (QA) component using Elasticsearch. See
-:ref:`MindMeld QA <mindmeled_qa> for more details.
+MindeMeld 4.2 includes a built-in Question-Answering (QA) component using Elasticsearch for unstructured text retrieval.
+ This complements the structured text retrieval already supported in MindMeld for knowledge-base search. See
+:ref:`MindMeld QA <mindmeled_qa>` for more details.
 
 **3. MindMeld converter for Rasa and Dialogflow**
-MindMeld 4.2 includes built-in converters for Rasa and Dialogflow projects into MindMeld projects. See
+MindMeld 4.2 includes built-in support to automatically convert Rasa and Dialogflow projects into MindMeld projects. See
 [path] for more details.
 
-**4. WebexBotServer**
-MindMeld 4.2 includes built-in support for Webex Team integration. See
-[path] for more details.
+**4. Webex Bot Server**
+MindMeld 4.2 includes built-in support for Webex Teams integration, so developers can seamlessly integrate MindMeld bots
+to Webex Teams. See :doc:`Webex bot integration <../integrations/webex_teams>` for implementation details.
 
-**5. Dialogflow.reprocess**
-MindMeld 4.2 includes an improvement to DialogueFlow (MindMeld feature) where the user can exist the current flow and
-return to the main flow logic.
+**5. Locale and Language codes**
+Locale codes representing the ISO 639-1 language code and ISO3166 alpha 2 country code separated by an underscore
+character, for example, `en_US` and ISO 639-2 language codes, for example, `EN`, can now be used in MindMeld 4.2 to
+perform NLP tasks on non-english languages.
 
-Other minor improvements include an update to the Docker image for MindMeld application and reducing the Elasticsearch requirement
-for running a MindMeld application.
+Previously, the system entity recognizer, which is rule-based and not trained on app-specific data, could not
+extract system_entities like the time entity ``8`` in the spanish query ``despiértame a las 8``. By passing in the locale
+or language code, MindMeld will infer the correct time entity in the above query. We provide a code snippet of how
+to use this functionality below, assuming you have spanish training data for such queries:
+
+.. code:: python
+
+    nlp.process('despiértame a las 8', language='ES')
+
+.. code-block:: console
+
+       { 'domain': 'times_and_dates',
+         'entities': [ { 'role': None,
+                         'span': {'end': 19, 'start': 18},
+                         'text': '8',
+                         'type': 'sys_time',
+                         'value': [ { 'grain': 'hour',
+                                      'value': '2019-02-16T08:00:00.000-08:00'}]}],
+         'intent': 'set_alarm',
+         'text': 'despiértame a las 8'
+       }
+
+
+**6. Stemming**
+MindMeld 4.2 allows developers to specify their own custom stemmers, which are useful for non-english languages. We also provide
+two in-built stemmers that are wrappers around certain NLTK stemming operations, an English stemmer,
+``mindmeld.stemmers.EnglishhNLTKStemmer`` and a Spanish stemmer, ``mindmeld.stemmers.SpanishNLTKStemmer``. Below, we provide a code
+snippet on how to use the Spanish built-in stemmer with the NaturalLanguageProcessor object.
+
+.. code:: python
+
+        query_factory = QueryFactory.create_query_factory(app_path, stemmer=SpanishNLTKStemmer())
+        resource_loader = ResourceLoader.create_resource_loader(app_path, query_factory=query_factory)
+        nlp = NaturalLanguageProcessor(app_path, resource_loader)
+
+
+**7. Dialogflow.reprocess**
+MindMeld 4.2 includes an improvement to DialogueFlow (a MindMeld dialogue feature) where the user can exit the current dialogue flow and
+return to a default flow. Refer to :ref:`Existing Dialogue Flow <exiting_dialogue_flow>` section on how to exit an existing dialogue flow.
+
+**8. New blueprint: Human Resources Blueprint**
+MindMeld 4.2 provide an enterprise blueprint to complement the existing consumer blueprints we currently support.
+
+.. code:: console
+
+    mindmeld blueprint hr_assistant
+
+.. code:: python
+
+    import mindmeld as mm
+    mm.configure_logs()
+    bp_name = 'hr_assistant'
+    mm.blueprint(bp_name)
+
+    from mindmeld.components import NaturalLanguageProcessor
+    nlp = NaturalLanguageProcessor(bp_name)
+    nlp.build() # build the classifiers
+    nlp.dump() # save the classifiers
+
+    from mindmeld.components.dialogue import Conversation
+    conv = Conversation(nlp=nlp, app_path=bp_name)
+    conv.say('Hello!')
+    conv.say('When will I get my W2')
+
+.. code:: console
+
+    ["Hi, I am your HR assistant. Ask me about an individual employee, company's employee demographic
+    or general policy questions. You can say 'Is Mia married?' or 'Average salary of females' or 'When will I get my W2?'"]
+
+    ['Here is the top result:\nWhen can I expect my annual form W2?\nAll employee
+      W2s are mailed on or around January 31 for the prior calendar year.']
+
+**9. Docker updates**
+We updated the :ref:`Getting started with docker <getting_started_docker_setup>` page to spawn Elasticsearch within the docker
+container, which means the developer doesn't have to do any local Elasticsearch setup, thus significantly reducing the
+local dependencies needed to run MindMeld.
+
 
 MindMeld 4.1
 -------------
