@@ -97,7 +97,7 @@ async def send_store_hours(request, responder):
 
 @send_store_hours.handle(default=True)
 async def default_handler(request, responder):
-    responder.frame['count'] += 1
+    responder.frame['count'] = responder.frame.get('count', 0) + 1
     if responder.frame['count'] <= 3:
         responder.reply('Sorry, I did not get you. Which store would you like to know about?')
         responder.listen()
@@ -109,6 +109,13 @@ async def default_handler(request, responder):
 @send_store_hours.handle(intent='exit', exit_flow=True)
 async def exit_handler(request, responder):
     responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
+
+
+@send_store_hours.handle(intent='find_nearest_store')
+async def transition_flows(request, responder):
+    del request
+    del responder
+    send_store_hours.reprocess()
 
 
 @send_store_hours.handle(intent='get_store_hours')

@@ -35,7 +35,9 @@ class RasaConverter(Converter):
             self.rasa_project_directory = rasa_project_directory
             self.mindmeld_project_directory = mindmeld_project_directory
         else:
-            raise FileNotFoundError
+            msg = "`{rasa_project_directory}` does not exist. Please verify.".format(
+                rasa_project_directory=rasa_project_directory)
+            raise FileNotFoundError(msg)
 
     def _create_intents_directories(self, mindmeld_project_directory, intents):
         """Note: Because Rasa does not support multiple domains at this time. All intents
