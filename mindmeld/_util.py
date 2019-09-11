@@ -45,7 +45,8 @@ BLUEPRINTS = {
     'food_ordering': {},
     'home_assistant': {'kb': False},
     'template': {'kb': False},
-    'video_discovery': {}
+    'video_discovery': {},
+    'hr_assistant': {}
 }
 
 

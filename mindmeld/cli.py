@@ -35,6 +35,7 @@ import requests
 from tqdm import tqdm
 from . import markup, path
 from .components import Conversation, QuestionAnswerer
+from .converter import RasaConverter, DialogflowConverter
 from .exceptions import (KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError)
 from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
 from ._version import current as __version__
@@ -442,6 +443,39 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
         ctx.exit(1)
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
+        ctx.exit(1)
+
+
+@module_cli.command('convert', context_settings=CONTEXT_SETTINGS)
+@click.pass_context
+@click.option('-d', '--df', is_flag=True, help="Convert a Dialogflow project")
+@click.option('-r', '--rs', is_flag=True, help="Convert a Rasa project")
+@click.argument('project_path', required=True, type=click.Path(exists=True))
+@click.argument('mindmeld_path', required=False)
+def convert(ctx, df, rs, project_path, mindmeld_path=None):
+    """Converts a Rasa or DialogueFlow project to a MindMeld project"""
+    if df:
+        framework = 'Dialogflow'
+    elif rs:
+        framework = 'Rasa'
+    else:
+        logger.warning("Please specify the project's platform Rasa/Dialogflow.")
+        ctx.exit(1)
+
+    try:
+        project_path = os.path.abspath(project_path)
+        mindmeld_path = os.path.abspath(mindmeld_path or "converted_app")
+        converter_cls = {'Rasa': RasaConverter, 'Dialogflow': DialogflowConverter}
+        converter_cls = converter_cls[framework]
+        converter = converter_cls(project_path, mindmeld_path)
+        converter.convert_project()
+        msg = "Successfully converted {framework} project at {project_path} to"\
+              " MindMeld project at {mindmeld_path}."
+        msg = msg.format(framework=framework, project_path=project_path,
+                         mindmeld_path=mindmeld_path)
+        logger.info(msg)
+    except IOError as e:
+        logger.error(e)
         ctx.exit(1)
 
 

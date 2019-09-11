@@ -129,6 +129,14 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :caption: MindMeld UI
+   :name: mindmeld_ui
+
+   mindmeld_ui/mindmeld_ui
+
+
+.. toctree::
+   :maxdepth: 2
    :caption: Versions
    :name: versions
 

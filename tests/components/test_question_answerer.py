@@ -152,6 +152,20 @@ def test_basic_search_validation(food_ordering_answerer):
                                    _sort_type='distance')
 
 
+def test_unstructured_search(food_ordering_answerer):
+    res = food_ordering_answerer.get(index='menu_items', query_type='text',
+                                     description='something with crab meat and scallops')
+    assert len(res) > 0
+
+    s = food_ordering_answerer.build_search(index='menu_items')
+    res = s.query(query_type='text', description='maybe a roll with some salmon').execute()
+    assert len(res) > 0
+
+    res = s.query(query_type='text', description='maybe a spicy roll with some salmon').filter(
+                                                 query_type='text', name='spicy roll').execute()
+    assert len(res) > 0
+
+
 def test_advanced_search_validation(answerer):
     """Tests validation in advanced search."""
 

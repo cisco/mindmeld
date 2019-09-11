@@ -352,7 +352,7 @@ class DialogueManager:
                 request, responder, target_dialogue_state=target_dialogue_state
             )
         except DialogueStateException as e:
-            if e.target_dialogue_state and e.target_dialogue_state != target_dialogue_state:
+            if e.target_dialogue_state != target_dialogue_state:
                 target_dialogue_state = e.target_dialogue_state
             else:
                 self.logger.warning(
@@ -432,11 +432,12 @@ class DialogueManager:
         dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder.dialogue_state = dialogue_state
-        res = await handler(request, responder)
+        result_handler = await handler(request, responder)
 
         # Add dialogue flow's sub-dialogue_state if provided
-        if res and 'dialogue_state' in res:
-            dialogue_state = '.'.join([dialogue_state, res["dialogue_state"]])
+        if result_handler and 'dialogue_state' in result_handler:
+            dialogue_state = "{}.{}".format(dialogue_state, result_handler['dialogue_state'])
+
         responder.dialogue_state = dialogue_state
         return responder
 
@@ -522,10 +523,7 @@ class DialogueFlow(DialogueManager):
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
         app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
-        if self.async_mode:
-            handler = self._apply_flow_handler_async
-        else:
-            handler = self._apply_flow_handler_sync
+        handler = self._apply_flow_handler_async if self.async_mode else self._apply_flow_handler_sync
         app.add_dialogue_rule(self.flow_state, handler, targeted_only=True)
 
     @property

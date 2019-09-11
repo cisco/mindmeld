@@ -16,6 +16,7 @@ requirements = [
     'Flask~=0.12',
     'Flask-Cors~=3.0',
     'future~=0.16.0',
+    'pycountry~=19.8',
     'nltk~=3.2',
     'numpy~=1.15',
     'pandas~=0.22',
@@ -26,15 +27,15 @@ requirements = [
     'scipy>=0.9,<2.0',
     'scikit-learn>=0.18.1,<0.20; python_version < "3.7"',
     'scikit-learn>=0.19.2,<0.20; python_version >= "3.7"',
-    'requests~=2.20.1',
+    'requests>=2.20.1,<3.0',
     'tqdm~=4.15',
-    'urllib3==1.24.3',
     'python-crfsuite~=0.9; python_version < "3.7"',
     'python-crfsuite>=0.9.6,<1.0; python_version >= "3.7"',
     'sklearn-crfsuite>=0.3.6,<1.0',
     'immutables~=0.9',
     'tensorflow~=1.2; python_version < "3.7"',
-    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"'
+    'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
+    'pyyaml>=5.1.1'
 ]
 
 setup_requirements = [
@@ -52,7 +53,7 @@ test_requirements = [
 
 setup(
     name='mindmeld',
-    version='4.1.4',
+    version='4.1.6',
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type='text/markdown',
@@ -84,5 +85,8 @@ setup(
     ],
     setup_requires=setup_requirements,
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=test_requirements,
+    extras_require={
+        'bot': ['ciscosparkapi'],
+    },
 )

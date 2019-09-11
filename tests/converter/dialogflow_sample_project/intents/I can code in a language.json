@@ -1,0 +1,52 @@
+{
+  "id": "ba59edc1-eb2d-474f-9838-be505082a887",
+  "name": "I can code in a language",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "ce2d6b93-4441-4c5a-b335-fcbdb4573073",
+          "required": false,
+          "dataType": "@ProgrammingLanguage",
+          "name": "ProgrammingLanguage",
+          "value": "$ProgrammingLanguage",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "es",
+          "speech": [
+            "¡La programación es increíble!",
+            "Es genial que sepas programar."
+          ]
+        },
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": [
+            "You\u0027re a programmer!",
+            "I love programming!",
+            "Programming is cool. So is MindMeld."
+          ]
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": []
+}
