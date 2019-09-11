@@ -255,7 +255,11 @@ class QuestionAnswerer:
         docs_count = _doc_count(data_file)
 
         if clean:
-            delete_index(app_namespace, index_name, es_host, es_client)
+            try:
+                delete_index(app_namespace, index_name, es_host, es_client)
+            except ValueError:
+                logger.warning('Index \'{}\' does not exist for application \'{}\', '
+                               'creating a new index'.format(index_name, app_namespace))
 
         load_index(app_namespace, index_name, docs, docs_count, DEFAULT_ES_QA_MAPPING,
                    DOC_TYPE, es_host, es_client, connect_timeout=connect_timeout)
