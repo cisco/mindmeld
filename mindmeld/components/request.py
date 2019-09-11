@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 def _validate_language_code(param=None):
     """Validates language code parameters
-
     Args:
         param (str, optional): The language code parameter
 
@@ -60,7 +59,6 @@ def _validate_language_code(param=None):
 
 def _validate_locale_code(param=None):
     """Validates the locale code parameters
-
     Args:
         param (str, optional): The locale code parameter
 

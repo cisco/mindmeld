@@ -18,6 +18,7 @@ from mindmeld.components import NaturalLanguageProcessor, Preprocessor
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.tokenizer import Tokenizer
+from mindmeld.stemmers import EnglishNLTKStemmer
 
 warnings.filterwarnings("module", category=DeprecationWarning,
                         module="sklearn.preprocessing.label")
@@ -165,9 +166,17 @@ def preprocessor():
 
 
 @pytest.fixture
-def query_factory(tokenizer, preprocessor):
+def stemmer():
+    """The english stemmer"""
+    return EnglishNLTKStemmer()
+
+
+@pytest.fixture
+def query_factory(tokenizer, preprocessor, stemmer):
     """For creating queries"""
-    return QueryFactory(tokenizer=tokenizer, preprocessor=preprocessor)
+    return QueryFactory(tokenizer=tokenizer,
+                        preprocessor=preprocessor,
+                        stemmer=stemmer)
 
 
 @pytest.fixture
