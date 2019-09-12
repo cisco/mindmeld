@@ -1151,10 +1151,8 @@ class EntityProcessor(Processor):
             model_path, incremental_model_path = path.get_role_model_paths(
                 self._app_path, self.domain, self.intent, self.type,
                 timestamp=incremental_timestamp)
-
-            self.role_classifier.load(
-                incremental_model_path if incremental_timestamp else model_path)
-
+            self.role_classifier.load(incremental_model_path if incremental_timestamp
+                                      else model_path)
             self.entity_resolver.load()
         except EntityResolverConnectionError:
             logger.warning('Cannot connect to ES, so Entity Resolver is not loaded.')
