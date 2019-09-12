@@ -16,8 +16,9 @@ serves as a debugging tool to step through the various stages of query processin
 
 **2. Question-answering on unstructured text**
 
-MindeMeld 4.2 includes a built-in Question-Answering (QA) component using Elasticsearch for unstructured text retrieval.
- This complements the structured text retrieval already supported in MindMeld for knowledge-base search. See
+MindMeld 4.2 includes a built-in Question-Answering (QA) component using Elasticsearch for unstructured text retrieval.
+This new feature can be used to perform QA using a knowledge base of passages, frequently asked questions or any long-form
+text data. This complements the structured text retrieval already supported in MindMeld for knowledge-base search. See
 :ref:`MindMeld QA <mindmeled_qa>` for more details.
 
 **3. MindMeld converter for Rasa and Dialogflow**
