@@ -12,14 +12,14 @@ MindMeld 4.2 packages several new features to allow developers to build non-engl
 
 MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application. This web UI also
 serves as a debugging tool to step through the various stages of query processing by the MindMeld pipeline. See
-:ref:`MindMeld UI <mindmeled_ui>` for more details.
+:doc:`MindMeld UI <../mindmeld_ui/mindmeld_ui>` for more details.
 
 **2. Question-answering on unstructured text**
 
 MindMeld 4.2 includes a built-in Question-Answering (QA) component using Elasticsearch for unstructured text retrieval.
 This new feature can be used to perform QA using a knowledge base of passages, frequently asked questions or any long-form
 text data. This complements the structured text retrieval already supported in MindMeld for knowledge-base search. See
-:ref:`MindMeld QA <mindmeled_qa>` for more details.
+:ref:`dealing with unstructed data <unstructed_data>` for more details.
 
 **3. MindMeld converter for Rasa and Dialogflow**
 MindMeld 4.2 includes built-in support to automatically convert Rasa and Dialogflow projects into MindMeld projects. See
@@ -75,36 +75,8 @@ MindMeld 4.2 includes an improvement to DialogueFlow (a MindMeld dialogue featur
 return to a default flow. Refer to :ref:`Existing Dialogue Flow <exiting_dialogue_flow>` section on how to exit an existing dialogue flow.
 
 **8. New blueprint: Human Resources Blueprint**
-MindMeld 4.2 provide an enterprise blueprint to complement the existing consumer blueprints we currently support.
-
-.. code:: console
-
-    mindmeld blueprint hr_assistant
-
-.. code:: python
-
-    import mindmeld as mm
-    mm.configure_logs()
-    bp_name = 'hr_assistant'
-    mm.blueprint(bp_name)
-
-    from mindmeld.components import NaturalLanguageProcessor
-    nlp = NaturalLanguageProcessor(bp_name)
-    nlp.build() # build the classifiers
-    nlp.dump() # save the classifiers
-
-    from mindmeld.components.dialogue import Conversation
-    conv = Conversation(nlp=nlp, app_path=bp_name)
-    conv.say('Hello!')
-    conv.say('When will I get my W2')
-
-.. code:: console
-
-    ["Hi, I am your HR assistant. Ask me about an individual employee, company's employee demographic
-    or general policy questions. You can say 'Is Mia married?' or 'Average salary of females' or 'When will I get my W2?'"]
-
-    ['Here is the top result:\nWhen can I expect my annual form W2?\nAll employee
-      W2s are mailed on or around January 31 for the prior calendar year.']
+MindMeld 4.2 provide an enterprise blueprint to complement the existing consumer blueprints we currently support. Refer to
+:doc:`HR Assistant <../mindmeld_ui/mindmeld_ui>` for more details.
 
 **9. Docker updates**
 We updated the :ref:`Getting started with docker <getting_started_docker_setup>` page to spawn Elasticsearch within the docker
