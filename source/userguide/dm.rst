@@ -519,6 +519,8 @@ Similar to the ``@app.handle`` decorator for regular dialogue state handlers, we
           responder.reply('Sorry I cannot help you. Please try again.')
           responder.exit_flow()
 
+.. _exiting_dialogue_flow:
+
 There are three ways to exit a Dialogue Flow:
 
 1. We can exit the flow by invoking the :meth:`Responder.exit_flow` method as shown in the above code snippet.

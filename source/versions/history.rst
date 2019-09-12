@@ -1,6 +1,30 @@
 Package History
 ===============
 
+4.2.0 (2019-09-01)
+------------------
+
+Major Features and Improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application
+
+- A built-in Question-Answering (QA) component using Elasticsearch
+
+- Converters for Rasa and Dialogflow projects into MindMeld projects
+
+- Built-in support for Webex Team integration.
+
+- An improvement to DialogueFlow where the user can exist the current flow and return to the main flow logic.
+
+
+Bug Fixes and Other Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Update Docker image for MindMeld application
+
+- Reduce the Elasticsearch requirement for running a MindMeld application
+
 
 4.1.0 (2019-04-22)
 ------------------
