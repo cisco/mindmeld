@@ -3,13 +3,14 @@
 HR Assistant
 ==============
 
-In this step-by-step walkthrough, you'll build a conversational application for a Human Resources assistant that can answer questions about employees at a company.
+In this step-by-step walkthrough, you'll build a conversational application for a Human Resources assistant that can answer questions about employees and general policies at a company.
 
 Working through this blueprint will teach you how to
 
    - handle a large number of domains and intents
    - use system entities such as amount-of-money, dates, and times
    - query the knowledge base on multiple parameters
+   - perform question answering on unstructured data
 
 .. note::
 
@@ -19,6 +20,7 @@ Working through this blueprint will teach you how to
 ^^^^^^^^^^^^^^^
 
 This HR assistant would be used by an HR manager to ask questions about employees at an organization. They should be able to ask for information about a particular employee, for company-wide statistics, or for a group of employees that meet certain criteria.
+In addition, they can also use the assistant to answer frequently asked questions about payroll, performance review and general policies.
 
 
 2. Example Dialogue Interactions
@@ -74,6 +76,11 @@ The ``Greeting`` domain supports the following intents:
 
    - ``greet`` — Greet the user and inform them of the assistant's functionality
    - ``exit`` — Say bye to the user
+
+The ``FAQ`` domain supports the following intents:
+
+  - ``all_topics`` - User asks a specific policy question
+  - ``generic`` - User indicates they want to ask a policy question
 
 There are two types of entities in MindMeld: :ref:`System Entities <system-entities>` and :doc:`Custom Entities <../userguide/entity_recognizer>`. System entities are pre-defined in MindMeld. Examples include ``sys_temperature``, ``sys_time``, and ``sys_interval``. Custom entities are defined by the developers of each application. Within each entity folder, the file ``gazetteer.txt`` contains the full list of values for each custom entity.
 
@@ -254,13 +261,18 @@ Here are the intents and states in the HR assistant blueprint, as defined in the
 +---------------------------------------------------+--------------------------------+---------------------------------------------------+
 | ``exit``                                          | ``exit``                       | Say bye to the user                               |
 +---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``generic``                                       | ``generic``                    | Prompt the user for a specific policy question    |
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
+| ``all_topics``                                    | ``all_topics``                 | Reply with the answer to the asked policy question|
++---------------------------------------------------+--------------------------------+---------------------------------------------------+
 
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
-The knowledge base for our HR assistant app leverages a publicly available synthetic dataset from `Kaggle <https://www.kaggle.com/rhuebner/human-resources-data-set>`_. The knowledge base comprises one index in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
+The knowledge base for our HR assistant app leverages a publicly available synthetic dataset from `Kaggle <https://www.kaggle.com/rhuebner/human-resources-data-set>`_ and frequently asked human resources questions from `UC Berkeley <https://hr.berkeley.edu/faq-page>`. The knowledge base comprises of two indices in `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_:
 
    - ``user_data`` — information about employees
+   - ``faq_data`` - frequently asked question answer pairs
 
 For example, here's the knowledge base entry in the ``user_data`` index for the employee "Mia Brown":
 
@@ -288,6 +300,16 @@ For example, here's the knowledge base entry in the ``user_data`` index for the 
         "performance_score": "Fully Meets",
         "first_name": "Mia",
         "last_name": "Brown"
+    }
+
+Here's another example with a knowledge base entry in the ``faq_data`` index:
+
+.. code:: javascript
+
+    {
+        "id": "hrfaq24",
+        "question": "What is the performance cycle?",
+        "answer": "The intent of the performance cycle is to identify the key parts of each employee's job, identify what it looks like when that is done well (meets your expectations as a manager), and how both you as manager and your employee will know when that is achieved (measurements).Phase 1 - Planning:  Creating goals and expectations between the employee and manager for the current year. Phase 2 - Check-Ins:  Giving ongoing feedback throughout the year; identifying acomplishments, areas for improvement and adjusting the goals/expectations as necessary. Phase 3 - Review:  Reviewing the year at the end of the performance period."
     }
 
 Assuming that you have Elasticsearch installed, running the :func:`blueprint()` command described above should build the knowledge base for the HR assistant app by creating the index and importing all the necessary data. To verify that the knowledge base has been set up correctly, use the :doc:`Question Answerer <../userguide/kb>` to query the indexes.
@@ -393,21 +415,19 @@ Train a baseline NLP system for the blueprint app. The :meth:`build()` method of
    Loading raw queries from file hr_assistant/domains/date/get_date/train.txt
    Loading raw queries from file hr_assistant/domains/date/get_date_range_aggregate/train.txt
    Loading raw queries from file hr_assistant/domains/date/get_date_range_employees/train.txt
-   Loading raw queries from file hr_assistant/domains/general/get_aggregate/train.txt
+   Loading raw queries from file hr_assistant/domains/faq/all_topics/train.txt
    .
    .
    .
-
-    Fitting intent classifier: domain='general'
-    Selecting hyperparameters using k-fold cross-validation with 5 splits
-    Best accuracy: 99.51%, params: {'C': 1, 'class_weight': {0: 1.0998148148148148, 1: 0.9049019607843137, 2: 1.0234505862646566}, 'fit_intercept': True}
-    Fitting entity recognizer: domain='general', intent='get_aggregate'
-    No entity model configuration set. Using default.
-    Selecting hyperparameters using k-fold cross-validation with 5 splits
-    Best accuracy: 93.16%, params: {'C': 10000, 'penalty': 'l2'}
-    .
-    .
-    .
+   Fitting intent classifier: domain='greeting'
+   Selecting hyperparameters using k-fold cross-validation with 5 splits
+   Best accuracy: 98.86%, params: {'C': 1, 'class_weight': {0: 1.5041516245487365, 1: 0.8843956953642383}, 'fit_intercept': False}
+   Fitting entity recognizer: domain='greeting', intent='greet'
+   No entity model configuration set. Using default.
+   There are no labels in this label set, so we don't fit the model.
+   .
+   .
+   .
 
 .. tip::
 
@@ -428,14 +448,14 @@ To see how the trained NLP pipeline performs on a test query, use the :meth:`pro
            'type': 'name',
            'role': None,
            'value': [{'cname': 'Mia Brown',
-             'score': 116.68605,
+             'score': 120.39465,
              'top_synonym': 'Mia Brown'},
             {'cname': 'Thelma Petrowsky',
-             'score': 11.246895,
+             'score': 11.883775,
              'top_synonym': 'Petrowsky'},
-            {'cname': 'Brooke Oliver', 'score': 11.212612, 'top_synonym': 'Brooke'},
+            {'cname': 'Brooke Oliver', 'score': 11.557489, 'top_synonym': 'Brooke'},
             {'cname': 'Jeremiah Semizoglou',
-             'score': 9.835518,
+             'score': 10.367119,
              'top_synonym': 'Jeremiah'}],
            'span': {'start': 3, 'end': 11}},
           {'text': 'sales',
@@ -493,7 +513,7 @@ We can change the feature extraction settings to use bag of trigrams in addition
 
     Fitting intent classifier: domain='salary'
     Selecting hyperparameters using k-fold cross-validation with 5 splits
-    Best accuracy: 97.43%, params: {'C': 100, 'class_weight': {0: 0.8294469357249626, 1: 1.1142528735632182, 2: 1.1555555555555554}, 'fit_intercept': True}
+    Best accuracy: 97.20%, params: {'C': 100, 'class_weight': {0: 0.9612578616352201, 1: 1.0065860215053766, 2: 1.0362745098039214}, 'fit_intercept': True}
 
 We can also change the model for the intent classifier to Support Vector Machine (SVM) classifier, which works well for some datasets:
 
@@ -517,14 +537,14 @@ We can also change the model for the intent classifier to Support Vector Machine
 
     Fitting intent classifier: domain='salary'
     Selecting hyperparameters using k-fold cross-validation with 10 splits
-    Best accuracy: 96.64%, params: {'C': 1000, 'kernel': 'rbf'}
+    Best accuracy: 98.00%, params: {'C': 0.5, 'kernel': 'linear'}
 
 Similar options are available for inspecting and experimenting with the Entity Recognizer and other NLP classifiers as well. Finding the optimal machine learning settings is an iterative process involving several rounds of parameter tuning, testing, and error analysis. Refer to the :doc:`NaturalLanguageProcessor <../userguide/nlp>` in the user guide for more about training, tuning, and evaluating the various MindMeld classifiers.
 
 Inspect the role classifiers
 """"""""""""""""""""""""""""
 
-The HR assistant does not make use of the role classifiers. For an examaple of inspecting the role classifiers please visit the home assistant application blueprint.
+The HR assistant does not make use of the role classifiers. For an example of inspecting the role classifiers please visit the home assistant application blueprint.
 
 Inspect the configuration
 """""""""""""""""""""""""
@@ -576,7 +596,7 @@ Since we do not have entity groups in the HR assistant app, we do not need a par
 9. Using the Question Answerer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. In the case of an HR assistant that intelligently retrieves information from a knowledge base of employee information a question answerer is essential. Other than the unsupported intent, all of the intents in the HR Assistant make use of the Question Answerer.
+The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly used within dialogue state handlers for retrieving information from the knowledge base. In the case of an HR assistant that intelligently retrieves information from a knowledge base of employee information or policy questions, a question answerer is essential. Other than the unsupported intent, all of the intents in the HR Assistant make use of the Question Answerer.
 
 .. code:: python
 
@@ -595,7 +615,7 @@ The :doc:`Question Answerer <../userguide/kb>` component in MindMeld is mainly u
 
 MindMeld would supports filtering the results (For example, we can search for employees that are male, in the sales department, etc.) See the :doc:`User Guide <../userguide/kb>` for an explanation of the retrieval and ranking mechanisms that the Question Answerer offers.
 
-In the case that we are trying to filter on multiple non-numeric entities, we can do so by passing in a dictionary that contains a key and value pair. An examaple of this is shown in the helper function for the HR Assistant below.
+In the case that we are trying to filter on multiple non-numeric entities, we can do so by passing in a dictionary that contains a key and value pair. An example of this is shown in the helper function for the HR Assistant below.
 
 .. code:: python
 
@@ -628,6 +648,43 @@ In the case that we are trying to filter on multiple non-numeric entities, we ca
 
       	return qa, size
 
+For the ``faq`` domain, given the user query, the Question Answerer has to retrieve information from a knowledge base that consists of long-form text in the form of question-answer pairs. See :doc:`User Guide <../userguide/kb>` to learn more about how MindMeld retrieves and ranks unstructured data.
+In the HR blueprint, we use both question and answer field to rank the KB entries. Depending on the domain and coverage of data, you may want to experiment with ranking on multiple fields.
+
+.. code:: python
+
+   from mindmeld.components import QuestionAnswerer
+   qa = QuestionAnswerer(app_path='hr_assistant')
+   qa.get(index='faq_data', query_type='text', question='how are overtime hours determined?')[0]
+
+.. code-block:: console
+
+   {
+    'question': 'How is my overtime compensation calculated?',
+    'answer': 'Overtime is paid at the rate of one and one-half times an employee’s regular rate of pay for all hours worked in excess of forty (40) hours in a standard work week. “Hours worked” refers to the amount of time actually worked in a standard work week. Paid time off for sick leave, vacation, or holidays is not included in hours worked for the determination of overtime. Overtime hours and compensation is based on calculation using the above rate.',
+    'id': 'hrfaq9'
+   }
+
+.. code:: python
+
+   from mindmeld.components import QuestionAnswerer
+   qa = QuestionAnswerer(app_path='hr_assistant')
+   query = 'is there an online course on how to set goals?'
+   qa.get(index='faq_data', query_type='text', question=query)[0]
+   qa.get(index='faq_data', query_type='text', question=query, answer=query)[0]
+
+.. code-block:: console
+
+   {
+    'question': 'How do I set goals?',
+    'answer': 'Meet with your employee. Identify and agree on major pieces of the job. Use that list to determine performance for the year. Start the next period by identifying the major pieces of the job, what success looks like, and how that might be measured.',
+    'id': 'hrfaq29'
+   }
+   {
+    'question': 'Will there be training on goal setting for Managers and Supervisors?',
+    'answer': 'Yes! Our classes provide detailed support on how to set goals. This program is offered twice a year based on the timing of the performance cycle. There is a online course (sign-up on blu) titled "Setting Expectations and Individual Performance Goals." Additionally, Staff Learning and Development offers training for work teams upon request.',
+    'id': 'hrfaq30'
+   }
 
 .. admonition:: Exercise
 
@@ -644,7 +701,7 @@ Once all the individual pieces (NLP, Dialogue State Handlers) have been trained,
 
    from mindmeld.components.dialogue import Conversation
    conv = Conversation(nlp=nlp, app_path='./hr_assistant')
-   conv.say('What is Elisa's marital status')
+   conv.say("What is Elisa's marital status")
 
 .. code-block:: console
 
@@ -664,23 +721,17 @@ Try a multi-turn dialogue:
 
    >>> conv = Conversation(nlp=nlp, app_path='hr_assistant')
    >>> conv.say('Tell me about Mia Brown')
-   ['What information would you like to know about Elisa Bramante?', 'Listening...']
+   ['What information would you like to know about Mia Brown?', 'Listening...']
    >>> conv.say("Who is her manager?")
    ["Brandon R. LeBlanc is Mia Brown's manager"]
 
 If the user goes off track, or presents a query that is out of the scope of the assistant, the app is able to recognize this and prompt the user back to what is supported. Below is an example:
 
    >>> conv.say("Can you give me a million dollars please?")
-   ["Hmmm, I didn't quite understand. Would you like to know what you can ask me?",
+   ["Hmmm, I don't quite understand, you can ask me something like 'What is the average salary for women?'",
    'Listening...']
-   >>> conv.say("Maybe.")
-   ['Hmmm, did you mean yes or no?', 'Listening...']
-   >>> conv.say("yes please")
-   ["Great! You can ask me about an employee's individual information (eg. Is Ivan married?), some employee statistic (eg. average salary of females) or names of employees according to your criteria (eg. give me a list of all married employees)",
-   'Now, what would you like to know?', 'Listening...']
    >>> conv.say("What is nan singh's hourly salary?")
    ["Nan Singh's hourly salary is 16.56"]
-
 
 Alternatively, enter conversation mode directly from the command-line.
 
@@ -692,7 +743,7 @@ Alternatively, enter conversation mode directly from the command-line.
 .. code-block:: console
 
    You: Percent of employees earning less than 20 an hour?
-   App: The percent based on your query is 29.0
+   App: Of the total employees, the percentage that meet your criteria is 29.0
 
 .. admonition:: Exercise
 
