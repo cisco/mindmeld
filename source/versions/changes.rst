@@ -6,7 +6,7 @@ MindMeld 4.2
 -------------
 
 MindMeld 4.2 packages several new features to allow developers to build non-english NLP applications, do unstructured Q/A searches,
- and convert from RASA and DialogFlow applications to MindMeld.
+ and convert RASA and DialogFlow conversation applications to MindMeld applications for ease of on-boarding onto the platform.
 
 **1. MindMeld UI**
 
@@ -22,14 +22,22 @@ text data. This complements the structured text retrieval already supported in M
 :ref:`dealing with unstructed data <unstructed_data>` for more details.
 
 **3. MindMeld converter for Rasa and Dialogflow**
-MindMeld 4.2 includes built-in support to automatically convert Rasa and Dialogflow projects into MindMeld projects. See
-[path] for more details.
 
-**4. Webex Bot Server**
+MindMeld 4.2 includes built-in support to automatically convert Rasa and Dialogflow projects into MindMeld projects. See
+:doc:`How to convert RASA and Dialogflow project to MindMeld <../integrations/converters>` for more details.
+
+**4. New Human Resources Blueprint**
+
+MindMeld 4.2 provide an enterprise Human Resources bot blueprint to complement the existing consumer blueprints we currently support. Refer to
+ :ref:`hr assistant <hr_assistant>` blueprint for more details.
+
+**5. Webex Teams Bot Integration**
+
 MindMeld 4.2 includes built-in support for Webex Teams integration, so developers can seamlessly integrate MindMeld bots
 to Webex Teams. See :doc:`Webex bot integration <../integrations/webex_teams>` for implementation details.
 
-**5. Locale and Language codes**
+**6. Locale and Language codes**
+
 Locale codes representing the ISO 639-1 language code and ISO3166 alpha 2 country code separated by an underscore
 character, for example, `en_US` and ISO 639-2 language codes, for example, `EN`, can now be used in MindMeld 4.2 to
 perform NLP tasks on non-english languages.
@@ -57,7 +65,8 @@ to use this functionality below, assuming you have spanish training data for suc
        }
 
 
-**6. Stemming**
+**7. Stemming**
+
 MindMeld 4.2 allows developers to specify their own custom stemmers, which are useful for non-english languages. We also provide
 two in-built stemmers that are wrappers around certain NLTK stemming operations, an English stemmer,
 ``mindmeld.stemmers.EnglishhNLTKStemmer`` and a Spanish stemmer, ``mindmeld.stemmers.SpanishNLTKStemmer``. Below, we provide a code
@@ -70,15 +79,13 @@ snippet on how to use the Spanish built-in stemmer with the NaturalLanguageProce
         nlp = NaturalLanguageProcessor(app_path, resource_loader)
 
 
-**7. Dialogflow.reprocess**
+**8. Dialogflow.reprocess**
+
 MindMeld 4.2 includes an improvement to DialogueFlow (a MindMeld dialogue feature) where the user can exit the current dialogue flow and
 return to a default flow. Refer to :ref:`Existing Dialogue Flow <exiting_dialogue_flow>` section on how to exit an existing dialogue flow.
 
-**8. New blueprint: Human Resources Blueprint**
-MindMeld 4.2 provide an enterprise blueprint to complement the existing consumer blueprints we currently support. Refer to
-:doc:`HR Assistant <../mindmeld_ui/mindmeld_ui>` for more details.
-
 **9. Docker updates**
+
 We updated the :ref:`Getting started with docker <getting_started_docker_setup>` page to spawn Elasticsearch within the docker
 container, which means the developer doesn't have to do any local Elasticsearch setup, thus significantly reducing the
 local dependencies needed to run MindMeld.
