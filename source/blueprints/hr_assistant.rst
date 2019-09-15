@@ -136,14 +136,6 @@ This should create a MindMeld project folder called ``hr_assistant`` in your cur
 
 Dialogue state logic can be arbitrarily complex. Simple dialogue state handlers just return a canned text response, while sophisticated ones can call third party APIs, calculate state transitions, and return complex responses.
 
-MindMeld supports three ways to organize dialogue states in the Dialogue Manager:
-
-#. Define **one dialogue state for each intent**, as seen in the Kwik-E-Mart blueprint. This is the simplest approach, but can lead to duplicated code.
-#. Define **one dialogue state for multiple intents**. This requires more work up front, but helps you consolidate duplicated dialogue state logic. Example shown in the home assistant blueprint.
-#. Define **multiple dialogue states for multiple intents**. Based on the presence of entities, multiple dialogue states can handle a user's request. This is a good choice for when an intent can have a many possible dialogue states based on the presence of entities.
-
-Which approach is best varies from one application to another. Figuring that out always requires some trial and error. You can see an example of the first two cases in the home assistant blueprint. The HR assistant will use and discuss the third method.
-
 Let's begin by looking at some of the dialogue states for the intents in the ``general`` domain:
 
 .. code:: python
