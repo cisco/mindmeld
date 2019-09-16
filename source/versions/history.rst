@@ -26,14 +26,6 @@ Major Features and Improvements
 - Docker setup update that makes getting started with MindMeld much easier by removing the Elasticsearch dependency
 
 
-Bug Fixes and Other Changes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- Update Docker image for MindMeld application
-
-- Reduce the Elasticsearch requirement for running a MindMeld application
-
-
 4.1.0 (2019-04-22)
 ------------------
 
