@@ -208,7 +208,7 @@ class TextModel(Model):
 
     def view_extracted_features(self, example, dynamic_resource=None):
         return self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=self.config.tokenizer)
+            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer)
 
     def _get_feature_weight(self, feat_name, label_class):
         """ Retrieves the feature weight from the coefficient matrix. If there are only two
@@ -256,7 +256,7 @@ class TextModel(Model):
         pred_label = self.predict([example], dynamic_resource=dynamic_resource)[0]
         pred_class = self._class_encoder.transform([pred_label])
         features = self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=self.config.tokenizer)
+            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer)
 
         logging.info("Predicted: %s.", pred_label)
 
@@ -331,7 +331,7 @@ class TextModel(Model):
         groups = []
         feats = []
         for idx, example in enumerate(examples):
-            feats.append(self._extract_features(example, dynamic_resource, self.config.tokenizer))
+            feats.append(self._extract_features(example, dynamic_resource, self.tokenizer))
             groups.append(idx)
 
         X, y = self._preprocess_data(feats, y, fit=fit)

@@ -165,13 +165,12 @@ class TaggerModel(Model):
         Args:
             query (mindmeld.core.Query): The query to extract features from
             dynamic_resource (dict): The dynamic resource used along with the query
-            tokenizer (Tokenizer): The component used to normalize entities in dynamic_resource
 
         Returns:
             list: A list of dictionaries of extracted features and their weights
         """
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.config.tokenizer)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer)
         return self._clf.extract_example_features(query, self.config, workspace_resource)
 
     def _fit(self, examples, labels, params=None):
@@ -211,7 +210,7 @@ class TaggerModel(Model):
             return [()]
 
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.config.tokenizer)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer)
         predicted_tags = self._clf.extract_and_predict(examples, self.config,
                                                        workspace_resource)
         # Decode the tags to labels
@@ -233,7 +232,7 @@ class TaggerModel(Model):
             return []
 
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.config.tokenizer)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer)
         predicted_tags_probas = self._clf.predict_proba(examples, self.config,
                                                         workspace_resource)
         tags, probas = zip(*predicted_tags_probas[0])

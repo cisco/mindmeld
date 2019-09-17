@@ -79,7 +79,6 @@ class EntityRecognizer(Classifier):
         logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
 
         # create model with given params
-        kwargs['tokenizer'] = self._resource_loader.query_factory.tokenizer
         self._model_config = self._get_model_config(**kwargs)
         model = create_model(self._model_config)
 
@@ -147,7 +146,6 @@ class EntityRecognizer(Classifier):
 
             self.entity_types = er_data['entity_types']
             self._model_config = er_data.get('model_config')
-            self._model_config.tokenizer = self._resource_loader.query_factory.tokenizer
 
             # The default is True since < MM 3.2.0 models are serializable by default
             is_serializable = er_data.get('serializable', True)
@@ -175,15 +173,15 @@ class EntityRecognizer(Classifier):
                 self._model.config.resolve_config(self._get_model_config())
 
             gazetteers = self._resource_loader.get_gazetteers()
+            tokenizer = self._resource_loader.get_tokenizer()
             sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
 
             w_ngram_freq = er_data.get('w_ngram_freq')
             c_ngram_freq = er_data.get('c_ngram_freq')
 
             self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types,
-                                           w_ngram_freq=w_ngram_freq, c_ngram_freq=c_ngram_freq)
-
-            self._model.config.tokenizer = self._resource_loader.query_factory.tokenizer
+                                           w_ngram_freq=w_ngram_freq, c_ngram_freq=c_ngram_freq,
+                                           tokenizer=tokenizer)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = self._load_hash(model_path)

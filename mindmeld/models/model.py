@@ -71,16 +71,14 @@ class ModelConfig:
             file names.
         test_label_set (regex pattern): The regex pattern for finding testing
             file names.
-        tokenizer (Tokenizer): The tokenizer to be used for tokenizing features
     """
 
     __slots__ = ['model_type', 'example_type', 'label_type', 'features', 'model_settings', 'params',
-                 'param_selection', 'train_label_set', 'test_label_set', 'tokenizer']
+                 'param_selection', 'train_label_set', 'test_label_set']
 
-    # pylint: disable=too-many-arguments
     def __init__(self, model_type=None, example_type=None, label_type=None, features=None,
                  model_settings=None, params=None, param_selection=None, train_label_set=None,
-                 test_label_set=None, tokenizer=None):
+                 test_label_set=None):
         for arg, val in {'model_type': model_type, 'example_type': example_type,
                          'label_type': label_type, 'features': features}.items():
             if val is None:
@@ -96,7 +94,6 @@ class ModelConfig:
         self.param_selection = param_selection
         self.train_label_set = train_label_set
         self.test_label_set = test_label_set
-        self.tokenizer = tokenizer or Tokenizer()
 
     def to_dict(self):
         """Converts the model config object into a dict
@@ -106,17 +103,11 @@ class ModelConfig:
         """
         result = {}
         for attr in self.__slots__:
-            # the tokenizer is not serializable, its loaded from the app during runtime
-            if attr != 'tokenizer':
-                result[attr] = getattr(self, attr)
+            result[attr] = getattr(self, attr)
         return result
 
     def __repr__(self):
-        args_list = []
-        for key in self.__slots__:
-            if key != 'tokenizer':
-                args_list.append("{}={!r}".format(key, getattr(self, key)))
-        args_str = ', '.join(args_list)
+        args_str = ', '.join("{}={!r}".format(key, getattr(self, key)) for key in self.__slots__)
         return "{}({})".format(self.__class__.__name__, args_str)
 
     def to_json(self):
@@ -721,6 +712,15 @@ class Model:
     def _get_model_constructor(self):
         raise NotImplementedError
 
+    @property
+    def tokenizer(self):
+        tokenizer = self._resources.get('tokenizer')
+        if not tokenizer:
+            logger.error('The tokenizer resource has not been register '
+                         'to the model. Using default tokenizer.')
+            tokenizer = Tokenizer()
+        return tokenizer
+
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
         validation and returns the best estimator and parameters.
@@ -1036,6 +1036,10 @@ class Model:
                 self._resources[rname] = resource_loader.load_feature_resource(
                     rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds,
                     enable_stemming=enable_stemming)
+
+        # Always initialize the global resource for tokenization, which is not a
+        # feature-specific resource
+        self._resources['tokenizer'] = resource_loader.get_tokenizer()
 
 
 class LabelEncoder:

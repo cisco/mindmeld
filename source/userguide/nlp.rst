@@ -616,14 +616,14 @@ Spanish training data for such queries:
 
 .. note::
 
-   If you are using Duckling for system entity resolution (the default), the following non-english languages are only supported: `ducking languages <https://github.com/facebook/duckling/blob/master/Duckling/Locale.hs>`_
+   If you are using Duckling for system entity resolution (the default), only the following languages are supported: `Duckling languages <https://github.com/facebook/duckling/blob/master/Duckling/Locale.hs>`_
 
 .. _stemming:
 
 Language stemming
 ^^^^^^^^^^^^^^^^^
 
-Stemming is an important, language-dependent NLP processing that transforms a word to it's root word. MindMeld allows you to specify their own custom stemmers,
+Stemming is an important, language-dependent NLP process that transforms a word to an approximation of its root form. MindMeld allows you to specify your own custom stemmers,
 which are useful for many languages. We also provide two built-in stemmers that are wrappers around certain NLTK stemming operations -- an English stemmer,
 ``mindmeld.stemmers.EnglishhNLTKStemmer`` and a Spanish stemmer, ``mindmeld.stemmers.SpanishNLTKStemmer``. Below, we provide a code snippet on how to use the
 Spanish built-in stemmer with the NaturalLanguageProcessor object.
