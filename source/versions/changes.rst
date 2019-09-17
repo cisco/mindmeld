@@ -39,7 +39,7 @@ to Webex Teams. See :doc:`Webex bot integration <../integrations/webex_teams>` f
 
 **6. Locale and Language codes**
 
-MindMeld 4.2 now supports non-english system entity classification and resolution. Please see :ref:`Specify language and locale codes <specify_language>` for more details.
+MindMeld 4.2 now supports system entity classification and resolution in non-English languages. Please see :ref:`Specify language and locale codes <specify_language>` for more details.
 
 **7. Stemming**
 
