@@ -593,7 +593,7 @@ Use the :data:`timestamp` parameter in conjunction with the :data:`time_zone` pa
 Specifying language or locale
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For non-english language applications, it is important to pass in the language or locale code to MindMeld's ``process`` API so that it can interpret the system entities correctly. Locale codes representing the ISO 639-1 language code
+For non-English language applications, it is important to pass in the language or locale code to MindMeld's ``process`` API so that it can interpret the system entities correctly. Locale codes representing the ISO 639-1 language code
 and ISO3166 alpha 2 country code separated by an underscore character, for example, `en_US` and ISO 639-2 language codes, for example, `EN` are used here. We provide a code snippet of how to use this functionality below, assuming you have
 Spanish training data for such queries:
 
