@@ -30,7 +30,7 @@ MindMeld 4.2 includes built-in support to automatically convert Rasa and Dialogf
 **4. New Human Resources Blueprint**
 
 MindMeld 4.2 provide an enterprise Human Resources bot blueprint to complement the existing consumer blueprints we currently support. Refer to
-:ref:`hr assistant <hr_assistant>` blueprint for more details.
+:ref:`HR assistant <hr_assistant>` blueprint for more details.
 
 **5. Webex Teams Bot Integration**
 
