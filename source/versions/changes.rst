@@ -6,7 +6,7 @@ MindMeld 4.2
 -------------
 
 
-MindMeld 4.2 packages several new features to allow developers to build non-english NLP applications, do unstructured QA searches,
+MindMeld 4.2 packages several new features to make it easier for developers to build NLP applications for non-English languages, do unstructured QA searches,
 and convert Rasa and Dialogflow conversation applications to MindMeld applications for ease of on-boarding onto the platform.
 
 **1. MindMeld UI**
