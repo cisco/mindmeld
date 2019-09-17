@@ -624,7 +624,7 @@ Language stemming
 ^^^^^^^^^^^^^^^^^
 
 Stemming is an important, language-dependent NLP processing that transforms a word to it's root word. MindMeld allows you to specify their own custom stemmers,
-which are useful for non-english languages. We also provide two in-built stemmers that are wrappers around certain NLTK stemming operations, an English stemmer,
+which are useful for many languages. We also provide two built-in stemmers that are wrappers around certain NLTK stemming operations -- an English stemmer,
 ``mindmeld.stemmers.EnglishhNLTKStemmer`` and a Spanish stemmer, ``mindmeld.stemmers.SpanishNLTKStemmer``. Below, we provide a code snippet on how to use the
 Spanish built-in stemmer with the NaturalLanguageProcessor object.
 
