@@ -43,7 +43,7 @@ MindMeld 4.2 now supports non-english system entity classification and resolutio
 
 **7. Stemming**
 
-MindMeld 4.2 allows developers to specify their own custom stemmers, which are useful for non-english languages. Please see :ref:`Stemming <stemming>` for more details.
+MindMeld 4.2 allows developers to specify their own custom stemmers, which are useful for many languages. Please see :ref:`Stemming <stemming>` for more details.
 
 **8. DialogueFlow.reprocess**
 
