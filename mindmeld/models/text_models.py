@@ -32,7 +32,6 @@ from sklearn.tree import DecisionTreeClassifier
 from .helpers import (QUERY_FREQ_RSC, WORD_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
                       CHAR_NGRAM_FREQ_RSC, register_model)
 from .model import EvaluatedExample, Model, StandardModelEvaluation
-from ..tokenizer import Tokenizer
 
 _NEG_INF = -1e10
 
@@ -208,9 +207,8 @@ class TextModel(Model):
         return predictions
 
     def view_extracted_features(self, example, dynamic_resource=None):
-        tokenizer = Tokenizer()
         return self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
+            example, dynamic_resource=dynamic_resource, tokenizer=self.config.tokenizer)
 
     def _get_feature_weight(self, feat_name, label_class):
         """ Retrieves the feature weight from the coefficient matrix. If there are only two
@@ -257,9 +255,8 @@ class TextModel(Model):
 
         pred_label = self.predict([example], dynamic_resource=dynamic_resource)[0]
         pred_class = self._class_encoder.transform([pred_label])
-        tokenizer = Tokenizer()
         features = self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
+            example, dynamic_resource=dynamic_resource, tokenizer=self.config.tokenizer)
 
         logging.info("Predicted: %s.", pred_label)
 
@@ -333,9 +330,8 @@ class TextModel(Model):
         """
         groups = []
         feats = []
-        tokenizer = Tokenizer()
         for idx, example in enumerate(examples):
-            feats.append(self._extract_features(example, dynamic_resource, tokenizer))
+            feats.append(self._extract_features(example, dynamic_resource, self.config.tokenizer))
             groups.append(idx)
 
         X, y = self._preprocess_data(feats, y, fit=fit)

@@ -335,8 +335,7 @@ class Classifier(ABC):
                 query, time_zone=time_zone, timestamp=timestamp)
         return self._model.view_extracted_features(query, dynamic_resource)
 
-    @staticmethod
-    def _get_model_config(loaded_config=None, **kwargs):
+    def _get_model_config(self, loaded_config=None, **kwargs):
         """Updates the loaded configuration with runtime specified options, and creates a model
         configuration object with the final configuration dictionary. If an application config
         exists it should be passed in, if not the default config should be passed in.
@@ -346,6 +345,7 @@ class Classifier(ABC):
         """
         try:
             # If all params required for model config were passed in, use kwargs
+            kwargs['tokenizer'] = self._resource_loader.query_factory.tokenizer
             return ModelConfig(**kwargs)
         except (TypeError, ValueError):
             # Use application specified or default config, customizing with provided kwargs
@@ -416,6 +416,9 @@ class Classifier(ABC):
                 self._model.config.resolve_config(self._get_model_config())
 
             self._model.initialize_resources(self._resource_loader)
+
+            # We need to load the tokenizer from the app
+            self._model.config.tokenizer = self._resource_loader.query_factory.tokenizer
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = self._load_hash(model_path)

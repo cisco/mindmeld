@@ -1,7 +1,7 @@
 Package History
 ===============
 
-4.2.0 (2019-09-01)
+4.2.0 (2019-09-16)
 ------------------
 
 Major Features and Improvements
@@ -9,7 +9,7 @@ Major Features and Improvements
 
 - MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application
 
-- A built-in Question-Answering (QA) component for un-structured data using Elasticsearch
+- A built-in Question-Answering (QA) component for unstructured data using Elasticsearch
 
 - Converters for Rasa and Dialogflow projects into MindMeld projects
 

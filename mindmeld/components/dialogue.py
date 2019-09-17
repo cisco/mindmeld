@@ -523,7 +523,8 @@ class DialogueFlow(DialogueManager):
 
         self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
         app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
-        handler = self._apply_flow_handler_async if self.async_mode else self._apply_flow_handler_sync
+        handler = \
+            self._apply_flow_handler_async if self.async_mode else self._apply_flow_handler_sync
         app.add_dialogue_rule(self.flow_state, handler, targeted_only=True)
 
     @property

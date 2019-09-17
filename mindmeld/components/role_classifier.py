@@ -84,6 +84,7 @@ class RoleClassifier(Classifier):
                     self.domain, self.intent, self.entity_type)
 
         # create model with given params
+        kwargs['tokenizer'] = self._resource_loader.query_factory.tokenizer
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
 
@@ -164,6 +165,7 @@ class RoleClassifier(Classifier):
 
             gazetteers = self._resource_loader.get_gazetteers()
             self._model.register_resources(gazetteers=gazetteers)
+            self._model.config.tokenizer = self._resource_loader.query_factory.tokenizer
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = self._load_hash(model_path)

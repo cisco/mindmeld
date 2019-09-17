@@ -553,8 +553,12 @@ class NaturalLanguageProcessor(Processor):
             intent (str): The gold value for intent classification.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
         """
-        query_factory = QueryFactory.create_query_factory()
-        _, query, _ = process_markup(markup, query_factory, query_options={})
+        if self.resource_loader:
+            _, query, _ = process_markup(
+                markup, self.resource_loader.query_factory, query_options={})
+        else:
+            query_factory = QueryFactory.create_query_factory()
+            _, query, _ = process_markup(markup, query_factory, query_options={})
 
         if domain:
             print('Inspecting domain classification')
