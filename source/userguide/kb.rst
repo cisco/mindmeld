@@ -716,7 +716,7 @@ In the example below, we search for restaurants whose names best match ``firetra
    We can set the ``size`` parameter of the :meth:`execute()` method to specify the maximum number of records.
 
 
-.. _unstructed_data:
+.. _unstructured_data:
 
 Dealing with unstructured text
 ------------------------------

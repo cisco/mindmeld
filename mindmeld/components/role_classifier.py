@@ -163,7 +163,8 @@ class RoleClassifier(Classifier):
                 self._model.config.resolve_config(self._get_model_config())
 
             gazetteers = self._resource_loader.get_gazetteers()
-            self._model.register_resources(gazetteers=gazetteers)
+            tokenizer = self._resource_loader.get_tokenizer()
+            self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = self._load_hash(model_path)
@@ -188,7 +189,8 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
+        tokenizer = self._resource_loader.get_tokenizer()
+        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
         return self._model.predict([(query, entities, entity_index)])[0]
 
     def predict_proba(self, query, entities, entity_index):  # pylint: disable=arguments-differ
@@ -209,7 +211,8 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
+        tokenizer = self._resource_loader.get_tokenizer()
+        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
 
         predict_proba_result = self._model.predict_proba([(query, entities, entity_index)])
         class_proba_tuples = list(predict_proba_result[0][1].items())
@@ -234,7 +237,8 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        self._model.register_resources(gazetteers=gazetteers)
+        tokenizer = self._resource_loader.get_tokenizer()
+        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
         return self._model._extract_features((query, entities, entity_index))
 
     def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):

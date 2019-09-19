@@ -32,6 +32,8 @@ from .helpers import (get_feature_extractor, get_label_encoder, register_label, 
 from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
                               BoundaryCounts)
 from .._version import _get_mm_version
+from ..tokenizer import Tokenizer
+
 logger = logging.getLogger(__name__)
 
 # model scoring type
@@ -710,6 +712,15 @@ class Model:
     def _get_model_constructor(self):
         raise NotImplementedError
 
+    @property
+    def tokenizer(self):
+        tokenizer = self._resources.get('tokenizer')
+        if not tokenizer:
+            logger.error('The tokenizer resource has not been registered '
+                         'to the model. Using default tokenizer.')
+            tokenizer = Tokenizer()
+        return tokenizer
+
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
         validation and returns the best estimator and parameters.
@@ -1025,6 +1036,10 @@ class Model:
                 self._resources[rname] = resource_loader.load_feature_resource(
                     rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds,
                     enable_stemming=enable_stemming)
+
+        # Always initialize the global resource for tokenization, which is not a
+        # feature-specific resource
+        self._resources['tokenizer'] = resource_loader.get_tokenizer()
 
 
 class LabelEncoder:

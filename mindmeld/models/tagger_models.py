@@ -24,7 +24,6 @@ from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from .taggers.lstm import LstmModel
 from ..exceptions import MindMeldError
-from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -170,9 +169,8 @@ class TaggerModel(Model):
         Returns:
             list: A list of dictionaries of extracted features and their weights
         """
-        tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer)
         return self._clf.extract_example_features(query, self.config, workspace_resource)
 
     def _fit(self, examples, labels, params=None):
@@ -211,9 +209,8 @@ class TaggerModel(Model):
         if self._no_entities:
             return [()]
 
-        tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer)
         predicted_tags = self._clf.extract_and_predict(examples, self.config,
                                                        workspace_resource)
         # Decode the tags to labels
@@ -234,9 +231,8 @@ class TaggerModel(Model):
         if self._no_entities:
             return []
 
-        tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer)
         predicted_tags_probas = self._clf.predict_proba(examples, self.config,
                                                         workspace_resource)
         tags, probas = zip(*predicted_tags_probas[0])

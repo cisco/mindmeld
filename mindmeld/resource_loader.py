@@ -127,6 +127,14 @@ class ResourceLoader:
 
         return self._entity_files[gaz_name]['gazetteer']['data']
 
+    def get_tokenizer(self):
+        """Get the tokenizer from the query_factory attribute
+
+        Returns:
+            tokenizer (Tokenizer): The resource loaders tokenizer
+        """
+        return self.query_factory.tokenizer
+
     def get_gazetteers_hash(self):
         """
         Gets a single hash of all the gazetteer ordered by alphabetical entity type.
