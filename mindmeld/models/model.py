@@ -716,7 +716,7 @@ class Model:
     def tokenizer(self):
         tokenizer = self._resources.get('tokenizer')
         if not tokenizer:
-            logger.error('The tokenizer resource has not been register '
+            logger.error('The tokenizer resource has not been registered '
                          'to the model. Using default tokenizer.')
             tokenizer = Tokenizer()
         return tokenizer
