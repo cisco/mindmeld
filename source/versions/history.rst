@@ -11,8 +11,6 @@ Major Features and Improvements
 
 - A built-in Question-Answering (QA) component for unstructured data using Elasticsearch
 
-- Converters for Rasa and Dialogflow projects into MindMeld projects
-
 - A new Human Resources blueprint for enterprise use-cases
 
 - Webex Teams Bot Integration

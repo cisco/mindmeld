@@ -730,9 +730,15 @@ Here is an example of what the knowledge base can look like for the HR assistant
 
 .. code:: python
 
+  # Download hr assistant blueprint
+  import mindmeld as mm
+  mm.configure_logs()
+  bp_name = 'hr_assistant'
+  mm.blueprint(bp_name)
+
 	from mindmeld.components import QuestionAnswerer
 	qa = QuestionAnswerer(app_path='hr_assistant')
-	qa.load_kb(app_namespace='hr_assistant', index_name='faq_data', data_file='hr_assistant/data/faq_data.json')
+	qa.load_kb(app_namespace='hr_assistant', index_name='faq_data', data_file='hr_assistant/data/hr_faq_data.json')
 	qa.get(index='faq_data')
 
 .. code-block:: console
