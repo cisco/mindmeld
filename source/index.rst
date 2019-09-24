@@ -118,7 +118,6 @@ Contents
    userguide/dm
    userguide/voice
    integrations/webex_teams
-   integrations/converters
 
 
 .. toctree::
