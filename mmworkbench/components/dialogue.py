@@ -361,6 +361,10 @@ class DialogueManager:
         dialogue_state = self._get_dialogue_state(context, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder = self._create_responder()
+        params = context.get('request', {}).get('params', {})
+        language = params.get('language')
+        locale = params.get('locale')
+        responder.set_locale(language=language, locale=locale)
         res = handler(context, responder)
 
         if res and 'dialogue_state' in res:
@@ -409,8 +413,11 @@ class DialogueManager:
         dialogue_state = self._get_dialogue_state(context, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder = self._create_responder()
+        params = context.get('request', {}).get('params', {})
+        language = params.get('language')
+        locale = params.get('locale')
+        responder.set_locale(language=language, locale=locale)
         res = await handler(context, responder)
-
         if res and 'dialogue_state' in res:
             # Add dialogue flow's sub-dialogue_state if provided
             dialogue_state = '.'.join([dialogue_state, res["dialogue_state"]])
@@ -620,6 +627,16 @@ class DialogueResponder:
         """
         self.slots = slots
         self.directives = []
+
+    def set_locale(self, language=None, locale=None):
+        """No-op function to provide logic for the responder once the
+        locale and language are known.
+
+        Args:
+            language (str): The language code
+            locale (str): The locale code
+        """
+        pass
 
     def reply(self, text):
         """Adds a 'reply' directive
