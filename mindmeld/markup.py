@@ -134,7 +134,7 @@ def read_query_file(file_path):
                 if query_text:
                     yield query_text
     except IOError:
-        logger.error('Problem reading file {0}.'.format(file_path))
+        logger.error('Problem reading file %s.', file_path)
         yield from ()
 
 
