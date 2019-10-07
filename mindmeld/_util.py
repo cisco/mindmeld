@@ -20,6 +20,7 @@ from email.utils import parsedate
 import logging
 import os
 import shutil
+import sys
 import tarfile
 
 from dateutil import tz
@@ -250,7 +251,6 @@ def configure_logs(**kwargs):
     Args:
         level (TYPE, optional): A logging level recognized by python's logging module.
     """
-    import sys
     level = kwargs.get('level', logging.INFO)
     log_format = kwargs.get('format', '%(message)s')
     logging.basicConfig(stream=sys.stdout, format=log_format)

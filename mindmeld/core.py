@@ -687,7 +687,7 @@ def resolve_entity_conflicts(query_entities):
         list of QueryEntity: A filtered list of query entities
 
     """
-    filtered = [e for e in query_entities]
+    filtered = query_entities
     i = 0
     while i < len(filtered):
         include_target = True
@@ -718,7 +718,8 @@ def resolve_entity_conflicts(query_entities):
                     del filtered[i]
                     include_target = False
                     break
-            j += 1
+            else:
+                j += 1
         if include_target:
             i += 1
 
