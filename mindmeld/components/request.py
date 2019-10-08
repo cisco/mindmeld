@@ -242,7 +242,7 @@ class FrozenParams(Params):
                                converter=immutables.Map)
 
 
-@attr.s(frozen=True, kw_only=True)
+@attr.s(frozen=True, kw_only=True)  # pylint: disable=too-many-instance-attributes
 class Request:
     """
     The Request is an object passed in through the Dialogue Manager and contains all the

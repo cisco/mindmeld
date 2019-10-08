@@ -12,6 +12,7 @@ services:
 install:
   - pip install --upgrade pip
   - pip install .
+  - pip install "mindmeld[bot]"
   - pip install -r test-requirements.txt
 before_script:
   - sleep 10

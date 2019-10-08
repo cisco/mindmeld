@@ -15,7 +15,9 @@
 representing annotations of query text inline.
 """
 import codecs
+import csv
 import logging
+import sys
 
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
@@ -148,8 +150,6 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
         nlp (NaturalLanguageProcessor): an application's NLP with built models
         kwargs (dict): A dictionary of additional args
     """
-    import csv
-    import sys
     show_confidence = kwargs.get("confidence")
     with open(output_file, 'w') if output_file else sys.stdout as csv_file:
         field_names = ["query"]
