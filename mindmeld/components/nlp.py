@@ -1036,7 +1036,7 @@ class IntentProcessor(Processor):
             query = query[0]
 
         processed_entities = [deepcopy(e) for e in entities[0]]
-        processed_entities_conf = self._process_list([i for i in range(len(processed_entities))],
+        processed_entities_conf = self._process_list(range(len(processed_entities)),
                                                      '_classify_and_resolve_entities',
                                                      *[query, processed_entities, aligned_entities,
                                                        verbose])

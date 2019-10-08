@@ -7,10 +7,11 @@ This module contains the Webex Bot Server component.
 import logging
 import json
 from flask import request, Flask
-from mindmeld.components import NaturalLanguageProcessor
-from mindmeld.components.dialogue import Conversation
 import requests
 from ciscosparkapi import CiscoSparkAPI
+from ..components import NaturalLanguageProcessor
+from ..components.dialogue import Conversation
+
 
 CISCO_API_URL = 'https://api.ciscospark.com/v1'
 ACCESS_TOKEN_WITH_BEARER = 'Bearer '
@@ -60,7 +61,7 @@ class WebexBotServer:
         self.access_token_with_bearer = ACCESS_TOKEN_WITH_BEARER + self.access_token
 
         @self.app.route('/', methods=['POST'])
-        def handle_message():
+        def handle_message():  # pylint: disable=unused-variable
             me = self.spark_api.people.me()
             data = request.get_json()
 
@@ -70,7 +71,7 @@ class WebexBotServer:
                     return BAD_REQUEST_NAME, BAD_REQUEST_CODE, payload
 
             if data['id'] != self.webhook_id:
-                self.logger.debug("Retrieved webhook_id {} doesn't match".format(data['id']))
+                self.logger.debug("Retrieved webhook_id %s doesn't match", data['id'])
                 payload = {'message': 'WEBHOOK_ID mismatch'}
                 return BAD_REQUEST_NAME, BAD_REQUEST_CODE, payload
 
@@ -97,7 +98,8 @@ class WebexBotServer:
     def run(self, host='localhost', port=7150):
         self.app.run(host=host, port=port)
 
-    def _url(self, path):
+    @staticmethod
+    def _url(path):
         return "{0}{1}".format(CISCO_API_URL, path)
 
     def _get_message(self, msg_id):

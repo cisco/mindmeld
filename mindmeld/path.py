@@ -15,9 +15,12 @@
 """
 This module is responsible for locating various MindMeld app files.
 """
+import logging
 import os
 import re
-import logging
+import sys
+
+from importlib.machinery import SourceFileLoader
 from functools import wraps
 
 from .exceptions import MindMeldImportError
@@ -535,9 +538,6 @@ def get_app(app_path):
     Raises:
         MindMeldImportError: when the application can not be found
     """
-    import sys
-    from importlib.machinery import SourceFileLoader
-
     app_path = os.path.abspath(app_path)
     package_name = os.path.basename(app_path)
 
