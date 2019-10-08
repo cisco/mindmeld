@@ -700,26 +700,28 @@ def resolve_entity_conflicts(query_entities):
                              'subset of another.', other.text, other.entity.type, i)
                 del filtered[j]
                 continue
-            elif _is_subset(target, other) and not _is_same_span(target, other):
+
+            if _is_subset(target, other) and not _is_same_span(target, other):
                 logger.debug('Removing {{%s|%s}} entity in query %d since it is a '
                              'subset of another.', target.text, target.entity.type, i)
                 del filtered[i]
                 include_target = False
                 break
-            elif _is_same_span(target, other) or _is_overlapping(target, other):
+
+            if _is_same_span(target, other) or _is_overlapping(target, other):
                 if target.entity.confidence >= other.entity.confidence:
                     logger.debug('Removing {{%s|%s}} entity in query %d since it overlaps '
                                  'with another.', other.text, other.entity.type, i)
                     del filtered[j]
                     continue
-                elif target.entity.confidence < other.entity.confidence:
+
+                if target.entity.confidence < other.entity.confidence:
                     logger.debug('Removing {{%s|%s}} entity in query %d since it overlaps '
                                  'with another.', target.text, target.entity.type, i)
                     del filtered[i]
                     include_target = False
                     break
-            else:
-                j += 1
+            j += 1
         if include_target:
             i += 1
 

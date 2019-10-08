@@ -14,7 +14,10 @@
 """The markup module contains functions for interacting with the MindMeld Markup language for
 representing annotations of query text inline.
 """
+import codecs
+import csv
 import logging
+import sys
 
 from .core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 from .exceptions import MarkupError, SystemEntityMarkupError, SystemEntityResolutionError
@@ -124,7 +127,6 @@ def read_query_file(file_path):
     Yields:
         str: query text for each line
     """
-    import codecs
     with codecs.open(file_path, encoding='utf-8') as queries_file:
         for line in queries_file:
             line = line.strip()
@@ -144,8 +146,6 @@ def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
         nlp (NaturalLanguageProcessor): an application's NLP with built models
         kwargs (dict): A dictionary of additional args
     """
-    import csv
-    import sys
     show_confidence = kwargs.get("confidence")
     with open(output_file, 'w') if output_file else sys.stdout as csv_file:
         field_names = ["query"]

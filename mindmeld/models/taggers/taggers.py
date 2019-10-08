@@ -219,7 +219,6 @@ def get_tags_from_entities(query, entities, scheme='IOB'):
             '' if the IOB status is 'O'. The last two are like the first two, \
             but for system entities.
     """
-    entities = [e for e in entities]
     iobs, types = _get_tags_from_entities(query, entities, scheme)
     tags = ['|'.join(args) for args in zip(iobs, types)]
     return tags
