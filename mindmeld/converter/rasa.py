@@ -237,18 +237,19 @@ class RasaConverter(Converter):
                             current_step["intent"] = copy.deepcopy(current_intent)
                             current_step["entities"] = copy.deepcopy(current_entities)
                             continue
-                            
+
                         if self._is_action(line):
                             current_actions.append(
                                 RasaConverter._remove_comments_from_line(line[3:]).rstrip())
+                            
                             if ((line_num + 1) < max_lines) and RasaConverter._is_action(
                                                                     stories_lines[line_num + 1]):
                                 continue
-                            else:
-                                current_step["actions"] = copy.deepcopy(current_actions)
-                                current_actions.clear()
-                                steps.append(copy.deepcopy(current_step))
-                                current_step.clear()
+
+                            current_step["actions"] = copy.deepcopy(current_actions)
+                            current_actions.clear()
+                            steps.append(copy.deepcopy(current_step))
+                            current_step.clear()
                         elif len(line.strip()) == 0:
                             if current_story_name != '':
                                 stories_dictionary[current_story_name] = copy.deepcopy(steps)
