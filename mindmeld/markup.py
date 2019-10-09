@@ -127,13 +127,17 @@ def read_query_file(file_path):
     Yields:
         str: query text for each line
     """
-    with codecs.open(file_path, encoding='utf-8') as queries_file:
-        for line in queries_file:
-            line = line.strip()
-            # only create query if line is not empty string
-            query_text = line.split('\t')[0].strip()
-            if query_text:
-                yield query_text
+    try:
+        with codecs.open(file_path, encoding='utf-8') as queries_file:
+            for line in queries_file:
+                line = line.strip()
+                # only create query if line is not empty string
+                query_text = line.split('\t')[0].strip()
+                if query_text:
+                    yield query_text
+    except IOError:
+        logger.error('Problem reading file %s.', file_path)
+        yield from ()
 
 
 def bootstrap_query_file(input_file, output_file, nlp, **kwargs):
