@@ -408,11 +408,14 @@ def _tokenize_markup(markup):
                 else:
                     key = 'entity'
                 if open_annotations[key] == 0:
-                    raise MarkupError('Mismatched end for {} at position {}'.format(key, idx))
+                    msg = 'Mismatched end for {} at position {}: {}'.format(key, idx, markup)
+                    raise MarkupError(msg)
                 if not token_is_meta:
-                    raise MarkupError('Missing label for {} at position {}'.format(key, idx))
+                    msg = 'Missing label for {} at position {}: {}'.format(key, idx, markup)
+                    raise MarkupError(msg)
                 if not token:
-                    raise MarkupError('Empty label for {} at position {}'.format(key, idx))
+                    msg = 'Empty label for {} at position {}: {}'.format(key, idx, markup)
+                    raise MarkupError(msg)
                 open_annotations[key] -= 1
 
                 yield token
@@ -426,7 +429,7 @@ def _tokenize_markup(markup):
 
     for key in open_annotations:
         if open_annotations[key]:
-            raise MarkupError('Mismatched start for {}'.format(key))
+            raise MarkupError('Mismatched start for {}: {}'.format(key, markup))
 
     if token:
         yield token
