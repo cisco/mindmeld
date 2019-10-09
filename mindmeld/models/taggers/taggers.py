@@ -222,7 +222,7 @@ def get_tags_from_entities(query, entities, scheme='IOB'):
     try:
         iobs, types = _get_tags_from_entities(query, entities, scheme)
     except IndexError:
-        logger.error("Invalid entities {} in '{}'".format(entities, query))
+        logger.error("Invalid entities %s in '%s'", entities, query)
         raise
     tags = ['|'.join(args) for args in zip(iobs, types)]
     return tags
