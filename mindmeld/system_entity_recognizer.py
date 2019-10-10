@@ -80,7 +80,7 @@ class SystemEntityRecognizer:
         try:
             response = requests.request('POST', url, data=data, timeout=1)
 
-            if response.status_code == requests.codes.ok:
+            if response.status_code == requests.codes['ok']:
                 response_json = response.json()
 
                 # Remove the redundant 'values' key in the response['value'] dictionary
