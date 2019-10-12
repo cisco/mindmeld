@@ -21,6 +21,10 @@ NO_RESPONSE_CODE = -1
 logger = logging.getLogger(__name__)
 
 
+class SystemEntityError(Exception):
+    pass
+
+
 class SystemEntityRecognizer:
     """SystemEntityRecognizer is the external parsing service used to extract
     system entities. It is intended to be used as a singleton, so it's
@@ -74,20 +78,24 @@ class SystemEntityRecognizer:
         url = get_system_entity_url_config(app_path=self.app_path)
 
         try:
-            response = requests.request('POST', url, data=data)
-            response_json = response.json()
+            response = requests.request('POST', url, data=data, timeout=1)
 
-            # Remove the redundant 'values' key in the response['value'] dictionary
-            for i, entity_dict in enumerate(response_json):
-                if 'values' in entity_dict['value']:
-                    del response_json[i]['value']['values']
+            if response.status_code == requests.codes['ok']:
+                response_json = response.json()
 
-            return response_json, response.status_code
+                # Remove the redundant 'values' key in the response['value'] dictionary
+                for i, entity_dict in enumerate(response_json):
+                    if 'values' in entity_dict['value']:
+                        del response_json[i]['value']['values']
+
+                return response_json, response.status_code
+            else:
+                raise SystemEntityError('System entity status code is not 200.')
         except requests.ConnectionError:
             sys.exit("Unable to connect to the system entity recognizer. Make sure it's "
                      "running by typing 'mindmeld num-parse' at the command line.")
         except Exception as ex:  # pylint: disable=broad-except
-            logger.error('Numerical Entity Recognizer Error %s\nURL: %r\nData: %s', ex, url,
+            logger.error('Numerical Entity Recognizer Error: %s\nURL: %r\nData: %s', ex, url,
                          json.dumps(data))
             sys.exit('\nThe system entity recognizer encountered the following ' +
                      'error:\n' + str(ex) + '\nURL: ' + url + '\nRaw data: ' + str(data) +

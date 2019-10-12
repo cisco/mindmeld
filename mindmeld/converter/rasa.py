@@ -241,7 +241,7 @@ class RasaConverter(Converter):
                         if self._is_action(line):
                             current_actions.append(
                                 RasaConverter._remove_comments_from_line(line[3:]).rstrip())
-                            
+
                             if ((line_num + 1) < max_lines) and RasaConverter._is_action(
                                                                     stories_lines[line_num + 1]):
                                 continue

@@ -577,6 +577,8 @@ def is_duckling_configured(app_path):
 
 
 def get_system_entity_url_config(app_path):
+    if not app_path:
+        return DEFAULT_DUCKLING_URL
     return get_nlp_config(app_path).get(
         'system_entity_recognizer', {}).get('url', DEFAULT_DUCKLING_URL)
 
