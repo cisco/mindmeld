@@ -21,6 +21,7 @@ from ...core import QueryEntity, Span, TEXT_FORM_RAW, \
     TEXT_FORM_NORMALIZED, _sort_by_lowest_time_grain
 from ...ser import resolve_system_entity, SystemEntityResolutionError
 from ..helpers import get_feature_extractor, ENABLE_STEMMING
+from ...markup import MarkupError
 
 logger = logging.getLogger(__name__)
 
@@ -222,8 +223,7 @@ def get_tags_from_entities(query, entities, scheme='IOB'):
     try:
         iobs, types = _get_tags_from_entities(query, entities, scheme)
     except IndexError:
-        logger.error("Invalid entities %s in '%s'", entities, query)
-        raise
+        raise MarkupError("Invalid entities {} in '{}'".format(entities, query))
     tags = ['|'.join(args) for args in zip(iobs, types)]
     return tags
 
