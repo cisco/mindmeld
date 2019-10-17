@@ -20,7 +20,7 @@ import pycountry
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
 from .system_entity_recognizer import SystemEntityRecognizer
-from .components.request import _validate_language_code, _validate_locale_code
+from .components.request import validate_language_code, validate_locale_code
 
 logger = logging.getLogger(__name__)
 
@@ -136,8 +136,8 @@ def parse_numerics(sentence, dimensions=None, language=None, locale=None,
         'latent': True,
     }
 
-    language = _validate_language_code(language)
-    locale = _validate_locale_code(locale)
+    language = validate_language_code(language)
+    locale = validate_locale_code(locale)
 
     # If a ISO 639-2 code is provided, we attempt to convert it to
     # ISO 639-1 since the dependent system entity resolver requires this

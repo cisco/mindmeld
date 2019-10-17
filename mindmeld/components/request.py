@@ -20,7 +20,7 @@ from pytz.exceptions import UnknownTimeZoneError
 logger = logging.getLogger(__name__)
 
 
-def _validate_language_code(param=None):
+def validate_language_code(param=None):
     """Validates language code parameters
     Args:
         param (str, optional): The language code parameter
@@ -57,7 +57,7 @@ def _validate_language_code(param=None):
     return param
 
 
-def _validate_locale_code(param=None):
+def validate_locale_code(param=None):
     """Validates the locale code parameters
     Args:
         param (str, optional): The locale code parameter
@@ -76,7 +76,7 @@ def _validate_locale_code(param=None):
         return None
 
     language_code = param.split('_')[0].lower()
-    if not _validate_language_code(language_code):
+    if not validate_language_code(language_code):
         logger.error("Invalid %r param: %s is not a valid ISO 639-1 language code. "
                      "See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.",
                      'locale', language_code)
@@ -129,8 +129,8 @@ PARAM_VALIDATORS = {
     'allowed_intents': _validate_generic('allowed_intents', tuple),
     'target_dialogue_state': _validate_generic('target_dialogue_state', str),
     'time_zone': _validate_time_zone,
-    'language': _validate_language_code,
-    'locale': _validate_locale_code,
+    'language': validate_language_code,
+    'locale': validate_locale_code,
     'timestamp': _validate_generic('timestamp', int),
     'dynamic_resource': _validate_generic('dynamic_resource', immutables.Map)
 }
