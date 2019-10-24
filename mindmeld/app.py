@@ -20,7 +20,7 @@ import sys
 
 from .app_manager import ApplicationManager
 from .cli import app_cli
-from .server import MindMeldServer
+from .server import AbstractMindMeldServer, MindMeldServer
 from .components.dialogue import DialogueResponder, DialogueFlow
 from .components.request import Request
 
@@ -38,12 +38,14 @@ class Application:
                 Request.
             responder_class (DialogueResponder): Any class that \
                 inherits from the DialogueResponder.
+            server_class (AbstractMindMeldServer): Any class that implements \
+                server functionality.
             preprocessor (Preprocessor): The application preprocessor, if any.
             async_mode (bool): ``True`` if the application is async, ``False`` otherwise.
         """
 
     def __init__(self, import_name, request_class=None, responder_class=None, preprocessor=None,
-                 async_mode=False):
+                 async_mode=False, server_class=None):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], '__file__', None)
         if filename is None:
@@ -56,6 +58,7 @@ class Application:
         self._middleware = []
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
+        self.server_class = server_class or MindMeldServer
         self.preprocessor = preprocessor
         self.async_mode = async_mode
 
@@ -77,7 +80,7 @@ class Application:
             self.app_path, nlp, responder_class=self.responder_class,
             request_class=self.request_class, preprocessor=self.preprocessor,
             async_mode=self.async_mode)
-        self._server = MindMeldServer(self.app_manager)
+        self._server = self.server_class(self.app_manager)
 
         # Add any pending dialogue rules
         for rule in self._dialogue_rules:

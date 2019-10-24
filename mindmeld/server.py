@@ -21,6 +21,7 @@ import sys
 import time
 import uuid
 
+from abc import ABC, abstractmethod
 from flask import Flask, Request, request, jsonify, g
 from flask_cors import CORS
 
@@ -47,7 +48,22 @@ class MindMeldRequest(Request):  # pylint: disable=too-many-ancestors
         raise BadMindMeldRequestError("Malformed request body: {0:s}".format(sys.exc_info()[1]))
 
 
-class MindMeldServer:
+class AbstractMindMeldServer(ABC):
+    """
+    Base class for MindMeldServer object
+    """
+    def __init__(self, app_manager):
+        self._app_manager = app_manager
+
+    @abstractmethod
+    def run(self, **kwarg):
+        """
+        Main function to start the server
+        """
+        pass
+
+
+class MindMeldServer(AbstractMindMeldServer):
     """This class sets up a Flask web server."""
 
     def __init__(self, app_manager):
