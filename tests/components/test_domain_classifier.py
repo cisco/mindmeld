@@ -1,5 +1,6 @@
-from mindmeld.components.nlp import NaturalLanguageProcessor
 from unittest.mock import patch
+
+from mindmeld.components.nlp import NaturalLanguageProcessor
 
 
 def test_domain_classifier_random_forest(home_assistant_app_path):

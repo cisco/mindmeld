@@ -12,10 +12,10 @@
 # limitations under the License.
 
 """Sphinx extension for conditionally exposing pages"""
-from builtins import open
-
 import os
 import re
+from builtins import open
+
 from sphinx import addnodes
 
 docs_to_remove = []

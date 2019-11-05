@@ -14,33 +14,29 @@
 """
 This module contains the question answerer component of MindMeld.
 """
-from abc import ABC, abstractmethod
-
+import copy
 import json
 import logging
-import copy
-from elasticsearch5 import (
-    TransportError,
-    ElasticsearchException,
-    ConnectionError as EsConnectionError,
-)
+from abc import ABC, abstractmethod
 
+from elasticsearch5 import ConnectionError as EsConnectionError
+from elasticsearch5 import ElasticsearchException, TransportError
+
+from ..exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError
+from ..resource_loader import ResourceLoader
 from ._config import (
-    get_app_namespace,
-    DOC_TYPE,
     DEFAULT_ES_QA_MAPPING,
     DEFAULT_RANKING_CONFIG,
+    DOC_TYPE,
+    get_app_namespace,
 )
 from ._elasticsearch_helpers import (
     create_es_client,
-    load_index,
-    get_scoped_index_name,
-    does_index_exist,
     delete_index,
+    does_index_exist,
+    get_scoped_index_name,
+    load_index,
 )
-
-from ..resource_loader import ResourceLoader
-from ..exceptions import KnowledgeBaseError, KnowledgeBaseConnectionError
 
 logger = logging.getLogger(__name__)
 

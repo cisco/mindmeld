@@ -7,16 +7,15 @@ test_entity_resolver
 
 Tests for `entity_resolver` module.
 """
-# pylint: disable=locally-disabled,redefined-outer-name
-import pytest
 import mock
 
+# pylint: disable=locally-disabled,redefined-outer-name
+import pytest
 from mock import PropertyMock
 
-from mindmeld.core import Entity
-
-from mindmeld.components.entity_resolver import EntityResolver
 from mindmeld.components._elasticsearch_helpers import create_es_client
+from mindmeld.components.entity_resolver import EntityResolver
+from mindmeld.core import Entity
 
 ENTITY_TYPE = "store_name"
 APP_PATH = "../kwik_e_mart"

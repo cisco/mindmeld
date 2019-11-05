@@ -13,16 +13,16 @@
 
 """This module contains the dialogue manager component of MindMeld"""
 import asyncio
-from functools import cmp_to_key, partial
 import copy
+import json
 import logging
 import random
-import json
+from functools import cmp_to_key, partial
+
 import immutables
 
 from .. import path
-from .request import Params, Request, FrozenParams
-
+from .request import FrozenParams, Params, Request
 
 mod_logger = logging.getLogger(__name__)
 

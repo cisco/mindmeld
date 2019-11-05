@@ -1,5 +1,6 @@
-from mindmeld.components.nlp import NaturalLanguageProcessor
 from unittest.mock import patch
+
+from mindmeld.components.nlp import NaturalLanguageProcessor
 
 
 def test_memm_model(kwik_e_mart_app_path):

@@ -12,22 +12,21 @@
 # limitations under the License.
 
 """This module contains helper methods for consuming Elasticsearch."""
-import os
 import logging
+import os
 
+from elasticsearch5 import ConnectionError as EsConnectionError
 from elasticsearch5 import (
     Elasticsearch,
-    ImproperlyConfigured,
     ElasticsearchException,
-    ConnectionError as EsConnectionError,
+    ImproperlyConfigured,
     TransportError,
 )
 from elasticsearch5.helpers import streaming_bulk
 from tqdm import tqdm
 
-from ._config import DEFAULT_ES_INDEX_TEMPLATE, DEFAULT_ES_INDEX_TEMPLATE_NAME
-
 from ..exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError
+from ._config import DEFAULT_ES_INDEX_TEMPLATE, DEFAULT_ES_INDEX_TEMPLATE_NAME
 
 logger = logging.getLogger(__name__)
 

@@ -14,19 +14,18 @@
 """
 This module contains the base class for all the machine-learned classifiers in MindMeld.
 """
-from abc import ABC, abstractmethod
 import json
 import logging
 import os
+from abc import ABC, abstractmethod
 
 from sklearn.externals import joblib
 
 from .. import markup
-from ..exceptions import ClassifierLoadError
+from ..constants import DEFAULT_TEST_SET_REGEX, DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
-from ..constants import DEFAULT_TRAIN_SET_REGEX, DEFAULT_TEST_SET_REGEX
-
-from ..models import create_model, ModelConfig
+from ..exceptions import ClassifierLoadError
+from ..models import ModelConfig, create_model
 
 logger = logging.getLogger(__name__)
 

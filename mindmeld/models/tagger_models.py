@@ -15,20 +15,21 @@
 import logging
 import os
 import random
+
 from sklearn.externals import joblib
 
+from ..exceptions import MindMeldError
 from .helpers import (
-    register_model,
     get_label_encoder,
     get_seq_accuracy_scorer,
     get_seq_tag_accuracy_scorer,
     ingest_dynamic_gazetteer,
+    register_model,
 )
-from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
+from .model import EntityModelEvaluation, EvaluatedExample, Model, ModelConfig
 from .taggers.crf import ConditionalRandomFields
-from .taggers.memm import MemmModel
 from .taggers.lstm import LstmModel
-from ..exceptions import MindMeldError
+from .taggers.memm import MemmModel
 
 logger = logging.getLogger(__name__)
 

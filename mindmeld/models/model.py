@@ -12,50 +12,45 @@
 # limitations under the License.
 
 """This module contains base classes for models defined in the models subpackage."""
-from collections import namedtuple
-import logging
-import json
-import math
 import copy
-
+import json
+import logging
+import math
+from collections import namedtuple
 from inspect import signature
-import numpy as np
 
+import numpy as np
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
+from sklearn.metrics import precision_recall_fscore_support as score
 from sklearn.model_selection import (
-    KFold,
-    GroupShuffleSplit,
-    GroupKFold,
     GridSearchCV,
+    GroupKFold,
+    GroupShuffleSplit,
+    KFold,
     ShuffleSplit,
     StratifiedKFold,
     StratifiedShuffleSplit,
 )
 
-from sklearn.metrics import (
-    f1_score,
-    precision_recall_fscore_support as score,
-    confusion_matrix,
-    accuracy_score,
-)
-from .helpers import (
-    get_feature_extractor,
-    get_label_encoder,
-    register_label,
-    ENTITIES_LABEL_TYPE,
-    entity_seqs_equal,
-    CHAR_NGRAM_FREQ_RSC,
-    WORD_NGRAM_FREQ_RSC,
-    ENABLE_STEMMING,
-    ingest_dynamic_gazetteer,
-)
-from .taggers.taggers import (
-    get_tags_from_entities,
-    get_entities_from_tags,
-    get_boundary_counts,
-    BoundaryCounts,
-)
 from .._version import _get_mm_version
 from ..tokenizer import Tokenizer
+from .helpers import (
+    CHAR_NGRAM_FREQ_RSC,
+    ENABLE_STEMMING,
+    ENTITIES_LABEL_TYPE,
+    WORD_NGRAM_FREQ_RSC,
+    entity_seqs_equal,
+    get_feature_extractor,
+    get_label_encoder,
+    ingest_dynamic_gazetteer,
+    register_label,
+)
+from .taggers.taggers import (
+    BoundaryCounts,
+    get_boundary_counts,
+    get_entities_from_tags,
+    get_tags_from_entities,
+)
 
 logger = logging.getLogger(__name__)
 

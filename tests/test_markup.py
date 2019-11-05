@@ -10,7 +10,6 @@ Tests for `markup` module.
 import pytest
 
 from mindmeld import markup
-
 from mindmeld.core import Entity, NestedEntity, ProcessedQuery, QueryEntity, Span
 
 MARKED_UP_STRS = [

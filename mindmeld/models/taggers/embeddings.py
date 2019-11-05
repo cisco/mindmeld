@@ -10,22 +10,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import zipfile
 import logging
+import os
 import pickle
+import zipfile
 from urllib.request import urlretrieve
-import numpy as np
 
+import numpy as np
 from tqdm import tqdm
 
+from ...exceptions import EmbeddingDownloadError
 from ...path import (
     EMBEDDINGS_FILE_PATH,
     EMBEDDINGS_FOLDER_PATH,
-    PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH,
     PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH,
+    PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH,
 )
-from ...exceptions import EmbeddingDownloadError
 
 logger = logging.getLogger(__name__)
 

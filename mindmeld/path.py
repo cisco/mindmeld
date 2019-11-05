@@ -19,9 +19,8 @@ import logging
 import os
 import re
 import sys
-
-from importlib.machinery import SourceFileLoader
 from functools import wraps
+from importlib.machinery import SourceFileLoader
 
 from .exceptions import MindMeldImportError
 

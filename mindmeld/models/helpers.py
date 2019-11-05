@@ -13,6 +13,7 @@
 
 """This module contains some helper functions for the models package"""
 import re
+
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer

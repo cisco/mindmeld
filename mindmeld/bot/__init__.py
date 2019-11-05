@@ -14,5 +14,4 @@
 """This module contains the components of the MindMeld platform"""
 from .webex_bot_server import WebexBotServer
 
-
 __all__ = ["WebexBotServer"]

@@ -12,23 +12,23 @@
 # limitations under the License.
 
 """This module contains feature extractors for queries"""
-from collections import Counter, defaultdict
 import math
 import re
+from collections import Counter, defaultdict
 
 from .helpers import (
+    CHAR_NGRAM_FREQ_RSC,
+    DEFAULT_SYS_ENTITIES,
+    ENABLE_STEMMING,
     GAZETTEER_RSC,
+    OUT_OF_BOUNDS_TOKEN,
     QUERY_FREQ_RSC,
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
-    OUT_OF_BOUNDS_TOKEN,
     WORD_NGRAM_FREQ_RSC,
-    CHAR_NGRAM_FREQ_RSC,
-    ENABLE_STEMMING,
-    DEFAULT_SYS_ENTITIES,
-    register_query_feature,
-    mask_numerics,
     get_ngram,
+    mask_numerics,
+    register_query_feature,
     requires,
 )
 

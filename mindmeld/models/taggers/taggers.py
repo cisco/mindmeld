@@ -14,19 +14,19 @@
 """
 This module contains all code required to perform sequence tagging.
 """
-import logging
 import copy
+import logging
 
 from ...core import (
+    TEXT_FORM_NORMALIZED,
+    TEXT_FORM_RAW,
     QueryEntity,
     Span,
-    TEXT_FORM_RAW,
-    TEXT_FORM_NORMALIZED,
     _sort_by_lowest_time_grain,
 )
-from ...ser import resolve_system_entity, SystemEntityResolutionError
-from ..helpers import get_feature_extractor, ENABLE_STEMMING
 from ...markup import MarkupError
+from ...ser import SystemEntityResolutionError, resolve_system_entity
+from ..helpers import ENABLE_STEMMING, get_feature_extractor
 
 logger = logging.getLogger(__name__)
 

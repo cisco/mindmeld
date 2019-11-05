@@ -15,37 +15,32 @@
 This module contains the entity resolver component of the MindMeld natural language processor.
 """
 import copy
-import logging
 import hashlib
+import logging
 import os
 
-from elasticsearch5.exceptions import (
-    ConnectionError as EsConnectionError,
-    TransportError,
-    ElasticsearchException,
-)
+from elasticsearch5.exceptions import ConnectionError as EsConnectionError
+from elasticsearch5.exceptions import ElasticsearchException, TransportError
 
 from ..core import Entity
+from ..exceptions import EntityResolverConnectionError, EntityResolverError
 from ._config import (
+    DEFAULT_ES_SYNONYM_MAPPING,
+    DOC_TYPE,
+    PHONETIC_ES_SYNONYM_MAPPING,
     get_app_namespace,
     get_classifier_config,
-    DOC_TYPE,
-    DEFAULT_ES_SYNONYM_MAPPING,
-    PHONETIC_ES_SYNONYM_MAPPING,
 )
-
 from ._elasticsearch_helpers import (
+    INDEX_TYPE_KB,
+    INDEX_TYPE_SYNONYM,
     create_es_client,
-    load_index,
-    get_scoped_index_name,
     delete_index,
     does_index_exist,
     get_field_names,
-    INDEX_TYPE_KB,
-    INDEX_TYPE_SYNONYM,
+    get_scoped_index_name,
+    load_index,
 )
-
-from ..exceptions import EntityResolverConnectionError, EntityResolverError
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
 import pytest
 from attr.exceptions import FrozenInstanceError
-from mindmeld.components.request import Request, Params, FrozenParams
+
+from mindmeld.components.request import FrozenParams, Params, Request
 
 
 @pytest.fixture

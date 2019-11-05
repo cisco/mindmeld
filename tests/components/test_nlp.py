@@ -7,12 +7,13 @@ test_nlp
 
 Tests for NaturalLanguageProcessor module.
 """
-# pylint: disable=locally-disabled,redefined-outer-name
-import pytest
 import math
 
-from mindmeld.exceptions import ProcessorError, AllowedNlpClassesKeyError
+# pylint: disable=locally-disabled,redefined-outer-name
+import pytest
+
 from mindmeld.components import NaturalLanguageProcessor
+from mindmeld.exceptions import AllowedNlpClassesKeyError, ProcessorError
 from mindmeld.query_factory import QueryFactory
 
 

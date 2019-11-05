@@ -14,11 +14,12 @@
 """This module contains the Rasacoverter class used to convert Rasa projects
 into Mindmeld projects"""
 
-from keyword import iskeyword
-import re
-import os
 import copy
 import logging
+import os
+import re
+from keyword import iskeyword
+
 import yaml
 
 from mindmeld.converter.converter import Converter

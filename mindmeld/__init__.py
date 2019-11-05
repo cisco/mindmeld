@@ -19,6 +19,8 @@ try:
 except ImportError:
     pass  # no worries
 
+from ._util import blueprint, configure_logs
+from ._version import current
 from .app import Application
 from .components import (
     Conversation,
@@ -26,8 +28,6 @@ from .components import (
     NaturalLanguageProcessor,
     QuestionAnswerer,
 )
-from ._util import blueprint, configure_logs
-from ._version import current
 
 __all__ = [
     "blueprint",

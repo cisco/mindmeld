@@ -16,7 +16,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from . import ser as sys_ent_rec
-from .core import Query, TEXT_FORM_RAW, TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED
+from .core import TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED, TEXT_FORM_RAW, Query
 from .stemmers import EnglishNLTKStemmer
 from .tokenizer import Tokenizer
 

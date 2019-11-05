@@ -16,23 +16,22 @@ These are capabilities that do not have an obvious home within the existing
 project structure.
 """
 import datetime
-from email.utils import parsedate
 import logging
 import os
 import shutil
 import sys
 import tarfile
+from email.utils import parsedate
 
-from dateutil import tz
 import py
 import requests
+from dateutil import tz
 
 from . import path
 from .components import QuestionAnswerer
-from .exceptions import KnowledgeBaseConnectionError
 from .components._config import get_app_namespace
 from .constants import DEVCENTER_URL
-
+from .exceptions import KnowledgeBaseConnectionError
 
 logger = logging.getLogger(__name__)
 

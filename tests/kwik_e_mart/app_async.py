@@ -2,7 +2,6 @@
 """This module contains the Kwik-E-Mart MindMeld demo application"""
 from mindmeld import Application
 
-
 app = Application(__name__, async_mode=True)
 
 

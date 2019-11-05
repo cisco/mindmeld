@@ -17,8 +17,8 @@ import pytest
 from mindmeld.components import NaturalLanguageProcessor, Preprocessor
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
-from mindmeld.tokenizer import Tokenizer
 from mindmeld.stemmers import EnglishNLTKStemmer
+from mindmeld.tokenizer import Tokenizer
 
 warnings.filterwarnings(
     "module", category=DeprecationWarning, module="sklearn.preprocessing.label"

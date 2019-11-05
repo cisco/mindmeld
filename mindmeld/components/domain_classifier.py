@@ -16,14 +16,11 @@ This module contains the domain classifier component of the MindMeld natural lan
 """
 import logging
 
-from ..markup import mark_down
-from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
-
-from .classifier import Classifier
 from ..constants import DEFAULT_TRAIN_SET_REGEX
-
+from ..markup import mark_down
+from ..models import CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE
 from ._config import get_classifier_config
-
+from .classifier import Classifier
 
 logger = logging.getLogger(__name__)
 

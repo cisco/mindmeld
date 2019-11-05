@@ -20,9 +20,9 @@ import sys
 
 from .app_manager import ApplicationManager
 from .cli import app_cli
-from .server import MindMeldServer
-from .components.dialogue import DialogueResponder, DialogueFlow
+from .components.dialogue import DialogueFlow, DialogueResponder
 from .components.request import Request
+from .server import MindMeldServer
 
 logger = logging.getLogger(__name__)
 

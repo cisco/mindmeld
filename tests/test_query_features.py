@@ -1,5 +1,6 @@
-import pytest
 import math
+
+import pytest
 
 EXACT_QUERY_MATCH_SCALING_FACTOR = 10
 EPSILON = math.pow(10, -5)

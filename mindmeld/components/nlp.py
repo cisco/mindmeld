@@ -14,34 +14,32 @@
 """
 This module contains the natural language processor.
 """
+import datetime
+import logging
 import os
 import sys
-from multiprocessing import cpu_count
-from concurrent.futures import ProcessPoolExecutor, wait
-from abc import ABC, abstractmethod
-from copy import deepcopy
-import logging
-import datetime
 import time
 import warnings
+from abc import ABC, abstractmethod
+from concurrent.futures import ProcessPoolExecutor, wait
+from copy import deepcopy
+from multiprocessing import cpu_count
 
 from .. import path
-from ..core import ProcessedQuery, Bunch
-from ..exceptions import ProcessorError
+from ..core import Bunch, ProcessedQuery
+from ..exceptions import AllowedNlpClassesKeyError, MindMeldImportError, ProcessorError
+from ..markup import TIME_FORMAT, process_markup
+from ..path import get_app
+from ..query_factory import QueryFactory
 from ..resource_loader import ResourceLoader
-
+from ..system_entity_recognizer import SystemEntityRecognizer
+from ._config import get_nlp_config
 from .domain_classifier import DomainClassifier
-from .intent_classifier import IntentClassifier
-from .entity_resolver import EntityResolver, EntityResolverConnectionError
 from .entity_recognizer import EntityRecognizer
+from .entity_resolver import EntityResolver, EntityResolverConnectionError
+from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
-from ..path import get_app
-from ..exceptions import AllowedNlpClassesKeyError, MindMeldImportError
-from ..markup import process_markup, TIME_FORMAT
-from ..query_factory import QueryFactory
-from ._config import get_nlp_config
-from ..system_entity_recognizer import SystemEntityRecognizer
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)

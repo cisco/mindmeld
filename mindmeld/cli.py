@@ -13,35 +13,34 @@
 # limitations under the License.
 
 import asyncio
+import datetime
+import hashlib
 import json
 import logging
+import math
 import os
-import stat
-import signal
 import shutil
+import signal
+import stat
 import subprocess
 import sys
 import time
 import warnings
-import datetime
 
-import math
-import hashlib
 import click
 import click_log
 import distro
 import requests
-
 from tqdm import tqdm
-from . import markup, path
-from .components import Conversation, QuestionAnswerer
-from .converter import RasaConverter, DialogflowConverter
-from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
-from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, MODEL_CACHE_PATH
-from ._version import current as __version__
-from ._util import blueprint
-from .constants import DEVCENTER_URL
 
+from . import markup, path
+from ._util import blueprint
+from ._version import current as __version__
+from .components import Conversation, QuestionAnswerer
+from .constants import DEVCENTER_URL
+from .converter import DialogflowConverter, RasaConverter
+from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
+from .path import MODEL_CACHE_PATH, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
 
 logger = logging.getLogger(__name__)
 

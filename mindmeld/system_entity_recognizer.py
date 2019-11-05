@@ -10,13 +10,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
 import logging
 import sys
-import json
+
 import requests
+
 from mindmeld.components._config import (
-    is_duckling_configured,
     get_system_entity_url_config,
+    is_duckling_configured,
 )
 
 NO_RESPONSE_CODE = -1

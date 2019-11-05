@@ -16,11 +16,10 @@ This module contains the application manager
 """
 import logging
 
-from .components.request import Request, Params, FrozenParams
-from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
+from .components import DialogueManager, NaturalLanguageProcessor, QuestionAnswerer
 from .components.dialogue import DialogueResponder
+from .components.request import FrozenParams, Params, Request
 from .resource_loader import ResourceLoader
-
 
 logger = logging.getLogger(__name__)
 

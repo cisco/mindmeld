@@ -15,8 +15,8 @@
 This module contains the Config class.
 """
 import copy
-import logging
 import imp
+import logging
 import os
 import warnings
 

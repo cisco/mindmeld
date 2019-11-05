@@ -12,9 +12,9 @@
 # limitations under the License.
 
 import codecs
-from collections import defaultdict
 import logging
 import os
+from collections import defaultdict
 
 from sklearn.externals import joblib
 

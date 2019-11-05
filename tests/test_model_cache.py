@@ -8,12 +8,13 @@ test_model_cache
 Tests the generated model cache has to correct key value types.
 
 """
-# pylint: disable=locally-disabled,redefined-outer-name
-import shutil
 import os
 
-from mindmeld.path import MODEL_CACHE_PATH
+# pylint: disable=locally-disabled,redefined-outer-name
+import shutil
+
 from mindmeld.components import NaturalLanguageProcessor
+from mindmeld.path import MODEL_CACHE_PATH
 
 
 def test_model_accuracies_are_similar_before_and_after_caching(kwik_e_mart_app_path):

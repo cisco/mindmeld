@@ -14,10 +14,11 @@
 """This module contains the DialogflowConverter class used to convert Dialogflow projects
 into Mindmeld projects"""
 
-import re
-import os
 import json
 import logging
+import os
+import re
+
 from sklearn.model_selection import train_test_split
 
 from mindmeld.converter.converter import Converter

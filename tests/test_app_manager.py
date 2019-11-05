@@ -13,7 +13,7 @@ These tests apply only when async/await are supported.
 import pytest
 
 from mindmeld.app_manager import ApplicationManager, freeze_params
-from mindmeld.components.request import Params, FrozenParams
+from mindmeld.components.request import FrozenParams, Params
 
 
 @pytest.fixture

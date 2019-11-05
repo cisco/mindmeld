@@ -4,14 +4,15 @@
 This module contains the Webex Bot Server component.
 """
 
-import logging
 import json
-from flask import request, Flask
+import logging
+
 import requests
 from ciscosparkapi import CiscoSparkAPI
+from flask import Flask, request
+
 from ..components import NaturalLanguageProcessor
 from ..components.dialogue import Conversation
-
 
 CISCO_API_URL = "https://api.ciscospark.com/v1"
 ACCESS_TOKEN_WITH_BEARER = "Bearer "

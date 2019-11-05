@@ -15,6 +15,7 @@
 This module contains the CRF entity recognizer.
 """
 import logging
+
 import numpy as np
 from sklearn_crfsuite import CRF
 

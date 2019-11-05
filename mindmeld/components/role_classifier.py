@@ -18,12 +18,11 @@ import logging
 
 from sklearn.externals import joblib
 
-from ..models import create_model, ENTITY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
-from ..core import Query
 from ..constants import DEFAULT_TRAIN_SET_REGEX
-
-from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
+from ..core import Query
+from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model
 from ._config import get_classifier_config
+from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 
 logger = logging.getLogger(__name__)
 

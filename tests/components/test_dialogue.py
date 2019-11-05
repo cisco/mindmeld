@@ -13,8 +13,8 @@ These tests apply regardless of async/await support.
 import pytest
 
 from mindmeld.components import Conversation, DialogueManager, DialogueResponder
-from mindmeld.components.request import Request, Params
 from mindmeld.components.dialogue import DialogueStateRule
+from mindmeld.components.request import Params, Request
 from mindmeld.system_entity_recognizer import SystemEntityRecognizer
 
 

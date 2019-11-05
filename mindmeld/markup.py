@@ -25,8 +25,8 @@ from .exceptions import (
     SystemEntityMarkupError,
     SystemEntityResolutionError,
 )
-from .ser import resolve_system_entity
 from .query_factory import QueryFactory
+from .ser import resolve_system_entity
 
 logger = logging.getLogger(__name__)
 

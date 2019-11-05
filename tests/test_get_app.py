@@ -13,9 +13,8 @@ import tempfile
 import pytest
 
 from mindmeld import Application
-from mindmeld.path import get_app
 from mindmeld.exceptions import MindMeldImportError
-
+from mindmeld.path import get_app
 
 GOOD_APP_FILE = """
 from mindmeld import Application

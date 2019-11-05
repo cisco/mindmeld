@@ -11,13 +11,13 @@ Tests for `core` module.
 import pytest
 
 from mindmeld.core import (
+    TEXT_FORM_NORMALIZED,
+    TEXT_FORM_PROCESSED,
+    TEXT_FORM_RAW,
     Entity,
+    NestedEntity,
     QueryEntity,
     Span,
-    NestedEntity,
-    TEXT_FORM_RAW,
-    TEXT_FORM_PROCESSED,
-    TEXT_FORM_NORMALIZED,
     _sort_by_lowest_time_grain,
 )
 

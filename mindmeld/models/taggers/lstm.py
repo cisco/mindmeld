@@ -10,17 +10,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
+import math
+import os
+import re
+
 import numpy as np
 import tensorflow as tf
-import re
-import math
-import logging
-import os
-
 from sklearn.externals import joblib
-from .taggers import Tagger, extract_sequence_features
-from .embeddings import WordSequenceEmbedding, CharacterSequenceEmbedding
 from sklearn.preprocessing import LabelBinarizer
+
+from .embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
+from .taggers import Tagger, extract_sequence_features
 
 DEFAULT_ENTITY_TOKEN_SPAN_INDEX = 2
 GAZ_PATTERN_MATCH = r"in-gaz\|type:(\w+)\|pos:(\w+)\|"

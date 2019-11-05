@@ -1,5 +1,6 @@
-from mindmeld.components.nlp import NaturalLanguageProcessor
 from unittest.mock import patch
+
+from mindmeld.components.nlp import NaturalLanguageProcessor
 
 
 def test_intent_classifier_svm(kwik_e_mart_app_path):

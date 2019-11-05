@@ -14,34 +14,33 @@
 """
 This module contains the processor resource loader.
 """
-from copy import deepcopy
-from collections import Counter
-
 import hashlib
 import json
 import logging
 import os
-import time
 import re
+import time
+from collections import Counter
+from copy import deepcopy
 
 from . import markup, path
-from .query_cache import QueryCache
+from .constants import DEFAULT_TRAIN_SET_REGEX
+from .core import Entity
 from .exceptions import MindMeldError
 from .gazetteer import Gazetteer
-from .query_factory import QueryFactory
 from .models.helpers import (
+    CHAR_NGRAM_FREQ_RSC,
+    ENABLE_STEMMING,
     GAZETTEER_RSC,
     QUERY_FREQ_RSC,
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
-    ENABLE_STEMMING,
-    CHAR_NGRAM_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
     mask_numerics,
 )
-from .core import Entity
-from .constants import DEFAULT_TRAIN_SET_REGEX
 from .path import MODEL_CACHE_PATH
+from .query_cache import QueryCache
+from .query_factory import QueryFactory
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,10 @@
 import os
+from unittest.mock import patch
 
 from click.testing import CliRunner
-from unittest.mock import patch
+
 from mindmeld import cli
-from mindmeld.cli import num_parser, clean
+from mindmeld.cli import clean, num_parser
 
 
 def test_num_parse_already_running(mocker):

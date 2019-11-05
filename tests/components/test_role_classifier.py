@@ -1,10 +1,10 @@
-import pytest
 import os
 import shutil
 
-from mindmeld.path import MODEL_CACHE_PATH, get_role_model_paths, get_entity_model_paths
-from mindmeld.components import NaturalLanguageProcessor
+import pytest
 
+from mindmeld.components import NaturalLanguageProcessor
+from mindmeld.path import MODEL_CACHE_PATH, get_entity_model_paths, get_role_model_paths
 
 test_data_7 = [
     (

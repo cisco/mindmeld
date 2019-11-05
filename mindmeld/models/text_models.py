@@ -25,19 +25,16 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import (
-    LabelEncoder as SKLabelEncoder,
-    MaxAbsScaler,
-    StandardScaler,
-)
+from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
+from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from .helpers import (
+    CHAR_NGRAM_FREQ_RSC,
     QUERY_FREQ_RSC,
     WORD_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
-    CHAR_NGRAM_FREQ_RSC,
     register_model,
 )
 from .model import EvaluatedExample, Model, StandardModelEvaluation

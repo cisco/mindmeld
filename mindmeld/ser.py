@@ -12,15 +12,16 @@
 # limitations under the License.
 
 """This module contains the system entity recognizer."""
-import logging
 import json
+import logging
 from enum import Enum
+
 import pycountry
 
+from .components.request import validate_language_code, validate_locale_code
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
 from .system_entity_recognizer import SystemEntityRecognizer
-from .components.request import validate_language_code, validate_locale_code
 
 logger = logging.getLogger(__name__)
 

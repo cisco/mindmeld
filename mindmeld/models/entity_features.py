@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """This module contains feature extractors for entities"""
-from .helpers import GAZETTEER_RSC, register_entity_feature, get_ngram, requires
+from .helpers import GAZETTEER_RSC, get_ngram, register_entity_feature, requires
 
 
 @register_entity_feature(feature_name="in-gaz")

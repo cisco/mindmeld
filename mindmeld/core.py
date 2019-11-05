@@ -14,7 +14,6 @@
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
 
-
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
 TEXT_FORM_NORMALIZED = 2

@@ -14,19 +14,19 @@
 """
     This module contains the class which serves the MindMeld API.
 """
-import logging
 import json
+import logging
 import os
 import sys
 import time
 import uuid
 
-from flask import Flask, Request, request, jsonify, g
+from flask import Flask, Request, g, jsonify, request
 from flask_cors import CORS
 
 from ._version import current as __version__
-from .exceptions import BadMindMeldRequestError
 from .components.dialogue import DialogueResponder
+from .exceptions import BadMindMeldRequestError
 
 logger = logging.getLogger(__name__)
 

@@ -13,11 +13,11 @@ import os
 import pytest
 
 from mindmeld import markup
-from mindmeld.models import ModelConfig, CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE
+from mindmeld.models import CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE, ModelConfig
 from mindmeld.models.text_models import TextModel
-from mindmeld.tokenizer import Tokenizer
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
+from mindmeld.tokenizer import Tokenizer
 
 APP_NAME = "kwik_e_mart"
 APP_PATH = os.path.join(

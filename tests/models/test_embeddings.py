@@ -1,5 +1,6 @@
-from mindmeld.models.taggers.embeddings import GloVeEmbeddingsContainer
 from numpy import ndarray
+
+from mindmeld.models.taggers.embeddings import GloVeEmbeddingsContainer
 
 
 def test_embedding_size_is_correct():

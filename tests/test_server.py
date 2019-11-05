@@ -1,8 +1,9 @@
-import pytest
 import json
 
-from mindmeld.server import MindMeldServer
+import pytest
+
 from mindmeld.app_manager import ApplicationManager
+from mindmeld.server import MindMeldServer
 
 
 @pytest.fixture

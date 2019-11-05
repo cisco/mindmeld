@@ -15,16 +15,15 @@
 This module contains the Memm entity recognizer.
 """
 import logging
+
+import numpy as np
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import (
-    LabelEncoder as SKLabelEncoder,
-    MaxAbsScaler,
-    StandardScaler,
-)
-import numpy as np
-from .taggers import Tagger, START_TAG, extract_sequence_features
+from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
+from sklearn.preprocessing import MaxAbsScaler, StandardScaler
+
+from .taggers import START_TAG, Tagger, extract_sequence_features
 
 logger = logging.getLogger(__name__)
 

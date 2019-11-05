@@ -14,13 +14,14 @@
 """
 This module contains the query cache implementation.
 """
+import logging
 import os
 import shutil
-import logging
+
 from sklearn.externals import joblib
 
 from ._version import _get_mm_version
-from .path import QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH, GEN_FOLDER
+from .path import GEN_FOLDER, QUERY_CACHE_PATH, QUERY_CACHE_TMP_PATH
 
 logger = logging.getLogger(__name__)
 

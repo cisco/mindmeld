@@ -1,4 +1,5 @@
 import pytest
+
 from mindmeld.components import Conversation
 
 

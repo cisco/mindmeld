@@ -7,12 +7,13 @@ test_question_answerer
 
 Tests for `question_answerer` module.
 """
-# pylint: disable=locally-disabled,redefined-outer-name
-import pytest
 import os
 
-from mindmeld.components.question_answerer import QuestionAnswerer
+# pylint: disable=locally-disabled,redefined-outer-name
+import pytest
+
 from mindmeld.components._elasticsearch_helpers import create_es_client
+from mindmeld.components.question_answerer import QuestionAnswerer
 
 ENTITY_TYPE = "store_name"
 STORE_DATA_FILE_PATH = os.path.dirname(__file__) + "/../kwik_e_mart/data/stores.json"

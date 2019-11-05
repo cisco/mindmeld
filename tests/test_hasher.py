@@ -1,7 +1,7 @@
 import hashlib
-from mock import mock_open, patch
 
 import pytest
+from mock import mock_open, patch
 
 from mindmeld.resource_loader import Hasher
 

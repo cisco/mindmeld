@@ -17,13 +17,15 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sphinx_rtd_theme
 import sys
-from sphinx.domains.python import PythonDomain
-import mindmeld
+
+import sphinx_rtd_theme
 
 # Mock imports
 from mock import Mock as MagicMock
+from sphinx.domains.python import PythonDomain
+
+import mindmeld
 
 # Insert our custom sphinx extensions
 cwd = os.getcwd()

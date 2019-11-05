@@ -14,19 +14,18 @@
 """
 This module contains the language parser component of the MindMeld natural language processor
 """
-from collections import defaultdict, namedtuple, OrderedDict
 import logging
 import time
+from collections import OrderedDict, defaultdict, namedtuple
 
 from nltk import FeatureChartParser
-from nltk.grammar import FeatureGrammar
 from nltk.featstruct import Feature
+from nltk.grammar import FeatureGrammar
 
-from ._config import get_parser_config
-
+from .. import path
 from ..core import Span
 from ..exceptions import ParserTimeout
-from .. import path
+from ._config import get_parser_config
 
 logger = logging.getLogger(__name__)
 

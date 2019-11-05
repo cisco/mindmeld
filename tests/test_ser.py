@@ -9,6 +9,7 @@ Tests for `ser` module (Duckling)
 """
 import pytest
 import requests
+
 from mindmeld import system_entity_recognizer
 
 NOW_TIMESTAMP = 1544706000000

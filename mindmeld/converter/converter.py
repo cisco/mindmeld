@@ -14,9 +14,9 @@
 """This module contains the abstract Coverter class used to convert other software's
 projects into MindMeld projects"""
 
-from abc import ABC, abstractmethod
-import os
 import logging
+import os
+from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)
 
