@@ -31,6 +31,7 @@ class QueryCache:
     ProcessedQuery objects consist of the query itself, the domain/intent classifications,
     recognized entities in the query, and more.
     """
+
     def __init__(self, app_path):
         self.app_path = app_path
         self.is_dirty = False
@@ -54,7 +55,7 @@ class QueryCache:
     @property
     def versioned_data(self):
         """A dictionary containing the MindMeld version in addition to any cached queries."""
-        return {'mm_version': _get_mm_version(), 'cached_queries': self.cached_queries}
+        return {"mm_version": _get_mm_version(), "cached_queries": self.cached_queries}
 
     def set_value(self, domain, intent, query_text, processed_query):
         """
@@ -115,8 +116,10 @@ class QueryCache:
             if os.path.exists(self.tmp_cache_location):
                 os.remove(self.tmp_cache_location)
 
-            logger.error("Couldn't dump query cache to disk properly, "
-                         "so deleting query cache due to possible corruption.")
+            logger.error(
+                "Couldn't dump query cache to disk properly, "
+                "so deleting query cache due to possible corruption."
+            )
 
     def load(self):
         """
@@ -125,14 +128,16 @@ class QueryCache:
         file_location = QUERY_CACHE_PATH.format(app_path=self.app_path)
         try:
             versioned_data = joblib.load(file_location)
-            if 'cached_queries' not in versioned_data:
+            if "cached_queries" not in versioned_data:
                 # The old version of caching did not have versions
-                logger.warning('The cache contains deprecated versions of queries. Please '
-                               'run this command to clear the query cache: '
-                               '"python -m <app_name> clean -q"')
+                logger.warning(
+                    "The cache contains deprecated versions of queries. Please "
+                    "run this command to clear the query cache: "
+                    '"python -m <app_name> clean -q"'
+                )
                 self._cached_queries = versioned_data
             else:
-                self._cached_queries = versioned_data['cached_queries']
+                self._cached_queries = versioned_data["cached_queries"]
         except (OSError, IOError, KeyboardInterrupt):
             self._cached_queries = {}
         self.is_dirty = False

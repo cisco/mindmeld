@@ -19,5 +19,12 @@ from .entity_resolver import EntityResolver
 from .preprocessor import Preprocessor
 
 
-__all__ = ['Conversation', 'DialogueResponder', 'DialogueManager',
-           'NaturalLanguageProcessor', 'QuestionAnswerer', 'EntityResolver', 'Preprocessor']
+__all__ = [
+    "Conversation",
+    "DialogueResponder",
+    "DialogueManager",
+    "NaturalLanguageProcessor",
+    "QuestionAnswerer",
+    "EntityResolver",
+    "Preprocessor",
+]

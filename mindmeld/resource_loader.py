@@ -29,16 +29,23 @@ from .query_cache import QueryCache
 from .exceptions import MindMeldError
 from .gazetteer import Gazetteer
 from .query_factory import QueryFactory
-from .models.helpers import (GAZETTEER_RSC, QUERY_FREQ_RSC, SYS_TYPES_RSC, WORD_FREQ_RSC,
-                             ENABLE_STEMMING, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
-                             mask_numerics)
+from .models.helpers import (
+    GAZETTEER_RSC,
+    QUERY_FREQ_RSC,
+    SYS_TYPES_RSC,
+    WORD_FREQ_RSC,
+    ENABLE_STEMMING,
+    CHAR_NGRAM_FREQ_RSC,
+    WORD_NGRAM_FREQ_RSC,
+    mask_numerics,
+)
 from .core import Entity
 from .constants import DEFAULT_TRAIN_SET_REGEX
 from .path import MODEL_CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
-ENABLE_STEMMING_ARGS = 'enable_stemming'
+ENABLE_STEMMING_ARGS = "enable_stemming"
 
 
 class ResourceLoader:
@@ -106,8 +113,10 @@ class ResourceLoader:
         # TODO: get role gazetteers
         del kwargs
         entity_types = path.get_entity_types(self.app_path)
-        return {entity_type: self.get_gazetteer(entity_type, force_reload=force_reload)
-                for entity_type in entity_types}
+        return {
+            entity_type: self.get_gazetteer(entity_type, force_reload=force_reload)
+            for entity_type in entity_types
+        }
 
     def get_gazetteer(self, gaz_name, force_reload=False):
         """Gets a gazetteers by name.
@@ -122,10 +131,10 @@ class ResourceLoader:
         # TODO: get role gazetteers
         if self._gaz_needs_build(gaz_name) or force_reload:
             self.build_gazetteer(gaz_name, force_reload=force_reload)
-        if self._entity_file_needs_load('gazetteer', gaz_name):
+        if self._entity_file_needs_load("gazetteer", gaz_name):
             self.load_gazetteer(gaz_name)
 
-        return self._entity_files[gaz_name]['gazetteer']['data']
+        return self._entity_files[gaz_name]["gazetteer"]["data"]
 
     def get_tokenizer(self):
         """Get the tokenizer from the query_factory attribute
@@ -143,8 +152,12 @@ class ResourceLoader:
             str: Hash of a list of gazetteer hashes.
         """
         entity_types = path.get_entity_types(self.app_path)
-        return self._hasher.hash_list((self.get_gazetteer_hash(entity_type)
-                                      for entity_type in sorted(entity_types)))
+        return self._hasher.hash_list(
+            (
+                self.get_gazetteer_hash(entity_type)
+                for entity_type in sorted(entity_types)
+            )
+        )
 
     def get_gazetteer_hash(self, gaz_name):
         """
@@ -183,18 +196,21 @@ class ResourceLoader:
         gaz = Gazetteer(gaz_name, exclude_ngrams)
 
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
-        gaz.update_with_entity_data_file(entity_data_path, popularity_cutoff,
-                                         self.query_factory.normalize)
-        self._entity_files[gaz_name]['entity_data']['loaded'] = time.time()
+        gaz.update_with_entity_data_file(
+            entity_data_path, popularity_cutoff, self.query_factory.normalize
+        )
+        self._entity_files[gaz_name]["entity_data"]["loaded"] = time.time()
 
         mapping = self.get_entity_map(gaz_name, force_reload=force_reload)
-        gaz.update_with_entity_map(mapping.get('entities', []), self.query_factory.normalize)
+        gaz.update_with_entity_map(
+            mapping.get("entities", []), self.query_factory.normalize
+        )
 
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.dump(gaz_path)
 
-        self._entity_files[gaz_name]['gazetteer']['data'] = gaz.to_dict()
-        self._entity_files[gaz_name]['gazetteer']['loaded'] = time.time()
+        self._entity_files[gaz_name]["gazetteer"]["data"] = gaz.to_dict()
+        self._entity_files[gaz_name]["gazetteer"]["loaded"] = time.time()
 
     def load_gazetteer(self, gaz_name):
         """
@@ -206,8 +222,8 @@ class ResourceLoader:
         gaz = Gazetteer(gaz_name)
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.load(gaz_path)
-        self._entity_files[gaz_name]['gazetteer']['data'] = gaz.to_dict()
-        self._entity_files[gaz_name]['gazetteer']['loaded'] = time.time()
+        self._entity_files[gaz_name]["gazetteer"]["data"] = gaz.to_dict()
+        self._entity_files[gaz_name]["gazetteer"]["loaded"] = time.time()
 
     def get_entity_map(self, entity_type, force_reload=False):
         """Creates a mapping file for a given entity.
@@ -216,10 +232,10 @@ class ResourceLoader:
             entity_type (str): The name of the entity
         """
         self._update_entity_file_dates(entity_type)
-        if self._entity_file_needs_load('mapping', entity_type) or force_reload:
+        if self._entity_file_needs_load("mapping", entity_type) or force_reload:
             # file is out of date, load it
             self.load_entity_map(entity_type)
-        return deepcopy(self._entity_files[entity_type]['mapping']['data'])
+        return deepcopy(self._entity_files[entity_type]["mapping"]["data"])
 
     def load_entity_map(self, entity_type):
         """Loads an entity mapping file.
@@ -234,14 +250,15 @@ class ResourceLoader:
             json_data = {}
         else:
             try:
-                with open(file_path, 'r') as json_file:
+                with open(file_path, "r") as json_file:
                     json_data = json.load(json_file)
             except json.JSONDecodeError:
-                raise MindMeldError('Could not load entity map (Invalid JSON): {!r}'.
-                                    format(file_path))
+                raise MindMeldError(
+                    "Could not load entity map (Invalid JSON): {!r}".format(file_path)
+                )
 
-        self._entity_files[entity_type]['mapping']['data'] = json_data
-        self._entity_files[entity_type]['mapping']['loaded'] = time.time()
+        self._entity_files[entity_type]["mapping"]["data"] = json_data
+        self._entity_files[entity_type]["mapping"]["loaded"] = time.time()
 
     def _load_cached_models(self):
         if not self._hash_to_model_path:
@@ -249,32 +266,32 @@ class ResourceLoader:
 
         cache_path = MODEL_CACHE_PATH.format(app_path=self.app_path)
         for dir_path, _, file_names in os.walk(cache_path):
-            for filename in [f for f in file_names if f.endswith('.hash')]:
+            for filename in [f for f in file_names if f.endswith(".hash")]:
                 file_path = os.path.join(dir_path, filename)
-                hash_val = open(file_path, 'r').read()
-                classifier_file_path = file_path.split('.hash')[0]
+                hash_val = open(file_path, "r").read()
+                classifier_file_path = file_path.split(".hash")[0]
                 if not os.path.exists(classifier_file_path):
-                    logger.warning('Could not find the serialized model')
+                    logger.warning("Could not find the serialized model")
                     continue
                 self._hash_to_model_path[hash_val] = classifier_file_path
 
     def _gaz_needs_build(self, gaz_name):
         try:
-            build_time = self._entity_files[gaz_name]['gazetteer']['modified']
+            build_time = self._entity_files[gaz_name]["gazetteer"]["modified"]
         except KeyError:
             # gazetteer hasn't been built
             return True
 
-        data_modified = self._entity_files[gaz_name]['entity_data']['modified']
-        mapping_modified = self._entity_files[gaz_name]['mapping']['modified']
+        data_modified = self._entity_files[gaz_name]["entity_data"]["modified"]
+        mapping_modified = self._entity_files[gaz_name]["mapping"]["modified"]
 
         # If entity data or mapping modified after gaz build -> stale
         return build_time < data_modified or build_time < mapping_modified
 
     def _entity_file_needs_load(self, file_type, entity_type):
-        mod_time = self._entity_files[entity_type][file_type]['modified']
+        mod_time = self._entity_files[entity_type][file_type]["modified"]
         try:
-            load_time = self._entity_files[entity_type][file_type]['loaded']
+            load_time = self._entity_files[entity_type][file_type]["loaded"]
         except KeyError:
             # file hasn't been loaded
             return True
@@ -282,49 +299,54 @@ class ResourceLoader:
 
     def _update_entity_file_dates(self, entity_type):
         # TODO: handle deleted entity
-        file_table = self._entity_files.get(entity_type, {
-            'entity_data': {},
-            'mapping': {},
-            'gazetteer': {}
-        })
+        file_table = self._entity_files.get(
+            entity_type, {"entity_data": {}, "mapping": {}, "gazetteer": {}}
+        )
         self._entity_files[entity_type] = file_table
 
         # update entity data
         entity_data_path = path.get_entity_gaz_path(self.app_path, entity_type)
         try:
-            file_table['entity_data']['modified'] = os.path.getmtime(entity_data_path)
+            file_table["entity_data"]["modified"] = os.path.getmtime(entity_data_path)
         except (OSError, IOError):
             # required file doesnt exist -- notify and error out
-            logger.warning('Entity data file not found at %r. '
-                           'Proceeding with empty entity data.', entity_data_path)
+            logger.warning(
+                "Entity data file not found at %r. "
+                "Proceeding with empty entity data.",
+                entity_data_path,
+            )
 
             # mark the modified time as now if the entity file does not exist
             # so that the gazetteer gets rebuilt properly.
-            file_table['entity_data']['modified'] = time.time()
+            file_table["entity_data"]["modified"] = time.time()
 
         # update mapping
         mapping_path = path.get_entity_map_path(self.app_path, entity_type)
         try:
-            file_table['mapping']['modified'] = os.path.getmtime(mapping_path)
+            file_table["mapping"]["modified"] = os.path.getmtime(mapping_path)
         except (OSError, IOError):
             # required file doesnt exist
-            logger.warning('Entity mapping file not found at %r. '
-                           'Proceeding with empty entity data.', mapping_path)
+            logger.warning(
+                "Entity mapping file not found at %r. "
+                "Proceeding with empty entity data.",
+                mapping_path,
+            )
 
             # mark the modified time as now if the entity mapping file does not exist
             # so that the gazetteer gets rebuilt properly.
-            file_table['mapping']['modified'] = time.time()
+            file_table["mapping"]["modified"] = time.time()
 
         # update gaz data
         gazetteer_path = path.get_gazetteer_data_path(self.app_path, entity_type)
         try:
-            file_table['gazetteer']['modified'] = os.path.getmtime(gazetteer_path)
+            file_table["gazetteer"]["modified"] = os.path.getmtime(gazetteer_path)
         except (OSError, IOError):
             # gaz not yet built so set to a time impossibly long ago
-            file_table['gazetteer']['modified'] = 0.0
+            file_table["gazetteer"]["modified"] = 0.0
 
-    def get_labeled_queries(self, domain=None, intent=None, label_set=None,
-                            force_reload=False, raw=False):
+    def get_labeled_queries(
+        self, domain=None, intent=None, label_set=None, force_reload=False, raw=False
+    ):
         """Gets labeled queries from the cache, or loads them from disk.
 
         Args:
@@ -339,12 +361,14 @@ class ResourceLoader:
         """
         label_set = label_set or DEFAULT_TRAIN_SET_REGEX
         query_tree = {}
-        loaded_key = 'loaded_raw' if raw else 'loaded'
+        loaded_key = "loaded_raw" if raw else "loaded"
         file_iter = self._traverse_labeled_queries_files(domain, intent, label_set)
         for a_domain, an_intent, filename in file_iter:
             file_info = self.file_to_query_info[filename]
             if force_reload or (
-                    not file_info[loaded_key] or file_info[loaded_key] < file_info['modified']):
+                not file_info[loaded_key]
+                or file_info[loaded_key] < file_info["modified"]
+            ):
                 # file is out of date, load it
                 self.load_query_file(a_domain, an_intent, filename, raw=raw)
 
@@ -354,7 +378,7 @@ class ResourceLoader:
             if an_intent not in query_tree[a_domain]:
                 query_tree[a_domain][an_intent] = []
             queries = query_tree[a_domain][an_intent]
-            queries.extend(file_info['raw_queries' if raw else 'queries'])
+            queries.extend(file_info["raw_queries" if raw else "queries"])
 
         return query_tree
 
@@ -375,8 +399,9 @@ class ResourceLoader:
                 flattened.extend(queries)
         return flattened
 
-    def _traverse_labeled_queries_files(self, domain=None, intent=None,
-                                        file_pattern=DEFAULT_TRAIN_SET_REGEX):
+    def _traverse_labeled_queries_files(
+        self, domain=None, intent=None, file_pattern=DEFAULT_TRAIN_SET_REGEX
+    ):
         provided_intent = intent
         query_tree = path.get_labeled_query_tree(self.app_path)
         self._update_query_file_dates(query_tree)
@@ -411,26 +436,36 @@ class ResourceLoader:
             queries = []
             for query in markup.read_query_file(file_path):
                 queries.append(query)
-            file_data['raw_queries'] = queries
-            file_data['loaded_raw'] = time.time()
+            file_data["raw_queries"] = queries
+            file_data["loaded_raw"] = time.time()
         else:
-            queries = markup.load_query_file(file_path, self.query_factory, domain, intent,
-                                             is_gold=True, query_cache=self.query_cache)
+            queries = markup.load_query_file(
+                file_path,
+                self.query_factory,
+                domain,
+                intent,
+                is_gold=True,
+                query_cache=self.query_cache,
+            )
             try:
                 self._check_query_entities(queries)
             except MindMeldError as exc:
                 logger.warning(exc.message)
-            file_data['queries'] = queries
-            file_data['loaded'] = time.time()
+            file_data["queries"] = queries
+            file_data["loaded"] = time.time()
 
     def _check_query_entities(self, queries):
         entity_types = path.get_entity_types(self.app_path)
         for query in queries:
             for entity in query.entities:
-                if (entity.entity.type not in entity_types and
-                        not entity.entity.is_system_entity):
-                    msg = 'Unknown entity {!r} found in query {!r}'
-                    raise MindMeldError(msg.format(entity.entity.type, query.query.text))
+                if (
+                    entity.entity.type not in entity_types
+                    and not entity.entity.is_system_entity
+                ):
+                    msg = "Unknown entity {!r} found in query {!r}"
+                    raise MindMeldError(
+                        msg.format(entity.entity.type, query.query.text)
+                    )
 
     def _update_query_file_dates(self, query_tree):
         # We can just use this if it this is the first check
@@ -440,9 +475,9 @@ class ResourceLoader:
                 for filename in query_tree[domain][intent]:
                     # filename needs to be full path
                     new_query_files[filename] = {
-                        'modified': query_tree[domain][intent][filename],
-                        'loaded': None,
-                        'loaded_raw': None
+                        "modified": query_tree[domain][intent][filename],
+                        "loaded": None,
+                        "loaded_raw": None,
                     }
 
         all_filenames = set(new_query_files.keys())
@@ -463,7 +498,7 @@ class ResourceLoader:
                 continue
 
             # file existed before and now -> update
-            old_file_info['modified'] = new_file_info['modified']
+            old_file_info["modified"] = new_file_info["modified"]
 
     def _build_word_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
         """Compiles unigram frequency dictionary of normalized query tokens
@@ -476,7 +511,7 @@ class ResourceLoader:
         # Unigram frequencies
         tokens = []
 
-        for query in kwargs.get('queries'):
+        for query in kwargs.get("queries"):
             for i in range(len(query.normalized_tokens)):
                 tok = query.normalized_tokens[i]
                 tokens.append(mask_numerics(tok))
@@ -498,12 +533,14 @@ class ResourceLoader:
                queries (list of Query): A list of all queries
         """
         char_freq_dict = Counter()
-        for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
+        for length, threshold in zip(kwargs.get("lengths"), kwargs.get("thresholds")):
             if threshold > 0:
-                for q in kwargs.get('queries'):
-                    character_tokens = [q.normalized_text[i:i+length]
-                                        for i in range(len(q.normalized_text))
-                                        if len(q.normalized_text[i:i+length]) == length]
+                for q in kwargs.get("queries"):
+                    character_tokens = [
+                        q.normalized_text[i : i + length]
+                        for i in range(len(q.normalized_text))
+                        if len(q.normalized_text[i : i + length]) == length
+                    ]
                     char_freq_dict.update(character_tokens)
         return char_freq_dict
 
@@ -515,15 +552,17 @@ class ResourceLoader:
         """
         enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
         word_freq_dict = Counter()
-        for length, threshold in zip(kwargs.get('lengths'), kwargs.get('thresholds')):
+        for length, threshold in zip(kwargs.get("lengths"), kwargs.get("thresholds")):
             if threshold > 0:
                 ngram_tokens = []
-                for query in kwargs.get('queries'):
+                for query in kwargs.get("queries"):
                     for i in range(len(query.normalized_tokens)):
-                        ngram_query = ' '.join(query.normalized_tokens[i:i + length])
+                        ngram_query = " ".join(query.normalized_tokens[i : i + length])
                         ngram_tokens.append(ngram_query)
                         if enable_stemming:
-                            stemmed_ngram_query = ' '.join(query.stemmed_tokens[i:i + length])
+                            stemmed_ngram_query = " ".join(
+                                query.stemmed_tokens[i : i + length]
+                            )
                             if stemmed_ngram_query != ngram_query:
                                 ngram_tokens.append(stemmed_ngram_query)
                 word_freq_dict.update(ngram_tokens)
@@ -541,11 +580,11 @@ class ResourceLoader:
         query_dict = Counter()
         stemmed_query_dict = Counter()
 
-        for query in kwargs.get('queries'):
-            query_dict.update(['<{}>'.format(query.normalized_text)])
+        for query in kwargs.get("queries"):
+            query_dict.update(["<{}>".format(query.normalized_text)])
 
             if enable_stemming:
-                stemmed_query_dict.update(['<{}>'.format(query.stemmed_text)])
+                stemmed_query_dict.update(["<{}>".format(query.stemmed_text)])
 
         for query in query_dict:
             if query_dict[query] < 2:
@@ -568,7 +607,7 @@ class ResourceLoader:
         """
         # Build entity types set
         entity_types = set()
-        for label in kwargs.get('labels'):
+        for label in kwargs.get("labels"):
             for entity in label:
                 entity_types.add(entity.entity.type)
 
@@ -584,7 +623,7 @@ class ResourceLoader:
         if resource_loader:
             return resource_loader(self, **kwargs)
         else:
-            raise ValueError('Invalid resource name {!r}.'.format(name))
+            raise ValueError("Invalid resource name {!r}.".format(name))
 
     def hash_feature_resource(self, name):
         """Hashes the named resource.
@@ -599,7 +638,7 @@ class ResourceLoader:
         if hash_func:
             return hash_func(self)
         else:
-            raise ValueError('Invalid resource name {!r}.'.format(name))
+            raise ValueError("Invalid resource name {!r}.".format(name))
 
     def hash_string(self, string):
         """Hashes a string.
@@ -636,7 +675,8 @@ class ResourceLoader:
             ResourceLoader: a resource loader
         """
         query_factory = query_factory or QueryFactory.create_query_factory(
-            app_path, preprocessor=preprocessor)
+            app_path, preprocessor=preprocessor
+        )
         query_cache = QueryCache(app_path)
         return ResourceLoader(app_path, query_factory, query_cache)
 
@@ -647,18 +687,18 @@ class ResourceLoader:
         CHAR_NGRAM_FREQ_RSC: _build_char_ngram_freq_dict,
         WORD_NGRAM_FREQ_RSC: _build_word_ngram_freq_dict,
         QUERY_FREQ_RSC: _build_query_freq_dict,
-        SYS_TYPES_RSC: _get_sys_entity_types
+        SYS_TYPES_RSC: _get_sys_entity_types,
     }
 
     RSC_HASH_MAP = {
         GAZETTEER_RSC: get_gazetteers_hash,
         # the following resources only vary based on the queries used for training
-        WORD_FREQ_RSC: lambda _: 'constant',
-        WORD_NGRAM_FREQ_RSC: lambda _: 'constant',
-        CHAR_NGRAM_FREQ_RSC: lambda _: 'constant',
-        QUERY_FREQ_RSC: lambda _: 'constant',
-        SYS_TYPES_RSC: lambda _: 'constant',
-        ENABLE_STEMMING: lambda _: 'constant'
+        WORD_FREQ_RSC: lambda _: "constant",
+        WORD_NGRAM_FREQ_RSC: lambda _: "constant",
+        CHAR_NGRAM_FREQ_RSC: lambda _: "constant",
+        QUERY_FREQ_RSC: lambda _: "constant",
+        SYS_TYPES_RSC: lambda _: "constant",
+        ENABLE_STEMMING: lambda _: "constant",
     }
 
 
@@ -672,7 +712,7 @@ class Hasher:
 
     """
 
-    def __init__(self, algorithm='sha1'):
+    def __init__(self, algorithm="sha1"):
         # TODO consider alternative data structure so cache doesnt get too big
         self._cache = {}
         # intentionally using the setter to check value
@@ -697,7 +737,7 @@ class Hasher:
             value (str): The hashing algorithm to use.
         """
         if value not in hashlib.algorithms_available:
-            raise ValueError('Invalid hashing algorithm: {!r}'.format(value))
+            raise ValueError("Invalid hashing algorithm: {!r}".format(value))
 
         if value != self._algorithm:
             # reset cache when changing algorithm
@@ -719,7 +759,7 @@ class Hasher:
             return self._cache[string]
 
         hash_obj = hashlib.new(self.algorithm)
-        hash_obj.update(string.encode('utf8'))
+        hash_obj.update(string.encode("utf8"))
         result = hash_obj.hexdigest()
         self._cache[string] = result
         return result
@@ -735,7 +775,7 @@ class Hasher:
         """
         hash_obj = hashlib.new(self.algorithm)
         for string in strings:
-            hash_obj.update(self.hash(string).encode('utf8'))
+            hash_obj.update(self.hash(string).encode("utf8"))
         return hash_obj.hexdigest()
 
     def hash_file(self, filename):
@@ -750,12 +790,12 @@ class Hasher:
         """
         hash_obj = hashlib.new(self.algorithm)
         try:
-            with open(filename, 'rb') as file_p:
+            with open(filename, "rb") as file_p:
                 while True:
                     buf = file_p.read(4096)
                     if not buf:
                         break
                     hash_obj.update(buf)
         except IOError:
-            hash_obj.update(''.encode('utf-8'))
+            hash_obj.update("".encode("utf-8"))
         return hash_obj.hexdigest()

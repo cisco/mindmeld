@@ -15,8 +15,13 @@
 import os
 import logging
 
-from elasticsearch5 import (Elasticsearch, ImproperlyConfigured, ElasticsearchException,
-                            ConnectionError as EsConnectionError, TransportError)
+from elasticsearch5 import (
+    Elasticsearch,
+    ImproperlyConfigured,
+    ElasticsearchException,
+    ConnectionError as EsConnectionError,
+    TransportError,
+)
 from elasticsearch5.helpers import streaming_bulk
 from tqdm import tqdm
 
@@ -26,12 +31,12 @@ from ..exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError
 
 logger = logging.getLogger(__name__)
 
-INDEX_TYPE_SYNONYM = 'syn'
-INDEX_TYPE_KB = 'kb'
+INDEX_TYPE_SYNONYM = "syn"
+INDEX_TYPE_KB = "kb"
 
 
 def get_scoped_index_name(app_namespace, index_name):
-    return '{}${}'.format(app_namespace, index_name)
+    return "{}${}".format(app_namespace, index_name)
 
 
 def create_es_client(es_host=None, es_user=None, es_pass=None):
@@ -42,9 +47,9 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
         es_user (str): The Elasticsearch username for http auth
         es_pass (str): The Elasticsearch password for http auth
     """
-    es_host = es_host or os.environ.get('MM_ES_HOST')
-    es_user = es_user or os.environ.get('MM_ES_USERNAME')
-    es_pass = es_pass or os.environ.get('MM_ES_PASSWORD')
+    es_host = es_host or os.environ.get("MM_ES_HOST")
+    es_user = es_user or os.environ.get("MM_ES_USERNAME")
+    es_pass = es_pass or os.environ.get("MM_ES_PASSWORD")
 
     try:
         http_auth = (es_user, es_pass) if es_user and es_pass else None
@@ -56,7 +61,9 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
         raise KnowledgeBaseError
 
 
-def does_index_exist(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
+def does_index_exist(
+    app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2
+):
     """Return boolean flag to indicate whether the specified index exists."""
 
     es_client = es_client or create_es_client(es_host)
@@ -67,42 +74,63 @@ def does_index_exist(app_namespace, index_name, es_host=None, es_client=None, co
         es_client.cluster.health(request_timeout=connect_timeout)
         return es_client.indices.exists(index=scoped_index_name)
     except EsConnectionError as e:
-        logger.debug('Unable to connect to Elasticsearch: %s details: %s', e.error, e.info)
+        logger.debug(
+            "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
+        )
         raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
-        logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
-                     'Status code: %s details: %s', e.error, e.status_code, e.info)
+        logger.error(
+            "Unexpected error occurred when sending requests to Elasticsearch: %s "
+            "Status code: %s details: %s",
+            e.error,
+            e.status_code,
+            e.info,
+        )
         raise KnowledgeBaseError
     except ElasticsearchException:
         raise KnowledgeBaseError
 
 
-def get_field_names(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
+def get_field_names(
+    app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2
+):
     """Return a list of field names available in the specified index."""
 
     es_client = es_client or create_es_client(es_host)
     scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
     try:
-        if not does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
-            raise ValueError('Elasticsearch index \'{}\' does not exist.'.format(index_name))
+        if not does_index_exist(
+            app_namespace, index_name, es_host, es_client, connect_timeout
+        ):
+            raise ValueError(
+                "Elasticsearch index '{}' does not exist.".format(index_name)
+            )
 
         res = es_client.indices.get(index=scoped_index_name)
-        all_field_info = res[scoped_index_name]['mappings']['document']['properties']
+        all_field_info = res[scoped_index_name]["mappings"]["document"]["properties"]
         return all_field_info.keys()
     except EsConnectionError as e:
-        logger.debug('Unable to connect to Elasticsearch: %s details: %s', e.error, e.info)
+        logger.debug(
+            "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
+        )
         raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
-        logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
-                     'Status code: %s details: %s', e.error, e.status_code, e.info)
+        logger.error(
+            "Unexpected error occurred when sending requests to Elasticsearch: %s "
+            "Status code: %s details: %s",
+            e.error,
+            e.status_code,
+            e.info,
+        )
         raise KnowledgeBaseError
     except ElasticsearchException:
         raise KnowledgeBaseError
 
 
-def create_index(app_namespace, index_name, mapping, es_host=None, es_client=None,
-                 connect_timeout=2):
+def create_index(
+    app_namespace, index_name, mapping, es_host=None, es_client=None, connect_timeout=2
+):
     """Creates a new index.
 
     Args:
@@ -118,27 +146,41 @@ def create_index(app_namespace, index_name, mapping, es_host=None, es_client=Non
     scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
     try:
-        if not does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
-            es_client.indices.put_template(name=DEFAULT_ES_INDEX_TEMPLATE_NAME,
-                                           body=DEFAULT_ES_INDEX_TEMPLATE)
-            logger.info('Creating index %r', index_name)
+        if not does_index_exist(
+            app_namespace, index_name, es_host, es_client, connect_timeout
+        ):
+            es_client.indices.put_template(
+                name=DEFAULT_ES_INDEX_TEMPLATE_NAME, body=DEFAULT_ES_INDEX_TEMPLATE
+            )
+            logger.info("Creating index %r", index_name)
             es_client.indices.create(scoped_index_name, body=mapping)
         else:
-            logger.error('Index %r already exists.', index_name)
+            logger.error("Index %r already exists.", index_name)
     except EsConnectionError as e:
-        logger.debug('Unable to connect to Elasticsearch: %s details: %s', e.error, e.info)
+        logger.debug(
+            "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
+        )
         raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
-        logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
-                     'Status code: %s details: %s', e.error, e.status_code, e.info)
-        raise KnowledgeBaseError('Unexpected error occurred when sending requests to '
-                                 'Elasticsearch: {} Status code: {} details: '
-                                 '{}'.format(e.error, e.status_code, e.info))
+        logger.error(
+            "Unexpected error occurred when sending requests to Elasticsearch: %s "
+            "Status code: %s details: %s",
+            e.error,
+            e.status_code,
+            e.info,
+        )
+        raise KnowledgeBaseError(
+            "Unexpected error occurred when sending requests to "
+            "Elasticsearch: {} Status code: {} details: "
+            "{}".format(e.error, e.status_code, e.info)
+        )
     except ElasticsearchException:
         raise KnowledgeBaseError
 
 
-def delete_index(app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2):
+def delete_index(
+    app_namespace, index_name, es_host=None, es_client=None, connect_timeout=2
+):
     """Deletes an index.
 
     Args:
@@ -153,25 +195,46 @@ def delete_index(app_namespace, index_name, es_host=None, es_client=None, connec
     scoped_index_name = get_scoped_index_name(app_namespace, index_name)
 
     try:
-        if does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
-            logger.info('Deleting index %r', index_name)
+        if does_index_exist(
+            app_namespace, index_name, es_host, es_client, connect_timeout
+        ):
+            logger.info("Deleting index %r", index_name)
             es_client.indices.delete(scoped_index_name)
         else:
-            raise ValueError('Elasticsearch index \'{}\' for application \'{}\' does not exist.'
-                             .format(index_name, app_namespace))
+            raise ValueError(
+                "Elasticsearch index '{}' for application '{}' does not exist.".format(
+                    index_name, app_namespace
+                )
+            )
     except EsConnectionError as e:
-        logger.debug('Unable to connect to Elasticsearch: %s details: %s', e.error, e.info)
+        logger.debug(
+            "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
+        )
         raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
-        logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
-                     'Status code: %s details: %s', e.error, e.status_code, e.info)
+        logger.error(
+            "Unexpected error occurred when sending requests to Elasticsearch: %s "
+            "Status code: %s details: %s",
+            e.error,
+            e.status_code,
+            e.info,
+        )
         raise KnowledgeBaseError
     except ElasticsearchException:
         raise KnowledgeBaseError
 
 
-def load_index(app_namespace, index_name, docs, docs_count, mapping, doc_type, es_host=None,
-               es_client=None, connect_timeout=2):
+def load_index(
+    app_namespace,
+    index_name,
+    docs,
+    docs_count,
+    mapping,
+    doc_type,
+    es_host=None,
+    es_client=None,
+    connect_timeout=2,
+):
     """Loads documents from data into the specified index. If an index with the specified name
     doesn't exist, a new index with that name will be created.
 
@@ -192,39 +255,58 @@ def load_index(app_namespace, index_name, docs, docs_count, mapping, doc_type, e
     es_client = es_client or create_es_client(es_host)
     try:
         # create index if specified index does not exist
-        if does_index_exist(app_namespace, index_name, es_host, es_client, connect_timeout):
-            logger.warning('Elasticsearch index \'%s\' for application \'%s\' already exists!',
-                           index_name, app_namespace)
-            logger.info('Loading index %r', index_name)
+        if does_index_exist(
+            app_namespace, index_name, es_host, es_client, connect_timeout
+        ):
+            logger.warning(
+                "Elasticsearch index '%s' for application '%s' already exists!",
+                index_name,
+                app_namespace,
+            )
+            logger.info("Loading index %r", index_name)
         else:
-            create_index(app_namespace, index_name, mapping, es_host=es_host, es_client=es_client)
+            create_index(
+                app_namespace, index_name, mapping, es_host=es_host, es_client=es_client
+            )
 
         count = 0
         # create the progess bar with docs count
         pbar = tqdm(total=docs_count)
 
-        for okay, result in streaming_bulk(es_client, docs,
-                                           index=scoped_index_name, doc_type=doc_type,
-                                           chunk_size=50, raise_on_error=False):
+        for okay, result in streaming_bulk(
+            es_client,
+            docs,
+            index=scoped_index_name,
+            doc_type=doc_type,
+            chunk_size=50,
+            raise_on_error=False,
+        ):
 
             action, result = result.popitem()
-            doc_id = '/%s/%s/%s' % (index_name, doc_type, result['_id'])
+            doc_id = "/%s/%s/%s" % (index_name, doc_type, result["_id"])
             # process the information from ES whether the document has been
             # successfully indexed
             if not okay:
-                logger.error('Failed to %s document %s: %r', action, doc_id, result)
+                logger.error("Failed to %s document %s: %r", action, doc_id, result)
             else:
                 count += 1
             pbar.update(1)
         # close the progress bar and flush all output
         pbar.close()
-        logger.info('Loaded %s document%s', count, '' if count == 1 else 's')
+        logger.info("Loaded %s document%s", count, "" if count == 1 else "s")
     except EsConnectionError as e:
-        logger.debug('Unable to connect to Elasticsearch: %s details: %s', e.error, e.info)
+        logger.debug(
+            "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
+        )
         raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts)
     except TransportError as e:
-        logger.error('Unexpected error occurred when sending requests to Elasticsearch: %s '
-                     'Status code: %s details: %s', e.error, e.status_code, e.info)
+        logger.error(
+            "Unexpected error occurred when sending requests to Elasticsearch: %s "
+            "Status code: %s details: %s",
+            e.error,
+            e.status_code,
+            e.info,
+        )
         raise KnowledgeBaseError
     except ElasticsearchException:
         raise KnowledgeBaseError

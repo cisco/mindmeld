@@ -40,7 +40,7 @@ from mindmeld import Application
 
 
 def dump_to_file(path, contents):
-    with open(path, 'w') as target:
+    with open(path, "w") as target:
         target.write(contents)
 
 
@@ -52,7 +52,7 @@ def app_dir():
     global app_counter
     with tempfile.TemporaryDirectory() as temp_dir:
 
-        temp_app_dir = os.path.join(temp_dir, 'mm_app_' + str(app_counter))
+        temp_app_dir = os.path.join(temp_dir, "mm_app_" + str(app_counter))
         os.mkdir(temp_app_dir)
         yield temp_app_dir
 
@@ -62,7 +62,7 @@ def app_dir():
 def test_package_app(app_dir):
     """Tests that a package app is correctly loaded"""
     # prep dir
-    dump_to_file(os.path.join(app_dir, '__init__.py'), GOOD_APP_FILE)
+    dump_to_file(os.path.join(app_dir, "__init__.py"), GOOD_APP_FILE)
 
     app = get_app(app_dir)
     assert app
@@ -72,7 +72,7 @@ def test_package_app(app_dir):
 def test_module_app(app_dir):
     """Tests that a package app is correctly loaded"""
     # prep dir
-    dump_to_file(os.path.join(app_dir, 'app.py'), GOOD_APP_FILE)
+    dump_to_file(os.path.join(app_dir, "app.py"), GOOD_APP_FILE)
 
     app = get_app(app_dir)
     assert app
@@ -85,22 +85,22 @@ def test_no_files(app_dir):
 
 
 def test_bad_package(app_dir):
-    dump_to_file(os.path.join(app_dir, '__init__.py'), BAD_APP_FILE)
+    dump_to_file(os.path.join(app_dir, "__init__.py"), BAD_APP_FILE)
 
     with pytest.raises(MindMeldImportError):
         get_app(app_dir)
 
 
 def test_bad_module(app_dir):
-    dump_to_file(os.path.join(app_dir, 'app.py'), BAD_APP_FILE)
+    dump_to_file(os.path.join(app_dir, "app.py"), BAD_APP_FILE)
 
     with pytest.raises(MindMeldImportError):
         get_app(app_dir)
 
 
 def test_bad_package_good_module(app_dir):
-    dump_to_file(os.path.join(app_dir, '__init__.py'), "")
-    dump_to_file(os.path.join(app_dir, 'app.py'), GOOD_APP_FILE)
+    dump_to_file(os.path.join(app_dir, "__init__.py"), "")
+    dump_to_file(os.path.join(app_dir, "app.py"), GOOD_APP_FILE)
 
     app = get_app(app_dir)
     assert app

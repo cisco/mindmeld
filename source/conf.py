@@ -27,8 +27,8 @@ from mock import Mock as MagicMock
 
 # Insert our custom sphinx extensions
 cwd = os.getcwd()
-sys.path.insert(0, os.path.abspath('../scripts/sphinx_ext'))
-sys.path.insert(0, os.path.abspath('../mindmeld'))
+sys.path.insert(0, os.path.abspath("../scripts/sphinx_ext"))
+sys.path.insert(0, os.path.abspath("../mindmeld"))
 
 
 # Get the project root dir, which is the parent dir of this
@@ -42,25 +42,26 @@ sys.path.insert(0, project_root)
 
 class PatchedPythonDomain(PythonDomain):
     def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
-        if 'refspecific' in node:
-            del node['refspecific']
+        if "refspecific" in node:
+            del node["refspecific"]
         return super(PatchedPythonDomain, self).resolve_xref(
-            env, fromdocname, builder, typ, target, node, contnode)
+            env, fromdocname, builder, typ, target, node, contnode
+        )
 
 
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-            return Mock()
+        return Mock()
 
 
-MOCK_MODULES = ['duckling', 'pandas']
+MOCK_MODULES = ["duckling", "pandas"]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
 def setup(app):
-    app.add_stylesheet('custom.css')
-    app.add_config_value('release_visibility', 'public', 'env')
+    app.add_stylesheet("custom.css")
+    app.add_config_value("release_visibility", "public", "env")
     app.add_javascript("custom.js")
     app.add_javascript("https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js")
     app.override_domain(PatchedPythonDomain)
@@ -77,42 +78,42 @@ def setup(app):
 # ones.
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',  # Support Google Style docstrings
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.extlinks',  # Markup to shorten external links
-    'nbsphinx',
-    'scope'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",  # Support Google Style docstrings
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.extlinks",  # Markup to shorten external links
+    "nbsphinx",
+    "scope",
 ]
 
-autodoc_member_order = 'groupwise'
+autodoc_member_order = "groupwise"
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The encoding of source files.
 #
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'The Conversational AI Playbook'
-copyright = u'2019, Cisco Systems'
-author = u'Cisco Systems.'
+project = u"The Conversational AI Playbook"
+copyright = u"2019, Cisco Systems"
+author = u"Cisco Systems."
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -164,10 +165,10 @@ exclude_patterns = []
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
-modindex_common_prefix = ['mindmeld.']
+modindex_common_prefix = ["mindmeld."]
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
@@ -181,7 +182,7 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -210,12 +211,12 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 #
-html_favicon = './_static/favicon.ico'
+html_favicon = "./_static/favicon.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -281,7 +282,7 @@ html_show_sphinx = False
 #   'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja'
 #   'nl', 'no', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'
 #
-html_search_language = 'en'
+html_search_language = "en"
 
 # A dictionary with options for the search language support, empty by default.
 # 'ja' uses this config value.
@@ -295,36 +296,36 @@ html_search_language = 'en'
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'MindMelddoc'
+htmlhelp_basename = "MindMelddoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-     # The paper size ('letterpaper' or 'a4paper').
-     #
-     # 'papersize': 'letterpaper',
-
-     # The font size ('10pt', '11pt' or '12pt').
-     #
-     # 'pointsize': '10pt',
-
-     # Additional stuff for the LaTeX preamble.
-     #
-     # 'preamble': '',
-
-     # Latex figure (float) alignment
-     #
-     # 'figure_align': 'htbp',
+    # The paper size ('letterpaper' or 'a4paper').
+    #
+    # 'papersize': 'letterpaper',
+    # The font size ('10pt', '11pt' or '12pt').
+    #
+    # 'pointsize': '10pt',
+    # Additional stuff for the LaTeX preamble.
+    #
+    # 'preamble': '',
+    # Latex figure (float) alignment
+    #
+    # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc,
-     'MindMeld.tex',
-     u'MindMeld Documentation',
-     u'Cisco Systems.', 'manual'),
+    (
+        master_doc,
+        "MindMeld.tex",
+        u"MindMeld Documentation",
+        u"Cisco Systems.",
+        "manual",
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -364,10 +365,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'MindMeld', u'MindMeld Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "MindMeld", u"MindMeld Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 #
@@ -380,9 +378,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'MindMeld', u'MindMeld Documentation',
-     author, 'MindMeld', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "MindMeld",
+        u"MindMeld Documentation",
+        author,
+        "MindMeld",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -456,7 +460,7 @@ epub_copyright = copyright
 # epub_post_files = []
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
+epub_exclude_files = ["search.html"]
 
 # The depth of the table of contents in toc.ncx.
 #
@@ -488,10 +492,10 @@ epub_exclude_files = ['search.html']
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {"https://docs.python.org/": None}
 
 # Markup to shorten external links (http://www.sphinx-doc.org/en/stable/ext/extlinks.html)
 extlinks = {
-    'sk_guide': ('http://scikit-learn.org/stable/modules/%s', None),
-    'sk_api': ('http://scikit-learn.org/stable/modules/generated/%s', None)
+    "sk_guide": ("http://scikit-learn.org/stable/modules/%s", None),
+    "sk_api": ("http://scikit-learn.org/stable/modules/generated/%s", None),
 }

@@ -18,7 +18,11 @@ import logging
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
+from sklearn.preprocessing import (
+    LabelEncoder as SKLabelEncoder,
+    MaxAbsScaler,
+    StandardScaler,
+)
 import numpy as np
 from .taggers import Tagger, START_TAG, extract_sequence_features
 
@@ -27,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class MemmModel(Tagger):
     """A maximum-entropy Markov model."""
+
     @staticmethod
     def _predict_proba(X):
         del X
@@ -65,7 +70,9 @@ class MemmModel(Tagger):
         Returns:
             (list[dict]): Features.
         """
-        return extract_sequence_features(example, config.example_type, config.features, resources)
+        return extract_sequence_features(
+            example, config.example_type, config.features, resources
+        )
 
     def extract_features(self, examples, config, resources, y=None, fit=True):
         """Transforms a list of examples into a feature matrix. Use extract_and_predict if you are
@@ -89,22 +96,25 @@ class MemmModel(Tagger):
         y_flat = [tag for example in y for tag in example]
         y_offset = 0
         for i, example in enumerate(examples):
-            features_by_segment = self.extract_example_features(example, config,
-                                                                resources)
+            features_by_segment = self.extract_example_features(
+                example, config, resources
+            )
             X.extend(features_by_segment)
             groups.extend([i for _ in features_by_segment])
             for j, segment in enumerate(features_by_segment):
                 if j == 0:
-                    segment['prev_tag'] = START_TAG
+                    segment["prev_tag"] = START_TAG
                 elif fit:
-                    segment['prev_tag'] = y_flat[y_offset + j - 1]
+                    segment["prev_tag"] = y_flat[y_offset + j - 1]
 
             y_offset += len(features_by_segment)
         X, y = self._preprocess_data(X, y_flat, fit)
         return X, y, groups
 
     def extract_and_predict(self, examples, config, resources):
-        return [self._predict_example(example, config, resources) for example in examples]
+        return [
+            self._predict_example(example, config, resources) for example in examples
+        ]
 
     def _predict_example(self, example, config, resources):
         features_by_segment = self.extract_example_features(example, config, resources)
@@ -114,7 +124,7 @@ class MemmModel(Tagger):
         predicted_tags = []
         prev_tag = START_TAG
         for features in features_by_segment:
-            features['prev_tag'] = prev_tag
+            features["prev_tag"] = prev_tag
             X, _ = self._preprocess_data([features])
             prediction = self.predict(X)
             predicted_tag = self.class_encoder.inverse_transform(prediction)[0]
@@ -124,8 +134,10 @@ class MemmModel(Tagger):
         return predicted_tags
 
     def predict_proba(self, examples, config, resources):
-        return [self._predict_proba_example(example, config, resources)
-                for example in examples]
+        return [
+            self._predict_proba_example(example, config, resources)
+            for example in examples
+        ]
 
     def _predict_proba_example(self, example, config, resources):
         features_by_segment = self.extract_example_features(example, config, resources)
@@ -135,7 +147,7 @@ class MemmModel(Tagger):
         prev_tag = START_TAG
         seq_log_probs = []
         for features in features_by_segment:
-            features['prev_tag'] = prev_tag
+            features["prev_tag"] = prev_tag
             X, _ = self._preprocess_data([features])
             prediction = self._clf.predict_proba(X)[0]
             predicted_tag = np.argmax(prediction)
@@ -152,15 +164,19 @@ class MemmModel(Tagger):
             (Object): A feature selector which returns a reduced feature matrix, \
                 given the full feature matrix, X and the class labels, y.
         """
-        selector = {'l1': SelectFromModel(LogisticRegression(penalty='l1', C=1)),
-                    'f': SelectPercentile()}.get(selector_type)
+        selector = {
+            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1)),
+            "f": SelectPercentile(),
+        }.get(selector_type)
         return selector
 
     @staticmethod
     def _get_feature_scaler(scale_type):
         """Get a feature value scaler based on the model settings"""
-        scaler = {'std-dev': StandardScaler(with_mean=False),
-                  'max-abs': MaxAbsScaler()}.get(scale_type)
+        scaler = {
+            "std-dev": StandardScaler(with_mean=False),
+            "max-abs": MaxAbsScaler(),
+        }.get(scale_type)
         return scaler
 
     def setup_model(self, config):
@@ -168,8 +184,8 @@ class MemmModel(Tagger):
             selector_type = None
             scale_type = None
         else:
-            selector_type = config.model_settings.get('feature_selector')
-            scale_type = config.model_settings.get('feature_scaler')
+            selector_type = config.model_settings.get("feature_selector")
+            scale_type = config.model_settings.get("feature_scaler")
         self.class_encoder = SKLabelEncoder()
         self.feat_vectorizer = DictVectorizer()
         self._feat_selector = self._get_feature_selector(selector_type)

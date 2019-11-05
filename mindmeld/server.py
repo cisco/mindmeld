@@ -44,7 +44,9 @@ class MindMeldRequest(Request):  # pylint: disable=too-many-ancestors
         occurred. The default implementation just raises a BadRequest exception.
         """
         del exc
-        raise BadMindMeldRequestError("Malformed request body: {0:s}".format(sys.exc_info()[1]))
+        raise BadMindMeldRequestError(
+            "Malformed request body: {0:s}".format(sys.exc_info()[1])
+        )
 
 
 class MindMeldServer:
@@ -52,31 +54,31 @@ class MindMeldServer:
 
     def __init__(self, app_manager):
         self._app_manager = app_manager
-        self._request_logger = logger.getChild('requests')
+        self._request_logger = logger.getChild("requests")
 
-        server = Flask('mindmeld')
+        server = Flask("mindmeld")
         CORS(server)
 
         server.request_class = MindMeldRequest
 
-        server.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 16
+        server.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 16
 
         # Set the version for logging purposes
         self._package_version = __version__
         self._app_version = None
-        if os.environ.get('MM_APP_VERSION'):
-            self._app_version = os.environ.get('MM_APP_VERSION')
-        elif os.environ.get('MM_APP_VERSION_FILE'):
-            version_file = os.environ.get('MM_APP_VERSION_FILE')
+        if os.environ.get("MM_APP_VERSION"):
+            self._app_version = os.environ.get("MM_APP_VERSION")
+        elif os.environ.get("MM_APP_VERSION_FILE"):
+            version_file = os.environ.get("MM_APP_VERSION_FILE")
             try:
-                with open(version_file, 'r') as file:
+                with open(version_file, "r") as file:
                     self._app_version = file.readline().strip()
             except (OSError, IOError):
                 # failed to set version
                 logger.warning("Failed to open app version file: '%s'", version_file)
 
         # pylint: disable=unused-variable
-        @server.route('/parse', methods=['POST'])
+        @server.route("/parse", methods=["POST"])
         def parse():
             """The main endpoint for the MindMeld API"""
             request_json = request.get_json()
@@ -85,13 +87,13 @@ class MindMeldServer:
                 raise BadMindMeldRequestError(msg, status_code=415)
 
             safe_request = {}
-            for key in ['text', 'params', 'context', 'frame', 'history', 'verbose']:
+            for key in ["text", "params", "context", "frame", "history", "verbose"]:
                 if key in request_json:
                     safe_request[key] = request_json[key]
             response = self._app_manager.parse(**safe_request)
             # add request id to response
             # use the passed in id if any
-            request_id = request_json.get('request_id', str(uuid.uuid4()))
+            request_id = request_json.get("request_id", str(uuid.uuid4()))
             response.request_id = request_id
             return jsonify(DialogueResponder.to_json(response))
 
@@ -107,8 +109,8 @@ class MindMeldServer:
             # add response time to response
             try:
                 data = json.loads(response.get_data(as_text=True))
-                data['response_time'] = g.response_time
-                data['version'] = '2.0'
+                data["response_time"] = g.response_time
+                data["version"] = "2.0"
                 response.set_data(json.dumps(data))
             except json.JSONDecodeError:
                 pass
@@ -118,8 +120,8 @@ class MindMeldServer:
         @server.teardown_request
         def _teardown_request(error):
             del error
-            if hasattr(g, 'log_this_request') and g.log_this_request:
-                response = g.get('response', None)
+            if hasattr(g, "log_this_request") and g.log_this_request:
+                response = g.get("response", None)
                 self._log_request(request, response)
 
         # handle exceptions
@@ -132,17 +134,17 @@ class MindMeldServer:
 
         @server.errorhandler(500)
         def handle_server_error(error):
-            response_data = {'error': error.message}
+            response_data = {"error": error.message}
             response = jsonify(response_data)
             response.status_code = 500
             logger.error(json.dumps(response_data))
             return response
 
-        @server.route('/_status', methods=['GET'])
+        @server.route("/_status", methods=["GET"])
         def status_check():
-            body = {'status': 'OK', 'package_version': self._package_version}
+            body = {"status": "OK", "package_version": self._package_version}
             if self._app_version:
-                body['app_version'] = self._app_version
+                body["app_version"] = self._app_version
             return jsonify(body)
 
         self._server = server
@@ -160,7 +162,7 @@ class MindMeldServer:
             else:
                 ip_address = req.remote_addr
 
-            if req.method == 'GET':
+            if req.method == "GET":
                 request_data = req.args.to_dict()
             else:
                 request_data = req.get_json()
@@ -168,27 +170,27 @@ class MindMeldServer:
             # TODO add hook for app to modify logged info
 
         except (KeyError, ValueError, AttributeError) as exc:
-            logger.warning('Error occured while logging request')
-            logger.debug('Response: %s\nerror: %s', response, exc)
+            logger.warning("Error occured while logging request")
+            logger.debug("Response: %s\nerror: %s", response, exc)
             return
 
         log_request_data = {}
-        log_request_data['response'] = response_data
-        log_request_data['request'] = request_data
-        if hasattr(g, 'response_time'):
-            log_request_data['response_time'] = g.response_time
-        if hasattr(g, 'app_name'):
-            log_request_data['app_name'] = g.app_name
+        log_request_data["response"] = response_data
+        log_request_data["request"] = request_data
+        if hasattr(g, "response_time"):
+            log_request_data["response_time"] = g.response_time
+        if hasattr(g, "app_name"):
+            log_request_data["app_name"] = g.app_name
 
-        log_request_data['ip'] = ip_address
-        log_request_data['platform'] = req.user_agent.platform
-        log_request_data['url_root'] = req.url_root
-        log_request_data['base_url'] = req.base_url
-        log_request_data['source'] = {'type': 'app'}
-        log_request_data['source']['package_version'] = self._package_version
-        if os.environ.get('MM_NODE_NAME'):
-            log_request_data['source']['node_name'] = os.environ.get('MM_NODE_NAME')
+        log_request_data["ip"] = ip_address
+        log_request_data["platform"] = req.user_agent.platform
+        log_request_data["url_root"] = req.url_root
+        log_request_data["base_url"] = req.base_url
+        log_request_data["source"] = {"type": "app"}
+        log_request_data["source"]["package_version"] = self._package_version
+        if os.environ.get("MM_NODE_NAME"):
+            log_request_data["source"]["node_name"] = os.environ.get("MM_NODE_NAME")
         if self._app_version:
-            log_request_data['source']['app_version'] = self._app_version
+            log_request_data["source"]["app_version"] = self._app_version
 
         self._request_logger.info(json.dumps(log_request_data))

@@ -17,9 +17,7 @@ This module contains the application manager
 import logging
 
 from .components.request import Request, Params, FrozenParams
-from .components import (
-    NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
-)
+from .components import NaturalLanguageProcessor, DialogueManager, QuestionAnswerer
 from .components.dialogue import DialogueResponder
 from .resource_loader import ResourceLoader
 
@@ -44,8 +42,10 @@ def freeze_params(params):
     elif params.__class__ == Params:
         params = FrozenParams(**DialogueResponder.to_json(params))
     elif not isinstance(params, FrozenParams):
-        raise TypeError("Invalid type for params argument. "
-                        "Should be dict or {}".format(FrozenParams.__name__))
+        raise TypeError(
+            "Invalid type for params argument. "
+            "Should be dict or {}".format(FrozenParams.__name__)
+        )
     return params
 
 
@@ -65,11 +65,21 @@ class ApplicationManager:
                 that inherits from the DialogueResponder
             dialogue_manager (DialogueManager): The application's dialogue manager.
     """
+
     MAX_HISTORY_LEN = 100
     """The max number of turns in history."""
 
-    def __init__(self, app_path, nlp=None, question_answerer=None, es_host=None,
-                 request_class=None, responder_class=None, preprocessor=None, async_mode=False):
+    def __init__(
+        self,
+        app_path,
+        nlp=None,
+        question_answerer=None,
+        es_host=None,
+        request_class=None,
+        responder_class=None,
+        preprocessor=None,
+        async_mode=False,
+    ):
         self.async_mode = async_mode
 
         self._app_path = app_path
@@ -82,16 +92,20 @@ class ApplicationManager:
             resource_loader = question_answerer.resource_loader
         else:
             resource_loader = ResourceLoader.create_resource_loader(
-                app_path, preprocessor=preprocessor)
+                app_path, preprocessor=preprocessor
+            )
 
         self._query_factory = resource_loader.query_factory
 
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
         self.question_answerer = question_answerer or QuestionAnswerer(
-            app_path, resource_loader, es_host)
+            app_path, resource_loader, es_host
+        )
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
-        self.dialogue_manager = DialogueManager(self.responder_class, async_mode=self.async_mode)
+        self.dialogue_manager = DialogueManager(
+            self.responder_class, async_mode=self.async_mode
+        )
 
     @property
     def ready(self):
@@ -117,16 +131,28 @@ class ApplicationManager:
 
     def _pre_dm(self, processed_query, context, params, frame, history):
         # We pass in the previous turn's responder's params to the current request
-        request = self.request_class(context=context, history=history, frame=frame,
-                                     params=params, **processed_query)
+        request = self.request_class(
+            context=context,
+            history=history,
+            frame=frame,
+            params=params,
+            **processed_query
+        )
 
         # We reset the current turn's responder's params
-        response = self.responder_class(frame=frame, params=Params(),
-                                        slots={}, history=history, request=request,
-                                        directives=[])
+        response = self.responder_class(
+            frame=frame,
+            params=Params(),
+            slots={},
+            history=history,
+            request=request,
+            directives=[],
+        )
         return request, response
 
-    def parse(self, text, params=None, context=None, frame=None, history=None, verbose=False):
+    def parse(
+        self, text, params=None, context=None, frame=None, history=None, verbose=False
+    ):
         """
         Args:
             text (str): The text of the message sent by the user
@@ -156,8 +182,14 @@ class ApplicationManager:
 
         """
         if self.async_mode:
-            return self._parse_async(text, params=params, context=context, frame=frame,
-                                     history=history, verbose=verbose)
+            return self._parse_async(
+                text,
+                params=params,
+                context=context,
+                frame=frame,
+                history=history,
+                verbose=verbose,
+            )
 
         params = freeze_params(params)
         history = history or []
@@ -165,18 +197,26 @@ class ApplicationManager:
         context = context or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
-        processed_query = self.nlp.process(query_text=text, allowed_intents=allowed_intents,
-                                           **nlp_params)
-        request, response = self._pre_dm(processed_query=processed_query,
-                                         context=context, history=history,
-                                         frame=frame, params=params)
+        processed_query = self.nlp.process(
+            query_text=text, allowed_intents=allowed_intents, **nlp_params
+        )
+        request, response = self._pre_dm(
+            processed_query=processed_query,
+            context=context,
+            history=history,
+            frame=frame,
+            params=params,
+        )
 
-        dm_responder = self.dialogue_manager.apply_handler(request, response, **dm_params)
+        dm_responder = self.dialogue_manager.apply_handler(
+            request, response, **dm_params
+        )
         modified_dm_responder = self._post_dm(request, dm_responder)
         return modified_dm_responder
 
-    async def _parse_async(self, text, params=None, context=None, frame=None,
-                           history=None, verbose=False):
+    async def _parse_async(
+        self, text, params=None, context=None, frame=None, history=None, verbose=False
+    ):
         """
         Args:
             text (str): The text of the message sent by the user
@@ -211,37 +251,46 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
-        processed_query = self.nlp.process(query_text=text,
-                                           allowed_intents=allowed_intents,
-                                           **nlp_params)
-        request, response = self._pre_dm(processed_query=processed_query,
-                                         context=context, history=history,
-                                         frame=frame, params=params)
+        processed_query = self.nlp.process(
+            query_text=text, allowed_intents=allowed_intents, **nlp_params
+        )
+        request, response = self._pre_dm(
+            processed_query=processed_query,
+            context=context,
+            history=history,
+            frame=frame,
+            params=params,
+        )
 
-        dm_responder = await self.dialogue_manager.apply_handler(request, response, **dm_params)
+        dm_responder = await self.dialogue_manager.apply_handler(
+            request, response, **dm_params
+        )
         modified_dm_responder = self._post_dm(request, dm_responder)
         return modified_dm_responder
 
     def _pre_nlp(self, params, verbose=False):
         # validate params
-        allowed_intents = params.validate_param('allowed_intents')
+        allowed_intents = params.validate_param("allowed_intents")
         nlp_params = params.nlp_params()
-        nlp_params['verbose'] = verbose
-        return allowed_intents, nlp_params, params.dm_params(
-            self.dialogue_manager.handler_map)
+        nlp_params["verbose"] = verbose
+        return (
+            allowed_intents,
+            nlp_params,
+            params.dm_params(self.dialogue_manager.handler_map),
+        )
 
     def _post_dm(self, request, dm_response):
         # Append this item to the history, but don't recursively store history
         prev_request = DialogueResponder.to_json(dm_response)
-        prev_request.pop('history')
+        prev_request.pop("history")
 
         # limit length of history
         new_history = (prev_request,) + request.history
-        dm_response.history = new_history[:self.MAX_HISTORY_LEN]
+        dm_response.history = new_history[: self.MAX_HISTORY_LEN]
 
         # validate outgoing params
-        dm_response.params.validate_param('allowed_intents')
-        dm_response.params.validate_param('target_dialogue_state')
+        dm_response.params.validate_param("allowed_intents")
+        dm_response.params.validate_param("target_dialogue_state")
         return dm_response
 
     def add_middleware(self, middleware):

@@ -15,4 +15,4 @@
 from .webex_bot_server import WebexBotServer
 
 
-__all__ = ['WebexBotServer']
+__all__ = ["WebexBotServer"]

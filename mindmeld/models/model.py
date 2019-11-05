@@ -21,23 +21,46 @@ import copy
 from inspect import signature
 import numpy as np
 
-from sklearn.model_selection import (KFold, GroupShuffleSplit, GroupKFold, GridSearchCV,
-                                     ShuffleSplit, StratifiedKFold, StratifiedShuffleSplit)
+from sklearn.model_selection import (
+    KFold,
+    GroupShuffleSplit,
+    GroupKFold,
+    GridSearchCV,
+    ShuffleSplit,
+    StratifiedKFold,
+    StratifiedShuffleSplit,
+)
 
-from sklearn.metrics import (f1_score, precision_recall_fscore_support as score, confusion_matrix,
-                             accuracy_score)
-from .helpers import (get_feature_extractor, get_label_encoder, register_label, ENTITIES_LABEL_TYPE,
-                      entity_seqs_equal, CHAR_NGRAM_FREQ_RSC, WORD_NGRAM_FREQ_RSC, ENABLE_STEMMING,
-                      ingest_dynamic_gazetteer)
-from .taggers.taggers import (get_tags_from_entities, get_entities_from_tags, get_boundary_counts,
-                              BoundaryCounts)
+from sklearn.metrics import (
+    f1_score,
+    precision_recall_fscore_support as score,
+    confusion_matrix,
+    accuracy_score,
+)
+from .helpers import (
+    get_feature_extractor,
+    get_label_encoder,
+    register_label,
+    ENTITIES_LABEL_TYPE,
+    entity_seqs_equal,
+    CHAR_NGRAM_FREQ_RSC,
+    WORD_NGRAM_FREQ_RSC,
+    ENABLE_STEMMING,
+    ingest_dynamic_gazetteer,
+)
+from .taggers.taggers import (
+    get_tags_from_entities,
+    get_entities_from_tags,
+    get_boundary_counts,
+    BoundaryCounts,
+)
 from .._version import _get_mm_version
 from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
 
 # model scoring type
-LIKELIHOOD_SCORING = 'log_loss'
+LIKELIHOOD_SCORING = "log_loss"
 
 _NEG_INF = -1e10
 
@@ -73,18 +96,44 @@ class ModelConfig:
             file names.
     """
 
-    __slots__ = ['model_type', 'example_type', 'label_type', 'features', 'model_settings', 'params',
-                 'param_selection', 'train_label_set', 'test_label_set']
+    __slots__ = [
+        "model_type",
+        "example_type",
+        "label_type",
+        "features",
+        "model_settings",
+        "params",
+        "param_selection",
+        "train_label_set",
+        "test_label_set",
+    ]
 
-    def __init__(self, model_type=None, example_type=None, label_type=None, features=None,
-                 model_settings=None, params=None, param_selection=None, train_label_set=None,
-                 test_label_set=None):
-        for arg, val in {'model_type': model_type, 'example_type': example_type,
-                         'label_type': label_type, 'features': features}.items():
+    def __init__(
+        self,
+        model_type=None,
+        example_type=None,
+        label_type=None,
+        features=None,
+        model_settings=None,
+        params=None,
+        param_selection=None,
+        train_label_set=None,
+        test_label_set=None,
+    ):
+        for arg, val in {
+            "model_type": model_type,
+            "example_type": example_type,
+            "label_type": label_type,
+            "features": features,
+        }.items():
             if val is None:
-                raise TypeError('__init__() missing required argument {!r}'.format(arg))
-        if params is None and (param_selection is None or param_selection.get('grid') is None):
-            raise ValueError("__init__() One of 'params' and 'param_selection' is required")
+                raise TypeError("__init__() missing required argument {!r}".format(arg))
+        if params is None and (
+            param_selection is None or param_selection.get("grid") is None
+        ):
+            raise ValueError(
+                "__init__() One of 'params' and 'param_selection' is required"
+            )
         self.model_type = model_type
         self.example_type = example_type
         self.label_type = label_type
@@ -107,7 +156,9 @@ class ModelConfig:
         return result
 
     def __repr__(self):
-        args_str = ', '.join("{}={!r}".format(key, getattr(self, key)) for key in self.__slots__)
+        args_str = ", ".join(
+            "{}={!r}".format(key, getattr(self, key)) for key in self.__slots__
+        )
         return "{}({})".format(self.__class__.__name__, args_str)
 
     def to_json(self):
@@ -125,9 +176,10 @@ class ModelConfig:
         Args:
             new_config (ModelConfig): The ModelConfig representing the app's latest config
         """
-        new_settings = ['train_label_set', 'test_label_set']
-        logger.warning('Loading missing properties %s from app '
-                       'configuration file', new_settings)
+        new_settings = ["train_label_set", "test_label_set"]
+        logger.warning(
+            "Loading missing properties %s from app " "configuration file", new_settings
+        )
         for setting in new_settings:
             setattr(self, setting, getattr(new_config, setting))
 
@@ -147,22 +199,28 @@ class ModelConfig:
         lengths = thresholds = None
         # if it's not the n-gram feature, we don't need length and threshold information
         if rname == CHAR_NGRAM_FREQ_RSC:
-            feature_name = 'char-ngrams'
+            feature_name = "char-ngrams"
         elif rname == WORD_NGRAM_FREQ_RSC:
-            feature_name = 'bag-of-words'
+            feature_name = "bag-of-words"
         else:
             return lengths, thresholds
 
         # feature name varies based on whether it's for a classifier or tagger
-        if self.model_type == 'text':
+        if self.model_type == "text":
             if feature_name in self.features:
-                lengths = self.features[feature_name]['lengths']
-                thresholds = self.features[feature_name].get('thresholds', [0] * len(lengths))
-        elif self.model_type == 'tagger':
-            feature_name = feature_name + '-seq'
+                lengths = self.features[feature_name]["lengths"]
+                thresholds = self.features[feature_name].get(
+                    "thresholds", [0] * len(lengths)
+                )
+        elif self.model_type == "tagger":
+            feature_name = feature_name + "-seq"
             if feature_name in self.features:
-                lengths = self.features[feature_name]['ngram_lengths_to_start_positions'].keys()
-                thresholds = self.features[feature_name].get('thresholds', [0] * len(lengths))
+                lengths = self.features[feature_name][
+                    "ngram_lengths_to_start_positions"
+                ].keys()
+                thresholds = self.features[feature_name].get(
+                    "thresholds", [0] * len(lengths)
+                )
 
         return lengths, thresholds
 
@@ -176,12 +234,15 @@ class ModelConfig:
         required_resources = set()
         for name in self.features:
             feature = get_feature_extractor(self.example_type, name)
-            required_resources.update(feature.__dict__.get('requirements', []))
+            required_resources.update(feature.__dict__.get("requirements", []))
         return required_resources
 
 
-class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'predicted',
-                                                       'probas', 'label_type'])):
+class EvaluatedExample(
+    namedtuple(
+        "EvaluatedExample", ["example", "expected", "predicted", "probas", "label_type"]
+    )
+):
     """Represents the evaluation of a single example
 
     Attributes:
@@ -202,7 +263,7 @@ class EvaluatedExample(namedtuple('EvaluatedExample', ['example', 'expected', 'p
             return self.expected == self.predicted
 
 
-class RawResults():
+class RawResults:
     """Represents the raw results of a set of evaluated examples. Useful for generating
     stats and graphs.
 
@@ -218,7 +279,10 @@ class RawResults():
         expected_flat (list): (Optional): For sequence models this is a flattened list of all gold
                               tags
     """
-    def __init__(self, predicted, expected, text_labels, predicted_flat=None, expected_flat=None):
+
+    def __init__(
+        self, predicted, expected, text_labels, predicted_flat=None, expected_flat=None
+    ):
         self.predicted = predicted
         self.expected = expected
         self.text_labels = text_labels
@@ -226,7 +290,7 @@ class RawResults():
         self.expected_flat = expected_flat
 
 
-class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
+class ModelEvaluation(namedtuple("ModelEvaluation", ["config", "results"])):
     """Represents the evaluation of a model at a specific configuration
     using a collection of examples and labels.
 
@@ -234,6 +298,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         config (ModelConfig): The model config used during evaluation.
         results (list of EvaluatedExample): A list of the evaluated examples.
     """
+
     def __init__(self, config, results):
         del results
         self.label_encoder = get_label_encoder(config)
@@ -254,8 +319,13 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         num_correct = len(list(self.correct_results()))
         accuracy = self.get_accuracy()
         msg = "<{} score: {:.2%}, {} of {} example{} correct>"
-        return msg.format(self.__class__.__name__, accuracy, num_correct, num_examples,
-                          '' if num_examples == 1 else 's')
+        return msg.format(
+            self.__class__.__name__,
+            accuracy,
+            num_correct,
+            num_examples,
+            "" if num_examples == 1 else "s",
+        )
 
     def correct_results(self):
         """
@@ -337,30 +407,34 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         """
         labels = range(len(text_labels))
 
-        confusion_stats = self._get_confusion_matrix_and_counts(y_true=raw_expected,
-                                                                y_pred=raw_predicted)
-        stats_overall = self._get_overall_stats(y_true=raw_expected,
-                                                y_pred=raw_predicted,
-                                                labels=labels)
-        counts_overall = confusion_stats['counts_overall']
-        stats_overall['tp'] = counts_overall.tp
-        stats_overall['tn'] = counts_overall.tn
-        stats_overall['fp'] = counts_overall.fp
-        stats_overall['fn'] = counts_overall.fn
+        confusion_stats = self._get_confusion_matrix_and_counts(
+            y_true=raw_expected, y_pred=raw_predicted
+        )
+        stats_overall = self._get_overall_stats(
+            y_true=raw_expected, y_pred=raw_predicted, labels=labels
+        )
+        counts_overall = confusion_stats["counts_overall"]
+        stats_overall["tp"] = counts_overall.tp
+        stats_overall["tn"] = counts_overall.tn
+        stats_overall["fp"] = counts_overall.fp
+        stats_overall["fn"] = counts_overall.fn
 
-        class_stats = self._get_class_stats(y_true=raw_expected, y_pred=raw_predicted,
-                                            labels=labels)
-        counts_by_class = confusion_stats['counts_by_class']
+        class_stats = self._get_class_stats(
+            y_true=raw_expected, y_pred=raw_predicted, labels=labels
+        )
+        counts_by_class = confusion_stats["counts_by_class"]
 
-        class_stats['tp'] = counts_by_class.tp
-        class_stats['tn'] = counts_by_class.tn
-        class_stats['fp'] = counts_by_class.fp
-        class_stats['fn'] = counts_by_class.fn
+        class_stats["tp"] = counts_by_class.tp
+        class_stats["tn"] = counts_by_class.tn
+        class_stats["fp"] = counts_by_class.fp
+        class_stats["fn"] = counts_by_class.fn
 
-        return {'stats_overall': stats_overall,
-                'class_labels': text_labels,
-                'class_stats': class_stats,
-                'confusion_matrix': confusion_stats['confusion_matrix']}
+        return {
+            "stats_overall": stats_overall,
+            "class_labels": text_labels,
+            "class_stats": class_stats,
+            "confusion_matrix": confusion_stats["confusion_matrix"],
+        }
 
     @staticmethod
     def _get_class_stats(y_true, y_pred, labels):
@@ -371,15 +445,16 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             dict: A structured dictionary containing precision, recall, f_beta, and support \
                   vectors (1 x number of classes)
         """
-        precision, recall, f_beta, support = score(y_true=y_true, y_pred=y_pred,
-                                                   labels=labels)
+        precision, recall, f_beta, support = score(
+            y_true=y_true, y_pred=y_pred, labels=labels
+        )
 
         stats = {
-                    'precision': precision,
-                    'recall': recall,
-                    'f_beta': f_beta,
-                    'support': support
-                }
+            "precision": precision,
+            "recall": recall,
+            "f_beta": f_beta,
+            "support": support,
+        }
         return stats
 
     @staticmethod
@@ -391,16 +466,22 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             dict: A structured dictionary containing scalar values for f1 scores and overall \
                   accuracy.
         """
-        f1_weighted = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='weighted')
-        f1_macro = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='macro')
-        f1_micro = f1_score(y_true=y_true, y_pred=y_pred, labels=labels, average='micro')
+        f1_weighted = f1_score(
+            y_true=y_true, y_pred=y_pred, labels=labels, average="weighted"
+        )
+        f1_macro = f1_score(
+            y_true=y_true, y_pred=y_pred, labels=labels, average="macro"
+        )
+        f1_micro = f1_score(
+            y_true=y_true, y_pred=y_pred, labels=labels, average="micro"
+        )
         accuracy = accuracy_score(y_true=y_true, y_pred=y_pred)
 
         stats_overall = {
-            'f1_weighted': f1_weighted,
-            'f1_macro': f1_macro,
-            'f1_micro': f1_micro,
-            'accuracy': accuracy
+            "f1_weighted": f1_weighted,
+            "f1_macro": f1_macro,
+            "f1_micro": f1_micro,
+            "accuracy": accuracy,
         }
         return stats_overall
 
@@ -426,31 +507,33 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             mask = np.ones((num_classes, num_classes))
             mask[:, class_index] = 0
             mask[class_index, :] = 0
-            tn = np.sum(mask*confusion_mat)
+            tn = np.sum(mask * confusion_mat)
             tn_arr.append(tn)
 
             # fp is the sum of Cij where j is class_index but i is not
             mask = np.zeros((num_classes, num_classes))
             mask[:, class_index] = 1
             mask[class_index, class_index] = 0
-            fp = np.sum(mask*confusion_mat)
+            fp = np.sum(mask * confusion_mat)
             fp_arr.append(fp)
 
             # fn is the sum of Cij where i is class_index but j is not
             mask = np.zeros((num_classes, num_classes))
             mask[class_index, :] = 1
             mask[class_index, class_index] = 0
-            fn = np.sum(mask*confusion_mat)
+            fn = np.sum(mask * confusion_mat)
             fn_arr.append(fn)
 
-        Counts = namedtuple('Counts', ['tp', 'tn', 'fp', 'fn'])
-        return {'confusion_matrix': confusion_mat,
-                'counts_by_class': Counts(tp_arr, tn_arr, fp_arr, fn_arr),
-                'counts_overall': Counts(sum(tp_arr), sum(tn_arr), sum(fp_arr),
-                                         sum(fn_arr))
-                }
+        Counts = namedtuple("Counts", ["tp", "tn", "fp", "fn"])
+        return {
+            "confusion_matrix": confusion_mat,
+            "counts_by_class": Counts(tp_arr, tn_arr, fp_arr, fn_arr),
+            "counts_overall": Counts(
+                sum(tp_arr), sum(tn_arr), sum(fp_arr), sum(fn_arr)
+            ),
+        }
 
-    def _print_class_stats_table(self, stats, text_labels, title='Statistics by class'):
+    def _print_class_stats_table(self, stats, text_labels, title="Statistics by class"):
         """
         Helper for printing a human readable table for class statistics
 
@@ -458,11 +541,25 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             None
         """
         title_format = "{:>20}" + "{:>12}" * (len(stats))
-        common_stats = ['f_beta', 'precision', 'recall', 'support', 'tp', 'tn', 'fp', 'fn']
-        stat_row_format = "{:>20}" + "{:>12.3f}" * 3 + "{:>12.0f}" * 5 + \
-                          "{:>12.3f}" * (len(stats) - len(common_stats))
-        table_titles = common_stats + [stat for stat in stats.keys()
-                                       if stat not in common_stats]
+        common_stats = [
+            "f_beta",
+            "precision",
+            "recall",
+            "support",
+            "tp",
+            "tn",
+            "fp",
+            "fn",
+        ]
+        stat_row_format = (
+            "{:>20}"
+            + "{:>12.3f}" * 3
+            + "{:>12.0f}" * 5
+            + "{:>12.3f}" * (len(stats) - len(common_stats))
+        )
+        table_titles = common_stats + [
+            stat for stat in stats.keys() if stat not in common_stats
+        ]
         print(title + ": \n")
         print(title_format.format("class", *table_titles))
         for label_index, label in enumerate(text_labels):
@@ -482,22 +579,29 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
         """
         # Doesn't print if there isn't enough space to display the full matrix.
         if len(text_labels) > 10:
-            print("Not printing confusion matrix since it is too large. The full matrix is still"
-                  " included in the dictionary returned from get_stats().")
+            print(
+                "Not printing confusion matrix since it is too large. The full matrix is still"
+                " included in the dictionary returned from get_stats()."
+            )
             return
         labels = range(len(text_labels))
-        title_format = "{:>15}" * (len(labels)+1)
-        stat_row_format = "{:>15}" * (len(labels)+1)
-        table_titles = [self._truncate_label(text_labels[label], 10) for label in labels]
+        title_format = "{:>15}" * (len(labels) + 1)
+        stat_row_format = "{:>15}" * (len(labels) + 1)
+        table_titles = [
+            self._truncate_label(text_labels[label], 10) for label in labels
+        ]
         print("Confusion matrix: \n")
         print(title_format.format("", *table_titles))
         for label_index, label in enumerate(text_labels):
-            print(stat_row_format.format(self._truncate_label(label, 10),
-                                         *matrix[label_index]))
+            print(
+                stat_row_format.format(
+                    self._truncate_label(label, 10), *matrix[label_index]
+                )
+            )
         print("\n\n")
 
     @staticmethod
-    def _print_overall_stats_table(stats_overall, title='Overall statistics'):
+    def _print_overall_stats_table(stats_overall, title="Overall statistics"):
         """
         Helper for printing a human readable table for overall statistics
 
@@ -505,11 +609,15 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
             None
         """
         title_format = "{:>12}" * (len(stats_overall))
-        common_stats = ['accuracy', 'f1_weighted', 'tp', 'tn', 'fp', 'fn']
-        stat_row_format = "{:>12.3f}" * 2 + "{:>12.0f}" * 4 + \
-                          "{:>12.3f}" * (len(stats_overall) - len(common_stats))
-        table_titles = common_stats + [stat for stat in stats_overall.keys()
-                                       if stat not in common_stats]
+        common_stats = ["accuracy", "f1_weighted", "tp", "tn", "fp", "fn"]
+        stat_row_format = (
+            "{:>12.3f}" * 2
+            + "{:>12.0f}" * 4
+            + "{:>12.3f}" * (len(stats_overall) - len(common_stats))
+        )
+        table_titles = common_stats + [
+            stat for stat in stats_overall.keys() if stat not in common_stats
+        ]
         print(title + ": \n")
         print(title_format.format(*table_titles))
         row = []
@@ -520,7 +628,7 @@ class ModelEvaluation(namedtuple('ModelEvaluation', ['config', 'results'])):
 
     @staticmethod
     def _truncate_label(label, max_len):
-        return (label[:max_len] + '..') if len(label) > max_len else label
+        return (label[:max_len] + "..") if len(label) > max_len else label
 
 
 class StandardModelEvaluation(ModelEvaluation):
@@ -530,18 +638,23 @@ class StandardModelEvaluation(ModelEvaluation):
         predicted, expected = [], []
 
         for result in self.results:
-            text_labels, predicted = self._update_raw_result(result.predicted, text_labels,
-                                                             predicted)
-            text_labels, expected = self._update_raw_result(result.expected, text_labels, expected)
+            text_labels, predicted = self._update_raw_result(
+                result.predicted, text_labels, predicted
+            )
+            text_labels, expected = self._update_raw_result(
+                result.expected, text_labels, expected
+            )
 
-        return RawResults(predicted=predicted, expected=expected, text_labels=text_labels)
+        return RawResults(
+            predicted=predicted, expected=expected, text_labels=text_labels
+        )
 
     def get_stats(self):
         """Prints model evaluation stats in a table to stdout"""
         raw_results = self.raw_results()
-        stats = self._get_common_stats(raw_results.expected,
-                                       raw_results.predicted,
-                                       raw_results.text_labels)
+        stats = self._get_common_stats(
+            raw_results.expected, raw_results.predicted, raw_results.text_labels
+        )
         # Note can add any stats specific to the standard model to any of the tables here
 
         return stats
@@ -551,14 +664,14 @@ class StandardModelEvaluation(ModelEvaluation):
         raw_results = self.raw_results()
         stats = self.get_stats()
 
-        self._print_overall_stats_table(stats['stats_overall'])
-        self._print_class_stats_table(stats['class_stats'], raw_results.text_labels)
-        self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
+        self._print_overall_stats_table(stats["stats_overall"])
+        self._print_class_stats_table(stats["class_stats"], raw_results.text_labels)
+        self._print_class_matrix(stats["confusion_matrix"], raw_results.text_labels)
 
 
 class SequenceModelEvaluation(ModelEvaluation):
     def __init__(self, config, results):
-        self._tag_scheme = config.model_settings.get('tag_scheme', 'IOB').upper()
+        self._tag_scheme = config.model_settings.get("tag_scheme", "IOB").upper()
         super().__init__(config, results)
 
     def raw_results(self):
@@ -568,10 +681,12 @@ class SequenceModelEvaluation(ModelEvaluation):
         predicted_flat, expected_flat = [], []
 
         for result in self.results:
-            raw_predicted = self.label_encoder.encode([result.predicted],
-                                                      examples=[result.example])[0]
-            raw_expected = self.label_encoder.encode([result.expected],
-                                                     examples=[result.example])[0]
+            raw_predicted = self.label_encoder.encode(
+                [result.predicted], examples=[result.example]
+            )[0]
+            raw_expected = self.label_encoder.encode(
+                [result.expected], examples=[result.example]
+            )[0]
 
             vec = []
             for entity in raw_predicted:
@@ -583,16 +698,20 @@ class SequenceModelEvaluation(ModelEvaluation):
                 text_labels, vec = self._update_raw_result(entity, text_labels, vec)
             expected.append(vec)
             expected_flat.extend(vec)
-        return RawResults(predicted=predicted, expected=expected,
-                          text_labels=text_labels, predicted_flat=predicted_flat,
-                          expected_flat=expected_flat)
+        return RawResults(
+            predicted=predicted,
+            expected=expected,
+            text_labels=text_labels,
+            predicted_flat=predicted_flat,
+            expected_flat=expected_flat,
+        )
 
     def _get_sequence_stats(self):
         """
         TODO: Generate additional sequence level stats
         """
         sequence_accuracy = self.get_accuracy()
-        return {'sequence_accuracy': sequence_accuracy}
+        return {"sequence_accuracy": sequence_accuracy}
 
     @staticmethod
     def _print_sequence_stats_table(sequence_stats):
@@ -603,7 +722,7 @@ class SequenceModelEvaluation(ModelEvaluation):
             None
         """
         title_format = "{:>18}" * (len(sequence_stats))
-        table_titles = ['sequence_accuracy']
+        table_titles = ["sequence_accuracy"]
         stat_row_format = "{:>18.3f}" * (len(sequence_stats))
         print("Sequence-level statistics: \n")
         print(title_format.format(*table_titles))
@@ -616,11 +735,13 @@ class SequenceModelEvaluation(ModelEvaluation):
     def get_stats(self):
         """Prints model evaluation stats in a table to stdout"""
         raw_results = self.raw_results()
-        stats = self._get_common_stats(raw_results.expected_flat,
-                                       raw_results.predicted_flat,
-                                       raw_results.text_labels)
+        stats = self._get_common_stats(
+            raw_results.expected_flat,
+            raw_results.predicted_flat,
+            raw_results.text_labels,
+        )
         sequence_stats = self._get_sequence_stats()
-        stats['sequence_stats'] = sequence_stats
+        stats["sequence_stats"] = sequence_stats
 
         # Note: can add any stats specific to the sequence model to any of the tables here
         return stats
@@ -630,16 +751,22 @@ class SequenceModelEvaluation(ModelEvaluation):
         raw_results = self.raw_results()
         stats = self.get_stats()
 
-        self._print_overall_stats_table(stats['stats_overall'], 'Overall tag-level statistics')
-        self._print_class_stats_table(stats['class_stats'], raw_results.text_labels,
-                                      'Tag-level statistics by class')
-        self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
-        self._print_sequence_stats_table(stats['sequence_stats'])
+        self._print_overall_stats_table(
+            stats["stats_overall"], "Overall tag-level statistics"
+        )
+        self._print_class_stats_table(
+            stats["class_stats"],
+            raw_results.text_labels,
+            "Tag-level statistics by class",
+        )
+        self._print_class_matrix(stats["confusion_matrix"], raw_results.text_labels)
+        self._print_sequence_stats_table(stats["sequence_stats"])
 
 
 class EntityModelEvaluation(SequenceModelEvaluation):
     """Generates some statistics specific to entity recognition
     """
+
     def _get_entity_boundary_stats(self):
         """
         Calculate le, be, lbe, tp, tn, fp, fn as defined here:
@@ -647,12 +774,18 @@ class EntityModelEvaluation(SequenceModelEvaluation):
         """
         boundary_counts = BoundaryCounts()
         raw_results = self.raw_results()
-        for expected_sequence, predicted_sequence in zip(raw_results.expected,
-                                                         raw_results.predicted):
-            expected_seq_labels = [raw_results.text_labels[i] for i in expected_sequence]
-            predicted_seq_labels = [raw_results.text_labels[i] for i in predicted_sequence]
-            boundary_counts = get_boundary_counts(expected_seq_labels, predicted_seq_labels,
-                                                  boundary_counts)
+        for expected_sequence, predicted_sequence in zip(
+            raw_results.expected, raw_results.predicted
+        ):
+            expected_seq_labels = [
+                raw_results.text_labels[i] for i in expected_sequence
+            ]
+            predicted_seq_labels = [
+                raw_results.text_labels[i] for i in predicted_sequence
+            ]
+            boundary_counts = get_boundary_counts(
+                expected_seq_labels, predicted_seq_labels, boundary_counts
+            )
         return boundary_counts.to_dict()
 
     @staticmethod
@@ -670,22 +803,27 @@ class EntityModelEvaluation(SequenceModelEvaluation):
 
     def get_stats(self):
         stats = super().get_stats()
-        if self._tag_scheme == 'IOB':
+        if self._tag_scheme == "IOB":
             boundary_stats = self._get_entity_boundary_stats()
-            stats['boundary_stats'] = boundary_stats
+            stats["boundary_stats"] = boundary_stats
         return stats
 
     def print_stats(self):
         raw_results = self.raw_results()
         stats = self.get_stats()
 
-        self._print_overall_stats_table(stats['stats_overall'], 'Overall tag-level statistics')
-        self._print_class_stats_table(stats['class_stats'], raw_results.text_labels,
-                                      'Tag-level statistics by class')
-        self._print_class_matrix(stats['confusion_matrix'], raw_results.text_labels)
-        if self._tag_scheme == 'IOB':
-            self._print_boundary_stats(stats['boundary_stats'])
-        self._print_sequence_stats_table(stats['sequence_stats'])
+        self._print_overall_stats_table(
+            stats["stats_overall"], "Overall tag-level statistics"
+        )
+        self._print_class_stats_table(
+            stats["class_stats"],
+            raw_results.text_labels,
+            "Tag-level statistics by class",
+        )
+        self._print_class_matrix(stats["confusion_matrix"], raw_results.text_labels)
+        if self._tag_scheme == "IOB":
+            self._print_boundary_stats(stats["boundary_stats"])
+        self._print_sequence_stats_table(stats["sequence_stats"])
 
 
 class Model:
@@ -694,6 +832,7 @@ class Model:
     Attributes:
         config (ModelConfig): The configuration for the model
     """
+
     def __init__(self, config):
         self.config = config
         self.mindmeld_version = _get_mm_version()
@@ -714,10 +853,12 @@ class Model:
 
     @property
     def tokenizer(self):
-        tokenizer = self._resources.get('tokenizer')
+        tokenizer = self._resources.get("tokenizer")
         if not tokenizer:
-            logger.error('The tokenizer resource has not been registered '
-                         'to the model. Using default tokenizer.')
+            logger.error(
+                "The tokenizer resource has not been registered "
+                "to the model. Using default tokenizer."
+            )
             tokenizer = Tokenizer()
         return tokenizer
 
@@ -741,38 +882,54 @@ class Model:
         if selection_settings is None:
             return self._fit(examples, labels, self.config.params), self.config.params
 
-        cv_type = selection_settings['type']
+        cv_type = selection_settings["type"]
         num_splits = cv_iterator.get_n_splits(examples, labels, groups)
-        logger.info('Selecting hyperparameters using %s cross-validation with %s split%s', cv_type,
-                    num_splits, '' if num_splits == 1 else 's')
+        logger.info(
+            "Selecting hyperparameters using %s cross-validation with %s split%s",
+            cv_type,
+            num_splits,
+            "" if num_splits == 1 else "s",
+        )
 
         scoring = self._get_cv_scorer(selection_settings)
-        n_jobs = selection_settings.get('n_jobs', -1)
+        n_jobs = selection_settings.get("n_jobs", -1)
 
-        param_grid = self._convert_params(selection_settings['grid'], labels)
+        param_grid = self._convert_params(selection_settings["grid"], labels)
         model_class = self._get_model_constructor()
-        estimator, param_grid = self._get_cv_estimator_and_params(model_class, param_grid)
+        estimator, param_grid = self._get_cv_estimator_and_params(
+            model_class, param_grid
+        )
         # set GridSearchCV's return_train_score attribute to False improves cross-validation
         # runtime perf as it doesn't have to compute training scores and which we don't consume
-        grid_cv = GridSearchCV(estimator=estimator, scoring=scoring, param_grid=param_grid,
-                               cv=cv_iterator, n_jobs=n_jobs, return_train_score=False)
+        grid_cv = GridSearchCV(
+            estimator=estimator,
+            scoring=scoring,
+            param_grid=param_grid,
+            cv=cv_iterator,
+            n_jobs=n_jobs,
+            return_train_score=False,
+        )
         model = grid_cv.fit(examples, labels, groups)
 
-        for idx, params in enumerate(model.cv_results_['params']):
-            logger.debug('Candidate parameters: %s', params)
-            std_err = 2.0 * model.cv_results_['std_test_score'][idx] / math.sqrt(model.n_splits_)
+        for idx, params in enumerate(model.cv_results_["params"]):
+            logger.debug("Candidate parameters: %s", params)
+            std_err = (
+                2.0
+                * model.cv_results_["std_test_score"][idx]
+                / math.sqrt(model.n_splits_)
+            )
             if scoring == LIKELIHOOD_SCORING:
-                msg = 'Candidate average log likelihood: {:.4} ± {:.4}'
+                msg = "Candidate average log likelihood: {:.4} ± {:.4}"
             else:
-                msg = 'Candidate average accuracy: {:.2%} ± {:.2%}'
+                msg = "Candidate average accuracy: {:.2%} ± {:.2%}"
             # pylint: disable=logging-format-interpolation
-            logger.debug(msg.format(model.cv_results_['mean_test_score'][idx], std_err))
+            logger.debug(msg.format(model.cv_results_["mean_test_score"][idx], std_err))
 
         if scoring == LIKELIHOOD_SCORING:
-            msg = 'Best log likelihood: {:.4}, params: {}'
-            self.cv_loss_ = - model.best_score_
+            msg = "Best log likelihood: {:.4}, params: {}"
+            self.cv_loss_ = -model.best_score_
         else:
-            msg = 'Best accuracy: {:.2%}, params: {}'
+            msg = "Best accuracy: {:.2%}, params: {}"
             self.cv_loss_ = 1 - model.best_score_
 
         best_params = self._process_cv_best_params(model.best_params_)
@@ -794,22 +951,23 @@ class Model:
         params
         """
         expected_params = signature(model_class).parameters.keys()
-        if len(expected_params) == 1 and 'parameters' in expected_params:
+        if len(expected_params) == 1 and "parameters" in expected_params:
             # if there is only one key, this is our custom TaggerModel which is supposed to be a
             # pass-through and pass everything to the actual sklearn model
             return params
         result = copy.deepcopy(params)
         for param in params:
             if param not in expected_params:
-                msg = 'Unexpected param `{param}`, dropping it from model config.'.format(
-                    param=param)
+                msg = "Unexpected param `{param}`, dropping it from model config.".format(
+                    param=param
+                )
                 logger.warning(msg)
                 result.pop(param)
         return result
 
     def _get_cv_estimator_and_params(self, model_class, param_grid):
         param_grid = self._clean_params(model_class, param_grid)
-        if 'warm_start' in signature(model_class).parameters.keys():
+        if "warm_start" in signature(model_class).parameters.keys():
             # Warm start helps speed up cross-validation for some models such as random forest
             return model_class(warm_start=True), param_grid
         else:
@@ -894,8 +1052,8 @@ class Model:
             ModelConfig
         """
         config_dict = self.config.to_dict()
-        config_dict.pop('param_selection')
-        config_dict['params'] = self._current_params
+        config_dict.pop("param_selection")
+        config_dict["params"] = self._current_params
         return ModelConfig(**config_dict)
 
     def register_resources(self, **kwargs):
@@ -923,7 +1081,9 @@ class Model:
         """
         example_type = self.config.example_type
         feat_set = {}
-        workspace_resource = ingest_dynamic_gazetteer(self._resources, dynamic_resource, tokenizer)
+        workspace_resource = ingest_dynamic_gazetteer(
+            self._resources, dynamic_resource, tokenizer
+        )
         workspace_features = copy.deepcopy(self.config.features)
         enable_stemming = workspace_features.pop(ENABLE_STEMMING, False)
 
@@ -943,53 +1103,54 @@ class Model:
     def _get_cv_iterator(self, settings):
         if not settings:
             return None
-        cv_type = settings['type']
+        cv_type = settings["type"]
         try:
-            cv_iterator = {"k-fold": self._k_fold_iterator,
-                           "shuffle": self._shuffle_iterator,
-                           "group-k-fold": self._groups_k_fold_iterator,
-                           "group-shuffle": self._groups_shuffle_iterator,
-                           "stratified-k-fold": self._stratified_k_fold_iterator,
-                           "stratified-shuffle": self._stratified_shuffle_iterator,
-                           }.get(cv_type)(settings)
+            cv_iterator = {
+                "k-fold": self._k_fold_iterator,
+                "shuffle": self._shuffle_iterator,
+                "group-k-fold": self._groups_k_fold_iterator,
+                "group-shuffle": self._groups_shuffle_iterator,
+                "stratified-k-fold": self._stratified_k_fold_iterator,
+                "stratified-shuffle": self._stratified_shuffle_iterator,
+            }.get(cv_type)(settings)
         except KeyError:
-            raise ValueError('Unknown param selection type: {!r}'.format(cv_type))
+            raise ValueError("Unknown param selection type: {!r}".format(cv_type))
 
         return cv_iterator
 
     @staticmethod
     def _k_fold_iterator(settings):
-        k = settings['k']
+        k = settings["k"]
         return KFold(n_splits=k)
 
     @staticmethod
     def _shuffle_iterator(settings):
-        k = settings['k']
-        n = settings.get('n', k)
+        k = settings["k"]
+        n = settings.get("n", k)
         test_size = 1.0 / k
         return ShuffleSplit(n_splits=n, test_size=test_size)
 
     @staticmethod
     def _groups_k_fold_iterator(settings):
-        k = settings['k']
+        k = settings["k"]
         return GroupKFold(n_splits=k)
 
     @staticmethod
     def _groups_shuffle_iterator(settings):
-        k = settings['k']
-        n = settings.get('n', k)
+        k = settings["k"]
+        n = settings.get("n", k)
         test_size = 1.0 / k
         return GroupShuffleSplit(n_splits=n, test_size=test_size)
 
     @staticmethod
     def _stratified_k_fold_iterator(settings):
-        k = settings['k']
+        k = settings["k"]
         return StratifiedKFold(n_splits=k)
 
     @staticmethod
     def _stratified_shuffle_iterator(settings):
-        k = settings['k']
-        n = settings.get('n', k)
+        k = settings["k"]
+        n = settings.get("n", k)
         test_size = 1.0 / k
         return StratifiedShuffleSplit(n_splits=n, test_size=test_size)
 
@@ -1004,8 +1165,10 @@ class Model:
                 feature_extractor = kwargs
             else:
                 feature_extractor = get_feature_extractor(example_type, name)
-            if ('requirements' in feature_extractor.__dict__ and
-                    resource in feature_extractor.requirements):
+            if (
+                "requirements" in feature_extractor.__dict__
+                and resource in feature_extractor.requirements
+            ):
                 return True
         return False
 
@@ -1032,14 +1195,21 @@ class Model:
             if rname == ENABLE_STEMMING:
                 continue
             if rname not in self._resources:
-                lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(rname)
+                lengths, thresholds = self.config.get_ngram_lengths_and_thresholds(
+                    rname
+                )
                 self._resources[rname] = resource_loader.load_feature_resource(
-                    rname, queries=examples, labels=labels, lengths=lengths, thresholds=thresholds,
-                    enable_stemming=enable_stemming)
+                    rname,
+                    queries=examples,
+                    labels=labels,
+                    lengths=lengths,
+                    thresholds=thresholds,
+                    enable_stemming=enable_stemming,
+                )
 
         # Always initialize the global resource for tokenization, which is not a
         # feature-specific resource
-        self._resources['tokenizer'] = resource_loader.get_tokenizer()
+        self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
 
 class LabelEncoder:
@@ -1050,6 +1220,7 @@ class LabelEncoder:
     form it can deal with, and at predict time to decode predictions into
     objects
     """
+
     def __init__(self, config):
         """Initializes an encoder
 
@@ -1084,9 +1255,8 @@ class LabelEncoder:
 
 
 class EntityLabelEncoder(LabelEncoder):
-
     def _get_tag_scheme(self):
-        return self.config.model_settings.get('tag_scheme', 'IOB').upper()
+        return self.config.model_settings.get("tag_scheme", "IOB").upper()
 
     def encode(self, labels, **kwargs):
         """"Gets a list of joint app and system IOB tags from each query's entities.
@@ -1100,7 +1270,7 @@ class EntityLabelEncoder(LabelEncoder):
             list: A list of list of joint app and system IOB tags from each
                 query's entities
         """
-        examples = kwargs['examples']
+        examples = kwargs["examples"]
         scheme = self._get_tag_scheme()
         # Here each label is a list of entities for the corresponding example
         all_tags = []
@@ -1120,11 +1290,13 @@ class EntityLabelEncoder(LabelEncoder):
             list: A list of decoded labels per query
         """
         # TODO: support decoding multiple queries at once
-        examples = kwargs['examples']
-        labels = [get_entities_from_tags(examples[idx], tags)
-                  for idx, tags in enumerate(tags_by_example)]
+        examples = kwargs["examples"]
+        labels = [
+            get_entities_from_tags(examples[idx], tags)
+            for idx, tags in enumerate(tags_by_example)
+        ]
         return labels
 
 
-register_label('class', LabelEncoder)
-register_label('entities', EntityLabelEncoder)
+register_label("class", LabelEncoder)
+register_label("entities", EntityLabelEncoder)

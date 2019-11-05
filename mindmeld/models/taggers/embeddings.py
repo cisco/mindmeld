@@ -19,15 +19,18 @@ import numpy as np
 
 from tqdm import tqdm
 
-from ...path import EMBEDDINGS_FILE_PATH, \
-    EMBEDDINGS_FOLDER_PATH, PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, \
-    PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH
+from ...path import (
+    EMBEDDINGS_FILE_PATH,
+    EMBEDDINGS_FOLDER_PATH,
+    PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH,
+    PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH,
+)
 from ...exceptions import EmbeddingDownloadError
 
 logger = logging.getLogger(__name__)
 
-GLOVE_DOWNLOAD_LINK = 'http://nlp.stanford.edu/data/glove.6B.zip'
-EMBEDDING_FILE_PATH_TEMPLATE = 'glove.6B.{}d.txt'
+GLOVE_DOWNLOAD_LINK = "http://nlp.stanford.edu/data/glove.6B.zip"
+EMBEDDING_FILE_PATH_TEMPLATE = "glove.6B.{}d.txt"
 ALLOWED_WORD_EMBEDDING_DIMENSIONS = [50, 100, 200, 300]
 
 
@@ -53,16 +56,18 @@ class GloVeEmbeddingsContainer:
 
     def __init__(self, token_dimension=300, token_pretrained_embedding_filepath=None):
 
-        self.token_pretrained_embedding_filepath = \
-            token_pretrained_embedding_filepath
+        self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
 
         self.token_dimension = token_dimension
 
         if self.token_dimension not in ALLOWED_WORD_EMBEDDING_DIMENSIONS:
-            logger.info("Token dimension %s not supported, "
-                        "chose from these dimensions: %s. "
-                        "Selected 300 by default", token_dimension,
-                        str(ALLOWED_WORD_EMBEDDING_DIMENSIONS))
+            logger.info(
+                "Token dimension %s not supported, "
+                "chose from these dimensions: %s. "
+                "Selected 300 by default",
+                token_dimension,
+                str(ALLOWED_WORD_EMBEDDING_DIMENSIONS),
+            )
             self.token_dimension = 300
 
         self.word_to_embedding = {}
@@ -84,24 +89,33 @@ class GloVeEmbeddingsContainer:
         if not os.path.exists(EMBEDDINGS_FOLDER_PATH):
             os.makedirs(EMBEDDINGS_FOLDER_PATH)
 
-        with TqdmUpTo(unit='B', unit_scale=True, miniters=1,
-                      desc=GLOVE_DOWNLOAD_LINK) as t:
+        with TqdmUpTo(
+            unit="B", unit_scale=True, miniters=1, desc=GLOVE_DOWNLOAD_LINK
+        ) as t:
 
             try:
-                urlretrieve(GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to)
+                urlretrieve(
+                    GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to
+                )
 
             except ConnectionError as e:
-                logger.error("There was an issue downloading from this "
-                             "link %s with the following error: "
-                             "%s", GLOVE_DOWNLOAD_LINK, e)
+                logger.error(
+                    "There was an issue downloading from this "
+                    "link %s with the following error: "
+                    "%s",
+                    GLOVE_DOWNLOAD_LINK,
+                    e,
+                )
                 return
 
             file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
-            zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
+            zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
 
             if file_name not in zip_file_object.namelist():
-                logger.info("Embedding file with %s dimensions "
-                            "not found", self.token_dimension)
+                logger.info(
+                    "Embedding file with %s dimensions " "not found",
+                    self.token_dimension,
+                )
                 return
 
             return zip_file_object
@@ -110,16 +124,18 @@ class GloVeEmbeddingsContainer:
         for line in glove_file:
             values = line.split()
             word = values[0]
-            coefs = np.asarray(values[1:], dtype='float32')
+            coefs = np.asarray(values[1:], dtype="float32")
             self.word_to_embedding[word] = coefs
 
     def _extract_embeddings(self):
         file_location = self.token_pretrained_embedding_filepath
 
         if file_location and os.path.isfile(file_location):
-            logger.info("Extracting embeddings from provided "
-                        "file location %s.", str(file_location))
-            with open(file_location, 'r') as embedding_file:
+            logger.info(
+                "Extracting embeddings from provided " "file location %s.",
+                str(file_location),
+            )
+            with open(file_location, "r") as embedding_file:
                 self._extract_and_map(embedding_file)
             return
 
@@ -128,22 +144,30 @@ class GloVeEmbeddingsContainer:
         file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
 
         if os.path.isfile(EMBEDDINGS_FILE_PATH):
-            logger.info("Extracting embeddings from default folder "
-                        "location %s.", EMBEDDINGS_FILE_PATH)
+            logger.info(
+                "Extracting embeddings from default folder " "location %s.",
+                EMBEDDINGS_FILE_PATH,
+            )
 
             try:
-                zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, 'r')
+                zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
                 with zip_file_object.open(file_name) as embedding_file:
                     self._extract_and_map(embedding_file)
             except zipfile.BadZipFile:
-                logger.warning("%s is corrupt. Deleting the zip file and attempting to"
-                               " download the embedding file again", EMBEDDINGS_FILE_PATH)
+                logger.warning(
+                    "%s is corrupt. Deleting the zip file and attempting to"
+                    " download the embedding file again",
+                    EMBEDDINGS_FILE_PATH,
+                )
                 os.remove(EMBEDDINGS_FILE_PATH)
                 self._extract_embeddings()
             except IOError:
-                logger.error("An error occurred when reading %s zip file. The file might"
-                             " be corrupt, so try deleting the file and running the program "
-                             "again", EMBEDDINGS_FILE_PATH)
+                logger.error(
+                    "An error occurred when reading %s zip file. The file might"
+                    " be corrupt, so try deleting the file and running the program "
+                    "again",
+                    EMBEDDINGS_FILE_PATH,
+                )
             return
 
         logger.info("Default folder location %s does not exist.", EMBEDDINGS_FILE_PATH)
@@ -163,10 +187,12 @@ class WordSequenceEmbedding:
     dimension real-numbered vectors by mapping each word as a vector.
     """
 
-    def __init__(self,
-                 sequence_padding_length,
-                 token_embedding_dimension=None,
-                 token_pretrained_embedding_filepath=None):
+    def __init__(
+        self,
+        sequence_padding_length,
+        token_embedding_dimension=None,
+        token_pretrained_embedding_filepath=None,
+    ):
         """Initializes the WordSequenceEmbedding class
 
         Args:
@@ -180,8 +206,8 @@ class WordSequenceEmbedding:
         self.sequence_padding_length = sequence_padding_length
 
         self.token_to_embedding_mapping = GloVeEmbeddingsContainer(
-            token_embedding_dimension,
-            token_pretrained_embedding_filepath).get_pretrained_word_to_embeddings_dict()
+            token_embedding_dimension, token_pretrained_embedding_filepath
+        ).get_pretrained_word_to_embeddings_dict()
 
         self._add_historic_embeddings()
 
@@ -214,7 +240,9 @@ class WordSequenceEmbedding:
             corresponding embedding
         """
         if token not in self.token_to_embedding_mapping:
-            random_vector = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
+            random_vector = np.random.uniform(
+                -1, 1, size=(self.token_embedding_dimension,)
+            )
             self.token_to_embedding_mapping[token] = random_vector
         return self.token_to_embedding_mapping[token]
 
@@ -223,18 +251,20 @@ class WordSequenceEmbedding:
 
         # load historic word embeddings
         if os.path.exists(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH):
-            pkl_file = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, 'rb')
+            pkl_file = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, "rb")
             historic_word_embeddings = pickle.load(pkl_file)
             pkl_file.close()
 
         for word in historic_word_embeddings:
             if len(historic_word_embeddings[word]) == self.token_embedding_dimension:
-                self.token_to_embedding_mapping[word] = historic_word_embeddings.get(word)
+                self.token_to_embedding_mapping[word] = historic_word_embeddings.get(
+                    word
+                )
 
     def save_embeddings(self):
         """Save extracted embeddings to historic pickle file.
         """
-        output = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, 'wb')
+        output = open(PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH, "wb")
         pickle.dump(self.token_to_embedding_mapping, output)
         output.close()
 
@@ -244,10 +274,12 @@ class CharacterSequenceEmbedding:
     dimension real-numbered vectors by mapping each character in the words as vectors.
     """
 
-    def __init__(self,
-                 sequence_padding_length,
-                 token_embedding_dimension=None,
-                 max_char_per_word=None):
+    def __init__(
+        self,
+        sequence_padding_length,
+        token_embedding_dimension=None,
+        max_char_per_word=None,
+    ):
         """Initializes the CharacterSequenceEmbedding class
 
         Args:
@@ -300,7 +332,9 @@ class CharacterSequenceEmbedding:
             corresponding embedding
         """
         if token not in self.token_to_embedding_mapping:
-            random_vector = np.random.uniform(-1, 1, size=(self.token_embedding_dimension,))
+            random_vector = np.random.uniform(
+                -1, 1, size=(self.token_embedding_dimension,)
+            )
             self.token_to_embedding_mapping[token] = random_vector
         return self.token_to_embedding_mapping[token]
 
@@ -309,7 +343,7 @@ class CharacterSequenceEmbedding:
 
         # load historic word embeddings
         if os.path.exists(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH):
-            pkl_file = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, 'rb')
+            pkl_file = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, "rb")
             historic_char_embeddings = pickle.load(pkl_file)
             pkl_file.close()
 
@@ -319,6 +353,6 @@ class CharacterSequenceEmbedding:
     def save_embeddings(self):
         """Save extracted embeddings to historic pickle file.
         """
-        output = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, 'wb')
+        output = open(PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH, "wb")
         pickle.dump(self.token_to_embedding_mapping, output)
         output.close()

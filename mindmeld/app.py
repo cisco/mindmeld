@@ -42,12 +42,18 @@ class Application:
             async_mode (bool): ``True`` if the application is async, ``False`` otherwise.
         """
 
-    def __init__(self, import_name, request_class=None, responder_class=None, preprocessor=None,
-                 async_mode=False):
+    def __init__(
+        self,
+        import_name,
+        request_class=None,
+        responder_class=None,
+        preprocessor=None,
+        async_mode=False,
+    ):
         self.import_name = import_name
-        filename = getattr(sys.modules[import_name], '__file__', None)
+        filename = getattr(sys.modules[import_name], "__file__", None)
         if filename is None:
-            raise ValueError('Invalid import name')
+            raise ValueError("Invalid import name")
         self.app_path = os.path.dirname(os.path.abspath(filename))
 
         self.app_manager = None
@@ -74,9 +80,13 @@ class Application:
         if self.app_manager:
             return
         self.app_manager = ApplicationManager(
-            self.app_path, nlp, responder_class=self.responder_class,
-            request_class=self.request_class, preprocessor=self.preprocessor,
-            async_mode=self.async_mode)
+            self.app_path,
+            nlp,
+            responder_class=self.responder_class,
+            request_class=self.request_class,
+            preprocessor=self.preprocessor,
+            async_mode=self.async_mode,
+        )
         self._server = MindMeldServer(self.app_manager)
 
         # Add any pending dialogue rules
@@ -90,7 +100,7 @@ class Application:
 
     def run(self, **kwargs):
         """Runs the application on a local development server."""
-        defaults = {'port': 7150, 'host': '0.0.0.0', 'threaded': True}
+        defaults = {"port": 7150, "host": "0.0.0.0", "threaded": True}
         for key, value in defaults.items():
             if key not in kwargs:
                 kwargs[key] = value
@@ -103,9 +113,10 @@ class Application:
         """A decorator that is used to register dialogue state rules"""
 
         def _decorator(func):
-            name = kwargs.pop('name', None)
+            name = kwargs.pop("name", None)
             self.add_dialogue_rule(name, func, **kwargs)
             return func
+
         return _decorator
 
     def middleware(self, *args):
@@ -154,7 +165,7 @@ class Application:
         """Creates a dialogue flow for the application"""
 
         def _decorator(func):
-            name = kwargs.pop('name', func.__name__)
+            name = kwargs.pop("name", func.__name__)
             flow = DialogueFlow(name, func, self, **kwargs)
             return flow
 
@@ -163,4 +174,4 @@ class Application:
     def cli(self):
         """Initialize the application's command line interface."""
         # pylint: disable=unexpected-keyword-arg,no-value-for-parameter
-        app_cli(obj={'app': self})
+        app_cli(obj={"app": self})

@@ -22,11 +22,11 @@ def app_manager(kwik_e_mart_app_path, kwik_e_mart_nlp):
 
 
 def test_freeze_params():
-    params = freeze_params({'target_dialogue_state': 'some-state'})
+    params = freeze_params({"target_dialogue_state": "some-state"})
     assert params.__class__ == FrozenParams
 
     input_params = Params()
-    input_params.target_dialogue_state = 'some-state-2'
+    input_params.target_dialogue_state = "some-state-2"
     params = freeze_params(input_params)
     assert params.__class__ == FrozenParams
 
@@ -38,8 +38,8 @@ def test_freeze_params():
 
 
 def test_parse(app_manager):
-    response = app_manager.parse('hello')
+    response = app_manager.parse("hello")
 
-    fields = {'params', 'request', 'dialogue_state', 'directives', 'history'}
+    fields = {"params", "request", "dialogue_state", "directives", "history"}
     for field in fields:
         assert field in vars(response).keys()

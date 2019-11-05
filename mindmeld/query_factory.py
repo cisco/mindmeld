@@ -30,12 +30,15 @@ class QueryFactory:
             text
         stemmer (Stemmer): the object responsible for stemming the text
     """
+
     def __init__(self, tokenizer, preprocessor=None, stemmer=None):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
         self.stemmer = stemmer
 
-    def create_query(self, text, time_zone=None, timestamp=None, locale=None, language=None):
+    def create_query(
+        self, text, time_zone=None, timestamp=None, locale=None, language=None
+    ):
         """Creates a query with the given text.
 
         Args:
@@ -65,10 +68,12 @@ class QueryFactory:
             processed_text = raw_text
 
         normalized_tokens = self.tokenizer.tokenize(processed_text)
-        normalized_text = ' '.join([t['entity'] for t in normalized_tokens])
+        normalized_text = " ".join([t["entity"] for t in normalized_tokens])
 
         # stemmed tokens
-        stemmed_tokens = [self.stemmer.stem_word(t['entity']) for t in normalized_tokens]
+        stemmed_tokens = [
+            self.stemmer.stem_word(t["entity"]) for t in normalized_tokens
+        ]
 
         # create normalized maps
         maps = self.tokenizer.get_char_index_map(processed_text, normalized_text)
@@ -77,11 +82,20 @@ class QueryFactory:
         char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)] = forward
         char_maps[(TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED)] = backward
 
-        query = Query(raw_text, processed_text, normalized_tokens, char_maps, locale=locale,
-                      language=language, time_zone=time_zone, timestamp=timestamp,
-                      stemmed_tokens=stemmed_tokens)
+        query = Query(
+            raw_text,
+            processed_text,
+            normalized_tokens,
+            char_maps,
+            locale=locale,
+            language=language,
+            time_zone=time_zone,
+            timestamp=timestamp,
+            stemmed_tokens=stemmed_tokens,
+        )
         query.system_entity_candidates = sys_ent_rec.get_candidates(
-            query, locale=locale, language=language)
+            query, locale=locale, language=language
+        )
         return query
 
     def normalize(self, text):
@@ -99,7 +113,9 @@ class QueryFactory:
         return "<{} id: {!r}>".format(self.__class__.__name__, id(self))
 
     @staticmethod
-    def create_query_factory(app_path=None, tokenizer=None, preprocessor=None, stemmer=None):
+    def create_query_factory(
+        app_path=None, tokenizer=None, preprocessor=None, stemmer=None
+    ):
         """Creates a query factory for the application.
 
         Args:

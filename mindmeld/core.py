@@ -25,22 +25,25 @@ logger = logging.getLogger(__name__)
 # The date keys are extracted from here
 # https://github.com/wit-ai/duckling_old/blob/a4bc34e3e945d403a9417df50c1fb2172d56de3e/src/duckling/time/obj.clj#L21 # noqa E722
 TIME_GRAIN_TO_ORDER = {
-    'year': 0,
-    'quarter': 1,
-    'month': 2,
-    'week': 3,
-    'day': 4,
-    'hour': 5,
-    'minute': 6,
-    'second': 7,
-    'milliseconds': 8
+    "year": 0,
+    "quarter": 1,
+    "month": 2,
+    "week": 3,
+    "day": 4,
+    "hour": 5,
+    "minute": 6,
+    "second": 7,
+    "milliseconds": 8,
 }
 
 
 def _sort_by_lowest_time_grain(system_entities):
     return sorted(
         system_entities,
-        key=lambda query_entity: TIME_GRAIN_TO_ORDER[query_entity.entity.value['grain']])
+        key=lambda query_entity: TIME_GRAIN_TO_ORDER[
+            query_entity.entity.value["grain"]
+        ],
+    )
 
 
 class Bunch(dict):
@@ -88,7 +91,8 @@ class Span:
         start (int): The index from the original text that represents the start of the span
         end (int): The index from the original text that represents the end of the span
     """
-    __slots__ = ['start', 'end']
+
+    __slots__ = ["start", "end"]
 
     def __init__(self, start, end):
         assert start <= end, "Span 'start' must be less than or equal to 'end'"
@@ -97,7 +101,7 @@ class Span:
 
     def to_dict(self):
         """Converts the span into a dictionary"""
-        return {'start': self.start, 'end': self.end}
+        return {"start": self.start, "end": self.end}
 
     def slice(self, obj):
         """Returns the slice of the object for this span
@@ -108,7 +112,7 @@ class Span:
         Returns:
             The slice of the passed in object for this span
         """
-        return obj[self.start:self.end + 1]
+        return obj[self.start : self.end + 1]
 
     def shift(self, offset):
         """Shifts a span by offset
@@ -137,7 +141,9 @@ class Span:
         return NotImplemented
 
     def __repr__(self):
-        return "{}(start={}, end={})".format(self.__class__.__name__, self.start, self.end)
+        return "{}(start={}, end={})".format(
+            self.__class__.__name__, self.start, self.end
+        )
 
 
 class Query:
@@ -165,8 +171,18 @@ class Query:
 
     # TODO: look into using __slots__
 
-    def __init__(self, raw_text, processed_text, normalized_tokens, char_maps, locale=None,
-                 language=None, time_zone=None, timestamp=None, stemmed_tokens=None):
+    def __init__(
+        self,
+        raw_text,
+        processed_text,
+        normalized_tokens,
+        char_maps,
+        locale=None,
+        language=None,
+        time_zone=None,
+        timestamp=None,
+        stemmed_tokens=None,
+    ):
         """Creates a query object
 
         Args:
@@ -178,7 +194,7 @@ class Query:
                 processed and normalized text
         """
         self._normalized_tokens = normalized_tokens
-        norm_text = ' '.join([t['entity'] for t in self._normalized_tokens])
+        norm_text = " ".join([t["entity"] for t in self._normalized_tokens])
         self._texts = (raw_text, processed_text, norm_text)
         self._char_maps = char_maps
         self.system_entity_candidates = ()
@@ -206,12 +222,12 @@ class Query:
     @property
     def stemmed_text(self):
         """The stemmed input text"""
-        return ' '.join(self.stemmed_tokens)
+        return " ".join(self.stemmed_tokens)
 
     @property
     def normalized_tokens(self):
         """The tokens of the normalized input text"""
-        return tuple((token['entity'] for token in self._normalized_tokens))
+        return tuple((token["entity"] for token in self._normalized_tokens))
 
     @property
     def language(self):
@@ -273,8 +289,10 @@ class Query:
         Returns:
             tuple: the equivalent range of text in the output form
         """
-        return Span(self.transform_index(text_span.start, form_in, form_out),
-                    self.transform_index(text_span.end, form_in, form_out))
+        return Span(
+            self.transform_index(text_span.start, form_in, form_out),
+            self.transform_index(text_span.end, form_in, form_out),
+        )
 
     def transform_index(self, index, form_in, form_out):
         """Transforms a text index from one form to another.
@@ -288,7 +306,7 @@ class Query:
             int: the equivalent index of text in the output form
         """
         if form_in not in TEXT_FORMS or form_out not in TEXT_FORMS:
-            raise ValueError('Invalid text form')
+            raise ValueError("Invalid text form")
 
         if form_in > form_out:
             while form_in > form_out:
@@ -302,7 +320,9 @@ class Query:
 
     def _process_index(self, index, form_in):
         if form_in == TEXT_FORM_NORMALIZED:
-            raise ValueError("'{}' form cannot be processed".format(TEXT_FORM_NORMALIZED))
+            raise ValueError(
+                "'{}' form cannot be processed".format(TEXT_FORM_NORMALIZED)
+            )
         mapping_key = (form_in, (form_in + 1))
         try:
             mapping = self._char_maps[mapping_key]
@@ -313,7 +333,7 @@ class Query:
         try:
             return mapping[index] if mapping else index
         except KeyError:
-            raise ValueError('Invalid index {}'.format(index))
+            raise ValueError("Invalid index {}".format(index))
 
     def _unprocess_index(self, index, form_in):
         if form_in == TEXT_FORM_RAW:
@@ -328,7 +348,7 @@ class Query:
         try:
             return mapping[index] if mapping else index
         except KeyError:
-            raise ValueError('Invalid index {}'.format(index))
+            raise ValueError("Invalid index {}".format(index))
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -363,9 +383,18 @@ class ProcessedQuery:
 
     # TODO: look into using __slots__
 
-    def __init__(self, query, domain=None, intent=None, entities=None, is_gold=False,
-                 nbest_transcripts_queries=None, nbest_transcripts_entities=None,
-                 nbest_aligned_entities=None, confidence=None):
+    def __init__(
+        self,
+        query,
+        domain=None,
+        intent=None,
+        entities=None,
+        is_gold=False,
+        nbest_transcripts_queries=None,
+        nbest_transcripts_entities=None,
+        nbest_aligned_entities=None,
+        confidence=None,
+    ):
         self.query = query
         self.domain = domain
         self.intent = intent
@@ -379,23 +408,30 @@ class ProcessedQuery:
     def to_dict(self):
         """Converts the processed query into a dictionary"""
         base = {
-            'text': self.query.text,
-            'domain': self.domain,
-            'intent': self.intent,
-            'entities': None if self.entities is None else [e.to_dict() for e in self.entities],
+            "text": self.query.text,
+            "domain": self.domain,
+            "intent": self.intent,
+            "entities": None
+            if self.entities is None
+            else [e.to_dict() for e in self.entities],
         }
         if self.nbest_transcripts_queries:
-            base['nbest_transcripts_text'] = [q.text for q in self.nbest_transcripts_queries]
+            base["nbest_transcripts_text"] = [
+                q.text for q in self.nbest_transcripts_queries
+            ]
         if self.nbest_transcripts_entities:
-            base['nbest_transcripts_entities'] = [[e.to_dict() for e in n_entities]
-                                                  for n_entities in self.nbest_transcripts_entities]
+            base["nbest_transcripts_entities"] = [
+                [e.to_dict() for e in n_entities]
+                for n_entities in self.nbest_transcripts_entities
+            ]
         if self.nbest_aligned_entities:
-            base['nbest_aligned_entities'] = [[{'text': e.entity.text, 'type': e.entity.type}
-                                               for e in n_entities]
-                                              for n_entities in self.nbest_aligned_entities]
+            base["nbest_aligned_entities"] = [
+                [{"text": e.entity.text, "type": e.entity.type} for e in n_entities]
+                for n_entities in self.nbest_aligned_entities
+            ]
 
         if self.confidence:
-            base['confidences'] = self.confidence
+            base["confidences"] = self.confidence
         return base
 
     def __eq__(self, other):
@@ -410,8 +446,14 @@ class ProcessedQuery:
 
     def __repr__(self):
         msg = "<{} {!r}, domain: {!r}, intent: {!r}, {!r} entities{}>"
-        return msg.format(self.__class__.__name__, self.query.text, self.domain, self.intent,
-                          len(self.entities), ', gold' if self.is_gold else '')
+        return msg.format(
+            self.__class__.__name__,
+            self.query.text,
+            self.domain,
+            self.intent,
+            len(self.entities),
+            ", gold" if self.is_gold else "",
+        )
 
 
 class NestedEntity:
@@ -446,11 +488,22 @@ class NestedEntity:
 
     def with_children(self, children):
         """Creates a copy of this entity with the provided children"""
-        return self.__class__(self._texts, self._spans, self._token_spans, self.entity, children)
+        return self.__class__(
+            self._texts, self._spans, self._token_spans, self.entity, children
+        )
 
     @classmethod
-    def from_query(cls, query, span=None, normalized_span=None, entity_type=None, role=None,
-                   entity=None, parent_offset=None, children=None):
+    def from_query(
+        cls,
+        query,
+        span=None,
+        normalized_span=None,
+        entity_type=None,
+        role=None,
+        entity=None,
+        parent_offset=None,
+        children=None,
+    ):
         """Creates an entity node using a parent entity node
 
         Args:
@@ -470,11 +523,12 @@ class NestedEntity:
             the created entity
 
         """
+
         def _get_form_details(query_span, offset, form_in, form_out):
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
-            tok_start = len(full_text[:span_out.start].split())
+            tok_start = len(full_text[: span_out.start].split())
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
 
             # convert span from query's indexing to parent's indexing
@@ -487,17 +541,26 @@ class NestedEntity:
             return text, span_out, tok_span
 
         if span:
-            query_span = span.shift(parent_offset) \
-                if parent_offset is not None else span
+            query_span = (
+                span.shift(parent_offset) if parent_offset is not None else span
+            )
             form_in = TEXT_FORM_RAW
         elif normalized_span:
-            query_span = normalized_span.shift(parent_offset) \
-                if parent_offset is not None else normalized_span
+            query_span = (
+                normalized_span.shift(parent_offset)
+                if parent_offset is not None
+                else normalized_span
+            )
             form_in = TEXT_FORM_NORMALIZED
 
-        texts, spans, tok_spans = list(zip(*[_get_form_details(query_span, parent_offset,
-                                                               form_in, form_out)
-                                             for form_out in TEXT_FORMS]))
+        texts, spans, tok_spans = list(
+            zip(
+                *[
+                    _get_form_details(query_span, parent_offset, form_in, form_out)
+                    for form_out in TEXT_FORMS
+                ]
+            )
+        )
 
         if entity is None:
             if entity_type is None:
@@ -509,9 +572,9 @@ class NestedEntity:
     def to_dict(self):
         """Converts the query entity into a dictionary"""
         base = self.entity.to_dict()
-        base['span'] = self.span.to_dict()
+        base["span"] = self.span.to_dict()
         if self.children:
-            base['children'] = [c.to_dict() for c in self.children]
+            base["children"] = [c.to_dict() for c in self.children]
         return base
 
     @property
@@ -571,14 +634,24 @@ class NestedEntity:
 
     def __str__(self):
         return "{}{} '{}' {}-{}".format(
-            self.entity.type, ':' + self.entity.role if self.entity.role else '', self.text,
-            self.span.start, self.span.end
+            self.entity.type,
+            ":" + self.entity.role if self.entity.role else "",
+            self.text,
+            self.span.start,
+            self.span.end,
         )
 
     def __repr__(self):
-        msg = '<{} {!r} ({!r}) char: [{!r}-{!r}], tok: [{!r}-{!r}]>'
-        return msg.format(self.__class__.__name__, self.text, self.entity.type, self.span.start,
-                          self.span.end, self.token_span.start, self.token_span.end)
+        msg = "<{} {!r} ({!r}) char: [{!r}-{!r}], tok: [{!r}-{!r}]>"
+        return msg.format(
+            self.__class__.__name__,
+            self.text,
+            self.entity.type,
+            self.span.start,
+            self.span.end,
+            self.token_span.start,
+            self.token_span.end,
+        )
 
 
 class QueryEntity(NestedEntity):
@@ -621,8 +694,15 @@ class Entity:
 
     # TODO: look into using __slots__
 
-    def __init__(self, text, entity_type, role=None, value=None, display_text=None,
-                 confidence=None):
+    def __init__(
+        self,
+        text,
+        entity_type,
+        role=None,
+        value=None,
+        display_text=None,
+        confidence=None,
+    ):
         self.text = text
         self.type = entity_type
         self.role = role
@@ -641,12 +721,12 @@ class Entity:
         Returns:
             bool: True if the entity is a system entity type, else False
         """
-        return entity_type.startswith('sys_')
+        return entity_type.startswith("sys_")
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
-        base = {'text': self.text, 'type': self.type, 'role': self.role}
-        for field in ['value', 'display_text', 'confidence']:
+        base = {"text": self.text, "type": self.type, "role": self.role}
+        for field in ["value", "display_text", "confidence"]:
             value = getattr(self, field)
             if value is not None:
                 base[field] = value
@@ -696,28 +776,48 @@ def resolve_entity_conflicts(query_entities):
         while j < len(filtered):
             other = filtered[j]
             if _is_superset(target, other) and not _is_same_span(target, other):
-                logger.debug('Removing {{%s|%s}} entity in query %d since it is a '
-                             'subset of another.', other.text, other.entity.type, i)
+                logger.debug(
+                    "Removing {{%s|%s}} entity in query %d since it is a "
+                    "subset of another.",
+                    other.text,
+                    other.entity.type,
+                    i,
+                )
                 del filtered[j]
                 continue
 
             if _is_subset(target, other) and not _is_same_span(target, other):
-                logger.debug('Removing {{%s|%s}} entity in query %d since it is a '
-                             'subset of another.', target.text, target.entity.type, i)
+                logger.debug(
+                    "Removing {{%s|%s}} entity in query %d since it is a "
+                    "subset of another.",
+                    target.text,
+                    target.entity.type,
+                    i,
+                )
                 del filtered[i]
                 include_target = False
                 break
 
             if _is_same_span(target, other) or _is_overlapping(target, other):
                 if target.entity.confidence >= other.entity.confidence:
-                    logger.debug('Removing {{%s|%s}} entity in query %d since it overlaps '
-                                 'with another.', other.text, other.entity.type, i)
+                    logger.debug(
+                        "Removing {{%s|%s}} entity in query %d since it overlaps "
+                        "with another.",
+                        other.text,
+                        other.entity.type,
+                        i,
+                    )
                     del filtered[j]
                     continue
 
                 if target.entity.confidence < other.entity.confidence:
-                    logger.debug('Removing {{%s|%s}} entity in query %d since it overlaps '
-                                 'with another.', target.text, target.entity.type, i)
+                    logger.debug(
+                        "Removing {{%s|%s}} entity in query %d since it overlaps "
+                        "with another.",
+                        target.text,
+                        target.entity.type,
+                        i,
+                    )
                     del filtered[i]
                     include_target = False
                     break
@@ -729,13 +829,11 @@ def resolve_entity_conflicts(query_entities):
 
 
 def _is_subset(target, other):
-    return ((target.start >= other.start) and
-            (target.end <= other.end))
+    return (target.start >= other.start) and (target.end <= other.end)
 
 
 def _is_superset(target, other):
-    return ((target.start <= other.start) and
-            (target.end >= other.end))
+    return (target.start <= other.start) and (target.end >= other.end)
 
 
 def _is_same_span(target, other):
@@ -746,5 +844,4 @@ def _is_overlapping(target, other):
     target_range = range(target.start, target.end + 1)
     predicted_range = range(other.start, other.end + 1)
     overlap = set(target_range).intersection(predicted_range)
-    return (overlap and not _is_subset(target, other) and
-            not _is_superset(target, other))
+    return overlap and not _is_subset(target, other) and not _is_superset(target, other)

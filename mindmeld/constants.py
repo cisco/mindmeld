@@ -10,6 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-DEFAULT_TRAIN_SET_REGEX = r'train.*\.txt'
-DEFAULT_TEST_SET_REGEX = r'test.*\.txt'
-DEVCENTER_URL = 'https://devcenter.mindmeld.com'
+DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
+DEFAULT_TEST_SET_REGEX = r"test.*\.txt"
+DEVCENTER_URL = "https://devcenter.mindmeld.com"

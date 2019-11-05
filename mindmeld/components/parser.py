@@ -30,10 +30,10 @@ from .. import path
 
 logger = logging.getLogger(__name__)
 
-START_SYMBOL = 'S'
-HEAD_SYMBOL = 'H'
+START_SYMBOL = "S"
+HEAD_SYMBOL = "H"
 
-TYPE_FEATURE = Feature('type', display='prefix')
+TYPE_FEATURE = Feature("type", display="prefix")
 
 START_SYMBOLS = frozenset({START_SYMBOL, HEAD_SYMBOL})
 
@@ -57,8 +57,14 @@ class Parser:
         config (dict): The parser config.
     """
 
-    def __init__(self, resource_loader=None, config=None, allow_relaxed=True,
-                 domain=None, intent=None):
+    def __init__(
+        self,
+        resource_loader=None,
+        config=None,
+        allow_relaxed=True,
+        domain=None,
+        intent=None,
+    ):
         """Initializes the parser
 
         Args:
@@ -68,12 +74,14 @@ class Parser:
                 is provided the app config will be loaded.
         """
         if not resource_loader and not config:
-            raise ValueError('Parser requires either a configuration or a resource loader')
+            raise ValueError(
+                "Parser requires either a configuration or a resource loader"
+            )
         app_path = resource_loader.app_path if resource_loader else None
         try:
-            entity_types = path.get_entity_types(app_path) + ['unk']
+            entity_types = path.get_entity_types(app_path) + ["unk"]
         except TypeError:
-            entity_types = {'unk'}
+            entity_types = {"unk"}
         self._resource_loader = resource_loader
         self.config = get_parser_config(app_path, config, domain, intent) or {}
         configured_entities = set()
@@ -93,8 +101,14 @@ class Parser:
             self._relaxed_grammar = None
             self._relaxed_parser = None
 
-    def parse_entities(self, query, entities, all_candidates=False, handle_timeout=True,
-                       timeout=MAX_PARSE_TIME):
+    def parse_entities(
+        self,
+        query,
+        entities,
+        all_candidates=False,
+        handle_timeout=True,
+        timeout=MAX_PARSE_TIME,
+    ):
         """Determines groupings of entities for the given query.
 
         Args:
@@ -115,12 +129,16 @@ class Parser:
             return entities
 
         if not handle_timeout:
-            return self._parse(query, entities, all_candidates=all_candidates, timeout=timeout)
+            return self._parse(
+                query, entities, all_candidates=all_candidates, timeout=timeout
+            )
 
         try:
-            return self._parse(query, entities, all_candidates=all_candidates, timeout=timeout)
+            return self._parse(
+                query, entities, all_candidates=all_candidates, timeout=timeout
+            )
         except ParserTimeout:
-            logger.warning('Parser timed out parsing query %r', query.text)
+            logger.warning("Parser timed out parsing query %r", query.text)
             return entities
 
     def _parse(self, query, entities, all_candidates, timeout):
@@ -134,36 +152,38 @@ class Parser:
             role_type = entity.entity.role
             if role_type:
                 # Append role type to entity type with - separator
-                entity_with_role_type = entity_type + '--' + role_type
+                entity_with_role_type = entity_type + "--" + role_type
                 if entity_with_role_type in self._configured_entities:
                     entity_type = entity_with_role_type
             if entity_type not in self._configured_entities:
-                entity_type = 'unk'
-            entity_id = '{}{}'.format(entity_type, entity_type_count[entity_type])
+                entity_type = "unk"
+            entity_id = "{}{}".format(entity_type, entity_type_count[entity_type])
             entity_type_count[entity_type] += 1
             entity_dict[entity_id] = entity
             tokens.append(entity_id)
 
-        logger.debug('Parsing sentential form: %r', ' '.join(tokens))
+        logger.debug("Parsing sentential form: %r", " ".join(tokens))
         start_time = time.time()
         parses = []
         for parse in self._parser.parse(tokens):
             parses.append(parse)
             if timeout is not None and (time.time() - start_time) > timeout:
-                raise ParserTimeout('Parsing took too long')
+                raise ParserTimeout("Parsing took too long")
 
         if not parses and self._relaxed_parser:
             for parse in self._relaxed_parser.parse(tokens):
                 parses.append(parse)
                 if timeout is not None and (time.time() - start_time) > MAX_PARSE_TIME:
-                    raise ParserTimeout('Parsing took too long')
+                    raise ParserTimeout("Parsing took too long")
 
         if not parses:
             if all_candidates:
                 return []
             return entities
 
-        ranked_parses = self._rank_parses(query, entity_dict, parses, timeout, start_time)
+        ranked_parses = self._rank_parses(
+            query, entity_dict, parses, timeout, start_time
+        )
         if all_candidates:
             return ranked_parses
 
@@ -177,7 +197,7 @@ class Parser:
 
         for parse in parses:
             if timeout is not None and time.time() - start_time > timeout:
-                raise ParserTimeout('Parsing took too long')
+                raise ParserTimeout("Parsing took too long")
             resolved[self._resolve_parse(parse)] = None
         filtered = (p for p in resolved.keys())
 
@@ -186,10 +206,15 @@ class Parser:
         filtered = (p for p in parses if len(p) <= len(parses[0]))
 
         # Prefer parses with minimal distance from dependents to heads
-        parses = list(sorted(filtered, key=lambda p: self._parse_distance(p, query, entity_dict)))
+        parses = list(
+            sorted(filtered, key=lambda p: self._parse_distance(p, query, entity_dict))
+        )
         min_parse_dist = self._parse_distance(parses[0], query, entity_dict)
-        filtered = (p for p in parses
-                    if self._parse_distance(p, query, entity_dict) <= min_parse_dist)
+        filtered = (
+            p
+            for p in parses
+            if self._parse_distance(p, query, entity_dict) <= min_parse_dist
+        )
 
         # TODO: apply precedence
 
@@ -207,12 +232,16 @@ class Parser:
                     continue
                 child = entity_dict[dep.id]
                 if child.token_span.start > head.token_span.start:
-                    intra_entity_span = Span(head.token_span.end, child.token_span.start)
+                    intra_entity_span = Span(
+                        head.token_span.end, child.token_span.start
+                    )
                 else:
-                    intra_entity_span = Span(child.token_span.end, head.token_span.start)
+                    intra_entity_span = Span(
+                        child.token_span.end, head.token_span.start
+                    )
                 link_distance = 0
-                for token in intra_entity_span.slice(query.text.split(' ')):
-                    if token in self.config[node.type][dep.type]['linking_words']:
+                for token in intra_entity_span.slice(query.text.split(" ")):
+                    if token in self.config[node.type][dep.type]["linking_words"]:
                         link_distance -= 0.5
                     else:
                         link_distance += 1
@@ -271,7 +300,7 @@ class Parser:
         return group
 
 
-class _EntityNode(namedtuple('EntityNode', ('type', 'id', 'dependents'))):
+class _EntityNode(namedtuple("EntityNode", ("type", "id", "dependents"))):
     """A private tree data structure used to parse queries
 
     EntityNodes use sets and are conditionally hashable. This makes it easy to check the
@@ -290,12 +319,14 @@ class _EntityNode(namedtuple('EntityNode', ('type', 'id', 'dependents'))):
         """Pretty prints the entity node.
 
         Primarily useful for debugging."""
-        text = ('  ' * indent) + self.id
+        text = ("  " * indent) + self.id
 
         if not self.dependents:
             return text
 
-        return text + '\n' + '\n'.join(dep.pretty(indent+1) for dep in self.dependents)
+        return (
+            text + "\n" + "\n".join(dep.pretty(indent + 1) for dep in self.dependents)
+        )
 
     def to_query_entity(self, entity_dict, is_root=True):
         """Converts a node to an QueryEntity
@@ -310,7 +341,9 @@ class _EntityNode(namedtuple('EntityNode', ('type', 'id', 'dependents'))):
         head = entity_dict[self.id]
         if self.dependents is None:
             return head
-        dependents = tuple((c.to_query_entity(entity_dict, is_root=False) for c in self.dependents))
+        dependents = tuple(
+            (c.to_query_entity(entity_dict, is_root=False) for c in self.dependents)
+        )
         return head.with_children(dependents)
 
 
@@ -330,12 +363,12 @@ def _build_symbol_template(group, features):
     symbol_template = group
     for feature in features:
         if symbol_template is group:
-            symbol_template += '['
+            symbol_template += "["
         else:
-            symbol_template += ', '
-        symbol_template += '{0}={{{0}}}'.format(feature)
+            symbol_template += ", "
+        symbol_template += "{0}={{{0}}}".format(feature)
     if symbol_template is not group:
-        symbol_template += ']'
+        symbol_template += "]"
     return symbol_template
 
 
@@ -354,29 +387,33 @@ def _generate_dependent_rules(dep_type, config, symbol_template, features, head_
     # If dependent is a group, its symbol should be capitalized
     dep_symbol = dep_type.capitalize() if dep_type in head_types else dep_type
 
-    max_instances = config.get('max_instances')
+    max_instances = config.get("max_instances")
     if max_instances is None:
         # pass through features unchanged
-        lhs = symbol_template.format(**{f: '?' + chr(ord('a') + i)
-                                        for i, f in enumerate(features)})
+        lhs = symbol_template.format(
+            **{f: "?" + chr(ord("a") + i) for i, f in enumerate(features)}
+        )
         rhs = lhs
-        if config.get('left'):
-            yield '{lhs} -> {dep} {rhs}'.format(lhs=lhs, rhs=rhs, dep=dep_symbol)
-        if config.get('right'):
-            yield '{lhs} -> {rhs} {dep}'.format(lhs=lhs, rhs=rhs, dep=dep_symbol)
+        if config.get("left"):
+            yield "{lhs} -> {dep} {rhs}".format(lhs=lhs, rhs=rhs, dep=dep_symbol)
+        if config.get("right"):
+            yield "{lhs} -> {rhs} {dep}".format(lhs=lhs, rhs=rhs, dep=dep_symbol)
     else:
         for dep_count in range(max_instances):
-            feature_dict = {f: '?' + chr(ord('a') + i) for i, f in enumerate(features)
-                            if f is not dep_type}
+            feature_dict = {
+                f: "?" + chr(ord("a") + i)
+                for i, f in enumerate(features)
+                if f is not dep_type
+            }
             feature_dict[dep_type] = dep_count
             rhs = symbol_template.format(**feature_dict)
             feature_dict[dep_type] = dep_count + 1
             lhs = symbol_template.format(**feature_dict)
 
-            if config.get('left'):
-                yield '{lhs} -> {dep} {rhs}'.format(lhs=lhs, rhs=rhs, dep=dep_symbol)
-            if config.get('right'):
-                yield '{lhs} -> {rhs} {dep}'.format(lhs=lhs, rhs=rhs, dep=dep_symbol)
+            if config.get("left"):
+                yield "{lhs} -> {dep} {rhs}".format(lhs=lhs, rhs=rhs, dep=dep_symbol)
+            if config.get("right"):
+                yield "{lhs} -> {rhs} {dep}".format(lhs=lhs, rhs=rhs, dep=dep_symbol)
 
 
 def generate_grammar(config, entity_types=None, relaxed=False, unique_entities=20):
@@ -392,8 +429,10 @@ def generate_grammar(config, entity_types=None, relaxed=False, unique_entities=2
     """
     entity_types = set(entity_types or ())
     # start rules
-    rules = ['{} -> {}'.format(START_SYMBOL, HEAD_SYMBOL),  # The start rule
-             '{0} -> {0} {0}'.format(HEAD_SYMBOL)]  # Allow multiple heads
+    rules = [
+        "{} -> {}".format(START_SYMBOL, HEAD_SYMBOL),  # The start rule
+        "{0} -> {0} {0}".format(HEAD_SYMBOL),
+    ]  # Allow multiple heads
 
     # the set of all heads
     head_types = set(config.keys())
@@ -406,31 +445,40 @@ def generate_grammar(config, entity_types=None, relaxed=False, unique_entities=2
     for entity in all_types:
         if entity not in head_types and entity not in dependent_types:
             # Add entities which are not mentioned in config as standalones
-            rules.append('H -> {}'.format(entity))
+            rules.append("H -> {}".format(entity))
         elif relaxed and entity not in head_types and entity in dependent_types:
             # Add dependent entities as standalones in relaxed mode
-            rules.append('H -> {}'.format(entity))
+            rules.append("H -> {}".format(entity))
 
     # create rules for each group
     for entity in head_types:
         # the symbol for a group is the capitalized version of the string
         group = entity.capitalize()
-        rules.append('H -> {}'.format(group))
+        rules.append("H -> {}".format(group))
 
         dep_configs = config[entity]
         # If a dependent has a max number of instances, we will track it as a feature
-        features = [t for t, d in dep_configs.items() if d.get('max_instances') is not None]
+        features = [
+            t for t, d in dep_configs.items() if d.get("max_instances") is not None
+        ]
 
         symbol_template = _build_symbol_template(group, features)
 
         # basic rule with features initialized to 0
-        rules.append('{} -> {}'.format(symbol_template.format(**{f: 0 for f in features}), entity))
+        rules.append(
+            "{} -> {}".format(
+                symbol_template.format(**{f: 0 for f in features}), entity
+            )
+        )
 
         for dep_type, dep_config in dep_configs.items():
-            rules.extend(_generate_dependent_rules(dep_type, dep_config, symbol_template,
-                                                   features, head_types))
+            rules.extend(
+                _generate_dependent_rules(
+                    dep_type, dep_config, symbol_template, features, head_types
+                )
+            )
     for entity in all_types:
         for idx in range(unique_entities):
             rules.append("{0} -> '{0}{1}'".format(entity, idx))
 
-    return '\n'.join(rules)
+    return "\n".join(rules)

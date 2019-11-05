@@ -3,6 +3,7 @@
 `python -m <app_name>` to see available commands.
 """
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from . import app
+
     app.cli()

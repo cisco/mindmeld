@@ -5,56 +5,58 @@ from mindmeld.components.request import Request, Params, FrozenParams
 
 @pytest.fixture
 def request():
-    return Request(domain='some_domain', intent='some_intent', entities=(), text='some_text')
+    return Request(
+        domain="some_domain", intent="some_intent", entities=(), text="some_text"
+    )
 
 
 def test_domain(request):
     with pytest.raises(FrozenInstanceError):
-        request.domain = 'new_domain'
+        request.domain = "new_domain"
 
 
 def test_intent(request):
     with pytest.raises(FrozenInstanceError):
-        request.intent = 'new_intent'
+        request.intent = "new_intent"
 
 
 def test_entities(request):
     with pytest.raises(FrozenInstanceError):
-        request.entities = ('some_entity',)
+        request.entities = ("some_entity",)
 
 
 def test_text(request):
     with pytest.raises(FrozenInstanceError):
-        request.text = 'some_text'
+        request.text = "some_text"
 
 
 def test_frame(request):
     with pytest.raises(FrozenInstanceError):
-        request.frame = {'key': 'value'}
+        request.frame = {"key": "value"}
 
 
 def test_params(request):
     with pytest.raises(FrozenInstanceError):
-        request.params = {'key': 'value'}
+        request.params = {"key": "value"}
 
 
 def test_context(request):
     with pytest.raises(FrozenInstanceError):
-        request.context = {'key': 'value'}
+        request.context = {"key": "value"}
 
 
 def test_nbest(request):
     with pytest.raises(FrozenInstanceError):
-        request.confidences = {'key': 'value'}
+        request.confidences = {"key": "value"}
 
     with pytest.raises(FrozenInstanceError):
-        request.nbest_transcripts_text = ['some_text']
+        request.nbest_transcripts_text = ["some_text"]
 
     with pytest.raises(FrozenInstanceError):
-        request.nbest_transcripts_entities = [{'key': 'value'}]
+        request.nbest_transcripts_entities = [{"key": "value"}]
 
     with pytest.raises(FrozenInstanceError):
-        request.nbest_aligned_entities = [{'key': 'value'}]
+        request.nbest_aligned_entities = [{"key": "value"}]
 
 
 def test_immutability_of_request_and_params():
@@ -65,7 +67,7 @@ def test_immutability_of_request_and_params():
 
     with pytest.raises(TypeError):
         params = FrozenParams()
-        params.dynamic_resource['a'] = 'b'
+        params.dynamic_resource["a"] = "b"
 
     with pytest.raises(FrozenInstanceError):
         request = Request()
@@ -73,4 +75,4 @@ def test_immutability_of_request_and_params():
 
     with pytest.raises(TypeError):
         request = Request()
-        request.frame['a'] = 'b'
+        request.frame["a"] = "b"

@@ -14,7 +14,10 @@ import logging
 import sys
 import json
 import requests
-from mindmeld.components._config import is_duckling_configured, get_system_entity_url_config
+from mindmeld.components._config import (
+    is_duckling_configured,
+    get_system_entity_url_config,
+)
 
 NO_RESPONSE_CODE = -1
 
@@ -78,27 +81,40 @@ class SystemEntityRecognizer:
         url = get_system_entity_url_config(app_path=self.app_path)
 
         try:
-            response = requests.request('POST', url, data=data, timeout=1)
+            response = requests.request("POST", url, data=data, timeout=1)
 
-            if response.status_code == requests.codes['ok']:
+            if response.status_code == requests.codes["ok"]:
                 response_json = response.json()
 
                 # Remove the redundant 'values' key in the response['value'] dictionary
                 for i, entity_dict in enumerate(response_json):
-                    if 'values' in entity_dict['value']:
-                        del response_json[i]['value']['values']
+                    if "values" in entity_dict["value"]:
+                        del response_json[i]["value"]["values"]
 
                 return response_json, response.status_code
             else:
-                raise SystemEntityError('System entity status code is not 200.')
+                raise SystemEntityError("System entity status code is not 200.")
         except requests.ConnectionError:
-            sys.exit("Unable to connect to the system entity recognizer. Make sure it's "
-                     "running by typing 'mindmeld num-parse' at the command line.")
+            sys.exit(
+                "Unable to connect to the system entity recognizer. Make sure it's "
+                "running by typing 'mindmeld num-parse' at the command line."
+            )
         except Exception as ex:  # pylint: disable=broad-except
-            logger.error('Numerical Entity Recognizer Error: %s\nURL: %r\nData: %s', ex, url,
-                         json.dumps(data))
-            sys.exit('\nThe system entity recognizer encountered the following ' +
-                     'error:\n' + str(ex) + '\nURL: ' + url + '\nRaw data: ' + str(data) +
-                     "\nPlease check your data and ensure Numerical parsing service is running. "
-                     "Make sure it's running by typing "
-                     "'mindmeld num-parse' at the command line.")
+            logger.error(
+                "Numerical Entity Recognizer Error: %s\nURL: %r\nData: %s",
+                ex,
+                url,
+                json.dumps(data),
+            )
+            sys.exit(
+                "\nThe system entity recognizer encountered the following "
+                + "error:\n"
+                + str(ex)
+                + "\nURL: "
+                + url
+                + "\nRaw data: "
+                + str(data)
+                + "\nPlease check your data and ensure Numerical parsing service is running. "
+                "Make sure it's running by typing "
+                "'mindmeld num-parse' at the command line."
+            )

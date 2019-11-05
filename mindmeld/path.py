@@ -26,91 +26,103 @@ from functools import wraps
 from .exceptions import MindMeldImportError
 
 MINDMELD_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PACKAGE_ROOT = os.path.join(MINDMELD_ROOT, 'mindmeld')
+PACKAGE_ROOT = os.path.join(MINDMELD_ROOT, "mindmeld")
 
-APP_PATH = '{app_path}'
+APP_PATH = "{app_path}"
 
 # Generated folder structure for models
-GEN_FOLDER = os.path.join(APP_PATH, '.generated')
-MODEL_CACHE_PATH = os.path.join(GEN_FOLDER, 'cached_models')
-QUERY_CACHE_PATH = os.path.join(GEN_FOLDER, 'query_cache.pkl')
-QUERY_CACHE_TMP_PATH = os.path.join(GEN_FOLDER, 'query_cache_tmp.pkl')
-DOMAIN_MODEL_PATH = os.path.join(GEN_FOLDER, 'domain.pkl')
-GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, 'domains')
-GEN_TIMESTAMP_FOLDER = os.path.join(MODEL_CACHE_PATH, '{timestamp}')
-DOMAIN_MODEL_TIMESTAMP_PATH = os.path.join(GEN_TIMESTAMP_FOLDER, 'domain.pkl')
-GEN_DOMAINS_CHECKPOINT_FOLDER = os.path.join(GEN_TIMESTAMP_FOLDER, 'domains')
-GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, '{domain}')
-GEN_DOMAIN_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAINS_CHECKPOINT_FOLDER, '{domain}')
-INTENT_MODEL_PATH = os.path.join(GEN_DOMAIN_FOLDER, 'intent.pkl')
-INTENT_MODEL_CHECKPOINT_PATH = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, 'intent.pkl')
-GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, '{intent}')
-GEN_INTENT_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, '{intent}')
-ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, 'entity.pkl')
-ENTITY_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, 'entity.pkl')
-ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, '{entity}-role.pkl')
-ROLE_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, '{entity}-role.pkl')
-GAZETTEER_PATH = os.path.join(GEN_FOLDER, 'gaz-{entity}.pkl')
-GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, 'indexes')
-GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, '{index}')
-RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, 'ranking.pkl')
+GEN_FOLDER = os.path.join(APP_PATH, ".generated")
+MODEL_CACHE_PATH = os.path.join(GEN_FOLDER, "cached_models")
+QUERY_CACHE_PATH = os.path.join(GEN_FOLDER, "query_cache.pkl")
+QUERY_CACHE_TMP_PATH = os.path.join(GEN_FOLDER, "query_cache_tmp.pkl")
+DOMAIN_MODEL_PATH = os.path.join(GEN_FOLDER, "domain.pkl")
+GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, "domains")
+GEN_TIMESTAMP_FOLDER = os.path.join(MODEL_CACHE_PATH, "{timestamp}")
+DOMAIN_MODEL_TIMESTAMP_PATH = os.path.join(GEN_TIMESTAMP_FOLDER, "domain.pkl")
+GEN_DOMAINS_CHECKPOINT_FOLDER = os.path.join(GEN_TIMESTAMP_FOLDER, "domains")
+GEN_DOMAIN_FOLDER = os.path.join(GEN_DOMAINS_FOLDER, "{domain}")
+GEN_DOMAIN_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAINS_CHECKPOINT_FOLDER, "{domain}")
+INTENT_MODEL_PATH = os.path.join(GEN_DOMAIN_FOLDER, "intent.pkl")
+INTENT_MODEL_CHECKPOINT_PATH = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, "intent.pkl")
+GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, "{intent}")
+GEN_INTENT_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, "{intent}")
+ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "entity.pkl")
+ENTITY_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, "entity.pkl")
+ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-role.pkl")
+ROLE_MODEL_CHECKPOINT_PATH = os.path.join(
+    GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-role.pkl"
+)
+GAZETTEER_PATH = os.path.join(GEN_FOLDER, "gaz-{entity}.pkl")
+GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, "indexes")
+GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, "{index}")
+RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
 
 # Domains sub tree for labeled queries
-DOMAINS_FOLDER = os.path.join(APP_PATH, 'domains')
-DOMAIN_FOLDER = os.path.join(DOMAINS_FOLDER, '{domain}')
-INTENT_FOLDER = os.path.join(DOMAIN_FOLDER, '{intent}')
-LABELED_QUERY_FILE = os.path.join(INTENT_FOLDER, '{filename}')
+DOMAINS_FOLDER = os.path.join(APP_PATH, "domains")
+DOMAIN_FOLDER = os.path.join(DOMAINS_FOLDER, "{domain}")
+INTENT_FOLDER = os.path.join(DOMAIN_FOLDER, "{intent}")
+LABELED_QUERY_FILE = os.path.join(INTENT_FOLDER, "{filename}")
 
 # Entities sub tree
-ENTITIES_FOLDER = os.path.join(APP_PATH, 'entities')
-ENTITY_FOLDER = os.path.join(ENTITIES_FOLDER, '{entity}')
-GAZETTEER_TXT_PATH = os.path.join(ENTITY_FOLDER, 'gazetteer.txt')
-ENTITY_MAP_PATH = os.path.join(ENTITY_FOLDER, 'mapping.json')
+ENTITIES_FOLDER = os.path.join(APP_PATH, "entities")
+ENTITY_FOLDER = os.path.join(ENTITIES_FOLDER, "{entity}")
+GAZETTEER_TXT_PATH = os.path.join(ENTITY_FOLDER, "gazetteer.txt")
+ENTITY_MAP_PATH = os.path.join(ENTITY_FOLDER, "mapping.json")
 
 # Indexes sub tree
-INDEXES_FOLDER = os.path.join(APP_PATH, 'indexes')
-INDEX_FOLDER = os.path.join(INDEXES_FOLDER, '{index}')
-RANKING_FILE_PATH = os.path.join(INDEX_FOLDER, 'ranking.json')
+INDEXES_FOLDER = os.path.join(APP_PATH, "indexes")
+INDEX_FOLDER = os.path.join(INDEXES_FOLDER, "{index}")
+RANKING_FILE_PATH = os.path.join(INDEX_FOLDER, "ranking.json")
 
 # App level files
-APP_MODULE_PATH = os.path.join(APP_PATH, 'app.py')
-CONFIG_MODULE_PATH = os.path.join(APP_PATH, 'config.py')
+APP_MODULE_PATH = os.path.join(APP_PATH, "app.py")
+CONFIG_MODULE_PATH = os.path.join(APP_PATH, "config.py")
 
 # Default config files
-RESOURCES_FOLDER = os.path.join(PACKAGE_ROOT, 'resources')
-DEFAULT_PROCESSOR_CONFIG_PATH = os.path.join(RESOURCES_FOLDER, 'default_processor_config.json')
-DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(RESOURCES_FOLDER, 'default_tokenizer_config.json')
-ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, 'ascii_folding_dict.txt')
+RESOURCES_FOLDER = os.path.join(PACKAGE_ROOT, "resources")
+DEFAULT_PROCESSOR_CONFIG_PATH = os.path.join(
+    RESOURCES_FOLDER, "default_processor_config.json"
+)
+DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(
+    RESOURCES_FOLDER, "default_tokenizer_config.json"
+)
+ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, "ascii_folding_dict.txt")
 
-DUCKLING_UBUNTU16_PATH = os.path.join(RESOURCES_FOLDER, 'duckling-x86_64-linux-ubuntu-16')
-DUCKLING_UBUNTU18_PATH = os.path.join(RESOURCES_FOLDER, 'duckling-x86_64-linux-ubuntu-18')
-DUCKLING_OSX_PATH = os.path.join(RESOURCES_FOLDER, 'duckling-x86_64-osx')
+DUCKLING_UBUNTU16_PATH = os.path.join(
+    RESOURCES_FOLDER, "duckling-x86_64-linux-ubuntu-16"
+)
+DUCKLING_UBUNTU18_PATH = os.path.join(
+    RESOURCES_FOLDER, "duckling-x86_64-linux-ubuntu-18"
+)
+DUCKLING_OSX_PATH = os.path.join(RESOURCES_FOLDER, "duckling-x86_64-osx")
 DUCKLING_UBUNTU16_MD5 = "8104ab69c34e158e2af44a57f706eca5"
 DUCKLING_UBUNTU18_MD5 = "01fe50291bd04a02ad2839b712cefdc5"
 DUCKLING_OSX_MD5 = "00c2b6d0e8e7a6d9dc0229b3286abea2"
 DUCKLING_OS_MAPPINGS = {
-    'ubuntu-16.04': DUCKLING_UBUNTU16_PATH,
-    'ubuntu-18.04': DUCKLING_UBUNTU18_PATH,
-    'darwin': DUCKLING_OSX_PATH
+    "ubuntu-16.04": DUCKLING_UBUNTU16_PATH,
+    "ubuntu-18.04": DUCKLING_UBUNTU18_PATH,
+    "darwin": DUCKLING_OSX_PATH,
 }
 DUCKLING_PATH_TO_MD5_MAPPINGS = {
     DUCKLING_UBUNTU16_PATH: DUCKLING_UBUNTU16_MD5,
     DUCKLING_UBUNTU18_PATH: DUCKLING_UBUNTU18_MD5,
-    DUCKLING_OSX_PATH: DUCKLING_OSX_MD5
+    DUCKLING_OSX_PATH: DUCKLING_OSX_MD5,
 }
 
-EMBEDDINGS_FOLDER_PATH = os.path.join(MINDMELD_ROOT, 'data')
-EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, 'glove.6B.zip')
-PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = \
-    os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_char_embeddings.pkl')
-PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH = \
-    os.path.join(EMBEDDINGS_FOLDER_PATH, 'previously_used_word_embeddings.pkl')
+EMBEDDINGS_FOLDER_PATH = os.path.join(MINDMELD_ROOT, "data")
+EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, "glove.6B.zip")
+PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = os.path.join(
+    EMBEDDINGS_FOLDER_PATH, "previously_used_char_embeddings.pkl"
+)
+PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH = os.path.join(
+    EMBEDDINGS_FOLDER_PATH, "previously_used_word_embeddings.pkl"
+)
 
 # User specific directories
-USER_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.mindmeld')
-USER_CONFIG_PATH = os.path.join(USER_CONFIG_DIR, 'config')
-BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, 'blueprints')
-BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, '{name}')
+USER_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".mindmeld")
+USER_CONFIG_PATH = os.path.join(USER_CONFIG_DIR, "config")
+BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, "blueprints")
+BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, "{name}")
 
 logger = logging.getLogger(__name__)
 
@@ -118,15 +130,17 @@ logger = logging.getLogger(__name__)
 # Helpers
 def safe_path(func):
     """A decorator to make the path safe by replacing unsafe characters"""
+
     @wraps(func)
     def _wrapper(*args, **kwargs):
         res = func(*args, **kwargs)
         if isinstance(res, tuple):
-            return tuple(map(lambda x: x.replace(':', '_') if x else x, res))
+            return tuple(map(lambda x: x.replace(":", "_") if x else x, res))
         elif isinstance(res, str):
-            return res.replace(':', '_')
+            return res.replace(":", "_")
         else:
             return res
+
     return _wrapper
 
 
@@ -138,6 +152,7 @@ def _resolve_model_name(path, model_name=None):
 
 
 # Collections
+
 
 def get_domains(app_path):
     """Gets all domains for a given application.
@@ -218,8 +233,9 @@ def get_labeled_query_tree(app_path, patterns=None):
 
     for pattern in found_pattern:
         if not found_pattern[pattern]:
-            logger.error("Couldn't find %s pattern files in %s directory",
-                         patterns, domains_dir)
+            logger.error(
+                "Couldn't find %s pattern files in %s directory", patterns, domains_dir
+            )
 
     return tree
 
@@ -259,6 +275,7 @@ def get_indexes(app_path):
 
 # Files and folders
 
+
 @safe_path
 def get_generated_data_folder(app_path):
     """Gets the path to the folder containing files the app generates.
@@ -294,7 +311,8 @@ def get_domain_model_paths(app_path, model_name=None, timestamp=None):
     ts_path = None
     if timestamp:
         ts_path = DOMAIN_MODEL_TIMESTAMP_PATH.format(
-            app_path=app_path, timestamp=timestamp)
+            app_path=app_path, timestamp=timestamp
+        )
         ts_path = _resolve_model_name(ts_path, model_name)
 
     return main_path, ts_path
@@ -321,7 +339,8 @@ def get_intent_model_paths(app_path, domain, model_name=None, timestamp=None):
     ts_path = None
     if timestamp:
         ts_path = INTENT_MODEL_CHECKPOINT_PATH.format(
-            app_path=app_path, domain=domain, timestamp=timestamp)
+            app_path=app_path, domain=domain, timestamp=timestamp
+        )
         ts_path = _resolve_model_name(ts_path, model_name)
 
     return main_path, ts_path
@@ -343,20 +362,25 @@ def get_entity_model_paths(app_path, domain, intent, model_name=None, timestamp=
         (tuple) A tuple with the main model path and the cached model path
 
     """
-    main_path = ENTITY_MODEL_PATH.format(app_path=app_path, domain=domain, intent=intent)
+    main_path = ENTITY_MODEL_PATH.format(
+        app_path=app_path, domain=domain, intent=intent
+    )
     main_path = _resolve_model_name(main_path)
 
     ts_path = None
     if timestamp:
         ts_path = ENTITY_MODEL_CHECKPOINT_PATH.format(
-            app_path=app_path, domain=domain, intent=intent, timestamp=timestamp)
+            app_path=app_path, domain=domain, intent=intent, timestamp=timestamp
+        )
         ts_path = _resolve_model_name(ts_path, model_name)
 
     return main_path, ts_path
 
 
 @safe_path
-def get_role_model_paths(app_path, domain, intent, entity, model_name=None, timestamp=None):
+def get_role_model_paths(
+    app_path, domain, intent, entity, model_name=None, timestamp=None
+):
     """Gets the path to the role classifier model as well as the path to a
     timestamp-cached role classifier model.
 
@@ -373,14 +397,19 @@ def get_role_model_paths(app_path, domain, intent, entity, model_name=None, time
 
     """
     main_path = ROLE_MODEL_PATH.format(
-            app_path=app_path, domain=domain, intent=intent, entity=entity)
+        app_path=app_path, domain=domain, intent=intent, entity=entity
+    )
     main_path = _resolve_model_name(main_path)
 
     ts_path = None
     if timestamp:
         ts_path = ROLE_MODEL_CHECKPOINT_PATH.format(
-            app_path=app_path, domain=domain,
-            intent=intent, entity=entity, timestamp=timestamp)
+            app_path=app_path,
+            domain=domain,
+            intent=intent,
+            entity=entity,
+            timestamp=timestamp,
+        )
         ts_path = _resolve_model_name(ts_path, model_name)
 
     return main_path, ts_path
@@ -415,8 +444,9 @@ def get_labeled_query_file_path(app_path, domain, intent, filename):
     Returns:
         (str) The full path of the specified file.
     """
-    return LABELED_QUERY_FILE.format(app_path=app_path, domain=domain, intent=intent,
-                                     filename=filename)
+    return LABELED_QUERY_FILE.format(
+        app_path=app_path, domain=domain, intent=intent, filename=filename
+    )
 
 
 @safe_path
@@ -544,20 +574,22 @@ def get_app(app_path):
     try:
         # check if package is already imported
         if package_name in sys.modules:
-            logger.warning('The application package %s is already imported.', package_name)
+            logger.warning(
+                "The application package %s is already imported.", package_name
+            )
             mod = __import__(package_name)
             return mod.app
         # try to load as package first
-        loader = SourceFileLoader(package_name, os.path.join(app_path, '__init__.py'))
+        loader = SourceFileLoader(package_name, os.path.join(app_path, "__init__.py"))
         return loader.load_module(package_name).app  # pylint: disable=deprecated-method
     except AttributeError:
         # __init__.py exists but has no app attribute
         # fallback to app.py, but emit warning
         logger.warning(
-            'The application package at %r includes no %r attribute. Falling back to %r.',
+            "The application package at %r includes no %r attribute. Falling back to %r.",
             app_path,
-            'app',
-            'app.py',
+            "app",
+            "app.py",
         )
     except FileNotFoundError:
         # fallback to app.py
@@ -568,6 +600,8 @@ def get_app(app_path):
         loader = SourceFileLoader(package_name, get_app_module_path(app_path))
         return loader.load_module(package_name).app  # pylint: disable=deprecated-method
     except (FileNotFoundError, AttributeError):
-        msg = 'Could not import application at {!r}. Create a __init__.py or app.py file' \
-              ' containing the application.'.format(app_path)
+        msg = (
+            "Could not import application at {!r}. Create a __init__.py or app.py file"
+            " containing the application.".format(app_path)
+        )
         raise MindMeldImportError(msg)

@@ -17,8 +17,13 @@ This module contains all code required to perform sequence tagging.
 import logging
 import copy
 
-from ...core import QueryEntity, Span, TEXT_FORM_RAW, \
-    TEXT_FORM_NORMALIZED, _sort_by_lowest_time_grain
+from ...core import (
+    QueryEntity,
+    Span,
+    TEXT_FORM_RAW,
+    TEXT_FORM_NORMALIZED,
+    _sort_by_lowest_time_grain,
+)
 from ...ser import resolve_system_entity, SystemEntityResolutionError
 from ..helpers import get_feature_extractor, ENABLE_STEMMING
 from ...markup import MarkupError
@@ -26,15 +31,15 @@ from ...markup import MarkupError
 logger = logging.getLogger(__name__)
 
 
-START_TAG = 'START'
-B_TAG = 'B'
-I_TAG = 'I'
-O_TAG = 'O'
-E_TAG = 'E'
-S_TAG = 'S'
+START_TAG = "START"
+B_TAG = "B"
+I_TAG = "I"
+O_TAG = "O"
+E_TAG = "E"
+S_TAG = "S"
 # End tag is used by the evaluation algorithm to mark the end of query. This
 # differs from the E tag which is used to denote the end of an entity in IOBES tagging.
-END_TAG = 'END'
+END_TAG = "END"
 
 
 class Tagger:
@@ -43,6 +48,7 @@ class Tagger:
     model is configured and trained as expected in the MindMeld pipeline. Note that this follows
     the sklearn estimator interface so that GridSearchCV can be used on our sequence models.
     """
+
     def __init__(self, **parameters):
         """To be consistent with the sklearn interface, __init__ and set_params should have the same
         effect. We do all parameter setting and validation in set_params which is called from here.
@@ -189,7 +195,7 @@ class Tagger:
             config (dict): The altered config object
         """
         del model_path
-        config['serializable'] = True
+        config["serializable"] = True
         return config
 
     @staticmethod
@@ -206,7 +212,7 @@ class Tagger:
         pass
 
 
-def get_tags_from_entities(query, entities, scheme='IOB'):
+def get_tags_from_entities(query, entities, scheme="IOB"):
     """Get joint app and system IOB tags from a query's entities.
 
     Args:
@@ -224,14 +230,14 @@ def get_tags_from_entities(query, entities, scheme='IOB'):
         iobs, types = _get_tags_from_entities(query, entities, scheme)
     except IndexError:
         raise MarkupError("Invalid entities {} in '{}'".format(entities, query))
-    tags = ['|'.join(args) for args in zip(iobs, types)]
+    tags = ["|".join(args) for args in zip(iobs, types)]
     return tags
 
 
-def _get_tags_from_entities(query, entities, scheme='IOB'):
+def _get_tags_from_entities(query, entities, scheme="IOB"):
     normalized_tokens = query.normalized_tokens
     iobs = [O_TAG for _ in normalized_tokens]
-    types = ['' for _ in normalized_tokens]
+    types = ["" for _ in normalized_tokens]
 
     # tag I and type for all tag schemes
     for entity in entities:
@@ -241,10 +247,10 @@ def _get_tags_from_entities(query, entities, scheme='IOB'):
             types[i] = entity.entity.type
 
     # Replace I with B/E/S when appropriate
-    if scheme in ('IOB', 'IOBES'):
+    if scheme in ("IOB", "IOBES"):
         for entity in entities:
             iobs[entity.normalized_token_span.start] = B_TAG
-    if scheme == 'IOBES':
+    if scheme == "IOBES":
         for entity in entities:
             if len(entity.normalized_token_span) == 1:
                 iobs[entity.normalized_token_span.end] = S_TAG
@@ -272,28 +278,30 @@ def get_entities_from_tags(query, tags):
     entities = []
 
     def _is_system_entity(entity_type):
-        if entity_type.split('_')[0] == 'sys':
+        if entity_type.split("_")[0] == "sys":
             return True
         return False
 
     def _append_entity(token_start, entity_type, tokens):
-        prefix = ' '.join(normalized_tokens[:token_start])
+        prefix = " ".join(normalized_tokens[:token_start])
         # If there is a prefix, we have to add one for the whitespace
         start = len(prefix) + 1 if len(prefix) else 0
-        end = start - 1 + len(' '.join(tokens))
+        end = start - 1 + len(" ".join(tokens))
 
         norm_span = Span(start, end)
-        entity = QueryEntity.from_query(query, normalized_span=norm_span, entity_type=entity_type)
+        entity = QueryEntity.from_query(
+            query, normalized_span=norm_span, entity_type=entity_type
+        )
         entities.append(entity)
         logger.debug("Appended %s.", entity)
 
     def _append_system_entity(token_start, token_end, entity_type):
         msg = "Looking for '%s' between %s and %s."
         logger.debug(msg, entity_type, token_start, token_end)
-        prefix = ' '.join(normalized_tokens[:token_start])
+        prefix = " ".join(normalized_tokens[:token_start])
         # If there is a prefix, we have to add one for the whitespace
         start = len(prefix) + 1 if len(prefix) else 0
-        end = start - 1 + len(' '.join(normalized_tokens[token_start:token_end]))
+        end = start - 1 + len(" ".join(normalized_tokens[token_start:token_end]))
 
         norm_span = Span(start, end)
 
@@ -305,30 +313,32 @@ def get_entities_from_tags(query, tags):
             logger.debug("Appended system entity %s.", entity)
         except SystemEntityResolutionError:
             msg = "Found no matching system entity {}-{}, {!r}".format(
-                token_start, token_end, entity_type)
+                token_start, token_end, entity_type
+            )
             logger.debug(msg)
 
     entity_tokens = []
     entity_start = None
-    prev_ent_type = ''
+    prev_ent_type = ""
 
     for tag_idx, tag in enumerate(tags):
-        iob, ent_type = tag.split('|')
+        iob, ent_type = tag.split("|")
 
         # Close entity and reset if the tag indicates a new entity
-        if (entity_start is not None and
-                (iob in (O_TAG, B_TAG, S_TAG) or ent_type != prev_ent_type)):
+        if entity_start is not None and (
+            iob in (O_TAG, B_TAG, S_TAG) or ent_type != prev_ent_type
+        ):
             logger.debug("Entity closed at prev")
             if _is_system_entity(prev_ent_type):
                 _append_system_entity(entity_start, tag_idx, prev_ent_type)
             else:
                 _append_entity(entity_start, prev_ent_type, entity_tokens)
             entity_start = None
-            prev_ent_type = ''
+            prev_ent_type = ""
             entity_tokens = []
 
         # Check if an entity has started
-        if iob in (B_TAG, S_TAG) or ent_type not in ('', prev_ent_type):
+        if iob in (B_TAG, S_TAG) or ent_type not in ("", prev_ent_type):
             entity_start = tag_idx
             if _is_system_entity(ent_type):
                 # During predict time, we construct sys_candidates for the input query.
@@ -340,7 +350,7 @@ def get_entities_from_tags(query, tags):
                 picked_by_existing_system_entity_candidates = False
 
                 sys_entities = query.get_system_entity_candidates(ent_type)
-                if ent_type == 'sys_time':
+                if ent_type == "sys_time":
                     sys_entities = _sort_by_lowest_time_grain(sys_entities)
 
                 for sys_candidate in sys_entities:
@@ -357,18 +367,22 @@ def get_entities_from_tags(query, tags):
                     entity_start = tag_idx
 
         # Append the current token to the current entity, if applicable.
-        if iob != O_TAG and entity_start is not None and not _is_system_entity(ent_type):
+        if (
+            iob != O_TAG
+            and entity_start is not None
+            and not _is_system_entity(ent_type)
+        ):
             entity_tokens.append(normalized_tokens[tag_idx])
 
         # Close the entity if the tag indicates it closed
         if entity_start is not None and iob in (E_TAG, S_TAG):
             logger.debug("Entity closed here")
             if _is_system_entity(ent_type):
-                _append_system_entity(entity_start, tag_idx+1, ent_type)
+                _append_system_entity(entity_start, tag_idx + 1, ent_type)
             else:
                 _append_entity(entity_start, ent_type, entity_tokens)
             entity_start = None
-            ent_type = ''
+            ent_type = ""
             entity_tokens = []
 
         prev_ent_type = ent_type
@@ -385,10 +399,11 @@ def get_entities_from_tags(query, tags):
 
     return tuple(entities)
 
+
 # Methods for tag evaluation
 
 
-class BoundaryCounts():
+class BoundaryCounts:
     """This class stores the counts of the boundary evaluation metrics.
 
     Attributes:
@@ -404,6 +419,7 @@ class BoundaryCounts():
         fp (int): False positive count. When an entity was predicted but one shouldn't have been
         fn (int): False negative count. When an entity was not predicted where one should have been
     """
+
     def __init__(self):
         """Initializes the object with all counts set to 0"""
         self.le = 0
@@ -416,13 +432,20 @@ class BoundaryCounts():
 
     def to_dict(self):
         """Converts the object to a dictionary"""
-        return {'le': self.le, 'be': self.be, 'lbe': self.lbe,
-                'tp': self.tp, 'tn': self.tn, 'fp': self.fp, 'fn': self.fn}
+        return {
+            "le": self.le,
+            "be": self.be,
+            "lbe": self.lbe,
+            "tp": self.tp,
+            "tn": self.tn,
+            "fp": self.fp,
+            "fn": self.fn,
+        }
 
 
 def _get_tag_label(token):
     """Splits a token into its tag and label."""
-    tag, label, = token.split('|')
+    tag, label, = token.split("|")
     return tag, label
 
 
@@ -456,7 +479,9 @@ def _new_tag(last_entity, curr_tag):
     """
     if len(last_entity) < 1 or not curr_tag:
         return False
-    elif (last_entity[-1][0] == I_TAG or last_entity[-1][0] == B_TAG) and curr_tag == B_TAG:
+    elif (
+        last_entity[-1][0] == I_TAG or last_entity[-1][0] == B_TAG
+    ) and curr_tag == B_TAG:
         return True
     else:
         return False
@@ -495,37 +520,43 @@ def get_boundary_counts(expected_sequence, predicted_sequence, boundary_counts):
     start = True
     last_pred_entity = []
     last_exp_entity = []
-    end_token = END_TAG + '|'
+    end_token = END_TAG + "|"
 
     # Iterate through the tokens in the sequence
-    for predicted_token, expected_token in zip(predicted_sequence + [end_token],
-                                               expected_sequence + [end_token]):
+    for predicted_token, expected_token in zip(
+        predicted_sequence + [end_token], expected_sequence + [end_token]
+    ):
         predicted_tag, predicted_label = _get_tag_label(predicted_token)
         expected_tag, expected_label = _get_tag_label(expected_token)
 
         # If we are exiting a coding region, determine the boundary count
         if predicted_tag == expected_tag == O_TAG:
             if in_coding_region:
-                boundary_counts = _determine_count_type(last_pred_entity, last_exp_entity,
-                                                        boundary_counts)
+                boundary_counts = _determine_count_type(
+                    last_pred_entity, last_exp_entity, boundary_counts
+                )
                 in_coding_region = False
                 last_pred_entity = []
                 last_exp_entity = []
 
         # If we are entering a new coding region (with a new tag), determine the boundary count and
         # reset entity history
-        elif _new_tag(last_pred_entity, predicted_tag) or _new_tag(last_exp_entity, expected_tag):
+        elif _new_tag(last_pred_entity, predicted_tag) or _new_tag(
+            last_exp_entity, expected_tag
+        ):
             if in_coding_region:
-                boundary_counts = _determine_count_type(last_pred_entity, last_exp_entity,
-                                                        boundary_counts)
+                boundary_counts = _determine_count_type(
+                    last_pred_entity, last_exp_entity, boundary_counts
+                )
                 last_pred_entity = [(predicted_tag, predicted_label)]
                 last_exp_entity = [(expected_tag, expected_label)]
 
         # If we are at the end of the sequence, determine the boundary count for the last section
         elif predicted_tag == expected_tag == END_TAG and not start:
             if in_coding_region:
-                boundary_counts = _determine_count_type(last_pred_entity, last_exp_entity,
-                                                        boundary_counts)
+                boundary_counts = _determine_count_type(
+                    last_pred_entity, last_exp_entity, boundary_counts
+                )
             else:
                 boundary_counts.tn += 1
 

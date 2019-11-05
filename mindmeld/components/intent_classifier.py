@@ -33,7 +33,8 @@ class IntentClassifier(Classifier):
     Attributes:
         domain (str): The domain that this intent classifier belongs to.
     """
-    CLF_TYPE = 'intent'
+
+    CLF_TYPE = "intent"
     """The classifier type."""
 
     def __init__(self, resource_loader, domain):
@@ -53,10 +54,11 @@ class IntentClassifier(Classifier):
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
-        kwargs['example_type'] = QUERY_EXAMPLE_TYPE
-        kwargs['label_type'] = CLASS_LABEL_TYPE
-        loaded_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
-                                              domain=self.domain)
+        kwargs["example_type"] = QUERY_EXAMPLE_TYPE
+        kwargs["label_type"] = CLASS_LABEL_TYPE
+        loaded_config = get_classifier_config(
+            self.CLF_TYPE, self._resource_loader.app_path, domain=self.domain
+        )
         return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, *args, **kwargs):
@@ -74,7 +76,7 @@ class IntentClassifier(Classifier):
             queries (list[ProcessedQuery]): The labeled queries to use as training data.
             cv (optional): Cross-validation settings.
         """
-        logger.info('Fitting intent classifier: domain=%r', self.domain)
+        logger.info("Fitting intent classifier: domain=%r", self.domain)
         super().fit(*args, **kwargs)
 
     def dump(self, *args, **kwargs):
@@ -83,7 +85,7 @@ class IntentClassifier(Classifier):
         Args:
             model_path (str): The location on disk where the model should be stored.
         """
-        logger.info('Saving intent classifier: domain=%r', self.domain)
+        logger.info("Saving intent classifier: domain=%r", self.domain)
         super().dump(*args, **kwargs)
 
     def load(self, *args, **kwargs):
@@ -92,7 +94,7 @@ class IntentClassifier(Classifier):
         Args:
             model_path (str): The location on disk where the model is stored.
         """
-        logger.info('Loading intent classifier: domain=%r', self.domain)
+        logger.info("Loading intent classifier: domain=%r", self.domain)
         super().load(*args, **kwargs)
 
     def inspect(self, query, intent=None, dynamic_resource=None):
@@ -108,9 +110,12 @@ class IntentClassifier(Classifier):
                 probability.
         """
         return self._model.inspect(
-            example=query, gold_label=intent, dynamic_resource=dynamic_resource)
+            example=query, gold_label=intent, dynamic_resource=dynamic_resource
+        )
 
-    def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
+    def _get_query_tree(
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
+    ):
         """Returns the set of queries to train on
 
         Args:
@@ -126,8 +131,9 @@ class IntentClassifier(Classifier):
         if queries:
             return self._build_query_tree(queries, domain=self.domain, raw=raw)
 
-        return self._resource_loader.get_labeled_queries(domain=self.domain,
-                                                         label_set=label_set, raw=raw)
+        return self._resource_loader.get_labeled_queries(
+            domain=self.domain, label_set=label_set, raw=raw
+        )
 
     def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a set of queries and their labels based on the label set
@@ -144,13 +150,17 @@ class IntentClassifier(Classifier):
             return [None, None]
         return list(zip(*[(q.query, q.intent) for q in queries]))
 
-    def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_and_labels_hash(
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+    ):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = []
 
         for intent in query_tree.get(self.domain, []):
             for query_text in query_tree[self.domain][intent]:
-                queries.append(self.domain + '###' + intent + '###' + mark_down(query_text))
+                queries.append(
+                    self.domain + "###" + intent + "###" + mark_down(query_text)
+                )
 
         queries.sort()
         return self._resource_loader.hash_list(queries)
