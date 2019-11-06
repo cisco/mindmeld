@@ -46,6 +46,7 @@ test_requirements = [
     "pytest==3.8.0",
     "pytest-cov==2.4.0",
     "pytest-asyncio==0.8.0",
+    "black>=19.10b0 ; python_version >= '3.6'",
 ]
 
 setup(
