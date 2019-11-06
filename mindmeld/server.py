@@ -59,21 +59,8 @@ class MindMeldServer:
 
         server.request_class = MindMeldRequest
 
-        server.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 16
-
         # Set the version for logging purposes
         self._package_version = __version__
-        self._app_version = None
-        if os.environ.get('MM_APP_VERSION'):
-            self._app_version = os.environ.get('MM_APP_VERSION')
-        elif os.environ.get('MM_APP_VERSION_FILE'):
-            version_file = os.environ.get('MM_APP_VERSION_FILE')
-            try:
-                with open(version_file, 'r') as file:
-                    self._app_version = file.readline().strip()
-            except (OSError, IOError):
-                # failed to set version
-                logger.warning("Failed to open app version file: '%s'", version_file)
 
         # pylint: disable=unused-variable
         @server.route('/parse', methods=['POST'])
@@ -138,11 +125,9 @@ class MindMeldServer:
             logger.error(json.dumps(response_data))
             return response
 
-        @server.route('/_status', methods=['GET'])
+        @server.route('/health', methods=['GET'])
         def status_check():
             body = {'status': 'OK', 'package_version': self._package_version}
-            if self._app_version:
-                body['app_version'] = self._app_version
             return jsonify(body)
 
         self._server = server
@@ -188,7 +173,9 @@ class MindMeldServer:
         log_request_data['source']['package_version'] = self._package_version
         if os.environ.get('MM_NODE_NAME'):
             log_request_data['source']['node_name'] = os.environ.get('MM_NODE_NAME')
-        if self._app_version:
-            log_request_data['source']['app_version'] = self._app_version
 
         self._request_logger.info(json.dumps(log_request_data))
+
+    @property
+    def web_app(self):
+        return self._server
