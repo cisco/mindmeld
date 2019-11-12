@@ -13,6 +13,7 @@
 
 """This module contains some helper functions for the models package"""
 import re
+
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
@@ -23,26 +24,35 @@ MODEL_MAP = {}
 LABEL_MAP = {}
 
 # Example types
-QUERY_EXAMPLE_TYPE = 'query'
-ENTITY_EXAMPLE_TYPE = 'entity'
+QUERY_EXAMPLE_TYPE = "query"
+ENTITY_EXAMPLE_TYPE = "entity"
 
 # Label types
-CLASS_LABEL_TYPE = 'class'
-ENTITIES_LABEL_TYPE = 'entities'
+CLASS_LABEL_TYPE = "class"
+ENTITIES_LABEL_TYPE = "entities"
 
 
 # resource/requirements names
-GAZETTEER_RSC = 'gazetteers'
-QUERY_FREQ_RSC = 'q_freq'
-SYS_TYPES_RSC = 'sys_types'
-ENABLE_STEMMING = 'enable-stemming'
-WORD_FREQ_RSC = 'w_freq'
-WORD_NGRAM_FREQ_RSC = 'w_ngram_freq'
-CHAR_NGRAM_FREQ_RSC = 'c_ngram_freq'
-OUT_OF_BOUNDS_TOKEN = '<$>'
-DEFAULT_SYS_ENTITIES = ['sys_time', 'sys_temperature', 'sys_volume', 'sys_amount-of-money',
-                        'sys_email', 'sys_url', 'sys_number', 'sys_ordinal', 'sys_duration',
-                        'sys_phone-number']
+GAZETTEER_RSC = "gazetteers"
+QUERY_FREQ_RSC = "q_freq"
+SYS_TYPES_RSC = "sys_types"
+ENABLE_STEMMING = "enable-stemming"
+WORD_FREQ_RSC = "w_freq"
+WORD_NGRAM_FREQ_RSC = "w_ngram_freq"
+CHAR_NGRAM_FREQ_RSC = "c_ngram_freq"
+OUT_OF_BOUNDS_TOKEN = "<$>"
+DEFAULT_SYS_ENTITIES = [
+    "sys_time",
+    "sys_temperature",
+    "sys_volume",
+    "sys_amount-of-money",
+    "sys_email",
+    "sys_url",
+    "sys_number",
+    "sys_ordinal",
+    "sys_duration",
+    "sys_phone-number",
+]
 
 
 def create_model(config):
@@ -60,7 +70,7 @@ def create_model(config):
     try:
         return MODEL_MAP[config.model_type](config)
     except KeyError:
-        msg = 'Invalid model configuration: Unknown model type {!r}'
+        msg = "Invalid model configuration: Unknown model type {!r}"
         raise ValueError(msg.format(config.model_type))
 
 
@@ -97,7 +107,7 @@ def register_model(model_type, model_class):
         model_class (class): The model to register
     """
     if model_type in MODEL_MAP:
-        raise ValueError('Model {!r} is already registered.'.format(model_type))
+        raise ValueError("Model {!r} is already registered.".format(model_type))
 
     MODEL_MAP[model_type] = model_class
 
@@ -137,6 +147,7 @@ def register_feature(feature_type, feature_name):
     Returns:
         (func): the feature extractor
     """
+
     def add_feature(func):
         if feature_type not in {QUERY_EXAMPLE_TYPE, ENTITY_EXAMPLE_TYPE}:
             raise TypeError("Feature type can only be 'query' or 'entity'")
@@ -163,7 +174,9 @@ def register_label(label_type, label_encoder):
         ValueError: If the label type is already registered
     """
     if label_type in LABEL_MAP:
-        msg = 'Label encoder for label type {!r} is already registered.'.format(label_type)
+        msg = "Label encoder for label type {!r} is already registered.".format(
+            label_type
+        )
         raise ValueError(msg)
 
     LABEL_MAP[label_type] = label_encoder
@@ -179,9 +192,9 @@ def mask_numerics(token):
         str: A masked string for digit characters
     """
     if token.isdigit():
-        return '#NUM'
+        return "#NUM"
     else:
-        return re.sub(r'\d', '8', token)
+        return re.sub(r"\d", "8", token)
 
 
 def get_ngram(tokens, start, length):
@@ -199,11 +212,12 @@ def get_ngram(tokens, start, length):
     """
 
     ngram_tokens = []
-    for index in range(start, start+length):
-        token = (OUT_OF_BOUNDS_TOKEN if index < 0 or index >= len(tokens)
-                 else tokens[index])
+    for index in range(start, start + length):
+        token = (
+            OUT_OF_BOUNDS_TOKEN if index < 0 or index >= len(tokens) else tokens[index]
+        )
         ngram_tokens.append(token)
-    return ' '.join(ngram_tokens)
+    return " ".join(ngram_tokens)
 
 
 def get_seq_accuracy_scorer():
@@ -238,8 +252,9 @@ def sequence_accuracy_scoring(y_true, y_pred):
     if not total:
         return 0
 
-    matches = sum(1 for yseq_true, yseq_pred in zip(y_true, y_pred)
-                  if yseq_true == yseq_pred)
+    matches = sum(
+        1 for yseq_true, yseq_pred in zip(y_true, y_pred) if yseq_true == yseq_pred
+    )
 
     return float(matches) / float(total)
 
@@ -263,8 +278,11 @@ def sequence_tag_accuracy_scoring(y_true, y_pred):
     if not total:
         return 0
 
-    matches = sum(1 for (y_true_tag, y_pred_tag) in zip(y_true_flat, y_pred_flat)
-                  if y_true_tag == y_pred_tag)
+    matches = sum(
+        1
+        for (y_true_tag, y_pred_tag) in zip(y_true_flat, y_pred_flat)
+        if y_true_tag == y_pred_tag
+    )
 
     return float(matches) / float(total)
 
@@ -325,7 +343,8 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
                 for entity in dynamic_resource[key][entity_type]:
                     new_gaz._update_entity(
                         tokenizer.normalize(entity),
-                        dynamic_resource[key][entity_type][entity])
+                        dynamic_resource[key][entity_type][entity],
+                    )
 
                 # The new gaz created is a deep copied version of the merged gaz data
                 return_obj[key][entity_type] = new_gaz.to_dict()
@@ -363,8 +382,9 @@ def requires(resource):
     Returns:
         (func): the feature extractor
     """
+
     def add_resource(func):
-        req = func.__dict__.get('requirements', set())
+        req = func.__dict__.get("requirements", set())
         req.add(resource)
         func.requirements = req
         return func

@@ -19,7 +19,6 @@ class MindMeldVersionWarning(UserWarning):
 
 
 class MindMeldError(Exception):
-
     def __init__(self, *args):
         super().__init__(*args)
         self.message = args[0] if len(args) > 0 else None
@@ -37,7 +36,7 @@ class BadMindMeldRequestError(MindMeldError):
 
     def to_dict(self):
         obj = dict(self.payload or ())
-        obj['error'] = self.message
+        obj["error"] = self.message
         return obj
 
 
@@ -55,11 +54,13 @@ class ClassifierLoadError(MindMeldError):
 
 class ProcessorError(MindMeldError):
     """An exception which indicates an error with a processor."""
+
     pass
 
 
 class ParserTimeout(MindMeldError):
     """An exception for when parsing takes an unexpected length of time"""
+
     pass
 
 
@@ -73,46 +74,60 @@ class SystemEntityMarkupError(MarkupError):
 
 class SystemEntityResolutionError(MindMeldError):
     """An exception representing an error resolving a system entity"""
+
     pass
 
 
 class KnowledgeBaseError(MindMeldError):
     """An exception for unexpected error from knowledge base."""
+
     pass
 
 
 class KnowledgeBaseConnectionError(KnowledgeBaseError):
     """An exception for problem connecting to knowledge base."""
+
     def __init__(self, es_host):
 
         self.es_host = es_host
         if (not es_host) or (not es_host[0]):
-            self.message = 'Unable to connect to Elasticsearch for knowledge base. Please' \
-                           ' verify your connection to localhost.'
+            self.message = (
+                "Unable to connect to Elasticsearch for knowledge base. Please"
+                " verify your connection to localhost."
+            )
         else:
-            es_host = [host['host'] for host in es_host]
-            self.message = 'Unable to connect to knowledge base. Please verify' \
-                           ' your connection to: {hosts}.'.format(hosts=', '.join(es_host))
+            es_host = [host["host"] for host in es_host]
+            self.message = (
+                "Unable to connect to knowledge base. Please verify"
+                " your connection to: {hosts}.".format(hosts=", ".join(es_host))
+            )
         super().__init__(self.message)
 
 
 class EntityResolverError(MindMeldError):
     """An exception for unexpected error from entity resolver."""
+
     pass
 
 
 class EntityResolverConnectionError(EntityResolverError):
     """An exception for connection error to Elasticsearch for entity resolver"""
+
     def __init__(self, es_host):
         self.es_host = es_host
         if (not es_host) or (not es_host[0]):
-            self.message = 'Unable to connect to Elasticsearch for entity resolution. ' \
-                           'Please verify your connection to localhost.'
+            self.message = (
+                "Unable to connect to Elasticsearch for entity resolution. "
+                "Please verify your connection to localhost."
+            )
         else:
-            es_host = [host['host'] for host in es_host]
-            self.message = 'Unable to connect to Elasticsearch for entity resolution. ' \
-                           'Please verify your connection to: {hosts}.'.format(
-                            hosts=', '.join(es_host))
+            es_host = [host["host"] for host in es_host]
+            self.message = (
+                "Unable to connect to Elasticsearch for entity resolution. "
+                "Please verify your connection to: {hosts}.".format(
+                    hosts=", ".join(es_host)
+                )
+            )
 
 
 class AuthNotFoundError(MindMeldError):

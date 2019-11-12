@@ -13,15 +13,15 @@ These tests apply regardless of async/await support.
 import pytest
 
 from mindmeld.components import Conversation, DialogueManager, DialogueResponder
-from mindmeld.components.request import Request, Params
 from mindmeld.components.dialogue import DialogueStateRule
+from mindmeld.components.request import Params, Request
 from mindmeld.system_entity_recognizer import SystemEntityRecognizer
 
 
 def create_request(domain, intent, entities=None):
     """Creates a request object for use by the dialogue manager"""
     entities = entities or ()
-    return Request(domain=domain, intent=intent, entities=entities, text='')
+    return Request(domain=domain, intent=intent, entities=entities, text="")
 
 
 def create_responder(request):
@@ -32,77 +32,98 @@ def create_responder(request):
 @pytest.fixture
 def dm():
     dm = DialogueManager()
-    dm.add_dialogue_rule('domain', lambda x, y: None, domain='domain')
-    dm.add_dialogue_rule('intent', lambda x, y: None, intent='intent')
-    dm.add_dialogue_rule('domain_intent', lambda x, y: None,
-                         domain='domain', intent='intent')
-    dm.add_dialogue_rule('intent_entity_1', lambda x, y: None,
-                         intent='intent', has_entity='entity_1')
-    dm.add_dialogue_rule('intent_entity_2', lambda x, y: None,
-                         intent='intent', has_entity='entity_2')
-    dm.add_dialogue_rule('intent_entities', lambda x, y: None,
-                         intent='intent', has_entities=('entity_1', 'entity_2', 'entity_3'))
+    dm.add_dialogue_rule("domain", lambda x, y: None, domain="domain")
+    dm.add_dialogue_rule("intent", lambda x, y: None, intent="intent")
+    dm.add_dialogue_rule(
+        "domain_intent", lambda x, y: None, domain="domain", intent="intent"
+    )
+    dm.add_dialogue_rule(
+        "intent_entity_1", lambda x, y: None, intent="intent", has_entity="entity_1"
+    )
+    dm.add_dialogue_rule(
+        "intent_entity_2", lambda x, y: None, intent="intent", has_entity="entity_2"
+    )
+    dm.add_dialogue_rule(
+        "intent_entities",
+        lambda x, y: None,
+        intent="intent",
+        has_entities=("entity_1", "entity_2", "entity_3"),
+    )
 
-    dm.add_dialogue_rule('targeted_only', lambda x, y: None, targeted_only=True)
-    dm.add_dialogue_rule('dummy_ruleless', lambda x, y: None)  # Defined to test default use
-    dm.add_dialogue_rule('default', lambda x, y: None, default=True)
+    dm.add_dialogue_rule("targeted_only", lambda x, y: None, targeted_only=True)
+    dm.add_dialogue_rule(
+        "dummy_ruleless", lambda x, y: None
+    )  # Defined to test default use
+    dm.add_dialogue_rule("default", lambda x, y: None, default=True)
 
     return dm
 
 
 def test_dialogue_state_rule_equal():
-    rule1 = DialogueStateRule(dialogue_state='some-state', domain='some-domain')
-    rule2 = DialogueStateRule(dialogue_state='some-state', domain='some-domain')
+    rule1 = DialogueStateRule(dialogue_state="some-state", domain="some-domain")
+    rule2 = DialogueStateRule(dialogue_state="some-state", domain="some-domain")
     assert rule1 == rule2
 
 
 def test_dialogue_state_rule_not_equal():
-    rule1 = DialogueStateRule(dialogue_state='some-state', domain='some-domain')
-    rule2 = DialogueStateRule(dialogue_state='some-state-2', domain='some-domain')
+    rule1 = DialogueStateRule(dialogue_state="some-state", domain="some-domain")
+    rule2 = DialogueStateRule(dialogue_state="some-state-2", domain="some-domain")
     assert rule1 != rule2
 
-    rule2 = DialogueStateRule(dialogue_state='some-state')
+    rule2 = DialogueStateRule(dialogue_state="some-state")
     assert rule1 != rule2
 
-    rule2 = DialogueStateRule(dialogue_state='some-state', domain='some-domain',
-                              intent='some-intent')
+    rule2 = DialogueStateRule(
+        dialogue_state="some-state", domain="some-domain", intent="some-intent"
+    )
     assert rule1 != rule2
 
 
 def test_dialogue_state_rule_unexpected_keyword():
     with pytest.raises(TypeError) as ex:
-        DialogueStateRule(dialogue_state='some-state', domain='some-domain', new_key='some-key')
+        DialogueStateRule(
+            dialogue_state="some-state", domain="some-domain", new_key="some-key"
+        )
 
     assert "DialogueStateRule() got an unexpected keyword argument 'new_key'" in str(ex)
 
 
 def test_dialogue_state_rule_targeted_only():
-    request = create_request('some-domain', 'some-intent')
-    rule1 = DialogueStateRule(dialogue_state='some-state', targeted_only=True)
+    request = create_request("some-domain", "some-intent")
+    rule1 = DialogueStateRule(dialogue_state="some-state", targeted_only=True)
     assert not rule1.apply(request)
 
     with pytest.raises(ValueError) as ex:
-        DialogueStateRule(dialogue_state='some-state', domain='some-domain', targeted_only=True)
+        DialogueStateRule(
+            dialogue_state="some-state", domain="some-domain", targeted_only=True
+        )
 
-    msg = "For a dialogue state rule, if targeted_only is True, domain, intent, and has_entity" \
-          " must be omitted"
+    msg = (
+        "For a dialogue state rule, if targeted_only is True, domain, intent, and has_entity"
+        " must be omitted"
+    )
 
     assert msg in str(ex)
 
 
 def test_dialogue_state_rule_exception():
     with pytest.raises(ValueError):
-        DialogueStateRule(dialogue_state='some-state', has_entities=[1, 2])
+        DialogueStateRule(dialogue_state="some-state", has_entities=[1, 2])
 
-    rule1 = DialogueStateRule(dialogue_state='some-state', has_entity="entity_1")
+    rule1 = DialogueStateRule(dialogue_state="some-state", has_entity="entity_1")
     assert rule1.entity_types == frozenset(("entity_1",))
 
-    rule2 = DialogueStateRule(dialogue_state='some-state', has_entities=["entity_2", "entity_3"])
+    rule2 = DialogueStateRule(
+        dialogue_state="some-state", has_entities=["entity_2", "entity_3"]
+    )
     assert rule2.entity_types == frozenset(("entity_2", "entity_3",))
 
     with pytest.raises(ValueError):
-        DialogueStateRule(dialogue_state='some-state', has_entity="entity_1",
-                          has_entities=["entity_2", "entity_3"])
+        DialogueStateRule(
+            dialogue_state="some-state",
+            has_entity="entity_1",
+            has_entities=["entity_2", "entity_3"],
+        )
 
     with pytest.raises(NotImplementedError):
         assert rule1 == 1
@@ -122,84 +143,96 @@ class TestDialogueManager:
     def test_default(self, dm):
         """Default dialogue state when no rules match
            This will select the rule with default=True"""
-        request = create_request('other', 'other')
+        request = create_request("other", "other")
         response = create_responder(request)
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'default'
+        assert result.dialogue_state == "default"
 
     def test_default_uniqueness(self, dm):
         with pytest.raises(AssertionError):
-            dm.add_dialogue_rule('default2', lambda x, y: None, default=True)
+            dm.add_dialogue_rule("default2", lambda x, y: None, default=True)
 
     def test_default_kwarg_exclusion(self, dm):
         with pytest.raises(ValueError):
-            dm.add_dialogue_rule('default3', lambda x, y: None,
-                                 intent='intent', default=True)
+            dm.add_dialogue_rule(
+                "default3", lambda x, y: None, intent="intent", default=True
+            )
 
     def test_domain(self, dm):
         """Correct dialogue state is found for a domain"""
-        request = create_request('domain', 'other')
+        request = create_request("domain", "other")
         response = create_responder(request)
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'domain'
+        assert result.dialogue_state == "domain"
 
     def test_domain_intent(self, dm):
         """Correct state should be found for domain and intent"""
-        request = create_request('domain', 'intent')
+        request = create_request("domain", "intent")
         response = create_responder(request)
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'domain_intent'
+        assert result.dialogue_state == "domain_intent"
 
     def test_intent(self, dm):
         """Correct state should be found for intent"""
-        request = create_request('other', 'intent')
+        request = create_request("other", "intent")
         response = create_responder(request)
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'intent'
+        assert result.dialogue_state == "intent"
 
     def test_intent_entity(self, dm):
         """Correctly match intent and entity"""
-        request = create_request('domain', 'intent', [{'type': 'entity_2'}])
+        request = create_request("domain", "intent", [{"type": "entity_2"}])
         response = create_responder(request)
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'intent_entity_2'
+        assert result.dialogue_state == "intent_entity_2"
 
     def test_intent_entity_tiebreak(self, dm):
         """Correctly break ties between rules of equal complexity"""
-        request = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'}])
+        request = create_request(
+            "domain", "intent", [{"type": "entity_1"}, {"type": "entity_2"}]
+        )
         response = create_responder(request)
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'intent_entity_1'
+        assert result.dialogue_state == "intent_entity_1"
 
     def test_intent_entities(self, dm):
         """Correctly break ties between rules of equal complexity"""
-        request = create_request('domain', 'intent', [{'type': 'entity_1'}, {'type': 'entity_2'},
-                                                      {'type': 'entity_3'}])
+        request = create_request(
+            "domain",
+            "intent",
+            [{"type": "entity_1"}, {"type": "entity_2"}, {"type": "entity_3"}],
+        )
         response = create_responder(request)
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'intent_entities'
+        assert result.dialogue_state == "intent_entities"
 
     def test_target_dialogue_state_management(self, dm):
         """Correctly sets the dialogue state based on the target_dialogue_state"""
-        request = create_request('domain', 'intent')
+        request = create_request("domain", "intent")
         response = create_responder(request)
-        result = dm.apply_handler(request, response, target_dialogue_state='intent_entity_2')
-        assert result.dialogue_state == 'intent_entity_2'
+        result = dm.apply_handler(
+            request, response, target_dialogue_state="intent_entity_2"
+        )
+        assert result.dialogue_state == "intent_entity_2"
 
     def test_target_dialogue_state_management_targeted_only(self, dm):
         """Correctly sets the dialogue state based on the target_dialogue_state"""
-        request = create_request('domain', 'intent')
+        request = create_request("domain", "intent")
         response = create_responder(request)
-        result = dm.apply_handler(request, response, target_dialogue_state='targeted_only')
-        assert result.dialogue_state == 'targeted_only'
+        result = dm.apply_handler(
+            request, response, target_dialogue_state="targeted_only"
+        )
+        assert result.dialogue_state == "targeted_only"
 
     def test_targeted_only_kwarg_exclusion(self, dm):
         with pytest.raises(ValueError):
-            dm.add_dialogue_rule('targeted_only2', lambda x, y: None,
-                                 intent='intent', targeted_only=True)
+            dm.add_dialogue_rule(
+                "targeted_only2", lambda x, y: None, intent="intent", targeted_only=True
+            )
 
     def test_middleware_single(self, dm):
         """Adding a single middleware works"""
+
         def _middle(request, responder, handler):
             responder.flag = True
             handler(request, responder)
@@ -208,65 +241,71 @@ class TestDialogueManager:
             assert responder.flag
 
         dm.add_middleware(_middle)
-        dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
+        dm.add_dialogue_rule("middleware_test", _handler, intent="middle")
 
-        request = create_request('domain', 'middle')
+        request = create_request("domain", "middle")
         response = create_responder(request)
 
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'middleware_test'
+        assert result.dialogue_state == "middleware_test"
 
     def test_middleware_multiple(self, dm):
         """Adding multiple middleware works"""
+
         def _first(request, responder, handler):
-            responder.middles = vars(responder).get('middles', []) + ['first']
+            responder.middles = vars(responder).get("middles", []) + ["first"]
             handler(request, responder)
 
         def _second(request, responder, handler):
-            responder.middles = vars(responder).get('middles', []) + ['second']
+            responder.middles = vars(responder).get("middles", []) + ["second"]
             handler(request, responder)
 
         def _handler(request, responder):
             # '_first' should have been called first, then '_second'
-            assert responder.middles == ['first', 'second']
+            assert responder.middles == ["first", "second"]
 
         dm.add_middleware(_first)
         dm.add_middleware(_second)
-        dm.add_dialogue_rule('middleware_test', _handler, intent='middle')
+        dm.add_dialogue_rule("middleware_test", _handler, intent="middle")
 
-        request = create_request('domain', 'middle')
+        request = create_request("domain", "middle")
         response = create_responder(request)
 
         result = dm.apply_handler(request, response)
-        assert result.dialogue_state == 'middleware_test'
+        assert result.dialogue_state == "middleware_test"
 
 
 def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
     """Tests that the params are cleared in one trip from app to mm."""
     convo = Conversation(nlp=kwik_e_mart_nlp, app_path=kwik_e_mart_app_path)
-    convo.params = Params(allowed_intents=['store_info.find_nearest_store'],
-                          target_dialogue_state='greeting')
-    convo.say('close door')
+    convo.params = Params(
+        allowed_intents=["store_info.find_nearest_store"],
+        target_dialogue_state="greeting",
+    )
+    convo.say("close door")
     assert convo.params == Params()
 
 
 @pytest.mark.parametrize(
     "language, locale, expected_ser_call",
     [
-        ('en', 'en_GB', {'lang': 'EN', 'latent': True, 'locale': 'en_GB'}),
-        ('es', 'en_US', {'latent': True, 'locale': 'en_US'}),
-        (None, None, {'latent': True, 'locale': 'en_US', 'lang': 'EN'}),
-        ('INVALID_LANG_CODE', 'en_GB', {'latent': True, 'locale': 'en_GB'}),
-        ('es', 'INVALID_LOCALE_CODE', {'lang': 'ES', 'latent': True}),
-        ('eng', 'en_GB', {'lang': 'EN', 'latent': True, 'locale': 'en_GB'}),
-    ]
+        ("en", "en_GB", {"lang": "EN", "latent": True, "locale": "en_GB"}),
+        ("es", "en_US", {"latent": True, "locale": "en_US"}),
+        (None, None, {"latent": True, "locale": "en_US", "lang": "EN"}),
+        ("INVALID_LANG_CODE", "en_GB", {"latent": True, "locale": "en_GB"}),
+        ("es", "INVALID_LOCALE_CODE", {"lang": "ES", "latent": True}),
+        ("eng", "en_GB", {"lang": "EN", "latent": True, "locale": "en_GB"}),
+    ],
 )
-def test_convo_language_and_locales(mocker, kwik_e_mart_nlp,
-                                    kwik_e_mart_app_path, language, locale, expected_ser_call):
+def test_convo_language_and_locales(
+    mocker, kwik_e_mart_nlp, kwik_e_mart_app_path, language, locale, expected_ser_call
+):
     """Tests that the params are cleared in one trip from app to mm."""
     convo = Conversation(nlp=kwik_e_mart_nlp, app_path=kwik_e_mart_app_path)
     convo.params = Params(language=language, locale=locale)
-    mock1 = mocker.patch.object(SystemEntityRecognizer, 'get_response', return_value=({}, 400))
-    convo.say('set alarm for 4pm tomorrow')
-    mock1.call_args_list[0][0][0].pop('text')
+    mock1 = mocker.patch.object(
+        SystemEntityRecognizer, "get_response", return_value=({}, 400)
+    )
+    convo.say("set alarm for 4pm tomorrow")
+    mock1.call_args_list[0][0][0].pop("text")
     assert mock1.call_args_list[0][0][0] == expected_ser_call
