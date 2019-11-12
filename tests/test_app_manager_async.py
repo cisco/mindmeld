@@ -14,9 +14,9 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_parse(async_kwik_e_mart_app):
-    response = await async_kwik_e_mart_app.app_manager.parse('hello')
-    fields = {'params', 'request', 'dialogue_state', 'directives', 'history'}
-    nested_fields = {'domain', 'intent', 'entities'}
+    response = await async_kwik_e_mart_app.app_manager.parse("hello")
+    fields = {"params", "request", "dialogue_state", "directives", "history"}
+    nested_fields = {"domain", "intent", "entities"}
     for field in fields:
         assert field in vars(response).keys()
     for field in nested_fields:

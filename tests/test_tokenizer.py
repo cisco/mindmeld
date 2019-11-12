@@ -19,46 +19,48 @@ def tokenizer():
 
 
 def test_tokenize_raw(tokenizer):
-    tokens = tokenizer.tokenize_raw('Test: Query for $500,000.')
+    tokens = tokenizer.tokenize_raw("Test: Query for $500,000.")
 
     assert len(tokens)
-    assert tokens[0]['text'] == 'Test:'
-    assert tokens[0]['start'] == 0
-    assert tokens[3]['start'] == 16
-    assert tokens[3]['start'] == 16
+    assert tokens[0]["text"] == "Test:"
+    assert tokens[0]["start"] == 0
+    assert tokens[3]["start"] == 16
+    assert tokens[3]["start"] == 16
 
 
 def test_tokenize(tokenizer):
-    tokens = tokenizer.tokenize('Test: Query for $500,000. Chyea!')
+    tokens = tokenizer.tokenize("Test: Query for $500,000. Chyea!")
 
     assert len(tokens)
-    assert tokens[0]['entity'] == 'test'
-    assert tokens[0]['raw_entity'] == 'Test:'
-    assert tokens[1]['raw_start'] == 6
-    assert tokens[3]['raw_entity'] == '$500,000.'
-    assert tokens[3]['raw_start'] == 16
-    assert tokens[3]['entity'] == '$500,000'
-    assert tokens[4]['entity'] == 'chyea'
-    assert tokens[4]['raw_entity'] == 'Chyea!'
-    assert tokens[4]['raw_start'] == 26
+    assert tokens[0]["entity"] == "test"
+    assert tokens[0]["raw_entity"] == "Test:"
+    assert tokens[1]["raw_start"] == 6
+    assert tokens[3]["raw_entity"] == "$500,000."
+    assert tokens[3]["raw_start"] == 16
+    assert tokens[3]["entity"] == "$500,000"
+    assert tokens[4]["entity"] == "chyea"
+    assert tokens[4]["raw_entity"] == "Chyea!"
+    assert tokens[4]["raw_start"] == 26
 
 
 def test_normalize(tokenizer):
-    normalized_text = tokenizer.normalize('Test: Query for $500,000.', False)
+    normalized_text = tokenizer.normalize("Test: Query for $500,000.", False)
 
-    assert normalized_text == 'test query for $500,000'
+    assert normalized_text == "test query for $500,000"
 
 
 def test_normalize_2(tokenizer):
-    normalized_text = tokenizer.normalize('Test: Query for test.12.345..test,test', False)
+    normalized_text = tokenizer.normalize(
+        "Test: Query for test.12.345..test,test", False
+    )
 
-    assert normalized_text == 'test query for test 12.345 test test'
+    assert normalized_text == "test query for test 12.345 test test"
 
 
 def test_normalize_3(tokenizer):
-    normalized_text = tokenizer.normalize('Test: awesome band sigur rós.', False)
+    normalized_text = tokenizer.normalize("Test: awesome band sigur rós.", False)
 
-    assert normalized_text == 'test awesome band sigur ros'
+    assert normalized_text == "test awesome band sigur ros"
 
 
 def test_normalize_4(tokenizer):
@@ -68,10 +70,10 @@ def test_normalize_4(tokenizer):
 
 
 def test_normalize_5(tokenizer):
-    raw = 'is s.o.b. ,, gonna be on at 8 p.m.?'
+    raw = "is s.o.b. ,, gonna be on at 8 p.m.?"
     normalized = tokenizer.normalize(raw, False)
 
-    assert normalized == 'is s o b gonna be on at 8 p m'
+    assert normalized == "is s o b gonna be on at 8 p m"
 
 
 def test_normalize_apos(tokenizer):
@@ -90,10 +92,10 @@ def test_normalize_apos(tokenizer):
 
 
 def test_mapping(tokenizer):
-    raw = 'Test: 1. 2. 3.'
+    raw = "Test: 1. 2. 3."
     normalized = tokenizer.normalize(raw)
 
-    assert normalized == 'test 1 2 3'
+    assert normalized == "test 1 2 3"
 
     forward, backward = tokenizer.get_char_index_map(raw, normalized)
 
@@ -111,7 +113,7 @@ def test_mapping(tokenizer):
         10: 7,
         11: 8,
         12: 9,
-        13: 9
+        13: 9,
     }
 
     assert backward == {
@@ -129,10 +131,10 @@ def test_mapping(tokenizer):
 
 
 def test_mapping_2(tokenizer):
-    raw = 'is s.o.b. ,, gonna be on at 8 p.m.?'
+    raw = "is s.o.b. ,, gonna be on at 8 p.m.?"
     normalized = tokenizer.normalize(raw, False)
 
-    assert normalized == 'is s o b gonna be on at 8 p m'
+    assert normalized == "is s o b gonna be on at 8 p m"
 
     forward, backward = tokenizer.get_char_index_map(raw, normalized)
 
@@ -171,7 +173,7 @@ def test_mapping_2(tokenizer):
         31: 27,
         32: 28,
         33: 28,
-        34: 28
+        34: 28,
     }
 
     assert backward == {
@@ -203,5 +205,5 @@ def test_mapping_2(tokenizer):
         25: 29,
         26: 30,
         27: 31,
-        28: 32
+        28: 32,
     }
