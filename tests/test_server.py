@@ -52,7 +52,7 @@ def test_parse_endpoint_fail(client):
 
 
 def test_status_endpoint(client):
-    response = client.get("/_status")
+    response = client.get("/health")
     assert response.status == "200 OK"
     assert set(json.loads(response.data.decode("utf8")).keys()) == {
         "package_version",
