@@ -1,6 +1,57 @@
 Recent Changes
 ==============
 
+
+MindMeld 4.2
+-------------
+
+
+MindMeld 4.2 packages several new features to make it easier for developers to build NLP applications for non-English languages, do unstructured QA searches,
+and a new enterprise blueprint for a human resources (HR) use-case.
+
+**1. MindMeld UI**
+
+MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application. This web UI also
+serves as a debugging tool to step through the various stages of query processing by the MindMeld pipeline. See
+:doc:`MindMeld UI <../mindmeld_ui/mindmeld_ui>` for more details.
+
+**2. Question-answering on unstructured text**
+
+MindMeld 4.2 includes a built-in Question-Answering (QA) component using Elasticsearch for unstructured text retrieval.
+This new feature can be used to perform QA using a knowledge base of passages, frequently asked questions or any long-form
+text data. This complements the structured text retrieval already supported in MindMeld for knowledge-base search. See
+:ref:`dealing with unstructed data <unstructured_data>` for more details.
+
+**3. New Human Resources Blueprint**
+
+MindMeld 4.2 provide an enterprise Human Resources bot blueprint to complement the existing consumer blueprints we currently support. Refer to
+:ref:`HR assistant <hr_assistant>` blueprint for more details.
+
+**4. Webex Teams Bot Integration**
+
+MindMeld 4.2 includes built-in support for Webex Teams integration, so developers can seamlessly integrate MindMeld bots
+to Webex Teams. See :doc:`Webex bot integration <../integrations/webex_teams>` for implementation details.
+
+**5. Locale and Language codes**
+
+MindMeld 4.2 now supports system entity classification and resolution in non-English languages. Please see :ref:`Specify language and locale codes <specify_language>` for more details.
+
+**6. Stemming**
+
+MindMeld 4.2 allows developers to specify their own custom stemmers, which are useful for many languages. Please see :ref:`Stemming <stemming>` for more details.
+
+**7. DialogueFlow.reprocess**
+
+MindMeld 4.2 includes an improvement to DialogueFlow (a MindMeld dialogue feature) where the user can exit the current dialogue flow and
+return to a default flow. Refer to :ref:`Exiting Dialogue Flow <exiting_dialogue_flow>` section on how to exit an active dialogue flow.
+
+**8. Docker updates**
+
+We updated the :ref:`Getting started with docker <getting_started_docker_setup>` page to spawn Elasticsearch within the docker
+container, which means the developer doesn't have to do any local Elasticsearch setup, thus significantly reducing the
+local dependencies needed to run MindMeld.
+
+
 MindMeld 4.1
 -------------
 

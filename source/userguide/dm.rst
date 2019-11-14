@@ -453,6 +453,9 @@ In this particular example, we want to structure the user experience of getting 
 
 We can organize this complex interaction in a straightforward manner using the dialogue flow construct.
 
+Creating a dialogue flow
+^^^^^^^^^^^^^^^^^^^^^^^^
+
 To instantiate a dialogue flow, we first need to designate a handler function to be the entry point for the flow. We do so by decorating the desired dialogue state handler with the ``@app.dialogue_flow`` method, which has the same signature as a normal handler and similar properties. The designated function (``send_store_hours`` in the example below) will be invoked when the request matches the specified attributes such as domain and intent.
 
 .. code:: python
@@ -504,6 +507,9 @@ This code snippet introduces two new constructs:
 
    The ``responder`` object's ``frame`` attribute can be used to persist information across turns. Here, we are using it to store the count of the number of turns in this flow. If the number of turns exceeds three, we gracefully exit the flow.
 
+Continuing a dialogue flow
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Similar to the ``@app.handle`` decorator for regular dialogue state handlers, we can use a ``@send_store_hours.handle`` decorator to designate different handlers within this flow. We can also designate a default handler by setting ``default=True``. The default handler is invoked if there is no matching handler for the request, for example, if the user asks about nearest store instead, which is a different intent that is not handled in this flow.
 
 .. code:: python
@@ -519,16 +525,8 @@ Similar to the ``@app.handle`` decorator for regular dialogue state handlers, we
           responder.reply('Sorry I cannot help you. Please try again.')
           responder.exit_flow()
 
-We can designate an exit state handler by setting ``exit_flow=True``. After the dialogue manager enters this state, subsequent turns will no longer be bound to the flow. We can also exit the flow by invoking the :meth:`Responder.exit_flow` method as shown in the previous code snippets.
-
-.. code:: python
-  :emphasize-lines: 1
-
-  @send_store_hours.handle(intent='exit', exit_flow=True)
-  def exit_handler(request, responder):
-      responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
-
 An important caveat to note is that we also need to add a flow-specific handler for `the original entry intent` (in this case, ``get_store_hours``).
+Otherwise, ``get_store_hours`` queries would be handled by the default handler.
 
 .. code:: python
   :emphasize-lines: 1
@@ -537,8 +535,37 @@ An important caveat to note is that we also need to add a flow-specific handler 
   def send_store_hours_in_flow_handler(request, responder):
       send_store_hours(request, responder)
 
-As shown here, you can use the dialog flow functionality to effectively craft complex flows that gracefully direct the user to provide the desired information for your application.
 
+.. _exiting_dialogue_flow:
+
+Exiting a dialogue flow
+^^^^^^^^^^^^^^^^^^^^^^^
+
+There are three ways to exit a Dialogue Flow:
+
+1. We can exit the flow by invoking the :meth:`Responder.exit_flow` method as shown in the ``send_store_hours`` and ``default_handler`` code snippets above. Once that method is called, subsequent turns are not bound to the flow.
+
+2. We can designate an exit state handler by setting ``exit_flow=True``, as in the ``exit_handler`` code snippet below. After the dialogue manager enters this state, subsequent turns are not bound to the flow.
+
+3. We can force the current flow to exit immediately and return to the main dialogue manager flow by invoking :meth:`Responder.reprocess` method as shown in the ``transition_flows`` code snippet below.
+
+.. code:: python
+  :emphasize-lines: 1
+
+  @send_store_hours.handle(intent='exit', exit_flow=True)
+  def exit_handler(request, responder):
+      responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
+
+.. code:: python
+  :emphasize-lines: 1
+
+  @send_store_hours.handle(intent='find_nearest_store')
+  def transition_flows(request, responder):
+      del request
+      del responder
+      send_store_hours.reprocess()
+
+As shown here, you can use the dialog flow functionality to effectively craft complex flows that gracefully direct the user to provide the desired information for your application.
 
 .. _dialogue_middleware:
 

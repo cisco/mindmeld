@@ -14,19 +14,31 @@
 try:
     # register test module for assertion rewrite
     import pytest
-    pytest.register_assert_rewrite('mindmeld.test')
+
+    pytest.register_assert_rewrite("mindmeld.test")
 except ImportError:
     pass  # no worries
 
-from .app import Application
-from .components import (Conversation, DialogueResponder,
-                         NaturalLanguageProcessor, QuestionAnswerer)
 from ._util import blueprint, configure_logs
 from ._version import current
+from .app import Application
+from .components import (
+    Conversation,
+    DialogueResponder,
+    NaturalLanguageProcessor,
+    QuestionAnswerer,
+)
 
-__all__ = ['blueprint', 'configure_logs', 'Application', 'Conversation', 'DialogueResponder',
-           'NaturalLanguageProcessor', 'QuestionAnswerer']
+__all__ = [
+    "blueprint",
+    "configure_logs",
+    "Application",
+    "Conversation",
+    "DialogueResponder",
+    "NaturalLanguageProcessor",
+    "QuestionAnswerer",
+]
 
-__author__ = 'Cisco Systems, Inc.'
-__email__ = 'mindmeld@cisco.com'
+__author__ = "Cisco Systems, Inc."
+__email__ = "mindmeld@cisco.com"
 __version__ = current

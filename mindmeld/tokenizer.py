@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 class Tokenizer:
     """The Tokenizer class encapsulates all the functionality for normalizing and tokenizing a
     given piece of text."""
-    _ASCII_CUTOFF = ord('\u0080')
+
+    _ASCII_CUTOFF = ord("\u0080")
 
     def __init__(self, exclude_from_norm=None):
         """Initializes the tokenizer.
@@ -52,42 +53,80 @@ class Tokenizer:
         # This is more of a tactical fix at this moment. Will probably need a more generic way
         # to handle all currency symbols.
         currency_symbols = "$¥"
-        to_exclude = currency_symbols + ''.join(self.exclude_from_norm)
+        to_exclude = currency_symbols + "".join(self.exclude_from_norm)
 
         letter_pattern_str = "[^\W\d_]+"  # noqa: W605
 
         # Make keep special regex list
         keep_special_regex_list.append(
-            "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+")  # noqa: W605
+            "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"
+        )  # noqa: W605
         keep_special_regex_list.append(
-            "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$")  # noqa: W605
+            "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"
+        )  # noqa: W605
         keep_special_regex_list.append(
-            "?P<pattern1>(?P<pattern1_replace>" + letter_pattern_str  # noqa: W605
-            + ")" + "[^\w\d\s&" + exception_chars + "]+(?=[\d]+)")  # noqa: W605
+            "?P<pattern1>(?P<pattern1_replace>"
+            + letter_pattern_str  # noqa: W605
+            + ")"
+            + "[^\w\d\s&"
+            + exception_chars
+            + "]+(?=[\d]+)"
+        )  # noqa: W605
         keep_special_regex_list.append(
-            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&" +  # noqa: W605
-            exception_chars + "]+" + "u(?=" + letter_pattern_str + ")")  # noqa: W605
+            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"
+            + exception_chars  # noqa: W605
+            + "]+"
+            + "u(?="
+            + letter_pattern_str
+            + ")"
+        )  # noqa: W605
         keep_special_regex_list.append(
-            "?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str +  # noqa: W605
-            ")" + "[^\w\d\s&" + exception_chars + "]+" +  # noqa: W605
-            "(?=" + letter_pattern_str + ")")  # noqa: W605
+            "?P<pattern3>(?P<pattern3_replace>"
+            + letter_pattern_str
+            + ")"  # noqa: W605
+            + "[^\w\d\s&"
+            + exception_chars
+            + "]+"
+            + "(?="  # noqa: W605
+            + letter_pattern_str
+            + ")"
+        )  # noqa: W605
         keep_special_regex_list.append(
-            "?P<escape1>(?P<escape1_replace>[\w\d]+)" +  # noqa: W605
-            "[^\w\d\s" + exception_chars + "]+" + "(?=\|)")  # noqa: W605
+            "?P<escape1>(?P<escape1_replace>[\w\d]+)"
+            + "[^\w\d\s"  # noqa: W605
+            + exception_chars
+            + "]+"
+            + "(?=\|)"
+        )  # noqa: W605
         keep_special_regex_list.append(
-            "?P<escape2>(?P<escape2_replace>[\]\}]+)" +  # noqa: W605
-            "[^\w\d\s" + exception_chars + "]+(?=s)")  # noqa: W605
+            "?P<escape2>(?P<escape2_replace>[\]\}]+)"
+            + "[^\w\d\s"  # noqa: W605
+            + exception_chars
+            + "]+(?=s)"
+        )  # noqa: W605
 
         # Make regex list
         regex_list.append("?P<start>^[^\w\d&" + to_exclude + "]+")  # noqa: W605
         regex_list.append("?P<end>[^\w\d&" + to_exclude + "]+$")  # noqa: W605
-        regex_list.append("?P<pattern1>(?P<pattern1_replace>" + letter_pattern_str +  # noqa: W605
-                          ")" + "[^\w\d\s&]+(?=[\d]+)")  # noqa: W605
-        regex_list.append("?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?=" +  # noqa: W605
-                          letter_pattern_str + ")")  # noqa: W605
         regex_list.append(
-            "?P<pattern3>(?P<pattern3_replace>" + letter_pattern_str + ")" +  # noqa: W605
-            "[^\w\d\s&]+(?=" + letter_pattern_str + ")")  # noqa: W605
+            "?P<pattern1>(?P<pattern1_replace>"
+            + letter_pattern_str
+            + ")"  # noqa: W605
+            + "[^\w\d\s&]+(?=[\d]+)"
+        )  # noqa: W605
+        regex_list.append(
+            "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&]+(?="
+            + letter_pattern_str  # noqa: W605
+            + ")"
+        )  # noqa: W605
+        regex_list.append(
+            "?P<pattern3>(?P<pattern3_replace>"
+            + letter_pattern_str
+            + ")"
+            + "[^\w\d\s&]+(?="  # noqa: W605
+            + letter_pattern_str
+            + ")"
+        )  # noqa: W605
 
         # commonalities between lists
         regex_list.append("?P<underscore>_")  # noqa: W605
@@ -113,25 +152,28 @@ class Tokenizer:
         regex_list.append("?P<apos_poss>(?<=[^\\s])'$")  # noqa: W605
 
         # Replace lookup based on regex
-        self.replace_lookup = {'apos_s': (" 's", None),
-                               'apos_poss': ("", None),
-                               'bar': (' ', None),
-                               'begspace': ('', None),
-                               'end': (' ', None),
-                               'escape1': ('{0}', 'escape1_replace'),
-                               'escape2': ('{0} ', 'escape2_replace'),
-                               'pattern1': ('{0} ', 'pattern1_replace'),
-                               'pattern2': ('{0} ', 'pattern2_replace'),
-                               'pattern3': ('{0} ', 'pattern3_replace'),
-                               'spaceplus': (' ', None),
-                               'start': (' ', None),
-                               'trailspace': ('', None),
-                               'underscore': (' ', None),
-                               'apostrophe': (' ', None)}
+        self.replace_lookup = {
+            "apos_s": (" 's", None),
+            "apos_poss": ("", None),
+            "bar": (" ", None),
+            "begspace": ("", None),
+            "end": (" ", None),
+            "escape1": ("{0}", "escape1_replace"),
+            "escape2": ("{0} ", "escape2_replace"),
+            "pattern1": ("{0} ", "pattern1_replace"),
+            "pattern2": ("{0} ", "pattern2_replace"),
+            "pattern3": ("{0} ", "pattern3_replace"),
+            "spaceplus": (" ", None),
+            "start": (" ", None),
+            "trailspace": ("", None),
+            "underscore": (" ", None),
+            "apostrophe": (" ", None),
+        }
 
         # Create a regular expression  from the dictionary keys
-        self.keep_special_compiled = re.compile("(%s)" % ")|(".join(
-            keep_special_regex_list), re.UNICODE)
+        self.keep_special_compiled = re.compile(
+            "(%s)" % ")|(".join(keep_special_regex_list), re.UNICODE
+        )
         self.compiled = re.compile("(%s)" % ")|(".join(regex_list), re.UNICODE)
 
     # Needed for train-roles where queries are deep copied (and thus tokenizer).
@@ -146,11 +188,15 @@ class Tokenizer:
         """
         Load mapping of ascii code points to ascii characters.
         """
-        logger.debug('Loading ascii folding mapping from file: %s.', ASCII_FOLDING_DICT_PATH)
+        logger.debug(
+            "Loading ascii folding mapping from file: %s.", ASCII_FOLDING_DICT_PATH
+        )
 
         ascii_folding_table = {}
 
-        with codecs.open(ASCII_FOLDING_DICT_PATH, 'r', encoding='unicode_escape') as mapping_file:
+        with codecs.open(
+            ASCII_FOLDING_DICT_PATH, "r", encoding="unicode_escape"
+        ) as mapping_file:
             for line in mapping_file:
                 tokens = line.split()
                 codepoint = tokens[0]
@@ -201,7 +247,7 @@ class Tokenizer:
             str: the original text string with each token in normalized form
         """
         norm_tokens = self.tokenize(text, keep_special_chars)
-        normalized_text = " ".join(t['entity'] for t in norm_tokens)
+        normalized_text = " ".join(t["entity"] for t in norm_tokens)
 
         return normalized_text
 
@@ -236,14 +282,16 @@ class Tokenizer:
 
         norm_tokens = []
         for i, raw_token in enumerate(raw_tokens):
-            if not raw_token['text'] or len(raw_token['text']) == 0:
+            if not raw_token["text"] or len(raw_token["text"]) == 0:
                 continue
 
             norm_token_start = len(norm_tokens)
-            norm_token_text = raw_token['text']
+            norm_token_text = raw_token["text"]
 
             if keep_special_chars:
-                norm_token_text = self.multiple_replace(norm_token_text, self.keep_special_compiled)
+                norm_token_text = self.multiple_replace(
+                    norm_token_text, self.keep_special_compiled
+                )
             else:
                 norm_token_text = self.multiple_replace(norm_token_text, self.compiled)
 
@@ -257,15 +305,15 @@ class Tokenizer:
                 # remove diacritics and fold the character to equivalent ascii character if possible
                 for token in norm_token_text.split():
                     norm_token = {}
-                    norm_token['entity'] = token
-                    norm_token['raw_entity'] = raw_token['text']
-                    norm_token['raw_token_index'] = i
-                    norm_token['raw_start'] = raw_token['start']
+                    norm_token["entity"] = token
+                    norm_token["raw_entity"] = raw_token["text"]
+                    norm_token["raw_token_index"] = i
+                    norm_token["raw_start"] = raw_token["start"]
                     norm_tokens.append(norm_token)
                     norm_token_count += 1
 
-            raw_token['norm_token_start'] = norm_token_start
-            raw_token['norm_token_count'] = norm_token_count
+            raw_token["norm_token_start"] = norm_token_start
+            raw_token["norm_token_count"] = norm_token_count
 
         return norm_tokens
 
@@ -282,21 +330,21 @@ class Tokenizer:
         """
         tokens = []
         token = {}
-        token_text = ''
+        token_text = ""
         for i, char in enumerate(text):
             if char.isspace():
                 if token and token_text:
-                    token['text'] = token_text
+                    token["text"] = token_text
                     tokens.append(token)
                 token = {}
-                token_text = ''
+                token_text = ""
                 continue
             if not token_text:
-                token = {'start': i}
+                token = {"start": i}
             token_text += char
 
         if token and token_text:
-            token['text'] = token_text
+            token["text"] = token_text
             tokens.append(token)
 
         return tokens
@@ -334,40 +382,40 @@ class Tokenizer:
             return mapping, mapping
 
         edit_dis = []
-        for i in range(0, n+1):
-            edit_dis.append([0] * (m+1))
-        edit_dis[0] = list(range(0, m+1))
-        for i in range(0, n+1):
+        for i in range(0, n + 1):
+            edit_dis.append([0] * (m + 1))
+        edit_dis[0] = list(range(0, m + 1))
+        for i in range(0, n + 1):
             edit_dis[i][0] = i
 
         directions = []
-        for i in range(0, n+1):
-            directions.append([''] * (m+1))
+        for i in range(0, n + 1):
+            directions.append([""] * (m + 1))
 
-        for i in range(1, n+1):
-            for j in range(1, m+1):
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
                 dis = 999
                 direction = None
 
-                diag_dis = edit_dis[i-1][j-1]
-                if normalized_text[i-1] != text[j-1]:
+                diag_dis = edit_dis[i - 1][j - 1]
+                if normalized_text[i - 1] != text[j - 1]:
                     diag_dis += 1
 
                 # dis from going down
-                down_dis = edit_dis[i-1][j] + 1
+                down_dis = edit_dis[i - 1][j] + 1
 
                 # dis from going right
-                right_dis = edit_dis[i][j-1] + 1
+                right_dis = edit_dis[i][j - 1] + 1
 
                 if down_dis < dis:
                     dis = down_dis
-                    direction = '↓'
+                    direction = "↓"
                 if right_dis < dis:
                     dis = right_dis
-                    direction = '→'
+                    direction = "→"
                 if diag_dis < dis:
                     dis = diag_dis
-                    direction = '↘'
+                    direction = "↘"
 
                 edit_dis[i][j] = dis
                 directions[i][j] = direction
@@ -378,13 +426,13 @@ class Tokenizer:
         m_idx = m
         n_idx = n
         while m_idx > 0 and n_idx > 0:
-            if directions[n_idx][m_idx] == '↘':
-                mapping[n_idx-1] = m_idx-1
+            if directions[n_idx][m_idx] == "↘":
+                mapping[n_idx - 1] = m_idx - 1
                 m_idx -= 1
                 n_idx -= 1
-            elif directions[n_idx][m_idx] == '→':
+            elif directions[n_idx][m_idx] == "→":
                 m_idx -= 1
-            elif directions[n_idx][m_idx] == '↓':
+            elif directions[n_idx][m_idx] == "↓":
                 n_idx -= 1
 
         # initialize the forward mapping (raw to normalized text)
@@ -395,7 +443,7 @@ class Tokenizer:
         raw_to_norm_mapping.update({v: k for k, v in mapping.items()})
         for i in range(0, m):
             if i not in raw_to_norm_mapping:
-                raw_to_norm_mapping[i] = raw_to_norm_mapping[i-1]
+                raw_to_norm_mapping[i] = raw_to_norm_mapping[i - 1]
 
         return raw_to_norm_mapping, mapping
 
@@ -428,14 +476,16 @@ class Tokenizer:
         Returns:
             char: a ASCII character
         """
-        folded_str = ''
+        folded_str = ""
         for char in text:
             folded_str += self.fold_char_to_ascii(char)
 
         return folded_str
 
     def __repr__(self):
-        return "<Tokenizer exclude_from_norm: {}>".format(self.exclude_from_norm.__repr__())
+        return "<Tokenizer exclude_from_norm: {}>".format(
+            self.exclude_from_norm.__repr__()
+        )
 
     @staticmethod
     def create_tokenizer():

@@ -15,40 +15,40 @@
 import logging
 import os
 import random
+
 from sklearn.externals import joblib
 
-from .helpers import (register_model, get_label_encoder, get_seq_accuracy_scorer,
-                      get_seq_tag_accuracy_scorer, ingest_dynamic_gazetteer)
-from .model import EvaluatedExample, ModelConfig, EntityModelEvaluation, Model
-from .taggers.crf import ConditionalRandomFields
-from .taggers.memm import MemmModel
-from .taggers.lstm import LstmModel
 from ..exceptions import MindMeldError
-from ..tokenizer import Tokenizer
+from .helpers import (
+    get_label_encoder,
+    get_seq_accuracy_scorer,
+    get_seq_tag_accuracy_scorer,
+    ingest_dynamic_gazetteer,
+    register_model,
+)
+from .model import EntityModelEvaluation, EvaluatedExample, Model, ModelConfig
+from .taggers.crf import ConditionalRandomFields
+from .taggers.lstm import LstmModel
+from .taggers.memm import MemmModel
 
 logger = logging.getLogger(__name__)
 
 # classifier types
-CRF_TYPE = 'crf'
-MEMM_TYPE = 'memm'
-LSTM_TYPE = 'lstm'
+CRF_TYPE = "crf"
+MEMM_TYPE = "memm"
+LSTM_TYPE = "lstm"
 
 # for default model scoring types
-ACCURACY_SCORING = 'accuracy'
-SEQ_ACCURACY_SCORING = 'seq_accuracy'
-SEQUENCE_MODELS = ['crf']
+ACCURACY_SCORING = "accuracy"
+SEQ_ACCURACY_SCORING = "seq_accuracy"
+SEQUENCE_MODELS = ["crf"]
 
 DEFAULT_FEATURES = {
-    'bag-of-words-seq': {
-        'ngram_lengths_to_start_positions': {
-            1: [-2, -1, 0, 1, 2],
-            2: [-2, -1, 0, 1]
-        }
+    "bag-of-words-seq": {
+        "ngram_lengths_to_start_positions": {1: [-2, -1, 0, 1, 2], 2: [-2, -1, 0, 1]}
     },
-    'in-gaz-span-seq': {},
-    'sys-candidates-seq': {
-        'start_positions': [-1, 0, 1]
-    }
+    "in-gaz-span-seq": {},
+    "sys-candidates-seq": {"start_positions": [-1, 0, 1]},
 }
 
 
@@ -85,7 +85,7 @@ class TaggerModel(Model):
     def __init__(self, config):
         if not config.features:
             config_dict = config.to_dict()
-            config_dict['features'] = DEFAULT_FEATURES
+            config_dict["features"] = DEFAULT_FEATURES
             config = ModelConfig(**config_dict)
 
         super().__init__(config)
@@ -105,10 +105,10 @@ class TaggerModel(Model):
         we save the resources that are memory intensive
         """
         attributes = self.__dict__.copy()
-        attributes['_resources'] = {}
-        resources_to_persist = set(['sys_types'])
+        attributes["_resources"] = {}
+        resources_to_persist = set(["sys_types"])
         for key in resources_to_persist:
-            attributes['_resources'][key] = self.__dict__['_resources'][key]
+            attributes["_resources"][key] = self.__dict__["_resources"][key]
 
         return attributes
 
@@ -133,8 +133,9 @@ class TaggerModel(Model):
         self.types = types
         if len(set(types)) == 0:
             self._no_entities = True
-            logger.info("There are no labels in this label set, so we don't "
-                        "fit the model.")
+            logger.info(
+                "There are no labels in this label set, so we don't " "fit the model."
+            )
             return self
 
         # Extract labels - label encoders are the same accross all entity recognition models
@@ -142,8 +143,9 @@ class TaggerModel(Model):
         y = self._label_encoder.encode(labels, examples=examples)
 
         # Extract features
-        X, y, groups = self._clf.extract_features(examples, self.config, self._resources, y,
-                                                  fit=True)
+        X, y, groups = self._clf.extract_features(
+            examples, self.config, self._resources, y, fit=True
+        )
 
         # Fit the model
         if skip_param_selection:
@@ -170,10 +172,12 @@ class TaggerModel(Model):
         Returns:
             list: A list of dictionaries of extracted features and their weights
         """
-        tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
-        return self._clf.extract_example_features(query, self.config, workspace_resource)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+        )
+        return self._clf.extract_example_features(
+            query, self.config, workspace_resource
+        )
 
     def _fit(self, examples, labels, params=None):
         """Trains a classifier without cross-validation.
@@ -211,14 +215,17 @@ class TaggerModel(Model):
         if self._no_entities:
             return [()]
 
-        tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
-        predicted_tags = self._clf.extract_and_predict(examples, self.config,
-                                                       workspace_resource)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+        )
+        predicted_tags = self._clf.extract_and_predict(
+            examples, self.config, workspace_resource
+        )
         # Decode the tags to labels
-        labels = [self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
-                  for example_predicted_tags, example in zip(predicted_tags, examples)]
+        labels = [
+            self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
+            for example_predicted_tags, example in zip(predicted_tags, examples)
+        ]
         return labels
 
     def predict_proba(self, examples, dynamic_resource=None):
@@ -234,17 +241,20 @@ class TaggerModel(Model):
         if self._no_entities:
             return []
 
-        tokenizer = Tokenizer()
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
-        predicted_tags_probas = self._clf.predict_proba(examples, self.config,
-                                                        workspace_resource)
+            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+        )
+        predicted_tags_probas = self._clf.predict_proba(
+            examples, self.config, workspace_resource
+        )
         tags, probas = zip(*predicted_tags_probas[0])
         entity_confidence = []
         entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
         for entity in entities:
-            entity_proba = probas[entity.normalized_token_span.start:
-                                  entity.normalized_token_span.end+1]
+            entity_proba = probas[
+                entity.normalized_token_span.start : entity.normalized_token_span.end
+                + 1
+            ]
             # We assume that the score of the least likely tag in the sequence as the confidence
             # score of the entire entity sequence
             entity_confidence.append(min(entity_proba))
@@ -256,7 +266,7 @@ class TaggerModel(Model):
         Returns the scorer to use based on the selection settings and classifier type,
         defaulting to tag accuracy.
         """
-        classifier_type = self.config.model_settings['classifier_type']
+        classifier_type = self.config.model_settings["classifier_type"]
 
         # Sets the default scorer based on the classifier type
         if classifier_type in SEQUENCE_MODELS:
@@ -266,11 +276,14 @@ class TaggerModel(Model):
 
         # Gets the scorer based on what is passed in to the selection settings (reverts to
         # default if nothing is passed in)
-        scorer = selection_settings.get('scoring', default_scorer)
+        scorer = selection_settings.get("scoring", default_scorer)
         if scorer == SEQ_ACCURACY_SCORING:
             if classifier_type not in SEQUENCE_MODELS:
-                logger.error("Sequence accuracy is only available for the following models: "
-                             "%s. Using tag level accuracy instead...", str(SEQUENCE_MODELS))
+                logger.error(
+                    "Sequence accuracy is only available for the following models: "
+                    "%s. Using tag level accuracy instead...",
+                    str(SEQUENCE_MODELS),
+                )
                 return ACCURACY_SCORING
             return get_seq_accuracy_scorer()
         elif scorer == ACCURACY_SCORING and classifier_type in SEQUENCE_MODELS:
@@ -290,14 +303,18 @@ class TaggerModel(Model):
                 evaluation
         """
         if self._no_entities:
-            logger.info("There are no labels in this label set, so we don't "
-                        "run model evaluation.")
+            logger.info(
+                "There are no labels in this label set, so we don't "
+                "run model evaluation."
+            )
             return
 
         predictions = self.predict(examples)
 
-        evaluations = [EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
-                       for i, e in enumerate(examples)]
+        evaluations = [
+            EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
+            for i, e in enumerate(examples)
+        ]
 
         config = self._get_effective_config()
         model_eval = EntityModelEvaluation(config, evaluations)
@@ -305,7 +322,7 @@ class TaggerModel(Model):
 
     def _get_model_constructor(self):
         """Returns the python class of the actual underlying model"""
-        classifier_type = self.config.model_settings['classifier_type']
+        classifier_type = self.config.model_settings["classifier_type"]
         try:
             return {
                 MEMM_TYPE: MemmModel,
@@ -313,7 +330,7 @@ class TaggerModel(Model):
                 LSTM_TYPE: LstmModel,
             }[classifier_type]
         except KeyError:
-            msg = '{}: Classifier type {!r} not recognized'
+            msg = "{}: Classifier type {!r} not recognized"
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
 
     def dump(self, path, config):
@@ -327,17 +344,19 @@ class TaggerModel(Model):
         """
         self._clf.dump(path, config)
 
-        if 'model' not in config:
+        if "model" not in config:
             # If the model path is not populated, the model is serializable, so
             # we just pass the entire model to the dictionary
-            config['model'] = self
+            config["model"] = self
         else:
             variables_to_dump = {
-                'current_params': self._current_params,
-                'label_encoder': self._label_encoder,
-                'no_entities': self._no_entities
+                "current_params": self._current_params,
+                "label_encoder": self._label_encoder,
+                "no_entities": self._no_entities,
             }
-            joblib.dump(variables_to_dump, os.path.join(config['model'], '.tagger_vars'))
+            joblib.dump(
+                variables_to_dump, os.path.join(config["model"], ".tagger_vars")
+            )
 
         joblib.dump(config, path)
 
@@ -351,10 +370,10 @@ class TaggerModel(Model):
             config (dict): The config containing the model configuration
         """
         self._clf.load(path)
-        variables_to_load = joblib.load(os.path.join(config['model'], '.tagger_vars'))
-        self._current_params = variables_to_load['current_params']
-        self._label_encoder = variables_to_load['label_encoder']
-        self._no_entities = variables_to_load['no_entities']
+        variables_to_load = joblib.load(os.path.join(config["model"], ".tagger_vars"))
+        self._current_params = variables_to_load["current_params"]
+        self._label_encoder = variables_to_load["label_encoder"]
+        self._no_entities = variables_to_load["no_entities"]
 
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
@@ -363,4 +382,4 @@ class TaggerModel(Model):
         raise NotImplementedError
 
 
-register_model('tagger', TaggerModel)
+register_model("tagger", TaggerModel)

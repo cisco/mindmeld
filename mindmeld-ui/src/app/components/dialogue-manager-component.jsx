@@ -62,9 +62,9 @@ class DialogueManager extends Component {
                       {
                         replies.map((reply, index) => {
                           return (
-                            <Row>
+                            <Row key={index}>
                               <Col>
-                                <div className="reply" key={index}>{reply}</div>
+                                <div className="reply">{reply}</div>
                               </Col>
                             </Row>
                             )

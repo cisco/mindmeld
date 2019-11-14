@@ -1,6 +1,28 @@
 Package History
 ===============
 
+4.2.0 (2019-09-16)
+------------------
+
+Major Features and Improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- MindMeld UI is a sample web-based chat client interface to interact with any MindMeld application
+
+- A built-in Question-Answering (QA) component for unstructured data using Elasticsearch
+
+- A new Human Resources blueprint for enterprise use-cases
+
+- Webex Teams Bot Integration
+
+- MindMeld now supports internationalization through language and locale codes
+
+- New built-in Spanish and English stemmers
+
+- An improvement to DialogueFlow where the user can exit the current flow and return to the main dialogue flow
+
+- Docker setup update that makes getting started with MindMeld much easier by removing the Elasticsearch dependency
+
 
 4.1.0 (2019-04-22)
 ------------------

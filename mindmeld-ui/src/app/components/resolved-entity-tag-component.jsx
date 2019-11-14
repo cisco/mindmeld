@@ -40,7 +40,7 @@ class ResolvedEntityTag extends Component {
         label = `Value: ${displayValue}`;
       }
     } else {
-      if ('cname' in value) {
+      if (value && ('cname' in value)) {
         const displayValue = value['cname'];
         label = `Value: ${displayValue}`;
       }

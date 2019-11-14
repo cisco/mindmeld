@@ -13,16 +13,16 @@
 
 """This module contains the dialogue manager component of MindMeld"""
 import asyncio
-from functools import cmp_to_key, partial
 import copy
+import json
 import logging
 import random
-import json
+from functools import cmp_to_key, partial
+
 import immutables
 
 from .. import path
-from .request import Params, Request, FrozenParams
-
+from .request import FrozenParams, Params, Request
 
 mod_logger = logging.getLogger(__name__)
 
@@ -30,36 +30,42 @@ mod_logger = logging.getLogger(__name__)
 class DirectiveNames:
     """A constants object for directive names."""
 
-    LIST = 'list'
+    LIST = "list"
     """A directive to display a list."""
 
-    LISTEN = 'listen'
+    LISTEN = "listen"
     """A directive to listen (start speech recognition)."""
 
-    REPLY = 'reply'
+    REPLY = "reply"
     """A directive to display a text view."""
 
-    RESET = 'reset'
+    RESET = "reset"
     """A directive to reset."""
 
-    SPEAK = 'speak'
+    SPEAK = "speak"
     """A directive to speak text out loud."""
 
-    SUGGESTIONS = 'suggestions'
+    SUGGESTIONS = "suggestions"
     """A view for a list of suggestions."""
 
-    SLEEP = 'sleep'
+    SLEEP = "sleep"
     """A directive to put the client to sleep after a specified number of milliseconds."""
 
 
 class DirectiveTypes:
     """A constants object for directive types."""
 
-    VIEW = 'view'
+    VIEW = "view"
     """An action directive."""
 
-    ACTION = 'action'
+    ACTION = "action"
     """A view directive."""
+
+
+class DialogueStateException(Exception):
+    def __init__(self, message=None, target_dialogue_state=None):
+        super().__init__(message)
+        self.target_dialogue_state = target_dialogue_state
 
 
 class DialogueStateRule:
@@ -75,7 +81,7 @@ class DialogueStateRule:
         default (bool): Whether this is the default state.
     """
 
-    logger = mod_logger.getChild('DialogueStateRule')
+    logger = mod_logger.getChild("DialogueStateRule")
     """Class logger."""
 
     def __init__(self, dialogue_state, **kwargs):
@@ -92,23 +98,34 @@ class DialogueStateRule:
 
         self.dialogue_state = dialogue_state
 
-        key_kwargs = (('domain',), ('intent',), ('has_entity', 'has_entities'),
-                      ('targeted_only',), ('default',))
+        key_kwargs = (
+            ("domain",),
+            ("intent",),
+            ("has_entity", "has_entities"),
+            ("targeted_only",),
+            ("default",),
+        )
         valid_kwargs = set()
         for keys in key_kwargs:
             valid_kwargs.update(keys)
         for kwarg in kwargs:
             if kwarg not in valid_kwargs:
-                raise TypeError(('DialogueStateRule() got an unexpected keyword argument'
-                                 ' \'{!s}\'').format(kwarg))
+                raise TypeError(
+                    (
+                        "DialogueStateRule() got an unexpected keyword argument"
+                        " '{!s}'"
+                    ).format(kwarg)
+                )
 
         resolved = {}
         for keys in key_kwargs:
             if len(keys) == 2:
                 single, plural = keys
                 if single in kwargs and plural in kwargs:
-                    msg = 'Only one of {!r} and {!r} can be specified for a dialogue state rule'
-                    raise ValueError(msg.format(single, plural, self.__class__.__name__))
+                    msg = "Only one of {!r} and {!r} can be specified for a dialogue state rule"
+                    raise ValueError(
+                        msg.format(single, plural, self.__class__.__name__)
+                    )
                 if single in kwargs:
                     resolved[plural] = {kwargs[single]}
                 if plural in kwargs:
@@ -116,26 +133,32 @@ class DialogueStateRule:
             elif keys[0] in kwargs:
                 resolved[keys[0]] = kwargs[keys[0]]
 
-        self.domain = resolved.get('domain', None)
-        self.intent = resolved.get('intent', None)
-        self.targeted_only = resolved.get('targeted_only', False)
-        self.default = resolved.get('default', False)
-        entities = resolved.get('has_entities', None)
+        self.domain = resolved.get("domain", None)
+        self.intent = resolved.get("intent", None)
+        self.targeted_only = resolved.get("targeted_only", False)
+        self.default = resolved.get("default", False)
+        entities = resolved.get("has_entities", None)
         self.entity_types = None
         if entities is not None:
             for entity in entities:
                 if not isinstance(entity, str):
-                    msg = 'Invalid entity specification for dialogue state rule: {!r}'
+                    msg = "Invalid entity specification for dialogue state rule: {!r}"
                     raise ValueError(msg.format(entities))
             self.entity_types = frozenset(entities)
 
         if self.targeted_only and any([self.domain, self.intent, self.entity_types]):
-            raise ValueError('For a dialogue state rule, if targeted_only is '
-                             'True, domain, intent, and has_entity must be omitted')
+            raise ValueError(
+                "For a dialogue state rule, if targeted_only is "
+                "True, domain, intent, and has_entity must be omitted"
+            )
 
-        if self.default and any([self.domain, self.intent, self.entity_types, self.targeted_only]):
-            raise ValueError('For a dialogue state rule, if default is True, '
-                             'domain, intent, has_entity, and targeted_only must be omitted')
+        if self.default and any(
+            [self.domain, self.intent, self.entity_types, self.targeted_only]
+        ):
+            raise ValueError(
+                "For a dialogue state rule, if default is True, "
+                "domain, intent, has_entity, and targeted_only must be omitted"
+            )
 
     def apply(self, request):
         """Applies the dialogue state rule to the given context.
@@ -165,7 +188,7 @@ class DialogueStateRule:
             # TODO cache entity types
             entity_types = set()
             for entity in request.entities:
-                entity_types.add(entity['type'])
+                entity_types.add(entity["type"])
 
             if len(self.entity_types & entity_types) < len(self.entity_types):
                 return False
@@ -208,7 +231,7 @@ class DialogueStateRule:
         raise NotImplementedError
 
     def __repr__(self):
-        return '<{} {!r}>'.format(self.__class__.__name__, self.dialogue_state)
+        return "<{} {!r}>".format(self.__class__.__name__, self.dialogue_state)
 
     @staticmethod
     def compare(this, that):
@@ -223,7 +246,9 @@ class DialogueStateRule:
                  0: this and that are equally complex
                  1: this is more complex than that
         """
-        if not (isinstance(this, DialogueStateRule) and isinstance(that, DialogueStateRule)):
+        if not (
+            isinstance(this, DialogueStateRule) and isinstance(that, DialogueStateRule)
+        ):
             raise NotImplementedError
 
         # https://docs.python.org/3.0/whatsnew/3.0.html#ordering-comparisons
@@ -231,7 +256,7 @@ class DialogueStateRule:
 
 
 class DialogueManager:
-    logger = mod_logger.getChild('DialogueManager')
+    logger = mod_logger.getChild("DialogueManager")
 
     def __init__(self, responder_class=None, async_mode=False):
         self.async_mode = async_mode
@@ -246,9 +271,10 @@ class DialogueManager:
         """A decorator that is used to register dialogue state rules."""
 
         def _decorator(func):
-            name = kwargs.pop('name', None)
+            name = kwargs.pop("name", None)
             self.add_dialogue_rule(name, func, **kwargs)
             return func
+
         return _decorator
 
     def middleware(self, *args):
@@ -275,8 +301,10 @@ class DialogueManager:
                 function.
         """
         if self.async_mode and not asyncio.iscoroutinefunction(middleware):
-            msg = ('Cannot use middleware {!r} in async mode. '
-                   'Middleware must be coroutine function.')
+            msg = (
+                "Cannot use middleware {!r} in async mode. "
+                "Middleware must be coroutine function."
+            )
             raise TypeError(msg.format(middleware.__name__))
 
         self.middlewares.append(middleware)
@@ -293,8 +321,10 @@ class DialogueManager:
             name = handler.__name__
 
         if self.async_mode and not asyncio.iscoroutinefunction(handler):
-            msg = ('Cannot use dialogue state handler {!r} in async mode. '
-                   'Handler must be coroutine function in async mode.')
+            msg = (
+                "Cannot use dialogue state handler {!r} in async mode. "
+                "Handler must be coroutine function in async mode."
+            )
             raise TypeError(msg.format(name))
 
         rule = DialogueStateRule(name, **kwargs)
@@ -303,13 +333,16 @@ class DialogueManager:
         if handler is not None:
             old_handler = self.handler_map.get(name)
             if old_handler is not None and old_handler != handler:
-                msg = 'Handler mapping is overwriting an existing dialogue state: %s' % name
+                msg = (
+                    "Handler mapping is overwriting an existing dialogue state: %s"
+                    % name
+                )
                 raise AssertionError(msg)
             self.handler_map[name] = handler
 
             if rule.default:
                 if self.default_rule:
-                    raise AssertionError('Only one default rule may be specified')
+                    raise AssertionError("Only one default rule may be specified")
                 self.default_rule = rule
 
     def apply_handler(self, request, responder, target_dialogue_state=None):
@@ -321,19 +354,75 @@ class DialogueManager:
             target_dialogue_state (str, optional): The target dialogue state.
 
         Returns:
-            (dict): A dict containing the dialogue state and directives.
+            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.
         """
         if self.async_mode:
             return self._apply_handler_async(
-                request, responder, target_dialogue_state=target_dialogue_state)
+                request, responder, target_dialogue_state=target_dialogue_state
+            )
+
+        return self._apply_handler_sync(
+            request, responder, target_dialogue_state=target_dialogue_state
+        )
+
+    def _apply_handler_sync(self, request, responder, target_dialogue_state=None):
+        """Applies the dialogue state handler for the most complex matching rule.
+
+         Args:
+            request (Request): The request object.
+            responder (DialogueResponder): The responder object.
+            target_dialogue_state (str, optional): The target dialogue state.
+
+        Returns:
+            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.
+        """
+        try:
+            return self._attempt_handler_sync(
+                request, responder, target_dialogue_state=target_dialogue_state
+            )
+        except DialogueStateException as e:
+            if e.target_dialogue_state != target_dialogue_state:
+                target_dialogue_state = e.target_dialogue_state
+            else:
+                self.logger.warning(
+                    "Ignoring target dialogue state '{}'".format(
+                        e.target_dialogue_state
+                    )
+                )
+                target_dialogue_state = None
+
+        if target_dialogue_state:
+            self.logger.warning(
+                "Ignoring target dialogue state '{}'".format(target_dialogue_state)
+            )
+        return self._attempt_handler_sync(request, responder)
+
+    def _attempt_handler_sync(self, request, responder, target_dialogue_state=None):
+        """Tries to apply the dialogue state handler for the most complex matching rule
+
+         Args:
+            request (Request): The request object.
+            responder (DialogueResponder): The responder object.
+            target_dialogue_state (str, optional): The target dialogue state.
+
+        Returns:
+            (DialogueResponder): A DialogueResponder containing the dialogue state and directives.
+        """
         dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder.dialogue_state = dialogue_state
-        handler(request, responder)
+        res = handler(request, responder)
+
+        # Add dialogue flow's sub-dialogue_state if provided
+        if res and "dialogue_state" in res:
+            dialogue_state = ".".join([dialogue_state, res["dialogue_state"]])
+        responder.dialogue_state = dialogue_state
         return responder
 
-    async def _apply_handler_async(self, request, responder, target_dialogue_state=None):
-        """Applies the dialogue state handler for the most complex matching rule
+    async def _apply_handler_async(
+        self, request, responder, target_dialogue_state=None
+    ):
+        """Applies the dialogue state handler for the most complex matching rule.
 
         Args:
             request (Request): The request object from the DM
@@ -341,13 +430,67 @@ class DialogueManager:
             target_dialogue_state (str, optional): The target dialogue state
 
         Returns:
-            dict: A dict containing the dialogue state and directives
+            DialogueResponder: A DialogueResponder containing the dialogue state and directives
+        """
+        try:
+            return await self._attempt_handler_async(
+                request, responder, target_dialogue_state=target_dialogue_state
+            )
+        except DialogueStateException as e:
+            if e.target_dialogue_state != target_dialogue_state:
+                target_dialogue_state = e.target_dialogue_state
+            else:
+                self.logger.warning(
+                    "Ignoring target dialogue state '{}'".format(
+                        e.target_dialogue_state
+                    )
+                )
+                target_dialogue_state = None
+
+        if target_dialogue_state:
+            self.logger.warning(
+                "Ignoring target dialogue state '{}'".format(target_dialogue_state)
+            )
+        return await self._attempt_handler_async(request, responder)
+
+    async def _attempt_handler_async(
+        self, request, responder, target_dialogue_state=None
+    ):
+        """Tries to apply the dialogue state handler for the most complex matching rule
+
+        Args:
+            request (Request): The request object from the DM
+            responder (DialogueResponder): The responder from the DM
+            target_dialogue_state (str, optional): The target dialogue state
+
+        Returns:
+            DialogueResponder: A DialogueResponder containing the dialogue state and directives
         """
         dialogue_state = self._get_dialogue_state(request, target_dialogue_state)
         handler = self._get_dialogue_handler(dialogue_state)
         responder.dialogue_state = dialogue_state
-        await handler(request, responder)
+        result_handler = await handler(request, responder)
+
+        # Add dialogue flow's sub-dialogue_state if provided
+        if result_handler and "dialogue_state" in result_handler:
+            dialogue_state = "{}.{}".format(
+                dialogue_state, result_handler["dialogue_state"]
+            )
+
+        responder.dialogue_state = dialogue_state
         return responder
+
+    @staticmethod
+    def reprocess(target_dialogue_state=None):
+        """Forces the dialogue manager to back out of the flow based on the initial target
+        dialogue state setting and reselect a handler, following a new target dialogue state
+
+        Args:
+            target_dialogue_state (str, optional): a dialogue_state name to push system into
+        """
+        raise DialogueStateException(
+            message="reprocess", target_dialogue_state=target_dialogue_state
+        )
 
     def _get_dialogue_state(self, request, target_dialogue_state=None):
         dialogue_state = None
@@ -361,14 +504,19 @@ class DialogueManager:
                     dialogue_state = rule.dialogue_state
                     break
         if dialogue_state is None:
-            msg = 'Failed to find dialogue state for {domain}.{intent}'.format(
-                domain=request.domain, intent=request.intent)
+            msg = "Failed to find dialogue state for {domain}.{intent}".format(
+                domain=request.domain, intent=request.intent
+            )
             self.logger.info(msg, request)
 
         return dialogue_state
 
     def _get_dialogue_handler(self, dialogue_state):
-        handler = self.handler_map[dialogue_state] if dialogue_state else self._default_handler
+        handler = (
+            self.handler_map[dialogue_state]
+            if dialogue_state
+            else self._default_handler
+        )
 
         for m in reversed(self.middlewares):
             handler = partial(m, handler=handler)
@@ -394,7 +542,8 @@ class DialogueFlow(DialogueManager):
         app (Application): The application that initializes this flow.
         exit_flow_states (list):  The list of exit states.
     """
-    logger = mod_logger.getChild('DialogueFlow')
+
+    logger = mod_logger.getChild("DialogueFlow")
     """Class logger."""
 
     all_flows = {}
@@ -417,9 +566,15 @@ class DialogueFlow(DialogueManager):
             responder.params.target_dialogue_state = self.flow_state
             return await entrance_handler(request, responder)
 
-        self._entrance_handler = _async_set_target_state if self.async_mode else _set_target_state
+        self._entrance_handler = (
+            _async_set_target_state if self.async_mode else _set_target_state
+        )
         app.add_dialogue_rule(self.name, self._entrance_handler, **kwargs)
-        handler = self.apply_handler_async if self.async_mode else self.apply_handler
+        handler = (
+            self._apply_flow_handler_async
+            if self.async_mode
+            else self._apply_flow_handler_sync
+        )
         app.add_dialogue_rule(self.flow_state, handler, targeted_only=True)
 
     @property
@@ -430,7 +585,7 @@ class DialogueFlow(DialogueManager):
     @property
     def flow_state(self):
         """The state of the flow (<name>_flow)."""
-        return self._name + '_flow'
+        return self._name + "_flow"
 
     @property
     def dialogue_manager(self):
@@ -444,6 +599,7 @@ class DialogueFlow(DialogueManager):
 
     def use_middleware(self, *args):
         """Allows a middleware to be added to this flow."""
+
         def _decorator(func):
             self.add_middleware(func)
             return func
@@ -459,14 +615,12 @@ class DialogueFlow(DialogueManager):
             # Support syntax: @middleware()
             return _decorator
 
-        self._entrance_handler = func
-        return func
-
     def handle(self, **kwargs):
         """The dialogue flow handler."""
+
         def _decorator(func):
-            name = kwargs.pop('name', None)
-            exit_flow = kwargs.pop('exit_flow', False)
+            name = kwargs.pop("name", None)
+            exit_flow = kwargs.pop("exit_flow", False)
             if exit_flow:
                 func_name = name or func.__name__
                 self.exit_flow_states.append(func_name)
@@ -475,7 +629,7 @@ class DialogueFlow(DialogueManager):
 
         return _decorator
 
-    def apply_handler(self, request, responder=None):  # pylint: disable=arguments-differ
+    def _apply_flow_handler_sync(self, request, responder):
         """Applies the dialogue state handler for the dialogue flow and set the target dialogue
         state to the flow state.
 
@@ -486,17 +640,16 @@ class DialogueFlow(DialogueManager):
         Returns:
             (dict): A dict containing the dialogue state and directives.
         """
-        if self.async_mode:
-            return self.apply_handler_async(request, responder)
         dialogue_state = self._get_dialogue_state(request)
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
             responder.params.target_dialogue_state = self.flow_state
 
         handler(request, responder)
-        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
 
-    async def apply_handler_async(self, request, responder):
+        return {"dialogue_state": dialogue_state, "directives": responder.directives}
+
+    async def _apply_flow_handler_async(self, request, responder):
         """Applies the dialogue state handler for the dialogue flow and sets the target dialogue
        state to the flow state asynchronously.
 
@@ -511,18 +664,24 @@ class DialogueFlow(DialogueManager):
         handler = self._get_dialogue_handler(dialogue_state)
         if dialogue_state not in self.exit_flow_states:
             responder.params.target_dialogue_state = self.flow_state
+
         res = handler(request, responder)
         if asyncio.iscoroutine(res):
             await res
-        return {'dialogue_state': dialogue_state, 'directives': responder.directives}
+
+        return {"dialogue_state": dialogue_state, "directives": responder.directives}
 
     def _get_dialogue_handler(self, dialogue_state):
-        handler = self.handler_map[dialogue_state] if dialogue_state else self._default_handler
+        handler = (
+            self.handler_map[dialogue_state]
+            if dialogue_state
+            else self._default_handler
+        )
 
         try:
             middlewares = self.middlewares
         except AttributeError:
-            middlewares = getattr(self, 'middleware', tuple())
+            middlewares = getattr(self, "middleware", tuple())
 
         for m in reversed(middlewares):
             handler = partial(m, handler=handler)
@@ -534,7 +693,8 @@ class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
     system-generated natural language responses.
     """
-    _logger = mod_logger.getChild('DialogueResponder')
+
+    _logger = mod_logger.getChild("DialogueResponder")
 
     DirectiveNames = DirectiveNames
     """The list of directive names."""
@@ -542,8 +702,16 @@ class DialogueResponder:
     DirectiveTypes = DirectiveTypes
     """The list of directive types."""
 
-    def __init__(self, frame=None, params=None, history=None, slots=None, request=None,
-                 dialogue_state=None, directives=None):
+    def __init__(
+        self,
+        frame=None,
+        params=None,
+        history=None,
+        slots=None,
+        request=None,
+        dialogue_state=None,
+        directives=None,
+    ):
         """
         Initializes a dialogue responder.
 
@@ -571,7 +739,7 @@ class DialogueResponder:
             text (str): The text of the reply.
         """
         text = self._process_template(text)
-        self.display(DirectiveNames.REPLY, payload={'text': text})
+        self.display(DirectiveNames.REPLY, payload={"text": text})
 
     def speak(self, text):
         """Adds a 'speak' directive.
@@ -580,7 +748,7 @@ class DialogueResponder:
             text (str): The text to speak aloud.
         """
         text = self._process_template(text)
-        self.act(DirectiveNames.SPEAK, payload={'text': text})
+        self.act(DirectiveNames.SPEAK, payload={"text": text})
 
     def list(self, items):
         """Adds a 'list' view directive.
@@ -635,9 +803,9 @@ class DialogueResponder:
             payload (dict, optional): The payload for the view.
         """
 
-        directive = {'name': name, 'type': dtype}
+        directive = {"name": name, "type": dtype}
         if payload:
-            directive['payload'] = payload
+            directive["payload"] = payload
 
         self.directives.append(directive)
 
@@ -647,7 +815,7 @@ class DialogueResponder:
         Args:
             directive (dict): A directive.
         """
-        self._logger.warning('respond() is deprecated. Instead use direct().')
+        self._logger.warning("respond() is deprecated. Instead use direct().")
         self.directives.append(directive)
 
     def prompt(self, text):
@@ -656,7 +824,9 @@ class DialogueResponder:
         Args:
             text (str): The text of the reply.
         """
-        self._logger.warning('prompt() is deprecated. Please use reply() and listen() instead')
+        self._logger.warning(
+            "prompt() is deprecated. Please use reply() and listen() instead"
+        )
         self.reply(text)
 
     def sleep(self, delay=0):
@@ -665,7 +835,7 @@ class DialogueResponder:
         Args:
             delay (int): The amount of milliseconds to wait before putting the client to sleep.
         """
-        self.act(DirectiveNames.SLEEP, payload={'delay': delay})
+        self.act(DirectiveNames.SLEEP, payload={"delay": delay})
 
     @staticmethod
     def _choose(items):
@@ -726,10 +896,17 @@ class Conversation:
             even when app is in async mode.
     """
 
-    _logger = mod_logger.getChild('Conversation')
+    _logger = mod_logger.getChild("Conversation")
 
-    def __init__(self, app=None, app_path=None, nlp=None, context=None, default_params=None,
-                 force_sync=False):
+    def __init__(
+        self,
+        app=None,
+        app_path=None,
+        nlp=None,
+        context=None,
+        default_params=None,
+        force_sync=False,
+    ):
         """
         Args:
             app (Application, optional): An initialized app object. Either app or app_path must
@@ -839,8 +1016,13 @@ class Conversation:
             for k, v in vars(params).items():
                 vars(internal_params)[k] = v
 
-        response = self._app_manager.parse(text, params=internal_params, context=self.context,
-                                           frame=self.frame, history=self.history)
+        response = self._app_manager.parse(
+            text,
+            params=internal_params,
+            context=self.context,
+            frame=self.frame,
+            history=self.history,
+        )
         self.history = response.history
         self.frame = response.frame
         self.params = response.params
@@ -875,40 +1057,49 @@ class Conversation:
             for k, v in vars(params).items():
                 vars(internal_params)[k] = v
 
-        response = await self._app_manager.parse(text, params=internal_params, context=self.context,
-                                                 frame=self.frame, history=self.history)
+        response = await self._app_manager.parse(
+            text,
+            params=internal_params,
+            context=self.context,
+            frame=self.frame,
+            history=self.history,
+        )
         self.history = response.history
         self.frame = response.frame
         self.params = response.params
         return response
 
     def _follow_directive(self, directive):
-        msg = ''
+        msg = ""
         try:
-            directive_name = directive['name']
+            directive_name = directive["name"]
             if directive_name in [DirectiveNames.REPLY, DirectiveNames.SPEAK]:
-                msg = directive['payload']['text']
+                msg = directive["payload"]["text"]
             elif directive_name == DirectiveNames.SUGGESTIONS:
-                suggestions = directive['payload']
+                suggestions = directive["payload"]
                 if not suggestions:
                     raise ValueError
-                msg = 'Suggestion{}:'.format('' if len(suggestions) == 1 else 's')
+                msg = "Suggestion{}:".format("" if len(suggestions) == 1 else "s")
                 texts = []
                 for idx, suggestion in enumerate(suggestions):
                     if idx > 0:
-                        msg += ', {!r}'
+                        msg += ", {!r}"
                     else:
-                        msg += ' {!r}'
+                        msg += " {!r}"
 
                     texts.append(self._generate_suggestion_text(suggestion))
                 msg = msg.format(*texts)
             elif directive_name in DirectiveNames.LIST:
-                msg = '\n'.join(
-                    [json.dumps(item, indent=4, sort_keys=True) for item in directive['payload']])
+                msg = "\n".join(
+                    [
+                        json.dumps(item, indent=4, sort_keys=True)
+                        for item in directive["payload"]
+                    ]
+                )
             elif directive_name == DirectiveNames.LISTEN:
-                msg = 'Listening...'
+                msg = "Listening..."
             elif directive_name == DirectiveNames.RESET:
-                msg = 'Resetting...'
+                msg = "Resetting..."
         except (KeyError, ValueError, AttributeError):
             msg = "Unsupported response: {!r}".format(directive)
 
@@ -917,12 +1108,12 @@ class Conversation:
     @staticmethod
     def _generate_suggestion_text(suggestion):
         pieces = []
-        if 'text' in suggestion:
-            pieces.append(suggestion['text'])
-        if suggestion['type'] != 'text':
-            pieces.append('({})'.format(suggestion['type']))
+        if "text" in suggestion:
+            pieces.append(suggestion["text"])
+        if suggestion["type"] != "text":
+            pieces.append("({})".format(suggestion["type"]))
 
-        return ' '.join(pieces)
+        return " ".join(pieces)
 
     def reset(self):
         """Reset the history, frame and params of the Conversation object."""

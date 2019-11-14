@@ -16,14 +16,11 @@ This module contains the domain classifier component of the MindMeld natural lan
 """
 import logging
 
-from ..markup import mark_down
-from ..models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE
-
-from .classifier import Classifier
 from ..constants import DEFAULT_TRAIN_SET_REGEX
-
+from ..markup import mark_down
+from ..models import CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE
 from ._config import get_classifier_config
-
+from .classifier import Classifier
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +31,7 @@ class DomainClassifier(Classifier):
     labels for the training data are the domain names associated with each query.
     """
 
-    CLF_TYPE = 'domain'
+    CLF_TYPE = "domain"
     """The classifier type."""
 
     def _get_model_config(self, **kwargs):
@@ -43,9 +40,11 @@ class DomainClassifier(Classifier):
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
-        kwargs['example_type'] = QUERY_EXAMPLE_TYPE
-        kwargs['label_type'] = CLASS_LABEL_TYPE
-        loaded_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path)
+        kwargs["example_type"] = QUERY_EXAMPLE_TYPE
+        kwargs["label_type"] = CLASS_LABEL_TYPE
+        loaded_config = get_classifier_config(
+            self.CLF_TYPE, self._resource_loader.app_path
+        )
         return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, *args, **kwargs):
@@ -64,7 +63,7 @@ class DomainClassifier(Classifier):
             queries (list of ProcessedQuery): The labeled queries to use as training data
 
         """
-        logger.info('Fitting domain classifier')
+        logger.info("Fitting domain classifier")
         super().fit(*args, **kwargs)
 
     def dump(self, *args, **kwargs):
@@ -73,7 +72,7 @@ class DomainClassifier(Classifier):
         Args:
             model_path (str): The location on disk where the model should be stored
         """
-        logger.info('Saving domain classifier')
+        logger.info("Saving domain classifier")
         super().dump(*args, **kwargs)
 
     def load(self, *args, **kwargs):
@@ -82,7 +81,7 @@ class DomainClassifier(Classifier):
         Args:
             model_path (str): The location on disk where the model is stored
         """
-        logger.info('Loading domain classifier')
+        logger.info("Loading domain classifier")
         super().load(*args, **kwargs)
 
     def inspect(self, query, domain=None, dynamic_resource=None):
@@ -98,9 +97,12 @@ class DomainClassifier(Classifier):
                 probability.
         """
         return self._model.inspect(
-            example=query, gold_label=domain, dynamic_resource=dynamic_resource)
+            example=query, gold_label=domain, dynamic_resource=dynamic_resource
+        )
 
-    def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
+    def _get_query_tree(
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
+    ):
         """Returns the set of queries to train on
 
         Args:
@@ -134,7 +136,9 @@ class DomainClassifier(Classifier):
             return [None, None]
         return list(zip(*[(q.query, q.domain) for q in queries]))
 
-    def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_and_labels_hash(
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+    ):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = []
         for domain in query_tree:

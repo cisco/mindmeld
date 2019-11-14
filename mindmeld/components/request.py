@@ -11,12 +11,103 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+
 import attr
 import immutables
+import pycountry
 from pytz import timezone
 from pytz.exceptions import UnknownTimeZoneError
 
 logger = logging.getLogger(__name__)
+
+
+def validate_language_code(param=None):
+    """Validates language code parameters
+    Args:
+        param (str, optional): The language code parameter
+
+    Returns:
+        str: A validated language code or None if unvalidated
+    """
+    if not param:
+        return None
+    if not isinstance(param, str):
+        logger.error("Invalid %r param: %s is not of type %s.", "language", param, str)
+        return None
+
+    # The pycountry APIs need the param to be in lowercase for processing
+    param = param.lower()
+
+    if len(param) != 2 and len(param) != 3:
+        logger.error(
+            "Invalid %r param: %s is not a valid ISO 639-1 or ISO 639-2 language code.",
+            "locale",
+            param,
+        )
+        return None
+
+    if len(param) == 2 and not pycountry.languages.get(alpha_2=param):
+        logger.error(
+            "Invalid %r param: %s is not a valid ISO 639-1 language code. "
+            "See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.",
+            "locale",
+            param,
+        )
+        return None
+
+    if len(param) == 3 and not pycountry.languages.get(alpha_3=param):
+        logger.error(
+            "Invalid %r param: %s is not a valid ISO 639-2 language code. "
+            "See https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes for valid codes.",
+            "locale",
+            param,
+        )
+        return None
+
+    return param
+
+
+def validate_locale_code(param=None):
+    """Validates the locale code parameters
+    Args:
+        param (str, optional): The locale code parameter
+
+    Returns:
+        str: A validated locale code or None if unvalidated
+    """
+    if not param:
+        return None
+    if not isinstance(param, str):
+        logger.error("Invalid %r param: %s is not of type %s.", "locale", param, str)
+        return None
+
+    if len(param.split("_")) != 2:
+        logger.error("Invalid %r param: Not a valid locale.", param)
+        return None
+
+    language_code = param.split("_")[0].lower()
+    if not validate_language_code(language_code):
+        logger.error(
+            "Invalid %r param: %s is not a valid ISO 639-1 language code. "
+            "See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes for valid codes.",
+            "locale",
+            language_code,
+        )
+        return None
+
+    # pycountry requires the country code to be upper-cased
+    country_code = param.split("_")[1].upper()
+    if not pycountry.countries.get(alpha_2=country_code):
+        logger.error(
+            "Invalid %r param: %s is not a valid ISO3166 alpha 2 country code. "
+            "See https://www.iso.org/obp/ui/#search for valid codes.",
+            "locale",
+            country_code,
+        )
+        return None
+
+    # return the validated locale
+    return language_code + "_" + country_code
 
 
 def _validate_time_zone(param=None):
@@ -31,12 +122,16 @@ def _validate_time_zone(param=None):
     if not param:
         return None
     if not isinstance(param, str):
-        logger.warning("Invalid %r param: %s is not of type %s.", 'time_zone', param, str)
+        logger.warning(
+            "Invalid %r param: %s is not of type %s.", "time_zone", param, str
+        )
         return None
     try:
         timezone(param)
     except UnknownTimeZoneError:
-        logger.warning("Invalid %r param: %s is not a valid time zone.", 'time_zone', param)
+        logger.warning(
+            "Invalid %r param: %s is not a valid time zone.", "time_zone", param
+        )
         return None
     return param
 
@@ -44,18 +139,23 @@ def _validate_time_zone(param=None):
 def _validate_generic(name, ptype):
     def validator(param):
         if not isinstance(param, ptype):
-            logger.warning("Invalid %r param: %s is not of type %s.", name, param, ptype)
+            logger.warning(
+                "Invalid %r param: %s is not of type %s.", name, param, ptype
+            )
             param = None
         return param
+
     return validator
 
 
 PARAM_VALIDATORS = {
-    'allowed_intents': _validate_generic('allowed_intents', tuple),
-    'target_dialogue_state': _validate_generic('target_dialogue_state', str),
-    'time_zone': _validate_time_zone,
-    'timestamp': _validate_generic('timestamp', int),
-    'dynamic_resource': _validate_generic('dynamic_resource', immutables.Map)
+    "allowed_intents": _validate_generic("allowed_intents", tuple),
+    "target_dialogue_state": _validate_generic("target_dialogue_state", str),
+    "time_zone": _validate_time_zone,
+    "language": validate_language_code,
+    "locale": validate_locale_code,
+    "timestamp": _validate_generic("timestamp", int),
+    "dynamic_resource": _validate_generic("dynamic_resource", immutables.Map),
 }
 
 
@@ -72,13 +172,20 @@ class Params:
         time_zone (str):  The name of an IANA time zone, such as 'America/Los_Angeles', or
             'Asia/Kolkata'.
         timestamp (long): A unix time stamp for the request accurate to the nearest second.
+        locale (str, optional): The locale representing the ISO 639-1/2 language code and ISO3166
+            alpha 2 country code separated by an underscore character.
+        language (str, optional): The language code representing ISO 639-1/2
+            language codes.
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
     """
+
     allowed_intents = attr.ib(default=attr.Factory(tuple))
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
+    language = attr.ib(default=None)
+    locale = attr.ib(default=None)
     dynamic_resource = attr.ib(default=attr.Factory(dict))
 
     def validate_param(self, name):
@@ -110,13 +217,16 @@ class Params:
         Returns:
             dict: single item dictionary with the parameter value if valid and None if not.
         """
-        target_dialogue_state = self.validate_param('target_dialogue_state')
+        target_dialogue_state = self.validate_param("target_dialogue_state")
         if target_dialogue_state and target_dialogue_state not in handler_map:
-            logger.error("Target dialogue state %s does not match any dialogue state names "
-                         "in for the application. Not applying the target dialogue state "
-                         "this turn.", target_dialogue_state)
-            return {'target_dialogue_state': None}
-        return {'target_dialogue_state': target_dialogue_state}
+            logger.error(
+                "Target dialogue state %s does not match any dialogue state names "
+                "in for the application. Not applying the target dialogue state "
+                "this turn.",
+                target_dialogue_state,
+            )
+            return {"target_dialogue_state": None}
+        return {"target_dialogue_state": target_dialogue_state}
 
     def nlp_params(self):
         """
@@ -125,8 +235,16 @@ class Params:
         Returns:
             dict: Mapping from parameter name to bool depending on validation.
         """
-        return {param: self.validate_param(param)
-                for param in ('time_zone', 'timestamp', 'dynamic_resource')}
+        return {
+            param: self.validate_param(param)
+            for param in (
+                "time_zone",
+                "timestamp",
+                "dynamic_resource",
+                "language",
+                "locale",
+            )
+        }
 
 
 @attr.s(frozen=True, kw_only=True)
@@ -141,20 +259,24 @@ class FrozenParams(Params):
             the next turn.
         time_zone (str):  The name of an IANA time zone, such as 'America/Los_Angeles', or
             'Asia/Kolkata'.
+        language (str): The language code representing ISO 639-1/2 language codes
+        locale (str, optional): The locale representing the ISO 639-1/2 language code and
+            ISO3166 alpha 2 country code separated by an underscore character.
         timestamp (long): A unix time stamp for the request accurate to the nearest second.
         dynamic_resource (dict): A dictionary containing data used to influence the language
             classifiers by adding resource data for the given turn.
     """
-    allowed_intents = attr.ib(default=attr.Factory(tuple),
-                              converter=tuple)
+
+    allowed_intents = attr.ib(default=attr.Factory(tuple), converter=tuple)
     target_dialogue_state = attr.ib(default=None)
     time_zone = attr.ib(default=None)
     timestamp = attr.ib(default=0)
-    dynamic_resource = attr.ib(default=immutables.Map(),
-                               converter=immutables.Map)
+    language = attr.ib(default=None)
+    locale = attr.ib(default=None)
+    dynamic_resource = attr.ib(default=immutables.Map(), converter=immutables.Map)
 
 
-@attr.s(frozen=True, kw_only=True)
+@attr.s(frozen=True, kw_only=True)  # pylint: disable=too-many-instance-attributes
 class Request:
     """
     The Request is an object passed in through the Dialogue Manager and contains all the
@@ -180,23 +302,16 @@ class Request:
         nbest_aligned_entities (tuple): List of lists of aligned entities for each of the n-best
             transcripts.
     """
+
     domain = attr.ib(default=None)
     intent = attr.ib(default=None)
-    entities = attr.ib(default=attr.Factory(tuple),
-                       converter=tuple)
-    history = attr.ib(default=attr.Factory(tuple),
-                      converter=tuple)
+    entities = attr.ib(default=attr.Factory(tuple), converter=tuple)
+    history = attr.ib(default=attr.Factory(tuple), converter=tuple)
     text = attr.ib(default=None)
-    frame = attr.ib(default=immutables.Map(),
-                    converter=immutables.Map)
+    frame = attr.ib(default=immutables.Map(), converter=immutables.Map)
     params = attr.ib(default=FrozenParams())
-    context = attr.ib(default=immutables.Map(),
-                      converter=immutables.Map)
-    confidences = attr.ib(default=immutables.Map(),
-                          converter=immutables.Map)
-    nbest_transcripts_text = attr.ib(default=attr.Factory(tuple),
-                                     converter=tuple)
-    nbest_transcripts_entities = attr.ib(default=attr.Factory(tuple),
-                                         converter=tuple)
-    nbest_aligned_entities = attr.ib(default=attr.Factory(tuple),
-                                     converter=tuple)
+    context = attr.ib(default=immutables.Map(), converter=immutables.Map)
+    confidences = attr.ib(default=immutables.Map(), converter=immutables.Map)
+    nbest_transcripts_text = attr.ib(default=attr.Factory(tuple), converter=tuple)
+    nbest_transcripts_entities = attr.ib(default=attr.Factory(tuple), converter=tuple)
+    nbest_aligned_entities = attr.ib(default=attr.Factory(tuple), converter=tuple)

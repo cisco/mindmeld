@@ -25,14 +25,19 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import LabelEncoder as SKLabelEncoder, MaxAbsScaler, StandardScaler
+from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
+from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-from .helpers import (QUERY_FREQ_RSC, WORD_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
-                      CHAR_NGRAM_FREQ_RSC, register_model)
+from .helpers import (
+    CHAR_NGRAM_FREQ_RSC,
+    QUERY_FREQ_RSC,
+    WORD_FREQ_RSC,
+    WORD_NGRAM_FREQ_RSC,
+    register_model,
+)
 from .model import EvaluatedExample, Model, StandardModelEvaluation
-from ..tokenizer import Tokenizer
 
 _NEG_INF = -1e10
 
@@ -71,21 +76,29 @@ class TextModel(Model):
         underscores. This overrides that behavior.
         """
         attributes = self.__dict__.copy()
-        attributes['_resources'] = {rname: self._resources.get(rname, {})
-                                    for rname in [WORD_FREQ_RSC, QUERY_FREQ_RSC,
-                                                  WORD_NGRAM_FREQ_RSC, CHAR_NGRAM_FREQ_RSC]}
+        attributes["_resources"] = {
+            rname: self._resources.get(rname, {})
+            for rname in [
+                WORD_FREQ_RSC,
+                QUERY_FREQ_RSC,
+                WORD_NGRAM_FREQ_RSC,
+                CHAR_NGRAM_FREQ_RSC,
+            ]
+        }
         return attributes
 
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
-        classifier_type = self.config.model_settings['classifier_type']
+        classifier_type = self.config.model_settings["classifier_type"]
         try:
-            return {LOG_REG_TYPE: LogisticRegression,
-                    DECISION_TREE_TYPE: DecisionTreeClassifier,
-                    RANDOM_FOREST_TYPE: RandomForestClassifier,
-                    SVM_TYPE: SVC}[classifier_type]
+            return {
+                LOG_REG_TYPE: LogisticRegression,
+                DECISION_TREE_TYPE: DecisionTreeClassifier,
+                RANDOM_FOREST_TYPE: RandomForestClassifier,
+                SVM_TYPE: SVC,
+            }[classifier_type]
         except KeyError:
-            msg = '{}: Classifier type {!r} not recognized'
+            msg = "{}: Classifier type {!r} not recognized"
             raise ValueError(msg.format(self.__class__.__name__, classifier_type))
 
     def _get_cv_scorer(self, selection_settings):
@@ -93,7 +106,7 @@ class TextModel(Model):
         Returns the scorer to use based on the selection settings and classifier type,
         defaulting to accuracy.
         """
-        return selection_settings.get('scoring', ACCURACY_SCORING)
+        return selection_settings.get("scoring", ACCURACY_SCORING)
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -112,8 +125,12 @@ class TextModel(Model):
         # Create a model config object for the current effective config (after param selection)
         config = self._get_effective_config()
 
-        evaluations = [EvaluatedExample(e, labels[i], predictions[i][0], predictions[i][1],
-                       config.label_type) for i, e in enumerate(examples)]
+        evaluations = [
+            EvaluatedExample(
+                e, labels[i], predictions[i][0], predictions[i][1], config.label_type
+            )
+            for i, e in enumerate(examples)
+        ]
 
         model_eval = StandardModelEvaluation(config, evaluations)
         return model_eval
@@ -208,9 +225,9 @@ class TextModel(Model):
         return predictions
 
     def view_extracted_features(self, example, dynamic_resource=None):
-        tokenizer = Tokenizer()
         return self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
+            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+        )
 
     def _get_feature_weight(self, feat_name, label_class):
         """ Retrieves the feature weight from the coefficient matrix. If there are only two
@@ -227,7 +244,9 @@ class TextModel(Model):
         if len(self._class_encoder.classes_) == 2 and label_class >= 1:
             return 0
         else:
-            return self._clf.coef_[label_class, self._feat_vectorizer.vocabulary_[feat_name]]
+            return self._clf.coef_[
+                label_class, self._feat_vectorizer.vocabulary_[feat_name]
+            ]
 
     def inspect(self, example, gold_label=None, dynamic_resource=None):
         """This class takes an example and returns a DataFrame for every feature with feature
@@ -246,28 +265,36 @@ class TextModel(Model):
         """
         if not isinstance(self._clf, LogisticRegression):
             logging.warning(
-                'Currently inspection is only available for Logistic Regression Model')
+                "Currently inspection is only available for Logistic Regression Model"
+            )
             return pd.DataFrame()
 
         try:
             gold_class = self._class_encoder.transform([gold_label])
         except ValueError:
-            logger.warning('Unable to decode label `%s`', gold_label)
+            logger.warning("Unable to decode label `%s`", gold_label)
             gold_class = None
 
         pred_label = self.predict([example], dynamic_resource=dynamic_resource)[0]
         pred_class = self._class_encoder.transform([pred_label])
-        tokenizer = Tokenizer()
         features = self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=tokenizer)
+            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+        )
 
         logging.info("Predicted: %s.", pred_label)
 
         if gold_class is None:
-            columns = ['Feature', 'Value', 'Pred_W({0})'.format(pred_label), 'Pred_P']
+            columns = ["Feature", "Value", "Pred_W({0})".format(pred_label), "Pred_P"]
         else:
-            columns = ['Feature', 'Value', 'Pred_W({0})'.format(pred_label), 'Pred_P',
-                       'Gold_W({0})'.format(gold_label), 'Gold_P', 'Diff']
+            columns = [
+                "Feature",
+                "Value",
+                "Pred_W({0})".format(pred_label),
+                "Pred_P",
+                "Gold_W({0})".format(gold_label),
+                "Gold_P",
+                "Diff",
+            ]
             logging.info("Gold: %s.", gold_label)
 
         df = pd.DataFrame(data=None, columns=columns)
@@ -289,17 +316,37 @@ class TextModel(Model):
             if gold_class is None:
                 # pylint: disable=no-member
                 row = pd.DataFrame(
-                    data=[[feat_name, round(feat_value, 4), weight.round(4), product.round(4)]],
-                    columns=columns, index=[feat_name])
+                    data=[
+                        [
+                            feat_name,
+                            round(feat_value, 4),
+                            weight.round(4),
+                            product.round(4),
+                        ]
+                    ],
+                    columns=columns,
+                    index=[feat_name],
+                )
             else:
                 gold_w = self._get_feature_weight(feat_name, gold_class)
                 gold_p = feat_value * gold_w
                 diff = gold_p - product
                 # pylint: disable=no-member
                 row = pd.DataFrame(
-                    data=[[feat_name, round(feat_value, 4), weight.round(4), product.round(4),
-                           gold_w.round(4), gold_p.round(4), diff.round(4)]],
-                    columns=columns, index=[feat_name])
+                    data=[
+                        [
+                            feat_name,
+                            round(feat_value, 4),
+                            weight.round(4),
+                            product.round(4),
+                            gold_w.round(4),
+                            gold_p.round(4),
+                            diff.round(4),
+                        ]
+                    ],
+                    columns=columns,
+                    index=[feat_name],
+                )
             df = df.append(row)
         return df
 
@@ -333,9 +380,10 @@ class TextModel(Model):
         """
         groups = []
         feats = []
-        tokenizer = Tokenizer()
         for idx, example in enumerate(examples):
-            feats.append(self._extract_features(example, dynamic_resource, tokenizer))
+            feats.append(
+                self._extract_features(example, dynamic_resource, self.tokenizer)
+            )
             groups.append(idx)
 
         X, y = self._preprocess_data(feats, y, fit=fit)
@@ -370,26 +418,39 @@ class TextModel(Model):
         Returns:
             (dict): revised param_grid
         """
-        if 'class_weight' in param_grid:
-            raw_weights = param_grid['class_weight'] if is_grid else [param_grid['class_weight']]
-            weights = [{k if isinstance(k, int) else self._class_encoder.transform((k,))[0]: v
-                        for k, v in cw_dict.items()} for cw_dict in raw_weights]
-            param_grid['class_weight'] = weights if is_grid else weights[0]
-        elif 'class_bias' in param_grid:
+        if "class_weight" in param_grid:
+            raw_weights = (
+                param_grid["class_weight"] if is_grid else [param_grid["class_weight"]]
+            )
+            weights = [
+                {
+                    k
+                    if isinstance(k, int)
+                    else self._class_encoder.transform((k,))[0]: v
+                    for k, v in cw_dict.items()
+                }
+                for cw_dict in raw_weights
+            ]
+            param_grid["class_weight"] = weights if is_grid else weights[0]
+        elif "class_bias" in param_grid:
             # interpolate between class_bias=0 => class_weight=None
             # and class_bias=1 => class_weight='balanced'
             class_count = np.bincount(y)
             classes = self._class_encoder.classes_
             weights = []
-            raw_bias = param_grid['class_bias'] if is_grid else [param_grid['class_bias']]
+            raw_bias = (
+                param_grid["class_bias"] if is_grid else [param_grid["class_bias"]]
+            )
             for class_bias in raw_bias:
                 # these weights are same as sklearn's class_weight='balanced'
                 balanced_w = [(len(y) / len(classes) / c) for c in class_count]
                 balanced_tuples = list(zip(list(range(len(classes))), balanced_w))
 
-                weights.append({c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples})
-            param_grid['class_weight'] = weights if is_grid else weights[0]
-            del param_grid['class_bias']
+                weights.append(
+                    {c: (1 - class_bias) + class_bias * w for c, w in balanced_tuples}
+                )
+            param_grid["class_weight"] = weights if is_grid else weights[0]
+            del param_grid["class_bias"]
 
         return param_grid
 
@@ -404,9 +465,11 @@ class TextModel(Model):
         if self.config.model_settings is None:
             selector_type = None
         else:
-            selector_type = self.config.model_settings.get('feature_selector')
-        selector = {'l1': SelectFromModel(LogisticRegression(penalty='l1', C=1)),
-                    'f': SelectPercentile()}.get(selector_type)
+            selector_type = self.config.model_settings.get("feature_selector")
+        selector = {
+            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1)),
+            "f": SelectPercentile(),
+        }.get(selector_type)
         return selector
 
     def _get_feature_scaler(self):
@@ -414,10 +477,12 @@ class TextModel(Model):
         if self.config.model_settings is None:
             scale_type = None
         else:
-            scale_type = self.config.model_settings.get('feature_scaler')
-        scaler = {'std-dev': StandardScaler(with_mean=False),
-                  'max-abs': MaxAbsScaler()}.get(scale_type)
+            scale_type = self.config.model_settings.get("feature_scaler")
+        scaler = {
+            "std-dev": StandardScaler(with_mean=False),
+            "max-abs": MaxAbsScaler(),
+        }.get(scale_type)
         return scaler
 
 
-register_model('text', TextModel)
+register_model("text", TextModel)

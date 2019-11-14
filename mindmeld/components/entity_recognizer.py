@@ -18,12 +18,11 @@ import logging
 
 from sklearn.externals import joblib
 
-from ..core import Entity, Query
-from ..models import create_model, QUERY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE
 from ..constants import DEFAULT_TRAIN_SET_REGEX
-
-from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
+from ..core import Entity, Query
+from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model
 from ._config import get_classifier_config
+from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ class EntityRecognizer(Classifier):
         entity_types (set): A set containing the entity types which can be recognized
     """
 
-    CLF_TYPE = 'entity'
+    CLF_TYPE = "entity"
     """The classifier type."""
 
     def __init__(self, resource_loader, domain, intent):
@@ -62,10 +61,14 @@ class EntityRecognizer(Classifier):
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
-        kwargs['example_type'] = QUERY_EXAMPLE_TYPE
-        kwargs['label_type'] = ENTITIES_LABEL_TYPE
-        loaded_config = get_classifier_config(self.CLF_TYPE, self._resource_loader.app_path,
-                                              domain=self.domain, intent=self.intent)
+        kwargs["example_type"] = QUERY_EXAMPLE_TYPE
+        kwargs["label_type"] = ENTITIES_LABEL_TYPE
+        loaded_config = get_classifier_config(
+            self.CLF_TYPE,
+            self._resource_loader.app_path,
+            domain=self.domain,
+            intent=self.intent,
+        )
         return super()._get_model_config(loaded_config, **kwargs)
 
     def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
@@ -76,7 +79,9 @@ class EntityRecognizer(Classifier):
             label_set (list, optional): A label set to load. If not specified, use the default.
             incremental_timestamp (str, optional): The timestamp folder to cache models in.
         """
-        logger.info('Fitting entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
+        logger.info(
+            "Fitting entity recognizer: domain=%r, intent=%r", self.domain, self.intent
+        )
 
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
@@ -90,7 +95,7 @@ class EntityRecognizer(Classifier):
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
-            logger.info('No need to fit. Loading previous model.')
+            logger.info("No need to fit. Loading previous model.")
             self.load(cached_model)
             return
 
@@ -114,10 +119,10 @@ class EntityRecognizer(Classifier):
 
     def _data_dump_payload(self):
         return {
-            'entity_types': self.entity_types,
-            'w_ngram_freq': self._model.get_resource('w_ngram_freq'),
-            'c_ngram_freq': self._model.get_resource('c_ngram_freq'),
-            'model_config': self._model_config
+            "entity_types": self.entity_types,
+            "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
+            "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
+            "model_config": self._model_config,
         }
 
     def _create_and_dump_payload(self, path):
@@ -131,7 +136,9 @@ class EntityRecognizer(Classifier):
             incremental_model_path (str, Optional): The timestamped folder where the cached \
                 models are stored.
         """
-        logger.info('Saving entity classifier: domain=%r, intent=%r', self.domain, self.intent)
+        logger.info(
+            "Saving entity classifier: domain=%r, intent=%r", self.domain, self.intent
+        )
         super().dump(model_path, incremental_model_path)
 
     def load(self, model_path):
@@ -140,30 +147,34 @@ class EntityRecognizer(Classifier):
         Args:
             model_path (str): The location on disk where the model is stored.
         """
-        logger.info('Loading entity recognizer: domain=%r, intent=%r', self.domain, self.intent)
+        logger.info(
+            "Loading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
+        )
         try:
             er_data = joblib.load(model_path)
 
-            self.entity_types = er_data['entity_types']
-            self._model_config = er_data.get('model_config')
+            self.entity_types = er_data["entity_types"]
+            self._model_config = er_data.get("model_config")
 
             # The default is True since < MM 3.2.0 models are serializable by default
-            is_serializable = er_data.get('serializable', True)
+            is_serializable = er_data.get("serializable", True)
 
             if is_serializable:
                 # Load the model in directly from the dictionary since its serializable
-                self._model = er_data['model']
+                self._model = er_data["model"]
             else:
                 self._model = create_model(self._model_config)
                 self._model.load(model_path, er_data)
         except (OSError, IOError):
-            msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
+            msg = "Unable to load {}. Pickle file cannot be read from {!r}"
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
 
         if self._model is not None:
-            if not hasattr(self._model, 'mindmeld_version'):
-                msg = "Your trained models are incompatible with this version of MindMeld. " \
-                      "Please run a clean build to retrain models"
+            if not hasattr(self._model, "mindmeld_version"):
+                msg = (
+                    "Your trained models are incompatible with this version of MindMeld. "
+                    "Please run a clean build to retrain models"
+                )
                 raise ClassifierLoadError(msg)
 
             try:
@@ -173,13 +184,21 @@ class EntityRecognizer(Classifier):
                 self._model.config.resolve_config(self._get_model_config())
 
             gazetteers = self._resource_loader.get_gazetteers()
-            sys_types = set((t for t in self.entity_types if Entity.is_system_entity(t)))
+            tokenizer = self._resource_loader.get_tokenizer()
+            sys_types = set(
+                (t for t in self.entity_types if Entity.is_system_entity(t))
+            )
 
-            w_ngram_freq = er_data.get('w_ngram_freq')
-            c_ngram_freq = er_data.get('c_ngram_freq')
+            w_ngram_freq = er_data.get("w_ngram_freq")
+            c_ngram_freq = er_data.get("c_ngram_freq")
 
-            self._model.register_resources(gazetteers=gazetteers, sys_types=sys_types,
-                                           w_ngram_freq=w_ngram_freq, c_ngram_freq=c_ngram_freq)
+            self._model.register_resources(
+                gazetteers=gazetteers,
+                sys_types=sys_types,
+                w_ngram_freq=w_ngram_freq,
+                c_ngram_freq=c_ngram_freq,
+                tokenizer=tokenizer,
+            )
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = self._load_hash(model_path)
@@ -201,11 +220,20 @@ class EntityRecognizer(Classifier):
         Returns:
             (str): The predicted class label.
         """
-        prediction = super().predict(query, time_zone=time_zone, timestamp=timestamp,
-                                     dynamic_resource=dynamic_resource) or ()
+        prediction = (
+            super().predict(
+                query,
+                time_zone=time_zone,
+                timestamp=timestamp,
+                dynamic_resource=dynamic_resource,
+            )
+            or ()
+        )
         return tuple(sorted(prediction, key=lambda e: e.span.start))
 
-    def predict_proba(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
+    def predict_proba(
+        self, query, time_zone=None, timestamp=None, dynamic_resource=None
+    ):
         """Runs prediction on a given query and generates multiple entity tagging hypotheses with
         their associated probabilities using the trained entity recognition model
 
@@ -224,15 +252,18 @@ class EntityRecognizer(Classifier):
         del dynamic_resource
 
         if not self._model:
-            logger.error('You must fit or load the model before running predict_proba')
+            logger.error("You must fit or load the model before running predict_proba")
             return []
         if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
-                                                                     timestamp=timestamp)
+            query = self._resource_loader.query_factory.create_query(
+                query, time_zone=time_zone, timestamp=timestamp
+            )
         predict_proba_result = self._model.predict_proba([query])
         return predict_proba_result
 
-    def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
+    def _get_query_tree(
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
+    ):
         """Returns the set of queries to train on
 
         Args:
@@ -246,10 +277,13 @@ class EntityRecognizer(Classifier):
             List: list of queries
         """
         if queries:
-            return self._build_query_tree(queries, domain=self.domain, intent=self.intent, raw=raw)
+            return self._build_query_tree(
+                queries, domain=self.domain, intent=self.intent, raw=raw
+            )
 
-        return self._resource_loader.get_labeled_queries(domain=self.domain, intent=self.intent,
-                                                         label_set=label_set, raw=raw)
+        return self._resource_loader.get_labeled_queries(
+            domain=self.domain, intent=self.intent, label_set=label_set, raw=raw
+        )
 
     def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
         """Returns a set of queries and their labels based on the label set
@@ -266,10 +300,14 @@ class EntityRecognizer(Classifier):
         labels = [q.entities for q in queries]
         return raw_queries, labels
 
-    def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_and_labels_hash(
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+    ):
         query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
         queries = self._resource_loader.flatten_query_tree(query_tree)
-        hashable_queries = [self.domain + '###' + self.intent + '###entity###'] + sorted(queries)
+        hashable_queries = [
+            self.domain + "###" + self.intent + "###entity###"
+        ] + sorted(queries)
         return self._resource_loader.hash_list(hashable_queries)
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):

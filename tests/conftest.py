@@ -17,87 +17,92 @@ import pytest
 from mindmeld.components import NaturalLanguageProcessor, Preprocessor
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
+from mindmeld.stemmers import EnglishNLTKStemmer
 from mindmeld.tokenizer import Tokenizer
 
-warnings.filterwarnings("module", category=DeprecationWarning,
-                        module="sklearn.preprocessing.label")
+warnings.filterwarnings(
+    "module", category=DeprecationWarning, module="sklearn.preprocessing.label"
+)
 
 
-APP_NAME = 'kwik_e_mart'
+APP_NAME = "kwik_e_mart"
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
-FOOD_ORDERING_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'food_ordering')
-HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'home_assistant')
-AENEID_FILE = 'aeneid.txt'
+FOOD_ORDERING_APP_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "food_ordering"
+)
+HOME_ASSISTANT_APP_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "home_assistant"
+)
+AENEID_FILE = "aeneid.txt"
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
-HOME_ASSISTANT_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'home_assistant')
-RASA_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 'converter/rasa_sample_project')
-MINDMELD_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                     'converter/mindmeld_project')
-DIALOGFLOW_PROJECT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                       'converter/dialogflow_sample_project')
-MINDMELD_PROJECT_PATH2 = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                      'converter/mindmeld_project2')
+HOME_ASSISTANT_APP_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "home_assistant"
+)
+RASA_PROJECT_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "converter/rasa_sample_project"
+)
+MINDMELD_PROJECT_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "converter/mindmeld_project"
+)
+DIALOGFLOW_PROJECT_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "converter/dialogflow_sample_project"
+)
+MINDMELD_PROJECT_PATH2 = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "converter/mindmeld_project2"
+)
 
 
 @pytest.fixture
 def lstm_entity_config():
     return {
-        'model_type': 'tagger',
-        'label_type': 'entities',
-
-        'model_settings': {
-            'classifier_type': 'lstm',
-
-            'tag_scheme': 'IOB',
-            'feature_scaler': 'max-abs'
-
+        "model_type": "tagger",
+        "label_type": "entities",
+        "model_settings": {
+            "classifier_type": "lstm",
+            "tag_scheme": "IOB",
+            "feature_scaler": "max-abs",
         },
-        'params': {
-            'number_of_epochs': 1
-        },
-        'features': {
-            'in-gaz-span-seq': {},
-        }
+        "params": {"number_of_epochs": 1},
+        "features": {"in-gaz-span-seq": {},},
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def kwik_e_mart_app_path():
     return APP_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def food_ordering_app_path():
     return FOOD_ORDERING_APP_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def home_assistant_app_path():
     return HOME_ASSISTANT_APP_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def rasa_project_path():
     return RASA_PROJECT_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def mindmeld_project_path():
     return MINDMELD_PROJECT_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def mindmeld_project_path2():
     return MINDMELD_PROJECT_PATH2
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def dialogflow_project_path():
     return DIALOGFLOW_PROJECT_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def kwik_e_mart_nlp(kwik_e_mart_app_path):
     """Provides a built processor instance"""
     nlp = NaturalLanguageProcessor(app_path=kwik_e_mart_app_path)
@@ -106,7 +111,7 @@ def kwik_e_mart_nlp(kwik_e_mart_app_path):
     return nlp
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def food_ordering_nlp(food_ordering_app_path):
     """Provides a built processor instance"""
     nlp = NaturalLanguageProcessor(app_path=food_ordering_app_path)
@@ -124,16 +129,18 @@ def home_assistant_nlp(home_assistant_app_path):
     return nlp
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def kwik_e_mart_app(kwik_e_mart_nlp):
     from .kwik_e_mart import app
+
     app.lazy_init(kwik_e_mart_nlp)
     return app
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def async_kwik_e_mart_app(kwik_e_mart_nlp):
     from .kwik_e_mart import app_async
+
     app = app_async.app
     app.lazy_init(kwik_e_mart_nlp)
     loop = asyncio.get_event_loop()
@@ -143,9 +150,10 @@ def async_kwik_e_mart_app(kwik_e_mart_nlp):
 
 class GhostPreprocessor(Preprocessor):
     """A simple preprocessor that removes all instances of the word `ghost`"""
+
     def process(self, text):
-        while 'ghost' in text:
-            text = text.replace('ghost', '')
+        while "ghost" in text:
+            text = text.replace("ghost", "")
         return text
 
     def get_char_index_map(self, raw_text, processed_text):
@@ -165,9 +173,15 @@ def preprocessor():
 
 
 @pytest.fixture
-def query_factory(tokenizer, preprocessor):
+def stemmer():
+    """The english stemmer"""
+    return EnglishNLTKStemmer()
+
+
+@pytest.fixture
+def query_factory(tokenizer, preprocessor, stemmer):
     """For creating queries"""
-    return QueryFactory(tokenizer=tokenizer, preprocessor=preprocessor)
+    return QueryFactory(tokenizer=tokenizer, preprocessor=preprocessor, stemmer=stemmer)
 
 
 @pytest.fixture
@@ -183,7 +197,7 @@ def aeneid_path():
 
 @pytest.fixture
 def aeneid_content(aeneid_path):
-    with codecs.open(aeneid_path, mode='r', encoding='utf-8') as f:
+    with codecs.open(aeneid_path, mode="r", encoding="utf-8") as f:
         return f.read()
 
 
@@ -194,4 +208,4 @@ class FakeApp:
 
 @pytest.fixture
 def fake_app():
-    return FakeApp('123')
+    return FakeApp("123")

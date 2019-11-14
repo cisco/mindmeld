@@ -15,6 +15,7 @@
 This module contains the CRF entity recognizer.
 """
 import logging
+
 import numpy as np
 from sklearn_crfsuite import CRF
 
@@ -108,8 +109,9 @@ class ConditionalRandomFields(Tagger):
         Returns:
             list[dict]: Features.
         """
-        return extract_sequence_features(example, config.example_type,
-                                         config.features, resources)
+        return extract_sequence_features(
+            example, config.example_type, config.features, resources
+        )
 
     def _preprocess_data(self, X, fit=False):
         """Converts data into formats of CRF suite.
@@ -138,6 +140,7 @@ class ConditionalRandomFields(Tagger):
     def setup_model(self, config):
         self._feat_binner = FeatureBinner()
 
+
 # Feature extraction for CRF
 
 
@@ -160,6 +163,7 @@ class FeatureMapper:
         _num_std (int): number of standard deviations to generate the bins
         _size_std (float): size of each bin in standard deviation
     """
+
     def __init__(self, num_std=2, size_std=0.5):
         self._num_std = num_std
         self._size_std = size_std
@@ -206,6 +210,7 @@ class FeatureBinner:
     """
     Class to convert features with numerical values to categorical values.
     """
+
     def __init__(self):
         self.features = {}
 

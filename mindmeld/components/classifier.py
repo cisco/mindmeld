@@ -14,19 +14,18 @@
 """
 This module contains the base class for all the machine-learned classifiers in MindMeld.
 """
-from abc import ABC, abstractmethod
 import json
 import logging
 import os
+from abc import ABC, abstractmethod
 
 from sklearn.externals import joblib
 
 from .. import markup
-from ..exceptions import ClassifierLoadError
+from ..constants import DEFAULT_TEST_SET_REGEX, DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
-from ..constants import DEFAULT_TRAIN_SET_REGEX, DEFAULT_TEST_SET_REGEX
-
-from ..models import create_model, ModelConfig
+from ..exceptions import ClassifierLoadError
+from ..models import ModelConfig, create_model
 
 logger = logging.getLogger(__name__)
 
@@ -54,16 +53,32 @@ class ClassifierConfig:
                 extract features.
     """
 
-    __slots__ = ['model_type', 'features', 'model_settings', 'params', 'param_selection']
+    __slots__ = [
+        "model_type",
+        "features",
+        "model_settings",
+        "params",
+        "param_selection",
+    ]
 
-    def __init__(self, model_type=None, features=None, model_settings=None, params=None,
-                 param_selection=None):
+    def __init__(
+        self,
+        model_type=None,
+        features=None,
+        model_settings=None,
+        params=None,
+        param_selection=None,
+    ):
         """Initializes a classifier configuration"""
-        for arg, val in {'model_type': model_type, 'features': features}.items():
+        for arg, val in {"model_type": model_type, "features": features}.items():
             if val is None:
-                raise TypeError('__init__() missing required argument {!r}'.format(arg))
-        if params is None and (param_selection is None or param_selection.get('grid') is None):
-            raise ValueError("__init__() One of 'params' and 'param_selection' is required")
+                raise TypeError("__init__() missing required argument {!r}".format(arg))
+        if params is None and (
+            param_selection is None or param_selection.get("grid") is None
+        ):
+            raise ValueError(
+                "__init__() One of 'params' and 'param_selection' is required"
+            )
         self.model_type = model_type
         self.features = features
         self.model_settings = model_settings
@@ -82,16 +97,18 @@ class ClassifierConfig:
         return result
 
     def __repr__(self):
-        args_str = ', '.join("{}={!r}".format(key, getattr(self, key)) for key in self.__slots__)
+        args_str = ", ".join(
+            "{}={!r}".format(key, getattr(self, key)) for key in self.__slots__
+        )
         return "{}({})".format(self.__class__.__name__, args_str)
 
     @classmethod
     def from_model_config(cls, model_config):
         config = model_config.to_dict()
-        config.pop('example_type')
-        config.pop('label_type')
-        config.pop('train_label_set')
-        config.pop('test_label_set')
+        config.pop("example_type")
+        config.pop("label_type")
+        config.pop("train_label_set")
+        config.pop("test_label_set")
         return cls(**config)
 
     def to_json(self):
@@ -131,7 +148,7 @@ class Classifier(ABC):
         self.ready = False
         self.dirty = False
         self.config = None
-        self.hash = ''
+        self.hash = ""
 
     def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
         """Trains a statistical model for classification using the provided training examples and
@@ -203,16 +220,19 @@ class Classifier(ABC):
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
-            logger.info('No need to fit. Loading previous model.')
+            logger.info("No need to fit. Loading previous model.")
             self.load(cached_model)
             return
 
         queries, classes = self._get_queries_and_labels(queries, label_set)
 
         if not queries:
-            logger.warning('Could not fit model since no relevant examples were found. '
-                           'Make sure the labeled queries for training are placed in "%s" '
-                           'files in your MindMeld project.', label_set)
+            logger.warning(
+                "Could not fit model since no relevant examples were found. "
+                'Make sure the labeled queries for training are placed in "%s" '
+                "files in your MindMeld project.",
+                label_set,
+            )
             return
 
         if len(set(classes)) <= 1:
@@ -244,14 +264,17 @@ class Classifier(ABC):
             str: The predicted class label
         """
         if not self._model:
-            logger.error('You must fit or load the model before running predict')
+            logger.error("You must fit or load the model before running predict")
             return None
         if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
-                                                                     timestamp=timestamp)
+            query = self._resource_loader.query_factory.create_query(
+                query, time_zone=time_zone, timestamp=timestamp
+            )
         return self._model.predict([query], dynamic_resource=dynamic_resource)[0]
 
-    def predict_proba(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
+    def predict_proba(
+        self, query, time_zone=None, timestamp=None, dynamic_resource=None
+    ):
         """Runs prediction on a given query and generates multiple hypotheses with their
         associated probabilities using the trained classification model
 
@@ -268,13 +291,16 @@ class Classifier(ABC):
                 their probabilities
         """
         if not self._model:
-            logger.error('You must fit or load the model before running predict_proba')
+            logger.error("You must fit or load the model before running predict_proba")
             return []
         if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query, time_zone=time_zone,
-                                                                     timestamp=timestamp)
+            query = self._resource_loader.query_factory.create_query(
+                query, time_zone=time_zone, timestamp=timestamp
+            )
 
-        predict_proba_result = self._model.predict_proba([query], dynamic_resource=dynamic_resource)
+        predict_proba_result = self._model.predict_proba(
+            [query], dynamic_resource=dynamic_resource
+        )
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
@@ -296,15 +322,18 @@ class Classifier(ABC):
             label_set = label_set if label_set else DEFAULT_TEST_SET_REGEX
 
         if not self._model:
-            logger.error('You must fit or load the model before running evaluate.')
+            logger.error("You must fit or load the model before running evaluate.")
             return None
 
         queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
 
         if not queries:
-            logger.info('Could not evaluate model since no relevant examples were found. Make sure '
-                        'the labeled queries for evaluation are placed in "%s" files '
-                        'in your MindMeld project.', label_set)
+            logger.info(
+                "Could not evaluate model since no relevant examples were found. Make sure "
+                'the labeled queries for evaluation are placed in "%s" files '
+                "in your MindMeld project.",
+                label_set,
+            )
             return None
 
         evaluation = self._model.evaluate(queries, labels)
@@ -313,7 +342,9 @@ class Classifier(ABC):
     def inspect(self, query, gold_label=None, dynamic_resource=None):
         raise NotImplementedError
 
-    def view_extracted_features(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
+    def view_extracted_features(
+        self, query, time_zone=None, timestamp=None, dynamic_resource=None
+    ):
         """Extracts features for the given input based on the model config.
 
         Args:
@@ -328,10 +359,12 @@ class Classifier(ABC):
             dict: The extracted features from the given input
         """
         if not self._model:
-            logger.error('You must fit or load the model to initialize resources')
+            logger.error("You must fit or load the model to initialize resources")
             return None
         if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(query, time_zone, timestamp)
+            query = self._resource_loader.query_factory.create_query(
+                query, time_zone=time_zone, timestamp=timestamp
+            )
         return self._model.view_extracted_features(query, dynamic_resource)
 
     @staticmethod
@@ -349,14 +382,14 @@ class Classifier(ABC):
         except (TypeError, ValueError):
             # Use application specified or default config, customizing with provided kwargs
             if not loaded_config:
-                logger.warning('loaded_config is not passed in')
+                logger.warning("loaded_config is not passed in")
             model_config = loaded_config or {}
             model_config.update(kwargs)
 
             # If a parameter selection grid was passed in at runtime, override params set in the
             # application specified or default config
-            if kwargs.get('param_selection') and not kwargs.get('params'):
-                model_config.pop('params', None)
+            if kwargs.get("param_selection") and not kwargs.get("params"):
+                model_config.pop("params", None)
         return ModelConfig(**model_config)
 
     def _data_dump_payload(self):
@@ -384,8 +417,8 @@ class Classifier(ABC):
 
             self._create_and_dump_payload(path)
 
-            hash_path = path + '.hash'
-            with open(hash_path, 'w') as hash_file:
+            hash_path = path + ".hash"
+            with open(hash_path, "w") as hash_file:
                 hash_file.write(self.hash)
 
             if path == model_path:
@@ -400,12 +433,14 @@ class Classifier(ABC):
         try:
             self._model = joblib.load(model_path)
         except (OSError, IOError):
-            msg = 'Unable to load {}. Pickle at {!r} cannot be read.'
+            msg = "Unable to load {}. Pickle at {!r} cannot be read."
             raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
         if self._model is not None:
-            if not hasattr(self._model, 'mindmeld_version'):
-                msg = "Your trained models are incompatible with this version of MindMeld. " \
-                      "Please run a clean build to retrain models"
+            if not hasattr(self._model, "mindmeld_version"):
+                msg = (
+                    "Your trained models are incompatible with this version of MindMeld. "
+                    "Please run a clean build to retrain models"
+                )
                 raise ClassifierLoadError(msg)
 
             try:
@@ -424,10 +459,10 @@ class Classifier(ABC):
 
     @staticmethod
     def _load_hash(model_path):
-        hash_path = model_path + '.hash'
+        hash_path = model_path + ".hash"
         if not os.path.isfile(hash_path):
-            return ''
-        with open(hash_path, 'r') as hash_file:
+            return ""
+        with open(hash_path, "r") as hash_file:
             model_hash = hash_file.read()
         return model_hash
 
@@ -466,7 +501,9 @@ class Classifier(ABC):
         return query_tree
 
     @abstractmethod
-    def _get_query_tree(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False):
+    def _get_query_tree(
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
+    ):
         """Returns the set of queries to train on
 
         Args:
@@ -479,7 +516,7 @@ class Classifier(ABC):
         Returns:
             List: list of queries
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        raise NotImplementedError("Subclasses must implement this method")
 
     @abstractmethod
     def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
@@ -491,10 +528,12 @@ class Classifier(ABC):
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        raise NotImplementedError("Subclasses must implement this method")
 
     @abstractmethod
-    def _get_queries_and_labels_hash(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_queries_and_labels_hash(
+        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+    ):
         """Returns a hashed string representing the labeled queries
 
         Args:
@@ -503,9 +542,11 @@ class Classifier(ABC):
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
         """
-        raise NotImplementedError('Subclasses must implement this method')
+        raise NotImplementedError("Subclasses must implement this method")
 
-    def _get_model_hash(self, model_config, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_model_hash(
+        self, model_config, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
+    ):
         """Returns a hash representing the inputs into the model
 
         Args:
@@ -520,7 +561,9 @@ class Classifier(ABC):
         """
 
         # Hash queries
-        queries_hash = self._get_queries_and_labels_hash(queries=queries, label_set=label_set)
+        queries_hash = self._get_queries_and_labels_hash(
+            queries=queries, label_set=label_set
+        )
 
         # Hash config
         config_hash = self._resource_loader.hash_string(model_config.to_json())
@@ -531,12 +574,8 @@ class Classifier(ABC):
             rsc_strings.append(self._resource_loader.hash_feature_resource(resource))
         rsc_hash = self._resource_loader.hash_list(rsc_strings)
 
-        return self._resource_loader.hash_list([
-            queries_hash,
-            config_hash,
-            rsc_hash
-        ])
+        return self._resource_loader.hash_list([queries_hash, config_hash, rsc_hash])
 
     def __repr__(self):
-        msg = '<{} ready: {!r}, dirty: {!r}>'
+        msg = "<{} ready: {!r}, dirty: {!r}>"
         return msg.format(self.__class__.__name__, self.ready, self.dirty)

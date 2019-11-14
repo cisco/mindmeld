@@ -21,6 +21,7 @@ class Preprocessor(ABC):
     """
     Base class for Preprocessor object
     """
+
     @abstractmethod
     def process(self, text):
         """

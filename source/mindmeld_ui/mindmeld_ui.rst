@@ -26,7 +26,7 @@ You can also use yarn:
     yarn install
 
 2. Run the web app
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 To run the web app simply do:
 
