@@ -15,6 +15,8 @@
 import logging
 import os
 
+import attr
+
 from elasticsearch5 import ConnectionError as EsConnectionError
 from elasticsearch5 import (
     Elasticsearch,
@@ -54,6 +56,33 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
         raise KnowledgeBaseError
     except ImproperlyConfigured:
         raise KnowledgeBaseError
+
+
+@attr.s
+class EsConfig:
+    es_host = attr.ib(default=None)
+    es_username = attr.ib(default=None)
+    es_password = attr.ib(default=None)
+    _es_client = attr.ib(default=None)
+    pid = attr.ib(default=None)
+
+    @property
+    def es_client(self):
+        # Lazily connect to Elasticsearch.  Make sure each subprocess gets its own connection
+        if self._es_client is None or self.pid != os.getpid():
+            self._es_client = self.create_es_client()
+            self.pid = os.getpid()
+        return self._es_client
+
+    @es_client.setter
+    def es_client(self, value):
+        self._es_client = value[0]
+        self.pid = value[1]
+
+    def create_es_client(self):
+        return create_es_client(
+            es_host=self.es_host, es_user=self.es_username, es_pass=self.es_password
+        )
 
 
 def does_index_exist(

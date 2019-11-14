@@ -34,7 +34,7 @@ from ._config import (
 from ._elasticsearch_helpers import (
     INDEX_TYPE_KB,
     INDEX_TYPE_SYNONYM,
-    create_es_client,
+    EsConfig,
     delete_index,
     does_index_exist,
     get_field_names,
@@ -55,8 +55,14 @@ class EntityResolver:
     """The prefix of the ES index."""
 
     def __init__(
-        self, app_path, resource_loader, entity_type, es_host=None, es_username=None, es_password=None,
-        es_client=None
+        self,
+        app_path,
+        resource_loader,
+        entity_type,
+        es_host=None,
+        es_username=None,
+        es_password=None,
+        es_client=None,
     ):
         """Initializes an entity resolver
 
@@ -78,25 +84,31 @@ class EntityResolver:
         self._exact_match_mapping = None
         self._er_config = get_classifier_config("entity_resolution", app_path=app_path)
         if es_host:
-            self._es_host = es_host
-            self._es_username = es_username
-            self._es_password = es_password
+            self._es_config = EsConfig(es_host, es_username, es_password)
         else:
-            config = self._load_es_config()
-            self._es_host = config["host"]
-            self._es_username = config["username"]
-            self._es_password = config["password"]
-        self._es_config = {"client": es_client, "pid": os.getpid()}
+            self._es_config = self._load_es_config()
+
+        if es_client:
+            self._es_config.es_client = (es_client, os.getpid())
 
     def _load_es_config(self):
-        if os.environ.get('MM_ES_HOST'):
-            return {'host': os.environ.get('MM_ES_HOST'),
-                    'username': os.environ.get('MM_ES_USERNAME'),
-                    'password': os.environ.get('MM_ES_PASSWORD')}
+        """
+        First we load ES config from the environment variable. If that is not available, we
+        try to read from the ER configuration.
+        """
+        if os.environ.get("MM_ES_HOST"):
+            return EsConfig(
+                os.environ.get("MM_ES_HOST"),
+                os.environ.get("MM_ES_USERNAME"),
+                os.environ.get("MM_ES_PASSWORD"),
+            )
         else:
-            return {'host': self._es_config.get('ES_HOST'),
-                    'username': self._es_config.get('ES_USERNAME'),
-                    'password': self._es_config.get('ES_PASSWORD')}
+            return EsConfig(
+                self._er_config.get("ES_HOST"),
+                self._er_config.get("ES_USERNAME"),
+                self._er_config.get("ES_PASSWORD"),
+            )
+
     @property
     def _es_index_name(self):
         return EntityResolver.ES_SYNONYM_INDEX_PREFIX + "_" + self.type
@@ -110,11 +122,12 @@ class EntityResolver:
         return "double_metaphone" in self._er_config.get("phonetic_match_types", [])
 
     @property
+    def _es_host(self):
+        return self._es_config.es_host
+
+    @property
     def _es_client(self):
-        # Lazily connect to Elasticsearch.  Make sure each subprocess gets its own connection
-        if self._es_config["client"] is None or self._es_config["pid"] != os.getpid():
-            self._es_config = {"pid": os.getpid(), "client": create_es_client()}
-        return self._es_config["client"]
+        return self._es_config.es_client
 
     @classmethod
     def ingest_synonym(
