@@ -31,7 +31,7 @@ from ._config import (
     get_app_namespace,
 )
 from ._elasticsearch_helpers import (
-    create_es_client,
+    EsConfig,
     delete_index,
     does_index_exist,
     get_scoped_index_name,
@@ -46,7 +46,14 @@ class QuestionAnswerer:
     necessary functionality for interacting with the application's knowledge base.
     """
 
-    def __init__(self, app_path, resource_loader=None, es_host=None):
+    def __init__(
+        self,
+        app_path,
+        resource_loader=None,
+        es_host=None,
+        es_username=None,
+        es_password=None,
+    ):
         """Initializes a question answerer
 
         Args:
@@ -57,17 +64,17 @@ class QuestionAnswerer:
         self._resource_loader = (
             resource_loader or ResourceLoader.create_resource_loader(app_path)
         )
-        self._es_host = es_host
-        self.__es_client = None
+        self._es_config = EsConfig(es_host, es_username, es_password)
         self._app_namespace = get_app_namespace(app_path)
         self._es_field_info = {}
 
     @property
+    def _es_host(self):
+        return self._es_config.es_host
+
+    @property
     def _es_client(self):
-        # Lazily connect to Elasticsearch
-        if self.__es_client is None:
-            self.__es_client = create_es_client(self._es_host)
-        return self.__es_client
+        return self._es_config.es_client
 
     def get(self, index, size=10, query_type="keyword", **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided

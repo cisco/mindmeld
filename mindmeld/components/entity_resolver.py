@@ -89,7 +89,7 @@ class EntityResolver:
             self._es_config = self._load_es_config()
 
         if es_client:
-            self._es_config.es_client = (es_client, os.getpid())
+            self._es_config.set_es_client(es_client)
 
     def _load_es_config(self):
         """

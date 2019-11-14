@@ -64,20 +64,19 @@ class EsConfig:
     es_username = attr.ib(default=None)
     es_password = attr.ib(default=None)
     _es_client = attr.ib(default=None)
-    pid = attr.ib(default=None)
+    _pid = attr.ib(default=None)
 
     @property
     def es_client(self):
         # Lazily connect to Elasticsearch.  Make sure each subprocess gets its own connection
-        if self._es_client is None or self.pid != os.getpid():
+        if self._es_client is None or self._pid != os.getpid():
             self._es_client = self.create_es_client()
-            self.pid = os.getpid()
+            self._pid = os.getpid()
         return self._es_client
 
-    @es_client.setter
-    def es_client(self, value):
-        self._es_client = value[0]
-        self.pid = value[1]
+    def set_es_client(self, es_client, pid=None):
+        self._es_client = es_client
+        self._pid = pid or os.getpid()
 
     def create_es_client(self):
         return create_es_client(
