@@ -49,6 +49,9 @@ class Application:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
+
+        # Expose language
+        language,
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
@@ -64,6 +67,9 @@ class Application:
         self.responder_class = responder_class or DialogueResponder
         self.preprocessor = preprocessor
         self.async_mode = async_mode
+
+        # Expose language
+        self.language = language or 'EN'
 
     @property
     def question_answerer(self):

@@ -78,6 +78,9 @@ class ApplicationManager:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
+
+        # Expose language
+        language,
     ):
         self.async_mode = async_mode
 
@@ -105,6 +108,9 @@ class ApplicationManager:
         self.dialogue_manager = DialogueManager(
             self.responder_class, async_mode=self.async_mode
         )
+
+        # Expose language
+        self.language = language or 'EN'
 
     @property
     def ready(self):
