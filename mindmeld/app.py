@@ -50,8 +50,8 @@ class Application:
         preprocessor=None,
         async_mode=False,
 
-        # Expose language
-        language,
+        # Expose language with default to English
+        language='EN',
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
@@ -69,7 +69,7 @@ class Application:
         self.async_mode = async_mode
 
         # Expose language
-        self.language = language or 'EN'
+        self.language = language
 
     @property
     def question_answerer(self):

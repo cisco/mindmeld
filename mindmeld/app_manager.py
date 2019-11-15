@@ -79,8 +79,8 @@ class ApplicationManager:
         preprocessor=None,
         async_mode=False,
 
-        # Expose language
-        language,
+        # Expose language with default to English
+        language='EN',
     ):
         self.async_mode = async_mode
 
@@ -110,7 +110,7 @@ class ApplicationManager:
         )
 
         # Expose language
-        self.language = language or 'EN'
+        self.language = language
 
     @property
     def ready(self):
