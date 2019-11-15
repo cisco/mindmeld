@@ -79,8 +79,8 @@ class ApplicationManager:
         preprocessor=None,
         async_mode=False,
 
-        # Expose language with default to English
-        language='EN',
+        # Expose language (default is English)
+        language=None,
     ):
         self.async_mode = async_mode
 

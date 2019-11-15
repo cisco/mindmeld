@@ -50,8 +50,8 @@ class Application:
         preprocessor=None,
         async_mode=False,
 
-        # Expose language with default to English
-        language='EN',
+        # Expose language (default is English)
+        language=None,
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
