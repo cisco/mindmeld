@@ -92,6 +92,9 @@ class Application:
             request_class=self.request_class,
             preprocessor=self.preprocessor,
             async_mode=self.async_mode,
+
+            # Make sure to pass in language parameter as well
+            language=self.language
         )
         self._server = MindMeldServer(self.app_manager)
 

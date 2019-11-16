@@ -202,8 +202,11 @@ class ApplicationManager:
         context = context or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
+        
+        # Make sure to pass in language parameter as well
         processed_query = self.nlp.process(
-            query_text=text, allowed_intents=allowed_intents, **nlp_params
+            query_text=text, allowed_intents=allowed_intents, **nlp_params,
+            language=self.language
         )
         request, response = self._pre_dm(
             processed_query=processed_query,
@@ -256,8 +259,11 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
+        
+        # Make sure to pass in language parameter as well
         processed_query = self.nlp.process(
-            query_text=text, allowed_intents=allowed_intents, **nlp_params
+            query_text=text, allowed_intents=allowed_intents, **nlp_params,
+            language=self.language
         )
         request, response = self._pre_dm(
             processed_query=processed_query,
