@@ -49,9 +49,7 @@ class Application:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-
-        # Expose language (default is English)
-        language=None,
+        language='EN'
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
@@ -68,9 +66,7 @@ class Application:
         self.preprocessor = preprocessor
         self.async_mode = async_mode
 
-        # Expose language
         self.language = language
-
     @property
     def question_answerer(self):
         """
@@ -92,8 +88,6 @@ class Application:
             request_class=self.request_class,
             preprocessor=self.preprocessor,
             async_mode=self.async_mode,
-
-            # Make sure to pass in language parameter as well
             language=self.language
         )
         self._server = MindMeldServer(self.app_manager)

@@ -78,9 +78,7 @@ class ApplicationManager:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-
-        # Expose language (default is English)
-        language=None,
+        language='EN'
     ):
         self.async_mode = async_mode
 
@@ -109,9 +107,7 @@ class ApplicationManager:
             self.responder_class, async_mode=self.async_mode
         )
 
-        # Expose language
         self.language = language
-
     @property
     def ready(self):
         """Whether the nlp component is ready."""
@@ -202,8 +198,6 @@ class ApplicationManager:
         context = context or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
-        
-        # Make sure to pass in language parameter as well
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params,
             language=self.language
@@ -259,8 +253,6 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
-        
-        # Make sure to pass in language parameter as well
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params,
             language=self.language
