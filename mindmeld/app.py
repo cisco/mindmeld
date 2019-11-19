@@ -49,7 +49,8 @@ class Application:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        language='EN'
+        language='EN',
+        locale=None
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
@@ -67,6 +68,7 @@ class Application:
         self.async_mode = async_mode
 
         self.language = language
+        self.locale = locale
     @property
     def question_answerer(self):
         """
