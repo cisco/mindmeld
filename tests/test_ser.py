@@ -11,6 +11,8 @@ import pytest
 import requests
 
 from mindmeld import system_entity_recognizer
+from mindmeld.ser import get_candidates_for_text
+
 
 NOW_TIMESTAMP = 1544706000000
 SECONDS_IN_HOUR = 3600
@@ -298,3 +300,31 @@ def test_system_entity_recognizer_component_empty_config(food_ordering_app_path)
     # reset system_entity_recognizer singleton
     system_entity_recognizer.SystemEntityRecognizer._instance = old_instance
     assert result[1] == -1
+
+
+test_data = [
+    ("Đặt vé ngày mai", "vi", "ngày mai"),
+    ("Ticket morgen buchen", "de", "morgen"),
+    ("book ticket tomorrow", "en", "tomorrow"),
+    ("明天订票", "zh", "明天"),
+]
+
+
+@pytest.mark.parametrize("text, language, expected_entity", test_data)
+def test_get_candidates_for_text_language(text, language, expected_entity):
+    candidates = get_candidates_for_text(text, language=language)
+    assert candidates[0]["body"] == expected_entity
+
+
+test_data = [
+    ("Đặt vé ngày mai", "vi_vi", "ngày mai"),
+    ("Ticket morgen buchen", "de_de", "morgen"),
+    ("book ticket tomorrow", "en_us", "tomorrow"),
+    ("明天订票", "zh_cn", "明天"),
+]
+
+
+@pytest.mark.parametrize("text, locale, expected_entity", test_data)
+def test_get_candidates_for_text_locale(text, locale, expected_entity):
+    candidates = get_candidates_for_text(text, locale=locale)
+    assert candidates[0]["body"] == expected_entity
