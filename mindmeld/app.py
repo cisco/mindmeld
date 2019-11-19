@@ -49,7 +49,7 @@ class Application:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        language='EN',
+        language='en',
         locale=None
     ):
         self.import_name = import_name
@@ -91,6 +91,7 @@ class Application:
             preprocessor=self.preprocessor,
             async_mode=self.async_mode,
             language=self.language
+            locale=self.locale
         )
         self._server = MindMeldServer(self.app_manager)
 

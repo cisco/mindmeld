@@ -78,7 +78,8 @@ class ApplicationManager:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        language='EN'
+        language='en',
+        locale=None
     ):
         self.async_mode = async_mode
 
@@ -204,8 +205,7 @@ class ApplicationManager:
             nlp_params['locale'] = self.locale
         
         processed_query = self.nlp.process(
-            query_text=text, allowed_intents=allowed_intents, **nlp_params,
-            language=language
+            query_text=text, allowed_intents=allowed_intents, **nlp_params
         )
         request, response = self._pre_dm(
             processed_query=processed_query,
@@ -258,6 +258,11 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
+
+        if 'language' not in nlp_params and 'locale' not in nlp_params:
+            nlp_params['language'] = self.language
+            nlp_params['locale'] = self.locale
+
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params,
             language=self.language
