@@ -90,7 +90,7 @@ class Application:
             request_class=self.request_class,
             preprocessor=self.preprocessor,
             async_mode=self.async_mode,
-            language=self.language
+            language=self.language,
             locale=self.locale
         )
         self._server = MindMeldServer(self.app_manager)
