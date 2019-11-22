@@ -265,7 +265,7 @@ class ApplicationManager:
             nlp_params['locale'] = self.locale
 
         processed_query = self.nlp.process(
-            query_text=text, allowed_intents=allowed_intents, **nlp_params,
+            query_text=text, allowed_intents=allowed_intents, **nlp_params
         )
         request, response = self._pre_dm(
             processed_query=processed_query,
