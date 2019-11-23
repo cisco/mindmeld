@@ -110,6 +110,7 @@ class ApplicationManager:
 
         self.language = language
         self.locale = locale
+
     @property
     def ready(self):
         """Whether the nlp component is ready."""
@@ -200,11 +201,11 @@ class ApplicationManager:
         context = context or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
-        
+
         if 'language' not in nlp_params and 'locale' not in nlp_params:
             nlp_params['language'] = self.language
             nlp_params['locale'] = self.locale
-        
+
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
         )

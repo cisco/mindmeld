@@ -69,6 +69,7 @@ class Application:
 
         self.language = language
         self.locale = locale
+
     @property
     def question_answerer(self):
         """
