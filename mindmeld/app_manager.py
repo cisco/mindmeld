@@ -73,13 +73,12 @@ class ApplicationManager:
         app_path,
         nlp=None,
         question_answerer=None,
-        es_host=None,
         request_class=None,
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        language='en',
-        locale=None
+        language="en",
+        locale=None,
     ):
         self.async_mode = async_mode
 
@@ -100,7 +99,7 @@ class ApplicationManager:
 
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
         self.question_answerer = question_answerer or QuestionAnswerer(
-            app_path, resource_loader, es_host
+            app_path, resource_loader
         )
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
@@ -202,9 +201,9 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
 
-        if 'language' not in nlp_params and 'locale' not in nlp_params:
-            nlp_params['language'] = self.language
-            nlp_params['locale'] = self.locale
+        if "language" not in nlp_params and "locale" not in nlp_params:
+            nlp_params["language"] = self.language
+            nlp_params["locale"] = self.locale
 
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
@@ -261,9 +260,9 @@ class ApplicationManager:
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
 
-        if 'language' not in nlp_params and 'locale' not in nlp_params:
-            nlp_params['language'] = self.language
-            nlp_params['locale'] = self.locale
+        if "language" not in nlp_params and "locale" not in nlp_params:
+            nlp_params["language"] = self.language
+            nlp_params["locale"] = self.locale
 
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
