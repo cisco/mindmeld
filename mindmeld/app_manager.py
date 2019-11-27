@@ -18,7 +18,13 @@ import logging
 
 from .components import DialogueManager, NaturalLanguageProcessor, QuestionAnswerer
 from .components.dialogue import DialogueResponder
-from .components.request import FrozenParams, Params, Request
+from .components.request import (
+    FrozenParams,
+    Params,
+    Request,
+    validate_language_code,
+    validate_locale_code,
+)
 from .resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
@@ -77,7 +83,7 @@ class ApplicationManager:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        language="en",
+        language=None,
         locale=None,
     ):
         self.async_mode = async_mode
@@ -107,8 +113,13 @@ class ApplicationManager:
             self.responder_class, async_mode=self.async_mode
         )
 
-        self.language = language
-        self.locale = locale
+        # if no locale or language is set, we default to english
+        if locale or language:
+            self.locale = validate_locale_code(locale)
+            self.language = validate_language_code(language)
+        else:
+            self.language = "en"
+            self.locale = None
 
     @property
     def ready(self):
@@ -201,7 +212,8 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
 
-        if "language" not in nlp_params and "locale" not in nlp_params:
+        # if there is no language or locale in params we set them to app manager's
+        if not (nlp_params.get("language") or nlp_params.get("locale")):
             nlp_params["language"] = self.language
             nlp_params["locale"] = self.locale
 
@@ -260,7 +272,8 @@ class ApplicationManager:
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
 
-        if "language" not in nlp_params and "locale" not in nlp_params:
+        # if there is no language or locale in params we set them to app manager's
+        if not (nlp_params.get("language") or nlp_params.get("locale")):
             nlp_params["language"] = self.language
             nlp_params["locale"] = self.locale
 

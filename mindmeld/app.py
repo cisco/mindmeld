@@ -49,7 +49,7 @@ class Application:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        language="en",
+        language=None,
         locale=None,
     ):
         self.import_name = import_name
