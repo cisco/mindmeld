@@ -1,0 +1,130 @@
+{
+  "entities": [
+    {
+      "id": "1",
+      "cname": "23 Elm Street",
+      "whitelist": ["23rd Elm St", "23rd Elm", "23 Elm St", "23 Elm", "Elm Street", "Elm", "Elm St"]
+    },
+    {
+      "id": "2",
+      "cname": "Pine and Market",
+      "whitelist": ["750 Market Street", "750 Market St", "750 Market", "Pine Street", "Pine St", "Pine", "Market"]
+    },
+    {
+      "id": "3",
+      "cname": "Central Plaza Store",
+      "whitelist": ["100 Main Street", "100 Main St", "100 Main", "Main", "Central Store", "Central Plaza"]
+    },
+    {
+      "id": "4",
+      "cname": "45 Fifth Avenue",
+      "whitelist": ["45 Fifth Ave", "45 Fifth", "Fifth Ave", "Fifth", "5th Avenue", "5th Ave", "5th", "Ogdenville"]
+    },
+    {
+      "id": "5",
+      "cname": "104 First Street",
+      "whitelist": ["104 First", "104 1st St", "1st St", "First", "North Haverbrook", "N Haverbrook", "Haverbrook"]
+    },
+    {
+      "id": "6",
+      "cname": "Chinatown Store",
+      "whitelist": ["Chinatown", "123 Fake Street", "123 Fake St", "Fake Street", "Fake St", "Fake"]
+    },
+    {
+      "id": "7",
+      "cname": "Little Italy Store",
+      "whitelist": ["Little Italy", "55 3rd Street", "55 3rd St", "3rd St", "Third", "Third Street"]
+    },
+    {
+      "id": "8",
+      "cname": "Russian District Store",
+      "whitelist": ["Russian District", "Russian", "44 8th Avenue", "8th Avenue", "44 8th Ave", "8th Ave", "Eighth"]
+    },
+    {
+      "id": "9",
+      "cname": "Springfield Mall Store",
+      "whitelist": ["Springfield Mall", "Mall", "20 Central Boulevard", "20 Central", "Central", "Central Blvd", "Central Boulevard"]
+    },
+    {
+      "id": "10",
+      "cname": "Evergreen Terrace",
+      "whitelist": ["145 Evergreen Terrace", "145 Evergreen", "Evergreen Terr", "Evergreen Ter", "Evergreen"]
+    },
+    {
+      "id": "11",
+      "cname": "West Oak Street",
+      "whitelist": ["3 W Oak Street", "3 W Oak St", "W Oak St", "West Oak", "W Oak", "West Oak St", "3 West Oak"]
+    },
+    {
+      "id": "12",
+      "cname": "East Oak Street",
+      "whitelist": ["10 E Oak Street", "10 E Oak St", "E Oak St", "East Oak", "E Oak", "East Oak St", "10 East Oak St"]
+    },
+    {
+      "id": "13",
+      "cname": "Rural Route 27",
+      "whitelist": ["550 Rural Route 27", "550 Rural Rte 27", "Rural Route", "Rural Rte", "Rte 27", "Route 27", "RR27", "RR 27"]
+    },
+    {
+      "id": "14",
+      "cname": "Industrial Road",
+      "whitelist": ["15 Industrial Road", "Industrial", "15 Industrial Rd", "Industrial Rd"]
+    },
+    {
+      "id": "15",
+      "cname": "156th Street",
+      "whitelist": ["122 156th Street", "156th St", "122 156th St", "156th"]
+    },
+    {
+      "id": "16",
+      "cname": "12th Avenue",
+      "whitelist": ["92 12th Avenue", "92 12th Ave", "12th Ave", "12th", "twelfth"]
+    },
+    {
+      "id": "17",
+      "cname": "181st Street",
+      "whitelist": ["90 181st Street", "181st St", "90 181st St", "181st"]
+    },
+    {
+      "id": "18",
+      "cname": "257th Street",
+      "whitelist": ["88 257th Street", "88 257th St", "257th St", "257th"]
+    },
+    {
+      "id": "19",
+      "cname": "D Street",
+      "whitelist": ["1 D Street", "D St", "1 D St", "D"]
+    },
+    {
+      "id": "20",
+      "cname": "Peanut Street",
+      "whitelist": ["50 Peanut Street", "50 Peanut St", "50 Peanut", "Peanut St", "Peanut"]
+    },
+    {
+      "id": "21",
+      "cname": "Sycamore Avenue",
+      "whitelist": ["101 Sycamore Avenue", "101 Sycamore Ave", "Sycamore Ave", "101 Sycamore", "Sycamore"]
+    },
+    {
+      "id": "22",
+      "cname": "Krustyland Store",
+      "whitelist": ["Krustyland", "15 Clown Street", "15 Clown St", "15 Clown", "Clown St", "Clown Street", "Clown"]
+    },
+    {
+      "id": "23",
+      "cname": "Duff Gardens Store",
+      "whitelist": ["Duff Gardens", "82 Beer Avenue", "82 Beer Ave", "82 Beer", "Beer Avenue", "Beer Ave", "Beer"]
+    },
+    {
+      "id": "24",
+      "cname": "Springfield Heights Store",
+      "whitelist": ["Springfield Heights", "13 West Oak St", "13 W Oak St", "13 West Oak", "13 W Oak"]
+    },
+    {
+      "id": "25",
+      "cname": "Diz-Nee Land Store",
+      "whitelist": ["Diz-Nee Land", "Diz-Nee", "67 Anaheim Road", "67 Anaheim Rd", "67 Anaheim", "Anaheim Road", "Anaheim Rd", "Anaheim"]
+    }
+  ]
+}
+
