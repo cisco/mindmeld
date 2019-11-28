@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""This module contains the Kwik-E-Mart MindMeld demo application"""
+"""This module contains the Kwik-E-Mart MindMeld demo application implemented in Vietnamese"""
 from mindmeld import Application
 from . import custom_features  # noqa: F401
 
-app = Application(__name__)
+app = Application(__name__, language='vi')
 
 __all__ = ['app']
 
@@ -12,23 +12,24 @@ __all__ = ['app']
 def welcome(request, responder):
     try:
         responder.slots['name'] = request.context['name']
-        prefix = 'Hello, {name}. '
+        prefix = 'Chào {name}. '
     except KeyError:
-        prefix = 'Hello. '
-    responder.reply(prefix + 'I can help you find store hours '
-                             'for your local Kwik-E-Mart. How can I help?')
+        prefix = 'Xin chào. '
+    responder.reply(prefix + 'Tôi có thể giúp bạn tìm giờ cửa hàng '
+                             'cho Kwik-E-Mart tại địa phương của bạn. '
+                             'Tôi có thể giúp gì cho bạn?')
     responder.listen()
 
 
 @app.handle(intent='exit')
 def say_goodbye(request, responder):
-    responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
+    responder.reply(['Tạm biệt', 'Chúc bạn một ngày vui vẻ'])
 
 
 @app.handle(intent='help')
 def provide_help(request, responder):
-    prompts = ["I can help you find store hours for your local Kwik-E-Mart. For example, you can "
-               "say 'Where's the nearest store?' or 'When does the Elm Street store open?'"]
+    prompts = ["Tôi có thể giúp bạn tìm giờ cửa hàng cho Kwik-E-Mart tại địa phương của bạn. Ví dụ, bạn có thể "
+               "nói 'Cửa hàng gần nhất ở đâu vậy?' hoặc là 'Khi nào cái tiệm ở Elm Street mở vậy?'"]
     responder.reply(prompts)
     responder.listen()
 
@@ -38,8 +39,10 @@ def send_nearest_store(request, responder):
     try:
         user_location = request.context['location']
     except KeyError:
-        responder.reply("I'm not sure. You haven't told me where you are!")
-        responder.suggest([{'type': 'location', 'text': 'Share your location'}])
+        responder.reply("Tôi không chắc. Bạn chưa nói bạn ở đâu!")
+        
+        # only translated value of 'text'
+        responder.suggest([{'type': 'location', 'text': 'Đưa vị trí của bạn'}])
         return
 
     stores = app.question_answerer.get(index='stores', _sort='location', _sort_type='distance',
@@ -48,13 +51,12 @@ def send_nearest_store(request, responder):
     responder.slots['store_name'] = target_store['store_name']
 
     responder.frame['target_store'] = target_store
-    responder.reply('Your nearest Kwik-E-Mart is located at {store_name}.')
-
+    responder.reply('Cái Kwik-E-Mart gần nhất bạn là ở {store_name}.')
 
 @app.handle()
 def default(request, responder):
-    prompts = ["Sorry, not sure what you meant there. I can help you find store hours "
-               "for your local Kwik-E-Mart."]
+    prompts = ["Xin lỗi tôi không biết ý bạn là gì. Tôi có thể giúp "
+                "bạn tìm giờ cửa hàng cho Kwik-E-Mart tại địa phương của bạn."]
     responder.reply(prompts)
     responder.listen()
 
@@ -82,17 +84,17 @@ def send_store_hours(request, responder):
         responder.slots['store_name'] = active_store['store_name']
         responder.slots['open_time'] = active_store['open_time']
         responder.slots['close_time'] = active_store['close_time']
-        responder.reply('The {store_name} Kwik-E-Mart opens at {open_time} and '
-                        'closes at {close_time}.')
+        responder.reply('Cái Kwik-E-Mart ở {store_name} mở cửa {open_time}h và '
+                        'đóng cửa {close_time}h.')
         return
 
     responder.frame['count'] = responder.frame.get('count', 0) + 1
 
     if responder.frame['count'] <= 3:
-        responder.reply('Which store would you like to know about?')
+        responder.reply('Bạn muốn biết về cửa hàng nào?')
         responder.listen()
     else:
-        responder.reply('Sorry I cannot help you. Please try again.')
+        responder.reply('Xin lỗi tôi không thể giúp bạn được. Xin vui lòng thử lại.')
         responder.exit_flow()
 
 
@@ -100,16 +102,16 @@ def send_store_hours(request, responder):
 def default_handler(request, responder):
     responder.frame['count'] += 1
     if responder.frame['count'] <= 3:
-        responder.reply('Sorry, I did not get you. Which store would you like to know about?')
+        responder.reply('Xin lỗi tôi không có hiểu bạn. Bạn muốn biết về cửa hàng nào?')
         responder.listen()
     else:
-        responder.reply('Sorry I cannot help you. Please try again.')
+        responder.reply('Xin lỗi tôi không thể giúp bạn được. Xin vui lòng thử lại.')
         responder.exit_flow()
 
 
 @send_store_hours.handle(intent='exit', exit_flow=True)
 def exit_handler(request, responder):
-    responder.reply(['Bye', 'Goodbye', 'Have a nice day.'])
+    responder.reply(['Tạm biệt', 'Chúc bạn một ngày vui vẻ.'])
 
 
 @send_store_hours.handle(intent='get_store_hours')
