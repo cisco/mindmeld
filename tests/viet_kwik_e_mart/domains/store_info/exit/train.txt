@@ -1,155 +1,96 @@
-Alright, I think that wraps it up.
-Alright, I'll talk to you later.
-Alright, I'm good now
-Alright, gotta go
-Alright, gotta go
-Bye
-Cancel
-Exit
-GOODBYE
-Good day to you!
-Good-bye.
-Goodbye
-Goodbye, Have a nice day!
-Great, that's a wrap
-Have a good day.
-Have a nice day!
-I am finished.
-I guess we are done here.
-I'm Out!
-I'm done. That's all for now.
-If I need anything else, I'll be back.
-Later
-Nice talking to you.
-Nope, that's it.
-OK, I think we are all done for now, bye.
-OK, I'm going to go for now.
-Ok, that was great, gotta go now!
-Okay, I guess we are done here.
-Okay, I think we've accomplished everything for now!
-See ya later.
-See you later.
-See you soon!
-Smell you later.
-Talk to you later!
-Thank you so much
-Thank you so much
-abort
-Thanks so much
-That about covers it.
-That's all I needed
-That's everything I need.
-This sounds good, I'll talk to you later.
-Unfortunately I have another engagement soon, but it was nice chatting with you.
-You too
-abort
-abort
-all done
-bye, have a nice day!
-bye, talk to you later!
-cancel
-done
-done for now
-end
-exit
-finish
-finish shopping
-finished
-goodbye
-have a nice day!
-later
-quit
-see you
-see you later
-see you next time
-see you soon
-stop
-stop it
-that will be all
-that'll do for now
-that's all I need!
-that's everything I need.
-that's it.
-this is the end
-we are done here.
-you too
-Alright, I think that wraps it up.
-Alright, I'll talk to you later.
-Alright, gotta go
-Alright, gotta go
-Bye
-Cancel
-Exit
-GOODBYE
-Good day to you!
-Goodbye
-Goodbye and have a good day.
-Goodbye, Have a nice day!
-Have a good day.
-Have a nice day!
-I am finished.
-I guess we are done here.
-I'm Out!
-I'm done. That's all for now.
-If I need anything else, I'll be back.
-Later
-Nice talking to you.
-OK, I'm going to go for now.
-Ok, that was great, gotta go now!
-Okay, I guess we are done here.
-Okay, I think we've accomplished everything for now!
-Okay, you have a great day.
-See ya later.
-See you later.
-See you soon!
-Smell you later.
-Talk to you later!
-Thank you so much
-Thanks so much
-Thanks
-Thank you
-Thanks for the info
-Thank you for the information
-Thanks. That was helpful.
-Thank you for the help
-Thanks!
-Thank you!
-Thanks.
-Thank you.
-That about covers it.
-That's all I needed
-That's everything I need.
-This sounds good, I'll talk to you later.
-Unfortunately I have another engagement soon, but it was nice chatting with you.
-You too
-abort
-all done
-bye
-bye, have a nice day!
-bye, talk to you later!
-bye-bye
-cancel
-done
-done for now
-end
-exit
-finish
-finish shopping
-goodbye
-have a nice day!
-later
-quit
-see you
-see you later
-see you next time
-see you soon
-stop
-stop it
-that will be all
-that'll do for now
-that's it.
-this is the end
-this is the end
-we are done here.
-you too
-that's all for now
+bạn cũng thế
+Bạn cũng vậy
+bỏ
+Cảm ơn
+Cảm ơn bạn
+Cảm ơn bạn đã đưa thông tin
+Cảm ơn bạn đã giúp tôi
+Cảm ơn bạn rất nhiều
+Cám ơn rất nhiều
+Cảm ơn. Bạn giúp đỡ tôi rất là nhiều.
+Chúc bạn một ngày vui vẻ!
+Chúc bạn một ngày vui vẻ.
+Chúc bạn ngày vui vẻ.
+Chúc một ngày vui vẻ!
+chúng tôi đã làm xong ở đây
+chúng tôi đã xong hết rồi
+đây là kết thúc
+Đến đây là kết thúc
+đó là tất cả mọi chuyện mình cần làm
+Đó là tất cả mọi thứ tôi cần.
+Đó là tất cả mọi thứ tui cần.
+Đó là tất cả những gì tôi cần
+Đó là tất cả những gì tui cần
+đó là tất cả tôi cần!
+dừng
+dừng lại
+dừng lại đi
+Được rồi, chúc bạn một ngày tuyệt vời.
+Được rồi, phải đi thôi
+Được rồi, tôi nghĩ chúng ta đã xong rồi.
+Được rồi, tôi nghĩ mình đã xong hết mọi chuyện mình cần làm
+Được rồi, tôi nghĩ mình xong rồi.
+Được rồi, tôi nghĩ thế là hết rồi.
+Được rồi, tôi phải đi
+Được rồi, tôi sẽ nói chuyện với bạn sau.
+Được rồi, tui nghĩ vậy là hết rồi.
+gặp bạn sau
+Gặp lại sau.
+hẹn gặp bạn kỳ sau
+hẹn gặp bạn kỳ tới
+hẹn gặp bạn sau
+Hẹn gặp lại
+Hẹn gặp lại nhé!
+hẹn lại sau
+hiện tại là xong hết rồi
+hiện tại xong hết rồi
+Hủy
+Hủy bỏ
+kết thúc
+kết thúc mua sắm
+Không, thế là xong rồi.
+làm xong rồi
+mình xong hết tất cả mọi chuyện rồi
+Nếu tôi cần gì nữa, tôi sẽ nhắn tin.
+Nếu tôi cần gì nữa, tôi sẽ quay lại.
+Nếu tôi cần gì thêm, tôi sẽ quay lại.
+Nói chuyện với bạn sau!
+Nói chuyện với bạn sau!
+OK, giờ tôi ổn rồi
+OK, giờ tôi sẽ đi.
+OK, giờ tui đi nhé.
+Ok, quá tốt, giờ phải đi!
+Ok, quá tuyệt, giờ tôi phải đi!
+OK, tôi nghĩ chúng ta xong hết mọi chuyện, tạm biệt.
+ok, tôi nghĩ mình làm xong hết mọi thứ rồi!
+Ok, tôi sẽ nói chuyện với bạn sau.
+Ok, xong hết rồi.
+Ra
+ra đi
+Rất là tốt, tôi sẽ nói chuyện với bạn sau.
+Tạm biệt
+Tạm biệt chúc một ngày vui vẻ!
+Tạm biệt và chúc một ngày vui vẻ.
+tạm biệt, chúc một ngày vui vẻ!
+tạm biệt, nói chuyện sau!
+tất cả đã được làm xong
+thế là hết.
+thế là xong
+Thế nhé
+thế thì mình xong hết rồi
+Thôi nhé
+Tôi có chuyện khác phải đi, nói chuyện với bạn sau.
+Tôi có chuyện phải đi, nói chuyện sau nhé.
+Tôi đã xong rồi.
+Tôi đã xong. Đó là tất cả mình cần hiện tại.
+Tôi đi nhé!
+tôi muốn ra
+Tôi nghĩ chúng ta xong rồi.
+Tôi phải ra ngoài!
+Tôi xong rồi. Tôi không cần gì thêm nữa.
+Tốt, tôi sẽ nói chuyện với bạn sau.
+Tui xong rồi.
+Tuyệt, vậy thì xong rồi
+xong
+xong hết rồi
+xong mua sắm rồi

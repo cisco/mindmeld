@@ -1,12 +1,12 @@
-Which store is closest to me?
-are there locations near me
-is there any kwik-e-mart near me
-locations near me
-other stores
-other stores near me
-where can I get my donuts?
-nearby kwik-e-mart.
-lead me to donuts
-lead me to the nearest store
-get me a slurpee
-show me the nearest location
+Cửa hàng nào gần tôi nhất?
+Có địa điểm nào gần tôi không?
+Có kwik-e-mart nào gần tui không?
+mấy cái địa điểm gần tôi
+vài tiệm khác
+mấy cửa hàng khác gần tui
+Nơi nào tôi có thể mua được donut vậy?
+kwik-e-mart gần tôi
+tôi muốn donut
+Tìm dùng cửa hàng gần tôi nhất
+lấy cho tôi một cái slurpee
+dẫn tôi đến địa điểm gần nhất

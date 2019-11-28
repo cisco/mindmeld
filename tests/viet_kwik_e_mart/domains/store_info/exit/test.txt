@@ -1,15 +1,14 @@
-Catch you later
-Goodbye and have a good day.
-Okay, you have a great day.
-bye
-bye-bye
-Alright, I'm good now
-Good-bye.
-Great, that's a wrap
-Nope, that's it.
-OK, I think we are all done for now, bye.
-abort
-Thanks for that
-finished
-that's all I need!
-that's everything I need.
+Nói chuyện sau nhé
+Tạm biệt, chúc một ngày vui vẻ
+Ok, chúc bạn một ngày vui vẻ.
+tạm biệt
+OK, giờ tôi ổn rồi
+Tạm biệt
+Ok, xong hết rồi
+Không, hết rồi
+OK, tôi nghĩ chúng ta xong hết mọi chuyện, tạm biệt.
+Hủy bỏ
+Cảm ơn
+xong
+Đó là tất cả những gì tôi cần!
+Đó là tất cả mọi thứ tôi cần.

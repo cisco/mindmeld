@@ -1,509 +1,187 @@
+Alô bạn! mọi thứ tốt không?
+Alô có gì mới không?
+Alô mọi việc thế nào?
+Alô ông, mọi thứ tốt không?
+Alô, có gì lạ không?
+Alô, có gì mới không?
+Alô, đang làm gì đấy?
+Alô, mọi thứ tốt chứ?
+Alô!
 Aloha!
-Are you there?
-Ay, how are you?
+Anh bạn! bạn khỏe không
+bà đang làm gì đấy
+Bà dạo này có gì lạ không?
+bà khỏe không?
+Bà ơi
+Bà ơi, khỏe không?
+Bà thế nào rồi?
+Bạn có ở đây không?
+Bạn có ở đó không?
+Bạn đã như thế nào rồi?
+Bạn đang làm gì đấy?
+Bạn đang làm gì đó?
+Bạn đang làm gì thế
+Bạn đang làm gì vậy?
+Bạn đang làm gì?
+Bạn dạo này có gì lạ không?
+Bạn khỏe không
+Bạn ơi
+Bạn ơi có gì mới không?
+Bạn ơi, có gì lạ không?
+Bạn ơi, có gì mới không?
+Bạn ơi, khỏe không?
+Bạn ơi, mọi thứ tốt chứ?
+Bạn ơi, mọi việc thế nào rồi?
+Bạn sẽ làm gì hôm nay vậy?
+Bạn thế nào rồi?
+Bắt đầu
+Bắt đầu nhé!
 Bonjour
-Dude! how are you
-G’day mate!
-Good afternoon
-Good afternoon!
-Good day!
-Good day!
-Good evening!
-Good morning
-Good morning!
-Good morning!
-Good morning. How are you?
-Good to see you, how have you been?
-Great seeing you!
-Greetings
-Greetings my friend, how are you?
-Greetings, ready to start the day?
-Greetings!
-Greetings!
-Greetings!
-Greetings!
-Greetings.
-hello
-Hello and how are you doing?
-hello there
-Hello there!
-Hello there!
-Hello there.
-Hello to you!
-Hello, how are you?
-Hello, how are you?
-Hello, what you up to?
-Hello!
-Hello! Hope your day is going well!
-Hello. How are you today?
-Hello. How are you?
-hey
-Hey buddy
-hey hey hey
-Hey how are you?
-Hey how's it going?
-HEY HOWS IT GOING
-Hey man
-Hey now!
-hey there
-Hey there
-Hey there, How are you?
-Hey there, How are you?
-Hey There, Sup!
-Hey there!
-hey wassup
-Hey what's goin on?
-Hey you
-Hey you!
-Hey-o!
-Hey, how's it going?
-Hey, something new?
-Hey, whatcha doing?
-Hey, whatcha up to?
-Hey, whats going on?
-Hey!
-Hey!  What's going on in your world today?
-Heya, how's it going?
-hi
-hi
-Hi how are you?
-hi there
-Hi there, how're you doing?
-Hi there!
-Hi, are we ready to start?
-Hi, can you help me with something?
-Hi, how are you doing today?
-Hi, how are you doing?
-Hi, How are you today?
-Hi, how are you?
-Hi, how's it going?
-HI, how's it going?
-Hi, how's it going?
-Hi, I was wondering if you could help me with something.
-Hi, whatcha been up to?
-Hi,nice to be speaking with you.
-Hi!
-Hi!
-Hi! How are you?
-Hi. How are you?
-Hiya! How are you?
-hola
-Hola!
-How are ya doing?
-How are you doing today?
-How are you doing?
-hi there How are you doing?
-hey How are you doing?
-How are you on this fine day?
-How are you today?
-How are you today?
-How are you?
-How goes it?
-How have you been today?
-how is it going?
-How is your doing going so far?
-How'd there!
-How's everything?
-How's it going?
-How's it going?
-How's it going?
-How's it hanging?
-How's it hanging?
-Howdy there
-Howdy!
-Howdy!
-Hows it going?
-Morning
-Namasthe, How are you
-Oh hello
-ola
-Salutations my friend
-Sam, how's it going?
-Sup
-SUP MY FRIEND!
-Sup!
-Sup!?
-wassup
-Welcome.
-What are you up do?
-What up?
-What's going on?
-What's up
-whats good stranger!
-Whats happening?
-Yo
-yo
-Yo man, Hows it going.
-Yo what's up
-Yo yo yo
-Yo, what's good?
-Yo, what's up?
-Hey
-Hey man
-Hey
-Heyhey
-Heyhey
-Hi
-Hi iq
-Hi
-Hiya
-How are you?
-How are you?
-Poke
-Wake up
-hello
-hey man
-hiya
-what's up
-yo
-hiya
-heey
-begin
-dudehello
-hey there
-hey
-hello there
-hi there
-hey wassup
-hey what's up?
-yo
-hola
-heya
-hiya
-hihi
-hihi
-hihi
-heeyHi!
-Yo yo yo
-Hey there!
-Hi!
-How are you today
-hi
-Hello there!
-How's it going?
-Howdy!
-How are you?
-how is it going?
-Hi, how are you doing?
-Greetings. 
-Sup!?
-Good morning
-Hey!
-Hey man
-What up?
-Hi, how's it going?
-Hey you!
-Greetings!
-Sup
-Hey now!
-Good morning!
-How are you doing?
-Good morning!
-Hola!
-How are you?
-Howdy!
-Greetings
-Hi how are you?
-What's up
-hey hey hey
-Bonjour
-wassup
-Hey you
-Greetings my friend, how are you?
-Greetings Earthling.
-Howdy!
-Hows it going?
-Dude! how are you
-What's going on?
-Hey dude.
-Hello to you!
-Hey, whatcha up to?
-Good afternoon
-Hello!
-Hiya! How are you?
-ola
-How have you been today?
-Good evening!
-Good day!
-Greetings!
-Yo, what's good?
-Yo, what's up?
-Good morning. How are you?
-Salutations!
-Sup!
-Salutations my friend
-Welcome.
-SUP MY FRIEND!
-What are you up to?
-Great seeing you!
-whatcha doing
-How are ya doing?
-How is your doing going so far?
-Hey buddy
-Good morning!
-What are you up do?
-How's it hanging?
-Aloha! 
-Hello, what you up to?
-Whats happening?
-How are you doing today?
-How goes it?
-Hey!  What's going on in your world today?
-Hi, whatcha been up to?
-whats good stranger!
-Hey, something new?
-Oh hello
-Ay, how are you?
-How's everything?
-Yo man, Hows it going.
-Good to see you, how have you been?
-G’day mate!
-How's it hanging?
-Morning
-heyaAloha!
-Bonjour
-Dude! how are you
-G’day mate!
-Good afternoon!
-Good afternoon!
-Good day!
-Good day!
-Good evening!
-Good morning
-Good morning!
-Good morning!
-Good morning!
-Good morning. How are you?
-Good to see you, how have you been?
-Great seeing you!
-Greetings
-Greetings Earthling.
-Greetings my friend, how are you?
-Greetings, ready to start the day?
-Greetings!
-Greetings!
-Greetings!
-Greetings!
-Greetings.
-hello
-Hello and how are you doing?
-hello there
-Hello there!
-Hello there!
-Hello there.
-Hello to you!
-Hello, how are you?
-Hello, how are you?
-Hello, how would you like me to start?
-Hello, what you up to?
-Hello!
-Hello! Hope your day is going well!
-Hello. How are you today?
-Hello. How are you?
-hey
-Hey dude.
-hey hey hey
-Hey how are you?
-Hey how's it going?
-HEY HOWS IT GOING
-Hey man
-Hey now!
-hey there
-Hey there, How are you?
-Hey there, How are you?
-Hey There, Sup!
-Hey there!
-hey wassup
-hey what's up?
-Hey you
-Hey you!
-Hey-o!
-Hey, how's it going?
-Hey, something new?
-Hey, whatcha doing?
-Hey, whatcha up to?
-Hey, whats going on?
-Hey!
-Hey!  What's going on in your world today?
-Heya, how's it going?
-hi
-Hi how are you?
-hi there
-Hi there, how're you doing?
-Hi there!
-Hi, are we ready to start?
-Hi, can you help me with something?
-Hi, how are you doing today?
-Hi, how are you doing?
-Hi, How are you today?
-Hi, how are you?
-Hi, how's it going?
-HI, how's it going?
-Hi, how's it going?
-Hi, I was wondering if you could help me with something.
-Hi,nice to be speaking with you.
-Hi!
-Hi!
-Hi! How are you?
-Hi! How are you?
-Hiya! How are you?
-hola
-Hola!
-How are ya doing?
-How are you doing today?
-How are you doing?
-How are you on this fine day?
-How are you today
-How are you today?
-How are you today?
-How are you?
-How are you?
-How goes it?
-How have you been today?
-how is it going?
-How is your doing going so far?
-How'd there!
-How's everything?
-How's it going?
-How's it going?
-How's it going?
-How's it hanging?
-Howdy there
-Howdy!
-Howdy!
-Howdy!
-Hows it going?
-Morning
-Namasthe, How are you
-Oh hello
-ola
-Salutations my friend
-Salutations!
-Sam, how's it going?
-Sup
-SUP MY FRIEND!
-Sup!
-Sup!?
-wassup
-Welcome.
-What are you up do?
-What are you up to?
-What up?
-What's going on?
-What's up
-whatcha doing
-whats good stranger!
-Whats happening?
-Yo
-yo
-Yo man, Hows it going.
-Yo yo yo
-Yo, what's good?
-Yo, what's up?
+Bonjour bà
+Bonjour bạn
+Bonjour ông
+Bữa nay bạn sẽ làm gì?
+bữa nay bạn thế nào rồi?
+Chào
+Chào bạn của tôi, bạn có khỏe không?
+Chào bạn, bạn có khỏe không?
+Chào bạn, bạn khỏe không?
+Chào bạn!
+Chào bạn! Có gì mới không?
+Chào buổi sáng
+Chào buổi sáng. Bạn khỏe không?
+Chào buổi tối!
+Chào buổi trưa
+chào, bạn thế nào rồi?
+Chào! Bạn khỏe không?
+Chào. Mọi việc thế nào rồi?
+Chào. Mọi việc thế nào?
+Cho hỏi
+Cho hỏi nè
+Cho tôi hỏi
+Cho tôi hỏi cái này
+Cho tôi hỏi cái này được không?
+Cho tôi hỏi này một tí
+Có chuyện gì lạ không?
+Có chuyện gì thế?
+có gì lạ không
+Có gì lạ không bạn?
+Có gì lạ không ông?
+Có gì mới không bạn?
+Có gì mới không ông?
+Có gì mới không?
+Đang làm gì đấy?
+Đang làm gì đó?
+đang làm gì vậy
+Dạo này bà có khỏe khong?
+Dạo này bà thế nào?
+Dạo này bà tốt chứ?
+Dạo này bạn có khỏe khong?
+Dạo này bạn thế nào?
+Dạo này bạn tốt chứ?
+Dạo này có gì lạ không bà?
+Dạo này có gì lạ không bạn?
+Dạo này có gì lạ không ông?
+Dạo này có gì lạ không?
+Dạo này có khỏe khong?
+Dạo này mọi chuyện thế nào?
+Dạo này mọi thứ tốt chứ?
+Dạo này ông có khỏe khong?
+Dạo này ông thế nào?
+Dạo này ông tốt chứ?
+Dạo này sao rồi?
+Dạo này thế nào?
+Dạo này tốt chứ?
+Ê
+Ê anh bạn
+Ê bà ơi
+Ê bạn ơi
+Ê có gì lạ không
+Ê có gì mới không?
+Ê đang làm gì đấy
+Ê đang làm gì đó
+Ê ê
+Ê ê ê
+Ê khỏe không?
+Ê ông ơi
+Ê, bạn khỏe không?
+Ê, bạn sao rồi?
+Ê, bạn thế nào rồi?
 Hello
+Hello xin chào!
 Hey
-Hey man
-Hey
-Heyhey
-Heyhey
-Hi
-Hi iq
-Hiya
-How are you?
-How are you?
-Poke
-hello
-hey man
-hey
-hi
-hiya
-what's up
-yo
-hihi
-hiya
-heey
-begin
-Hi!
-Yo yo yo
-Hey there!
-Hi!
-Yo
-Hey how's it going? 
-How are you today
-hi
-Hello there!
-How's it going?
-Howdy!
-How are you?
-how is it going?
-Hi, how are you doing?
-Greetings. 
-Sup!?
-Are you there?
-Good morning
-Hey!
-Hey man
-What up?
-Hi, how's it going?
-Hey you!
-Greetings!
-Sup
-Good morning!
+Hiya! Bạn khỏe không?
+Hỏi bạn
+Hỏi bạn nè
+Hỏi bạn tí
+Hỏi bạn tí được không?
+Hỏi cái này nhé
+hỏi nề
+hola
 Hola!
-How are you?
-Howdy!
-Hi how are you?
-What's up
-hey hey hey
-Bonjour
-Hey you
-Greetings my friend, how are you?
-Greetings Earthling.
-Howdy!
-Hows it going?
-Dude! how are you
-What's going on?
-Hey dude.
-Hello to you!
-Hey, whatcha up to?
-Good afternoon
-Hello!
-Hello, how are you?
-ola
-How have you been today?
-Good evening!
-Good day!
-Greetings!
-Yo, what's good?
-Yo, what's up?
-Namasthe, How are you
-Good morning. How are you?
-Salutations!
+Hôm nay bà thế nào?
+Hôm nay bạn sẽ làm gì?
+Hôm nay bạn thế nào rồi
+Hôm nay bạn thế nào?
+Hôm nay ông thế nào?
+John khỏe không?
+Khỏe không Tom?
+khỏe không?
+làm gì đó
+làm gì vậy
+Mấy bữa nay có gì vui không
+Mọi chuyện thế nào rồi?
+Mọi thứ như thế nào rồi?
+Mọi thứ như thế nào?
+Mọi thứ tốt chứ bạn?
+Mọi thứ tốt chứ?
+Mọi việc thế nào?
+Namasthe
+Namasthe, bạn có khỏe không
+Này, mọi chuyện sao rồi?
+Này, mọi chuyện thế nào rồi?
+Này, ông dạo này sao rồi?
+Này, ông dạo này thế nào rồi?
+Ola
+Ông đã như thế nào rồi?
+Ông dạo này có gì lạ không?
+Ông ơi
+Ông ơi có gì lạ không?
+Ông ơi, có gì mới không?
+Ông ơi, có gì mới không?
+Ông ơi, khỏe không?
+Ông ơi, mọi thứ tốt chứ?
+Ông ơi! Khỏe không
+ông thế nào rồi?
+Rất vui được gặp bạn, bạn thế nào rồi?
+Sam, mọi chuyện thế nào rồi?
 Sup!
-Salutations my friend
-Welcome.
-What are you up to?
-Great seeing you!
-whatcha doing
-Hey-o!
-How are ya doing?
-How is your doing going so far?
-Hey buddy
-What are you up do?
-How's it hanging?
-Aloha! 
-Hello, what you up to?
-Whats happening?
-How are you doing today?
-How goes it?
-Hi, whatcha been up to?
-whats good stranger!
-Hey, something new?
-Oh hello
-Ay, how are you?
-How's everything?
-Yo man, Hows it going.
-Good to see you, how have you been?
-G’day mate!
-How's it hanging?
-how are you doing
+Thật tốt khi gặp bạn, bạn đã như thế nào?
+Thật tốt khi gặp bạn, bạn như thế nào rồi?
+Thật tuyệt khi gặp bạn!
+Thế nào rồi?
+Tôi bảo
+Tôi hỏi bạn một tí được không
+Tôi hỏi bạn này được không
+Tôi hỏi cái này được không?
+Tôi hỏi cái này nhé
+Tôi hỏi này một tí
+Tôi hỏi này tí nè
+Tôi hỏi tí
+Tôi hỏi tí nè
+wassup
+xin chào
+Xin chào, bạn khỏe không?
+Xin chào, bạn ổn không?
+Xin chào, bạn thế nào rồi?
+Xin chào, bạn thế nào?
+Xin chào, mọi việc thế nào?
+Xin chào, rất vui được nói chuyện với bạn.
+Xin chào, tôi có thể hỏi bạn một tí được không?
+Xin chào!
+Xin chào! Hy vọng ngày của bạn tiến triển tốt!
+Xin chào. Hôm nay bạn thế nào?
+Xin cho hỏi
+Yo có gì vui không?
+Yo, bạn khỏe không?
+Yo, ông khỏe không?
