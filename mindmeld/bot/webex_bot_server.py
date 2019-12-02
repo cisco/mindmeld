@@ -49,7 +49,7 @@ class WebexBotServer:
             self.nlp.load()
         else:
             self.nlp = nlp
-        self.conv = Conversation(self.nlp, app_path=app_path)
+        self.conv = Conversation(nlp=self.nlp, app_path=app_path)
 
         self.logger = logging.getLogger(__name__)
 
