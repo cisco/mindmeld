@@ -18,7 +18,13 @@ import logging
 
 from .components import DialogueManager, NaturalLanguageProcessor, QuestionAnswerer
 from .components.dialogue import DialogueResponder
-from .components.request import FrozenParams, Params, Request
+from .components.request import (
+    FrozenParams,
+    Params,
+    Request,
+    validate_language_code,
+    validate_locale_code,
+)
 from .resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
@@ -73,13 +79,12 @@ class ApplicationManager:
         app_path,
         nlp=None,
         question_answerer=None,
-        es_host=None,
         request_class=None,
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        language='en',
-        locale=None
+        language=None,
+        locale=None,
     ):
         self.async_mode = async_mode
 
@@ -100,7 +105,7 @@ class ApplicationManager:
 
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
         self.question_answerer = question_answerer or QuestionAnswerer(
-            app_path, resource_loader, es_host
+            app_path, resource_loader
         )
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
@@ -108,8 +113,13 @@ class ApplicationManager:
             self.responder_class, async_mode=self.async_mode
         )
 
-        self.language = language
-        self.locale = locale
+        # if no locale or language is set, we default to english
+        if locale or language:
+            self.locale = validate_locale_code(locale)
+            self.language = validate_language_code(language)
+        else:
+            self.language = "en"
+            self.locale = None
 
     @property
     def ready(self):
@@ -202,9 +212,10 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
 
-        if 'language' not in nlp_params and 'locale' not in nlp_params:
-            nlp_params['language'] = self.language
-            nlp_params['locale'] = self.locale
+        # if there is no language or locale in params we set them to app manager's
+        if not (nlp_params.get("language") or nlp_params.get("locale")):
+            nlp_params["language"] = self.language
+            nlp_params["locale"] = self.locale
 
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
@@ -261,9 +272,10 @@ class ApplicationManager:
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
 
-        if 'language' not in nlp_params and 'locale' not in nlp_params:
-            nlp_params['language'] = self.language
-            nlp_params['locale'] = self.locale
+        # if there is no language or locale in params we set them to app manager's
+        if not (nlp_params.get("language") or nlp_params.get("locale")):
+            nlp_params["language"] = self.language
+            nlp_params["locale"] = self.locale
 
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params

@@ -49,8 +49,8 @@ class Application:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        language='en',
-        locale=None
+        language=None,
+        locale=None,
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
@@ -62,13 +62,34 @@ class Application:
         self._server = None
         self._dialogue_rules = []
         self._middleware = []
-        self.request_class = request_class or Request
-        self.responder_class = responder_class or DialogueResponder
-        self.preprocessor = preprocessor
+        self._app_manager_kwargs = (
+            request_class,
+            responder_class,
+            preprocessor,
+            language,
+            locale,
+        )
         self.async_mode = async_mode
 
-        self.language = language
-        self.locale = locale
+    @property
+    def request_class(self):
+        return self._app_manager_kwargs[0] or Request
+
+    @property
+    def responder_class(self):
+        return self._app_manager_kwargs[1] or DialogueResponder
+
+    @property
+    def preprocessor(self):
+        return self._app_manager_kwargs[2]
+
+    @property
+    def language(self):
+        return self._app_manager_kwargs[3]
+
+    @property
+    def locale(self):
+        return self._app_manager_kwargs[4]
 
     @property
     def question_answerer(self):
@@ -92,7 +113,7 @@ class Application:
             preprocessor=self.preprocessor,
             async_mode=self.async_mode,
             language=self.language,
-            locale=self.locale
+            locale=self.locale,
         )
         self._server = MindMeldServer(self.app_manager)
 
