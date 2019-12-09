@@ -212,10 +212,7 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
 
-        # if there is no language or locale in params we set them to app manager's
-        if not (nlp_params.get("language") or nlp_params.get("locale")):
-            nlp_params["language"] = self.language
-            nlp_params["locale"] = self.locale
+        self.check_language_and_locale(nlp_params)
 
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
@@ -272,10 +269,7 @@ class ApplicationManager:
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
 
-        # if there is no language or locale in params we set them to app manager's
-        if not (nlp_params.get("language") or nlp_params.get("locale")):
-            nlp_params["language"] = self.language
-            nlp_params["locale"] = self.locale
+        self.check_language_and_locale(nlp_params)
 
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
@@ -336,3 +330,9 @@ class ApplicationManager:
             kwargs (dict): A list of options which specify the dialogue rule
         """
         self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)
+
+    def check_language_and_locale(self, nlp_params):
+        # Helper function: if there is no language or locale in params we set them to app manager's
+        if not (nlp_params.get("language") or nlp_params.get("locale")):
+            nlp_params["language"] = self.language
+            nlp_params["locale"] = self.locale
