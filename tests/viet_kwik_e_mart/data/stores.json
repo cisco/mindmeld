@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "store_name": "23 Elm Street",
+    "store_name": "23 Đường Elm",
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "23 Elm Street, Suite 800, Springfield, OR, 97077",
@@ -10,7 +10,7 @@
   },
   {
     "id": "2",
-    "store_name": "Pine and Market",
+    "store_name": "Pine và Market",
     "open_time": "6:00",
     "close_time": "22:00",
     "address": "750 Market Street, Shelbyville, OR, 97086",
@@ -19,7 +19,7 @@
   },
   {
     "id": "3",
-    "store_name": "Central Plaza Store",
+    "store_name": "Cửa hàng Central Plaza",
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "100 Main Street, Suite 800, Capital City, OR, 97080",
@@ -37,7 +37,7 @@
   },
   {
     "id": "5",
-    "store_name": "104 First Street",
+    "store_name": "104 Đường First",
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "104 1st St, North Haverbrook, OR, 97076",
@@ -46,7 +46,7 @@
   },
   {
     "id": "6",
-    "store_name": "Chinatown Store",
+    "store_name": "Cửa hàng ở Phố Tàu",
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "123 Fake St, Springfield, OR, 97077",
@@ -55,7 +55,7 @@
   },
   {
     "id": "7",
-    "store_name": "Little Italy Store",
+    "store_name": "Cửa hàng ở Phố Ý",
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "55 3rd St, Springfield, OR, 97077",
@@ -64,7 +64,7 @@
   },
   {
     "id": "8",
-    "store_name": "Russian District Store",
+    "store_name": "Cửa hàng ở Phố Nga",
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "44 8th Ave, Springfield, OR, 97077",
@@ -73,7 +73,7 @@
   },
   {
     "id": "9",
-    "store_name": "Springfield Mall Store",
+    "store_name": "Cửa hàng Springfield Mall",
     "open_time": "9:00",
     "close_time": "19:00",
     "address": "20 Central Blvd, Springfield, OR, 97077",
@@ -91,7 +91,7 @@
   },
   {
     "id": "11",
-    "store_name": "West Oak Street",
+    "store_name": "Đường West Oak",
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "3 W Oak St, Springfield, OR, 97077",
@@ -100,7 +100,7 @@
   },
   {
     "id": "12",
-    "store_name": "East Oak Street",
+    "store_name": "Đường East Oak",
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "10 E Oak St, Springfield, OR, 97077",
@@ -118,7 +118,7 @@
   },
   {
     "id": "14",
-    "store_name": "Industrial Road",
+    "store_name": "Đường Industrial",
     "open_time": "8:00",
     "close_time": "22:00",
     "address": "15 Industrial Road, North Haverbrook, OR, 97076",
@@ -127,7 +127,7 @@
   },
   {
     "id": "15",
-    "store_name": "156th Street",
+    "store_name": "Đường 156th",
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "122 156th St, Springfield, OR, 97077",
@@ -145,7 +145,7 @@
   },
   {
     "id": "17",
-    "store_name": "181st Street",
+    "store_name": "Đường 181st",
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "90 181st St, Springfield, OR, 97077",
@@ -154,7 +154,7 @@
   },
   {
     "id": "18",
-    "store_name": "257th Street",
+    "store_name": "Đường 257th",
     "open_time": "7:00",
     "close_time": "22:00",
     "address": "88 257th St, Springfield, OR, 97077",
@@ -163,7 +163,7 @@
   },
   {
     "id": "19",
-    "store_name": "D Street",
+    "store_name": "Đường D",
     "open_time": "8:00",
     "close_time": "19:00",
     "address": "1 D Street, Springfield, OR, 97077",
@@ -172,7 +172,7 @@
   },
   {
     "id": "20",
-    "store_name": "Peanut Street",
+    "store_name": "Đường Peanut",
     "open_time": "7:00",
     "close_time": "19:00",
     "address": "50 Peanut St, Springfield, OR, 97077",
@@ -190,7 +190,7 @@
   },
   {
     "id": "22",
-    "store_name": "Krustyland Store",
+    "store_name": "Cửa hàng Krustyland",
     "open_time": "9:00",
     "close_time": "20:00",
     "address": "15 Clown St, Springfield, OR, 97077",
@@ -199,7 +199,7 @@
   },
   {
     "id": "23",
-    "store_name": "Duff Gardens Store",
+    "store_name": "Cửa hàng Duff Gardens",
     "open_time": "9:00",
     "close_time": "19:00",
     "address": "82 Beer Ave, Springfield, OR, 97077",
@@ -208,7 +208,7 @@
   },
   {
     "id": "24",
-    "store_name": "Springfield Heights Store",
+    "store_name": "Cửa hàng Springfield Heights",
     "open_time": "9:00",
     "close_time": "20:00",
     "address": "13 W Oak St, Springfield, OR, 97077",
@@ -217,7 +217,7 @@
   },
   {
     "id": "25",
-    "store_name": "Diz-Nee Land Store",
+    "store_name": "Cửa hàng Diz-Nee Land",
     "open_time": "8:00",
     "close_time": "19:00",
     "address": "67 Anaheim Rd, Springfield, OR, 97077",

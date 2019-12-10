@@ -28,7 +28,7 @@
     {
       "id": "6",
       "cname": "Cửa hàng ở Phố Tàu",
-      "whitelist": ["Tiệm ở Phố Tàu", "Phố Tàu", "Cửa hàng Chinatown", "Tiệm Chinatown", "Chinatown", "123 Đường Fake", "Đường Fake", "123 Fake Street", "123 Fake St", "Fake Street", "Fake St", "Fake"]
+      "whitelist": ["Tiệm ở Phố Tàu", "Cửa hàng Phố Tàu", "Tiệm Phố Tàu", "Phố Tàu", "Cửa hàng Chinatown", "Tiệm Chinatown", "Chinatown", "123 Đường Fake", "Đường Fake", "123 Fake Street", "123 Fake St", "Fake Street", "Fake St", "Fake"]
     },
     {
       "id": "7",
@@ -52,13 +52,13 @@
     },
     {
       "id": "11",
-      "cname": "West Oak Street",
-      "whitelist": ["3 W Oak Street", "3 W Oak St", "W Oak St", "West Oak", "W Oak", "West Oak St", "3 West Oak"]
+      "cname": "Đường West Oak",
+      "whitelist": ["West Oak Street", "3 W Oak Street", "3 W Oak St", "W Oak St", "West Oak", "W Oak", "West Oak St", "3 West Oak"]
     },
     {
       "id": "12",
-      "cname": "East Oak Street",
-      "whitelist": ["10 E Oak Street", "10 E Oak St", "E Oak St", "East Oak", "E Oak", "East Oak St", "10 East Oak St"]
+      "cname": "Đường East Oak",
+      "whitelist": ["East Oak Street", "10 E Oak Street", "10 E Oak St", "E Oak St", "East Oak", "E Oak", "East Oak St", "10 East Oak St"]
     },
     {
       "id": "13",
