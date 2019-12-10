@@ -332,7 +332,11 @@ class ApplicationManager:
         self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)
 
     def check_language_and_locale(self, nlp_params):
-        # Helper function: if there is no language or locale in params we set them to app manager's
+        """If there is no language or locale in params, set them to app manager's.
+
+        Args:
+            nlp_params (dict): A dictionary specifying nlp params
+        """
         if not (nlp_params.get("language") or nlp_params.get("locale")):
             nlp_params["language"] = self.language
             nlp_params["locale"] = self.locale
