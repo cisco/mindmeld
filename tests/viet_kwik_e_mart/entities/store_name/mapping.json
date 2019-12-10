@@ -2,18 +2,18 @@
   "entities": [
     {
       "id": "1",
-      "cname": "23 Elm Street",
-      "whitelist": ["23rd Elm St", "23rd Elm", "23 Elm St", "23 Elm", "Elm Street", "Elm", "Elm St"]
+      "cname": "23 Đường Elm",
+      "whitelist": ["23 Elm Street", "23 Elm", "23 Elm St", "Đường Elm", "Elm", "Elm St", "Elm Street", "23 Đường Elm"]
     },
     {
       "id": "2",
-      "cname": "Pine and Market",
-      "whitelist": ["750 Market Street", "750 Market St", "750 Market", "Pine Street", "Pine St", "Pine", "Market"]
+      "cname": "Pine và Market",
+      "whitelist": ["750 Market Street", "750 Market St", "750 Market", "750 Đường Market", "Đường Market", "Market Street", "Market St", "Đường Pine", "Pine St", "Pine Street", "Pine", "Market"]
     },
     {
       "id": "3",
-      "cname": "Central Plaza Store",
-      "whitelist": ["100 Main Street", "100 Main St", "100 Main", "Main", "Central Store", "Central Plaza"]
+      "cname": "Cửa hàng Central Plaza",
+      "whitelist": ["Tiệm Central Plaza", "100 Đường Main", "100 Main Street", "100 Main St", "100 Main", "Main", "Cửa hàng Central", "Tiệm Central", "Central Plaza"]
     },
     {
       "id": "4",
@@ -22,28 +22,28 @@
     },
     {
       "id": "5",
-      "cname": "104 First Street",
-      "whitelist": ["104 First", "104 1st St", "1st St", "First", "North Haverbrook", "N Haverbrook", "Haverbrook"]
+      "cname": "104 Đường First",
+      "whitelist": ["104 First Street", "104 First", "104 1st St", "1st St", "First", "Đường First", "Đường 1st", "104 Đường Số 1", "Đường Số 1", "North Haverbrook", "N Haverbrook", "Haverbrook"]
     },
     {
       "id": "6",
-      "cname": "Chinatown Store",
-      "whitelist": ["Chinatown", "123 Fake Street", "123 Fake St", "Fake Street", "Fake St", "Fake"]
+      "cname": "Cửa hàng ở Phố Tàu",
+      "whitelist": ["Tiệm ở Phố Tàu", "Phố Tàu", "Cửa hàng Chinatown", "Tiệm Chinatown", "Chinatown", "123 Đường Fake", "Đường Fake", "123 Fake Street", "123 Fake St", "Fake Street", "Fake St", "Fake"]
     },
     {
       "id": "7",
-      "cname": "Little Italy Store",
-      "whitelist": ["Little Italy", "55 3rd Street", "55 3rd St", "3rd St", "Third", "Third Street"]
+      "cname": "Cửa hàng ở Phố Ý",
+      "whitelist": ["Tiệm ở Phố Ý", "Phố Ý", "Cửa hàng Phố Ý", "Tiệm Phố Ý", "Little Italy", "55 Đường 3rd", "55 Đường Số 3", "55 3rd Street", "55 3rd St", "3rd St", "Đường Số 3"]
     },
     {
       "id": "8",
-      "cname": "Russian District Store",
-      "whitelist": ["Russian District", "Russian", "44 8th Avenue", "8th Avenue", "44 8th Ave", "8th Ave", "Eighth"]
+      "cname": "Cửa hàng ở Phố Nga",
+      "whitelist": ["Tiệm ở Phố Nga", "Cửa hàng Phố Nga", "Tiệm Phố Nga", "Phố Nga", "Russian District", "Nga", "Russian", "44 8th Avenue", "8th Avenue", "44 8th Ave", "8th Ave", "Eighth"]
     },
     {
       "id": "9",
-      "cname": "Springfield Mall Store",
-      "whitelist": ["Springfield Mall", "Mall", "20 Central Boulevard", "20 Central", "Central", "Central Blvd", "Central Boulevard"]
+      "cname": "Cửa hàng Springfield Mall",
+      "whitelist": ["Tiệm Springfield Mall", "Springfield Mall", "Mall", "20 Central Boulevard", "Số 20 Central", "20 Central", "Central", "Central Blvd", "Central Boulevard"]
     },
     {
       "id": "10",
@@ -63,17 +63,17 @@
     {
       "id": "13",
       "cname": "Rural Route 27",
-      "whitelist": ["550 Rural Route 27", "550 Rural Rte 27", "Rural Route", "Rural Rte", "Rte 27", "Route 27", "RR27", "RR 27"]
+      "whitelist": ["550 Rural Route 27", "550 Rural Rte 27", "Rural Route", "Rural Rte", "Rte 27", "Route 27", "Quốc lộ 27", "RR27", "RR 27"]
     },
     {
       "id": "14",
-      "cname": "Industrial Road",
-      "whitelist": ["15 Industrial Road", "Industrial", "15 Industrial Rd", "Industrial Rd"]
+      "cname": "Đường Industrial",
+      "whitelist": ["Số 15 Đường Industrial", "Industrial Road", "15 Industrial Road", "Industrial", "15 Industrial Rd", "Industrial Rd"]
     },
     {
       "id": "15",
-      "cname": "156th Street",
-      "whitelist": ["122 156th Street", "156th St", "122 156th St", "156th"]
+      "cname": "Đường 156th",
+      "whitelist": ["Đường 156", "156th Street", "122 Đường 156th", "Số 122 Đường 156", "122 156th Street", "156th St", "122 156th St", "156th"]
     },
     {
       "id": "16",
@@ -82,48 +82,48 @@
     },
     {
       "id": "17",
-      "cname": "181st Street",
-      "whitelist": ["90 181st Street", "181st St", "90 181st St", "181st"]
+      "cname": "Đường 181st",
+      "whitelist": ["Đường 181", "181st Street", "90 Đường 181st", "Số 90 Đường 181", "90 181st Street", "181st St", "90 181st St", "181st"]
     },
     {
       "id": "18",
-      "cname": "257th Street",
-      "whitelist": ["88 257th Street", "88 257th St", "257th St", "257th"]
+      "cname": "Đường 257th",
+      "whitelist": ["Đường 257", "257th Street", "88 Đường 257th", "Số 88 Đường 257", "88 257th Street", "88 257th St", "257th St", "257th"]
     },
     {
       "id": "19",
-      "cname": "D Street",
-      "whitelist": ["1 D Street", "D St", "1 D St", "D"]
+      "cname": "Đường D",
+      "whitelist": ["Số 1 Đường D", "1 Đường D", "1 D Street", "D St", "1 D St", "D", "D Street"]
     },
     {
       "id": "20",
-      "cname": "Peanut Street",
-      "whitelist": ["50 Peanut Street", "50 Peanut St", "50 Peanut", "Peanut St", "Peanut"]
+      "cname": "Đường Peanut",
+      "whitelist": ["Peanut Street", "Số 50 Đường Peanut", "50 Đường Peanut", "50 Peanut Street", "50 Peanut St", "Số 50 Peanut", "50 Peanut", "Peanut St", "Peanut"]
     },
     {
       "id": "21",
       "cname": "Sycamore Avenue",
-      "whitelist": ["101 Sycamore Avenue", "101 Sycamore Ave", "Sycamore Ave", "101 Sycamore", "Sycamore"]
+      "whitelist": ["101 Sycamore Avenue", "101 Sycamore Ave", "Sycamore Ave", "Số 101 Sycamore", "101 Sycamore", "Sycamore"]
     },
     {
       "id": "22",
-      "cname": "Krustyland Store",
-      "whitelist": ["Krustyland", "15 Clown Street", "15 Clown St", "15 Clown", "Clown St", "Clown Street", "Clown"]
+      "cname": "Cửa hàng Krustyland",
+      "whitelist": ["Tiệm Krustyland", "Krustyland", "15 Đường Clown", "Số 15 Đường Clown", "15 Clown Street", "15 Clown St", "Số 15 Clown", "15 Clown", "Clown St", "Đường Clown", "Clown Street", "Clown"]
     },
     {
       "id": "23",
-      "cname": "Duff Gardens Store",
-      "whitelist": ["Duff Gardens", "82 Beer Avenue", "82 Beer Ave", "82 Beer", "Beer Avenue", "Beer Ave", "Beer"]
+      "cname": "Cửa hàng Duff Gardens",
+      "whitelist": ["Tiệm Duff Gardens", "Duff Gardens", "82 Beer Avenue", "82 Beer Ave", "Số 82 Beer", "82 Beer", "Beer Avenue", "Beer Ave", "Beer"]
     },
     {
       "id": "24",
-      "cname": "Springfield Heights Store",
-      "whitelist": ["Springfield Heights", "13 West Oak St", "13 W Oak St", "13 West Oak", "13 W Oak"]
+      "cname": "Cửa hàng Springfield Heights",
+      "whitelist": ["Tiệm Springfield Heights", "Springfield Heights", "13 West Oak St", "13 W Oak St", "13 West Oak", "13 W Oak"]
     },
     {
       "id": "25",
-      "cname": "Diz-Nee Land Store",
-      "whitelist": ["Diz-Nee Land", "Diz-Nee", "67 Anaheim Road", "67 Anaheim Rd", "67 Anaheim", "Anaheim Road", "Anaheim Rd", "Anaheim"]
+      "cname": "Cửa hàng Diz-Nee Land",
+      "whitelist": ["Tiệm Diz-Nee Land", "Diz-Nee Land", "Diz-Nee", "67 Đường Anaheim", "Số 67 Đường Anaheim", "Đường Anaheim", "67 Anaheim Road", "67 Anaheim Rd", "67 Anaheim", "Anaheim Road", "Anaheim Rd", "Anaheim"]
     }
   ]
 }
