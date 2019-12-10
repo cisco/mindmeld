@@ -79,13 +79,14 @@ class ApplicationManager:
         app_path,
         nlp=None,
         question_answerer=None,
+        es_host=None,
         request_class=None,
         responder_class=None,
         preprocessor=None,
         async_mode=False,
         language=None,
         locale=None,
-    ):
+    ):  # pylint: disable=too-many-arguments
         self.async_mode = async_mode
 
         self._app_path = app_path
@@ -105,7 +106,7 @@ class ApplicationManager:
 
         self.nlp = nlp or NaturalLanguageProcessor(app_path, resource_loader)
         self.question_answerer = question_answerer or QuestionAnswerer(
-            app_path, resource_loader
+            app_path, resource_loader, es_host
         )
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
