@@ -1,0 +1,227 @@
+[
+  {
+    "id": "1",
+    "store_name": "23 Elm Street",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "23 Elm Street, Suite 800, Springfield, OR, 97077",
+    "location": { "lat": 44.046236, "lon": -123.022029 },
+    "phone_number": "541-555-1100"
+  },
+  {
+    "id": "2",
+    "store_name": "Pine and Market",
+    "open_time": "6:00",
+    "close_time": "22:00",
+    "address": "750 Market Street, Shelbyville, OR, 97086",
+    "location": { "lat": 44.028371, "lon": -123.088074 },
+    "phone_number": "541-555-4500"
+  },
+  {
+    "id": "3",
+    "store_name": "Central Plaza Store",
+    "open_time": "8:00",
+    "close_time": "22:00",
+    "address": "100 Main Street, Suite 800, Capital City, OR, 97080",
+    "location": { "lat": 44.939529, "lon": -123.026276 },
+    "phone_number": "458-100-1100"
+  },
+  {
+    "id": "4",
+    "store_name": "45 Fifth Avenue",
+    "open_time": "6:00",
+    "close_time": "22:00",
+    "address": "45 5th Ave, Ogdenville, OR, 97075",
+    "location": { "lat": 42.309815, "lon": -122.838135 },
+    "phone_number": "541-150-1100"
+  },
+  {
+    "id": "5",
+    "store_name": "104 First Street",
+    "open_time": "8:00",
+    "close_time": "22:00",
+    "address": "104 1st St, North Haverbrook, OR, 97076",
+    "location": { "lat": 45.512121, "lon": -122.662354 },
+    "phone_number": "541-100-1101"
+  },
+  {
+    "id": "6",
+    "store_name": "Chinatown Store",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "123 Fake St, Springfield, OR, 97077",
+    "location": { "lat": 43.916236, "lon": -122.972029 },
+    "phone_number": "541-555-1141"
+  },
+  {
+    "id": "7",
+    "store_name": "Little Italy Store",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "55 3rd St, Springfield, OR, 97077",
+    "location": { "lat": 44.055136, "lon": -123.044229 },
+    "phone_number": "541-555-1142"
+  },
+  {
+    "id": "8",
+    "store_name": "Russian District Store",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "44 8th Ave, Springfield, OR, 97077",
+    "location": { "lat": 43.946236, "lon": -122.891029 },
+    "phone_number": "541-555-1143"
+  },
+  {
+    "id": "9",
+    "store_name": "Springfield Mall Store",
+    "open_time": "9:00",
+    "close_time": "19:00",
+    "address": "20 Central Blvd, Springfield, OR, 97077",
+    "location": { "lat": 44.076246, "lon": -123.022526 },
+    "phone_number": "541-555-1144"
+  },
+  {
+    "id": "10",
+    "store_name": "Evergreen Terrace",
+    "open_time": "8:00",
+    "close_time": "22:00",
+    "address": "145 Evergreen Terrace, Springfield, OR, 97077",
+    "location": { "lat": 44.056236, "lon": -122.812029 },
+    "phone_number": "541-555-1145"
+  },
+  {
+    "id": "11",
+    "store_name": "West Oak Street",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "3 W Oak St, Springfield, OR, 97077",
+    "location": { "lat": 44.146236, "lon": -122.942029 },
+    "phone_number": "541-555-1146"
+  },
+  {
+    "id": "12",
+    "store_name": "East Oak Street",
+    "open_time": "8:00",
+    "close_time": "22:00",
+    "address": "10 E Oak St, Springfield, OR, 97077",
+    "location": { "lat": 44.036336, "lon": -123.022229 },
+    "phone_number": "541-555-1147"
+  },
+  {
+    "id": "13",
+    "store_name": "Rural Route 27",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "550 Rural Rte 27, Ogdenville, OR, 97075",
+    "location": { "lat": 42.329815, "lon": -122.898935 },
+    "phone_number": "541-555-1148"
+  },
+  {
+    "id": "14",
+    "store_name": "Industrial Road",
+    "open_time": "8:00",
+    "close_time": "22:00",
+    "address": "15 Industrial Road, North Haverbrook, OR, 97076",
+    "location": { "lat": 45.522121, "lon": -122.672354 },
+    "phone_number": "541-555-1149"
+  },
+  {
+    "id": "15",
+    "store_name": "156th Street",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "122 156th St, Springfield, OR, 97077",
+    "location": { "lat": 43.896236, "lon": -123.022029 },
+    "phone_number": "541-555-1150"
+  },
+  {
+    "id": "16",
+    "store_name": "12th Avenue",
+    "open_time": "9:00",
+    "close_time": "22:00",
+    "address": "92 12th Ave, Springfield, OR, 97077",
+    "location": { "lat": 44.046666, "lon": -123.022222 },
+    "phone_number": "541-555-1151"
+  },
+  {
+    "id": "17",
+    "store_name": "181st Street",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "90 181st St, Springfield, OR, 97077",
+    "location": { "lat": 44.246236, "lon": -122.882029 },
+    "phone_number": "541-555-1152"
+  },
+  {
+    "id": "18",
+    "store_name": "257th Street",
+    "open_time": "7:00",
+    "close_time": "22:00",
+    "address": "88 257th St, Springfield, OR, 97077",
+    "location": { "lat": 43.846236, "lon": -123.000029 },
+    "phone_number": "541-555-1153"
+  },
+  {
+    "id": "19",
+    "store_name": "D Street",
+    "open_time": "8:00",
+    "close_time": "19:00",
+    "address": "1 D Street, Springfield, OR, 97077",
+    "location": { "lat": 44.246236, "lon": -123.122029 },
+    "phone_number": "541-555-1154"
+  },
+  {
+    "id": "20",
+    "store_name": "Peanut Street",
+    "open_time": "7:00",
+    "close_time": "19:00",
+    "address": "50 Peanut St, Springfield, OR, 97077",
+    "location": { "lat": 44.046236, "lon": -122.902029 },
+    "phone_number": "541-555-1155"
+  },
+  {
+    "id": "21",
+    "store_name": "Sycamore Avenue",
+    "open_time": "8:00",
+    "close_time": "18:00",
+    "address": "101 Sycamore Ave, Springfield, OR, 97077",
+    "location": { "lat": 44.146236, "lon": -123.021029 },
+    "phone_number": "541-555-1156"
+  },
+  {
+    "id": "22",
+    "store_name": "Krustyland Store",
+    "open_time": "9:00",
+    "close_time": "20:00",
+    "address": "15 Clown St, Springfield, OR, 97077",
+    "location": { "lat": 43.999936, "lon": -123.111029 },
+    "phone_number": "541-555-1157"
+  },
+  {
+    "id": "23",
+    "store_name": "Duff Gardens Store",
+    "open_time": "9:00",
+    "close_time": "19:00",
+    "address": "82 Beer Ave, Springfield, OR, 97077",
+    "location": { "lat": 44.006206, "lon": -123.130029 },
+    "phone_number": "541-555-1158"
+  },
+  {
+    "id": "24",
+    "store_name": "Springfield Heights Store",
+    "open_time": "9:00",
+    "close_time": "20:00",
+    "address": "13 W Oak St, Springfield, OR, 97077",
+    "location": { "lat": 43.042236, "lon": -122.988829 },
+    "phone_number": "541-555-1159"
+  },
+  {
+    "id": "25",
+    "store_name": "Diz-Nee Land Store",
+    "open_time": "8:00",
+    "close_time": "19:00",
+    "address": "67 Anaheim Rd, Springfield, OR, 97077",
+    "location": { "lat": 44.000206, "lon": -123.022199 },
+    "phone_number": "541-555-1160"
+  }
+]
