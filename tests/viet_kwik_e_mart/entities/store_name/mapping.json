@@ -3,7 +3,7 @@
     {
       "id": "1",
       "cname": "23 Đường Elm",
-      "whitelist": ["23 Elm Street", "23 Elm", "23 Elm St", "Đường Elm", "Elm", "Elm St", "Elm Street", "23 Đường Elm"]
+      "whitelist": ["23 Elm Street", "23 Elm", "23 Elm St", "23rd Elm St", "23rd Elm", "Đường Elm", "Elm", "Elm St", "Elm Street", "23 Đường Elm"]
     },
     {
       "id": "2",
@@ -33,12 +33,12 @@
     {
       "id": "7",
       "cname": "Cửa hàng ở Phố Ý",
-      "whitelist": ["Tiệm ở Phố Ý", "Phố Ý", "Cửa hàng Phố Ý", "Tiệm Phố Ý", "Little Italy", "55 Đường 3rd", "55 Đường Số 3", "55 3rd Street", "55 3rd St", "3rd St", "Đường Số 3"]
+      "whitelist": ["Tiệm ở Phố Ý", "Phố Ý", "Cửa hàng Phố Ý", "Tiệm Phố Ý", "Little Italy", "55 Đường 3rd", "55 Đường Số 3", "55 3rd Street", "55 3rd St", "3rd St", "Đường Số 3", "Cửa hàng Little Italy", "Tiệm Little Italy"]
     },
     {
       "id": "8",
       "cname": "Cửa hàng ở Phố Nga",
-      "whitelist": ["Tiệm ở Phố Nga", "Cửa hàng Phố Nga", "Tiệm Phố Nga", "Phố Nga", "Russian District", "Nga", "Russian", "44 8th Avenue", "8th Avenue", "44 8th Ave", "8th Ave", "Eighth"]
+      "whitelist": ["Tiệm ở Phố Nga", "Cửa hàng Phố Nga", "Tiệm Phố Nga", "Phố Nga", "Russian District", "Nga", "Russian", "44 8th Avenue", "8th Avenue", "44 8th Ave", "8th Ave", "Eighth", "Cửa hàng Russian District", "Tiệm Russian District"]
     },
     {
       "id": "9",
@@ -73,7 +73,7 @@
     {
       "id": "15",
       "cname": "Đường 156th",
-      "whitelist": ["Đường 156", "156th Street", "122 Đường 156th", "Số 122 Đường 156", "122 156th Street", "156th St", "122 156th St", "156th"]
+      "whitelist": ["Đường 156", "156th Street", "122 Đường 156th", "Số 122 Đường 156", "122 Đường 156", "122 156th Street", "156th St", "122 156th St", "156th"]
     },
     {
       "id": "16",
@@ -113,7 +113,7 @@
     {
       "id": "23",
       "cname": "Cửa hàng Duff Gardens",
-      "whitelist": ["Tiệm Duff Gardens", "Duff Gardens", "82 Beer Avenue", "82 Beer Ave", "Số 82 Beer", "82 Beer", "Beer Avenue", "Beer Ave", "Beer"]
+      "whitelist": ["Tiệm Duff Gardens", "Duff Gardens", "82 Beer Avenue", "82 Beer Ave", "Số 82 Beer", "Số 82 Beer Avenue", "Số 82 Beer Ave", "82 Beer", "Beer Avenue", "Beer Ave", "Beer"]
     },
     {
       "id": "24",

@@ -1,23 +1,31 @@
+23 Đường Elm
 23 Elm Street
 23rd Elm St
 23rd Elm
+Đường Elm
 23 Elm St
 23 Elm
 Elm Street
 Elm
 Elm St
-Pine and Market
+Pine và Market
 750 Market Street
 750 Market St
 750 Market
+750 Đường Market
+Đường Market
 Pine
 Market
-Central Plaza Store
+Cửa hàng Central Plaza
+Tiệm Central Plaza
+Central Plaza
+100 Đường Main
+Tiệm Central
+Cửa hàng Central
 100 Main Street
 100 Main St
 100 Main
 Main
-Central Store
 Central Plaza
 45 Fifth Avenue
 45 Fifth Ave
@@ -28,6 +36,10 @@ Fifth
 5th Ave
 5th
 Ogdenville
+104 Đường First
+Đường First
+104 Đường Số 1
+Đường Số 1
 104 First Street
 104 First
 104 1st St
@@ -36,31 +48,55 @@ First
 North Haverbrook
 N Haverbrook
 Haverbrook
-Chinatown Store
+Cửa hàng ở Phố Tàu
+Tiệm ở Phố Tàu
+Tiệm Chinatown
+Tiệm Phố Tàu
+Cửa hàng Phố Tàu
+123 Đường Fake
+Đường Fake
 Chinatown
 123 Fake Street
 123 Fake St
 Fake Street
 Fake St
 Fake
-Little Italy Store
+Cửa hàng ở Phố Ý
+Tiệm ở Phố Ý
+Phố Ý
+Cửa hàng Phố Ý
+Tiệm Phố Ý
+Tiệm Little Italy
+Cửa hàng Little Italy
+55 Đường 3rd
+55 Đường Số 3
+Đường Số 3
 Little Italy
 55 3rd Street
 55 3rd St
 3rd St
 Third
 Third Street
-Russian District Store
+Cửa hàng Russian District
+Tiệm Russian District
 Russian District
 Russian
+Nga
+Tiệm ở Phố Nga
+Cửa hàng Phố Nga
+Cửa hàng ở Phố Nga
+Tiệm Phố Nga
+Phố Nga
 44 8th Avenue
 8th Avenue
 44 8th Ave
 8th Ave
 Eighth
-Springfield Mall Store
+Cửa hàng Springfield Mall
+Tiệm Springfield Mall
 Springfield Mall
 Mall
+Số 20 Central
 20 Central Boulevard
 20 Central
 Central
@@ -72,6 +108,7 @@ Evergreen Terrace
 Evergreen Terr
 Evergreen Ter
 Evergreen
+Đường West Oak
 West Oak Street
 3 W Oak Street
 3 W Oak St
@@ -80,6 +117,7 @@ West Oak
 W Oak
 West Oak St
 3 West Oak
+Đường East Oak
 East Oak Street
 10 E Oak Street
 10 E Oak St
@@ -91,17 +129,25 @@ East Oak St
 Rural Route 27
 550 Rural Route 27
 550 Rural Rte 27
+Quốc lộ 27
 Rural Route
 Rural Rte
 Rte 27
 Route 27
 RR27
 RR 27
+Đường Industrial
+Số 15 Đường Industrial
 Industrial Road
 15 Industrial Road
 Industrial
 15 Industrial Rd
 Industrial Rd
+Đường 156th
+Đường 156
+122 Đường 156th
+122 Đường 156
+Số 122 Đường 156
 156th Street
 122 156th Street
 156th St
@@ -113,21 +159,36 @@ Industrial Rd
 12th Ave
 12th
 twelfth
+Đường 181st
+Đường 181
+90 Đường 181st
+Số 90 Đường 181
 181st Street
 90 181st Street
 181st St
 90 181st St
 181st
+Đường 257th
+Đường 257
+88 Đường 257th
+Số 88 Đường 257
 257th Street
 88 257th Street
 88 257th St
 257th St
 257th
+Đường D
+Số 1 Đường D
+1 Đường D
 D Street
 1 D Street
 D St
 1 D St
 D
+Đường Peanut
+Số 50 Đường Peanut
+50 Đường Peanut
+Số 50 Peanut
 Peanut Street
 50 Peanut Street
 50 Peanut St
@@ -140,7 +201,12 @@ Sycamore Avenue
 Sycamore Ave
 101 Sycamore
 Sycamore
-Krustyland Store
+Cửa hàng Krustyland
+Tiệm Krustyland
+15 Đường Clown
+Số 15 Đường Clown
+Số 15 Clown
+Đường Clown
 Krustyland
 15 Clown Street
 15 Clown St
@@ -148,7 +214,11 @@ Krustyland
 Clown St
 Clown Street
 Clown
-Duff Gardens Store
+Cửa hàng Duff Gardens
+Tiệm Duff Gardens
+Số 82 Beer
+Số 82 Beer Avenue
+Số 82 Beer Ave
 Duff Gardens
 82 Beer Avenue
 82 Beer Ave
@@ -156,13 +226,18 @@ Duff Gardens
 Beer Avenue
 Beer Ave
 Beer
-Springfield Heights Store
+Cửa hàng Springfield Heights
+Tiệm Springfield Heights
 Springfield Heights
 13 West Oak St
 13 W Oak St
 13 West Oak
 13 W Oak
-Diz-Nee Land Store
+Cửa hàng Diz-Nee Land
+Tiệm Diz-Nee Land
+67 Đường Anaheim
+Số 67 Đường Anaheim
+Đường Anaheim
 Diz-Nee Land
 Diz-Nee
 67 Anaheim Road
