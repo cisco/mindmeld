@@ -26,7 +26,9 @@ warnings.filterwarnings(
 
 
 APP_NAME = "kwik_e_mart"
+VI_APP_NAME = "viet_kwik_e_mart"
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
+VI_APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), VI_APP_NAME)
 FOOD_ORDERING_APP_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "food_ordering"
 )
@@ -70,6 +72,11 @@ def lstm_entity_config():
 @pytest.fixture(scope="session")
 def kwik_e_mart_app_path():
     return APP_PATH
+
+
+@pytest.fixture(scope="session")
+def vi_kwik_e_mart_app_path():
+    return VI_APP_PATH
 
 
 @pytest.fixture(scope="session")
@@ -131,6 +138,23 @@ def home_assistant_nlp(home_assistant_app_path):
 
 @pytest.fixture(scope="session")
 def kwik_e_mart_app(kwik_e_mart_nlp):
+    from .kwik_e_mart import app
+
+    app.lazy_init(kwik_e_mart_nlp)
+    return app
+
+
+@pytest.fixture(scope="session")
+def vi_kwik_e_mart_nlp(vi_kwik_e_mart_app_path):
+    """Provides a built processor instance"""
+    nlp = NaturalLanguageProcessor(app_path=vi_kwik_e_mart_app_path)
+    nlp.build()
+    nlp.dump()
+    return nlp
+
+
+@pytest.fixture(scope="session")
+def vi_kwik_e_mart_app(kwik_e_mart_nlp):
     from .kwik_e_mart import app
 
     app.lazy_init(kwik_e_mart_nlp)
