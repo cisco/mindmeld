@@ -63,8 +63,8 @@ class Application:
         self._dialogue_rules = []
         self._middleware = []
         self._app_manager_kwargs = (
-            request_class,
-            responder_class,
+            request_class or Request,
+            responder_class or DialogueResponder,
             preprocessor,
             language,
             locale,
@@ -73,11 +73,11 @@ class Application:
 
     @property
     def request_class(self):
-        return self._app_manager_kwargs[0] or Request
+        return self._app_manager_kwargs[0]
 
     @property
     def responder_class(self):
-        return self._app_manager_kwargs[1] or DialogueResponder
+        return self._app_manager_kwargs[1]
 
     @property
     def preprocessor(self):
