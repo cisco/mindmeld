@@ -3,7 +3,7 @@
     {
       "id": "1",
       "cname": "23 Đường Elm",
-      "whitelist": ["23 Elm Street", "23 Elm", "23 Elm St", "23rd Elm St", "23rd Elm", "Đường Elm", "Elm", "Elm St", "Elm Street", "23 Đường Elm"]
+      "whitelist": ["23 Elm Street", "23 Elm", "23 Elm St", "23rd Elm St", "23rd Elm", "Đường Elm", "Elm", "Elm St", "Elm Street"]
     },
     {
       "id": "2",
@@ -13,7 +13,7 @@
     {
       "id": "3",
       "cname": "Cửa hàng Central Plaza",
-      "whitelist": ["Tiệm Central Plaza", "100 Đường Main", "100 Main Street", "100 Main St", "100 Main", "Main", "Cửa hàng Central", "Tiệm Central", "Central Plaza"]
+      "whitelist": ["Tiệm Central Plaza", "100 Đường Main", "100 Main Street", "100 Main St", "100 Main", "Main", "Cửa hàng Central", "Tiệm Central", "Central Plaza", "Main Street", "Đường Main"]
     },
     {
       "id": "4",
@@ -58,7 +58,7 @@
     {
       "id": "12",
       "cname": "Đường East Oak",
-      "whitelist": ["East Oak Street", "10 E Oak Street", "10 E Oak St", "E Oak St", "East Oak", "E Oak", "East Oak St", "10 East Oak St"]
+      "whitelist": ["East Oak Street", "10 E Oak Street", "10 E Oak St", "E Oak St", "East Oak", "E Oak", "East Oak St", "Đường E Oak", "10 East Oak St"]
     },
     {
       "id": "13",
