@@ -5,6 +5,10 @@ Webex Teams Integration
 A conversational app built using MindMeld can be integrated seamlessly with Webex Teams.
 In this tutorial, we will create a Webex Teams bot based on the :doc:`Food Ordering <../blueprints/food_ordering>` blueprint. The food ordering app is an example of a deep-domain conversational agent that uses a knowledge base of restaurants and menu items to understand complex user queries that reference dishes from different restaurant menus.
 
+.. note::
+
+   Please make sure to install Webex Teams dependency by running in shell: :code:`pip install mindmeld[bot]`.
+
 Quick Start
 -----------
 
