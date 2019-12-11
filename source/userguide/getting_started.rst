@@ -5,7 +5,7 @@ These instructions explain how to install MindMeld on a Unix-based system and se
 
 .. note::
 
-  MindMeld requires Python 3.4, 3.5, 3.6 or 3.7.
+  MindMeld requires Python 3.5, 3.6 or 3.7.
 
 
 Install MindMeld
