@@ -9,6 +9,7 @@ Configurations for tests. Include shared fixtures here.
 # pylint: disable=locally-disabled,redefined-outer-name
 import asyncio
 import codecs
+from distutils.util import strtobool
 import os
 import warnings
 
@@ -209,3 +210,20 @@ class FakeApp:
 @pytest.fixture
 def fake_app():
     return FakeApp("123")
+
+
+def pytest_collection_modifyitems(config, items):
+    use_extras = strtobool(os.environ.get("MM_EXTRAS", "false"))
+    skip_markers = ["no_extras"] if use_extras else ["extras"]
+    skip = pytest.mark.skip(
+        reason=(
+            "Skipping tests which require a clean mindmeld install"
+            if use_extras
+            else "Skipping tests which require mindmeld extras"
+        )
+    )
+
+    for item in items:
+        for marker in skip_markers:
+            if marker in item.keywords:
+                item.add_marker(skip)
