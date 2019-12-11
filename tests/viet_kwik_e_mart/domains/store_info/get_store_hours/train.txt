@@ -1,95 +1,95 @@
 {Đường 181st|store_name} đang đóng cửa vì đang xây dựng. Tôi vẫn có thể đến {Đường 257th|store_name} chứ?
 {Đường 181|store_name} có mở cửa 24 tiếng không?
-{Đường 257|store_name} có mở {Christmas|sys_time} không?
+{Đường 257|store_name} có mở {Giáng Sinh|sys_time} không?
 {257th st|store_name} có đóng chưa?
-{Central Plaza|store_name} có đóng cửa sớm {today|sys_time} không?
-{Cửa hàng ở Phố Tàu|store_name} có đóng cửa sớm ngày {july 4th|sys_time} không
-{christmas day|sys_time} cửa hàng {little italy|store_name} đóng cửa mấy giờ?
-{D street|store_name} có mở {yesterday|sys_time} không?
-{Đường D|store_name} có mở cửa lúc 6 giờ sáng {tomorrow|sys_time} không?
+{Central Plaza|store_name} có đóng cửa sớm {hôm nay|sys_time} không?
+{Cửa hàng ở Phố Tàu|store_name} có đóng cửa sớm ngày {ngày 04 tháng 7|sys_time} không
+{ngày Giáng Sinh|sys_time} cửa hàng {little italy|store_name} đóng cửa mấy giờ?
+{D street|store_name} có mở {hôm qua|sys_time} không?
+{Đường D|store_name} có mở cửa lúc 6 giờ sáng {ngày mai|sys_time} không?
 {Số 1 Đường D|store_name} có mở cửa ngày học không?
 {1 Đường D|store_name} đang rất đông. {181st|store_name} vẫn mở chứ?
 {Cửa hàng Diz-Nee Land|store_name} có mở bây giờ không?
-{E oak|store_name} sẽ mở {tomorrow|sys_time} không?
+{E oak|store_name} sẽ mở {ngày mai|sys_time} không?
 {east oak street|store_name} sẽ mở cửa đến 12h khuya không?
-{Elm Street|store_name} có mở {tomorrow|sys_time} không?
-{friday|sys_time} cửa hàng {104 first street|store_name} đóng cửa mấy giờ?
-{friday|sys_time} khi nào {Phố Nga|store_name} đóng vậy
-{Industrial Road|store_name} có đóng cửa trước 12h khuya {today|sys_time} không?
+{Elm Street|store_name} có mở {ngày mai|sys_time} không?
+{Thứ sáu|sys_time} cửa hàng {104 first street|store_name} đóng cửa mấy giờ?
+{Thứ sáu|sys_time} khi nào {Phố Nga|store_name} đóng vậy
+{Industrial Road|store_name} có đóng cửa trước 12h khuya {hôm nay|sys_time} không?
 {Đường Industrial|store_name} sẽ mở lúc mấy giờ?
-{Main Street|store_name} có mở {Thanksgiving|sys_time} không?
+{Main Street|store_name} có mở {Lễ tạ ơn|sys_time} không?
 {mall|store_name} đang mở không
-{Đường Market|store_name} có mở cửa {Tuesday|sys_time} không?
+{Đường Market|store_name} có mở cửa {thứ ba|sys_time} không?
 {750 Market|store_name} sẽ đóng cửa ngày lễ không
-{monday|sys_time} giờ mở cửa tiệm {sycamore ave|store_name} là thế nào
-{next Thursday|sys_time} cửa hàng {Industrial road|store_name} sẽ đóng mấy giờ?
-{r route 27|store_name} có mở khuya {monday|sys_time} không?
-{Rockefeller|store_name} Kwik-E-Mart có mở cửa {tomorrow|sys_time} không?
-{Route 27|store_name} có mở {tomorrow|sys_time} không?
-{RR27|store_name} có sẽ mở {tomorrow|sys_time} không?
+{Thứ hai|sys_time} giờ mở cửa tiệm {sycamore ave|store_name} là thế nào
+{Thứ năm tới|sys_time} cửa hàng {Industrial road|store_name} sẽ đóng mấy giờ?
+{r route 27|store_name} có mở khuya {thứ hai|sys_time} không?
+{Rockefeller|store_name} Kwik-E-Mart có mở cửa {ngày mai|sys_time} không?
+{Route 27|store_name} có mở {ngày mai|sys_time} không?
+{RR27|store_name} có sẽ mở {ngày mai|sys_time} không?
 {rural route 27|store_name} có mở bây giờ không?
 {russian district|store_name} còn mở không
-{Saturday|sys_time} khi nào nó mở?
+{Thứ bảy|sys_time} khi nào nó mở?
 {springfield|store_name} mở lúc mấy giờ
 {springfield mall|store_name} mở cửa lúc mấy giờ
 {Tiệm Springfield Mall|store_name} sẽ mở cửa mấy giờ và đóng cửa mấy giờ
-{Sunday|sys_time} bạn mở tiệm {little italy|store_name} mấy giờ
-{Sunday|sys_time} giờ mở ở {Đường E Oak|store_name} sẽ khác mọi thường không?
-{terrace|store_name} có đóng {Thanksgiving|sys_time} không
-{today|sys_time} cửa hàng {Cửa hàng Central Plaza|store_name} mấy giờ?
-{tomorrow|sys_time} {Rural route 27|store_name} sẽ mở trước 7 giờ sáng không?
-{tomorrow|sys_time} cái tiệm kwikemart ở {Đường East Oak|store_name} sẽ mở trước khi giờ làm không?
-{tomorrow|sys_time} lúc nào cửa hàng {12th Avenue|store_name} mở cửa?
-{Tuesday|sys_time} cửa hàng trên {12th avenue|store_name} có đóng cửa trước 23h không?
-{Wednesday|sys_time} khi nào thì cửa hàng đóng?
-{west oak|store_name} có mở sau 9 giờ tối {tomorrow|sys_time} không?
+{Chủ nhật|sys_time} bạn mở tiệm {little italy|store_name} mấy giờ
+{Chủ nhật|sys_time} giờ mở ở {Đường E Oak|store_name} sẽ khác mọi thường không?
+{terrace|store_name} có đóng {Lễ tạ ơn|sys_time} không
+{Hôm nay|sys_time} cửa hàng {Cửa hàng Central Plaza|store_name} mấy giờ?
+{Ngày mai|sys_time} {Rural route 27|store_name} sẽ mở trước 7 giờ sáng không?
+{ngày mai|sys_time} cái tiệm kwikemart ở {Đường East Oak|store_name} sẽ mở trước khi giờ làm không?
+{ngày mai|sys_time} lúc nào cửa hàng {12th Avenue|store_name} mở cửa?
+{Thứ ba|sys_time} cửa hàng trên {12th avenue|store_name} có đóng cửa trước 23h không?
+{Thứ tư|sys_time} khi nào thì cửa hàng đóng?
+{west oak|store_name} có mở sau 9 giờ tối {ngày mai|sys_time} không?
 bạn cho tôi giờ mở của tiệm {chinatown|store_name} trên {fake|store_name}
-bạn có thể cho tôi biết khi nào {diz-nee land|store_name} mở cửa {friday|sys_time} không?
+bạn có thể cho tôi biết khi nào {diz-nee land|store_name} mở cửa {Thứ sáu|sys_time} không?
 bạn có thể cho tôi biết nếu cái tiệm trên {peanut street|store_name} đóng chưa?
-Bạn có thể kiểm tra xem cửa hàng ở {100 Đường Main|store_name} có mở {Sunday|sys_time} không?
+Bạn có thể kiểm tra xem cửa hàng ở {100 Đường Main|store_name} có mở {chủ nhật|sys_time} không?
 Bây giờ cái cửa hàng {156th Street|store_name} có mở không?
-Bình thường cái tiệm kwik trên {Đường 156th|store_name} {next week|sys_time} mở giờ nào vậy?
-Cái chợ ở {Đường 156|store_name} đóng cửa mấy giờ {Wednesday|sys_time}?
-Cái cửa hàng {Phố Tàu|store_name} có mở {sunday|sys_time} không?
-Cái cửa hàng ở {257th|store_name} giờ {Sunday|sys_time} như thế nào?
+Bình thường cái tiệm kwik trên {Đường 156th|store_name} {tuần tới|sys_time} mở giờ nào vậy?
+Cái chợ ở {Đường 156|store_name} đóng cửa mấy giờ {Thứ tư|sys_time}?
+Cái cửa hàng {Phố Tàu|store_name} có mở {chủ nhật|sys_time} không?
+Cái cửa hàng ở {257th|store_name} giờ {chủ nhật|sys_time} như thế nào?
 Cái cửa hàng tại {50 clown st|store_name} đóng cửa khảong mấy giờ?
 Cái cửa hàng tại {Pine và Market|store_name} có mở cửa không?
-Cái cửa hàng trên {12th Avenue|store_name} mở {tomorrow|sys_time} không?
+Cái cửa hàng trên {12th Avenue|store_name} mở {ngày mai|sys_time} không?
 Cái đèn ở {Phố Nga|store_name} còn sáng không?
 Cái e mart ở {russian district|store_name} có mở không
 cái kwik ở {82 Bia Ave, Springfield|store_name}, khi nào nó đóng cửa?
 Cái Kwik-E-Mart trên {12th Avenue|store_name} có mở không?
-cái tiệm {north haverbrook|store_name} của bạn có mở {christmas|sys_time} không
+cái tiệm {north haverbrook|store_name} của bạn có mở {Giáng Sinh|sys_time} không
 Cái tiệm ở {12th Ave|store_name} có đóng cửa trước 10 giờ tối không?
 Cái tiệm ở {Đường D|store_name} có mở cửa không?
-Cái tiệm ở {23 Đường Elm|store_name} đóng cửa giờ nào {Monday|sys_time}?
+Cái tiệm ở {23 Đường Elm|store_name} đóng cửa giờ nào {Thứ hai|sys_time}?
 Cái tiệm ở {evergreen|store_name}, giờ nào mở vậy?
 Cái tiệm ở {số 15 Đường Industrial|store_name} có đóng trước 12 giờ khuya không?
-Cái tiệm ở {Pine|store_name} có mở {Monday|sys_time} không?
-Cái tiệm quickie trên {sycamore|store_name} có mở {sunday|sys_time} không?
+Cái tiệm ở {Pine|store_name} có mở {Thứ hai|sys_time} không?
+Cái tiệm quickie trên {sycamore|store_name} có mở {chủ nhật|sys_time} không?
 Cái tiệm tại {Đường Peanut|store_name} mở cửa lúc mấy giờ sáng?
 Cho đến khi nào mở?
-Cho đến khi nào tiệm {duff Gardens|store_name} mở {this Saturday|sys_time}?
-Cho đến khi nào tiệm {springfield height|store_name} mở mỗi {Sunday|sys_time}?
-Cho đến khi nào tôi có thể đến {tiệm Diz-Nee Land|store_name} {friday|sys_time}?
+Cho đến khi nào tiệm {duff Gardens|store_name} mở {this Thứ bảy|sys_time}?
+Cho đến khi nào tiệm {springfield height|store_name} mở mỗi {chủ nhật|sys_time}?
+Cho đến khi nào tôi có thể đến {tiệm Diz-Nee Land|store_name} {Thứ sáu|sys_time}?
 Cho giờ mở của cái cửa hàng ở {springfield height|store_name}
 Cho giờ mở của nó
 Cho mình giờ mở cửa hàng của cái kwik ở {Đường West Oak|store_name}
 Cho tôi biết cái Kwik-E-Mart tại {Pine và Market|store_name} hiện tại có mở không?
-Cho tôi biết nếu {springfield|store_name} có mở giờ này {friday|sys_time} không?
+Cho tôi biết nếu {springfield|store_name} có mở giờ này {Thứ sáu|sys_time} không?
 cho tôi giờ mở cửa cho cửa hàng ở {sycamore|store_name}
 Cho tôi giờ mở cửa của cái Kwik-E-Mart trên {Main|store_name} được không?
 Cho tôi giờ mở cửa của cái tiệm ở {88 Đường 257th|store_name} được không
-Cho tôi giờ thường của cái tiệm {Industrial Road|store_name} ngày {Tuesday|sys_time}
-Cho tới khi nào cửa hàng {Diz-Nee Land|store_name} mở {today|sys_time}
+Cho tôi giờ thường của cái tiệm {Industrial Road|store_name} ngày {Thứ ba|sys_time}
+Cho tới khi nào cửa hàng {Diz-Nee Land|store_name} mở {hôm nay|sys_time}
 Cho tôi xin giờ mở cửa cho {Phố Nga|store_name}
 cho xin tôi biết khi cái kwik emart tại {82 beer ave|store_name} sẽ tắt đèn cửa tiệm
 Chừng nào {181st street|store_name} mở?
 Chừng nào {w oak|store_name} đóng?
 Chừng nào cái tiệm ở {west oak st|store_name} đóng cửa?
-Chừng nào tiệm {sycamore ave|store_name} đóng {today|sys_time}?
+Chừng nào tiệm {sycamore ave|store_name} đóng {hôm nay|sys_time}?
 Có ai sẽ ở quầy tại cửa hàng {156th Street|store_name} nếu tôi đến sau 9 giờ tối chứ?
-Có cửa hàng nào mở {sunday|sys_time} lúc 9 giờ tối không?
+Có cửa hàng nào mở {chủ nhật|sys_time} lúc 9 giờ tối không?
 Có đóng chưa?
 Có đóng cửa chưa?
 Có đóng cửa không?
@@ -97,50 +97,50 @@ Có đóng không?
 Có mở chưa?
 Có mở không?
 Có phải {Tiệm Central Plaza|store_name} Kwik-E-Mart giờ đang mở không?
-Có phải {Quốc lộ 27|store_name} mở khuya {today|sys_time} không?
-Có phải cái cửa hàng trên {156th street|store_name} mở quá 12h tối {today|sys_time} không?
-Có phải cái tiệm ở {Central Plaza|store_name} vẫn mở {Sunday|sys_time} không?
+Có phải {Quốc lộ 27|store_name} mở khuya {hôm nay|sys_time} không?
+Có phải cái cửa hàng trên {156th street|store_name} mở quá 12h tối {hôm nay|sys_time} không?
+Có phải cái tiệm ở {Central Plaza|store_name} vẫn mở {chủ nhật|sys_time} không?
 Có phải cửa hàng {Industrial Road|store_name} đóng cửa 10h không?
-Có phải kwik e mart mở {sunday|sys_time} không
+Có phải kwik e mart mở {chủ nhật|sys_time} không
 Còn cái chợ trên {Đường Peanut|store_name} đóng cửa giờ nào
-cửa hàng {104 Đường First|store_name} mở {sunday|sys_time} này không
+cửa hàng {104 Đường First|store_name} mở {chủ nhật|sys_time} này không
 Cửa hàng {12th Ave|store_name} có mở suốt đêm không?
 Cửa hàng {156th|store_name} có còn mở sau 9:30 tối không?
-Cửa hàng {Capital City|store_name} có mở {today|sys_time} không?
-Cửa hàng {Cửa hàng Central Plaza|store_name} có mở {tomorrow|sys_time} không?
+Cửa hàng {Capital City|store_name} có mở {hôm nay|sys_time} không?
+Cửa hàng {Cửa hàng Central Plaza|store_name} có mở {ngày mai|sys_time} không?
 Cửa hàng {Tiệm Central|store_name} sẽ đóng cửa mấy giờ?
-Cửa hàng {Phố Tàu|store_name} có mở {tomorrow|sys_time} không
-cửa hàng {chinatown|store_name} có mở trưa {saturday|sys_time} không
-Cửa hàng {chinatown|store_name} của bạn mở đến mấy giờ {today|sys_time}
+Cửa hàng {Phố Tàu|store_name} có mở {ngày mai|sys_time} không
+cửa hàng {chinatown|store_name} có mở trưa {Thứ bảy|sys_time} không
+Cửa hàng {chinatown|store_name} của bạn mở đến mấy giờ {hôm nay|sys_time}
 Cửa hàng {clown st|store_name} còn mở không?
-cửa hàng {crusty Land|store_name} có mở {saturday|sys_time} này không
-cửa hàng {diz-nee|store_name} có mở cửa {tomorrow|sys_time} không?
-Cửa hàng {23 Elm Street|store_name} sẽ mở {Wednesday|sys_time} này không?
-Cửa hàng {fake street|store_name} ở {springfield|store_name} mở mấy giờ {tuesday|sys_time}
-Cửa hàng {Industrial Road|store_name} có mở {Sunday|sys_time} không
-Cửa hàng {Đường Industrial|store_name} có mở {today|sys_time} không?
-cửa hàng {little italy|store_name} của bạn, bạn đóng cửa mấy giờ tối {friday|sys_time}
-cửa hàng {Phố Ý|store_name} trong {springfield|store_name} mở  {Sunday|sys_time} không
-Cửa hàng {100 Main|store_name} có mở {Christmas|sys_time} không?
-Cửa hàng {Shelbyville|store_name} có mở {Monday|sys_time} không?
+cửa hàng {crusty Land|store_name} có mở {Thứ bảy|sys_time} này không
+cửa hàng {diz-nee|store_name} có mở cửa {ngày mai|sys_time} không?
+Cửa hàng {23 Elm Street|store_name} sẽ mở {Thứ tư|sys_time} này không?
+Cửa hàng {fake street|store_name} ở {springfield|store_name} mở mấy giờ {Thứ ba|sys_time}
+Cửa hàng {Industrial Road|store_name} có mở {chủ nhật|sys_time} không
+Cửa hàng {Đường Industrial|store_name} có mở {hôm nay|sys_time} không?
+cửa hàng {little italy|store_name} của bạn, bạn đóng cửa mấy giờ tối {Thứ sáu|sys_time}
+cửa hàng {Phố Ý|store_name} trong {springfield|store_name} mở  {chủ nhật|sys_time} không
+Cửa hàng {100 Main|store_name} có mở {Giáng Sinh|sys_time} không?
+Cửa hàng {Shelbyville|store_name} có mở {Thứ hai|sys_time} không?
 Cửa hàng {Shelbyville|store_name} sẽ mở lại ngày lễ không?
-Cửa hàng ở {Đường First|store_name} trong {this week|sys_time} đóng cửa mấy giờ vậy
-Cửa hàng ở {chinatown|store_name}, khi nào mở và khi nào đóng {saturday|sys_time} vậy
-Cửa hàng ở {Đường Elm|store_name} có mở {Saturday|sys_time} không?
+Cửa hàng ở {Đường First|store_name} trong {tuần này|sys_time} đóng cửa mấy giờ vậy
+Cửa hàng ở {chinatown|store_name}, khi nào mở và khi nào đóng {Thứ bảy|sys_time} vậy
+Cửa hàng ở {Đường Elm|store_name} có mở {Thứ bảy|sys_time} không?
 Cửa hàng ở {23rd Elm|store_name} đóng cửa mấy giờ?
 Cửa hàng ở {Phố Ý|store_name} mở đến mấy giờ?
-Cửa hàng ở {số 101 Sycamore|store_name} mở cửa giờ nào {sunday|sys_time} vậy?
+Cửa hàng ở {số 101 Sycamore|store_name} mở cửa giờ nào {chủ nhật|sys_time} vậy?
 Cửa hàng ở {west oak|store_name} mở đến khi nào?
 Cửa hàng sẽ đóng cửa lúc mấy giờ?
-cửa hàng tại {104 first|store_name} có mở {mothers day|sys_time} không
-Cửa hàng trên {12th Avenue|store_name} có đóng sớm {today|sys_time} không?
+cửa hàng tại {104 first|store_name} có mở {Ngày của Mẹ|sys_time} không
+Cửa hàng trên {12th Avenue|store_name} có đóng sớm {hôm nay|sys_time} không?
 Cửa hàng trên {12th avenue|store_name} có mở quá 10 giờ tối không?
-Cửa hàng trên {45 Fifth Avenue|store_name} có đóng {today|sys_time} không?
-cửa hàng trên {Peanut|store_name} {friday|sys_time} này thì sao
+Cửa hàng trên {45 Fifth Avenue|store_name} có đóng {hôm nay|sys_time} không?
+cửa hàng trên {Peanut|store_name} {Thứ sáu|sys_time} này thì sao
 cửa hàng trên {sycamore avenue|store_name} đã mở chưa
 đang tìm cách đi tới {Số 88 Đường 257|store_name}. nó có mở không?
 Điều đó sẽ đóng cửa sớm không?
-Đưa cho tôi giờ mở cửa {Monday next week|sys_time} của cửa hàng ở {Số 122 Đường 156|store_name}
+Đưa cho tôi giờ mở cửa {Thứ hai tuần tới|sys_time} của cửa hàng ở {Số 122 Đường 156|store_name}
 đưa giờ thường cửa hàng {156th|store_name}
 đưa tôi đến {springfield mall|store_name}
 Đưa tôi giờ mở và giờ đóng
@@ -150,10 +150,10 @@ Giờ {duff Gardens|store_name} có mở không?
 giờ đang -5 độ. {Đường 181st|store_name} vẫn mở không?
 giờ mở {russian district|store_name}
 Giờ mở buổi sáng của cửa hàng {12 avenue|store_name} như thế nào?
-Giờ mở buổi tối {tomorrow|sys_time} cửa hàng {Industrial Road|store_name} là như thế nào?
+Giờ mở buổi tối {ngày mai|sys_time} cửa hàng {Industrial Road|store_name} là như thế nào?
 Giờ mở cho {east oak|store_name}?
 giờ mở cho cửa hàng trên {Rural route 27|store_name}
-Giờ mở cửa {east oak|store_name} {tomorrow|sys_time}
+Giờ mở cửa {east oak|store_name} {ngày mai|sys_time}
 Giờ mở cửa {Tiệm Springfield Mall|store_name}
 giờ mở của cái tiệm gần nhất {8th ave|store_name}
 Giờ mở cửa của cái tiệm ở {100 Main St|store_name} là như thế nào?
@@ -164,18 +164,18 @@ giờ mở cửa hàng của {67 Anaheim Rd, Springfield, OR|store_name}
 Giờ mở cửa hàng của cái tiệm trên {Đường E Oak|store_name} là như thế nào?
 giờ mở cửa hàng của Kwikemart trên {w oak|store_name}
 Giờ mở của kwik trên {3 W Oak St|store_name}
-giờ mở ở {w oak|store_name} cho {sunday|sys_time}
+giờ mở ở {w oak|store_name} cho {chủ nhật|sys_time}
 giờ mở và đóng của {springfield heights|store_name}
 giờ mở và đóng cửa của {Diz-Nee Land|store_name}
 Giờ nào {Cửa hàng Central Plaza|store_name} đóng cửa thứ năm?
 Giờ nào {east oak|store_name} bắt đầu mở?
-Giờ nào {saturday|sys_time} cửa hàng trên {peanut st|store_name} mở
-giờ nào {springfield|store_name} tại {3rd|store_name} mở {tomorrow|sys_time} vậy
-Giờ nào {tomorrow|sys_time} {duff Gardens|store_name} sẽ mở?
-giờ nào {tuesday|sys_time} tiệm ở {clown street|store_name} mở cửa
+Giờ nào {Thứ bảy|sys_time} cửa hàng trên {peanut st|store_name} mở
+giờ nào {springfield|store_name} tại {3rd|store_name} mở {ngày mai|sys_time} vậy
+Giờ nào {ngày mai|sys_time} {duff Gardens|store_name} sẽ mở?
+giờ nào {Thứ ba|sys_time} tiệm ở {clown street|store_name} mở cửa
 Giờ nào cả {springfield|store_name} và {Phố Nga|store_name} đều mở vậy?
-Giờ nào cái cửa hàng ở {Elm|store_name} mở {Wednesday|sys_time}?
-giờ nào cửa hàng tại {67 Anaheim Rd, Springfield, OR|store_name} sẽ đóng {tomorrow|sys_time}?
+Giờ nào cái cửa hàng ở {Elm|store_name} mở {Thứ tư|sys_time}?
+giờ nào cửa hàng tại {67 Anaheim Rd, Springfield, OR|store_name} sẽ đóng {ngày mai|sys_time}?
 Hãy cho tôi biết giờ mở cửa cho {w oak|store_name}
 Hãy cho tôi biết về giờ mở cửa hàng của kwik-e-mart trên {Đường West Oak|store_name}
 Hiện giờ {Pine và Market|store_name} có mở không?
@@ -184,84 +184,84 @@ Họ có mở không?
 Họ đã đóng cửa chưa?
 Họ sẽ mở chứ?
 Khảong mấy giờ {Krustyland|store_name} sẽ đóng cửa?
-Khi nào {Diz-Nee Land|store_name} mở cửa {Wednesday|sys_time}?
-Khi nào {duff Gardens|store_name} có thể mở {tomorrow|sys_time}?
+Khi nào {Diz-Nee Land|store_name} mở cửa {Thứ tư|sys_time}?
+Khi nào {duff Gardens|store_name} có thể mở {ngày mai|sys_time}?
 Khi nào {Fifth Avenue|store_name} sẽ mở?
-Khi nào {route 27|store_name} sẽ đóng cửa {monday|sys_time}?
-khi nào {Phố Nga|store_name} đóng {friday after next|sys_time}
+Khi nào {route 27|store_name} sẽ đóng cửa {Thứ hai|sys_time}?
+khi nào {Phố Nga|store_name} đóng {Thứ sáu sau tuần tới|sys_time}
 khi nào {russian district|store_name} mở
-Khi nào {springfield height|store_name} sẽ đóng {sunday|sys_time}?
-Khi nào {springfields height|store_name} mở {tomorrow|sys_time}?
-khi nào {tomorrow|sys_time} cái kwikemart trên {quốc lộ 27|store_name} sẽ đóng?
-Khi nào {tomorrow|sys_time} cửa hàng {Krustyland|store_name} mở
-Khi nào {tomorrow|sys_time} cửa hàng {12th avenue|store_name} mở cửa?
-khi nào bạn mở và đóng cửa hàng {little italy|store_name} {this week|sys_time}
-Khi nào cái cửa hàng ở {Elm St|store_name} đóng {today|sys_time}?
+Khi nào {springfield height|store_name} sẽ đóng {chủ nhật|sys_time}?
+Khi nào {springfields height|store_name} mở {ngày mai|sys_time}?
+khi nào {ngày mai|sys_time} cái kwikemart trên {quốc lộ 27|store_name} sẽ đóng?
+Khi nào {ngày mai|sys_time} cửa hàng {Krustyland|store_name} mở
+Khi nào {ngày mai|sys_time} cửa hàng {12th avenue|store_name} mở cửa?
+khi nào bạn mở và đóng cửa hàng {little italy|store_name} {tuần này|sys_time}
+Khi nào cái cửa hàng ở {Elm St|store_name} đóng {hôm nay|sys_time}?
 Khi nào cái cửa hàng ở {Đường Elm|store_name} đóng cửa?
 Khi nào cái cửa hàng ở {Market street|store_name} đóng cửa?
 Khi nào cái cửa hàng trên {Đường 181|store_name} đóng cửa
 Khi nào cái cửa hàng trên {Fifth Ave|store_name} sẽ mở?
 Khi nào cái gần {Pine và Market|store_name} mở?
-khi nào cái kwik tại {67 Đường Anaheim|store_name} sẽ đóng {today|sys_time}?
+khi nào cái kwik tại {67 Đường Anaheim|store_name} sẽ đóng {hôm nay|sys_time}?
 Khi nào cái kwikemart trên {Đường East Oak|store_name} đóng?
 Khi nào cái tiệm đó đóng?
 Khi nào cái tiệm đó mở?
-Khi nào cái tiệm kwik trên {duff Gardens|store_name} sẽ đóng {today|sys_time}?
-khi nào cái tiệm ở {Phố Tàu|store_name} mở {tomorrow|sys_time}
+Khi nào cái tiệm kwik trên {duff Gardens|store_name} sẽ đóng {hôm nay|sys_time}?
+khi nào cái tiệm ở {Phố Tàu|store_name} mở {ngày mai|sys_time}
 Khi nào cái tiệm ở {Main Street|store_name} mở lại?
-Khi nào cái tiệm trên {90 Đường 181st|store_name} mở {tomorrow|sys_time}?
+Khi nào cái tiệm trên {90 Đường 181st|store_name} mở {ngày mai|sys_time}?
 Khi nào cái trên {Đường Main|store_name} mở?
 Khi nào cửa hàng {Cửa hàng Central Plaza|store_name} đóng cửa?
 Khi nào cửa hàng {Diz-Nee Land|store_name} sẽ đóng cửa?
 Khi nào cửa hàng {Diz-Nee Land|store_name} sẽ mở?
-Khi nào cửa hàng {Duff Gardens|store_name} mở {tomorrow|sys_time}?
+Khi nào cửa hàng {Duff Gardens|store_name} mở {ngày mai|sys_time}?
 Khi nào cửa hàng {23rd Elm St|store_name} đóng cửa?
 Khi nào cửa hàng {Industrial Road|store_name} đóng cửa?
-Khi nào cửa hàng {west oak|store_name} mở {tomorrow|sys_time}?
+Khi nào cửa hàng {west oak|store_name} mở {ngày mai|sys_time}?
 Khi nào cửa hàng đó đóng cửa?
 Khi nào cửa hàng đó mở?
-Khi nào cửa hàng kwik tại {Clown st|store_name} mở giờ nào {saturday|sys_time} không?
+Khi nào cửa hàng kwik tại {Clown st|store_name} mở giờ nào {Thứ bảy|sys_time} không?
 Khi nào cửa hàng này mở?
-Khi nào cửa hàng ở {Elm|store_name} mở {tomorrow|sys_time}?
+Khi nào cửa hàng ở {Elm|store_name} mở {ngày mai|sys_time}?
 Khi nào cửa hàng trên {12th Ave|store_name} đóng cửa?
-Khi nào cửa hàng trên {12th ave|store_name} mở ngày {Monday|sys_time}?
-Khi nào cửa hàng trên {Đường Industrial|store_name} đóng {tomorrow|sys_time}?
+Khi nào cửa hàng trên {12th ave|store_name} mở ngày {Thứ hai|sys_time}?
+Khi nào cửa hàng trên {Đường Industrial|store_name} đóng {ngày mai|sys_time}?
 Khi nào cửa hàng trên {100 Main St|store_name} đóng cửa?
-Khi nào nó đóng {Monday|sys_time}?
+Khi nào nó đóng {Thứ hai|sys_time}?
 Khi nào nó đong?
 Khi nào nó mở?
 Khi nào sẽ đóng cửa?
 Khi nào sẽ mở?
 Khi nào thì cửa hàng {peanut street|store_name} đóng cửa?
 Khi nào thì đóng?
-Khi nào thì mở {today|sys_time}?
+Khi nào thì mở {hôm nay|sys_time}?
 Khi nào thì mở?
 Khi nào tiệm này đóng?
 Khi nào tôi có mua được squishee từ {Số 1 Đường D|store_name}?
-Khi nào tôi có thể đến {D street|store_name} {tomorrow|sys_time}?
+Khi nào tôi có thể đến {D street|store_name} {ngày mai|sys_time}?
 khi nào tôi có thể đến {Diz-Nee Land|store_name}?
 Khi nào tui có thể tới tiệm {Diz-Nee Land|store_name}?
-Kwik sẽ mở {sunday|sys_time} không? Cái trên {East Oak|store_name}
+Kwik sẽ mở {chủ nhật|sys_time} không? Cái trên {East Oak|store_name}
 Lịch lễ của cái tiệm ở {257th|store_name} như thế nào?
-Lúc giờ nào {sunday|sys_time} cửa hàng {duff Gardens|store_name} sẽ mở?
-Lúc khi nào {Monday|sys_time} cửa hàng {Fifth Avenue|store_name} sẽ mở?
-Lúc nào {route 27|store_name} sẽ đóng cửa {monday|sys_time}?
-Lúc nào {today|sys_time} tiệm {12th avenue|store_name} đóng cửa?
-Lúc nào {wednesday|sys_time} {Diz-Nee Land|store_name} đóng?
+Lúc giờ nào {chủ nhật|sys_time} cửa hàng {duff Gardens|store_name} sẽ mở?
+Lúc khi nào {Thứ hai|sys_time} cửa hàng {Fifth Avenue|store_name} sẽ mở?
+Lúc nào {route 27|store_name} sẽ đóng cửa {Thứ hai|sys_time}?
+Lúc nào {hôm nay|sys_time} tiệm {12th avenue|store_name} đóng cửa?
+Lúc nào {Thứ tư|sys_time} {Diz-Nee Land|store_name} đóng?
 Lúc nào cái kwik ở {82 Bia Ave|store_name} sẽ đóng cửa?
-Lúc nào cái tiệm ở {12th ave|store_name} mở {Monday|sys_time}?
+Lúc nào cái tiệm ở {12th ave|store_name} mở {Thứ hai|sys_time}?
 Lúc nào là giờ mở của của cái tiệm ở {duff Gardens|store_name}?
 Lúc nào nó sẽ đóng cửa?
-Lúc nào thì cái {156th Street|store_name} Kwik E Mart mở cửa {Saturday|sys_time} vậy?
-Mấy giờ {Elm Street|store_name} đóng cửa {Sunday|sys_time}?
-Mấy giờ {Thursday|sys_time} cửa hàng trên {Đường 156|store_name} đóng cửa?
+Lúc nào thì cái {156th Street|store_name} Kwik E Mart mở cửa {Thứ bảy|sys_time} vậy?
+Mấy giờ {Elm Street|store_name} đóng cửa {chủ nhật|sys_time}?
+Mấy giờ {Thứ năm|sys_time} cửa hàng trên {Đường 156|store_name} đóng cửa?
 mấy giờ bạn mở cái tiệm ở {Little Italy|store_name}
-Mấy giờ cái cửa hàng tại {số 50 Đường Peanut|store_name} mở cửa sáng {tomorrow|sys_time} vậy?
+Mấy giờ cái cửa hàng tại {số 50 Đường Peanut|store_name} mở cửa sáng {ngày mai|sys_time} vậy?
 Mấy giờ cái tiệm {Fifth Ave|store_name} mở cửa?
-Mấy giờ cửa hàng trên {156th street|store_name} đóng {tomorrow|sys_time}?
+Mấy giờ cửa hàng trên {156th street|store_name} đóng {ngày mai|sys_time}?
 Mấy giờ nó sẽ đóng?
 Mấy giờ nó sẽ mở?
-Nếu tôi muốn squishee {Wednesday|sys_time} tại {d st|store_name}, khi nào tôi có thể đi
+Nếu tôi muốn squishee {Thứ tư|sys_time} tại {d st|store_name}, khi nào tôi có thể đi
 Nếu tôi tới lúc 9 giờ sáng, cửa hàng ở {Đường Industrial|store_name} đã mở chưa?
 Ngày nào cửa hàng {Phố Nga|store_name} mở cửa lâu nhất
 Nó có sẽ đóng cửa sớm?
@@ -270,30 +270,30 @@ Nó mở rồi?
 Nó sẽ đóng cửa sớm?
 Tiệm {12th Avenue|store_name} có mở 24 giờ không?
 Tiệm {Tiệm Central Plaza|store_name} có mở không?
-tiệm {Phố Ý|store_name} có mở chiều {sunday|sys_time} không
+tiệm {Phố Ý|store_name} có mở chiều {chủ nhật|sys_time} không
 Tiệm trên {Đường Industrial|store_name} có mở cửa 24 tiếng không?
 Tôi có kịp giờ đến {west oak|store_name} trước khi nó đóng không?
-Tôi có thể đến cửa hàng {Fifth Avenue|store_name} {Saturday|sys_time} được không?
-Tôi có thể đến cửa hàng {Ogdenville|store_name} {Saturday|sys_time} không?
-Tôi có thể đến cửa hàng {Ogdenville|store_name} {today|sys_time} được không?
+Tôi có thể đến cửa hàng {Fifth Avenue|store_name} {Thứ bảy|sys_time} được không?
+Tôi có thể đến cửa hàng {Ogdenville|store_name} {Thứ bảy|sys_time} không?
+Tôi có thể đến cửa hàng {Ogdenville|store_name} {hôm nay|sys_time} được không?
 Tôi có thể đến cửa hàng tại {12th avenue|store_name} sau 12 giờ tối không?
 Tôi có thể đến tại cửa hàng {12th Ave|store_name} lúc 9 giờ sáng không?
 tôi có thể đến trước khi {88 257th St|store_name} đóng cửa không
-Tôi có thể mua được một squishee tại {Đường 181st|store_name} lúc 3 giờ sáng {today|sys_time} không
-Tôi có thể mua được một squishee từ cửa hàng {west oak|store_name} {today|sys_time} không?
+Tôi có thể mua được một squishee tại {Đường 181st|store_name} lúc 3 giờ sáng {hôm nay|sys_time} không
+Tôi có thể mua được một squishee từ cửa hàng {west oak|store_name} {hôm nay|sys_time} không?
 Tôi có thể vào cửa hàng {duff Gardens|store_name} ngay hôm nay không? mấy giờ vào được?
-tôi có tới {1 d street|store_name} {today|sys_time} kịp không
+tôi có tới {1 d street|store_name} {hôm nay|sys_time} kịp không
 Tôi đang ở gần {d street|store_name}. Cửa hàng của bạn có mở không?
 Tôi muốn biết khi nào {Số 90 Đường 181|store_name} đóng cửa
-tôi muốn đến {Diz-Nee Land|store_name}, mấy giờ {today|sys_time} tôi đến được?
+tôi muốn đến {Diz-Nee Land|store_name}, mấy giờ {hôm nay|sys_time} tôi đến được?
 tôi muốn đi {d st|store_name}. Nó có mở không?
 Tôi muốn một squishee sau giờ làm việc của tôi, lúc đó cửa hàng ở {e oak|store_name} sẽ mở chứ?
-tôi muốn mua đồ từ {13 w oak st|store_name} {tomorrow|sys_time}, xin cho tôi biết giờ mở cửa
+tôi muốn mua đồ từ {13 w oak st|store_name} {ngày mai|sys_time}, xin cho tôi biết giờ mở cửa
 Tôi muộn rồi, cái tiệm ở {Số 90 Đường 181|store_name} còn mở không
 tôi nghe nói có động đất. {1 D St|store_name} vẫn mở không?
 Tôi vẫn có thể đến cửa hàng trên {Industrial road|store_name} sau 10h không?
-Tui có thể tới {88 257th Street|store_name} trước khi tui đi làm {tomorrow|sys_time}
-Tui ghé cái tiệm trên {156th St|store_name} {Monday|sys_time} được không?
+Tui có thể tới {88 257th Street|store_name} trước khi tui đi làm {ngày mai|sys_time}
+Tui ghé cái tiệm trên {156th St|store_name} {Thứ hai|sys_time} được không?
 và khi nào tiệm {krustyland|store_name} sẽ mở?
 vài tiếng nữa cái cửa hàng ở {route 27|store_name} có còn mở không?
 vui lòng cho tôi giờ mở cửa hàng {Diz-Nee Land|store_name}
