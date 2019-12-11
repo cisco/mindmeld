@@ -13,7 +13,6 @@ install:
   - pip install --upgrade pip
   - pip install .
   - pip install "mindmeld[bot]"
-  - pip install "mindmeld[tensorflow]"
   - pip install -r test-requirements.txt
 before_script:
   - sleep 10
