@@ -69,10 +69,10 @@ Cái tiệm ở {Pine|store_name} có mở {Thứ hai|sys_time} không?
 Cái tiệm quickie trên {sycamore|store_name} có mở {chủ nhật|sys_time} không?
 Cái tiệm tại {Đường Peanut|store_name} mở cửa lúc mấy giờ sáng?
 Cho đến khi nào mở?
-Cho đến khi nào tiệm {duff Gardens|store_name} mở {this Thứ bảy|sys_time}?
-Cho đến khi nào tiệm {springfield height|store_name} mở mỗi {chủ nhật|sys_time}?
+Cho đến khi nào tiệm {duff Gardens|store_name} mở {Thứ bảy này|sys_time}?
+Cho đến khi nào tiệm {springfield heights|store_name} mở mỗi {chủ nhật|sys_time}?
 Cho đến khi nào tôi có thể đến {tiệm Diz-Nee Land|store_name} {Thứ sáu|sys_time}?
-Cho giờ mở của cái cửa hàng ở {springfield height|store_name}
+Cho giờ mở của cái cửa hàng ở {springfield heights|store_name}
 Cho giờ mở của nó
 Cho mình giờ mở cửa hàng của cái kwik ở {Đường West Oak|store_name}
 Cho tôi biết cái Kwik-E-Mart tại {Pine và Market|store_name} hiện tại có mở không?
@@ -190,8 +190,8 @@ Khi nào {Fifth Avenue|store_name} sẽ mở?
 Khi nào {route 27|store_name} sẽ đóng cửa {Thứ hai|sys_time}?
 khi nào {Phố Nga|store_name} đóng {Thứ sáu sau tuần tới|sys_time}
 khi nào {russian district|store_name} mở
-Khi nào {springfield height|store_name} sẽ đóng {chủ nhật|sys_time}?
-Khi nào {springfields height|store_name} mở {ngày mai|sys_time}?
+Khi nào {springfield heights|store_name} sẽ đóng {chủ nhật|sys_time}?
+Khi nào {springfield heights|store_name} mở {ngày mai|sys_time}?
 khi nào {ngày mai|sys_time} cái kwikemart trên {quốc lộ 27|store_name} sẽ đóng?
 Khi nào {ngày mai|sys_time} cửa hàng {Krustyland|store_name} mở
 Khi nào {ngày mai|sys_time} cửa hàng {12th avenue|store_name} mở cửa?
