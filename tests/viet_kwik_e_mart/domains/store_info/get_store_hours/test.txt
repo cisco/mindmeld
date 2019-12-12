@@ -1,7 +1,7 @@
 Khi nào cửa hàng {Central Plaza|store_name} mở cửa?
 Cái đèn ở {evergreen|store_name} còn sáng không?
 Tôi có thể đến tại cửa hàng {181st|store_name} lúc 7 giờ chiều {ngày mai|sys_time} được không?
-đưa giờ thường cửa hàng {181st|store_name}
+đưa giờ mở cửa ở cửa hàng {181st|store_name}
 Cái tiệm ở {Đường Elm|store_name} có mở {hôm nay|sys_time} không?
 Cho tôi biết cái Kwik-E-Mart tại {Pine và Market|store_name} hiện tại có mở không?
 Cửa hàng {Central Plaza|store_name} sẽ đóng cửa mấy giờ?

@@ -52,7 +52,7 @@ Bình thường cái tiệm kwik trên {Đường 156th|store_name} {tuần tớ
 Cái chợ ở {Đường 156|store_name} đóng cửa mấy giờ {Thứ tư|sys_time}?
 Cái cửa hàng {Phố Tàu|store_name} có mở {chủ nhật|sys_time} không?
 Cái cửa hàng ở {257th|store_name} giờ {chủ nhật|sys_time} như thế nào?
-Cái cửa hàng tại {50 clown st|store_name} đóng cửa khảong mấy giờ?
+Cái cửa hàng tại {50 clown st|store_name} đóng cửa khoảng mấy giờ?
 Cái cửa hàng tại {Pine và Market|store_name} có mở cửa không?
 Cái cửa hàng trên {12th Avenue|store_name} mở {ngày mai|sys_time} không?
 Cái đèn ở {Phố Nga|store_name} còn sáng không?
