@@ -43,7 +43,7 @@
     {
       "id": "9",
       "cname": "Cửa hàng Springfield Mall",
-      "whitelist": ["Tiệm Springfield Mall", "Springfield Mall", "Mall", "20 Central Boulevard", "Số 20 Central", "20 Central", "Central", "Central Blvd", "Central Boulevard"]
+      "whitelist": ["Tiệm Springfield Mall", "Springfield Mall", "Mall", "20 Central Boulevard", "20 Đại lộ Central", "Số 20 Central", "Số 20 Đại lộ Central", "20 Central", "Central", "Central Blvd", "Central Boulevard", "Đại lộ Central"]
     },
     {
       "id": "10",
