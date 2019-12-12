@@ -15,11 +15,11 @@
 try:
     from .webex_bot_server import WebexBotServer
 
-    __all__ = ["WebexBotServer"]
 except ImportError:
     import warnings
 
     warnings.warn(
         "Dependency not found. Please install the mindmeld[bot] extra to use mindmeld.bot"
     )
-    __all__ = []
+
+__all__ = ["WebexBotServer"]
