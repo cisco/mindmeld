@@ -16,9 +16,9 @@ import os
 import re
 
 import numpy as np
-import tensorflow as tf
 from sklearn.externals import joblib
 from sklearn.preprocessing import LabelBinarizer
+import tensorflow as tf
 
 from .embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
 from .taggers import Tagger, extract_sequence_features
@@ -34,7 +34,7 @@ ZERO_INITIALIZER_VALUE = 0
 logger = logging.getLogger(__name__)
 
 
-class LstmModel(Tagger):
+class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
     """This class encapsulates the bi-directional LSTM model and provides
     the correct interface for use by the tagger model"""
 
@@ -210,6 +210,7 @@ class LstmModel(Tagger):
         Returns:
             (sequence_embeddings, encoded_labels, groups): features for the LSTM network
         """
+        del fit  # unused -- we use the value of y to determine whether to encode labels
         if y:
             # Train time
             self.resources = resources
@@ -226,7 +227,7 @@ class LstmModel(Tagger):
                 )
                 start_index += len(label_sequence)
 
-            gaz_entities = [k for k in self.resources.get("gazetteers", {}).keys()]
+            gaz_entities = list(self.resources.get("gazetteers", {}).keys())
             gaz_entities.append(DEFAULT_GAZ_LABEL)
             self.gaz_encoder.fit(gaz_entities)
 
@@ -276,7 +277,7 @@ class LstmModel(Tagger):
             )
 
     def construct_feed_dictionary(
-        self, batch_examples, batch_char, batch_gaz, batch_seq_len, batch_labels=list()
+        self, batch_examples, batch_char, batch_gaz, batch_seq_len, batch_labels=None
     ):
         """Constructs the feed dictionary that is used to feed data into the tensors
 
@@ -290,6 +291,9 @@ class LstmModel(Tagger):
         Returns:
             The feed dictionary
         """
+        if batch_labels is None:
+            batch_labels = []
+
         return_dict = {
             self.query_input_tf: batch_examples,
             self.batch_sequence_lengths_tf: batch_seq_len,
@@ -444,7 +448,7 @@ class LstmModel(Tagger):
         """
         if self.use_crf_layer:
             flattened_labels = tf.cast(tf.argmax(self.label_tf, axis=2), tf.int32)
-            log_likelihood, transition_params = tf.contrib.crf.crf_log_likelihood(
+            log_likelihood, _ = tf.contrib.crf.crf_log_likelihood(
                 self.lstm_output_tf, flattened_labels, self.batch_sequence_lengths_tf
             )
             cost_tf = tf.reduce_mean(-log_likelihood, name="cost_tf")
@@ -491,7 +495,7 @@ class LstmModel(Tagger):
         reshaped_labels_arr = np.argmax(label_arr, 2)
 
         score = 0
-        for idx, query in enumerate(reshaped_output_arr):
+        for idx, _ in enumerate(reshaped_output_arr):
             seq_len = seq_lengths_arr[idx]
             predicted_tags = reshaped_output_arr[idx][:seq_len]
             actual_tags = reshaped_labels_arr[idx][:seq_len]
@@ -514,7 +518,7 @@ class LstmModel(Tagger):
         padded_output = []
         for sequence in list_of_sequences:
             padded_seq = [default_token] * self.padding_length
-            for idx, token in enumerate(sequence):
+            for idx, _ in enumerate(sequence):
                 if idx < self.padding_length:
                     padded_seq[idx] = sequence[idx]
             padded_output.append(padded_seq)
@@ -537,7 +541,8 @@ class LstmModel(Tagger):
                 mask[i] = True
         return mask
 
-    def _construct_lstm_state(self, initializer, hidden_dimension, batch_size, name):
+    @staticmethod
+    def _construct_lstm_state(initializer, hidden_dimension, batch_size, name):
         """Construct the LSTM initial state
 
         Args:
@@ -702,7 +707,7 @@ class LstmModel(Tagger):
         x_feats_array = []
         gaz_feats_array = []
         char_feats_array = []
-        for idx, example in enumerate(examples):
+        for example in examples:
             x_feat, gaz_feat, char_feat = self._extract_features(example)
             x_feats_array.append(x_feat)
             gaz_feats_array.append(gaz_feat)
@@ -812,9 +817,9 @@ class LstmModel(Tagger):
         self.session.run([self.global_init, self.local_init])
 
         for epochs in range(int(self.number_of_epochs)):
-            logger.info("Training epoch : {}".format(epochs))
+            logger.info("Training epoch : %s", epochs)
 
-            indices = [x for x in range(len(X))]
+            indices = list(range(len(X)))
             np.random.shuffle(indices)
 
             gaz = self.gaz_features_arr[indices]
@@ -830,26 +835,24 @@ class LstmModel(Tagger):
                 batch_start_index = batch * batch_size
                 batch_end_index = (batch * batch_size) + batch_size
 
-                batch_examples = examples[batch_start_index:batch_end_index]
-                batch_labels = labels[batch_start_index:batch_end_index]
-                batch_gaz = gaz[batch_start_index:batch_end_index]
-                batch_seq_len = seq_len[batch_start_index:batch_end_index]
-                batch_char = char[batch_start_index:batch_end_index]
+                batch_info = {
+                    "batch_examples": examples[batch_start_index:batch_end_index],
+                    "batch_labels": labels[batch_start_index:batch_end_index],
+                    "batch_gaz": gaz[batch_start_index:batch_end_index],
+                    "batch_seq_len": seq_len[batch_start_index:batch_end_index],
+                    "batch_char": char[batch_start_index:batch_end_index],
+                }
 
                 if batch % int(self.display_epoch) == 0:
                     output, loss, _ = self.session.run(
                         [self.lstm_output_tf, self.cost_tf, self.optimizer_tf],
-                        feed_dict=self.construct_feed_dictionary(
-                            batch_examples,
-                            batch_char,
-                            batch_gaz,
-                            batch_seq_len,
-                            batch_labels,
-                        ),
+                        feed_dict=self.construct_feed_dictionary(**batch_info),
                     )
 
-                    score = self._calculate_score(output, batch_labels, batch_seq_len)
-                    accuracy = score / (len(batch_examples) * 1.0)
+                    score = self._calculate_score(
+                        output, batch_info["batch_labels"], batch_info["batch_seq_len"]
+                    )
+                    accuracy = score / (len(batch_info["batch_examples"]) * 1.0)
 
                     logger.info(
                         "Trained batch from index {} to {}, "
@@ -864,13 +867,7 @@ class LstmModel(Tagger):
                 else:
                     self.session.run(
                         self.optimizer_tf,
-                        feed_dict=self.construct_feed_dictionary(
-                            batch_examples,
-                            batch_char,
-                            batch_gaz,
-                            batch_seq_len,
-                            batch_labels,
-                        ),
+                        feed_dict=self.construct_feed_dictionary(**batch_info),
                     )
         return self
 
