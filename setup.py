@@ -27,7 +27,6 @@ requirements = [
     'tqdm~=4.15',
     'python-crfsuite~=0.9',
     'sklearn-crfsuite>=0.3.6,<1.0',
-    'tensorflow~=1.2',
     'distro~=1.3'
 ]
 
@@ -61,6 +60,7 @@ setup(
     },
     include_package_data=True,
     install_requires=requirements,
+    extras_require={'tensorflow': ['tensorflow~=1.2']},
     zip_safe=False,
     keywords='mindmeld',
     classifiers=[

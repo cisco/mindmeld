@@ -180,7 +180,7 @@ class LstmModel(Tagger):
                     encoded_labels_flat[start_index: start_index + len(label_sequence)])
                 start_index += len(label_sequence)
 
-            gaz_entities = [k for k in self.resources['gazetteers'].keys()]
+            gaz_entities = list(self.resources.get('gazetteers', {}).keys())
             gaz_entities.append(DEFAULT_GAZ_LABEL)
             self.gaz_encoder.fit(gaz_entities)
 
