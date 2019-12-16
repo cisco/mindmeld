@@ -32,7 +32,7 @@ from sklearn.model_selection import (
     StratifiedShuffleSplit,
 )
 
-from .._version import _get_mm_version
+from .._version import get_mm_version
 from ..tokenizer import Tokenizer
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
@@ -830,7 +830,7 @@ class Model:
 
     def __init__(self, config):
         self.config = config
-        self.mindmeld_version = _get_mm_version()
+        self.mindmeld_version = get_mm_version()
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
         self._resources = {}

@@ -1056,6 +1056,7 @@ class IntentProcessor(Processor):
     ):
         """Processes the given input text using the hierarchy of natural language processing models
         trained for this intent.
+
         Args:
             query_text (str, list, tuple): The raw user text input, or a list of the n-best query
                 transcripts from ASR.
@@ -1068,6 +1069,7 @@ class IntentProcessor(Processor):
             timestamp (long, optional): A unix time stamp for the request (in seconds).
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
             verbose (bool, optional): If True, returns class as well as predict probabilities.
+
         Returns:
             (ProcessedQuery): A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text.
