@@ -5,6 +5,9 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+env:
+   - MM_EXTRAS=true
+   - MM_EXTRAS=false
 jdk:
   - openjdk8
 # command to install services
@@ -12,10 +15,7 @@ services:
   - elasticsearch
 # command to install dependencies
 install:
-  - pip install --upgrade pip
-  - pip install .
-  - pip install "mindmeld[bot]"
-  - pip install -r test-requirements.txt
+  - scripts/travis_install.sh
 before_script:
   - sleep 10
 # command to run tests
