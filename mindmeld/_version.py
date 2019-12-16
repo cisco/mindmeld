@@ -18,6 +18,6 @@ current = "4.2.3"
 
 
 def get_mm_version():
-    """Returns the current MindMeld version
+    """Returns the current MindMeld version.
     """
     return current
