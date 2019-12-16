@@ -139,7 +139,7 @@ def parse_numerics(
     Args:
         sentence (str): A raw sentence.
         dimensions (None or list of str): The list of types (e.g. volume, \
-            temperature) to restrict the output to. If None, include all types
+            temperature) to restrict the output to. If None, include all types.
         language (str, optional): Language of the sentence specified using a 639-1/2 code.
             If both locale and language are provided, the locale is used. If neither are
             provided, the EN language code is used.
