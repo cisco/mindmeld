@@ -5,7 +5,7 @@ Entity recognition is the one task within the NLP pipeline where deep learning m
 
 .. note::
 
-   Please make sure to install Tensorflow requirement by running in shell: :code:`pip install mindmeld[tensorflow]`.
+   Please make sure to install the Tensorflow requirement by running in the shell: :code:`pip install mindmeld[tensorflow]`.
 
 LSTM network overview
 ^^^^^^^^^^^^^^^^^^^^^
