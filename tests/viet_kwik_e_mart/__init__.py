@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains the Kwik-E-Mart MindMeld demo application implemented in Vietnamese"""
 from mindmeld import Application
-from . import custom_features  # noqa: F401
 
 app = Application(__name__, language="vi")
 
