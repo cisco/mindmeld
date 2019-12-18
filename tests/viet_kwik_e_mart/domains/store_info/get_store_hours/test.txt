@@ -6,7 +6,7 @@ Cái tiệm ở {Đường Elm|store_name} có mở {hôm nay|sys_time} không?
 Cho tôi biết cái Kwik-E-Mart tại {Pine và Market|store_name} hiện tại có mở không?
 Cửa hàng {Central Plaza|store_name} sẽ đóng cửa mấy giờ?
 Nói cho tôi biết cái Kwik-E-Mart trên {Đường Elm|store_name} có đóng cửa không
-Xin cho tôi biết cửa hàng Shelbyville mở {hôm nay|sys_time} không.
+Xin cho tôi biết cửa hàng {Shelbyville|store_name} mở {hôm nay|sys_time} không.
 Cái tiệm trên {Pine và Market|store_name} có mở không?
 Mấy giờ tiệm ở {north haverbrook|store_name} của bạn mở và đóng cửa {ngày mai|sys_time}
 Chừng nào cái cửa hàng ở {3rd|store_name} đóng cửa {hôm nay|sys_time}
