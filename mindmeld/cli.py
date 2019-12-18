@@ -455,12 +455,12 @@ def num_parser(start, port):
             hash_digest = hashlib.md5(open(exec_path, "rb").read()).hexdigest()
             if hash_digest != path.DUCKLING_PATH_TO_MD5_MAPPINGS[exec_path]:
                 os.remove(exec_path)
-
+        print("Downloading")
         if not os.path.exists(exec_path):
             url = os.path.join(
                 os.path.join(DEVCENTER_URL, "binaries"), os.path.basename(exec_path)
             )
-            logger.info(
+            print(
                 "Could not find %s binary file, downloading from %s", exec_path, url
             )
             r = requests.get(url, stream=True)
