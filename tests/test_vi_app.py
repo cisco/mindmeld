@@ -17,3 +17,8 @@ def test_get_help(vi_kwik_e_mart_nlp):
 	result = vi_kwik_e_mart_nlp.process("Giúp tôi")
 	assert result["domain"] == "store_info"
 	assert result["intent"] == "help"
+
+def test_exit(vi_kwik_e_mart_nlp):
+	result = vi_kwik_e_mart_nlp.process("bỏ")
+	assert result["domain"] == "store_info"
+	assert result["intent"] == "exit"
