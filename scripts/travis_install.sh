@@ -11,7 +11,9 @@ pip install --upgrade pip
 pip install .
 pip install -r test-requirements.txt
 if [ "$MM_EXTRAS" == "true" ]; then
+  echo "Installing extra requirements"
   pip install -r extras-requirements.txt
+  echo "Finished installing extra requirements"
 fi
 
 popd
