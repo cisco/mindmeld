@@ -97,13 +97,13 @@ To verify your setup is good, run this command. If there is no error, the instal
 
   mindmeld
 
-A few of our dependencies are optional since they are not required for the core NLU functions. If you are interested in developing for Cisco Webex Teams, you can install the Teams dependency by typing in shell:
+A few of our dependencies are optional since they are not required for the core NLU functions. If you are interested in developing for Cisco Webex Teams, you can install the Webex Teams dependency by typing in the shell:
 
 .. code-block:: shell
 
   pip install mindmeld[bot]
 
-If you are interested in using the LSTM entity recognizer, you will need to install Tensorflow dependency:
+If you are interested in using the LSTM entity recognizer, you will need to install the Tensorflow dependency:
 
 .. code-block:: shell
 
@@ -226,13 +226,13 @@ To verify your setup is good, run this command. If there is no error, the instal
 
   mindmeld
 
-A few of our dependencies are optional since they are not required for the core NLU functions. If you are interested in developing for Cisco Webex Teams, you can install the Teams dependency by typing in shell:
+A few of our dependencies are optional since they are not required for the core NLU functions. If you are interested in developing for Cisco Webex Teams, you can install the Webex Teams dependency by typing in the shell:
 
 .. code-block:: shell
 
   pip install mindmeld[bot]
 
-If you are interested in using the LSTM entity recognizer, you will need to install Tensorflow dependency:
+If you are interested in using the LSTM entity recognizer, you will need to install the Tensorflow dependency:
 
 .. code-block:: shell
 

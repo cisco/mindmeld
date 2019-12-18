@@ -135,10 +135,11 @@ def parse_numerics(
     timestamp=None,
 ):
     """Calls System Entity Recognizer service API to extract numerical entities from a sentence.
+
     Args:
         sentence (str): A raw sentence.
         dimensions (None or list of str): The list of types (e.g. volume, \
-            temperature) to restrict the output to. If None, include all types
+            temperature) to restrict the output to. If None, include all types.
         language (str, optional): Language of the sentence specified using a 639-1/2 code.
             If both locale and language are provided, the locale is used. If neither are
             provided, the EN language code is used.
@@ -149,12 +150,13 @@ def parse_numerics(
         timestamp (long, optional): A unix millisecond timestamp used as the reference time. \
             If not specified, the current system time is used. If `time_zone` \
             is not also specified, this parameter is ignored.
+
     Returns:
         (tuple): A tuple containing:
-            * response (list, dict): Response from the System Entity Recognizer service that
-            consists of a list of dicts, each corresponding to a single prediction or just a
+            - response (list, dict): Response from the System Entity Recognizer service that \
+            consists of a list of dicts, each corresponding to a single prediction or just a \
             dict, corresponding to a single prediction.
-            * response_code (int): http status code.
+            - response_code (int): http status code.
     """
     if sentence == "":
         logger.error("Empty query passed to the system entity resolver")

@@ -7,7 +7,7 @@ In this tutorial, we will create a Webex Teams bot based on the :doc:`Food Order
 
 .. note::
 
-   Please make sure to install Webex Teams dependency by running in shell: :code:`pip install mindmeld[bot]`.
+   Please make sure to install the Webex Teams dependency by running in the shell: :code:`pip install mindmeld[bot]`.
 
 Quick Start
 -----------
