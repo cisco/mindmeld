@@ -12,6 +12,14 @@
 # limitations under the License.
 
 """This module contains the components of the MindMeld platform"""
-from .webex_bot_server import WebexBotServer
+try:
+    from .webex_bot_server import WebexBotServer
+
+except ImportError:
+    import warnings
+
+    warnings.warn(
+        "Dependency not found. Please install the mindmeld[bot] extra to use mindmeld.bot"
+    )
 
 __all__ = ["WebexBotServer"]

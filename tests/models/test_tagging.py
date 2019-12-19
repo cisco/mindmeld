@@ -278,6 +278,42 @@ def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
     assert extracted_features == expected_features
 
 
+@pytest.mark.no_extras
+@pytest.mark.no_tensorflow
+def test_lstm_er_model_no_tf(kwik_e_mart_nlp):
+    config = {
+        "model_type": "tagger",
+        "model_settings": {
+            "classifier_type": "lstm",
+            "tag_scheme": "IOB",
+            "feature_scaler": "max-abs",
+        },
+        "params": {
+            "number_of_epochs": 3,
+            "token_embedding_dimension": 50,
+            "gaz_encoding_dimension": 50,
+            "token_lstm_hidden_state_dimension": 200,
+        },
+        "features": {
+            "bag-of-words-seq": {"ngram_lengths_to_start_positions": {1: [0],}},
+        },
+    }
+    er = (
+        kwik_e_mart_nlp.domains["store_info"]
+        .intents["get_store_hours"]
+        .entity_recognizer
+    )
+    with pytest.raises(ValueError) as exc_info:
+        er.fit(**config)
+
+    assert exc_info.value.args[0] == (
+        "TaggerModel: Classifier type 'lstm' dependencies not found. "
+        "Install the mindmeld[tensorflow] extra to use this classifier type."
+    )
+
+
+@pytest.mark.extras
+@pytest.mark.tensorflow
 def test_lstm_er_model(kwik_e_mart_nlp):
     config = {
         "model_type": "tagger",

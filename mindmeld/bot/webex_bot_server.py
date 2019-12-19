@@ -7,9 +7,9 @@ This module contains the Webex Bot Server component.
 import json
 import logging
 
-import requests
 from ciscosparkapi import CiscoSparkAPI
 from flask import Flask, request
+import requests
 
 from ..components import NaturalLanguageProcessor
 from ..components.dialogue import Conversation
@@ -49,7 +49,7 @@ class WebexBotServer:
             self.nlp.load()
         else:
             self.nlp = nlp
-        self.conv = Conversation(self.nlp, app_path=app_path)
+        self.conv = Conversation(nlp=self.nlp, app_path=app_path)
 
         self.logger = logging.getLogger(__name__)
 

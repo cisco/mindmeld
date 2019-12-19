@@ -5,7 +5,7 @@ These instructions explain how to install MindMeld on a Unix-based system and se
 
 .. note::
 
-  MindMeld requires Python 3.4, 3.5, 3.6 or 3.7.
+  MindMeld requires Python 3.5, 3.6 or 3.7.
 
 
 Install MindMeld
@@ -97,6 +97,17 @@ To verify your setup is good, run this command. If there is no error, the instal
 
   mindmeld
 
+A few of our dependencies are optional since they are not required for the core NLU functions. If you are interested in developing for Cisco Webex Teams, you can install the Webex Teams dependency by typing in the shell:
+
+.. code-block:: shell
+
+  pip install mindmeld[bot]
+
+If you are interested in using the LSTM entity recognizer, you will need to install the Tensorflow dependency:
+
+.. code-block:: shell
+
+  pip install mindmeld[tensorflow]
 
 .. _getting_started_virtualenv_setup:
 
@@ -214,6 +225,18 @@ To verify your setup is good, run this command. If there is no error, the instal
 .. code-block:: shell
 
   mindmeld
+
+A few of our dependencies are optional since they are not required for the core NLU functions. If you are interested in developing for Cisco Webex Teams, you can install the Webex Teams dependency by typing in the shell:
+
+.. code-block:: shell
+
+  pip install mindmeld[bot]
+
+If you are interested in using the LSTM entity recognizer, you will need to install the Tensorflow dependency:
+
+.. code-block:: shell
+
+  pip install mindmeld[tensorflow]
 
 
 .. _duckling:

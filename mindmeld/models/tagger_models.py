@@ -28,8 +28,13 @@ from .helpers import (
 )
 from .model import EntityModelEvaluation, EvaluatedExample, Model, ModelConfig
 from .taggers.crf import ConditionalRandomFields
-from .taggers.lstm import LstmModel
 from .taggers.memm import MemmModel
+
+try:
+    from .taggers.lstm import LstmModel
+except ImportError:
+    LstmModel = None
+
 
 logger = logging.getLogger(__name__)
 
@@ -324,6 +329,12 @@ class TaggerModel(Model):
         """Returns the python class of the actual underlying model"""
         classifier_type = self.config.model_settings["classifier_type"]
         try:
+            if classifier_type == LSTM_TYPE and LstmModel is None:
+                msg = (
+                    "{}: Classifier type {!r} dependencies not found. Install the "
+                    "mindmeld[tensorflow] extra to use this classifier type."
+                )
+                raise ValueError(msg.format(self.__class__.__name__, classifier_type))
             return {
                 MEMM_TYPE: MemmModel,
                 CRF_TYPE: ConditionalRandomFields,
