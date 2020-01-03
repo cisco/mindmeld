@@ -33,7 +33,7 @@ from ..path import get_app
 from ..query_factory import QueryFactory
 from ..resource_loader import ResourceLoader
 from ..system_entity_recognizer import SystemEntityRecognizer
-from ._config import get_nlp_config
+from ._config import get_nlp_config, get_language_config
 from .domain_classifier import DomainClassifier
 from .entity_recognizer import EntityRecognizer
 from .entity_resolver import EntityResolver, EntityResolverConnectionError
@@ -625,7 +625,7 @@ class NaturalLanguageProcessor(Processor):
                 markup, self.resource_loader.query_factory, query_options={}
             )
         else:
-            query_factory = QueryFactory.create_query_factory()
+            query_factory = QueryFactory.create_query_factory(self._app_path)
             _, query, _ = process_markup(markup, query_factory, query_options={})
 
         if domain:
@@ -690,6 +690,9 @@ class NaturalLanguageProcessor(Processor):
             )
         if allowed_intents:
             allowed_nlp_classes = self.extract_allowed_intents(allowed_intents)
+
+        if not language and not locale:
+            language, locale = get_language_config(self._app_path)
 
         return super().process(
             query_text,

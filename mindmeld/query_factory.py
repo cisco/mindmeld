@@ -19,6 +19,7 @@ from . import ser as sys_ent_rec
 from .core import TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED, TEXT_FORM_RAW, Query
 from .stemmers import EnglishNLTKStemmer
 from .tokenizer import Tokenizer
+from .components._config import get_language_config
 
 
 class QueryFactory:
@@ -31,10 +32,13 @@ class QueryFactory:
         stemmer (Stemmer): the object responsible for stemming the text
     """
 
-    def __init__(self, tokenizer, preprocessor=None, stemmer=None):
+    def __init__(self, tokenizer, preprocessor=None, stemmer=None,
+                 locale=None, language=None):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
         self.stemmer = stemmer
+        self.locale = locale
+        self.language = language
 
     def create_query(
         self, text, time_zone=None, timestamp=None, locale=None, language=None
@@ -53,8 +57,11 @@ class QueryFactory:
         Returns:
             Query: A newly constructed query
         """
-        raw_text = text
+        if not language and not locale:
+            language = self.language
+            locale = self.locale
 
+        raw_text = text
         char_maps = {}
 
         # create raw, processed maps
@@ -130,7 +137,8 @@ class QueryFactory:
         Returns:
             QueryFactory: A QueryFactory object that is used to create Query objects.
         """
-        del app_path
         tokenizer = tokenizer or Tokenizer.create_tokenizer()
         stemmer = stemmer or EnglishNLTKStemmer()
-        return QueryFactory(tokenizer, preprocessor, stemmer)
+        language, locale = get_language_config(app_path)
+        return QueryFactory(tokenizer, preprocessor, stemmer,
+                            language=language, locale=locale)
