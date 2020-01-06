@@ -58,8 +58,6 @@ def _app_cli(ctx):
     """Command line interface for mmworkbench apps."""
 
     # configure logger settings for dependent libraries
-    urllib3_logger = logging.getLogger('urllib3')
-    urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
 
@@ -465,8 +463,6 @@ def cli(ctx):
     """Command line interface for mmworkbench."""
 
     # configure logger settings for dependent libraries
-    urllib3_logger = logging.getLogger('urllib3')
-    urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
     warnings.filterwarnings("module", category=DeprecationWarning,
@@ -486,8 +482,6 @@ def app_cli(ctx):
     """Command line interface for mmworkbench apps."""
 
     # configure logger settings for dependent libraries
-    urllib3_logger = logging.getLogger('urllib3')
-    urllib3_logger.setLevel(logging.ERROR)
     es_logger = logging.getLogger('elasticsearch')
     es_logger.setLevel(logging.ERROR)
     warnings.filterwarnings("module", category=DeprecationWarning,
