@@ -17,7 +17,7 @@ from __future__ import absolute_import, unicode_literals
 
 from . import ser as sys_ent_rec
 from .core import TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED, TEXT_FORM_RAW, Query
-from .stemmers import EnglishNLTKStemmer
+from .stemmers import get_language_stemmer
 from .tokenizer import Tokenizer
 from .components._config import get_language_config
 
@@ -137,8 +137,8 @@ class QueryFactory:
         Returns:
             QueryFactory: A QueryFactory object that is used to create Query objects.
         """
-        tokenizer = tokenizer or Tokenizer.create_tokenizer()
-        stemmer = stemmer or EnglishNLTKStemmer()
         language, locale = get_language_config(app_path)
+        tokenizer = tokenizer or Tokenizer.create_tokenizer()
+        stemmer = stemmer or get_language_stemmer(language_code=language)
         return QueryFactory(tokenizer, preprocessor, stemmer,
                             language=language, locale=locale)
