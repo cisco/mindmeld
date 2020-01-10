@@ -119,6 +119,7 @@ Contents
    userguide/internationalization
    userguide/voice
    integrations/webex_teams
+   integrations/whatsapp
 
 
 .. toctree::
