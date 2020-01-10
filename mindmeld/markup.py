@@ -52,6 +52,7 @@ MARKUP_FORMATS = frozenset({MINDMELD_FORMAT, BRAT_FORMAT})
 def load_query(
     markup,
     query_factory=None,
+    app_path=None,
     domain=None,
     intent=None,
     is_gold=False,
@@ -63,6 +64,7 @@ def load_query(
         markup (str): The marked up query text.
         query_factory (QueryFactory, optional): An object which can create
             queries.
+        app_path (str, optional): The dir path of the application
         domain (str, optional): The name of the domain annotated for the query.
         intent (str, optional): The name of the intent annotated for the query.
         is_gold (bool, optional): True if the markup passed in is a reference,
@@ -73,7 +75,7 @@ def load_query(
     Returns:
         ProcessedQuery: a processed query
     """
-    query_factory = query_factory or QueryFactory.create_query_factory()
+    query_factory = query_factory or QueryFactory.create_query_factory(app_path)
     query_options = query_options or {}
     _, query, entities = process_markup(
         markup, query_factory=query_factory, query_options=query_options
@@ -87,6 +89,7 @@ def load_query(
 def load_query_file(
     file_path,
     query_factory=None,
+    app_path=None,
     domain=None,
     intent=None,
     is_gold=False,
@@ -95,6 +98,7 @@ def load_query_file(
     """Loads the queries from the specified file
 
     Args:
+        app_path (str): The app path
         file_path (str): The path of the file to load
         query_factory (QueryFactory, optional): An object which can create
             queries.
@@ -107,7 +111,7 @@ def load_query_file(
     Returns:
         ProcessedQuery: a processed query
     """
-    query_factory = query_factory or QueryFactory.create_query_factory()
+    query_factory = query_factory or QueryFactory.create_query_factory(app_path)
 
     queries = []
     for query_text in read_query_file(file_path):
@@ -118,12 +122,14 @@ def load_query_file(
             query = query_cache.get_value(domain, intent, query_text)
             if not query:
                 query = load_query(
-                    query_text, query_factory, domain, intent, is_gold=is_gold
+                    query_text, query_factory=query_factory, domain=domain,
+                    intent=intent, is_gold=is_gold
                 )
                 query_cache.set_value(domain, intent, query_text, query)
         else:
             query = load_query(
-                query_text, query_factory, domain, intent, is_gold=is_gold
+                query_text, query_factory=query_factory, domain=domain,
+                intent=intent, is_gold=is_gold
             )
 
         queries.append(query)

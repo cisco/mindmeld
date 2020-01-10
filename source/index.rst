@@ -116,6 +116,7 @@ Contents
    userguide/custom_features
    userguide/kb
    userguide/dm
+   userguide/internationalization
    userguide/voice
    integrations/webex_teams
 
