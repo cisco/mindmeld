@@ -93,7 +93,7 @@ After downloading the HR blueprint, we can inspect the implementation in `whatsa
        app = Flask(__name__)
        configure_logs()
        server = WhatsappBotServer(name='whatsapp', app_path='.')
-       port_number = 5000
+       port_number = 8080
        print('Running server on port {}...'.format(port_number))
        server.run(host='localhost', port=port_number)
 
