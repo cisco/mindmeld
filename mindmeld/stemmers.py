@@ -104,8 +104,8 @@ def get_language_stemmer(language_code):
         language = pycountry.languages.get(alpha_3=language_code)
 
     if not language:
-        logger.warning('Language code "%s" is not supported for stemming. If stemming is enabled in '
-                       'config.py, consider disabling it.', language_code)
+        logger.warning('Language code "%s" is not supported for stemming. If stemming is '
+                       'enabled in config.py, consider disabling it.', language_code)
         return NoOpStemmer()
 
     language_name = language.name.lower()
