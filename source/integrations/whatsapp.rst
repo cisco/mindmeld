@@ -2,7 +2,7 @@ WhatsApp Integration
 ====================
 
 A conversational app built using MindMeld can be integrated seamlessly with WhatsApp through the Twilio sandbox.
-In this tutorial, we will create a WhatsApp bot based on the :doc:`Human Resource <../blueprints/hr_assistant>` blueprint. The HR assistant app is an example of a deep-domain conversational agent that uses a knowledge base of human resources and policies to understand complex user queries that reference employees within a company.
+In this tutorial, you will create a WhatsApp bot based on the :doc:`Human Resource <../blueprints/hr_assistant>` blueprint. The HR assistant app is an example of a deep-domain conversational agent that uses a knowledge base of human resources and policies to understand complex user queries that reference employees within a company.
 
 .. note::
 
@@ -11,7 +11,7 @@ In this tutorial, we will create a WhatsApp bot based on the :doc:`Human Resourc
 Quick Start
 -----------
 
-In this quick start guide, we will use a Twilio sandbox and `ngrok` to integrate the human resource application to WhatsApp. By setting up a publicly accessible server, one can register the server's IP address to the Twilio developer sandbox, thereby allowing WhatsApp to send messages to the human resource application through a phone number registered with the sandbox. This guide should take between five and fifteen minutes to complete.
+In this quick start guide, you will use a Twilio sandbox and `ngrok` to integrate the human resource application to WhatsApp. By setting up a publicly accessible server, one can register the server's IP address to the Twilio developer sandbox, thereby allowing WhatsApp to send messages to the human resource application through a phone number registered with the sandbox. This guide should take between five and fifteen minutes to complete.
 
 
 1. Register a sandbox
@@ -26,8 +26,6 @@ Next, make sure you `register the sandbox and confirm it on WhatsApp <https://ww
 2. Building the bot
 ^^^^^^^^^^^^^^^^^^^
 
-You can import `WhatsAppBotServer` to build a WhatsApp bot application server with MindMeld.
-
 First, you need to install the specific dependencies for bot integration.
 
 .. code:: console
@@ -40,7 +38,7 @@ After that you can instantiate a WhatsappBotServer instance. A sample implementa
 
    mindmeld blueprint hr_assistant
 
-After downloading the HR blueprint, we can inspect the implementation in `whatsapp_bot_server.py`.
+After downloading the HR blueprint, you can inspect the implementation in `whatsapp_bot_server.py`.
 
 .. code:: python
 
