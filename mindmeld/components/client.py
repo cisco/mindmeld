@@ -28,7 +28,7 @@ class ConversationClient:
         params (dict): The params returned by the most recent turn.
     """
 
-    _logger = mod_logger.getChild("Conversation")
+    _logger = mod_logger.getChild("ConversationClient")
 
     def __init__(
         self, url="http://localhost:7150/parse", context=None, default_params=None,
