@@ -9,12 +9,12 @@ mod_logger = logging.getLogger(__name__)
 
 
 class ConversationClient:
-    """The conversation object is a very basic MindMeld client.
+    """The conversation object is a very basic MindMeld http client.
 
     It can be useful for testing out dialogue flows in python.
 
     Example:
-        >>> convo = Conversation(app_path='path/to/my/app')
+        >>> convo = ConversationClient()
         >>> convo.say('Hello')
         ['Hello. I can help you find store hours. How can I help?']
         >>> convo.say('Is the store on elm open?')
@@ -23,11 +23,9 @@ class ConversationClient:
     Attributes:
         history (list): The history of the conversation. Starts with the most recent message.
         context (dict): The context of the conversation, containing user context.
-        default_params (Params): The default params to use with each turn. These \
+        default_params (dict): The default params to use with each turn. These \
             defaults will be overridden by params passed for each turn.
-        params (FrozenParams): The params returned by the most recent turn.
-        force_sync (bool): Force synchronous return for `say()` and `process()` \
-            even when app is in async mode.
+        params (dict): The params returned by the most recent turn.
     """
 
     _logger = mod_logger.getChild("Conversation")
@@ -157,4 +155,4 @@ class ConversationClient:
         """Reset the history, frame and params of the Conversation object."""
         self.history = []
         self.frame = {}
-        self.params = FrozenParams()
+        self.params = {}
