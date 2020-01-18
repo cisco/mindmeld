@@ -21,8 +21,8 @@ class ConversationClient:
         ['The 23 Elm Street Kwik-E-Mart is open from 7:00 to 19:00.']
 
     Attributes:
-        history (list): The history of the conversation. Starts with the most recent message.
-        context (dict): The context of the conversation, containing user context.
+        history (list): The sequence of previous turns in the conversation, starting with the most recent message.
+        context (dict): The user context of the conversation.
         default_params (dict): The default params to use with each turn. These \
             defaults will be overridden by params passed for each turn.
         params (dict): The params returned by the most recent turn.
