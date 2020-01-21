@@ -50,7 +50,7 @@ class ConversationClient:
         self.params = {}
 
     def say(
-        self, text, params=None,
+        self, text, params=None, frame=None, context=None
     ):
         """Send a message in the conversation. The message will be
         processed by the app based on the current state of the conversation and
@@ -60,17 +60,19 @@ class ConversationClient:
             text (str): The text of a message.
             params (dict): The params to use with this message,
                 overriding any defaults which may have been set.
+            frame (dict): The frame to be used with this message, overriding any defaults.
+            context (dict): The context to be used with this message, overriding any defaults.
 
         Returns:
             (list): A text representation of the dialogue responses.
         """
-        response = self.process(text, params=params)
+        response = self.process(text, params=params, frame=frame, context=context)
 
         # handle directives
         response_texts = [self._follow_directive(a) for a in response["directives"]]
         return response_texts
 
-    def process(self, text, params=None):
+    def process(self, text, params=None, frame=None, context=None):
         """Send a message in the conversation. The message will be processed by
         the app based on the current state of the conversation and returns
         the response.
@@ -79,6 +81,8 @@ class ConversationClient:
             text (str): The text of a message.
             params (dict): The params to use with this message, overriding any defaults
                 which may have been set.
+            frame (dict): The frame to be used with this message, overriding any defaults.
+            context (dict): The context to be used with this message, overriding any defaults.
 
         Returns:
             (dict): The dictionary response.
@@ -89,13 +93,25 @@ class ConversationClient:
             for k, v in params.items():
                 internal_params[k] = v
 
+        internal_frame = copy.deepcopy(self.frame)
+
+        if frame:
+            for k, v in frame.items():
+                internal_frame[k] = v
+
+        internal_context = copy.deepcopy(self.context)
+
+        if context:
+            for k, v in context.items():
+                internal_context[k] = v
+
         response = requests.post(
             url=self.url,
             json={
                 "text": text,
                 "history": self.history,
-                "context": self.context,
-                "frame": self.frame,
+                "context": internal_context,
+                "frame": internal_frame,
                 "params": internal_params,
             },
         ).json()
