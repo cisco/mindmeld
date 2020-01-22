@@ -152,6 +152,7 @@ class ConversationClient:
                 msg = "Listening..."
             elif directive_name == DirectiveNames.RESET:
                 msg = "Resetting..."
+                self.reset()
         except (KeyError, ValueError, AttributeError):
             msg = "Unsupported response: {!r}".format(directive)
             self._logger.warning(msg)
