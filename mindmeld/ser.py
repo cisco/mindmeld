@@ -216,7 +216,6 @@ def parse_numerics(
             # Convert a second grain unix timestamp to millisecond
             timestamp *= 1000
         data["reftime"] = timestamp
-
     return SystemEntityRecognizer.get_instance().get_response(data)
 
 

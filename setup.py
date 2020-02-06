@@ -49,7 +49,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.2.3",
+    version="4.2.4",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -79,7 +79,7 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     extras_require={
-        "bot": ["ciscosparkapi"],
+        "bot": ["ciscosparkapi", "twilio"],
         "tensorflow": [
             'tensorflow~=1.2; python_version < "3.7"',
             'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
