@@ -83,9 +83,7 @@ class ApplicationManager:
         request_class=None,
         responder_class=None,
         preprocessor=None,
-        async_mode=False,
-        language=None,
-        locale=None,
+        async_mode=False
     ):  # pylint: disable=too-many-arguments
         self.async_mode = async_mode
 
@@ -113,14 +111,6 @@ class ApplicationManager:
         self.dialogue_manager = DialogueManager(
             self.responder_class, async_mode=self.async_mode
         )
-
-        # if no locale or language is set, we default to english
-        if locale or language:
-            self.locale = validate_locale_code(locale)
-            self.language = validate_language_code(language)
-        else:
-            self.language = "en"
-            self.locale = None
 
     @property
     def ready(self):
@@ -213,8 +203,6 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
 
-        self.check_language_and_locale(nlp_params)
-
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
         )
@@ -269,8 +257,6 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
-
-        self.check_language_and_locale(nlp_params)
 
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
@@ -331,13 +317,3 @@ class ApplicationManager:
             kwargs (dict): A list of options which specify the dialogue rule
         """
         self.dialogue_manager.add_dialogue_rule(name, handler, **kwargs)
-
-    def check_language_and_locale(self, nlp_params):
-        """If there is no language or locale in params, set them to app manager's.
-
-        Args:
-            nlp_params (dict): A dictionary specifying nlp params
-        """
-        if not (nlp_params.get("language") or nlp_params.get("locale")):
-            nlp_params["language"] = self.language
-            nlp_params["locale"] = self.locale

@@ -1,3 +1,8 @@
+LANGUAGE_CONFIG = {
+    'language': 'vi',
+    'locale': 'vi_VI'
+}
+
 NLP_CONFIG = {
     "resolve_entities_using_nbest_transcripts": ["store_info.get_store_hours"]
 }
