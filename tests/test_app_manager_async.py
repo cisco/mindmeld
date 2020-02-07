@@ -39,81 +39,27 @@ async def test_parse(async_kwik_e_mart_app):
 
 
 @pytest.mark.asyncio
-async def test_language(async_app_manager):
+async def test_language_locale(async_app_manager):
     kwik_e_mart_nlp = async_app_manager.nlp
 
     nlp_result = kwik_e_mart_nlp.process("hi")
 
-    # first we test for passing language param into app manager
-    async_app_manager.language = "vi"
-    async_app_manager.locale = None
+    # we test for manually overriding language or locale using params
 
     with patch.object(
         kwik_e_mart_nlp, "process", autospec=True, return_value=nlp_result
     ) as mock:
-        await async_app_manager.parse("hi")
+        await async_app_manager.parse("hi", params={"language": "vi"})
 
     assert mock.call_args[1]["query_text"] == "hi"
     assert mock.call_args[1]["language"] == "vi"
     assert mock.call_args[1]["locale"] is None
 
-    # we test for manually overriding language or locale using params
-
     with patch.object(
         kwik_e_mart_nlp, "process", autospec=True, return_value=nlp_result
     ) as mock:
-        await async_app_manager.parse("hi", params={"language": "en"})
+        await async_app_manager.parse("hi", params={"locale": "vi_vi"})
 
     assert mock.call_args[1]["query_text"] == "hi"
-    assert mock.call_args[1]["language"] == "en"
-    assert mock.call_args[1]["locale"] is None
-
-    with patch.object(
-        kwik_e_mart_nlp, "process", autospec=True, return_value=nlp_result
-    ) as mock:
-        await async_app_manager.parse("hi", params={"locale": "en_us"})
-
-    assert mock.call_args[1]["query_text"] == "hi"
-    assert mock.call_args[1]["locale"] == "en_US"
-    assert mock.call_args[1]["language"] is None
-
-
-@pytest.mark.asyncio
-async def test_locale(async_app_manager):
-    kwik_e_mart_nlp = async_app_manager.nlp
-
-    nlp_result = kwik_e_mart_nlp.process("hi")
-
-    # first we test for passing locale param into app manager's construction
-    # not sure why fixture is not resetting properly
-    async_app_manager.language = None
-    async_app_manager.locale = "vi_VI"
-
-    with patch.object(
-        kwik_e_mart_nlp, "process", autospec=True, return_value=nlp_result
-    ) as mock:
-        await async_app_manager.parse("hi")
-
-    assert mock.call_args[1]["query_text"] == "hi"
-    assert mock.call_args[1]["language"] is None
     assert mock.call_args[1]["locale"] == "vi_VI"
-
-    # we test for manually overriding language or locale using params
-
-    with patch.object(
-        kwik_e_mart_nlp, "process", autospec=True, return_value=nlp_result
-    ) as mock:
-        await async_app_manager.parse("hi", params={"language": "en"})
-
-    assert mock.call_args[1]["query_text"] == "hi"
-    assert mock.call_args[1]["language"] == "en"
-    assert mock.call_args[1]["locale"] is None
-
-    with patch.object(
-        kwik_e_mart_nlp, "process", autospec=True, return_value=nlp_result
-    ) as mock:
-        await async_app_manager.parse("hi", params={"locale": "en_us"})
-
-    assert mock.call_args[1]["query_text"] == "hi"
-    assert mock.call_args[1]["locale"] == "en_US"
     assert mock.call_args[1]["language"] is None

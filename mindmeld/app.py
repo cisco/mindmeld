@@ -48,7 +48,7 @@ class Application:
         request_class=None,
         responder_class=None,
         preprocessor=None,
-        async_mode=False
+        async_mode=False,
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
@@ -63,7 +63,7 @@ class Application:
         self._app_manager_kwargs = (
             request_class or Request,
             responder_class or DialogueResponder,
-            preprocessor
+            preprocessor,
         )
         self.async_mode = async_mode
 
@@ -99,7 +99,7 @@ class Application:
             responder_class=self.responder_class,
             request_class=self.request_class,
             preprocessor=self.preprocessor,
-            async_mode=self.async_mode
+            async_mode=self.async_mode,
         )
         self._server = MindMeldServer(self.app_manager)
 

@@ -122,14 +122,20 @@ def load_query_file(
             query = query_cache.get_value(domain, intent, query_text)
             if not query:
                 query = load_query(
-                    query_text, query_factory=query_factory, domain=domain,
-                    intent=intent, is_gold=is_gold
+                    query_text,
+                    query_factory=query_factory,
+                    domain=domain,
+                    intent=intent,
+                    is_gold=is_gold,
                 )
                 query_cache.set_value(domain, intent, query_text, query)
         else:
             query = load_query(
-                query_text, query_factory=query_factory, domain=domain,
-                intent=intent, is_gold=is_gold
+                query_text,
+                query_factory=query_factory,
+                domain=domain,
+                intent=intent,
+                is_gold=is_gold,
             )
 
         queries.append(query)

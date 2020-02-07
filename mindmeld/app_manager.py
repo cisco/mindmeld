@@ -22,8 +22,6 @@ from .components.request import (
     FrozenParams,
     Params,
     Request,
-    validate_language_code,
-    validate_locale_code,
 )
 from .resource_loader import ResourceLoader
 
@@ -83,7 +81,7 @@ class ApplicationManager:
         request_class=None,
         responder_class=None,
         preprocessor=None,
-        async_mode=False
+        async_mode=False,
     ):  # pylint: disable=too-many-arguments
         self.async_mode = async_mode
 

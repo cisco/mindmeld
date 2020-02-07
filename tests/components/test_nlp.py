@@ -72,33 +72,34 @@ def test_process(kwik_e_mart_nlp):
 def test_query_info_contains_language_information(kwik_e_mart_nlp):
     file_to_test = None
     for file in kwik_e_mart_nlp.resource_loader.file_to_query_info.keys():
-        if 'train.txt' in file:
+        if "train.txt" in file:
             file_to_test = file
             break
-    query = kwik_e_mart_nlp.resource_loader.file_to_query_info[file_to_test]['queries'][0].query
-    assert query.language == 'en'
-    assert query.locale == 'en_CA'
+    query = kwik_e_mart_nlp.resource_loader.file_to_query_info[file_to_test]["queries"][
+        0
+    ].query
+    assert query.language == "en"
+    assert query.locale == "en_CA"
 
 
 def test_process_contains_language_information(kwik_e_mart_nlp):
     # Timestamp is set to Jan 2nd 2020 so that the resolve thanksgiving date will be in 2020
-    result = kwik_e_mart_nlp.process('Is the Main Street location open for Thanksgiving?',
-                                     timestamp=1578025558)
-    for entity in result['entities']:
-        if entity['text'] == 'Thanksgiving':
+    result = kwik_e_mart_nlp.process(
+        "Is the Main Street location open for Thanksgiving?", timestamp=1578025558
+    )
+    for entity in result["entities"]:
+        if entity["text"] == "Thanksgiving":
             # American thanksgiving is 2020-11-26T00:00:00.000-08:00,
             # which is different from Canada's.
-            assert entity['value'][0]['value'] == '2020-10-12T00:00:00.000-07:00'
+            assert entity["value"][0]["value"] == "2020-10-12T00:00:00.000-07:00"
 
 
 def test_inspect_contains_language_information(kwik_e_mart_nlp, mocker):
-    mock = mocker.patch.object(
-        DomainClassifier, "inspect", return_value=({}, 400)
-    )
-    kwik_e_mart_nlp.inspect('When is main street open tomorrow', domain='store_info')
+    mock = mocker.patch.object(DomainClassifier, "inspect", return_value=({}, 400))
+    kwik_e_mart_nlp.inspect("When is main street open tomorrow", domain="store_info")
     query = mock.call_args_list[0][0][0]
-    assert query.language == 'en'
-    assert query.locale == 'en_CA'
+    assert query.language == "en"
+    assert query.locale == "en_CA"
 
 
 test_data_1 = [

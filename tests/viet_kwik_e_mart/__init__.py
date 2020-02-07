@@ -2,7 +2,7 @@
 """This module contains the Kwik-E-Mart MindMeld demo application implemented in Vietnamese"""
 from mindmeld import Application
 
-app = Application(__name__, language="vi")
+app = Application(__name__)
 
 __all__ = ["app"]
 

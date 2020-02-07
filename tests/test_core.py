@@ -10,8 +10,12 @@ Tests for `core` module.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mindmeld.stemmers import get_language_stemmer, \
-    EnglishNLTKStemmer, NoOpStemmer, SnowballNLTKStemmer
+from mindmeld.stemmers import (
+    get_language_stemmer,
+    EnglishNLTKStemmer,
+    NoOpStemmer,
+    SnowballNLTKStemmer,
+)
 from mindmeld.core import (
     TEXT_FORM_NORMALIZED,
     TEXT_FORM_PROCESSED,

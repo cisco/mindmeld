@@ -32,8 +32,9 @@ class QueryFactory:
         stemmer (Stemmer): the object responsible for stemming the text
     """
 
-    def __init__(self, tokenizer, preprocessor=None, stemmer=None,
-                 locale=None, language=None):
+    def __init__(
+        self, tokenizer, preprocessor=None, stemmer=None, locale=None, language=None
+    ):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
         self.stemmer = stemmer
@@ -140,5 +141,6 @@ class QueryFactory:
         language, locale = get_language_config(app_path)
         tokenizer = tokenizer or Tokenizer.create_tokenizer()
         stemmer = stemmer or get_language_stemmer(language_code=language)
-        return QueryFactory(tokenizer, preprocessor, stemmer,
-                            language=language, locale=locale)
+        return QueryFactory(
+            tokenizer, preprocessor, stemmer, language=language, locale=locale
+        )
