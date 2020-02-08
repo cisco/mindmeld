@@ -38,9 +38,6 @@ HOME_ASSISTANT_APP_PATH = os.path.join(
 )
 AENEID_FILE = "aeneid.txt"
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
-HOME_ASSISTANT_APP_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "home_assistant"
-)
 RASA_PROJECT_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "converter/rasa_sample_project"
 )

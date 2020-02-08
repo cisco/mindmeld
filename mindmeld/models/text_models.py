@@ -239,10 +239,10 @@ class TextModel(Model):
             label_class (int): The index of the label
 
         Returns:
-            (float): The feature weight
+            (ndarray float): The ndarray with a single float element
         """
         if len(self._class_encoder.classes_) == 2 and label_class >= 1:
-            return 0
+            return np.array([0.0])
         else:
             return self._clf.coef_[
                 label_class, self._feat_vectorizer.vocabulary_[feat_name]

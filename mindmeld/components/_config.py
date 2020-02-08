@@ -471,15 +471,18 @@ DEFAULT_NLP_CONFIG = {
 def get_language_config(app_path):
     if not app_path:
         return ENGLISH_LANGUAGE_CODE, ENGLISH_US_LOCALE
-
-    language_config = getattr(
-        _get_config_module(app_path), "LANGUAGE_CONFIG", DEFAULT_LANGUAGE_CONFIG
-    )
-
-    locale = language_config.get("locale")
-    language = language_config.get("language")
-    resolved_language = resolve_language(language, locale)
-    return resolved_language, locale
+      
+    try:
+        language_config = getattr(_get_config_module(app_path),
+                                  'LANGUAGE_CONFIG',
+                                  DEFAULT_LANGUAGE_CONFIG)
+        locale = language_config.get('locale')
+        language = language_config.get('language')
+        resolved_language = resolve_language(language, locale)
+        return resolved_language, locale
+    except (OSError, IOError):
+        logger.info("No app configuration file found. Using default language and locale.")
+        return ENGLISH_LANGUAGE_CODE, ENGLISH_US_LOCALE
 
 
 def resolve_language(language=None, locale=None):
