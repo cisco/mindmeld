@@ -22,10 +22,52 @@ ENTITY_RECOGNIZER_CONFIG = {
                 2: [-2, -1, 0, 1]
             }
         },
-        'in-gaz-span-seq': {},
         'sys-candidates-seq': {
             'start_positions': [-1, 0, 1]
         },
         'enable-stemming': True
     }
 }
+
+INTENT_CLASSIFIER_CONFIG = {
+    "model_type": "text",
+    "model_settings": {"classifier_type": "logreg"},
+    "param_selection": {
+        "type": "k-fold",
+        "k": 10,
+        "grid": {
+            'penalty': ['l1', 'l2'],
+            "fit_intercept": [True, False],
+            "C": [0.01, 1, 100, 10000, 1000000],
+            "class_bias": [1, 0.7, 0.3, 0],
+        },
+    },
+    "features": {
+        "bag-of-words": {"lengths": [1, 2, 3]},
+        "freq": {"bins": 5},
+        "enable-stemming": True,
+        "sys-candidates": {},
+        "word-shape": {"lengths": [1, 2]},
+    },
+}
+
+DOMAIN_CLASSIFIER_CONFIG = {
+    "model_type": "text",
+    "model_settings": {"classifier_type": "logreg"},
+    "param_selection": {
+        "type": "k-fold",
+        "k": 10,
+        "grid": {
+            "fit_intercept": [True, False],
+            "C": [0.01, 1, 100, 10000, 1000000],
+            "class_bias": [1, 0.7, 0.3, 0],
+        },
+    },
+    "features": {
+        "bag-of-words": {"lengths": [1, 2, 3]},
+        "freq": {"bins": 5},
+        "enable-stemming": True,
+        "sys-candidates": {},
+    },
+}
+

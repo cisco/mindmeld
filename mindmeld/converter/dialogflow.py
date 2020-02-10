@@ -195,9 +195,7 @@ class DialogflowConverter(Converter):
                     dialogflow_intent_file, mindmeld_intent_directory, language
                 )
 
-    def _create_intent_file(
-        self, dialogflow_intent_file, mindmeld_intent_directory, language
-    ):
+    def _create_intent_file(self, dialogflow_intent_file, mindmeld_intent_directory, language):
         source_en = open(dialogflow_intent_file, "r")
         target_test = open(os.path.join(mindmeld_intent_directory, "test.txt"), "w")
         target_train = open(os.path.join(mindmeld_intent_directory, "train.txt"), "w")
@@ -217,6 +215,7 @@ class DialogflowConverter(Converter):
                     ):  # if text is a dialogflow sys entity
                         if df_meta in DialogflowConverter.sys_entity_map:
                             mm_meta = DialogflowConverter.sys_entity_map[df_meta]
+                            entity_type = self.clean_name(mm_meta)
                         else:
                             mm_meta = "[DNE: {sysEntity}]".format(sysEntity=df_meta[1:])
                             logger.info(
@@ -225,12 +224,12 @@ class DialogflowConverter(Converter):
                                 "Please create an entity for this.",
                                 df_meta[1:],
                             )
+                            entity_type = self.clean_name(mm_meta) + "_" + language
 
-                        entity_type = self.clean_name(mm_meta) + "_entries_" + language
                         part = "{" + df_text + "|" + entity_type + "}"
                     else:
                         entity_type = (
-                            self.clean_name(df_meta[1:]) + "_entries_" + language
+                            self.clean_name(df_meta[1:]) + "_" + language
                         )
                         part = "{" + df_text + "|" + entity_type + "}"
                 else:
@@ -253,9 +252,9 @@ class DialogflowConverter(Converter):
         levels (str): either "entities" or "intents"
 
         ex. if we had the following files in our entities directory:
-            ["test.json", "test_entries_en.json", "test_entries_de.json"]
+            ["test.json", "test_en.json", "test_de.json"]
         it returns:
-            {'test': {'en': 'test_entries_en', 'de': 'test_entries_de'}} """
+            {'test': {'en': 'test_en', 'de': 'test_de'}} """
 
         directory = os.path.join(self.dialogflow_project_directory, level)
         files = os.listdir(directory)
@@ -428,7 +427,7 @@ class DialogflowConverter(Converter):
 
             entities folder contains:
                 entityName.json - Meta data about entityName for all languages.
-                entityName_entries_la.json - One for each language, contains entitiy mappings.
+                entityName_la.json - One for each language, contains entitiy mappings.
 
             intents folder contain:
                 intentName.json - Contains rules, information about conversation flow, meta data.
