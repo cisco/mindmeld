@@ -102,9 +102,12 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 
 DEFAULT_ENTITY_RESOLVER_CONFIG = {"model_type": "text_relevance"}
 
-ENGLISH_LANGUAGE_CODE = 'en'
-ENGLISH_US_LOCALE = 'en_US'
-DEFAULT_LANGUAGE_CONFIG = {'language': ENGLISH_LANGUAGE_CODE, 'locale': ENGLISH_US_LOCALE}
+ENGLISH_LANGUAGE_CODE = "en"
+ENGLISH_US_LOCALE = "en_US"
+DEFAULT_LANGUAGE_CONFIG = {
+    "language": ENGLISH_LANGUAGE_CODE,
+    "locale": ENGLISH_US_LOCALE,
+}
 
 DOC_TYPE = "document"
 
@@ -469,12 +472,12 @@ def get_language_config(app_path):
     if not app_path:
         return ENGLISH_LANGUAGE_CODE, ENGLISH_US_LOCALE
 
-    language_config = getattr(_get_config_module(app_path),
-                              'LANGUAGE_CONFIG',
-                              DEFAULT_LANGUAGE_CONFIG)
+    language_config = getattr(
+        _get_config_module(app_path), "LANGUAGE_CONFIG", DEFAULT_LANGUAGE_CONFIG
+    )
 
-    locale = language_config.get('locale')
-    language = language_config.get('language')
+    locale = language_config.get("locale")
+    language = language_config.get("language")
     resolved_language = resolve_language(language, locale)
     return resolved_language, locale
 
@@ -488,7 +491,7 @@ def resolve_language(language=None, locale=None):
 
     # Locale overrides language
     if locale:
-        language = locale.split('_')[0]
+        language = locale.split("_")[0]
 
     if not language:
         language = ENGLISH_LANGUAGE_CODE
