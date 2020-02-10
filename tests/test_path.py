@@ -9,8 +9,10 @@ Tests for `path` module.
 """
 
 import os
+import pytest
 
 from mindmeld import path
+from mindmeld.components._config import get_language_config
 
 APP_NAME = "kwik_e_mart"
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
@@ -58,3 +60,27 @@ def test_get_indexes():
     indexes = path.get_indexes(APP_PATH)
     assert len(indexes) == 1
     assert "stores" in indexes
+
+
+@pytest.mark.parametrize(
+    "path, language, locale",
+    [
+        # test absolute file path
+        (APP_PATH, "en", "en_CA"),
+        # test relative file path
+        ("{}/../tests/{}".format(
+            os.path.dirname(
+                os.path.abspath(__file__)),
+            APP_NAME),
+         "en", "en_CA"),
+        # test relative invalid file path
+        (".", "en", "en_US"),
+        # test None file path
+        (None, "en", "en_US"),
+        # test invalid file path
+        ("INVALID_FILE_PATH", "en", "en_US"),
+
+    ],
+)
+def test_language_config(path, language, locale):
+    assert get_language_config(path) == (language, locale)
