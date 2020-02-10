@@ -70,7 +70,7 @@ def test_process(kwik_e_mart_nlp):
 
 
 def test_query_info_contains_language_information(kwik_e_mart_nlp):
-    query_info =  kwik_e_mart_nlp.resource_loader.file_to_query_info
+    query_info = kwik_e_mart_nlp.resource_loader.file_to_query_info
     file_to_test = None
     for file in query_info.keys():
         if "train.txt" in file:
