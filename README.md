@@ -86,7 +86,7 @@ source bin/activate
 
 For local development we recommend using Python 3.6 and above since one of our linters ([Black](https://black.readthedocs.io/en/stable/)) is available only for Python 3.6 and above. To install and manage different versions of Python, you can checkout [pyenv](https://github.com/pyenv/pyenv) which also works with ``virtualenv``.
 
-Now we can install `mindmeld` and its dependency:
+Now we can install `mindmeld` and its dependencies:
 
 ```
 pip install -e .
@@ -94,7 +94,7 @@ pip install -r dev-requirements.txt
 pip install -r test-requirements.txt
 ```
 
-Finally we ae ready to run MindMeld static style checks and unit tests. Make sure that the [numerical parser and Elasticsearch](https://www.mindmeld.com/docs/userguide/getting_started.html) is running in the background.
+Finally we are ready to run MindMeld static style checks and unit tests. Make sure that the [numerical parser and Elasticsearch](https://www.mindmeld.com/docs/userguide/getting_started.html) are running in the background.
 
 ```
 ./lintme
@@ -102,7 +102,7 @@ cd tests
 pytest .
 ```
 
-After all changes are made and all tests are passed locally, commit the code changes and issue a PR against the [cisco/mindmeld](https://github.com/cisco/mindmeld) repo.
+After all changes are made and all tests are passed locally, commit the code changes to your fork and issue a PR against the [cisco/mindmeld](https://github.com/cisco/mindmeld) repo.
 
 ## Citation
 
