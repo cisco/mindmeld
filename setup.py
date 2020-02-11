@@ -13,7 +13,7 @@ requirements = [
     "click-log==0.1.8",
     "distro~=1.3",
     "elasticsearch5~=5.5",
-    "Flask~=0.12",
+    "Flask~=1.0",
     "Flask-Cors~=3.0",
     "future~=0.16.0",
     "pycountry",  # uses calendar versioning
@@ -34,7 +34,6 @@ requirements = [
     "sklearn-crfsuite>=0.3.6,<1.0",
     "immutables~=0.9",
     "pyyaml>=5.1.1",
-    "werkzeug<1.0",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
