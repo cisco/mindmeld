@@ -187,8 +187,15 @@ class DialogflowConverter(Converter):
                     sub, self.intents_list
                 )
 
-                domain = 'unrelated' if \
-                    'default' in mindmeld_intent_directory_name else 'app_specific'
+                # DF has "default" intents like "default_fallback" and "default_greeting"
+                # which are in-built intents. We map these intents to the "unrelated" domain
+                # compared to the other app specific intents being mapped to the "app_specific"
+                # domain.
+                if 'default' in mindmeld_intent_directory_name:
+                    domain = 'unrelated'
+                else:
+                    domain = 'app_specific'
+
                 mindmeld_intent_directory = os.path.join(
                     self.mindmeld_project_directory,
                     "domains",
@@ -269,6 +276,7 @@ class DialogflowConverter(Converter):
 
         w = {"entities": "entries", "intents": "usersays"}
         p = r".+(?<=(_" + w[level] + "_))(.*)(?=(.json))"
+        language = 'en'
 
         info = {}
         for name in files:
@@ -277,7 +285,7 @@ class DialogflowConverter(Converter):
             if match:
                 isbase = False
                 base = name[: match.start(1)]
-                language = match.group(2)
+                language = str(match.group(2))
             else:
                 isbase = True
                 base = name[:-5]
@@ -383,17 +391,11 @@ class DialogflowConverter(Converter):
 
                             if "speech" in message:
                                 data = message["speech"]
-
                                 replies = data if isinstance(data, list) else [data]
-
                                 function_name = "renameMe" + str(i) + "_" + language
                                 handles = [
-                                    "intent="
-                                    + "'"
-                                    + self.clean_name(datastore["name"])
-                                    + "_"
-                                    + language
-                                    + "'"
+                                    "intent='%s_%s'" % (
+                                        self.clean_name(datastore["name"]), language)
                                 ]
 
                                 target.write(
@@ -461,7 +463,6 @@ class DialogflowConverter(Converter):
         self.create_mindmeld_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
 
-        self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_mindmeld_init()
 

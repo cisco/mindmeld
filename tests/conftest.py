@@ -20,7 +20,6 @@ from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.stemmers import EnglishNLTKStemmer
 from mindmeld.tokenizer import Tokenizer
-from mindmeld.converter.dialogflow import DialogflowConverter
 
 warnings.filterwarnings(
     "module", category=DeprecationWarning, module="sklearn.preprocessing.label"
@@ -37,25 +36,6 @@ HOME_ASSISTANT_APP_PATH = os.path.join(
 )
 AENEID_FILE = "aeneid.txt"
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
-RASA_PROJECT_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/rasa_sample_project"
-)
-MINDMELD_PROJECT_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/mindmeld_project"
-)
-DF_PROJECT_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/dialogflow_sample_project"
-)
-# This is the dialogflow app converted to mindmeld app
-MM_DF_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/mm_df_converted_project"
-)
-df_init = DialogflowConverter(DF_PROJECT_PATH, MM_DF_PATH)
-df_init.convert_project()
-
-MINDMELD_PROJECT_PATH2 = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/mindmeld_project2"
-)
 
 
 @pytest.fixture
@@ -86,35 +66,6 @@ def food_ordering_app_path():
 @pytest.fixture(scope="session")
 def home_assistant_app_path():
     return HOME_ASSISTANT_APP_PATH
-
-
-@pytest.fixture(scope="session")
-def rasa_project_path():
-    return RASA_PROJECT_PATH
-
-
-@pytest.fixture(scope="session")
-def mindmeld_project_path():
-    return MINDMELD_PROJECT_PATH
-
-
-@pytest.fixture(scope="session")
-def mindmeld_project_path2():
-    return MINDMELD_PROJECT_PATH2
-
-
-@pytest.fixture(scope="session")
-def mm_df_app_path():
-    return MM_DF_PATH
-
-
-@pytest.fixture(scope="session")
-def mm_df_nlp(mm_df_app_path):
-    """Provides a built processor instance"""
-    nlp = NaturalLanguageProcessor(app_path=mm_df_app_path)
-    nlp.build()
-    nlp.dump()
-    return nlp
 
 
 @pytest.fixture(scope="session")
@@ -149,13 +100,6 @@ def kwik_e_mart_app(kwik_e_mart_nlp):
     from .kwik_e_mart import app
 
     app.lazy_init(kwik_e_mart_nlp)
-    return app
-
-
-@pytest.fixture(scope="session")
-def mm_df_app(mm_df_nlp):
-    from .converter.mm_df_converted_project import app
-    app.lazy_init(mm_df_nlp)
     return app
 
 

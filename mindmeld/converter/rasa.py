@@ -551,5 +551,4 @@ __all__ = ['app']
         file_loc = os.path.dirname(os.path.realpath(__file__))
         self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_mindmeld_init()
-        self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_custom_features(self.mindmeld_project_directory, file_loc)
