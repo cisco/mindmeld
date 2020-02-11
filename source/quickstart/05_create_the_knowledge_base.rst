@@ -18,6 +18,7 @@ Creating the knowledge base is the first step in utilizing the Question Answerer
 
 As shown in :doc:`Step 4 <04_define_the_dialogue_handlers>`, our example application provides information about Kwik-E-Mart stores, relying on a knowledge base which contains information about all retail store locations. In our example, let's assume that each store object contains the following attributes:
 
+    * ``id``
     * ``store_name``
     * ``open_time``
     * ``close_time``
@@ -30,6 +31,7 @@ The corresponding JSON data file could look like this:
 
   [
       {
+        "id": "1",
         "store_name": "23 Elm Street",
         "open_time": "7am",
         "close_time": "9pm",
@@ -37,6 +39,7 @@ The corresponding JSON data file could look like this:
         "phone_number": "(+1) 415-555-1100"
       },
       {
+        "id": "2",
         "store_name": "Pine and Market",
         "open_time": "6am",
         "close_time": "10pm",
@@ -46,6 +49,8 @@ The corresponding JSON data file could look like this:
   ]
 
 Assuming that this file is named ``stores.json`` and is in the ``data`` subdirectory of the application root directory, you would create the knowledge base as follows.
+
+A sample ``stores.json`` is available under the `data <https://github.com/cisco/mindmeld/blob/master/tests/kwik_e_mart/data/stores.json>`_ folder in the Kwik-E-Mart blueprint.
 
 .. warning::
 
@@ -73,6 +78,7 @@ This code loads the Question Answerer module from MindMeld, then loads the ``dat
 .. code:: console
 
   {
+    "id": "3",
     "store_name": "Central Plaza Store",
     "open_time": "0800 hrs",
     "close_time": "1800 hrs",
