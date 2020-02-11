@@ -84,7 +84,7 @@ virtualenv -p python3 .
 source bin/activate
 ```
 
-For local development we recommend using Python 3.6 and above since one of our linters ([Black](https://black.readthedocs.io/en/stable/)) is available only for Python 3.6 and above. To install and manage different versions of Python, you can checkout [pyenv](https://github.com/pyenv/pyenv) which also works with ``virtualenv``.
+For local development we recommend using Python 3.6 or 3.7 since one of our linters ([Black](https://black.readthedocs.io/en/stable/)) is available only for Python 3.6 and above. To install and manage different versions of Python, you can checkout [pyenv](https://github.com/pyenv/pyenv) which also works with ``virtualenv``.
 
 Now we can install MindMeld and its dependencies:
 
