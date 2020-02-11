@@ -69,9 +69,11 @@ For detailed installation instructions, see [Getting Started for UI](https://www
 
 Note: this web client only works on Chrome browser.
 
-## Developing with MindMeld
+## How to contribute to the Mindmeld platform:
 
-We welcome every contribution to MindMeld platform!
+We are very happy to receive your contributions. We maintain the list of [open issues](https://github.com/cisco/mindmeld/issues) on our GitHub project.
+
+You can also create your own issue and link it to your code in a pull request, which we will promptly review.
 
 To setup local development for MindMeld, first you will need to fork the MindMeld repository from GitHub and follow instructions on [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html) page to 
 
@@ -92,7 +94,7 @@ pip install -r dev-requirements.txt
 pip install -r test-requirements.txt
 ```
 
-Finally we ae ready to run MindMeld static style checks and unit tests. Make sure that the numerical parser and Elasticsearch is running in the background.
+Finally we ae ready to run MindMeld static style checks and unit tests. Make sure that the [numerical parser and Elasticsearch](https://www.mindmeld.com/docs/userguide/getting_started.html) is running in the background.
 
 ```
 ./lintme
@@ -100,7 +102,7 @@ cd tests
 pytest .
 ```
 
-After all changes are made and all tests are passed locally, save them in git commits and send the PR against the original repository.
+After all changes are made and all tests are passed locally, commit the code changes and issue a PR against the [cisco/mindmeld](https://github.com/cisco/mindmeld) repo.
 
 ## Citation
 
