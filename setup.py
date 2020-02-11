@@ -34,6 +34,7 @@ requirements = [
     "sklearn-crfsuite>=0.3.6,<1.0",
     "immutables~=0.9",
     "pyyaml>=5.1.1",
+    "werkzeug<1.0",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -49,7 +50,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.2.5",
+    version="4.2.6",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
