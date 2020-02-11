@@ -75,7 +75,7 @@ We are very happy to receive your contributions. We maintain the list of [open i
 
 You can also create your own issue and link it to your code in a pull request, which we will promptly review.
 
-To setup local development for MindMeld, first you will need to fork the MindMeld repository from GitHub and follow instructions on [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html) page to 
+To setup local development for MindMeld, first you will need to fork the MindMeld repository from GitHub and follow instructions on [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html) page to setup the virutal environment.
 
 ```
 git clone git@github.com:[username]/mindmeld.git
