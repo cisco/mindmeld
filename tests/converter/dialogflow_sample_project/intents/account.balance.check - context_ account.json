@@ -1,0 +1,53 @@
+{
+  "id": "8ee63be0-9b5f-4e23-ab5c-67ae6caa5897",
+  "name": "account.balance.check - context: account",
+  "auto": true,
+  "contexts": [
+    "balance"
+  ],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "account.balance.check",
+      "affectedContexts": [
+        {
+          "name": "balance",
+          "parameters": {},
+          "lifespan": 5
+        }
+      ],
+      "parameters": [
+        {
+          "id": "c453411b-0c04-420b-a40e-638f9bc42315",
+          "required": false,
+          "dataType": "@account",
+          "name": "account",
+          "value": "$account",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "Here\u0027s the balance for this account:"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

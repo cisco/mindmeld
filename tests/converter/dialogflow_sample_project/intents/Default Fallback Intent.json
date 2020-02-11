@@ -1,5 +1,5 @@
 {
-  "id": "82cc7587-3474-485e-bb25-e703307a4a42",
+  "id": "ae4cf7e5-ada2-4efc-bf7a-d4b73acb5c91",
   "name": "Default Fallback Intent",
   "auto": true,
   "contexts": [],
@@ -12,31 +12,18 @@
       "messages": [
         {
           "type": 0,
-          "lang": "es",
-          "speech": [
-            "Ups, no he entendido a que te refieres.",
-            "¿Podrías repetirlo, por favor?",
-            "¿Disculpa?",
-            "¿Decías?",
-            "¿Cómo?"
-          ]
-        },
-        {
-          "type": 0,
           "lang": "en",
+          "condition": "",
           "speech": [
-            "I didn\u0027t get that. Can you say it again?",
-            "I missed what you said. What was that?",
-            "Sorry, could you say that again?",
+            "Sorry, I didn’t get that.",
+            "I\u0027m afraid I don\u0027t understand.",
+            "Sorry, say that again?",
             "Sorry, can you say that again?",
-            "Can you say that again?",
-            "Sorry, I didn\u0027t get that. Can you rephrase?",
-            "Sorry, what was that?",
-            "One more time?",
-            "What was that?",
-            "Say that one more time?",
-            "I didn\u0027t get that. Can you repeat?",
-            "I missed that, say that again?"
+            "I didn\u0027t get that. Can you say it again?",
+            "Sorry, could you say that again?",
+            "Sorry, can you tell me again?",
+            "Sorry, tell me one more time?",
+            "Sorry, can you say that again?"
           ]
         }
       ],
@@ -48,5 +35,8 @@
   "webhookUsed": false,
   "webhookForSlotFilling": false,
   "fallbackIntent": true,
-  "events": []
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
 }

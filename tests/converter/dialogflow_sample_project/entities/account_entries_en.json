@@ -1,0 +1,22 @@
+[
+  {
+    "value": "checking account",
+    "synonyms": [
+      "checking",
+      "checking account"
+    ]
+  },
+  {
+    "value": "credit card",
+    "synonyms": [
+      "credit card"
+    ]
+  },
+  {
+    "value": "savings account",
+    "synonyms": [
+      "savings",
+      "savings account"
+    ]
+  }
+]

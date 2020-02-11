@@ -107,7 +107,10 @@ class DialogflowConverter(Converter):
         self.create_directory(os.path.join(self.mindmeld_project_directory, "data"))
         self.create_directory(os.path.join(self.mindmeld_project_directory, "domains"))
         self.create_directory(
-            os.path.join(self.mindmeld_project_directory, "domains", "general")
+            os.path.join(self.mindmeld_project_directory, "domains", "app_specific")
+        )
+        self.create_directory(
+            os.path.join(self.mindmeld_project_directory, "domains", "unrelated")
         )
         self.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
 
@@ -135,8 +138,9 @@ class DialogflowConverter(Converter):
                     mindmeld_entity_directory_name,
                 )
 
+                # remove DF entity reference "entries"
+                mindmeld_entity_directory = mindmeld_entity_directory.replace('entries_', '')
                 self.create_directory(mindmeld_entity_directory)
-
                 self._create_entity_file(
                     dialogflow_entity_file, mindmeld_entity_directory
                 )
@@ -182,15 +186,19 @@ class DialogflowConverter(Converter):
                 mindmeld_intent_directory_name = self.clean_check(
                     sub, self.intents_list
                 )
+
+                domain = 'unrelated' if \
+                    'default' in mindmeld_intent_directory_name else 'app_specific'
                 mindmeld_intent_directory = os.path.join(
                     self.mindmeld_project_directory,
                     "domains",
-                    "general",
+                    domain,
                     mindmeld_intent_directory_name,
                 )
 
+                # remove DF intent reference "usersays_"
+                mindmeld_intent_directory = mindmeld_intent_directory.replace('usersays_', '')
                 self.create_directory(mindmeld_intent_directory)
-
                 self._create_intent_file(
                     dialogflow_intent_file, mindmeld_intent_directory, language
                 )
@@ -252,9 +260,9 @@ class DialogflowConverter(Converter):
         levels (str): either "entities" or "intents"
 
         ex. if we had the following files in our entities directory:
-            ["test.json", "test_en.json", "test_de.json"]
+            ["test.json", "test_entries_en.json", "test_entries_de.json"]
         it returns:
-            {'test': {'en': 'test_en', 'de': 'test_de'}} """
+            {'test': {'en': 'test_entries_en', 'de': 'test_entries_de'}} """
 
         directory = os.path.join(self.dialogflow_project_directory, level)
         files = os.listdir(directory)
@@ -378,26 +386,15 @@ class DialogflowConverter(Converter):
 
                                 replies = data if isinstance(data, list) else [data]
 
-                                if datastore["fallbackIntent"]:
-                                    function_name = "default" + "_" + language
-                                    if language == "en":
-                                        # TODO: support multiple defaults for languages
-                                        handles = [
-                                            "default=True",
-                                            "intent='unsupported'",
-                                        ]
-                                    else:
-                                        handles = ["intent='unsupported'"]
-                                else:
-                                    function_name = "renameMe" + str(i) + "_" + language
-                                    handles = [
-                                        "intent="
-                                        + "'"
-                                        + self.clean_name(datastore["name"])
-                                        + "_usersays_"
-                                        + language
-                                        + "'"
-                                    ]
+                                function_name = "renameMe" + str(i) + "_" + language
+                                handles = [
+                                    "intent="
+                                    + "'"
+                                    + self.clean_name(datastore["name"])
+                                    + "_"
+                                    + language
+                                    + "'"
+                                ]
 
                                 target.write(
                                     "\n\n\n"

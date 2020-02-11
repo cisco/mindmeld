@@ -1,0 +1,218 @@
+[
+  {
+    "id": "aa39cdbe-c444-4143-b9a1-f0a7b0a5463e",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " my ",
+        "userDefined": false
+      },
+      {
+        "text": "credit card",
+        "alias": "account",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " balance",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "05efaef4-2c3a-4c48-8582-6cf5c03fb57d",
+    "data": [
+      {
+        "text": "balance",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "40e31f9e-5c8a-4f3e-8510-3085c56b2c39",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "4f5f8f6b-4c3f-4fbd-828f-a32978e5bd36",
+    "data": [
+      {
+        "text": "what\u0027s the balance in my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account",
+        "meta": "@account",
+        "userDefined": true
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "fef2a710-64b7-4d4e-892c-b9bac7349902",
+    "data": [
+      {
+        "text": "show available money on my ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "1ba345bf-9829-47ca-aa3f-efa2f7e233cc",
+    "data": [
+      {
+        "text": "how much money is available on my bank account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 1,
+    "updated": 0
+  },
+  {
+    "id": "e4ca8322-f9c3-4521-b7d1-eed2d4e808da",
+    "data": [
+      {
+        "text": "check how much money do i have",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "00862ec3-d082-4ca0-883d-686e67db8bab",
+    "data": [
+      {
+        "text": "how much money do I have on the card",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "68e9e89b-17ae-4ff1-8cb1-5f160cc5da8b",
+    "data": [
+      {
+        "text": "check my balance",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "513d5f72-6ef1-4116-904e-15a523e6d019",
+    "data": [
+      {
+        "text": "can you show balance on ",
+        "userDefined": false
+      },
+      {
+        "text": "the card",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "4062043b-89d0-40b5-8798-329e4519064a",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " money on my card",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "27fbecfc-5db2-4b6e-9209-bd0dfe5e8f0e",
+    "data": [
+      {
+        "text": "show balance",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "9b35317e-785a-4001-b754-91f9ee77cbdd",
+    "data": [
+      {
+        "text": "check my account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

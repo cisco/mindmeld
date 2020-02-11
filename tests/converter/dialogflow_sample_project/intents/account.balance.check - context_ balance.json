@@ -1,0 +1,47 @@
+{
+  "id": "7a2aa93d-ffff-4430-86c0-812915717376",
+  "name": "account.balance.check - context: balance",
+  "auto": true,
+  "contexts": [
+    "balance"
+  ],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "account.balance.check",
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "b5c3a409-1d21-4a85-86a9-ad40deb2cdb9",
+          "required": false,
+          "dataType": "@account",
+          "name": "account",
+          "value": "#balance.account",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "This is your latest balance:"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

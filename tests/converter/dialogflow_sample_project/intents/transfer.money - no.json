@@ -1,12 +1,18 @@
 {
-  "id": "1e9eafd6-2daa-4e24-a6cb-f13c5936a4a1",
-  "name": "Default Welcome Intent",
+  "id": "deed5889-d03b-456d-87c8-eff16c4dd76d",
+  "parentId": "c80891cf-b988-4b43-8c66-8ce5e502c9b2",
+  "rootParentId": "c80891cf-b988-4b43-8c66-8ce5e502c9b2",
+  "name": "transfer.money - no",
   "auto": true,
-  "contexts": [],
+  "contexts": [
+    "transfer",
+    "balance",
+    "transfermoney-followup"
+  ],
   "responses": [
     {
       "resetContexts": false,
-      "action": "input.welcome",
+      "action": "transfer.money.no",
       "affectedContexts": [],
       "parameters": [],
       "messages": [
@@ -14,10 +20,7 @@
           "type": 0,
           "lang": "en",
           "condition": "",
-          "speech": [
-            "Hello. Welcome to ACME Bank.",
-            "Hello, thanks for choosing ACME Bank."
-          ]
+          "speech": "Sorry. Can you repeat your transfer request?"
         }
       ],
       "defaultResponsePlatforms": {},
@@ -28,11 +31,7 @@
   "webhookUsed": false,
   "webhookForSlotFilling": false,
   "fallbackIntent": false,
-  "events": [
-    {
-      "name": "WELCOME"
-    }
-  ],
+  "events": [],
   "conditionalResponses": [],
   "condition": "",
   "conditionalFollowupEvents": []

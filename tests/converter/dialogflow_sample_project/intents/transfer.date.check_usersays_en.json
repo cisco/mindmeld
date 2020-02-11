@@ -1,0 +1,108 @@
+[
+  {
+    "id": "709ed63c-6212-4767-a426-99e4721f1e84",
+    "data": [
+      {
+        "text": "when was my last transfer",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 1,
+    "updated": 0
+  },
+  {
+    "id": "9ae6c6a4-3b43-478c-aa14-22d80691bdd9",
+    "data": [
+      {
+        "text": "date of my last ",
+        "userDefined": false
+      },
+      {
+        "text": "deposit",
+        "alias": "type",
+        "meta": "@transfer-type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "f7ba6496-bd9d-4841-9d09-2c147b924456",
+    "data": [
+      {
+        "text": "check the last ",
+        "userDefined": false
+      },
+      {
+        "text": "EFT",
+        "alias": "type",
+        "meta": "@transfer-type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "93a203d0-7363-40c2-9d91-b850e80d6e11",
+    "data": [
+      {
+        "text": "can you show the date of my last ",
+        "userDefined": false
+      },
+      {
+        "text": "credit",
+        "alias": "type",
+        "meta": "@transfer-type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "c72217c6-618d-4533-87d7-890f59763f19",
+    "data": [
+      {
+        "text": "when was the last ",
+        "userDefined": false
+      },
+      {
+        "text": "credit",
+        "alias": "type",
+        "meta": "@transfer-type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "625de0bf-f245-4b97-a8e0-8e3feab71708",
+    "data": [
+      {
+        "text": "When was my last ",
+        "userDefined": false
+      },
+      {
+        "text": "deposit",
+        "alias": "type",
+        "meta": "@transfer-type",
+        "userDefined": true
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

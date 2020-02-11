@@ -1,12 +1,12 @@
 {
-  "id": "1e9eafd6-2daa-4e24-a6cb-f13c5936a4a1",
-  "name": "Default Welcome Intent",
+  "id": "4e717976-858b-4e3e-b6e5-1b5e81cba92e",
+  "name": "account.open",
   "auto": true,
   "contexts": [],
   "responses": [
     {
       "resetContexts": false,
-      "action": "input.welcome",
+      "action": "account.open",
       "affectedContexts": [],
       "parameters": [],
       "messages": [
@@ -14,10 +14,7 @@
           "type": 0,
           "lang": "en",
           "condition": "",
-          "speech": [
-            "Hello. Welcome to ACME Bank.",
-            "Hello, thanks for choosing ACME Bank."
-          ]
+          "speech": "To open your account you should come to one of our banks in person. Don\u0027t forget to bring your ID."
         }
       ],
       "defaultResponsePlatforms": {},
@@ -28,11 +25,7 @@
   "webhookUsed": false,
   "webhookForSlotFilling": false,
   "fallbackIntent": false,
-  "events": [
-    {
-      "name": "WELCOME"
-    }
-  ],
+  "events": [],
   "conditionalResponses": [],
   "condition": "",
   "conditionalFollowupEvents": []
