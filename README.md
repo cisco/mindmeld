@@ -69,6 +69,39 @@ For detailed installation instructions, see [Getting Started for UI](https://www
 
 Note: this web client only works on Chrome browser.
 
+## Developing with MindMeld
+
+We welcome every contribution to MindMeld platform!
+
+To setup local development for MindMeld, first you will need to fork the MindMeld repository from GitHub and follow instructions on [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html) page to 
+
+```
+git clone git@github.com:[username]/mindmeld.git
+cd mindmeld
+virtualenv -p python3 .
+source bin/activate
+```
+
+For local development we recommend using Python 3.6 and above since one of our linters ([Black](https://black.readthedocs.io/en/stable/)) is available only for Python 3.6 and above. To install and manage different versions of Python, you can checkout [pyenv](https://github.com/pyenv/pyenv) which also works with ``virtualenv``.
+
+Now we can install `mindmeld` and its dependency:
+
+```
+pip install -e .
+pip install -r dev-requirements.txt
+pip install -r test-requirements.txt
+```
+
+Finally we ae ready to run MindMeld unit tests. Make sure that the numerical parser and Elasticsearch is running in the background.
+
+```
+./lintme
+cd tests
+pytest .
+```
+
+After all changes are made and all tests are passed locally, save them in git commits and send the PR against the original repository.
+
 ## Citation
 
 Please cite [this paper](https://www.aclweb.org/anthology/D18-2027) if you use MindMeld in your work:
