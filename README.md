@@ -92,7 +92,7 @@ pip install -r dev-requirements.txt
 pip install -r test-requirements.txt
 ```
 
-Finally we ae ready to run MindMeld unit tests. Make sure that the numerical parser and Elasticsearch is running in the background.
+Finally we ae ready to run MindMeld static style checks and unit tests. Make sure that the numerical parser and Elasticsearch is running in the background.
 
 ```
 ./lintme
