@@ -1,0 +1,526 @@
+[
+  {
+    "id": "d8da83a9-7850-4f0d-bc32-6512a02331e8",
+    "data": [
+      {
+        "text": "I need to send ",
+        "userDefined": false
+      },
+      {
+        "text": "2 bucks",
+        "alias": "amount",
+        "meta": "@sys.unit-currency",
+        "userDefined": false
+      },
+      {
+        "text": " to ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " from ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "8a3bac5d-311b-48d2-9e4d-8c7fe0ae26bf",
+    "data": [
+      {
+        "text": "send money into my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings account",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " from ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "fc9e0137-5bae-4b46-ad4b-5652bae4193c",
+    "data": [
+      {
+        "text": "transfer ",
+        "userDefined": false
+      },
+      {
+        "text": "100 dollars",
+        "alias": "amount",
+        "meta": "@sys.unit-currency",
+        "userDefined": true
+      },
+      {
+        "text": " from ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": true
+      },
+      {
+        "text": " into ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "d5d1d5cf-4283-40af-92c2-185e765de994",
+    "data": [
+      {
+        "text": "pay for card from ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "0a943240-a95e-422f-8409-ae280621b88c",
+    "data": [
+      {
+        "text": "send money from ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": true
+      },
+      {
+        "text": " into my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": true
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "2df84810-ade6-4501-91c6-34ffe0a3ad08",
+    "data": [
+      {
+        "text": "I need to send ",
+        "userDefined": false
+      },
+      {
+        "text": "2 bucks",
+        "alias": "amount",
+        "meta": "@sys.unit-currency",
+        "userDefined": false
+      },
+      {
+        "text": " from ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " to ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "ca031990-76da-43a3-a465-c88b8939bbe2",
+    "data": [
+      {
+        "text": "send ",
+        "userDefined": false
+      },
+      {
+        "text": "$30",
+        "alias": "amount",
+        "meta": "@sys.unit-currency",
+        "userDefined": false
+      },
+      {
+        "text": " from my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "8255f31e-e9c7-4383-b724-2bd5aa8e2399",
+    "data": [
+      {
+        "text": "can you send payment for my card",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "556ec8fc-9b42-4b62-9cc5-3e2c05c33a56",
+    "data": [
+      {
+        "text": "I want to transfer money",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "3ea69af9-df6c-447a-aa2a-8bab91e0839b",
+    "data": [
+      {
+        "text": "transfer money between my accounts",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "42fbe822-eb6c-44cc-aefb-6850151d5c61",
+    "data": [
+      {
+        "text": "transfer to my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": true
+      },
+      {
+        "text": " account ",
+        "userDefined": false
+      },
+      {
+        "text": "$6",
+        "alias": "amount",
+        "meta": "@sys.unit-currency",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "3b580923-705e-4e23-8c77-c0e9e235d286",
+    "data": [
+      {
+        "text": "pay for the card from ",
+        "userDefined": false
+      },
+      {
+        "text": "checking account",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "e255623c-dd38-4a6c-9716-60700b00f39a",
+    "data": [
+      {
+        "text": "can you help me send some money",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "360c975a-93b8-46f0-ae1d-0b58bf1c5082",
+    "data": [
+      {
+        "text": "card payment from ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": true
+      },
+      {
+        "text": " to ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "c3e4a303-135c-435c-b0f5-55ce1c24ea80",
+    "data": [
+      {
+        "text": "$5000",
+        "alias": "amount",
+        "meta": "@sys.unit-currency",
+        "userDefined": false
+      },
+      {
+        "text": " should be transferred to my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": true
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "751013df-4c99-4f4d-a0f0-951b5a6d485b",
+    "data": [
+      {
+        "text": "transfer money",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "98ba27e3-68d7-4a15-be1d-6b6e6dd76a20",
+    "data": [
+      {
+        "text": "can you make a money transfer",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "2d5007b7-9c2d-4eb6-a560-50d39a6ca30e",
+    "data": [
+      {
+        "text": "send ",
+        "userDefined": false
+      },
+      {
+        "text": "$2000",
+        "alias": "amount",
+        "meta": "@sys.unit-currency",
+        "userDefined": false
+      },
+      {
+        "text": " from ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": true
+      },
+      {
+        "text": " to my ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "5219bf50-c262-4750-a3ce-18982f0fa4c7",
+    "data": [
+      {
+        "text": "transfer money from my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "170ca99f-bcf2-44b8-aa12-8f5bba35e1d5",
+    "data": [
+      {
+        "text": "i need to pay for the card from the ",
+        "userDefined": false
+      },
+      {
+        "text": "saving account",
+        "alias": "account-from",
+        "meta": "@account",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "4496c093-5b26-4da1-96d2-9206b43a2e39",
+    "data": [
+      {
+        "text": "transfer ",
+        "userDefined": false
+      },
+      {
+        "text": "$100",
+        "alias": "amount",
+        "meta": "@sys.unit-currency",
+        "userDefined": false
+      },
+      {
+        "text": " to my ",
+        "userDefined": false
+      },
+      {
+        "text": "savings",
+        "alias": "account-to",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "6bb803cb-6762-4861-be77-5d059624f079",
+    "data": [
+      {
+        "text": "transfer money from one card to another",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

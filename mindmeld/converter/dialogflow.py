@@ -107,7 +107,10 @@ class DialogflowConverter(Converter):
         self.create_directory(os.path.join(self.mindmeld_project_directory, "data"))
         self.create_directory(os.path.join(self.mindmeld_project_directory, "domains"))
         self.create_directory(
-            os.path.join(self.mindmeld_project_directory, "domains", "general")
+            os.path.join(self.mindmeld_project_directory, "domains", "app_specific")
+        )
+        self.create_directory(
+            os.path.join(self.mindmeld_project_directory, "domains", "unrelated")
         )
         self.create_directory(os.path.join(self.mindmeld_project_directory, "entities"))
 
@@ -135,8 +138,11 @@ class DialogflowConverter(Converter):
                     mindmeld_entity_directory_name,
                 )
 
+                # remove DF entity reference "entries"
+                mindmeld_entity_directory = mindmeld_entity_directory.replace(
+                    "entries_", ""
+                )
                 self.create_directory(mindmeld_entity_directory)
-
                 self._create_entity_file(
                     dialogflow_entity_file, mindmeld_entity_directory
                 )
@@ -182,15 +188,28 @@ class DialogflowConverter(Converter):
                 mindmeld_intent_directory_name = self.clean_check(
                     sub, self.intents_list
                 )
+
+                # DF has "default" intents like "default_fallback" and "default_greeting"
+                # which are in-built intents. We map these intents to the "unrelated" domain
+                # compared to the other app specific intents being mapped to the "app_specific"
+                # domain.
+                if "default" in mindmeld_intent_directory_name:
+                    domain = "unrelated"
+                else:
+                    domain = "app_specific"
+
                 mindmeld_intent_directory = os.path.join(
                     self.mindmeld_project_directory,
                     "domains",
-                    "general",
+                    domain,
                     mindmeld_intent_directory_name,
                 )
 
+                # remove DF intent reference "usersays_"
+                mindmeld_intent_directory = mindmeld_intent_directory.replace(
+                    "usersays_", ""
+                )
                 self.create_directory(mindmeld_intent_directory)
-
                 self._create_intent_file(
                     dialogflow_intent_file, mindmeld_intent_directory, language
                 )
@@ -217,6 +236,7 @@ class DialogflowConverter(Converter):
                     ):  # if text is a dialogflow sys entity
                         if df_meta in DialogflowConverter.sys_entity_map:
                             mm_meta = DialogflowConverter.sys_entity_map[df_meta]
+                            entity_type = self.clean_name(mm_meta)
                         else:
                             mm_meta = "[DNE: {sysEntity}]".format(sysEntity=df_meta[1:])
                             logger.info(
@@ -225,13 +245,11 @@ class DialogflowConverter(Converter):
                                 "Please create an entity for this.",
                                 df_meta[1:],
                             )
+                            entity_type = self.clean_name(mm_meta) + "_" + language
 
-                        entity_type = self.clean_name(mm_meta) + "_entries_" + language
                         part = "{" + df_text + "|" + entity_type + "}"
                     else:
-                        entity_type = (
-                            self.clean_name(df_meta[1:]) + "_entries_" + language
-                        )
+                        entity_type = self.clean_name(df_meta[1:]) + "_" + language
                         part = "{" + df_text + "|" + entity_type + "}"
                 else:
                     part = df_text
@@ -262,6 +280,7 @@ class DialogflowConverter(Converter):
 
         w = {"entities": "entries", "intents": "usersays"}
         p = r".+(?<=(_" + w[level] + "_))(.*)(?=(.json))"
+        language = "en"
 
         info = {}
         for name in files:
@@ -270,7 +289,7 @@ class DialogflowConverter(Converter):
             if match:
                 isbase = False
                 base = name[: match.start(1)]
-                language = match.group(2)
+                language = str(match.group(2))
             else:
                 isbase = True
                 base = name[:-5]
@@ -376,29 +395,12 @@ class DialogflowConverter(Converter):
 
                             if "speech" in message:
                                 data = message["speech"]
-
                                 replies = data if isinstance(data, list) else [data]
-
-                                if datastore["fallbackIntent"]:
-                                    function_name = "default" + "_" + language
-                                    if language == "en":
-                                        # TODO: support multiple defaults for languages
-                                        handles = [
-                                            "default=True",
-                                            "intent='unsupported'",
-                                        ]
-                                    else:
-                                        handles = ["intent='unsupported'"]
-                                else:
-                                    function_name = "renameMe" + str(i) + "_" + language
-                                    handles = [
-                                        "intent="
-                                        + "'"
-                                        + self.clean_name(datastore["name"])
-                                        + "_usersays_"
-                                        + language
-                                        + "'"
-                                    ]
+                                function_name = "renameMe" + str(i) + "_" + language
+                                handles = [
+                                    "intent='%s_%s'"
+                                    % (self.clean_name(datastore["name"]), language)
+                                ]
 
                                 target.write(
                                     "\n\n\n"
@@ -428,7 +430,7 @@ class DialogflowConverter(Converter):
 
             entities folder contains:
                 entityName.json - Meta data about entityName for all languages.
-                entityName_entries_la.json - One for each language, contains entitiy mappings.
+                entityName_la.json - One for each language, contains entitiy mappings.
 
             intents folder contain:
                 intentName.json - Contains rules, information about conversation flow, meta data.
@@ -465,7 +467,6 @@ class DialogflowConverter(Converter):
         self.create_mindmeld_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
 
-        self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_mindmeld_init()
 

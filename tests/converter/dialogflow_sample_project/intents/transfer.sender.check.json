@@ -1,0 +1,45 @@
+{
+  "id": "697ecddc-cee6-4cdf-9d37-afbc938f9e85",
+  "name": "transfer.sender.check",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "transfer.sender.check",
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "f2f1f6a1-e1d4-4868-a482-ad2b63948d88",
+          "required": false,
+          "dataType": "@transfer-type",
+          "name": "type",
+          "value": "$type",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "Your last deposit was by:"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

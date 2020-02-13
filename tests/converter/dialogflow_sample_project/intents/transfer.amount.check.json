@@ -1,0 +1,45 @@
+{
+  "id": "2271550f-17a7-4888-96cd-0b0a6d939bdd",
+  "name": "transfer.amount.check",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "transfer.amount.check",
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "a1160777-47ea-4f00-a3ec-6e003c25e2b7",
+          "required": false,
+          "dataType": "@transfer-type",
+          "name": "type",
+          "value": "$type",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "The last transfer into your account was:"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

@@ -1,0 +1,215 @@
+[
+  {
+    "id": "9c9e3294-4ea7-4e91-9200-ec226cbf3604",
+    "data": [
+      {
+        "text": "deposits",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": true
+      },
+      {
+        "text": " history",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 1,
+    "updated": 0
+  },
+  {
+    "id": "bbadd2b6-44da-4caf-b8a5-df7344a30c59",
+    "data": [
+      {
+        "text": "see my ",
+        "userDefined": false
+      },
+      {
+        "text": "latest",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " ",
+        "userDefined": false
+      },
+      {
+        "text": "deposit",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "b14965fa-92b6-4a01-9cce-79679b3b6eb4",
+    "data": [
+      {
+        "text": "I want to see my ",
+        "userDefined": false
+      },
+      {
+        "text": "deposits",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "6eec2a0e-1adf-4be5-be8a-894656db3567",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " earnings",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "4961ccc6-8874-476e-b957-07bf6b840947",
+    "data": [
+      {
+        "text": "earnings",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "90aacee6-434a-4112-aec7-67e4657ebf66",
+    "data": [
+      {
+        "text": "can you say how much money I got ",
+        "userDefined": false
+      },
+      {
+        "text": "last month",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      },
+      {
+        "text": " on my ",
+        "userDefined": false
+      },
+      {
+        "text": "checking account",
+        "alias": "account",
+        "meta": "@account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "bd57e03c-2fdb-4d1c-ae8b-818b4a321a0c",
+    "data": [
+      {
+        "text": "how much money did I earn in ",
+        "userDefined": false
+      },
+      {
+        "text": "December",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "674392ac-add5-4ea3-bc27-5897fd7747c3",
+    "data": [
+      {
+        "text": "how much money did I earn on ",
+        "userDefined": false
+      },
+      {
+        "text": "January 2",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "5177afa1-9620-47be-8477-d7acabf07e0c",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " my earnings on my card",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "d4155526-7a15-4531-adc9-5c8434ed304a",
+    "data": [
+      {
+        "text": "check earnings are on my ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "7b014cbc-9fe8-4e82-b09f-f33ec7d515c4",
+    "data": [
+      {
+        "text": "get info about my earnings on my card in ",
+        "userDefined": false
+      },
+      {
+        "text": "December",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]
