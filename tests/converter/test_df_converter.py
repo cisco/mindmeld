@@ -24,19 +24,30 @@ def test_df_converter():
     mm_df_nlp.build()
 
     # check to make sure the NLP object contains the correct hierarchy
-    assert set(mm_df_nlp.domains.keys()) == {'app_specific', 'unrelated'}
+    assert set(mm_df_nlp.domains.keys()) == {"app_specific", "unrelated"}
 
-    assert set(mm_df_nlp.domains['app_specific'].intents.keys()) == {
-        'accountopen_en', 'accountbalancecheck_en',
-        'accountearningcheck_context__earning_date_en',
-        'transfermoney_no_en', 'accountbalancecheck_context__account_en',
-        'transfermoney_yes_en', 'transfermoney_en', 'transferamountcheck_en',
-        'paymentdue_date_en', 'accountspendingcheck_context__spending_date_en',
-        'transferdatecheck_en', 'accountspendingcheck_en', 'transfersendercheck_en',
-        'accountbalancecheck_context__balance_en', 'accountearningcheck_en'}
+    assert set(mm_df_nlp.domains["app_specific"].intents.keys()) == {
+        "accountopen_en",
+        "accountbalancecheck_en",
+        "accountearningcheck_context__earning_date_en",
+        "transfermoney_no_en",
+        "accountbalancecheck_context__account_en",
+        "transfermoney_yes_en",
+        "transfermoney_en",
+        "transferamountcheck_en",
+        "paymentdue_date_en",
+        "accountspendingcheck_context__spending_date_en",
+        "transferdatecheck_en",
+        "accountspendingcheck_en",
+        "transfersendercheck_en",
+        "accountbalancecheck_context__balance_en",
+        "accountearningcheck_en",
+    }
 
-    assert set(mm_df_nlp.domains['unrelated'].intents.keys()) == {
-        'default_welcome_intent_en', 'default_fallback_intent_en'}
+    assert set(mm_df_nlp.domains["unrelated"].intents.keys()) == {
+        "default_welcome_intent_en",
+        "default_fallback_intent_en",
+    }
 
     entities = set()
     for domain in mm_df_nlp.domains:
@@ -44,10 +55,15 @@ def test_df_converter():
             for entity in mm_df_nlp.domains[domain].intents[intent].entities:
                 entities.add(entity)
 
-    for expected_entity in {'category_en', 'transfer_type_en', 'merchant_en', 'account_en'}:
+    for expected_entity in {
+        "category_en",
+        "transfer_type_en",
+        "merchant_en",
+        "account_en",
+    }:
         assert expected_entity in entities
 
-    mm_df_app = importlib.import_module('mm_df_converted_project').app
+    mm_df_app = importlib.import_module("mm_df_converted_project").app
     mm_df_app.lazy_init(mm_df_nlp)
 
     conv = TestConversation(app=mm_df_app)
