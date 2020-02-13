@@ -68,18 +68,19 @@ def test_get_indexes():
         # test absolute file path
         (APP_PATH, "en", "en_CA"),
         # test relative file path
-        ("{}/../tests/{}".format(
-            os.path.dirname(
-                os.path.abspath(__file__)),
-            APP_NAME),
-         "en", "en_CA"),
+        (
+            "{}/../tests/{}".format(
+                os.path.dirname(os.path.abspath(__file__)), APP_NAME
+            ),
+            "en",
+            "en_CA",
+        ),
         # test relative invalid file path
         (".", "en", "en_US"),
         # test None file path
         (None, "en", "en_US"),
         # test invalid file path
         ("INVALID_FILE_PATH", "en", "en_US"),
-
     ],
 )
 def test_language_config(path, language, locale):

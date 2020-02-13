@@ -1,7 +1,4 @@
-LANGUAGE_CONFIG = {
-    'language': 'en',
-    'locale': 'en_CA'
-}
+LANGUAGE_CONFIG = {"language": "en", "locale": "en_CA"}
 
 NLP_CONFIG = {
     "resolve_entities_using_nbest_transcripts": ["store_info.get_store_hours"]

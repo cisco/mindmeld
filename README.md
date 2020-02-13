@@ -69,6 +69,41 @@ For detailed installation instructions, see [Getting Started for UI](https://www
 
 Note: this web client only works on Chrome browser.
 
+## How to contribute to the MindMeld platform:
+
+We are very happy to receive your contributions. We maintain a list of [open issues](https://github.com/cisco/mindmeld/issues) on our GitHub project.
+
+You can also create your own issue and link it to your code in a pull request, which we will promptly review.
+
+To setup local development for MindMeld, first you will need to fork the MindMeld repository from GitHub and follow instructions on [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html) page to setup the virtual environment.
+
+```
+git clone git@github.com:[username]/mindmeld.git
+cd mindmeld
+virtualenv -p python3 .
+source bin/activate
+```
+
+For local development we recommend using Python 3.6 or 3.7 since one of our linters ([Black](https://black.readthedocs.io/en/stable/)) is available only for Python 3.6 and above. To install and manage different versions of Python, you can checkout [pyenv](https://github.com/pyenv/pyenv) which also works with ``virtualenv``.
+
+Now we can install MindMeld and its dependencies:
+
+```
+pip install -e .
+pip install -r dev-requirements.txt
+pip install -r test-requirements.txt
+```
+
+Make sure that the [numerical parser and Elasticsearch](https://www.mindmeld.com/docs/userguide/getting_started.html) are running in the background. Finally we are ready to run MindMeld static style checks and unit tests.
+
+```
+./lintme
+cd tests
+pytest .
+```
+
+After making changes and all tests are passing locally, commit the code to your fork and issue a PR against the [cisco/mindmeld](https://github.com/cisco/mindmeld) repo.
+
 ## Citation
 
 Please cite [this paper](https://www.aclweb.org/anthology/D18-2027) if you use MindMeld in your work:

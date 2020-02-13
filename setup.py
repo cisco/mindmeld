@@ -13,7 +13,7 @@ requirements = [
     "click-log==0.1.8",
     "distro~=1.3",
     "elasticsearch5~=5.5",
-    "Flask~=0.12",
+    "Flask~=1.0",
     "Flask-Cors~=3.0",
     "future~=0.16.0",
     "pycountry",  # uses calendar versioning
@@ -49,7 +49,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.2.5",
+    version="4.2.6",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",

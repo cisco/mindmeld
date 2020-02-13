@@ -50,9 +50,7 @@ class ConversationClient:
         self.default_params = default_params
         self.params = {}
 
-    def say(
-        self, text, params=None, frame=None, context=None
-    ):
+    def say(self, text, params=None, frame=None, context=None):
         """Send a message in the conversation. The message will be
         processed by the app based on the current state of the conversation and
         returns the extracted messages from the directives.
