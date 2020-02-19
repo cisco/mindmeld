@@ -22,6 +22,7 @@ import re
 from sklearn.model_selection import train_test_split
 
 from mindmeld.converter.converter import Converter
+from mindmeld.converter.code_generator import MindmeldCodeGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,7 @@ class DialogflowConverter(Converter):
             self.directory = os.path.dirname(os.path.realpath(__file__))
             self.entities_list = set()
             self.intents_list = set()
+            self.code_gen = MindmeldCodeGenerator()
         else:
             msg = "`{dialogflow_project_directory}` does not exist. Please verify."
             msg = msg.format(dialogflow_project_directory=dialogflow_project_directory)
@@ -230,6 +232,7 @@ class DialogflowConverter(Converter):
                 df_text = texts["text"]
                 if "meta" in texts and texts["meta"] != "@sys.ignore":
                     df_meta = texts["meta"]
+                    role_type = texts["alias"].replace("-", "_")
 
                     if re.match(
                         "(@sys.).+", df_meta
@@ -247,10 +250,10 @@ class DialogflowConverter(Converter):
                             )
                             entity_type = self.clean_name(mm_meta) + "_" + language
 
-                        part = "{" + df_text + "|" + entity_type + "}"
+                        part = "{" + df_text + "|" + entity_type + "|" + role_type + "}"
                     else:
                         entity_type = self.clean_name(df_meta[1:]) + "_" + language
-                        part = "{" + df_text + "|" + entity_type + "}"
+                        part = "{" + df_text + "|" + entity_type + "|" + role_type + "}"
                 else:
                     part = df_text
 
@@ -314,26 +317,6 @@ class DialogflowConverter(Converter):
     # =========================
 
     @staticmethod
-    def create_handle(params):
-        return "@app.handle(" + params + ")"
-
-    @staticmethod
-    def create_header(function_name):
-        return "def " + function_name + "(request, responder):"
-
-    @staticmethod
-    def create_function(handles, function_name, replies):
-        assert isinstance(handles, list)
-
-        result = ""
-        for handle in handles:
-            result += DialogflowConverter.create_handle(handle) + "\n"
-        result += DialogflowConverter.create_header(function_name) + "\n"
-        result += "    " + "replies = {}".format(replies) + "\n"
-        result += "    " + "responder.reply(replies)"
-        return result
-
-    @staticmethod
     def clean_name(name):
         """ Takes in a string and returns a valid folder name (no spaces, all lowercase)."""
         name = re.sub(r"[^\w\s-]", "", name).strip().lower()
@@ -360,16 +343,9 @@ class DialogflowConverter(Converter):
         with open(
             os.path.join(self.mindmeld_project_directory, "__init__.py"), "w"
         ) as target:
-            begin_info = [
-                "# -*- coding: utf-8 -*-",
-                '"""This module contains the MindMeld application"""',
-                "from mindmeld import Application",
-                "app = Application(__name__)",
-                "__all__ = ['app']",
-            ]
 
-            for info, spacing in zip(begin_info, [1, 2, 1, 1, 0]):
-                target.write(info + "\n" * spacing)
+            self.code_gen.begin(tab="    ")
+            self.code_gen.generate_top_block()
 
             intents = self._get_file_names("intents")
 
@@ -385,31 +361,68 @@ class DialogflowConverter(Converter):
                             "Please check if your intent file"
                             "names are correctly labeled."
                         )
+                        return
 
                     datastore = json.load(source)
-                    replies = []
-
                     for response in datastore["responses"]:
-                        for message in response["messages"]:
-                            language = message["lang"]
+                        message = response["messages"][0]
+                        language = message["lang"]
+                        intent = self.clean_name(datastore["name"])
+                        intent_entity_role_replies = []
 
-                            if "speech" in message:
-                                data = message["speech"]
-                                replies = data if isinstance(data, list) else [data]
-                                function_name = "renameMe" + str(i) + "_" + language
-                                handles = [
-                                    "intent='%s_%s'"
-                                    % (self.clean_name(datastore["name"]), language)
-                                ]
-
-                                target.write(
-                                    "\n\n\n"
-                                    + self.create_function(
-                                        handles=handles,
-                                        function_name=function_name,
-                                        replies=replies,
+                        for param in response["parameters"]:
+                            if param["required"]:
+                                entity = param["dataType"]
+                                if entity in DialogflowConverter.sys_entity_map:
+                                    entity = DialogflowConverter.sys_entity_map[entity]
+                                else:
+                                    entity = (
+                                        param["dataType"]
+                                        .replace("@", "")
+                                        .replace("-", "_")
                                     )
+                                    entity = "%s_%s" % (entity, language)
+                                role = param["name"].replace("@", "").replace("-", "_")
+                                prompts = [x["value"] for x in param["prompts"]]
+                                intent_lang = "%s_%s" % (intent, language)
+                                intent_entity_role_replies.append(
+                                    (intent_lang, entity, role, prompts)
                                 )
+
+                        if "speech" in message:
+                            data = message["speech"]
+                            replies = data if isinstance(data, list) else [data]
+                            slot_templated_replies = []
+
+                            is_slot_template = False
+                            for resp in replies:
+                                template = resp
+                                slots = re.findall("\$([\w\-\_]+)", resp)
+                                for slot in slots:
+                                    template = template.replace(
+                                        "$" + slot, "{" + slot.replace("-", "_") + "}"
+                                    )
+                                if template != resp:
+                                    is_slot_template = True
+                                slot_templated_replies.append(template)
+
+                            handle = "intent='%s_%s'" % (intent, language)
+                            function_name = intent + "_" + language + "_handler"
+                            if is_slot_template:
+                                self.code_gen.generate_followup_function_code_block(
+                                    handle,
+                                    function_name,
+                                    intent_entity_role_replies,
+                                    slot_templated_replies,
+                                )
+                            else:
+                                self.code_gen.generate_function(
+                                    handle=handle,
+                                    function_name=function_name,
+                                    replies=replies,
+                                )
+
+            target.write(self.code_gen.end())
             target.write("\n")
 
     # =========================
