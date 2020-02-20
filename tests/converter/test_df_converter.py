@@ -1,4 +1,5 @@
 import os
+import pytest
 import shutil
 import importlib
 
@@ -7,6 +8,7 @@ from mindmeld.test import TestConversation
 from mindmeld.converter.dialogflow import DialogflowConverter
 
 
+@pytest.mark.skip(reason="Test is taking too long to pass and feature is experimental")
 def test_df_converter():
     df_project_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "dialogflow_sample_project"

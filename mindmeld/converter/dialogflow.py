@@ -363,72 +363,73 @@ class DialogflowConverter(Converter):
                         return
 
                     datastore = json.load(source)
+                    intent = self.clean_name(datastore["name"])
                     for response in datastore["responses"]:
-                        message = response["messages"][0]
-                        language = message["lang"]
-                        intent = self.clean_name(datastore["name"])
-                        intent_lang = "%s_%s" % (intent, language)
-                        intent_entity_role_replies = {intent_lang: {}}
-
-                        for param in response["parameters"]:
-                            if param["required"]:
-                                entity = param["dataType"]
-                                if entity in DialogflowConverter.sys_entity_map:
-                                    entity = DialogflowConverter.sys_entity_map[entity]
-                                else:
-                                    entity = (
-                                        param["dataType"]
-                                        .replace("@", "")
-                                        .replace("-", "_")
-                                    )
-                                    entity = "%s_%s" % (entity, language)
-                                role = param["name"].replace("@", "").replace("-", "_")
-                                prompts = [x["value"] for x in param["prompts"]]
-
-                                if entity in intent_entity_role_replies[intent_lang]:
-                                    intent_entity_role_replies[intent_lang][entity][
-                                        role
-                                    ] = prompts
-                                else:
-                                    intent_entity_role_replies[intent_lang][entity] = {
-                                        role: prompts
-                                    }
-
-                        if "speech" in message:
-                            data = message["speech"]
-                            replies = data if isinstance(data, list) else [data]
-                            slot_templated_replies = []
-
-                            is_slot_template = False
-                            for resp in replies:
-                                template = resp
-                                slots = re.findall("\$([\w\-\_]+)", resp)
-                                for slot in slots:
-                                    template = template.replace(
-                                        "$" + slot, "{" + slot.replace("-", "_") + "}"
-                                    )
-                                if template != resp:
-                                    is_slot_template = True
-                                slot_templated_replies.append(template)
-
-                            handle = "intent='%s_%s'" % (intent, language)
-                            function_name = intent + "_" + language + "_handler"
-                            if is_slot_template:
-                                self.code_gen.generate_followup_function_code_block(
-                                    handle,
-                                    function_name,
-                                    intent_entity_role_replies,
-                                    slot_templated_replies,
-                                )
-                            else:
-                                self.code_gen.generate_function(
-                                    handle=handle,
-                                    function_name=function_name,
-                                    replies=replies,
-                                )
+                        self.generate_handlers(intent, response)
 
             target.write(self.code_gen.end())
             target.write("\n")
+
+    def generate_handlers(self, intent, response):
+        message = response["messages"][0]
+        language = message["lang"]
+        intent_lang = "%s_%s" % (intent, language)
+        intent_entity_role_replies = {intent_lang: {}}
+
+        for param in response["parameters"]:
+            if param["required"]:
+                entity = param["dataType"]
+                if entity in DialogflowConverter.sys_entity_map:
+                    entity = DialogflowConverter.sys_entity_map[entity]
+                else:
+                    entity = (
+                        param["dataType"].replace("@", "").replace("-", "_")
+                    )
+                    entity = "%s_%s" % (entity, language)
+                role = param["name"].replace("@", "").replace("-", "_")
+                prompts = [x["value"] for x in param["prompts"]]
+
+                if entity in intent_entity_role_replies[intent_lang]:
+                    intent_entity_role_replies[intent_lang][entity][
+                        role
+                    ] = prompts
+                else:
+                    intent_entity_role_replies[intent_lang][entity] = {
+                        role: prompts
+                    }
+
+        if "speech" in message:
+            data = message["speech"]
+            replies = data if isinstance(data, list) else [data]
+            slot_templated_replies = []
+
+            is_slot_template = False
+            for resp in replies:
+                template = resp
+                slots = re.findall("\$([\w\-\_]+)", resp)
+                for slot in slots:
+                    template = template.replace(
+                        "$" + slot, "{" + slot.replace("-", "_") + "}"
+                    )
+                if template != resp:
+                    is_slot_template = True
+                slot_templated_replies.append(template)
+
+            handle = "intent='%s_%s'" % (intent, language)
+            function_name = intent + "_" + language + "_handler"
+            if is_slot_template:
+                self.code_gen.generate_followup_function_code_block(
+                    handle,
+                    function_name,
+                    intent_entity_role_replies,
+                    slot_templated_replies,
+                )
+            else:
+                self.code_gen.generate_function(
+                    handle=handle,
+                    function_name=function_name,
+                    replies=replies,
+                )
 
     # =========================
     # convert project
