@@ -53,7 +53,12 @@ class MindmeldCodeGenerator(CodeGenerator):
         self.write("__all__ = ['app']", 2)
 
     def generate_follow_up(self, intent, entity, role, replies):
-        self.write("if not entity_and_roles.get('%s', {}).get('%s'):" % (entity, role))
+        if role:
+            self.write(
+                "if not entity_and_roles.get('%s', {}).get('%s'):" % (entity, role)
+            )
+        else:
+            self.write("if not entity_and_roles.get('%s', {}).get(None):" % entity)
         self.indent()
         self.write("replies = %s" % replies)
         self.write(
@@ -91,15 +96,33 @@ class MindmeldCodeGenerator(CodeGenerator):
         self.dedent()
         self.write("")
 
-        for intent, entity, role, replies in intent_entity_role_replies:
-            self.generate_follow_up(intent, entity, role, replies)
+        for intent in intent_entity_role_replies:
+            for entity in intent_entity_role_replies[intent]:
+                roles = list(intent_entity_role_replies[intent][entity].keys())
+                if len(roles) == 1:
+                    replies = intent_entity_role_replies[intent][entity][roles[0]]
+                    self.generate_follow_up(intent, entity, None, replies)
+                else:
+                    for role in roles:
+                        replies = intent_entity_role_replies[intent][entity][role]
+                        self.generate_follow_up(intent, entity, role, replies)
 
         self.write("kwargs = {}")
-        for _, entity, role, _ in intent_entity_role_replies:
-            self.write(
-                "%s_slot = responder.frame['%s'].pop('%s')" % (role, entity, role)
-            )
-            self.write("kwargs['%s'] = %s" % (role, role + "_slot"))
+        for intent in intent_entity_role_replies:
+            for entity in intent_entity_role_replies[intent]:
+                roles = list(intent_entity_role_replies[intent][entity].keys())
+                if len(roles) == 1:
+                    self.write(
+                        "%s_slot = responder.frame['%s'].pop(None)" % (roles[0], entity)
+                    )
+                    self.write("kwargs['%s'] = %s" % (roles[0], roles[0] + "_slot"))
+                else:
+                    for role in roles:
+                        self.write(
+                            "%s_slot = responder.frame['%s'].pop('%s')"
+                            % (role, entity, role)
+                        )
+                        self.write("kwargs['%s'] = %s" % (role, role + "_slot"))
 
         code_block = "replies = ["
         for template in final_templates:

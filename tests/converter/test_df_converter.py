@@ -79,12 +79,6 @@ def test_df_converter():
     conv.assert_intent("paymentdue_date_en")
     conv.assert_frame({})
 
-    conv.process("show my withdrawals")
-    conv.assert_text("Here are your withdrawals:")
-    conv.assert_domain("app_specific")
-    conv.assert_intent("accountspendingcheck_en")
-    conv.assert_frame({})
-
     conv.process("transfer money")
     conv.assert_text("Sure. Transfer from which account?")
 
@@ -93,6 +87,11 @@ def test_df_converter():
 
     conv.process("transfer to savings account")
     conv.assert_text("And, how much do you want to transfer?")
+
+    conv.process("transfer $200")
+    conv.assert_text(
+        "All right. So, you're transferring $200 from your checking to a savings. Is that right?"
+    )
 
     # delete generated files
     shutil.rmtree(mm_df_path)

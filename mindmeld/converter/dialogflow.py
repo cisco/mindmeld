@@ -47,6 +47,7 @@ class DialogflowConverter(Converter):
         "@sys.email": "sys_email",
         "@sys.phone-number": "sys_phone-number",
         "@sys.url": "sys_url",
+        "@sys.temperature": "sys_temperature",
     }
 
     # TODO: provide support for entities listed in sys_entity_map_todo
@@ -59,8 +60,6 @@ class DialogflowConverter(Converter):
         "@sys.unit-speed",
         "@sys.unit-information",
         "@sys.percentage",
-        "@sys.temperature",
-        "@sys.duration",
         "@sys.age",
         "@sys.currency-name",
         "@sys.unit-area-name",
@@ -239,7 +238,7 @@ class DialogflowConverter(Converter):
                     ):  # if text is a dialogflow sys entity
                         if df_meta in DialogflowConverter.sys_entity_map:
                             mm_meta = DialogflowConverter.sys_entity_map[df_meta]
-                            entity_type = self.clean_name(mm_meta)
+                            entity_type = mm_meta
                         else:
                             mm_meta = "[DNE: {sysEntity}]".format(sysEntity=df_meta[1:])
                             logger.info(
@@ -349,7 +348,7 @@ class DialogflowConverter(Converter):
 
             intents = self._get_file_names("intents")
 
-            for i, main in enumerate(intents.keys()):
+            for main in intents:
 
                 df_main = os.path.join(
                     self.dialogflow_project_directory, "intents", main + ".json"
@@ -368,7 +367,8 @@ class DialogflowConverter(Converter):
                         message = response["messages"][0]
                         language = message["lang"]
                         intent = self.clean_name(datastore["name"])
-                        intent_entity_role_replies = []
+                        intent_lang = "%s_%s" % (intent, language)
+                        intent_entity_role_replies = {intent_lang: {}}
 
                         for param in response["parameters"]:
                             if param["required"]:
@@ -384,10 +384,15 @@ class DialogflowConverter(Converter):
                                     entity = "%s_%s" % (entity, language)
                                 role = param["name"].replace("@", "").replace("-", "_")
                                 prompts = [x["value"] for x in param["prompts"]]
-                                intent_lang = "%s_%s" % (intent, language)
-                                intent_entity_role_replies.append(
-                                    (intent_lang, entity, role, prompts)
-                                )
+
+                                if entity in intent_entity_role_replies[intent_lang]:
+                                    intent_entity_role_replies[intent_lang][entity][
+                                        role
+                                    ] = prompts
+                                else:
+                                    intent_entity_role_replies[intent_lang][entity] = {
+                                        role: prompts
+                                    }
 
                         if "speech" in message:
                             data = message["speech"]
