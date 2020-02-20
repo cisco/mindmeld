@@ -219,9 +219,12 @@ class DialogflowConverter(Converter):
     ):
         source_en = open(dialogflow_intent_file, "r")
         target_train = open(os.path.join(mindmeld_intent_directory, "train.txt"), "w")
-
         datastore = json.load(source_en)
         all_text = []
+        default_intent_to_training_file = {
+            "default_fallback_intent": "unrelated.txt",
+            "default_welcome_intent": "greetings.txt"
+        }
 
         for usersay in datastore:
             sentence = ""
@@ -257,15 +260,11 @@ class DialogflowConverter(Converter):
                 sentence += part
             all_text.append(sentence)
 
-        if "default_fallback_intent" in mindmeld_intent_directory:
-            with open(os.path.join(package_dir, "unrelated.txt")) as fp:
-                for line in fp:
-                    all_text.append(line.strip())
-
-        if "default_welcome_intent" in mindmeld_intent_directory:
-            with open(os.path.join(package_dir, "greetings.txt")) as fp:
-                for line in fp:
-                    all_text.append(line.strip())
+        for key in default_intent_to_training_file:
+            if key in mindmeld_intent_directory:
+                with open(os.path.join(package_dir, default_intent_to_training_file[key])) as fp:
+                    for line in fp:
+                        all_text.append(line.strip())
 
         # Double the size of the training set if there are less than 10 training examples.
         # This is needed since the k-fold cross validation parameter is set to 10 for
