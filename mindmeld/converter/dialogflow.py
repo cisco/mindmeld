@@ -19,12 +19,11 @@ import logging
 import os
 import re
 
-from sklearn.model_selection import train_test_split
-
 from mindmeld.converter.converter import Converter
 from mindmeld.converter.code_generator import MindmeldCodeGenerator
 
 logger = logging.getLogger(__name__)
+package_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 class DialogflowConverter(Converter):
@@ -219,7 +218,6 @@ class DialogflowConverter(Converter):
         self, dialogflow_intent_file, mindmeld_intent_directory, language
     ):
         source_en = open(dialogflow_intent_file, "r")
-        target_test = open(os.path.join(mindmeld_intent_directory, "test.txt"), "w")
         target_train = open(os.path.join(mindmeld_intent_directory, "train.txt"), "w")
 
         datastore = json.load(source_en)
@@ -259,13 +257,24 @@ class DialogflowConverter(Converter):
                 sentence += part
             all_text.append(sentence)
 
-        train, test = train_test_split(all_text, test_size=0.2)
+        if "default_fallback_intent" in mindmeld_intent_directory:
+            with open(os.path.join(package_dir, "unrelated.txt")) as fp:
+                for line in fp:
+                    all_text.append(line.strip())
 
-        target_test.write("\n".join(test))
-        target_train.write("\n".join(train))
+        if "default_welcome_intent" in mindmeld_intent_directory:
+            with open(os.path.join(package_dir, "greetings.txt")) as fp:
+                for line in fp:
+                    all_text.append(line.strip())
 
+        # Double the size of the training set if there are less than 10 training examples.
+        # This is needed since the k-fold cross validation parameter is set to 10 for
+        # intent classification.
+        while len(all_text) < 10:
+            all_text = all_text * 2
+
+        target_train.write("\n".join(all_text))
         source_en.close()
-        target_test.close()
         target_train.close()
 
     def _get_file_names(self, level):
