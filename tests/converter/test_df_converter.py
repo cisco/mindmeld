@@ -7,7 +7,8 @@ from mindmeld.components import NaturalLanguageProcessor
 from mindmeld.test import TestConversation
 from mindmeld.converter.dialogflow import DialogflowConverter
 
-@pytest.mark.skip(reason="no way of currently testing this")
+
+@pytest.mark.skip(reason="Test is taking too long to pass and feature is experimental")
 def test_df_converter():
     df_project_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "dialogflow_sample_project"
@@ -80,11 +81,19 @@ def test_df_converter():
     conv.assert_intent("paymentdue_date_en")
     conv.assert_frame({})
 
-    conv.process("show my withdrawals")
-    conv.assert_text("Here are your withdrawals:")
-    conv.assert_domain("app_specific")
-    conv.assert_intent("accountspendingcheck_en")
-    conv.assert_frame({})
+    conv.process("transfer money")
+    conv.assert_text("Sure. Transfer from which account?")
+
+    conv.process("checking account")
+    conv.assert_text("To which account?")
+
+    conv.process("transfer to savings account")
+    conv.assert_text("And, how much do you want to transfer?")
+
+    conv.process("transfer $200")
+    conv.assert_text(
+        "All right. So, you're transferring $200 from your checking to a savings. Is that right?"
+    )
 
     # delete generated files
     shutil.rmtree(mm_df_path)
