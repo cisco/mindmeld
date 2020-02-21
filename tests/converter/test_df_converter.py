@@ -95,5 +95,25 @@ def test_df_converter():
         "All right. So, you're transferring $200 from your checking to a savings. Is that right?"
     )
 
+    conv.process("hello!")
+    conv.assert_text(
+        ["Hello, thanks for choosing ACME Bank.", "Hello. Welcome to ACME Bank."]
+    )
+
+    conv.process("I dont know what the laptop")
+    conv.assert_text(
+        [
+            "Sorry, I didn’t get that.",
+            "I'm afraid I don't understand.",
+            "Sorry, say that again?",
+            "Sorry, can you say that again?",
+            "I didn't get that. Can you say it again?",
+            "Sorry, could you say that again?",
+            "Sorry, can you tell me again?",
+            "Sorry, tell me one more time?",
+            "Sorry, can you say that again?",
+        ]
+    )
+
     # delete generated files
     shutil.rmtree(mm_df_path)
