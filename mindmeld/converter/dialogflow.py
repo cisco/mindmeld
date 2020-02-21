@@ -25,6 +25,8 @@ from mindmeld.converter.code_generator import MindmeldCodeGenerator
 logger = logging.getLogger(__name__)
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
+MIN_NUM_QUERIES = int(os.environ.get("MM_DF_CONVERTER_MIN_NUM_QUERIES", 5))
+
 
 class DialogflowConverter(Converter):
     """The class is a sub class of the abstract Converter class. This class
@@ -269,7 +271,7 @@ class DialogflowConverter(Converter):
         # Double the size of the training set if there are less than 10 training examples.
         # This is needed since the k-fold cross validation parameter is set to 10 for
         # intent classification.
-        while len(all_text) < 10:
+        while len(all_text) < MIN_NUM_QUERIES:
             all_text = all_text * 2
 
         target_train.write("\n".join(all_text))
