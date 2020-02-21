@@ -481,3 +481,7 @@ Environment Variables
 MM_SUBPROCESS_COUNT
 ^^^^^^^^^^^^^^^^^^^
 MindMeld supports parallel processing via process forking when the input is a list of queries, as is the case when :ref:`leveraging n-best ASR transcripts for entity resolution <nbest_lists>`. Set this variable to an integer value to adjust the number of subprocesses. The default is ``4``. Setting it to ``0`` will turn off the feature.
+
+MM_SYS_ENTITY_REQUEST_TIMEOUT
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This variable sets the request timeout value for the :ref:`system entity recognition service <configuring-system-entities>` . The default float value is ``1.0 seconds``.
