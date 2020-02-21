@@ -21,6 +21,7 @@ import re
 
 from mindmeld.converter.converter import Converter
 from mindmeld.converter.code_generator import MindmeldCodeGenerator
+from mindmeld.components._config import DEFAULT_INTENT_CLASSIFIER_CONFIG
 
 logger = logging.getLogger(__name__)
 package_dir = os.path.dirname(os.path.abspath(__file__))
@@ -271,7 +272,7 @@ class DialogflowConverter(Converter):
         # Double the size of the training set if there are less than 10 training examples.
         # This is needed since the k-fold cross validation parameter is set to 10 for
         # intent classification.
-        while len(all_text) < MIN_NUM_QUERIES:
+        while len(all_text) < DEFAULT_INTENT_CLASSIFIER_CONFIG['param_selection']['k']:
             all_text = all_text * 2
 
         target_train.write("\n".join(all_text))
@@ -496,6 +497,7 @@ class DialogflowConverter(Converter):
         self.create_mindmeld_training_data()
         file_loc = os.path.dirname(os.path.realpath(__file__))
 
+        self.create_config(self.mindmeld_project_directory, file_loc)
         self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_mindmeld_init()
 
