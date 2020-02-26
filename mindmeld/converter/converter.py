@@ -70,7 +70,7 @@ class Converter(ABC):
             mindmeld_project_directory: Location of MindMeld directory.
             main_file_loc: Location where default __main__.py is stored.
         """
-        MINDMELD_MODEL_MAIN_FILE_NAME = "/template_main.py"
+        MINDMELD_MODEL_MAIN_FILE_NAME = "/template_main.txt"
         with open(main_file_loc + MINDMELD_MODEL_MAIN_FILE_NAME, "r") as f:
             string = f.read()
         with open(mindmeld_project_directory + "/__main__.py", "w") as f:
