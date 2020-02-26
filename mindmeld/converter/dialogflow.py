@@ -18,15 +18,15 @@ import json
 import logging
 import os
 import re
+import importlib.util
 
+from shutil import copyfile
 from mindmeld.converter.converter import Converter
 from mindmeld.converter.code_generator import MindmeldCodeGenerator
 from mindmeld.components._config import DEFAULT_INTENT_CLASSIFIER_CONFIG
 
 logger = logging.getLogger(__name__)
 package_dir = os.path.dirname(os.path.abspath(__file__))
-
-MIN_NUM_QUERIES = int(os.environ.get("MM_DF_CONVERTER_MIN_NUM_QUERIES", 5))
 
 
 class DialogflowConverter(Converter):
@@ -92,7 +92,8 @@ class DialogflowConverter(Converter):
         "@sys.any",
     ]
 
-    def __init__(self, dialogflow_project_directory, mindmeld_project_directory):
+    def __init__(self, dialogflow_project_directory, mindmeld_project_directory,
+                 custom_config_file_path=None):
         if os.path.exists(os.path.dirname(dialogflow_project_directory)):
             self.dialogflow_project_directory = dialogflow_project_directory
             self.mindmeld_project_directory = mindmeld_project_directory
@@ -100,6 +101,7 @@ class DialogflowConverter(Converter):
             self.entities_list = set()
             self.intents_list = set()
             self.code_gen = MindmeldCodeGenerator()
+            self.custom_config_file_path = custom_config_file_path
         else:
             msg = "`{dialogflow_project_directory}` does not exist. Please verify."
             msg = msg.format(dialogflow_project_directory=dialogflow_project_directory)
@@ -269,10 +271,17 @@ class DialogflowConverter(Converter):
                     for line in fp:
                         all_text.append(line.strip())
 
-        # Double the size of the training set if there are less than 10 training examples.
-        # This is needed since the k-fold cross validation parameter is set to 10 for
-        # intent classification.
-        while len(all_text) < DEFAULT_INTENT_CLASSIFIER_CONFIG['param_selection']['k']:
+        # Double the size of the training set if there are less than the number of folds for cross-val
+        # in the config.py file
+        intent_config = DEFAULT_INTENT_CLASSIFIER_CONFIG
+        if self.custom_config_file_path:
+            config_path = os.path.join(self.mindmeld_project_directory, "config.py")
+            spec = importlib.util.spec_from_file_location("mindmeld_app", config_path)
+            config = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(config)
+            intent_config = getattr(config, 'INTENT_RECOGNIZER_CONFIG', intent_config)
+
+        while len(all_text) < intent_config['param_selection']['k']:
             all_text = all_text * 2
 
         target_train.write("\n".join(all_text))
@@ -493,12 +502,15 @@ class DialogflowConverter(Converter):
         # Create project directory with sub folders
         self.create_mindmeld_directory()
 
-        # Transfer over test data from Dialogflow project and reformat to Mindmeld project
-        self.create_mindmeld_training_data()
-        file_loc = os.path.dirname(os.path.realpath(__file__))
+        # copy config file to the Mindmeld dir
+        if self.custom_config_file_path:
+            copyfile(self.custom_config_file_path, os.path.join(
+                self.mindmeld_project_directory, "config.py"))
 
-        self.create_config(self.mindmeld_project_directory, file_loc)
+        file_loc = os.path.dirname(os.path.realpath(__file__))
         self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_mindmeld_init()
 
+        # Transfer over test data from Dialogflow project and reformat to Mindmeld project
+        self.create_mindmeld_training_data()
         logger.info("Project converted.")
