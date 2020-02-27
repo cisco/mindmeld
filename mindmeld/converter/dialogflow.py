@@ -97,6 +97,7 @@ class DialogflowConverter(Converter):
         dialogflow_project_directory,
         mindmeld_project_directory,
         custom_config_file_path=None,
+        language="en",
     ):
         if os.path.exists(os.path.dirname(dialogflow_project_directory)):
             self.dialogflow_project_directory = dialogflow_project_directory
@@ -106,6 +107,7 @@ class DialogflowConverter(Converter):
             self.intents_list = set()
             self.code_gen = MindmeldCodeGenerator()
             self.custom_config_file_path = custom_config_file_path
+            self.language = language
         else:
             msg = "`{dialogflow_project_directory}` does not exist. Please verify."
             msg = msg.format(dialogflow_project_directory=dialogflow_project_directory)
@@ -133,6 +135,11 @@ class DialogflowConverter(Converter):
         """
         for languages in entities.values():
             for sub in languages.values():
+
+                if sub != self.language:
+                    # Each MindMeld app works on one language
+                    continue
+
                 dialogflow_entity_file = os.path.join(
                     self.dialogflow_project_directory, "entities", sub + ".json"
                 )
@@ -190,6 +197,11 @@ class DialogflowConverter(Converter):
 
         for languages in intents.values():
             for language, sub in languages.items():
+
+                if language != self.language:
+                    # Each MindMeld app works on one language
+                    continue
+
                 dialogflow_intent_file = os.path.join(
                     self.dialogflow_project_directory, "intents", sub + ".json"
                 )
@@ -411,7 +423,12 @@ class DialogflowConverter(Converter):
                     entity = param["dataType"].replace("@", "").replace("-", "_")
                     entity = "%s_%s" % (entity, language)
                 role = param["name"].replace("@", "").replace("-", "_")
-                prompts = [x["value"] for x in param["prompts"]]
+
+                prompts = []
+                if "prompts" in param:
+                    prompts = [x["value"] for x in param["prompts"]]
+                else:
+                    prompts = ["What is the " + param["name"]]
 
                 if entity in intent_entity_role_replies[intent_lang]:
                     intent_entity_role_replies[intent_lang][entity][role] = prompts
@@ -437,6 +454,7 @@ class DialogflowConverter(Converter):
 
             handle = "intent='%s_%s'" % (intent, language)
             function_name = intent + "_" + language + "_handler"
+
             if is_slot_template:
                 self.code_gen.generate_followup_function_code_block(
                     handle,

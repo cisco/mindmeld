@@ -130,3 +130,6 @@ class MindmeldCodeGenerator(CodeGenerator):
         code_block += "]"
         self.write(code_block)
         self.write("responder.reply(replies)")
+        self.write("return")
+        self.dedent()
+        self.write("")
