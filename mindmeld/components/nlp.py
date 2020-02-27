@@ -392,6 +392,7 @@ class NaturalLanguageProcessor(Processor):
         self.name = app_path
         self._load_custom_features()
         self.domain_classifier = DomainClassifier(self.resource_loader)
+        self.app_language, self.app_locale = get_language_config(app_path)
 
         for domain in path.get_domains(self._app_path):
             self._children[domain] = DomainProcessor(
@@ -692,7 +693,7 @@ class NaturalLanguageProcessor(Processor):
             allowed_nlp_classes = self.extract_allowed_intents(allowed_intents)
 
         if not language and not locale:
-            language, locale = get_language_config(self._app_path)
+            language, locale = self.app_language, self.app_locale
 
         return super().process(
             query_text,

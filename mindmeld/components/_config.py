@@ -469,7 +469,6 @@ DEFAULT_NLP_CONFIG = {
 
 
 def get_language_config(app_path):
-
     if not app_path:
         return ENGLISH_LANGUAGE_CODE, ENGLISH_US_LOCALE
     try:
