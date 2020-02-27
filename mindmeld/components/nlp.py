@@ -248,7 +248,8 @@ class Processor(ABC):
                 where smart_home is the domain and close_door is the intent.
             locale (str, optional): The locale representing the ISO 639-1 language code and \
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code
+            language (str, optional): Language as specified using a 639-1/2 code. This parameter is
+                deprecated deprecated this is an application level parameter.
             time_zone (str, optional): The name of an IANA time zone, such as \
                 'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -262,6 +263,7 @@ class Processor(ABC):
                  applying the full hierarchy of natural language processing models to the input \
                  query.
         """
+        # TODO: Deprecate language argument
         del language
 
         query = self.create_query(
@@ -340,8 +342,8 @@ class Processor(ABC):
         locale = locale or self.locale
         if locale.split("_")[0].lower() != self.language.lower():
             raise MindMeldError(
-                "Locale %s is inconsistent with "
-                "app language %s" % (locale, self.language)
+                "Locale %s is inconsistent with app language code %s. "
+                "Set the language code in the config.py file." % (locale, self.language)
             )
         return locale
 
@@ -691,7 +693,8 @@ class NaturalLanguageProcessor(Processor):
                 the NLP processing.
             locale (str, optional): The locale representing the ISO 639-1 language code and
                 ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code.
+            language (str, optional): Language as specified using a 639-1/2 code. This parameter is
+                ignored deprecated this is an application level parameter.
             time_zone (str, optional): The name of an IANA time zone, such as \
                 'America/Los_Angeles', or 'Asia/Kolkata' \
                 See the [tz database](https://www.iana.org/time-zones) for more information.
@@ -705,6 +708,7 @@ class NaturalLanguageProcessor(Processor):
                 applying the full hierarchy of natural language processing models to the input \
                 query.
         """
+        # TODO: Deprecate language argument
         del language
 
         if allowed_intents is not None and allowed_nlp_classes is not None:
@@ -843,6 +847,7 @@ class DomainProcessor(Processor):
             (ProcessedQuery): A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text.
         """
+        # TODO: Deprecate language argument
         del language
 
         query = self.create_query(
@@ -1099,6 +1104,7 @@ class IntentProcessor(Processor):
             (ProcessedQuery): A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text.
         """
+        # TODO: Deprecate language argument
         del language
         del allowed_nlp_classes
 
