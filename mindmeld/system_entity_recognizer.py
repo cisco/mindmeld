@@ -29,10 +29,10 @@ try:
         raise MindMeldError(
             "MM_SYS_ENTITY_REQUEST_TIMEOUT env var has to be > 0.0 seconds."
         )
-except ValueError:
+except ValueError as e:
     raise MindMeldError(
         "MM_SYS_ENTITY_REQUEST_TIMEOUT env var has to be a float value."
-    )
+    ) from e
 
 logger = logging.getLogger(__name__)
 
