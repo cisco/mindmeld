@@ -27,13 +27,21 @@ from multiprocessing import cpu_count
 
 from .. import path
 from ..core import Bunch, ProcessedQuery
-from ..exceptions import AllowedNlpClassesKeyError, MindMeldImportError, ProcessorError
+from ..exceptions import (
+    AllowedNlpClassesKeyError,
+    MindMeldImportError,
+    ProcessorError,
+    MindMeldError,
+)
 from ..markup import TIME_FORMAT, process_markup
 from ..path import get_app
 from ..query_factory import QueryFactory
 from ..resource_loader import ResourceLoader
 from ..system_entity_recognizer import SystemEntityRecognizer
-from ._config import get_nlp_config, get_language_config
+from ._config import (
+    get_nlp_config,
+    get_language_config,
+)
 from .domain_classifier import DomainClassifier
 from .entity_recognizer import EntityRecognizer
 from .entity_resolver import EntityResolver, EntityResolverConnectionError
@@ -108,6 +116,7 @@ class Processor(ABC):
         self.resource_loader = resource_loader or ResourceLoader.create_resource_loader(
             app_path
         )
+        self.language, self.locale = get_language_config(app_path)
 
         self._children = Bunch()
         self.ready = False
@@ -253,9 +262,11 @@ class Processor(ABC):
                  applying the full hierarchy of natural language processing models to the input \
                  query.
         """
+        del language
+
         query = self.create_query(
             query_text,
-            language=language,
+            language=self.language,
             locale=locale,
             time_zone=time_zone,
             timestamp=timestamp,
@@ -323,6 +334,16 @@ class Processor(ABC):
                 restart_subprocesses()
         # process the list in series
         return tuple([getattr(self, func)(itm, *args, **kwargs) for itm in items])
+
+    def _validate_locale(self, locale=None):
+        """This function makes sure the locale is consistent with the app's language code"""
+        locale = locale or self.locale
+        if locale.split("_")[0].lower() != self.language.lower():
+            raise MindMeldError(
+                "Locale %s is inconsistent with "
+                "app language %s" % (locale, self.language)
+            )
+        return locale
 
     def create_query(
         self, query_text, locale=None, language=None, time_zone=None, timestamp=None
@@ -392,7 +413,6 @@ class NaturalLanguageProcessor(Processor):
         self.name = app_path
         self._load_custom_features()
         self.domain_classifier = DomainClassifier(self.resource_loader)
-        self.app_language, self.app_locale = get_language_config(app_path)
 
         for domain in path.get_domains(self._app_path):
             self._children[domain] = DomainProcessor(
@@ -685,6 +705,8 @@ class NaturalLanguageProcessor(Processor):
                 applying the full hierarchy of natural language processing models to the input \
                 query.
         """
+        del language
+
         if allowed_intents is not None and allowed_nlp_classes is not None:
             raise TypeError(
                 "'allowed_intents' and 'allowed_nlp_classes' cannot be used together"
@@ -692,15 +714,11 @@ class NaturalLanguageProcessor(Processor):
         if allowed_intents:
             allowed_nlp_classes = self.extract_allowed_intents(allowed_intents)
 
-        if not language and not locale:
-            language, locale = self.app_language, self.app_locale
-
         return super().process(
             query_text,
             allowed_nlp_classes=allowed_nlp_classes,
-            language=language,
             time_zone=time_zone,
-            locale=locale,
+            locale=self._validate_locale(locale),
             timestamp=timestamp,
             dynamic_resource=dynamic_resource,
             verbose=verbose,
@@ -825,12 +843,14 @@ class DomainProcessor(Processor):
             (ProcessedQuery): A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text.
         """
+        del language
+
         query = self.create_query(
             query_text,
             time_zone=time_zone,
             timestamp=timestamp,
-            language=language,
-            locale=locale,
+            language=self.language,
+            locale=self._validate_locale(locale),
         )
         processed_query = self.process_query(
             query,
@@ -1051,8 +1071,9 @@ class IntentProcessor(Processor):
     def process(
         self,
         query_text,
+        allowed_nlp_classes=None,
         locale=None,
-        language=None,  # pylint: disable=arguments-differ
+        language=None,
         time_zone=None,
         timestamp=None,
         dynamic_resource=None,
@@ -1078,12 +1099,15 @@ class IntentProcessor(Processor):
             (ProcessedQuery): A processed query object that contains the prediction results from \
                 applying the hierarchy of natural language processing models to the input text.
         """
+        del language
+        del allowed_nlp_classes
+
         query = self.create_query(
             query_text,
             time_zone=time_zone,
             timestamp=timestamp,
-            language=language,
-            locale=locale,
+            language=self.language,
+            locale=self._validate_locale(locale),
         )
         processed_query = self.process_query(query, dynamic_resource=dynamic_resource)
         processed_query.domain = self.domain
