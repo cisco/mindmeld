@@ -95,7 +95,7 @@ class SystemEntityRecognizer:
 
         try:
             response = requests.request(
-                "POST", url, data=data, timeout=SYS_ENTITY_REQUEST_TIMEOUT
+                "POST", url, data=data, timeout=float(SYS_ENTITY_REQUEST_TIMEOUT)
             )
 
             if response.status_code == requests.codes["ok"]:
