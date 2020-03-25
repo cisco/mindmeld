@@ -82,7 +82,7 @@ class ApplicationManager:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-    ):  # pylint: disable=too-many-arguments
+    ):
         self.async_mode = async_mode
 
         self._app_path = app_path

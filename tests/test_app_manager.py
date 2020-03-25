@@ -12,7 +12,6 @@ These tests apply only when async/await are supported.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mock import patch
 
 from mindmeld.app_manager import ApplicationManager, freeze_params
 from mindmeld.components.request import FrozenParams, Params
@@ -45,29 +44,3 @@ def test_parse(app_manager):
     fields = {"params", "request", "dialogue_state", "directives", "history"}
     for field in fields:
         assert field in vars(response).keys()
-
-
-def test_language_locale(kwik_e_mart_app_path, kwik_e_mart_nlp):
-    app_manager = ApplicationManager(kwik_e_mart_app_path, kwik_e_mart_nlp)
-
-    nlp_result = kwik_e_mart_nlp.process("hi")
-
-    # we test for manually overriding language or locale using params
-
-    with patch.object(
-        kwik_e_mart_nlp, "process", autospec=True, return_value=nlp_result
-    ) as mock:
-        app_manager.parse("hi", params={"language": "vi"})
-
-    assert mock.call_args[1]["query_text"] == "hi"
-    assert mock.call_args[1]["language"] == "vi"
-    assert mock.call_args[1]["locale"] is None
-
-    with patch.object(
-        kwik_e_mart_nlp, "process", autospec=True, return_value=nlp_result
-    ) as mock:
-        app_manager.parse("hi", params={"locale": "vi_VI"})
-
-    assert mock.call_args[1]["query_text"] == "hi"
-    assert mock.call_args[1]["locale"] == "vi_VI"
-    assert mock.call_args[1]["language"] is None
