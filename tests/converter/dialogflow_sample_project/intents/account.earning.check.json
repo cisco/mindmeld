@@ -1,0 +1,86 @@
+{
+  "id": "0db5ffef-30c7-417e-8acb-d41c2d50c228",
+  "name": "account.earning.check",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "account.earning.check",
+      "affectedContexts": [
+        {
+          "name": "earning",
+          "parameters": {},
+          "lifespan": 5
+        },
+        {
+          "name": "I",
+          "parameters": {},
+          "lifespan": 5
+        }
+      ],
+      "parameters": [
+        {
+          "id": "088b443b-d16f-4de1-a5d1-37234c1a7d50",
+          "required": false,
+          "dataType": "@account",
+          "name": "account",
+          "value": "$account",
+          "prompts": [
+            {
+              "lang": "en",
+              "value": "What account are we checking?"
+            }
+          ],
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        },
+        {
+          "id": "cc4d18e2-60c9-4d1a-8552-1675ff932fc4",
+          "required": false,
+          "dataType": "@sys.date-time",
+          "name": "date-time",
+          "value": "$date-time.recent",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        },
+        {
+          "id": "f7b3fc03-5106-4bd2-b322-d97ab40bdd8d",
+          "required": false,
+          "dataType": "@category",
+          "name": "category",
+          "value": "$category",
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "Here are your deposit transactions:"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

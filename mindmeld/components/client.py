@@ -21,8 +21,8 @@ class ConversationClient:
         ['The 23 Elm Street Kwik-E-Mart is open from 7:00 to 19:00.']
 
     Attributes:
-        history (list): The sequence of previous turns in the conversation, starting with the \
-            most recent message.
+        history (list): The sequence of previous turns in the conversation,
+            starting with the most recent message.
         context (dict): The user context of the conversation.
         default_params (dict): The default params to use with each turn. These \
             defaults will be overridden by params passed for each turn.
@@ -140,7 +140,7 @@ class ConversationClient:
 
                     texts.append(self._generate_suggestion_text(suggestion))
                 msg = msg.format(*texts)
-            elif directive_name in DirectiveNames.LIST:
+            elif directive_name == DirectiveNames.LIST:
                 msg = "\n".join(
                     [
                         json.dumps(item, indent=4, sort_keys=True)

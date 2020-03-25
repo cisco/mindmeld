@@ -1,0 +1,9 @@
+{
+  "id": "abc8c962-c443-4df6-90d1-3a68f16dbd14",
+  "name": "merchant",
+  "isOverridable": true,
+  "isEnum": false,
+  "isRegexp": false,
+  "automatedExpansion": true,
+  "allowFuzzyExtraction": false
+}

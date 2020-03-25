@@ -1,0 +1,61 @@
+{
+  "id": "e43a1f20-41d4-4e79-ad87-8d88221daedc",
+  "name": "account.balance.check",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "account.balance.check",
+      "affectedContexts": [
+        {
+          "name": "balance",
+          "parameters": {},
+          "lifespan": 5
+        }
+      ],
+      "parameters": [
+        {
+          "id": "94833e9f-dbe9-4881-b8ba-e283a918ffb0",
+          "required": true,
+          "dataType": "@account",
+          "name": "account",
+          "value": "$account",
+          "prompts": [
+            {
+              "lang": "en",
+              "value": "Balance for which savings or checking?"
+            },
+            {
+              "lang": "en",
+              "value": "What account do you want the balance for: savings or checking?"
+            }
+          ],
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "Here\u0027s your latest balance:"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

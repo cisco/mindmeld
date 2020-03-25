@@ -1,5 +1,5 @@
 {
-  "id": "5ff09fd7-4c1d-40ce-9fee-d193b29b72aa",
+  "id": "1e9eafd6-2daa-4e24-a6cb-f13c5936a4a1",
   "name": "Default Welcome Intent",
   "auto": true,
   "contexts": [],
@@ -12,21 +12,11 @@
       "messages": [
         {
           "type": 0,
-          "lang": "es",
-          "speech": [
-            "¡Hola!",
-            "¡Hey!",
-            "¡Buenos días!"
-          ]
-        },
-        {
-          "type": 0,
           "lang": "en",
+          "condition": "",
           "speech": [
-            "Hi! How are you doing?",
-            "Hello! How can I help you?",
-            "Good day! What can I do for you today?",
-            "Greetings! How can I assist?"
+            "Hello. Welcome to ACME Bank.",
+            "Hello, thanks for choosing ACME Bank."
           ]
         }
       ],
@@ -42,5 +32,8 @@
     {
       "name": "WELCOME"
     }
-  ]
+  ],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
 }

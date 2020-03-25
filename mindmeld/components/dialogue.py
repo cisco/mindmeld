@@ -1089,7 +1089,7 @@ class Conversation:
 
                     texts.append(self._generate_suggestion_text(suggestion))
                 msg = msg.format(*texts)
-            elif directive_name in DirectiveNames.LIST:
+            elif directive_name == DirectiveNames.LIST:
                 msg = "\n".join(
                     [
                         json.dumps(item, indent=4, sort_keys=True)

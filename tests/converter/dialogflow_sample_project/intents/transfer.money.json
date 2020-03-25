@@ -1,0 +1,103 @@
+{
+  "id": "c80891cf-b988-4b43-8c66-8ce5e502c9b2",
+  "name": "transfer.money",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "transfer.money",
+      "affectedContexts": [
+        {
+          "name": "transfer",
+          "parameters": {},
+          "lifespan": 5
+        },
+        {
+          "name": "balance",
+          "parameters": {},
+          "lifespan": 5
+        },
+        {
+          "name": "transfermoney-followup",
+          "parameters": {},
+          "lifespan": 2
+        }
+      ],
+      "parameters": [
+        {
+          "id": "40ba4a39-99f3-4830-a0f7-92081e825030",
+          "required": true,
+          "dataType": "@account",
+          "name": "account-from",
+          "value": "$account-from",
+          "prompts": [
+            {
+              "lang": "en",
+              "value": "Sure. Transfer from which account?"
+            }
+          ],
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": true
+        },
+        {
+          "id": "092fdca3-37e9-4913-8686-7f79803398c8",
+          "required": true,
+          "dataType": "@account",
+          "name": "account-to",
+          "value": "$account-to",
+          "prompts": [
+            {
+              "lang": "en",
+              "value": "To which account?"
+            }
+          ],
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        },
+        {
+          "id": "f756ce27-753d-4be1-bb6b-a5bd277186ac",
+          "required": true,
+          "dataType": "@sys.unit-currency",
+          "name": "amount",
+          "value": "$amount",
+          "prompts": [
+            {
+              "lang": "en",
+              "value": "And, how much do you want to transfer?"
+            }
+          ],
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": [],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "All right. So, you\u0027re transferring $amount from your $account-from to a $account-to. Is that right?"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

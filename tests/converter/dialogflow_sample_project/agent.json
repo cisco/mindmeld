@@ -1,20 +1,21 @@
 {
-  "description": "",
+  "description": "The agent handles requests about transfers, balances and credit card payment due dates.",
   "language": "en",
-  "shortDescription": "",
-  "examples": "",
+  "shortDescription": "Banking operations",
+  "examples": "User: Transfer $100 from my checking to my savings account.\nUser: Check my credit card balance.\nUser: How much money did I spend on shopping in Amazon in December?\nUser: Where was my last deposit from?",
   "linkToDocs": "",
+  "activeAssistantAgents": [
+    "smalltalk-domain-on"
+  ],
   "disableInteractionLogs": false,
   "disableStackdriverLogs": true,
   "googleAssistant": {
-    "googleAssistantCompatible": true,
-    "project": "test-luhxgl",
+    "googleAssistantCompatible": false,
+    "project": "",
     "welcomeIntentSignInRequired": false,
     "startIntents": [],
     "systemIntents": [],
-    "endIntentIds": [
-      "ba59edc1-eb2d-474f-9838-be505082a887"
-    ],
+    "endIntentIds": [],
     "oAuthLinking": {
       "required": false,
       "providerId": "",
@@ -27,26 +28,26 @@
     "voiceType": "MALE_1",
     "capabilities": [],
     "env": "",
-    "protocolVersion": "V2",
+    "protocolVersion": "V1",
     "autoPreviewEnabled": false,
     "isDeviceAgent": false
   },
-  "defaultTimezone": "America/Los_Angeles",
+  "defaultTimezone": "America/New_York",
   "webhook": {
     "url": "",
     "username": "",
-    "headers": {},
+    "headers": {
+      "": ""
+    },
     "available": false,
     "useForDomains": false,
     "cloudFunctionsEnabled": false,
     "cloudFunctionsInitialized": false
   },
-  "isPrivate": true,
-  "customClassifierMode": "use.after",
-  "mlMinConfidence": 0.3,
-  "supportedLanguages": [
-    "es"
-  ],
+  "isPrivate": false,
+  "customClassifierMode": "use.instead",
+  "mlMinConfidence": 0.2,
+  "supportedLanguages": [],
   "onePlatformApiVersion": "v2",
   "analyzeQueryTextSentiment": false,
   "enabledKnowledgeBaseNames": [],

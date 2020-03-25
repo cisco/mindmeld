@@ -1,0 +1,43 @@
+{
+  "id": "f15a146f-7f12-4961-b0d5-b3fb66a4754b",
+  "name": "payment.due_date",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "payment.due_date",
+      "affectedContexts": [
+        {
+          "name": "due_date",
+          "parameters": {},
+          "lifespan": 5
+        },
+        {
+          "name": "balance",
+          "parameters": {},
+          "lifespan": 5
+        }
+      ],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "The due date is:"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}
