@@ -171,6 +171,15 @@ class Application:
 
         return _decorator
 
+     def auto_fill(self, **kwargs):
+        """Creates a dialogue flow to fill missing entities"""
+
+        def _decorator(func, *args):
+            name = kwargs.pop("name", func.__name__)
+            return AutoEntityFilling(name, func, self, **kwargs)
+
+        return _decorator
+
     def cli(self):
         """Initialize the application's command line interface."""
         # pylint: disable=unexpected-keyword-arg,no-value-for-parameter

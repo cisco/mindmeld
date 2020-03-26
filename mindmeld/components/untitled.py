@@ -800,7 +800,7 @@ class AutoEntityFilling(DialogueFlow):
 
                 else:
                     if self._validation_type == 'self':
-                        # Add logic to handle user defined validation function or return control to handler.
+                        # Add 
                         return
 
                     else:
