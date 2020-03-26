@@ -22,7 +22,7 @@ from functools import cmp_to_key, partial
 import immutables
 
 from .. import path
-from .request import FrozenParams, Params, 
+from .request import FrozenParams, Params, Request
 from ..models import entity_features
 from ..markup import process_markup
 
@@ -810,11 +810,16 @@ class AutoEntityFilling(DialogueFlow):
 
                         else:
                             # retry logic
-                            if responder.frame['retry_count'] == 1:
+                            if 'retry_count' not in responder.frame:
+                                responder.frame['retry_count'] = 0:
+
+                            if responder.frame['retry_count'] <= 1:
+                                responder.frame['retry_count'] += 1:
                                 next_flow = self.flow_state
 
                             else:
                                 next_flow = None
+                                responder.frame['retry_count'] = 0:
 
                             self.app.app_manager.dialogue_manager.reprocess(next_flow)
 
