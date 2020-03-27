@@ -120,10 +120,10 @@ def vi_kwik_e_mart_nlp(vi_kwik_e_mart_app_path):
 
 
 @pytest.fixture(scope="session")
-def vi_kwik_e_mart_app(kwik_e_mart_nlp):
-    from .kwik_e_mart import app
+def vi_kwik_e_mart_app(vi_kwik_e_mart_nlp):
+    from .viet_kwik_e_mart import app
 
-    app.lazy_init(kwik_e_mart_nlp)
+    app.lazy_init(vi_kwik_e_mart_nlp)
     return app
 
 
