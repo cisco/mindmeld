@@ -750,7 +750,9 @@ class AutoEntityFilling(DialogueFlow):
         return extracted_feature != {}
 
     def _initial_fill(self, request):
-        """Fills the Entity form initially with values from the initial query.
+        """
+        (In progress)
+        Fills the Entity form initially with values from the initial query.
     
         Args:
             request (Request): The request object.
@@ -802,11 +804,11 @@ class AutoEntityFilling(DialogueFlow):
                     responder.reply(nlr)
                     responder.listen()
                     responder.frame['slot_not_prompted'] = False
-                    return False
+                    return True
 
                 else:
                     if self._validation_type == 'self':
-                        # Add logic to handle user defined validation function or return control to handler.
+                        # return to form-filling handler for accessing user defined validation function.
                         return self.entrance_handler(request, responder)
 
                     else:
@@ -822,21 +824,20 @@ class AutoEntityFilling(DialogueFlow):
 
                             if responder.frame['retry_count'] <= 1:
                                 responder.frame['retry_count'] += 1
-                                next_flow = self.flow_state
 
                             else:
-                                next_flow = None
                                 responder.frame['retry_count'] = 0
+                                responder.exit_flow()
 
-                            responder.reply([nlr])
+                            print(responder.frame['retry_count'])
+                            responder.reply(nlr)
                             responder.listen()
-                            return False
-                            # self.app.app_manager.dialogue_manager.reprocess(next_flow)
+                            return True
 
         # Finish slot-filling flow and return to handler
         del responder.frame['slot_not_prompted']
         responder.exit_flow()
-        return True
+        return False
                             
 class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
