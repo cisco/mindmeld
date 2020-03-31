@@ -11,7 +11,7 @@ requirements = [
     'Click~=6.0',
     'click-log==0.1.8',
     'elasticsearch5~=5.5',
-    'Flask~=0.12',
+    'Flask~=1.0',
     'Flask-Cors~=3.0',
     'nltk~=3.2',
     'numpy~=1.14',
