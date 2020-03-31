@@ -751,7 +751,7 @@ class AutoEntityFilling(DialogueFlow):
 
     def _initial_fill(self, request):
         """Fills the Entity form initially with values from the initial query.
-
+    
         Args:
             request (Request): The request object.
         """
@@ -766,14 +766,13 @@ class AutoEntityFilling(DialogueFlow):
                     if (role not in slot) or (role == slot['role']):
                         slot['value'] = value
 
-    def __call__(self, request, responder, entity_form=None, validation=None, user_list=None):
+    def __call__(self, request, responder, validation=None, user_list=None):
         """The iterative call to fill missing slots in the entity form till all slots have been
         filled up or the flow has been exited.
 
         Args:
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
-            entity_from (optional): Entity Object form comprising of type, nlr, entity form, role and value.
             validation (optional): Validation type ('self', 'ulist', None (default)).
             user_list (optional): user list for 'ulist' validation.
         """
@@ -793,7 +792,7 @@ class AutoEntityFilling(DialogueFlow):
             entity_ = slot['entity']
             value = slot['value']
             nlr = (
-                slot['response'] if ('response' in slot) else ["Please provide value for: {}".format(entity_)]
+                slot['responses'] if ('responses' in slot) else ["Please provide value for: {}".format(entity_)]
             )
 
             if not value:
@@ -803,12 +802,12 @@ class AutoEntityFilling(DialogueFlow):
                     responder.reply(nlr)
                     responder.listen()
                     responder.frame['slot_not_prompted'] = False
-                    return
+                    return False
 
                 else:
                     if self._validation_type == 'self':
                         # Add logic to handle user defined validation function or return control to handler.
-                        return
+                        return self.entrance_handler(request, responder)
 
                     else:
                         if self._validate(request.text, entity_):
@@ -831,13 +830,13 @@ class AutoEntityFilling(DialogueFlow):
 
                             responder.reply([nlr])
                             responder.listen()
-                            return
+                            return False
                             # self.app.app_manager.dialogue_manager.reprocess(next_flow)
 
         # Finish slot-filling flow and return to handler
         del responder.frame['slot_not_prompted']
         responder.exit_flow()
-        return self.entrance_handler(request, responder)
+        return True
                             
 class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
