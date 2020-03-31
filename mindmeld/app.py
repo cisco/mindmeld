@@ -20,7 +20,7 @@ import sys
 
 from .app_manager import ApplicationManager
 from .cli import app_cli
-from .components.dialogue import DialogueFlow, DialogueResponder
+from .components.dialogue import DialogueFlow, DialogueResponder, AutoEntityFilling
 from .components.request import Request
 from .server import MindMeldServer
 
@@ -171,7 +171,7 @@ class Application:
 
         return _decorator
 
-     def auto_fill(self, **kwargs):
+    def auto_fill(self, **kwargs):
         """Creates a dialogue flow to fill missing entities"""
 
         def _decorator(func, *args):

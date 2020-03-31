@@ -703,21 +703,22 @@ class AutoEntityFilling(DialogueFlow):
     logger = mod_logger.getChild("AutoEntityFilling")
     """Class logger."""
 
-    def __init__(self, entrance_handler, app, **kwargs):
-        super().__init__(entrance_handler.__name__, entrance_handler, app)
+    def __init__(self, name, entrance_handler, app, **kwargs):
+        super().__init__(name, entrance_handler, app)
 
         self.app = app
+        self.entrance_handler = entrance_handler
 
     def _set_target_state(self):
         """Set target dialogue state to current flow"""
         responder.params.target_dialogue_state = self.flow_state
 
-    def _validate(self, text, entity_):
+    def _validate(self, text, entity_type):
         """Validates the user input based on the entity type and validation type.
 
         Args: 
             text (Request.text) = Text in the query
-            entity_ = Type of entity
+            entity_type = Type of entity
 
         Returns:
             (bool): Boolean whether the user input fulfills the slot requirements
@@ -727,7 +728,7 @@ class AutoEntityFilling(DialogueFlow):
         query = process_markup(text, resource_loader.query_factory, {})[1]
         formatted_payload = (query, [query], 0)
 
-        if 'sys_' in entity_:
+        if 'sys_' in entity_type:
             # duckling validation
             extracted_feature = (
                 entity_features.extract_numeric_candidate_features()(formatted_payload, {})
@@ -737,7 +738,7 @@ class AutoEntityFilling(DialogueFlow):
                 # validation using user defined list
                 return True if text in self._user_list else False
            
-           else:
+            else:
                 # gazetteer validation
                 gazetter = (
                     {'gazetteers': 
@@ -777,17 +778,22 @@ class AutoEntityFilling(DialogueFlow):
             user_list (optional): user list for 'ulist' validation.
         """
 
-        self._entity_form = entity_form or request.frame['slots']
+        if ('slot_not_prompted' in request.frame):
+            self._entity_form = request.frame['slots']
+            slot_not_prompted = request.frame['slot_not_prompted']
+
+        else:
+            self._entity_form = responder.frame['nlr_form']
+            slot_not_prompted = responder.frame['nlr_form'] is not None
+
         self._validation_type = validation
         self._user_list = user_list
-
-        slot_not_prompted = self._entity_form is not None
 
         for slot in self._entity_form:
             entity_ = slot['entity']
             value = slot['value']
             nlr = (
-                slot['responses'] if slot['responses'] else ["Please provide value for: {}".format(entity_)]
+                slot['response'] if ('response' in slot) else ["Please provide value for: {}".format(entity_)]
             )
 
             if not value:
@@ -796,6 +802,7 @@ class AutoEntityFilling(DialogueFlow):
                     responder.frame['slots'] = self._entity_form
                     responder.reply(nlr)
                     responder.listen()
+                    responder.frame['slot_not_prompted'] = False
                     return
 
                 else:
@@ -804,28 +811,33 @@ class AutoEntityFilling(DialogueFlow):
                         return
 
                     else:
-                        if self._validate(request.text, entity_, self._validation_type):
+                        if self._validate(request.text, entity_):
                             slot['value'] = request.text
                             slot_not_prompted = True
+                            responder.frame['test'] = True
 
                         else:
                             # retry logic
                             if 'retry_count' not in responder.frame:
-                                responder.frame['retry_count'] = 0:
+                                responder.frame['retry_count'] = 0
 
                             if responder.frame['retry_count'] <= 1:
-                                responder.frame['retry_count'] += 1:
+                                responder.frame['retry_count'] += 1
                                 next_flow = self.flow_state
 
                             else:
                                 next_flow = None
-                                responder.frame['retry_count'] = 0:
+                                responder.frame['retry_count'] = 0
 
-                            self.app.app_manager.dialogue_manager.reprocess(next_flow)
+                            responder.reply([nlr])
+                            responder.listen()
+                            return
+                            # self.app.app_manager.dialogue_manager.reprocess(next_flow)
 
         # Finish slot-filling flow and return to handler
+        del responder.frame['slot_not_prompted']
         responder.exit_flow()
-        return
+        return self.entrance_handler(request, responder)
                             
 class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
