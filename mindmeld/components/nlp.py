@@ -340,6 +340,11 @@ class Processor(ABC):
     def _validate_locale(self, locale=None):
         """This function makes sure the locale is consistent with the app's language code"""
         locale = locale or self.locale
+
+        # if the developer or app doesnt specify the locale, we just use the default locale
+        if not locale:
+            return
+
         if locale.split("_")[0].lower() != self.language.lower():
             raise MindMeldError(
                 "Locale %s is inconsistent with app language code %s. "
