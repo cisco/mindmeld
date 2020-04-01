@@ -692,7 +692,7 @@ class DialogueFlow(DialogueManager):
 
 
 class AutoEntityFilling(DialogueFlow):
-    """A special dialogue flow sublcass to implement Automatic Slot Filling
+    """A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
     requirements for entity slots.
 
@@ -768,15 +768,19 @@ class AutoEntityFilling(DialogueFlow):
                     if (role not in slot) or (role == slot['role']):
                         slot['value'] = value
 
-    def __call__(self, request, responder, validation=None, user_list=None):
+    def __call__(self, request, responder, validation=None, user_list=None, retry_attempts=1):
         """The iterative call to fill missing slots in the entity form till all slots have been
         filled up or the flow has been exited.
 
         Args:
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
-            validation (optional): Validation type ('self', 'ulist', None (default)).
+            validation (optional): Validation type (
+                                    'self' - ,
+                                    'ulist' - ,
+                                    None (default - uses duckling and gazetteer validation)).
             user_list (optional): user list for 'ulist' validation.
+            retry_attempts (optional): number of reprompts to user per slot. (default 1)
         """
 
         if ('slot_not_prompted' in request.frame):
@@ -819,17 +823,18 @@ class AutoEntityFilling(DialogueFlow):
 
                         else:
                             # retry logic
-                            if 'retry_count' not in responder.frame:
-                                responder.frame['retry_count'] = 0
+                            if 'retry_count' in responder.frame:
+                                if responder.frame['retry_count'] < retry_attempts:
+                                    responder.frame['retry_count'] += 1
 
-                            if responder.frame['retry_count'] <= 1:
-                                responder.frame['retry_count'] += 1
+                                else:
+                                    # max attempts exceeded, reset counter, exit flow.
+                                    responder.frame['retry_count'] = 0
+                                    responder.exit_flow()
 
                             else:
                                 responder.frame['retry_count'] = 0
-                                responder.exit_flow()
 
-                            print(responder.frame['retry_count'])
                             responder.reply(nlr)
                             responder.listen()
                             return True
