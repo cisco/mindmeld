@@ -805,8 +805,8 @@ class AutoEntityFilling(DialogueFlow):
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
             validation (optional): Validation type (
-                                    'self' - ,
-                                    'ulist' - ,
+                                    'self' - uses developer defined validation function,
+                                    'ulist' - validation against a developer defined list of words,
                                     None (default - uses duckling and gazetteer validation)).
             user_list (optional): user list for 'ulist' validation.
             retry_attempts (optional): number of reprompts to user per slot. (default 1)
