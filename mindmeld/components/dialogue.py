@@ -713,20 +713,51 @@ class AutoEntityFilling(DialogueFlow):
         """Set target dialogue state to current flow"""
         responder.params.target_dialogue_state = self.flow_state
 
+    def _extract_query_features(self, text):
+        """ Extracts Query object from the user input and converts it into
+        appropriate format for entity extraction.
+
+        Args:
+            text (Request.text): Text in the query
+
+        Returns:
+            Formatted Payload (tuple(query (Query Object), list of entities, entity index))
+        """
+        resource_loader = self.app.app_manager.nlp.resource_loader
+
+        """ Extracting the Query object associated with the user input here.
+
+        process_markup args:
+            text, query factory, query options (optional dict) {language, time_zone and time_stamp}
+
+        returns: 
+            tuple(raw_text (str), Query object, list of entities)
+        """
+        query = process_markup(text, resource_loader.query_factory, {})[1]
+
+
+        """ 
+        payload format for entity feature extractors: 
+            tuple(query (Query Object), list of entities, entity index)
+
+        For slot filling, the user query will consist of the prompted entity. 
+        Hence `entity = [query]` and `entity_index = 0`.
+
+        """
+        formatted_payload = (query, [query], 0)
+        return formatted_payload
+
     def _validate(self, text, entity_type):
         """Validates the user input based on the entity type and validation type.
 
         Args: 
-            text (Request.text) = Text in the query
-            entity_type = Type of entity
+            text (Request.text): Text in the query
+            entity_type: Type of entity
 
         Returns:
             (bool): Boolean whether the user input fulfills the slot requirements
         """
-
-        resource_loader = self.app.app_manager.nlp.resource_loader
-        query = process_markup(text, resource_loader.query_factory, {})[1]
-        formatted_payload = (query, [query], 0)
+        formatted_payload = self._extract_query_features(text)
 
         if 'sys_' in entity_type:
             # duckling validation
@@ -737,7 +768,6 @@ class AutoEntityFilling(DialogueFlow):
             if self._validation_type == 'ulist':
                 # validation using user defined list
                 return True if text in self._user_list else False
-           
             else:
                 # gazetteer validation
                 gazetter = (
@@ -751,13 +781,12 @@ class AutoEntityFilling(DialogueFlow):
 
     def _initial_fill(self, request):
         """
-        (In progress)
-        Fills the Entity form initially with values from the initial query.
+        Performs the first pass and fills the entity form with entity values available 
+        in the initial query.
     
         Args:
             request (Request): The request object.
         """
-
         for entity in request.entities:
             entity_type = entity['type']
             role = entity['role']
@@ -765,7 +794,7 @@ class AutoEntityFilling(DialogueFlow):
 
             for slot in self._entity_form:
                 if entity_type == slot['entity']:
-                    if (role not in slot) or (role == slot['role']):
+                    if ('role' not in slot) or (role == slot['role']):
                         slot['value'] = value
 
     def __call__(self, request, responder, validation=None, user_list=None, retry_attempts=1):
@@ -782,14 +811,15 @@ class AutoEntityFilling(DialogueFlow):
             user_list (optional): user list for 'ulist' validation.
             retry_attempts (optional): number of reprompts to user per slot. (default 1)
         """
-
         if ('slot_not_prompted' in request.frame):
+            # Continuing the flow
             self._entity_form = request.frame['slots']
             slot_not_prompted = request.frame['slot_not_prompted']
-
         else:
+            # Entering the flow
             self._entity_form = responder.frame['nlr_form']
             slot_not_prompted = responder.frame['nlr_form'] is not None
+            self._initial_fill(request)
 
         self._validation_type = validation
         self._user_list = user_list
@@ -798,7 +828,8 @@ class AutoEntityFilling(DialogueFlow):
             entity_ = slot['entity']
             value = slot['value']
             nlr = (
-                slot['responses'] if ('responses' in slot) else ["Please provide value for: {}".format(entity_)]
+                slot['responses'] if ('responses' in slot) 
+            else ["Please provide value for: {}".format(entity_)]
             )
 
             if not value:
@@ -814,24 +845,20 @@ class AutoEntityFilling(DialogueFlow):
                     if self._validation_type == 'self':
                         # return to form-filling handler for accessing user defined validation function.
                         return self.entrance_handler(request, responder)
-
                     else:
                         if self._validate(request.text, entity_):
                             slot['value'] = request.text
                             slot_not_prompted = True
                             responder.frame['test'] = True
-
                         else:
                             # retry logic
                             if 'retry_count' in responder.frame:
                                 if responder.frame['retry_count'] < retry_attempts:
                                     responder.frame['retry_count'] += 1
-
                                 else:
                                     # max attempts exceeded, reset counter, exit flow.
                                     responder.frame['retry_count'] = 0
                                     responder.exit_flow()
-
                             else:
                                 responder.frame['retry_count'] = 0
 
@@ -843,7 +870,8 @@ class AutoEntityFilling(DialogueFlow):
         del responder.frame['slot_not_prompted']
         responder.exit_flow()
         return False
-                            
+                  
+
 class DialogueResponder:
     """The dialogue responder helps generate directives and fill slots in the
     system-generated natural language responses.
