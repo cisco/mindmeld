@@ -817,8 +817,8 @@ class AutoEntityFilling(DialogueFlow):
             slot_not_prompted = request.frame['slot_not_prompted']
         else:
             # Entering the flow
-            self._entity_form = responder.frame['nlr_form']
-            slot_not_prompted = responder.frame['nlr_form'] is not None
+            self._entity_form = responder.frame['entity_form']
+            slot_not_prompted = responder.frame['entity_form'] is not None
             self._initial_fill(request)
 
         self._validation_type = validation
