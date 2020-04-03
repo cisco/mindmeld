@@ -760,10 +760,13 @@ class AutoEntityFilling(DialogueFlow):
         formatted_payload = self._extract_query_features(text)
 
         if 'sys_' in entity_type:
-            # duckling validation
+            # system entity validation
+            # checks whether required system entity is present in query or not.
+            resources = {'entity_type': entity_type}
             extracted_feature = (
-                entity_features.extract_numeric_candidate_features()(formatted_payload, {})
+                entity_features.extract_system_entity_features()(formatted_payload, resources)
             )
+            print(extracted_feature)
         else:
             if self._validation_type == 'ulist':
                 # validation using user defined list
@@ -809,7 +812,7 @@ class AutoEntityFilling(DialogueFlow):
                                     'ulist' - validation against a developer defined list of words,
                                     None (default - uses duckling and gazetteer validation)).
             user_list (optional): user list for 'ulist' validation.
-            retry_attempts (optional): number of reprompts to user per slot. (default 1)
+            retry_attempts (optional): number of user reprompts per slot. (default 1)
         """
         if ('slot_not_prompted' in request.frame):
             # Continuing the flow
