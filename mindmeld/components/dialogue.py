@@ -713,6 +713,12 @@ class AutoEntityFilling(DialogueFlow):
         """Set target dialogue state to current flow"""
         responder.params.target_dialogue_state = self.flow_state
 
+    def _exit_flow(self):
+        """Exits this flow and clears the related parameter for re-usability"""
+        if 'slot_not_prompted' in responder.frame:
+            del responder.frame['slot_not_prompted']
+        responder.exit_flow()
+
     def _extract_query_features(self, text):
         """ Extracts Query object from the user input and converts it into
         appropriate format for entity extraction.
@@ -766,7 +772,6 @@ class AutoEntityFilling(DialogueFlow):
             extracted_feature = (
                 entity_features.extract_system_entity_features()(formatted_payload, resources)
             )
-            print(extracted_feature)
         else:
             if self._validation_type == 'ulist':
                 # validation using user defined list
@@ -775,10 +780,12 @@ class AutoEntityFilling(DialogueFlow):
                 # gazetteer validation
                 gazetter = (
                     {'gazetteers': 
-                        {entity_type: self.app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)}
+                        {entity_type: 
+                        self.app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)}
                         }
                 )
-                extracted_feature = entity_features.extract_in_gaz_features()(formatted_payload, gazetter)
+                extracted_feature = (
+                entity_features.extract_in_gaz_features()(formatted_payload, gazetter))
 
         return extracted_feature != {}
 
@@ -808,9 +815,9 @@ class AutoEntityFilling(DialogueFlow):
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
             validation (optional): Validation type (
-                                    'self' - uses developer defined validation function,
-                                    'ulist' - validation against a developer defined list of words,
-                                    None (default - uses duckling and gazetteer validation)).
+                                'self' - uses developer defined validation function,
+                                'ulist' - validation against a developer defined list of words,
+                                None (default - uses duckling and gazetteer validation)).
             user_list (optional): user list for 'ulist' validation.
             retry_attempts (optional): number of user reprompts per slot. (default 1)
         """
@@ -820,6 +827,9 @@ class AutoEntityFilling(DialogueFlow):
             slot_not_prompted = request.frame['slot_not_prompted']
         else:
             # Entering the flow
+            if 'entity_form' not in responder.frame:
+                responder.exit_flow()
+                return False
             self._entity_form = responder.frame['entity_form']
             slot_not_prompted = responder.frame['entity_form'] is not None
             self._initial_fill(request)
@@ -846,7 +856,8 @@ class AutoEntityFilling(DialogueFlow):
 
                 else:
                     if self._validation_type == 'self':
-                        # return to form-filling handler for accessing user defined validation function.
+                        # return to form-filling handler for accessing 
+                        # user defined validation function.
                         return self.entrance_handler(request, responder)
                     else:
                         if self._validate(request.text, entity_):
@@ -860,8 +871,9 @@ class AutoEntityFilling(DialogueFlow):
                                     responder.frame['retry_count'] += 1
                                 else:
                                     # max attempts exceeded, reset counter, exit flow.
-                                    responder.frame['retry_count'] = 0
-                                    responder.exit_flow()
+                                    del responder.frame['retry_count']
+                                    self._exit_flow
+                                    return True
                             else:
                                 responder.frame['retry_count'] = 0
 
@@ -870,8 +882,7 @@ class AutoEntityFilling(DialogueFlow):
                             return True
 
         # Finish slot-filling flow and return to handler
-        del responder.frame['slot_not_prompted']
-        responder.exit_flow()
+        self._exit_flow
         return False
                   
 
