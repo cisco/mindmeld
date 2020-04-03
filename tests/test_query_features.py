@@ -427,3 +427,25 @@ def test_entity_gaz_query_features(
         else:
             assert expected_value == extracted_features[feature_key]
     entity_recognizer.fit()
+
+
+@pytest.mark.parametrize(
+    "query, expected_entity_type, domain, intent",
+    [
+        # system entity should be detected
+        ('2am', 'sys_time', 'times_and_dates', 'change_alarm'),
+        ('4:30 pm', 'sys_time', 'times_and_dates', 'change_alarm'),
+        ('tomorrow at noon', 'sys_time', 'times_and_dates', 'change_alarm'),
+        # custom entity in training data should be detected
+        ('bathroom', 'location', 'smart_home', 'set_thermostat'),
+        ('bedroom', 'location', 'smart_home', 'set_thermostat'),
+        ('balcony', 'location', 'smart_home', 'set_thermostat'),
+        # gaz entity should be detected even if not in training data
+        ('powder room', 'location', 'smart_home', 'set_thermostat'),
+        ('living room', 'location', 'smart_home', 'set_thermostat'),
+    ])
+def test_entity_no_context_detection(home_assistant_nlp, domain, intent, query, expected_entity_type):
+    entity_recognizer = home_assistant_nlp.domains[domain].intents[intent].entity_recognizer
+    entities = entity_recognizer.predict(query)
+    assert len(entities) > 0
+    assert entities[0].entity.type == expected_entity_type
