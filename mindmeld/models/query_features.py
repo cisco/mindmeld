@@ -670,7 +670,7 @@ def extract_ngrams(lengths=(1,), thresholds=(0,), **args):
 
 
 @register_query_feature(feature_name="sys-candidates")
-def extract_sys_candidates(entities=None, **args):
+def extract_sys_candidates(**args):
     """
     Return an extractor for features based on a heuristic guess of numeric \
         candidates in the current query.
@@ -678,7 +678,7 @@ def extract_sys_candidates(entities=None, **args):
     Returns:
             (function) The feature extractor.
      """
-    del args
+    entities = [args['entities']] if 'entities' in args else None
     entities = entities or DEFAULT_SYS_ENTITIES
 
     def _extractor(query, resources):

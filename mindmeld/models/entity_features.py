@@ -149,22 +149,3 @@ def extract_other_entities_features(**args):
         return features
 
     return _extractor
-
-
-@register_entity_feature(feature_name="system")
-def extract_system_entity_features(**args):
-    """Returns a feature extractor for any system entity that has been specified"""
-    del args
-
-    def _extractor(example, resources):
-        query, _, _ = example
-        feature = {}
-        entity_type = resources['entity_type']
-        sys_entities = query.get_system_entity_candidates([entity_type])
-        for ent in sys_entities:
-            for i in ent.token_span:
-                feat_name = "sys_candidate|type:{}".format(ent.entity.type)
-                feature[feat_name] = 1
-        return feature
-
-    return _extractor

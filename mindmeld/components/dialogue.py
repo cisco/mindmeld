@@ -23,7 +23,7 @@ import immutables
 
 from .. import path
 from .request import FrozenParams, Params, Request
-from ..models import entity_features
+from ..models import entity_features, query_features
 from ..markup import process_markup
 
 mod_logger = logging.getLogger(__name__)
@@ -764,13 +764,13 @@ class AutoEntityFilling(DialogueFlow):
             (bool): Boolean whether the user input fulfills the slot requirements
         """
         formatted_payload = self._extract_query_features(text)
+        query = formatted_payload[0]
 
         if 'sys_' in entity_type:
             # system entity validation
             # checks whether required system entity is present in query or not.
-            resources = {'entity_type': entity_type}
-            extracted_feature = (
-                entity_features.extract_system_entity_features()(formatted_payload, resources)
+            extracted_feature = dict(
+                query_features.extract_sys_candidates(entities=entity_type)(query, {})
             )
         else:
             if self._validation_type == 'ulist':
