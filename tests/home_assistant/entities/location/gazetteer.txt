@@ -1,0 +1,7 @@
+varandah
+balcony
+powder room
+bedroom
+bathroom
+kitchen
+living room
