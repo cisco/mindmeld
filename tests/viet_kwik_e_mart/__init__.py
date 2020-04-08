@@ -28,7 +28,7 @@ def welcome(request, responder):
 
 @app.handle(intent="exit")
 def say_goodbye(request, responder):
-    responder.reply(["Tạm biệt", "Chúc bạn một ngày vui vẻ"])
+    responder.reply(["Tạm biệt!", "Chúc bạn một ngày vui vẻ."])
 
 
 @app.handle(intent="help")
@@ -139,7 +139,7 @@ def default_handler(request, responder):
 
 @send_store_hours.handle(intent="exit", exit_flow=True)
 def exit_handler(request, responder):
-    responder.reply(["Tạm biệt", "Chúc bạn một ngày vui vẻ."])
+    responder.reply(["Tạm biệt!", "Chúc bạn một ngày vui vẻ."])
 
 
 @send_store_hours.handle(intent="get_store_hours")

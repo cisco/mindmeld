@@ -228,7 +228,7 @@ Khi nào cửa hàng trên {12th ave|store_name} mở ngày {Thứ hai|sys_time}
 Khi nào cửa hàng trên {Đường Industrial|store_name} đóng {ngày mai|sys_time}?
 Khi nào cửa hàng trên {100 Main St|store_name} đóng cửa?
 Khi nào nó đóng {Thứ hai|sys_time}?
-Khi nào nó đong?
+Khi nào nó đóng?
 Khi nào nó mở?
 Khi nào sẽ đóng cửa?
 Khi nào sẽ mở?

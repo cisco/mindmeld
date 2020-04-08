@@ -1,1 +1,1 @@
-mindmeld==4.2.2
+mindmeld==4.2.10
