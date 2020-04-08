@@ -25,7 +25,6 @@ from .. import path
 from .request import FrozenParams, Params, Request
 from ..models import entity_features, query_features
 from ..markup import process_markup
-from ..models.helpers import DEFAULT_SYS_ENTITIES
 
 mod_logger = logging.getLogger(__name__)
 
@@ -692,7 +691,7 @@ class DialogueFlow(DialogueManager):
         return handler
 
 
-class AutoEntityFilling():
+class AutoEntityFilling(DialogueFlow):
     """A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
     (AEF) that allows developers to prompt users for completing the missing
     requirements for entity slots.
@@ -704,15 +703,15 @@ class AutoEntityFilling():
     logger = mod_logger.getChild("AutoEntityFilling")
     """Class logger."""
 
-    def __init__(self, entrance_handler, entity_form, app, **kwargs):
+    def __init__(self, name, entrance_handler, app, **kwargs):
+        super().__init__(name, entrance_handler, app, **kwargs)
+
         self.app = app
-        self.name = entrance_handler.__name__
         self.entrance_handler = entrance_handler
-        self._entity_form = entity_form
 
     def _set_target_state(self):
         """Set target dialogue state to current flow"""
-        responder.params.target_dialogue_state = self.entrance_handler+'auto_fill'
+        responder.params.target_dialogue_state = self.flow_state
 
     def _exit_flow(self):
         """Exits this flow and clears the related parameter for re-usability"""
@@ -739,26 +738,9 @@ class AutoEntityFilling():
 
         returns: 
             tuple(raw_text (str), Query object, list of entities)
-
-        The following returns the extracted Query object
         """
         query = process_markup(text, resource_loader.query_factory, {})[1]
 
-        return query
-
-    def _validate(self, text, entity_type, slot):
-        """Validates the user input based on the entity type and validation type.
-
-        Args: 
-            text (Request.text): Text in the query
-            entity_type: Type of entity
-            slot: FormEntity object
-
-        Returns:
-            (bool): Boolean whether the user input fulfills the slot requirements
-        """
-
-        query = self._extract_query_features(text)
 
         """ 
         payload format for entity feature extractors: 
@@ -769,32 +751,42 @@ class AutoEntityFilling():
 
         """
         formatted_payload = (query, [query], 0)
+        return formatted_payload
 
-        if slot.default_eval:
-            if entity_type in DEFAULT_SYS_ENTITIES:
-                """
-                system entity validation - checks for presence of required system entity
-                """
-                resources = {}
-                extracted_feature = dict(
-                    query_features.extract_sys_candidates(entities=entity_type)(query, resources)
-                )
+    def _validate(self, text, entity_type):
+        """Validates the user input based on the entity type and validation type.
+
+        Args: 
+            text (Request.text): Text in the query
+            entity_type: Type of entity
+
+        Returns:
+            (bool): Boolean whether the user input fulfills the slot requirements
+        """
+        formatted_payload = self._extract_query_features(text)
+        query = formatted_payload[0]
+
+        if 'sys_' in entity_type:
+            # system entity validation
+            # checks whether required system entity is present in query or not.
+            extracted_feature = dict(
+                query_features.extract_sys_candidates(entities=entity_type)(query, {})
+            )
+        else:
+            if self._validation_type == 'ulist':
+                # validation using user defined list
+                return True if text in self._user_list else False
             else:
                 # gazetteer validation
-                gazetteer = (
+                gazetter = (
                     {'gazetteers': 
                         {entity_type: 
                         self.app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)}
                         }
                 )
                 extracted_feature = (
-                entity_features.extract_in_gaz_features()(formatted_payload, gazetteer))
+                entity_features.extract_in_gaz_features()(formatted_payload, gazetter))
 
-        if slot.hints:
-            # hints / user-list validation
-            extracted_feature = {'hint_validated_entity': text} if text in hints else {}
-
-        # return True iff user input results in extracted features (i.e. validated)
         return extracted_feature != {}
 
     def _initial_fill(self, request):
@@ -815,33 +807,43 @@ class AutoEntityFilling():
                     if ('role' not in slot) or (role == slot['role']):
                         slot['value'] = value
 
-    def __call__(self, request, responder):
+    def __call__(self, request, responder, validation=None, user_list=None, retry_attempts=1):
         """The iterative call to fill missing slots in the entity form till all slots have been
         filled up or the flow has been exited.
 
         Args:
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
+            validation (optional): Validation type (
+                                'self' - uses developer defined validation function,
+                                'ulist' - validation against a developer defined list of words,
+                                None (default - uses duckling and gazetteer validation)).
+            user_list (optional): user list for 'ulist' validation.
+            retry_attempts (optional): number of user reprompts per slot. (default 1)
         """
-        self._set_target_state
-
         if ('slot_not_prompted' in request.frame):
             # Continuing the flow
             self._entity_form = request.frame['slots']
             slot_not_prompted = request.frame['slot_not_prompted']
         else:
             # Entering the flow
-            if not self._entity_form:
-                self._exit_flow
-                return
-            slot_not_prompted = True
+            if 'entity_form' not in responder.frame:
+                responder.exit_flow()
+                return False
+            self._entity_form = responder.frame['entity_form']
+            slot_not_prompted = responder.frame['entity_form'] is not None
             self._initial_fill(request)
 
+        self._validation_type = validation
+        self._user_list = user_list
+
         for slot in self._entity_form:
-            entity_ = slot.entity
-            value = slot.value
-            nlr = (slot.responses if slot.responses
-            else ["Please provide value for: {}".format(entity_)])
+            entity_ = slot['entity']
+            value = slot['value']
+            nlr = (
+                slot['responses'] if ('responses' in slot) 
+            else ["Please provide value for: {}".format(entity_)]
+            )
 
             if not value:
                 if slot_not_prompted:
@@ -850,34 +852,38 @@ class AutoEntityFilling():
                     responder.reply(nlr)
                     responder.listen()
                     responder.frame['slot_not_prompted'] = False
-                    return
+                    return True
 
                 else:
-                    if self._validate(request.text, entity_, slot):
-                        slot.value = request.text
-                        slot_not_prompted = True
-                        responder.frame['slots'] = self._entity_form
+                    if self._validation_type == 'self':
+                        # return to form-filling handler for accessing 
+                        # user defined validation function.
+                        return self.entrance_handler(request, responder)
                     else:
-                        # retry logic
-                        if 'retry_count' in responder.frame:
-                            if responder.frame['retry_count'] < retry_attempts:
-                                responder.frame['retry_count'] += 1
-                            else:
-                                # max attempts exceeded, reset counter, exit flow.
-                                del responder.frame['retry_count']
-                                responder.reply()
-                                self._exit_flow
-                                return
+                        if self._validate(request.text, entity_):
+                            slot['value'] = request.text
+                            slot_not_prompted = True
+                            responder.frame['test'] = True
                         else:
-                            responder.frame['retry_count'] = 0
+                            # retry logic
+                            if 'retry_count' in responder.frame:
+                                if responder.frame['retry_count'] < retry_attempts:
+                                    responder.frame['retry_count'] += 1
+                                else:
+                                    # max attempts exceeded, reset counter, exit flow.
+                                    del responder.frame['retry_count']
+                                    self._exit_flow
+                                    return True
+                            else:
+                                responder.frame['retry_count'] = 0
 
-                        responder.reply(nlr)
-                        responder.listen()
-                        return
+                            responder.reply(nlr)
+                            responder.listen()
+                            return True
 
         # Finish slot-filling flow and return to handler
         self._exit_flow
-        return self.entrance_handler(request, responder)
+        return False
                   
 
 class DialogueResponder:

@@ -49,6 +49,7 @@ class Application:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
+        autofill=None
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
@@ -63,6 +64,7 @@ class Application:
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
         self.preprocessor = preprocessor
+        self.autofill = autofill or AutoEntityFilling
         self.async_mode = async_mode
 
     @property
@@ -172,12 +174,15 @@ class Application:
         return _decorator
 
     def auto_fill(self, **kwargs):
-        """Creates a dialogue flow to fill missing entities"""
+        """Creates a flow to fill missing entities"""
 
         def _decorator(func, *args):
             name = kwargs.pop("name", func.__name__)
-            return AutoEntityFilling(name, func, self, **kwargs)
-
+            entity_form = kwargs.pop("entity_form", None)
+            autofill_func = self.autofill(func, entity_form, self, **kwargs)
+            self.add_dialogue_rule(name, autofill_func, **kwargs)
+            return func
+            
         return _decorator
 
     def cli(self):
