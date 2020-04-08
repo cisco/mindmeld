@@ -14,11 +14,15 @@ def welcome(request, responder):
         prefix = "Chào {name}. "
     except KeyError:
         prefix = "Xin chào. "
-    responder.reply(
-        prefix + "Tôi có thể giúp bạn tìm giờ cửa hàng "
-        "cho Kwik-E-Mart tại địa phương của bạn. "
-        "Tôi có thể giúp gì cho bạn?"
-    )
+    responder.reply(prefix)
+
+    statement = "Tôi có thể giúp bạn tìm giờ cửa hàng "
+    "cho Kwik-E-Mart tại địa phương của bạn. "
+    responder.reply(statement)
+
+    question = "Tôi có thể giúp gì cho bạn?"
+    responder.reply(question)
+
     responder.listen()
 
 
@@ -29,11 +33,17 @@ def say_goodbye(request, responder):
 
 @app.handle(intent="help")
 def provide_help(request, responder):
-    prompts = [
-        "Tôi có thể giúp bạn tìm giờ cửa hàng cho Kwik-E-Mart tại địa phương của bạn. Ví dụ, bạn có"
-        " thể nói 'Cửa hàng gần nhất ở đâu vậy?' hoặc là 'Khi nào cái tiệm ở Elm Street mở vậy?'"
+    prompt1 = [
+        "Tôi có thể giúp bạn tìm giờ cửa hàng cho Kwik-E-Mart tại địa phương của bạn."
     ]
-    responder.reply(prompts)
+    responder.reply(prompt1)
+
+    prompt2 = [
+        "Ví dụ, bạn có thể nói "
+        "'Cửa hàng gần nhất ở đâu vậy?' hoặc là "
+        "'Khi nào cái tiệm ở Elm Street mở vậy?'"
+    ]
+    responder.reply(prompt2)
     responder.listen()
 
 

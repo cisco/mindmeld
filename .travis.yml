@@ -4,7 +4,6 @@ python:
   - "3.5"
   - "3.6"
 env:
-#   - MM_EXTRAS=true
    - MM_EXTRAS=false
 jdk:
   - openjdk8
