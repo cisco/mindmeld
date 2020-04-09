@@ -748,7 +748,7 @@ class Entity:
 
 
 class FormEntity:
-    """A form entity is used for defining custom objects for the entity form used in 
+    """A form entity is used for defining custom objects for the entity form used in
     AutoEntityFilling (slot-filling).
 
     Attributes:
@@ -761,12 +761,12 @@ class FormEntity:
         custom_eval(func): custom validation function
     """
     def __init__(
-        self, 
-        entity, 
-        role=None, 
-        responses=None, 
-        value=None, 
-        default_eval=True, 
+        self,
+        entity,
+        role=None,
+        responses=None,
+        value=None,
+        default_eval=True,
         hints=None,
         custom_eval=None
     ):
@@ -777,6 +777,7 @@ class FormEntity:
         self.default_eval = default_eval
         self.hints = hints
         self.custom_eval = custom_eval
+
 
 def resolve_entity_conflicts(query_entities):
     """This method takes a list containing query entities for a query, and resolves
