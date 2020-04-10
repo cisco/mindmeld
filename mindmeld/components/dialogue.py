@@ -708,7 +708,7 @@ class AutoEntityFilling():
         self._app = app
         self._entrance_handler = entrance_handler
         self._entity_form = entity_form
-        self._retry_attempts = retry_attempts or 1
+        self._retry_attempts = retry_attempts
         self._local_form = None
         self._slot_not_prompted = None
 
@@ -777,7 +777,7 @@ class AutoEntityFilling():
                 # system entity validation - checks for presence of required system entity
                 resources = {}
                 extracted_feature = dict(
-                    query_features.extract_sys_candidates(entities=entity_type)(query, resources)
+                    query_features.extract_sys_candidates([entity_type])(query, resources)
                 )
             else:
                 # gazetteer validation

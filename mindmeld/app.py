@@ -179,7 +179,7 @@ class Application:
         def _decorator(func, *args):
             name = kwargs.pop("name", func.__name__)
             entity_form = kwargs.pop("entity_form", None)
-            retry_attempts = kwargs.pop("retry_attempts", None)
+            retry_attempts = kwargs.pop("retry_attempts", 1)
             autofill_func = self.autofill(func, entity_form, retry_attempts, self, **kwargs)
             self.add_dialogue_rule(name, autofill_func, **kwargs)
             return func
