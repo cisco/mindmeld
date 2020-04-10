@@ -679,11 +679,11 @@ def extract_sys_candidates(entities=None, **args):
             (function) The feature extractor.
      """
     del args
-    entities = entities if entities else DEFAULT_SYS_ENTITIES
+    entities = entities or DEFAULT_SYS_ENTITIES
 
     def _extractor(query, resources):
         del resources
-        system_entities = query.get_system_entity_candidates(entities)
+        system_entities = query.get_system_entity_candidates(list(entities))
         sys_ent_counter = Counter()
         for entity in system_entities:
             sys_ent_counter.update(["sys_candidate|type:{}".format(entity.entity.type)])
