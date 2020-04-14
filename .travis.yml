@@ -13,7 +13,7 @@ services:
   - elasticsearch
 # command to install dependencies
 install:
-  - scripts/travis_install.sh
+  - scripts/py_dep_install.sh
 before_script:
   - sleep 10
 # command to run tests
