@@ -47,11 +47,21 @@ jobs:
     - name: Install dependencies
       run: |
         ./scripts/travis_install.sh
+        
     - name: Linting
       run: |
         ./lintme
-    - name: Test with pytest
+
+    - name: Running numerical parser
       run: |
         mindmeld num-parse
+
+    - name: Sleep for 30 seconds
+      uses: jakejarvis/wait-action@master
+      with:
+        time: '30s'
+    
+    - name: Test with pytest
+      run: |
         mkdir ~/test-reports
         pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld
