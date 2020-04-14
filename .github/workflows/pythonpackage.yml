@@ -29,7 +29,7 @@ jobs:
     - name: Runs Elasticsearch
       uses: elastic/elastic-github-actions/elasticsearch@master
       with:
-        stack-version: 7.6.0
+        stack-version: 5.4.3
         host port: 9200
         container port: 9200
         host node port: 9300
