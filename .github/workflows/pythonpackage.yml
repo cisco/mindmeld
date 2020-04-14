@@ -30,11 +30,6 @@ jobs:
       uses: elastic/elastic-github-actions/elasticsearch@master
       with:
         stack-version: 6.8.8
-        host port: 9200
-        container port: 9200
-        host node port: 9300
-        node port: 9300
-        discovery type: 'single-node'
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
