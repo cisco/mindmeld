@@ -753,16 +753,18 @@ class FormEntity:
 
     Attributes:
         entity (str): Entity name
-        role (str): The role of the entity
-        responses(list): NLR for prompting the user for missing entities
-        value (str): The resolved value of the entity
-        default_eval(bool): Use system validation (default: True)
-        hints(list): Developer defined list of keywords to verify the user input against
-        custom_eval(func): custom validation function
+        role (str, optional): The role of the entity
+        responses(list, optional): NLR for prompting the user for missing entities
+        value (str, optional): The resolved value of the entity
+        default_eval(bool, optional): Use system validation (default: True)
+        hints(list, optional): Developer defined list of keywords to verify the
+        user input against
+        custom_eval(func, optional): custom validation function (should return bool:
+        validated or not)
     """
     def __init__(
         self,
-        entity,
+        entity=None,
         role=None,
         responses=None,
         value=None,
@@ -771,8 +773,10 @@ class FormEntity:
         custom_eval=None
     ):
         self.entity = entity
+        assert self.entity not in (None, ''), 'Entity cannot be empty.'
         self.role = role
-        self.responses = responses
+        self.responses = (
+            responses or ["Please provide value for: {}".format(self.entity)])
         self.value = value
         self.default_eval = default_eval
         self.hints = hints

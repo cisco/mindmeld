@@ -49,7 +49,6 @@ class Application:
         responder_class=None,
         preprocessor=None,
         async_mode=False,
-        autofill=None
     ):
         self.import_name = import_name
         filename = getattr(sys.modules[import_name], "__file__", None)
@@ -64,7 +63,7 @@ class Application:
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
         self.preprocessor = preprocessor
-        self.autofill = autofill or AutoEntityFilling
+        self.autofill = AutoEntityFilling
         self.async_mode = async_mode
 
     @property
@@ -179,8 +178,9 @@ class Application:
         def _decorator(func, *args):
             name = kwargs.pop("name", func.__name__)
             entity_form = kwargs.pop("entity_form", None)
-            retry_attempts = kwargs.pop("retry_attempts", 1)
-            autofill_func = self.autofill(func, entity_form, retry_attempts, self, **kwargs)
+            assert entity_form not in (None, ''), "Entity Form cannot be empty."
+            max_retries = kwargs.pop("max_retries", 1)
+            autofill_func = self.autofill(func, entity_form, self, max_retries)
             self.add_dialogue_rule(name, autofill_func, **kwargs)
             return func
 
