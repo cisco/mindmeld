@@ -17,9 +17,9 @@ from .helpers import GAZETTEER_RSC, get_ngram, register_entity_feature, requires
 
 @register_entity_feature(feature_name="in-gaz")
 @requires(GAZETTEER_RSC)
-def extract_in_gaz_features(**args):
+def extract_in_gaz_features(**kwargs):
     """Returns a feature extractor that finds any gazetteer matches against the input query"""
-    del args
+    del kwargs
 
     def _extractor(example, resources):
         _, entities, entity_index = example
@@ -39,7 +39,7 @@ def extract_in_gaz_features(**args):
 
 
 @register_entity_feature(feature_name="bag-of-words-before")
-def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **args):
+def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **kwargs):
     """Returns a bag-of-words feature extractor.
 
     Args:
@@ -48,7 +48,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **arg
     Returns:
         (function) The feature extractor.
     """
-    del args
+    del kwargs
 
     def _extractor(example, resources):
         del resources
@@ -73,7 +73,7 @@ def extract_bag_of_words_before_features(ngram_lengths_to_start_positions, **arg
 
 
 @register_entity_feature(feature_name="bag-of-words-after")
-def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args):
+def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **kwargs):
     """Returns a bag-of-words feature extractor.
 
     Args:
@@ -82,7 +82,7 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
     Returns:
         (function) The feature extractor.
     """
-    del args
+    del kwargs
 
     def _extractor(example, resources):
         del resources
@@ -107,13 +107,13 @@ def extract_bag_of_words_after_features(ngram_lengths_to_start_positions, **args
 
 
 @register_entity_feature(feature_name="numeric")
-def extract_numeric_candidate_features(**args):
+def extract_numeric_candidate_features(**kwargs):
     """Returns a feature extractor that generates features indicating the presence
     of the ``sys_time`` and ``sys_interval`` numeric entities. These numeric entities are
     identified by duckling, the numerical entity recognition service and boosted by
     training data containing the entity labels. Used by the role classifier when the
     ``'numeric'`` feature is specified in the config."""
-    del args
+    del kwargs
 
     def _extractor(example, resources):
         del resources
@@ -130,11 +130,11 @@ def extract_numeric_candidate_features(**args):
 
 
 @register_entity_feature(feature_name="other-entities")
-def extract_other_entities_features(**args):
+def extract_other_entities_features(**kwargs):
     """Returns a feature extractor for all other entities apart from the current entity.\
     Used by the role classifier when the ``'other-entities'`` feature is specified in \
     the config."""
-    del args
+    del kwargs
 
     def _extractor(example, resources):
         del resources
