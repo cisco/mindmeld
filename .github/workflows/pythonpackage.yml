@@ -16,6 +16,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.5, 3.6]
+        mm-extras: ["true", "false"]
 
     steps:
     - uses: actions/checkout@v2
@@ -31,6 +32,8 @@ jobs:
         java-version: '9.0.4' # The JDK version to make available on the path.
         java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
         architecture: x64 # (x64 or x86) - defaults to x64
+      env:
+        MM_EXTRAS: ${{ matrix.mm-extras }}
     
     - name: Install dependencies
       run: |
