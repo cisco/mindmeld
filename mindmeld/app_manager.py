@@ -18,11 +18,7 @@ import logging
 
 from .components import DialogueManager, NaturalLanguageProcessor, QuestionAnswerer
 from .components.dialogue import DialogueResponder
-from .components.request import (
-    FrozenParams,
-    Params,
-    Request,
-)
+from .components.request import FrozenParams, Params, Request
 from .resource_loader import ResourceLoader
 
 logger = logging.getLogger(__name__)
@@ -200,7 +196,6 @@ class ApplicationManager:
         context = context or {}
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
-
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
         )
@@ -255,7 +250,6 @@ class ApplicationManager:
 
         allowed_intents, nlp_params, dm_params = self._pre_nlp(params, verbose)
         # TODO: make an async nlp
-
         processed_query = self.nlp.process(
             query_text=text, allowed_intents=allowed_intents, **nlp_params
         )

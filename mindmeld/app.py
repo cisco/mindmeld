@@ -60,24 +60,10 @@ class Application:
         self._server = None
         self._dialogue_rules = []
         self._middleware = []
-        self._app_manager_kwargs = (
-            request_class or Request,
-            responder_class or DialogueResponder,
-            preprocessor,
-        )
+        self.request_class = request_class or Request
+        self.responder_class = responder_class or DialogueResponder
+        self.preprocessor = preprocessor
         self.async_mode = async_mode
-
-    @property
-    def request_class(self):
-        return self._app_manager_kwargs[0]
-
-    @property
-    def responder_class(self):
-        return self._app_manager_kwargs[1]
-
-    @property
-    def preprocessor(self):
-        return self._app_manager_kwargs[2]
 
     @property
     def question_answerer(self):
