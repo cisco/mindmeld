@@ -17,7 +17,7 @@ DOMAIN_CLASSIFIER_CONFIG = {
         "freq": {"bins": 5},
         "in-gaz": {},
         "exact": {},
-        "enable-stemming": True,
+        "enable-stemming": False,
     },
 }
 
@@ -39,7 +39,7 @@ INTENT_CLASSIFIER_CONFIG = {
         "freq": {"bins": 5},
         "exact": {},
         "length": {},
-        "enable-stemming": True,
+        "enable-stemming": False,
     },
 }
 
@@ -69,7 +69,7 @@ ENTITY_RECOGNIZER_CONFIG = {
         },
         "in-gaz-span-seq": {},
         "sys-candidates-seq": {"start_positions": [-1, 0, 1]},
-        "enable-stemming": True,
+        "enable-stemming": False,
     },
 }
 
@@ -92,7 +92,7 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
         },
         "in-gaz-span-seq": {},
         "sys-candidates-seq": {"start_positions": [-1, 0, 1]},
-        "enable-stemming": True,
+        "enable-stemming": False,
     },
     "train_label_set": "testtrain.*\.txt",  # noqa: W605
     "test_label_set": "testtrain.*\.txt",  # noqa: W605
