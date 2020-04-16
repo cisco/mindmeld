@@ -781,6 +781,8 @@ class FormEntity:
         self.default_eval = default_eval
         self.hints = hints
         self.custom_eval = custom_eval
+        if self.custom_eval:
+            assert callable(custom_eval) is True, 'Invalid custom validation function.'
 
 
 def resolve_entity_conflicts(query_entities):

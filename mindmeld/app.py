@@ -175,7 +175,7 @@ class Application:
     def auto_fill(self, **kwargs):
         """Creates a flow to fill missing entities"""
 
-        def _decorator(func, *args):
+        def _decorator(func):
             name = kwargs.pop("name", func.__name__)
             entity_form = kwargs.pop("entity_form", None)
             assert entity_form not in (None, ''), "Entity Form cannot be empty."

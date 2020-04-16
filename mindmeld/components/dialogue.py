@@ -700,7 +700,7 @@ class AutoEntityFilling:
         app (Application): The application that initializes this flow.
     """
 
-    logger = mod_logger.getChild("AutoEntityFilling")
+    _logger = mod_logger.getChild("AutoEntityFilling")
     """Class logger."""
 
     def __init__(self, entrance_handler, entity_form, app, max_retries=1):
@@ -757,14 +757,11 @@ class AutoEntityFilling:
         entity_type = slot.entity
         query = self._extract_query_features(text)
 
-        """
-        payload format for entity feature extractors:
-            tuple(query (Query Object), list of entities, entity index)
+        # payload format for entity feature extractors:
+        #     tuple(query (Query Object), list of entities, entity index)
 
-        For slot filling, the user query will consist of the prompted entity.
-        Hence `entity = [query]` and `entity_index = 0`.
-
-        """
+        # For slot filling, the user query will consist of the prompted entity.
+        # Hence `entity = [query]` and `entity_index = 0`.
         formatted_payload = (query, [query], 0)
 
         extracted_feature = {}
@@ -778,34 +775,28 @@ class AutoEntityFilling:
                 )
             else:
                 # gazetteer validation
-                gazetteer = (
-                    {'gazetteers':
-                        {entity_type:
-                            self._app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)
-                         }
-                     }
-                )
-                extracted_feature = (
-                    entity_features.extract_in_gaz_features()(formatted_payload, gazetteer))
+                gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)
+
+                if len(gaz) > 0:
+                    gazetteer = {'gazetteers': {entity_type: gaz}}
+                    extracted_feature = (
+                        entity_features.extract_in_gaz_features()(formatted_payload, gazetteer))
 
         if slot.hints:
             # hints / user-list validation
             extracted_feature = {'hint_validated_entity': text} if text in slot.hints else {}
 
         if slot.custom_eval:
-            """
-            Custom validation using function provided by developer. Should return True/False
-            for validation status. If true, then continue, else fail overall validation.
-            """
-            if not slot.custom_eval(text):
+            # Custom validation using function provided by developer. Should return True/False
+            # for validation status. If true, then continue, else fail overall validation.
+            if slot.custom_eval(text) not in (True, False) or slot.custom_eval(text) is False:
                 return False
 
         # return True iff user input results in extracted features (i.e. successfully validated)
         return len(extracted_feature) > 0
 
     def _initial_fill(self, request):
-        """
-        Performs the first pass and fills the entity form with entity values available
+        """Performs the first pass and fills the entity form with entity values available
         in the initial query.
 
         Args:
