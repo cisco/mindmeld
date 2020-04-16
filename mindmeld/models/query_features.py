@@ -529,7 +529,7 @@ def extract_sys_candidate_features(start_positions=(0,), **args):
         for entity in system_entities:
             for i in entity.token_span:
                 for j in start_positions:
-                    if 0 < i - j < len(feat_seq):
+                    if 0 <= i - j < len(feat_seq):
                         feat_name = "sys_candidate|type:{}|granularity:{}|pos:{}".format(
                             entity.entity.type, entity.entity.value.get("grain"), j
                         )
