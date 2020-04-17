@@ -13,11 +13,15 @@ async def welcome(request, responder):
         prefix = "Chào {name}. "
     except KeyError:
         prefix = "Xin chào. "
-    responder.reply(
-        prefix + "Tôi có thể giúp bạn tìm giờ cửa hàng "
-        "cho Kwik-E-Mart tại địa phương của bạn. "
-        "Tôi có thể giúp gì cho bạn?"
-    )
+    responder.reply(prefix)
+
+    statement = "Tôi có thể giúp bạn tìm giờ cửa hàng "\
+    "cho Kwik-E-Mart tại địa phương của bạn. "
+    responder.reply(statement)
+
+    question = "Tôi có thể giúp gì cho bạn?"
+    responder.reply(question)
+
     responder.listen()
 
 
