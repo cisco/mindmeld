@@ -650,7 +650,6 @@ class NaturalLanguageProcessor(Processor):
         table = [fmt.format(*row) for row in s]
         print('\n'.join(table))
         print()
-        return
 
     def inspect(self, markup, domain=None, intent=None, dynamic_resource=None):
         """Inspect the marked up query and print the table of features and weights.

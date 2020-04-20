@@ -248,7 +248,7 @@ class TextModel(Model):
             ]
 
     def inspect(self, example, gold_label=None, dynamic_resource=None):
-        """This class takes an example and returns a DataFrame for every feature with feature
+        """This class takes an example and returns a 2D list for every feature with feature
           name, feature value, feature weight and their product for the predicted label. If gold
           label is passed in, we will also include the feature value and weight for the gold
           label and returns the log probability of the difference.
@@ -259,7 +259,7 @@ class TextModel(Model):
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
-            (DataFrame): The DataFrame that includes every feature, their value, weight and \
+            (list of lists): A 2D array that includes every feature, their value, weight and \
              probability
         """
         if not isinstance(self._clf, LogisticRegression):
