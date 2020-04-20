@@ -20,7 +20,6 @@ import operator
 import random
 
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
@@ -267,7 +266,7 @@ class TextModel(Model):
             logging.warning(
                 "Currently inspection is only available for Logistic Regression Model"
             )
-            return pd.DataFrame()
+            return []
 
         try:
             gold_class = self._class_encoder.transform([gold_label])
@@ -297,7 +296,7 @@ class TextModel(Model):
             ]
             logging.info("Gold: %s.", gold_label)
 
-        df = pd.DataFrame(data=None, columns=columns)
+        inspect_table = [columns]
 
         # Get all active features sorted alphabetically by name
         features = sorted(features.items(), key=operator.itemgetter(0))
@@ -315,26 +314,20 @@ class TextModel(Model):
 
             if gold_class is None:
                 # pylint: disable=no-member
-                row = pd.DataFrame(
-                    data=[
-                        [
+                row = [
                             feat_name,
                             round(feat_value, 4),
                             weight.round(4),
                             product.round(4),
+                            '-', '-', '-'
                         ]
-                    ],
-                    columns=columns,
-                    index=[feat_name],
-                )
+
             else:
                 gold_w = self._get_feature_weight(feat_name, gold_class)
                 gold_p = feat_value * gold_w
                 diff = gold_p - product
                 # pylint: disable=no-member
-                row = pd.DataFrame(
-                    data=[
-                        [
+                row = [
                             feat_name,
                             round(feat_value, 4),
                             weight.round(4),
@@ -343,17 +336,13 @@ class TextModel(Model):
                             gold_p.round(4),
                             diff.round(4),
                         ]
-                    ],
-                    columns=columns,
-                    index=[feat_name],
-                )
-            df = df.append(row)
-        return df
+            inspect_table.append(row)
+
+        return inspect_table
 
     def _predict_proba(self, X, predictor):
         predictions = []
         for row in predictor(X):
-            class_index = row.argmax()
             probabilities = {}
             top_class = None
             for class_index, proba in enumerate(row):

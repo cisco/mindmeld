@@ -639,6 +639,19 @@ class NaturalLanguageProcessor(Processor):
 
         return nlp_components
 
+    @staticmethod
+    def print_inspect_stats(stats):
+        """
+        Prints formatted output matrix
+        """
+        s = [[str(e) for e in row] for row in stats]
+        lens = [max(map(len, col)) for col in zip(*s)]
+        fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
+        table = [fmt.format(*row) for row in s]
+        print('\n'.join(table))
+        print()
+        return
+
     def inspect(self, markup, domain=None, intent=None, dynamic_resource=None):
         """Inspect the marked up query and print the table of features and weights.
 
@@ -661,7 +674,7 @@ class NaturalLanguageProcessor(Processor):
             domain_inspection = self.domain_classifier.inspect(
                 query, domain=domain, dynamic_resource=dynamic_resource
             )
-            print(domain_inspection)
+            self.print_inspect_stats(domain_inspection)
             print("")
 
         if intent:
@@ -670,7 +683,7 @@ class NaturalLanguageProcessor(Processor):
             intent_inspection = self.domains[domain].inspect(
                 query, intent=intent, dynamic_resource=dynamic_resource
             )
-            print(intent_inspection)
+            self.print_inspect_stats(intent_inspection)
             print("")
 
     def process(

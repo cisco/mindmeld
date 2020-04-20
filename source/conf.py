@@ -57,7 +57,7 @@ class Mock(MagicMock):
         return Mock()
 
 
-MOCK_MODULES = ["duckling", "pandas"]
+MOCK_MODULES = ["duckling"]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
