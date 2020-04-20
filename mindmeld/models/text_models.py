@@ -315,12 +315,12 @@ class TextModel(Model):
             if gold_class is None:
                 # pylint: disable=no-member
                 row = [
-                            feat_name,
-                            round(feat_value, 4),
-                            weight.round(4),
-                            product.round(4),
-                            '-', '-', '-'
-                        ]
+                        feat_name,
+                        round(feat_value, 4),
+                        weight.round(4),
+                        product.round(4),
+                        '-', '-', '-'
+                ]
 
             else:
                 gold_w = self._get_feature_weight(feat_name, gold_class)
@@ -328,14 +328,14 @@ class TextModel(Model):
                 diff = gold_p - product
                 # pylint: disable=no-member
                 row = [
-                            feat_name,
-                            round(feat_value, 4),
-                            weight.round(4),
-                            product.round(4),
-                            gold_w.round(4),
-                            gold_p.round(4),
-                            diff.round(4),
-                        ]
+                        feat_name,
+                        round(feat_value, 4),
+                        weight.round(4),
+                        product.round(4),
+                        gold_w.round(4),
+                        gold_p.round(4),
+                        diff.round(4),
+                ]
             inspect_table.append(row)
 
         return inspect_table

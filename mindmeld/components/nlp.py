@@ -675,7 +675,6 @@ class NaturalLanguageProcessor(Processor):
                 query, domain=domain, dynamic_resource=dynamic_resource
             )
             self.print_inspect_stats(domain_inspection)
-            print("")
 
         if intent:
             print("Inspecting intent classification")
@@ -684,7 +683,6 @@ class NaturalLanguageProcessor(Processor):
                 query, intent=intent, dynamic_resource=dynamic_resource
             )
             self.print_inspect_stats(intent_inspection)
-            print("")
 
     def process(
         self,
