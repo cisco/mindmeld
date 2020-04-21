@@ -313,7 +313,6 @@ class TextModel(Model):
             product = feat_value * weight
 
             if gold_class is None:
-                # pylint: disable=no-member
                 row = [
                         feat_name,
                         round(feat_value, 4),
@@ -326,7 +325,6 @@ class TextModel(Model):
                 gold_w = self._get_feature_weight(feat_name, gold_class)
                 gold_p = feat_value * gold_w
                 diff = gold_p - product
-                # pylint: disable=no-member
                 row = [
                         feat_name,
                         round(feat_value, 4),
