@@ -968,7 +968,7 @@ class DomainProcessor(Processor):
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
 
         Returns:
-            (DataFrame): The DataFrame that includes every feature, their value, weight and \
+            (list of lists): 2D list that includes every feature, their value, weight and \
              probability
         """
         return self.intent_classifier.inspect(
