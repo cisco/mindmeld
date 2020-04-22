@@ -773,7 +773,7 @@ class FormEntity:
         custom_eval=None
     ):
         self.entity = entity
-        assert self.entity not in (None, ''), 'Entity cannot be empty.'
+        assert self.entity, 'Entity cannot be empty.'
         self.role = role
         self.responses = (
             responses or ["Please provide value for: {}".format(self.entity)])

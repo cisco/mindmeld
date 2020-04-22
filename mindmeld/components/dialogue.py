@@ -23,6 +23,7 @@ import immutables
 
 from .. import path
 from .request import FrozenParams, Params, Request
+from ..core import Entity
 from ..models import entity_features, query_features
 from ..models.helpers import DEFAULT_SYS_ENTITIES
 
@@ -744,16 +745,17 @@ class AutoEntityFilling:
 
         return query
 
-    def _validate(self, text, slot):
+    def _validate(self, request, slot):
         """Validates the user input based on the entity type and validation type.
 
         Args:
-            text (Request.text): Text in the query
+            request: Request object
             slot: FormEntity object
 
         Returns:
             (bool): Boolean whether the user input fulfills the slot requirements
         """
+        text = request.text
         entity_type = slot.entity
         query = self._extract_query_features(text)
 
@@ -765,6 +767,7 @@ class AutoEntityFilling:
         formatted_payload = (query, [query], 0)
 
         extracted_feature = {}
+        _resolved_value = None
 
         if slot.default_eval:
             if entity_type in DEFAULT_SYS_ENTITIES:
@@ -782,18 +785,28 @@ class AutoEntityFilling:
                     extracted_feature = (
                         entity_features.extract_in_gaz_features()(formatted_payload, gazetteer))
 
+            if not extracted_feature:
+                return False, _resolved_value
+            _resolved_value = request.entities[0]['value']
+
         if slot.hints:
             # hints / user-list validation
-            extracted_feature = {'hint_validated_entity': text} if text in slot.hints else {}
+            if text in slot.hints:
+                extracted_feature.update({'hint_validated_entity': text})
+            else:
+                return False, _resolved_value
 
         if slot.custom_eval:
             # Custom validation using function provided by developer. Should return True/False
             # for validation status. If true, then continue, else fail overall validation.
-            if slot.custom_eval(text) not in (True, False) or slot.custom_eval(text) is False:
-                return False
+
+            if (slot.custom_eval(text) not in (True, False) or slot.custom_eval(text) is False):
+                return False, _resolved_value
+            else:
+                extracted_feature.update({'custom_validated_entity': text})
 
         # return True iff user input results in extracted features (i.e. successfully validated)
-        return len(extracted_feature) > 0
+        return len(extracted_feature) > 0, _resolved_value
 
     def _initial_fill(self, request):
         """Performs the first pass and fills the entity form with entity values available
@@ -805,12 +818,26 @@ class AutoEntityFilling:
         for entity in request.entities:
             entity_type = entity['type']
             role = entity['role']
-            value = entity['text']
 
             for slot in self._local_form:
                 if entity_type == slot.entity:
                     if (slot.role is None) or (role == slot.role):
-                        slot.value = value
+                        slot.value = entity
+                        break
+
+    def _end_slot_fill(self, request, responder):
+        # Returns filled entity objects as request.entities
+        # We pass in the previous turn's responder's params to the current request
+        request = self._app.app_manager.request_class(
+            entities=[slot.value for slot in self._local_form],
+            context=request.context or {},
+            history=request.history or [],
+            frame=responder.frame or {},
+            params=request.params
+        )
+
+        self._exit_flow(responder)
+        return self._entrance_handler(request, responder)
 
     def _prompt_slot(self, responder, nlr):
         responder.reply(nlr)
@@ -854,17 +881,21 @@ class AutoEntityFilling:
                     return self._prompt_slot(responder, nlr)
                 else:
                     # If prompted, validate the user response and retry if invalid response
-                    if self._validate(request.text, slot):
-                        slot.value = request.text
+                    _isValid, _resolved_value = self._validate(request, slot)
+                    if _isValid:
+                        slot.value = Entity(
+                            text=request.text,
+                            entity_type=slot.entity,
+                            role=slot.role,
+                            value=_resolved_value).to_dict()
+
                         self._slot_not_prompted = True
                     else:
                         # retry logic
                         return self._retry_logic(responder, nlr)
 
         # Finish slot-filling and return to handler
-        responder.frame['entity_form'] = self._local_form
-        self._exit_flow(responder)
-        return self._entrance_handler(request, responder)
+        return self._end_slot_fill(request, responder)
 
 
 class DialogueResponder:

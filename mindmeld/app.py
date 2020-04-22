@@ -178,7 +178,7 @@ class Application:
         def _decorator(func):
             name = kwargs.pop("name", func.__name__)
             entity_form = kwargs.pop("entity_form", None)
-            assert entity_form not in (None, ''), "Entity Form cannot be empty."
+            assert entity_form, "Entity Form cannot be empty."
             max_retries = kwargs.pop("max_retries", 1)
             autofill_func = self.autofill(func, entity_form, self, max_retries)
             self.add_dialogue_rule(name, autofill_func, **kwargs)
