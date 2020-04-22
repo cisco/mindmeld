@@ -710,7 +710,7 @@ class AutoEntityFilling:
         self._entity_form = entity_form
         self._max_retries = max_retries  # default 1
         self._local_form = None
-        self._slot_not_prompted = None
+        self._prompt_user = None
 
     def _set_target_state(self, responder):
         """Set target dialogue state to the entrance handler's name"""
@@ -718,7 +718,7 @@ class AutoEntityFilling:
 
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
-        self._slot_not_prompted = None
+        self._prompt_user = None
         self._local_form = None
         responder.exit_flow()
 
@@ -776,6 +776,11 @@ class AutoEntityFilling:
                 extracted_feature = dict(
                     query_features.extract_sys_candidates([entity_type])(query, resources)
                 )
+
+                if extracted_feature:
+                    _query_entity = query.get_system_entity_candidates([entity_type])[0]
+                    _query_entity_value = _query_entity.entity.value
+
             else:
                 # gazetteer validation
                 gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)
@@ -787,7 +792,9 @@ class AutoEntityFilling:
 
             if not extracted_feature:
                 return False, _resolved_value
-            _resolved_value = request.entities[0]['value']
+            
+            if request.entities:
+                _resolved_value = request.entities[0]['value']
 
         if slot.hints:
             # hints / user-list validation
@@ -841,7 +848,7 @@ class AutoEntityFilling:
 
     def _prompt_slot(self, responder, nlr):
         responder.reply(nlr)
-        self._slot_not_prompted = False
+        self._prompt_user = False
 
     def _retry_logic(self, responder, nlr):
         if self._retry_attempts < self._max_retries:
@@ -863,9 +870,9 @@ class AutoEntityFilling:
         """
         self._set_target_state(responder)
 
-        if self._slot_not_prompted is None or self._local_form is None:
+        if self._prompt_user is None or self._local_form is None:
             # Entering the flow
-            self._slot_not_prompted = True
+            self._prompt_user = True
             self._local_form = copy.deepcopy(self._entity_form)
             self._retry_attempts = 0
 
@@ -877,7 +884,7 @@ class AutoEntityFilling:
 
             if not slot.value:
                 # check if user has been prompted for this entity slot
-                if self._slot_not_prompted:
+                if self._prompt_user:
                     return self._prompt_slot(responder, nlr)
                 else:
                     # If prompted, validate the user response and retry if invalid response
@@ -889,7 +896,7 @@ class AutoEntityFilling:
                             role=slot.role,
                             value=_resolved_value).to_dict()
 
-                        self._slot_not_prompted = True
+                        self._prompt_user = True
                     else:
                         # retry logic
                         return self._retry_logic(responder, nlr)
