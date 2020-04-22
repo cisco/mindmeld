@@ -20,7 +20,6 @@ import operator
 import random
 
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
@@ -249,7 +248,7 @@ class TextModel(Model):
             ]
 
     def inspect(self, example, gold_label=None, dynamic_resource=None):
-        """This class takes an example and returns a DataFrame for every feature with feature
+        """This class takes an example and returns a 2D list for every feature with feature
           name, feature value, feature weight and their product for the predicted label. If gold
           label is passed in, we will also include the feature value and weight for the gold
           label and returns the log probability of the difference.
@@ -260,14 +259,14 @@ class TextModel(Model):
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
 
         Returns:
-            (DataFrame): The DataFrame that includes every feature, their value, weight and \
+            (list of lists): A 2D array that includes every feature, their value, weight and \
              probability
         """
         if not isinstance(self._clf, LogisticRegression):
             logging.warning(
                 "Currently inspection is only available for Logistic Regression Model"
             )
-            return pd.DataFrame()
+            return []
 
         try:
             gold_class = self._class_encoder.transform([gold_label])
@@ -297,7 +296,7 @@ class TextModel(Model):
             ]
             logging.info("Gold: %s.", gold_label)
 
-        df = pd.DataFrame(data=None, columns=columns)
+        inspect_table = [columns]
 
         # Get all active features sorted alphabetically by name
         features = sorted(features.items(), key=operator.itemgetter(0))
@@ -314,46 +313,36 @@ class TextModel(Model):
             product = feat_value * weight
 
             if gold_class is None:
-                # pylint: disable=no-member
-                row = pd.DataFrame(
-                    data=[
-                        [
-                            feat_name,
-                            round(feat_value, 4),
-                            weight.round(4),
-                            product.round(4),
-                        ]
-                    ],
-                    columns=columns,
-                    index=[feat_name],
-                )
+                row = [
+                    feat_name,
+                    round(feat_value, 4),
+                    weight.round(4),
+                    product.round(4),
+                    '-',
+                    '-',
+                    '-'
+                ]
             else:
                 gold_w = self._get_feature_weight(feat_name, gold_class)
                 gold_p = feat_value * gold_w
                 diff = gold_p - product
-                # pylint: disable=no-member
-                row = pd.DataFrame(
-                    data=[
-                        [
-                            feat_name,
-                            round(feat_value, 4),
-                            weight.round(4),
-                            product.round(4),
-                            gold_w.round(4),
-                            gold_p.round(4),
-                            diff.round(4),
-                        ]
-                    ],
-                    columns=columns,
-                    index=[feat_name],
-                )
-            df = df.append(row)
-        return df
+                row = [
+                    feat_name,
+                    round(feat_value, 4),
+                    weight.round(4),
+                    product.round(4),
+                    gold_w.round(4),
+                    gold_p.round(4),
+                    diff.round(4)
+                ]
+
+            inspect_table.append(row)
+
+        return inspect_table
 
     def _predict_proba(self, X, predictor):
         predictions = []
         for row in predictor(X):
-            class_index = row.argmax()
             probabilities = {}
             top_class = None
             for class_index, proba in enumerate(row):

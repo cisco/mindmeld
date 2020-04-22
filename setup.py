@@ -19,7 +19,6 @@ requirements = [
     "pycountry",  # uses calendar versioning
     "nltk~=3.2",
     "numpy~=1.15",
-    "pandas~=0.22",
     "pip>=9.0.1",
     "py~=1.4",
     "python-dateutil~=2.6",
