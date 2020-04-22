@@ -777,10 +777,6 @@ class AutoEntityFilling:
                     query_features.extract_sys_candidates([entity_type])(query, resources)
                 )
 
-                if extracted_feature:
-                    _query_entity = query.get_system_entity_candidates([entity_type])[0]
-                    _query_entity_value = _query_entity.entity.value
-
             else:
                 # gazetteer validation
                 gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)
@@ -792,7 +788,7 @@ class AutoEntityFilling:
 
             if not extracted_feature:
                 return False, _resolved_value
-            
+
             if request.entities:
                 _resolved_value = request.entities[0]['value']
 
