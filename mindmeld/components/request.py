@@ -246,6 +246,32 @@ class Params:
             )
         }
 
+    def to_dict(self):
+        fields = [
+            "allowed_intents",
+            "target_dialogue_state",
+            "time_zone",
+            "timestamp",
+            "language",
+            "locale",
+            "dynamic_resource",
+        ]
+        _dic = self.nlp_params()
+        _dic.update(
+            {
+                "allowed_intents": self.allowed_intents,
+                "target_dialogue_state": self.target_dialogue_state,
+            }
+        )
+        # converting from immutable map to just dictionary
+        _dic["dynamic_resource"] = {
+            key: _dic["dynamic_resource"][key] for key in _dic["dynamic_resource"]
+        }
+        for field in fields:
+            if field not in _dic:
+                logger.warning("Field %s not returned", field)
+        return _dic
+
 
 @attr.s(frozen=True, kw_only=True)
 class FrozenParams(Params):
