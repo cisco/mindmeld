@@ -16,7 +16,7 @@ def welcome(request, responder):
         prefix = "Xin chào. "
     responder.reply(prefix)
 
-    statement = "Tôi có thể giúp bạn tìm giờ cửa hàng "
+    statement = "Tôi có thể giúp bạn tìm giờ cửa hàng "\
     "cho Kwik-E-Mart tại địa phương của bạn. "
     responder.reply(statement)
 
