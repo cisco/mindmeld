@@ -426,6 +426,10 @@ test_data_4 = [
 ]
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="This test is flakey since sometime duckling does not recognize `sunday`",
+)
 @pytest.mark.parametrize(
     "queries,expected_domain,expected_intent,expected_nbest_entities,"
     "expected_aligned_entities",
