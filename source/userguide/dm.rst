@@ -596,8 +596,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``retry_response`` (str, optional): message for reprompting users
   - ``value`` (str, optional): The resolved value of the entity
   - ``default_eval`` (bool, optional): Use system validation (default: True)
-  - ``hints`` (list, optional): Developer defined list of keywords to verify the
-  - ``user`` input against
+  - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against
   - ``custom_eval`` (func, optional): custom validation function (should return bool:
     validated or not)
 
@@ -605,7 +604,58 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
 
    <br />
 
+Once the slot filling is complete, the filled in entities can be access through ``request.entities`` in the same manner as any other handler.
 
+Example use-case
+^^^^^^^^^^^^^^^^
+
+Transfer money in a banking app:
+
+.. code:: python
+
+    from mindmeld.core import FormEntity
+
+    form_transfermoney = {
+      'entities':[
+          FormEntity(
+              entity='account_en',
+              role='account_from',
+              responses=['Sure. Transfer from which account?'],
+              custom_eval=developer_func # validates the user-response for this entity 
+              ),                         # using this custom developer-defined function
+          FormEntity(
+              entity='account_en',
+              role='account_to',
+              responses=['To which account?']
+              hints=['checking', 'checkings', ....] # can be only from this list
+              ),
+          FormEntity(
+              entity='sys_amount-of-money',
+              responses=['And, how much do you want to transfer?']
+              )
+          ],
+      'max_retries': 1,
+      'exit_keys': [<list of keywords>],
+      'exit_msg': 'custom exit message',
+      'exit_intent': [<list of exit intents>]
+      }
+
+.. code:: python
+
+    @app.auto_fill(intent='transfermoney', form=form_transfermoney)
+    def transfermoney_handler(request, responder):
+        for entity in request.entities:
+          if entity['type'] == 'account_en':
+              if entity['role'] == 'account_from':
+                  responder.slots['account_from'] = entity['value'][0]['cname']
+              elif entity['role'] == 'account_to':
+                  responder.slots['account_to'] = entity['value'][0]['cname']
+          else:
+              responder.slots['amount'] = entity['value'][0]['value']
+
+      replies = ["All right. So, you're transferring {amount} from your "
+                 "{account_from} to a {account_to}. Is that right?"]
+      responder.reply(replies)
 
 .. _dialogue_middleware:
 
