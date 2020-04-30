@@ -767,6 +767,7 @@ class FormEntity:
         entity=None,
         role=None,
         responses=None,
+        retry_response=None,
         value=None,
         default_eval=True,
         hints=None,
@@ -777,12 +778,13 @@ class FormEntity:
         self.role = role
         self.responses = (
             responses or ["Please provide value for: {}".format(self.entity)])
+        self.retry_response = retry_response or self.responses
         self.value = value
         self.default_eval = default_eval
         self.hints = hints
         self.custom_eval = custom_eval
-        if self.custom_eval:
-            assert callable(custom_eval) is True, 'Invalid custom validation function.'
+        if self.custom_eval and not callable(custom_eval):
+            raise TypeError('Invalid custom validation function type.')
 
 
 def resolve_entity_conflicts(query_entities):

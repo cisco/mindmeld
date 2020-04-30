@@ -567,6 +567,46 @@ There are three ways to exit a Dialogue Flow:
 
 As shown here, you can use the dialog flow functionality to effectively craft complex flows that gracefully direct the user to provide the desired information for your application.
 
+.. _auto_slot_filling_for_entities:
+
+Automatic Slot Filling for Entities
+-----------------------------------
+
+MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This is done via applying the ``@app.auto_fill`` decorator for the dialogue state handler requiring entities to be obtained prior to applying the functionality defined within.
+
+This decorator replaces the need to define the ``@app.handle`` decorator. MindMeld will prompt the user for missing entities before applying the handler functionality by itself. The arguments required for this decorator are all the rules that would apply for that dialogue state (such as domain, intent, entities etc.), with the addition of a ``form`` argument.
+
+- ``form`` is a dictionary containing the following entries:
+
+  - ``entities`` (list, required): List of ``FormEntity`` objects with each defined for one entity slot to be filled.
+  - ``max_retries`` (int, optional, default 1): maximum number of retries allowed per entity or slot if user response is invalid.
+  - ``exit_msg`` (str, optional): If slot filling is exited abruptly without completion, define custom message to display.
+  - ``exit_intent`` (list, optional): If slot filling is exited abruptly without completion, the developer can define which intents should the following query be redirected to. Default: None.
+  - ``exit_hints`` (list, optional): List of exit hints for the slot filling flow. If these words or phrases are said by the user, the slot filling logic exits. Default: ['cancel', 'restart', 'exit', 'reset'].
+
+.. |br| raw:: html
+
+   <br />
+
+- ``FormEntity`` is a class that allows creation of entity objects for slot filling and comprises of the following attributes:
+  
+  - ``entity`` (str, required): Entity name
+  - ``role`` (str, optional): The role of the entity
+  - ``responses`` (list or str, optional): message for prompting the user for missing entities
+  - ``retry_response`` (str, optional): message for reprompting users
+  - ``value`` (str, optional): The resolved value of the entity
+  - ``default_eval`` (bool, optional): Use system validation (default: True)
+  - ``hints`` (list, optional): Developer defined list of keywords to verify the
+  - ``user`` input against
+  - ``custom_eval`` (func, optional): custom validation function (should return bool:
+    validated or not)
+
+.. |br| raw:: html
+
+   <br />
+
+
+
 .. _dialogue_middleware:
 
 Dialogue Middleware

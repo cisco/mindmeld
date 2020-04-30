@@ -172,15 +172,14 @@ class Application:
 
         return _decorator
 
-    def auto_fill(self, **kwargs):
+    def auto_fill(self, form, **kwargs):
         """Creates a flow to fill missing entities"""
 
         def _decorator(func):
             name = kwargs.pop("name", func.__name__)
-            entity_form = kwargs.pop("entity_form", None)
-            assert entity_form, "Entity Form cannot be empty."
-            max_retries = kwargs.pop("max_retries", 1)
-            autofill_func = self.autofill(func, entity_form, self, max_retries)
+            if not form or not isinstance(form, dict):
+                raise TypeError("Form cannot be empty.")
+            autofill_func = self.autofill(func, form, self)
             self.add_dialogue_rule(name, autofill_func, **kwargs)
             return func
 

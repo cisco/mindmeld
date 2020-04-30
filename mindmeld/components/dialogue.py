@@ -704,22 +704,48 @@ class AutoEntityFilling:
     _logger = mod_logger.getChild("AutoEntityFilling")
     """Class logger."""
 
-    def __init__(self, entrance_handler, entity_form, app, max_retries=1):
+    def __init__(self, entrance_handler, form, app):
         self._app = app
         self._entrance_handler = entrance_handler
-        self._entity_form = entity_form
-        self._max_retries = max_retries  # default 1
+        self._form = form
         self._local_form = None
         self._prompt_user = None
+        self._check_attr()
 
-    def _set_target_state(self, responder):
+    def _check_attr(self):
+        if not ('entities' in self._form and len(self._form['entities']) > 0):
+            raise KeyError("Entity list cannot be empty.")
+
+        self._entity_form = self._form['entities']
+        self._max_retries = (
+            self._form['max_retries'] if 'max_retries' in self._form else 1)
+        self._exit_response = (
+            self._form['exit_msg'] if 'exit_msg' in self._form else 'How may I help you?')
+        self._exit_intent = (
+            self._form['exit_intent'] if 'exit_intent' in self._form else None)
+        self._exit_keys = (
+            self._form['exit_keys'] if 'exit_keys' in self._form else
+            ['cancel', 'restart', 'exit', 'reset'])
+
+        if not isinstance(self._max_retries, int):
+                    raise TypeError("'max_retries' should be of type: int.")
+        if not isinstance(self._exit_response, str):
+                    raise TypeError("'exit_msg' should be of type: str.")
+        if self._exit_intent and not isinstance(self._exit_intent, list):
+                    raise TypeError("'exit_intent' should be of type: list.")
+        if not isinstance(self._exit_keys, list):
+            raise TypeError("'exit_keys' should be of type: list.")
+
+    def _set_target_state(self, request, responder):
         """Set target dialogue state to the entrance handler's name"""
+        responder.allowed_intents = [request.intent]
         responder.params.target_dialogue_state = self._entrance_handler.__name__
 
-    def _exit_flow(self, responder):
+    def _exit_flow(self, responder, intents=None):
         """Exits this flow and clears the related parameter for re-usability"""
         self._prompt_user = None
         self._local_form = None
+        responder.allowed_intents = intents
         responder.exit_flow()
 
     def _extract_query_features(
@@ -767,7 +793,7 @@ class AutoEntityFilling:
         formatted_payload = (query, [query], 0)
 
         extracted_feature = {}
-        _resolved_value = None
+        _resolved_value = {}
 
         if slot.default_eval:
             if entity_type in DEFAULT_SYS_ENTITIES:
@@ -790,7 +816,8 @@ class AutoEntityFilling:
                 return False, _resolved_value
 
             if request.entities:
-                _resolved_value = request.entities[0]['value']
+                if request.entities[0]['text'] == text:
+                    _resolved_value = request.entities[0]['value']
 
         if slot.hints:
             # hints / user-list validation
@@ -864,7 +891,11 @@ class AutoEntityFilling:
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
         """
-        self._set_target_state(responder)
+        if request.text in self._exit_keys:
+            responder.reply(self._exit_response)
+            return self._exit_flow(responder, self._exit_intent)
+
+        self._set_target_state(request, responder)
 
         if self._prompt_user is None or self._local_form is None:
             # Entering the flow
@@ -876,26 +907,27 @@ class AutoEntityFilling:
             self._initial_fill(request)
 
         for slot in self._local_form:
-            nlr = slot.responses
 
             if not slot.value:
                 # check if user has been prompted for this entity slot
                 if self._prompt_user:
-                    return self._prompt_slot(responder, nlr)
-                else:
-                    # If prompted, validate the user response and retry if invalid response
-                    _isValid, _resolved_value = self._validate(request, slot)
-                    if _isValid:
-                        slot.value = Entity(
-                            text=request.text,
-                            entity_type=slot.entity,
-                            role=slot.role,
-                            value=_resolved_value).to_dict()
+                    return self._prompt_slot(responder, slot.responses)
 
-                        self._prompt_user = True
-                    else:
-                        # retry logic
-                        return self._retry_logic(responder, nlr)
+                # If already prompted,
+                # validate the user response and retry if invalid response
+                _is_valid, _resolved_value = self._validate(request, slot)
+
+                if not _is_valid:
+                    # retry logic
+                    return self._retry_logic(responder, slot.retry_response)
+
+                slot.value = Entity(
+                    text=request.text,
+                    entity_type=slot.entity,
+                    role=slot.role,
+                    value=_resolved_value).to_dict()
+
+                self._prompt_user = True
 
         # Finish slot-filling and return to handler
         return self._end_slot_fill(request, responder)
