@@ -94,7 +94,7 @@ def test_process_contains_language_information(kwik_e_mart_nlp):
 
 
 def test_inspect_contains_language_information(kwik_e_mart_nlp, mocker):
-    mock = mocker.patch.object(DomainClassifier, "inspect", return_value=({}, 400))
+    mock = mocker.patch.object(DomainClassifier, "inspect", return_value=[])
     kwik_e_mart_nlp.inspect("When is main street open tomorrow", domain="store_info")
     query = mock.call_args_list[0][0][0]
     assert query.language == "en"

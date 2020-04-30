@@ -639,6 +639,18 @@ class NaturalLanguageProcessor(Processor):
 
         return nlp_components
 
+    @staticmethod
+    def print_inspect_stats(stats):
+        """
+        Prints formatted output matrix
+        """
+        s = [[str(e) for e in row] for row in stats]
+        lens = [max(map(len, col)) for col in zip(*s)]
+        fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
+        table = [fmt.format(*row) for row in s]
+        print('\n'.join(table))
+        print()
+
     def inspect(self, markup, domain=None, intent=None, dynamic_resource=None):
         """Inspect the marked up query and print the table of features and weights.
 
@@ -661,8 +673,7 @@ class NaturalLanguageProcessor(Processor):
             domain_inspection = self.domain_classifier.inspect(
                 query, domain=domain, dynamic_resource=dynamic_resource
             )
-            print(domain_inspection)
-            print("")
+            self.print_inspect_stats(domain_inspection)
 
         if intent:
             print("Inspecting intent classification")
@@ -670,8 +681,7 @@ class NaturalLanguageProcessor(Processor):
             intent_inspection = self.domains[domain].inspect(
                 query, intent=intent, dynamic_resource=dynamic_resource
             )
-            print(intent_inspection)
-            print("")
+            self.print_inspect_stats(intent_inspection)
 
     def process(
         self,
@@ -958,7 +968,7 @@ class DomainProcessor(Processor):
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference.
 
         Returns:
-            (DataFrame): The DataFrame that includes every feature, their value, weight and \
+            (list of lists): 2D list that includes every feature, their value, weight and \
              probability
         """
         return self.intent_classifier.inspect(
