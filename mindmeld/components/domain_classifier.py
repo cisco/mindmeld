@@ -47,7 +47,7 @@ class DomainClassifier(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, *args, **kwargs):
+    def fit(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Trains the domain classification model using the provided training queries
 
         Args:
@@ -66,7 +66,7 @@ class DomainClassifier(Classifier):
         logger.info("Fitting domain classifier")
         super().fit(*args, **kwargs)
 
-    def dump(self, *args, **kwargs):
+    def dump(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Persists the trained domain classification model to disk.
 
         Args:
