@@ -228,9 +228,10 @@ class Params:
             return {"target_dialogue_state": None}
         return {"target_dialogue_state": target_dialogue_state}
 
-    def nlp_params(self):
+    def validate_nlp_params(self):
         """
-        Validate time zone, timestamp, and dynamic resource parameters.
+        Validate time zone, timestamp, and dynamic resource parameters and return the params as a
+            dictionary.
 
         Returns:
             dict: Mapping from parameter name to bool depending on validation.
@@ -256,20 +257,12 @@ class Params:
             "locale",
             "dynamic_resource",
         ]
-        _dic = self.nlp_params()
-        _dic.update(
-            {
-                "allowed_intents": self.allowed_intents,
-                "target_dialogue_state": self.target_dialogue_state,
-            }
-        )
+        _dic = {field: vars(self).get(field) for field in fields}
         # converting from immutable map to just dictionary
         _dic["dynamic_resource"] = {
             key: _dic["dynamic_resource"][key] for key in _dic["dynamic_resource"]
         }
-        for field in fields:
-            if field not in _dic:
-                logger.warning("Field %s not returned", field)
+
         return _dic
 
 
