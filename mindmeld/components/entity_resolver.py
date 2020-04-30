@@ -19,14 +19,13 @@ import hashlib
 import logging
 import os
 
-from elasticsearch5.exceptions import ConnectionError as EsConnectionError
-from elasticsearch5.exceptions import ElasticsearchException, TransportError
+from elasticsearch.exceptions import ConnectionError as EsConnectionError
+from elasticsearch.exceptions import ElasticsearchException, TransportError
 
 from ..core import Entity
 from ..exceptions import EntityResolverConnectionError, EntityResolverError
 from ._config import (
     DEFAULT_ES_SYNONYM_MAPPING,
-    DOC_TYPE,
     PHONETIC_ES_SYNONYM_MAPPING,
     get_app_namespace,
     get_classifier_config,
@@ -175,7 +174,6 @@ class EntityResolver:
             _action_generator(data),
             len(data),
             mapping,
-            DOC_TYPE,
             es_host,
             es_client,
         )

@@ -109,90 +109,85 @@ DEFAULT_LANGUAGE_CONFIG = {
     "locale": ENGLISH_US_LOCALE,
 }
 
-DOC_TYPE = "document"
 
 # ElasticSearch mapping to define text analysis settings for text fields.
 # It defines specific index configuration for synonym indices. The common index configuration
 # is in default index template.
 DEFAULT_ES_SYNONYM_MAPPING = {
     "mappings": {
-        DOC_TYPE: {
-            "properties": {
-                "sort_factor": {"type": "double"},
-                "whitelist": {
-                    "type": "nested",
-                    "properties": {
-                        "name": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {"type": "keyword", "ignore_above": 256},
-                                "normalized_keyword": {
-                                    "type": "text",
-                                    "analyzer": "keyword_match_analyzer",
-                                },
-                                "char_ngram": {
-                                    "type": "text",
-                                    "analyzer": "char_ngram_analyzer",
-                                },
+        "properties": {
+            "sort_factor": {"type": "double"},
+            "whitelist": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
                             },
-                            "analyzer": "default_analyzer",
-                        }
-                    },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                        },
+                        "analyzer": "default_analyzer",
+                    }
                 },
-            }
+            },
         }
     }
 }
 
 PHONETIC_ES_SYNONYM_MAPPING = {
     "mappings": {
-        DOC_TYPE: {
-            "properties": {
-                "sort_factor": {"type": "double"},
-                "whitelist": {
-                    "type": "nested",
-                    "properties": {
-                        "name": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {"type": "keyword", "ignore_above": 256},
-                                "normalized_keyword": {
-                                    "type": "text",
-                                    "analyzer": "keyword_match_analyzer",
-                                },
-                                "char_ngram": {
-                                    "type": "text",
-                                    "analyzer": "char_ngram_analyzer",
-                                },
-                                "double_metaphone": {
-                                    "type": "text",
-                                    "analyzer": "phonetic_analyzer",
-                                },
+        "properties": {
+            "sort_factor": {"type": "double"},
+            "whitelist": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
                             },
-                            "analyzer": "default_analyzer",
-                        }
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                            "double_metaphone": {
+                                "type": "text",
+                                "analyzer": "phonetic_analyzer",
+                            },
+                        },
+                        "analyzer": "default_analyzer",
+                    }
+                },
+            },
+            "cname": {
+                "type": "text",
+                "analyzer": "default_analyzer",
+                "fields": {
+                    "raw": {"type": "keyword", "ignore_above": 256},
+                    "normalized_keyword": {
+                        "type": "text",
+                        "analyzer": "keyword_match_analyzer",
+                    },
+                    "char_ngram": {
+                        "type": "text",
+                        "analyzer": "char_ngram_analyzer",
+                    },
+                    "double_metaphone": {
+                        "type": "text",
+                        "analyzer": "phonetic_analyzer",
                     },
                 },
-                "cname": {
-                    "type": "text",
-                    "analyzer": "default_analyzer",
-                    "fields": {
-                        "raw": {"type": "keyword", "ignore_above": 256},
-                        "normalized_keyword": {
-                            "type": "text",
-                            "analyzer": "keyword_match_analyzer",
-                        },
-                        "char_ngram": {
-                            "type": "text",
-                            "analyzer": "char_ngram_analyzer",
-                        },
-                        "double_metaphone": {
-                            "type": "text",
-                            "analyzer": "phonetic_analyzer",
-                        },
-                    },
-                },
-            }
+            },
         }
     },
     "settings": {
@@ -258,36 +253,43 @@ DEFAULT_ES_INDEX_TEMPLATE_NAME = "mindmeld_default"
 DEFAULT_ES_INDEX_TEMPLATE = {
     "template": "*",
     "mappings": {
-        DOC_TYPE: {
-            "dynamic_templates": [
-                {
-                    "default_text": {
-                        "match": "*",
-                        "match_mapping_type": "string",
-                        "mapping": {
-                            "type": "text",
-                            "analyzer": "default_analyzer",
-                            "fields": {
-                                "raw": {"type": "keyword", "ignore_above": 256},
-                                "normalized_keyword": {
-                                    "type": "text",
-                                    "analyzer": "keyword_match_analyzer",
-                                },
-                                "processed_text": {
-                                    "type": "text",
-                                    "analyzer": "english",
-                                },
-                                "char_ngram": {
-                                    "type": "text",
-                                    "analyzer": "char_ngram_analyzer",
-                                },
+        "dynamic_templates": [
+            {
+                "default_text": {
+                    "match": "*",
+                    "match_mapping_type": "string",
+                    "mapping": {
+                        "type": "text",
+                        "analyzer": "default_analyzer",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
+                            },
+                            "processed_text": {
+                                "type": "text",
+                                "analyzer": "english",
+                            },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
                             },
                         },
+                    },
+                }
+            },
+            {
+                "default_embedding": {
+                    "match": "*_embedding",
+                    "mapping": {
+                        "type": "dense_vector",
+                        "dims": "768"
                     }
                 }
-            ],
-            "properties": {"id": {"type": "keyword"}},
-        }
+            }
+        ],
+        "properties": {"id": {"type": "keyword"}},
     },
     "settings": {
         "analysis": {
@@ -414,37 +416,35 @@ DEFAULT_ES_INDEX_TEMPLATE = {
 # The common configuration is defined in default index template
 DEFAULT_ES_QA_MAPPING = {
     "mappings": {
-        DOC_TYPE: {
-            "dynamic_templates": [
-                {
-                    "synonym_whitelist_text": {
-                        "match": "*$whitelist",
-                        "match_mapping_type": "object",
-                        "mapping": {
-                            "type": "nested",
-                            "properties": {
-                                "name": {
-                                    "type": "text",
-                                    "fields": {
-                                        "raw": {"type": "keyword", "ignore_above": 256},
-                                        "normalized_keyword": {
-                                            "type": "text",
-                                            "analyzer": "keyword_match_analyzer",
-                                        },
-                                        "char_ngram": {
-                                            "type": "text",
-                                            "analyzer": "char_ngram_analyzer",
-                                        },
+        "dynamic_templates": [
+            {
+                "synonym_whitelist_text": {
+                    "match": "*$whitelist",
+                    "match_mapping_type": "object",
+                    "mapping": {
+                        "type": "nested",
+                        "properties": {
+                            "name": {
+                                "type": "text",
+                                "fields": {
+                                    "raw": {"type": "keyword", "ignore_above": 256},
+                                    "normalized_keyword": {
+                                        "type": "text",
+                                        "analyzer": "keyword_match_analyzer",
                                     },
-                                    "analyzer": "default_analyzer",
-                                }
-                            },
+                                    "char_ngram": {
+                                        "type": "text",
+                                        "analyzer": "char_ngram_analyzer",
+                                    },
+                                },
+                                "analyzer": "default_analyzer",
+                            }
                         },
-                    }
+                    },
                 }
-            ],
-            "properties": {"location": {"type": "geo_point"}},
-        }
+            }
+        ],
+        "properties": {"location": {"type": "geo_point"}},
     }
 }
 

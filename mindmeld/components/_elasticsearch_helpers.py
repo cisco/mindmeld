@@ -15,14 +15,14 @@
 import logging
 import os
 
-from elasticsearch5 import ConnectionError as EsConnectionError
-from elasticsearch5 import (
+from elasticsearch import ConnectionError as EsConnectionError
+from elasticsearch import (
     Elasticsearch,
     ElasticsearchException,
     ImproperlyConfigured,
     TransportError,
 )
-from elasticsearch5.helpers import streaming_bulk
+from elasticsearch.helpers import streaming_bulk
 from tqdm import tqdm
 
 from ..exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError
@@ -107,7 +107,7 @@ def get_field_names(
             )
 
         res = es_client.indices.get(index=scoped_index_name)
-        all_field_info = res[scoped_index_name]["mappings"]["document"]["properties"]
+        all_field_info = res[scoped_index_name]["mappings"]["properties"]
         return all_field_info.keys()
     except EsConnectionError as e:
         logger.debug(
@@ -229,7 +229,6 @@ def load_index(
     docs,
     docs_count,
     mapping,
-    doc_type,
     es_host=None,
     es_client=None,
     connect_timeout=2,
@@ -276,13 +275,12 @@ def load_index(
             es_client,
             docs,
             index=scoped_index_name,
-            doc_type=doc_type,
             chunk_size=50,
             raise_on_error=False,
         ):
 
             action, result = result.popitem()
-            doc_id = "/%s/%s/%s" % (index_name, doc_type, result["_id"])
+            doc_id = "/%s/%s" % (index_name, result["_id"])
             # process the information from ES whether the document has been
             # successfully indexed
             if not okay:

@@ -19,15 +19,14 @@ import json
 import logging
 from abc import ABC, abstractmethod
 
-from elasticsearch5 import ConnectionError as EsConnectionError
-from elasticsearch5 import ElasticsearchException, TransportError
+from elasticsearch import ConnectionError as EsConnectionError
+from elasticsearch import ElasticsearchException, TransportError
 
 from ..exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError
 from ..resource_loader import ResourceLoader
 from ._config import (
     DEFAULT_ES_QA_MAPPING,
     DEFAULT_RANKING_CONFIG,
-    DOC_TYPE,
     get_app_namespace,
 )
 from ._elasticsearch_helpers import (
@@ -39,6 +38,8 @@ from ._elasticsearch_helpers import (
 )
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_QUERY_TYPE = "keyword"
 
 
 class QuestionAnswerer:
@@ -69,7 +70,7 @@ class QuestionAnswerer:
             self.__es_client = create_es_client(self._es_host)
         return self.__es_client
 
-    def get(self, index, size=10, query_type="keyword", **kwargs):
+    def get(self, index, size=10, query_type=DEFAULT_QUERY_TYPE, **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided
         search criteria. This API provides a simple interface for developers to specify a list of
         knowledge base field and query string pairs to find best matches in a similar way as in
@@ -110,7 +111,7 @@ class QuestionAnswerer:
             )
             s = self.build_search(index)
             s = s.filter(query_type=query_type, id=doc_id)
-            results = s.execute(size=size)
+            results = s.execute(size=size, query_type=query_type)
             return results
 
         sort_clause = {}
@@ -148,7 +149,7 @@ class QuestionAnswerer:
                 location=sort_clause.get("location"),
             )
 
-        results = s.execute(size=size)
+        results = s.execute(size=size, query_type=query_type)
         return results
 
     def build_search(self, index, ranking_config=None):
@@ -192,7 +193,7 @@ class QuestionAnswerer:
                 # TODO: move the ES API call logic to ES helper
                 self._es_field_info[index] = {}
                 res = self._es_client.indices.get(index=index)
-                all_field_info = res[index]["mappings"]["document"]["properties"]
+                all_field_info = res[index]["mappings"]["properties"]
                 for field_name in all_field_info:
                     field_type = all_field_info[field_name].get("type")
                     self._es_field_info[index][field_name] = FieldInfo(
@@ -310,7 +311,6 @@ class QuestionAnswerer:
             docs,
             docs_count,
             DEFAULT_ES_QA_MAPPING,
-            DOC_TYPE,
             es_host,
             es_client,
             connect_timeout=connect_timeout,
@@ -333,6 +333,7 @@ class FieldInfo:
     TEXT_TYPES = {"text", "keyword"}
     DATE_TYPES = {"date"}
     GEO_TYPES = {"geo_point"}
+    VECTOR_TYPES = {"dense_vector"}
 
     def __init__(self, name, field_type):
         self.name = name
@@ -364,9 +365,14 @@ class FieldInfo:
         return self.type in self.GEO_TYPES
 
     def is_text_field(self):
-        """Returns True if the knowledge base field is a text, otherwise returns False"""
+        """Returns True if the knowledge base field is a text field, otherwise returns False"""
 
         return self.type in self.TEXT_TYPES
+
+    def is_vector_field(self):
+        """Returns True if the knowledge base field is a vector field, otherwise returns False"""
+
+        return self.type in self.VECTOR_TYPES
 
 
 class Search:
@@ -410,7 +416,7 @@ class Search:
 
         return s
 
-    def _build_query_clause(self, query_type="keyword", **kwargs):
+    def _build_query_clause(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
         field, value = next(iter(kwargs.items()))
         field_info = self._kb_field_info.get(field)
         if not field_info:
@@ -427,7 +433,7 @@ class Search:
         clause.validate()
         self._clauses[clause.get_type()].append(clause)
 
-    def _build_filter_clause(self, query_type="keyword", **kwargs):
+    def _build_filter_clause(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
         # set the filter type to be 'range' if any range operator is specified.
         if (
             kwargs.get("gt")
@@ -480,7 +486,7 @@ class Search:
         clause.validate()
         self._clauses[clause.get_type()].append(clause)
 
-    def _build_clause(self, clause_type, query_type="keyword", **kwargs):
+    def _build_clause(self, clause_type, query_type=DEFAULT_QUERY_TYPE, **kwargs):
         """Helper method to build query, filter and sort clauses.
 
         Args:
@@ -495,7 +501,7 @@ class Search:
         else:
             raise Exception("Unknown clause type.")
 
-    def query(self, query_type="keyword", **kwargs):
+    def query(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
         """Specify the query text to match on a knowledge base text field. The query text is
         normalized and processed (based on query_type) to find matches in knowledge base using
         several text relevance scoring factors including exact matches, phrase matches and partial
@@ -520,7 +526,7 @@ class Search:
 
         return new_search
 
-    def filter(self, query_type="keyword", **kwargs):
+    def filter(self, query_type=DEFAULT_QUERY_TYPE, **kwargs):
         """Specify filter condition to be applied to specified knowledge base field. In MindMeld
         two types of filters are supported: text filter and range filters.
 
@@ -607,7 +613,7 @@ class Search:
             "max_value": res["aggregations"][field + "_max"]["value"],
         }
 
-    def _build_es_query(self, size=10):
+    def _build_es_query(self, size=10, query_type=DEFAULT_QUERY_TYPE):
         """Build knowledge base search syntax based on provided search criteria.
 
         Args:
@@ -616,6 +622,18 @@ class Search:
         Returns:
             str: knowledge base search syntax for the current search object.
         """
+        if query_type == "embedding":
+            for clause in self._clauses["query"]:
+                query = clause.build_query()[0]
+
+            es_query = {
+                "query": {
+                }
+            }
+            es_query["query"] = query
+            logger.debug("ES query syntax: %s.", es_query)
+            return es_query
+
         es_query = {
             "query": {
                 "function_score": {
@@ -674,9 +692,10 @@ class Search:
             es_query["query"]["function_score"]["functions"].append(sort_function)
 
         logger.debug("ES query syntax: %s.", es_query)
+
         return es_query
 
-    def execute(self, size=10):
+    def execute(self, size=10, query_type=DEFAULT_QUERY_TYPE):
         """Executes the knowledge base search with provided criteria and returns matching documents.
 
         Args:
@@ -687,7 +706,8 @@ class Search:
         """
         try:
             # TODO: move the ES API call logic to ES helper
-            es_query = self._build_es_query(size=size)
+            es_query = self._build_es_query(size=size, query_type=query_type)
+
             response = self.client.search(index=self.index, body=es_query)
             results = [hit["_source"] for hit in response["hits"]["hits"]]
             return results
@@ -735,7 +755,7 @@ class Search:
         DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT = 100
 
         def __init__(
-            self, field, field_info, value, query_type="keyword", synonym_field=None
+            self, field, field_info, value, query_type=DEFAULT_QUERY_TYPE, synonym_field=None
         ):
             """Initialize a knowledge base query clause."""
             self.field = field
@@ -790,18 +810,35 @@ class Search:
                         ]
                     }
                 }
+            elif self.query_type == "embedding":
+                clause = {
+                    "script_score": {
+                        "query": {
+                            "match_all": {}
+                        },
+                        "script": {
+                            "source": "cosineSimilarity(params.query_embedding,"
+                                      " doc['question_embedding']) + 1.0",
+                            "params": {
+                                "query_embedding": self.value.tolist()
+                            }
+                        }
+                    }
+                }
             else:
                 raise Exception("Unknown query type.")
 
-            # Boost function for boosting conditions, e.g. exact match boosting
-            boost_functions = [
-                {
-                    "filter": {
-                        "match": {self.field + ".normalized_keyword": self.value}
-                    },
-                    "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT,
-                }
-            ]
+            boost_functions = []
+            if isinstance(self.value, str):
+                # Boost function for boosting conditions, e.g. exact match boosting
+                boost_functions = [
+                    {
+                        "filter": {
+                            "match": {self.field + ".normalized_keyword": self.value}
+                        },
+                        "weight": self.DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT,
+                    }
+                ]
 
             # generate ES syntax for matching on synonym whitelist if available.
             if self.syn_field:
@@ -863,8 +900,8 @@ class Search:
             return clause, boost_functions
 
         def validate(self):
-            if not self.field_info.is_text_field():
-                raise ValueError("Query can only be defined on text field.")
+            if not self.field_info.is_text_field() and not self.field_info.is_vector_field():
+                raise ValueError("Query can only be defined on text and vector fields.")
 
     class FilterClause(Clause):
         """This class models a knowledge base filter clause."""
@@ -874,7 +911,7 @@ class Search:
             field,
             field_info=None,
             value=None,
-            query_type="keyword",
+            query_type=DEFAULT_QUERY_TYPE,
             range_gt=None,
             range_gte=None,
             range_lt=None,
