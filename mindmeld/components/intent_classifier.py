@@ -60,7 +60,7 @@ class IntentClassifier(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, *args, **kwargs):
+    def fit(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Trains the intent classification model using the provided training queries.
 
         Args:
@@ -78,7 +78,7 @@ class IntentClassifier(Classifier):
         logger.info("Fitting intent classifier: domain=%r", self.domain)
         super().fit(*args, **kwargs)
 
-    def dump(self, *args, **kwargs):
+    def dump(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Persists the trained intent classification model to disk.
 
         Args:
