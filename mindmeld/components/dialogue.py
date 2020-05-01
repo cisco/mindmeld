@@ -90,8 +90,8 @@ class DialogueStateRule:
         Args:
             dialogue_state (str): The name of the dialogue state.
             domain (str): The name of the domain to match against.
-            has_entity (str, list, set): A synonym for the ``has_entities`` param.
-            has_entities (str, list, set): A single entity type or a list of entity types to match
+            has_entity (str): A single entity type to match.
+            has_entities (str, list, set): A single entity type or a list/set of entity types to match
                 against.
             intent (str): The name of the intent to match against.
         """
