@@ -60,3 +60,9 @@ jobs:
         pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld
       env:
         MM_EXTRAS: ${{ matrix.mm-extras }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: junitxml
+        path: ~/test-reports/junit.xml
