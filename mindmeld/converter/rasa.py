@@ -486,7 +486,8 @@ __all__ = ['app']
                 break
 
         if not current_line:
-            logger.warning("Warning, action handler not found for " + current_action)
+            logger.warning("Action handler not found for %s.", current_action)
+            return
 
         file_lines.insert(
             current_line + 1,
