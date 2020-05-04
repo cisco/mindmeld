@@ -646,9 +646,9 @@ class NaturalLanguageProcessor(Processor):
         """
         s = [[str(e) for e in row] for row in stats]
         lens = [max(map(len, col)) for col in zip(*s)]
-        fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
+        fmt = "\t".join("{{:{}}}".format(x) for x in lens)
         table = [fmt.format(*row) for row in s]
-        print('\n'.join(table))
+        print("\n".join(table))
         print()
 
     def inspect(self, markup, domain=None, intent=None, dynamic_resource=None):

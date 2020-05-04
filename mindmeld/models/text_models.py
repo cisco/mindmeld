@@ -318,9 +318,9 @@ class TextModel(Model):
                     round(feat_value, 4),
                     weight.round(4),
                     product.round(4),
-                    '-',
-                    '-',
-                    '-'
+                    "-",
+                    "-",
+                    "-",
                 ]
             else:
                 gold_w = self._get_feature_weight(feat_name, gold_class)
@@ -333,7 +333,7 @@ class TextModel(Model):
                     product.round(4),
                     gold_w.round(4),
                     gold_p.round(4),
-                    diff.round(4)
+                    diff.round(4),
                 ]
 
             inspect_table.append(row)
