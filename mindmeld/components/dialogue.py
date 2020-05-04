@@ -126,14 +126,15 @@ class DialogueStateRule:
                     raise ValueError(msg.format(single, plural))
                 elif single in kwargs and isinstance(kwargs[single], str):
                     resolved[plural] = {kwargs[single]}
-                elif plural in kwargs and isinstance(kwargs[plural], (list, set)):
+                elif plural in kwargs and isinstance(kwargs[plural], (list, set, tuple)):
                     resolved[plural] = set(kwargs[plural])
                 else:
-                    msg = "Invalid argument type for {!r}"
                     if single in kwargs:
-                        raise ValueError(msg.format(single))
-                    else:
-                        raise ValueError(msg.format(plural))
+                        msg = "Invalid argument type {!r} for {!r}"
+                        raise ValueError(msg.format(kwargs[single], single))
+                    elif plural in kwargs:
+                        msg = "Invalid argument type {!r} for {!r}"
+                        raise ValueError(msg.format(kwargs[plural], plural))
             elif keys[0] in kwargs:
                 resolved[keys[0]] = kwargs[keys[0]]
 
