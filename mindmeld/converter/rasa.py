@@ -474,16 +474,24 @@ __all__ = ['app']
                 file_lines.insert(insert_line, handle)
 
     @staticmethod
-    def _attach_actions_to_function(actions, file_lines):
-        current_line = 0
+    def _attach_actions_to_function(current_action, actions, file_lines):
+        """
+        When we have more than one actions in an intent, we want to attach the
+            actions to the same intent handler.
+        """
+        current_line = None
         for i, line in enumerate(file_lines):
-            if len(re.findall("def {action}", line) > 0):
+            if len(re.findall("def {action}".format(action=current_action), line)) > 0:
                 current_line = i
                 break
-        while file_lines[current_line] != "":
-            current_line += 1
-        assert file_lines[current_line] == ""
-        file_lines[current_line:current_line] = actions
+
+        if not current_line:
+            logger.warning("Warning, action handler not found for " + current_action)
+
+        file_lines.insert(
+            current_line + 1,
+            "    additional_actions = {actions}\n".format(actions=actions),
+        )
 
     def create_mindmeld_init(self):
         f = self._write_init_header()
@@ -510,7 +518,9 @@ __all__ = ['app']
                 )
                 # check if more than 1 action per intent
                 if len(actions) > 1:
-                    self._attach_actions_to_function(actions[1:], file_lines)
+                    self._attach_actions_to_function(
+                        actions[0], actions[1:], file_lines
+                    )
         # write all lines back to file
         with open(self.mindmeld_project_directory + "/__init__.py", "w") as f:
             f.writelines(file_lines)
