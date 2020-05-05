@@ -7,9 +7,9 @@ This module contains the Webex Bot Server component.
 import json
 import logging
 
-import requests
 from ciscosparkapi import CiscoSparkAPI
 from flask import Flask, request
+import requests
 
 from ..components import NaturalLanguageProcessor
 from ..components.dialogue import Conversation

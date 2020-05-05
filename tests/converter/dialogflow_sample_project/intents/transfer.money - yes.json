@@ -1,0 +1,38 @@
+{
+  "id": "80264277-c530-484f-a67e-fdb32da25cd5",
+  "parentId": "c80891cf-b988-4b43-8c66-8ce5e502c9b2",
+  "rootParentId": "c80891cf-b988-4b43-8c66-8ce5e502c9b2",
+  "name": "transfer.money - yes",
+  "auto": true,
+  "contexts": [
+    "transfer",
+    "balance",
+    "transfermoney-followup"
+  ],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "transfer.money.yes",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "condition": "",
+          "speech": "Okay, I have processed your transfer. Your confirmation number is:"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

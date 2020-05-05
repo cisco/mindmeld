@@ -3,6 +3,9 @@ Using LSTM for Entity Recognition
 
 Entity recognition is the one task within the NLP pipeline where deep learning models are among the available classification models. In particular, MindMeld provides a `Bi-Directional Long Short-Term Memory (LSTM) Network <https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks>`_, which has been shown to perform well on sequence labeling tasks such as entity recognition. The model is implemented in `TensorFlow <https://www.tensorflow.org/get_started/>`_.
 
+.. note::
+
+   Please make sure to install the Tensorflow requirement by running in the shell: :code:`pip install mindmeld[tensorflow]`.
 
 LSTM network overview
 ^^^^^^^^^^^^^^^^^^^^^

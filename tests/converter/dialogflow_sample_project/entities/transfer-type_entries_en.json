@@ -1,0 +1,20 @@
+[
+  {
+    "value": "Credit",
+    "synonyms": [
+      "credit"
+    ]
+  },
+  {
+    "value": "Deposit",
+    "synonyms": [
+      "deposit"
+    ]
+  },
+  {
+    "value": "EFT",
+    "synonyms": [
+      "EFT"
+    ]
+  }
+]

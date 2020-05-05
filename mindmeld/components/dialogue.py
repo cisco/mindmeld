@@ -120,7 +120,7 @@ class DialogueStateRule:
         resolved = {}
         for keys in key_kwargs:
             if len(keys) == 2:
-                single, plural = keys
+                single, plural = keys  # pylint: disable=unbalanced-tuple-unpacking
                 if single in kwargs and plural in kwargs:
                     msg = "Only one of {!r} and {!r} can be specified for a dialogue state rule"
                     raise ValueError(
@@ -1089,7 +1089,7 @@ class Conversation:
 
                     texts.append(self._generate_suggestion_text(suggestion))
                 msg = msg.format(*texts)
-            elif directive_name in DirectiveNames.LIST:
+            elif directive_name == DirectiveNames.LIST:
                 msg = "\n".join(
                     [
                         json.dumps(item, indent=4, sort_keys=True)

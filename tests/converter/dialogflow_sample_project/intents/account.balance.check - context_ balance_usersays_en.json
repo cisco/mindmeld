@@ -1,0 +1,72 @@
+[
+  {
+    "id": "57e05484-58e1-4a87-a91e-22eb3dd1b41e",
+    "data": [
+      {
+        "text": "how much money",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "03990f4d-ca38-4d85-9688-ee1d471dfab5",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " how much",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "de3f8e4a-576e-47d0-b068-442f0f832b15",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " how much money",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "868bfcec-8054-4356-bf8e-f25195c4969b",
+    "data": [
+      {
+        "text": "how much",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "67438648-9950-4540-95fb-d441e2032fce",
+    "data": [
+      {
+        "text": "tell me how much money there is",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

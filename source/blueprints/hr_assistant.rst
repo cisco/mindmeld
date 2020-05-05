@@ -119,7 +119,7 @@ HR assistant uses three system entities: ``sys_time`` (time), ``sys_amount-of-mo
 
 .. admonition:: Exercise
 
-To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
+    To train the different machine learning models in the NLP pipeline for this app, we need labeled training data that covers all our intents and entities. To download the data and code required to run this blueprint, run the command below in a directory of your choice. (If you have already completed the Quick Start for this blueprint, you should skip this step.)
 
 .. code-block:: shell
 
@@ -740,3 +740,7 @@ Alternatively, enter conversation mode directly from the command-line.
 .. admonition:: Exercise
 
    Test the app and play around with different language patterns to discover edge cases that our classifiers are unable to handle. The more language patterns we can collect in our training data, the better our classifiers can handle in live usage with real users. Good luck and have fun - now you have your very own Jarvis!
+
+.. admonition:: WhatsApp integration
+
+   Follow our tutorial on :doc:`WhatsApp integration <../integrations/whatsapp>` for more information on how to integrate with WhatsApp.

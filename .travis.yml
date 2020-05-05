@@ -3,6 +3,9 @@ language: python
 python:
   - "3.5"
   - "3.6"
+env:
+   - MM_EXTRAS=true
+   - MM_EXTRAS=false
 jdk:
   - openjdk8
 # command to install services
@@ -10,10 +13,7 @@ services:
   - elasticsearch
 # command to install dependencies
 install:
-  - pip install --upgrade pip
-  - pip install .
-  - pip install "mindmeld[bot]"
-  - pip install -r test-requirements.txt
+  - scripts/py_dep_install.sh
 before_script:
   - sleep 10
 # command to run tests
@@ -21,4 +21,4 @@ script:
   - mindmeld num-parse
   - ./lintme
   - mkdir ~/test-reports
-  - travis_wait 20 pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld
+  # - travis_wait 30 pytest --junitxml=~/test-reports/junit.xml --cov-report html --cov=mindmeld

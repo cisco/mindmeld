@@ -1,0 +1,164 @@
+[
+  {
+    "id": "b69ecf5d-69e7-4fb6-83f9-23a07549fb30",
+    "data": [
+      {
+        "text": "When is the payment due?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "ec48f9f2-77b2-4988-a01e-e31763f4dae8",
+    "data": [
+      {
+        "text": "when is the payment due on the ",
+        "userDefined": false
+      },
+      {
+        "text": "my",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " card",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "c7787635-5e08-40d2-a1af-3b45eed323ae",
+    "data": [
+      {
+        "text": "what are payments deadlines",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "7dd0a1a4-5420-4b25-88fd-8fabde27636d",
+    "data": [
+      {
+        "text": "show due dates for my cards",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "afcc830e-6c49-4fc5-bbeb-25373a34750d",
+    "data": [
+      {
+        "text": "what is the payment due date",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "d1564120-9f1d-4c6b-8784-5a5e98a854cc",
+    "data": [
+      {
+        "text": "due date for the payment",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "7a08f581-3b55-4322-a854-43ae83fa8e36",
+    "data": [
+      {
+        "text": "can you ",
+        "userDefined": false
+      },
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " my payment due date for my credit card",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "2703b8a5-d1e3-4aa8-ac2c-284a330375ee",
+    "data": [
+      {
+        "text": "please ",
+        "userDefined": false
+      },
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " my payments deadlines",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "9dc255b9-7851-4079-89a5-b1613762586a",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " the payment due date",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "f1af2311-9dc8-49c2-af7f-4fdf9fee4571",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " due date for the payment on ",
+        "userDefined": false
+      },
+      {
+        "text": "my card",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]

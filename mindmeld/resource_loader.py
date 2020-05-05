@@ -378,7 +378,6 @@ class ResourceLoader:
                 query_tree[a_domain][an_intent] = []
             queries = query_tree[a_domain][an_intent]
             queries.extend(file_info["raw_queries" if raw else "queries"])
-
         return query_tree
 
     @staticmethod
@@ -441,6 +440,7 @@ class ResourceLoader:
             queries = markup.load_query_file(
                 file_path,
                 self.query_factory,
+                self.app_path,
                 domain,
                 intent,
                 is_gold=True,

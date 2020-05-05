@@ -21,6 +21,7 @@ import os
 import warnings
 
 from .. import path
+from .request import validate_language_code, validate_locale_code
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +101,13 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 }
 
 DEFAULT_ENTITY_RESOLVER_CONFIG = {"model_type": "text_relevance"}
+
+ENGLISH_LANGUAGE_CODE = "en"
+ENGLISH_US_LOCALE = "en_US"
+DEFAULT_LANGUAGE_CONFIG = {
+    "language": ENGLISH_LANGUAGE_CODE,
+    "locale": ENGLISH_US_LOCALE,
+}
 
 DOC_TYPE = "document"
 
@@ -464,6 +472,41 @@ class NlpConfigException(Exception):
     pass
 
 
+def get_language_config(app_path):
+    if not app_path:
+        return ENGLISH_LANGUAGE_CODE, ENGLISH_US_LOCALE
+    try:
+        language_config = getattr(
+            _get_config_module(app_path), "LANGUAGE_CONFIG", DEFAULT_LANGUAGE_CONFIG
+        )
+        locale = language_config.get("locale")
+        language = language_config.get("language")
+        resolved_language = resolve_language(language, locale)
+        return resolved_language, locale
+    except (OSError, IOError):
+        logger.info(
+            "No app configuration file found. Using default language and locale."
+        )
+        return ENGLISH_LANGUAGE_CODE, ENGLISH_US_LOCALE
+
+
+def resolve_language(language=None, locale=None):
+    """
+    Resolves to a language given a locale.
+    """
+    locale = validate_locale_code(locale)
+    language = validate_language_code(language)
+
+    # Locale overrides language
+    if locale:
+        language = locale.split("_")[0]
+
+    if not language:
+        language = ENGLISH_LANGUAGE_CODE
+
+    return language.lower()
+
+
 def get_app_namespace(app_path):
     """Returns the namespace of the application at app_path"""
     try:
@@ -638,6 +681,7 @@ def _get_default_classifier_config(clf_type):
             "entity": DEFAULT_ENTITY_RECOGNIZER_CONFIG,
             "entity_resolution": DEFAULT_ENTITY_RESOLVER_CONFIG,
             "role": DEFAULT_ROLE_CLASSIFIER_CONFIG,
+            "language_config": DEFAULT_LANGUAGE_CONFIG,
         }[clf_type]
     )
 

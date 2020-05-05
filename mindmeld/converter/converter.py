@@ -63,20 +63,6 @@ class Converter(ABC):
                 logger.error("Cannot create directory at %s", directory)
 
     @staticmethod
-    def create_config(mindmeld_project_directory, main_file_loc):
-        """Creates config.py file for MindMeld project.
-
-        Args:
-            mindmeld_project_directory: Location of MindMeld directory.
-            main_file_loc: Location where default config.py is stored.
-        """
-        MINDMELD_MODEL_CONFIG_FILE_NAME = "/generic_config.txt"
-        with open(main_file_loc + MINDMELD_MODEL_CONFIG_FILE_NAME, "r") as f:
-            string = f.read()
-        with open(mindmeld_project_directory + "/config.py", "w") as f:
-            f.write(string)
-
-    @staticmethod
     def create_main(mindmeld_project_directory, main_file_loc):
         """Creates __main__.py file for MindMeld project.
 
@@ -84,7 +70,7 @@ class Converter(ABC):
             mindmeld_project_directory: Location of MindMeld directory.
             main_file_loc: Location where default __main__.py is stored.
         """
-        MINDMELD_MODEL_MAIN_FILE_NAME = "/generic_main.txt"
+        MINDMELD_MODEL_MAIN_FILE_NAME = "/template_main.txt"
         with open(main_file_loc + MINDMELD_MODEL_MAIN_FILE_NAME, "r") as f:
             string = f.read()
         with open(mindmeld_project_directory + "/__main__.py", "w") as f:

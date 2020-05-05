@@ -9,6 +9,7 @@ Configurations for tests. Include shared fixtures here.
 # pylint: disable=locally-disabled,redefined-outer-name
 import asyncio
 import codecs
+from distutils.util import strtobool
 import os
 import warnings
 
@@ -35,21 +36,6 @@ HOME_ASSISTANT_APP_PATH = os.path.join(
 )
 AENEID_FILE = "aeneid.txt"
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
-HOME_ASSISTANT_APP_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "home_assistant"
-)
-RASA_PROJECT_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/rasa_sample_project"
-)
-MINDMELD_PROJECT_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/mindmeld_project"
-)
-DIALOGFLOW_PROJECT_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/dialogflow_sample_project"
-)
-MINDMELD_PROJECT_PATH2 = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "converter/mindmeld_project2"
-)
 
 
 @pytest.fixture
@@ -80,26 +66,6 @@ def food_ordering_app_path():
 @pytest.fixture(scope="session")
 def home_assistant_app_path():
     return HOME_ASSISTANT_APP_PATH
-
-
-@pytest.fixture(scope="session")
-def rasa_project_path():
-    return RASA_PROJECT_PATH
-
-
-@pytest.fixture(scope="session")
-def mindmeld_project_path():
-    return MINDMELD_PROJECT_PATH
-
-
-@pytest.fixture(scope="session")
-def mindmeld_project_path2():
-    return MINDMELD_PROJECT_PATH2
-
-
-@pytest.fixture(scope="session")
-def dialogflow_project_path():
-    return DIALOGFLOW_PROJECT_PATH
 
 
 @pytest.fixture(scope="session")
@@ -209,3 +175,20 @@ class FakeApp:
 @pytest.fixture
 def fake_app():
     return FakeApp("123")
+
+
+def pytest_collection_modifyitems(config, items):
+    use_extras = strtobool(os.environ.get("MM_EXTRAS", "false"))
+    skip_markers = ["no_extras"] if use_extras else ["extras"]
+    skip = pytest.mark.skip(
+        reason=(
+            "Skipping tests which require a clean mindmeld install"
+            if use_extras
+            else "Skipping tests which require mindmeld extras"
+        )
+    )
+
+    for item in items:
+        for marker in skip_markers:
+            if marker in item.keywords:
+                item.add_marker(skip)

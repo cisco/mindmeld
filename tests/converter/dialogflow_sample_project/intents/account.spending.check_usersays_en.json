@@ -1,0 +1,390 @@
+[
+  {
+    "id": "bf25db6c-6a70-475d-8184-99fa350c4cfd",
+    "data": [
+      {
+        "text": "withdrawal",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      },
+      {
+        "text": " history",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 1,
+    "updated": 0
+  },
+  {
+    "id": "9ea7b939-6e20-49a4-822c-7fa904fd57c4",
+    "data": [
+      {
+        "text": "can I see my latest ",
+        "userDefined": false
+      },
+      {
+        "text": "withdrawals",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 1,
+    "updated": 0
+  },
+  {
+    "id": "62fa4cf1-6d32-4d71-92d2-e55672e6a190",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " my spendings on ",
+        "userDefined": false
+      },
+      {
+        "text": "Marriott",
+        "alias": "merchant",
+        "meta": "@merchant",
+        "userDefined": true
+      },
+      {
+        "text": " for ",
+        "userDefined": false
+      },
+      {
+        "text": "this week",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "eb2565be-7b7c-4707-8e6f-9df3e07a86b3",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " yesterday\u0027s ",
+        "userDefined": false
+      },
+      {
+        "text": "ATM Withdrawals",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "9cea4aa7-1593-4515-a953-f2f2e6d44061",
+    "data": [
+      {
+        "text": "how much money did I spend on ",
+        "userDefined": false
+      },
+      {
+        "text": "shopping",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      },
+      {
+        "text": " in ",
+        "userDefined": false
+      },
+      {
+        "text": "December",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "00bcdf27-90a2-4535-96f0-40ff27131a6d",
+    "data": [
+      {
+        "text": "have I spent a lot at ",
+        "userDefined": false
+      },
+      {
+        "text": "Hyatt London",
+        "alias": "merchant",
+        "meta": "@merchant",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "497ba344-c0f0-41c6-bedc-4d4239c0f971",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " my ",
+        "userDefined": false
+      },
+      {
+        "text": "travel",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      },
+      {
+        "text": " spendings",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "1dd51d3c-b9c2-446f-a8de-381ece67931a",
+    "data": [
+      {
+        "text": "check",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " how much money did I spend on ",
+        "userDefined": false
+      },
+      {
+        "text": "taxes",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      },
+      {
+        "text": " in ",
+        "userDefined": false
+      },
+      {
+        "text": "December",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      },
+      {
+        "text": " on my ",
+        "userDefined": false
+      },
+      {
+        "text": "checking",
+        "alias": "account",
+        "meta": "@account",
+        "userDefined": false
+      },
+      {
+        "text": " account",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "05ea5c60-4c5e-42d1-a06c-245af478a9b4",
+    "data": [
+      {
+        "text": "How much did I spend on ",
+        "userDefined": false
+      },
+      {
+        "text": "Travel",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      },
+      {
+        "text": " in ",
+        "userDefined": false
+      },
+      {
+        "text": "January",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "45385b75-4839-4fb1-934d-e00a65268d06",
+    "data": [
+      {
+        "text": "how much did i spend on ",
+        "userDefined": false
+      },
+      {
+        "text": "Utilities",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      },
+      {
+        "text": " at ",
+        "userDefined": false
+      },
+      {
+        "text": "PG\u0026E",
+        "alias": "merchant",
+        "meta": "@merchant",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "691dd357-52d4-425d-b79a-a821de345ddc",
+    "data": [
+      {
+        "text": "tell me how much did I spend on ",
+        "userDefined": false
+      },
+      {
+        "text": "restaurants",
+        "alias": "category",
+        "meta": "@category",
+        "userDefined": false
+      },
+      {
+        "text": " ",
+        "userDefined": false
+      },
+      {
+        "text": "this weekend",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "8c5da23c-c00f-4985-b6ae-b74f037facfb",
+    "data": [
+      {
+        "text": "Did I pay for something at ",
+        "userDefined": false
+      },
+      {
+        "text": "Amazon",
+        "alias": "merchant",
+        "meta": "@merchant",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "4cd891cb-881b-4369-ac2c-9a0e8e4267e8",
+    "data": [
+      {
+        "text": "I want to see withdrawals for  ",
+        "userDefined": false
+      },
+      {
+        "text": "January 3, 2017",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "1c21584c-c884-4ea8-949e-a7cce4e37309",
+    "data": [
+      {
+        "text": "How much money did I spend ",
+        "userDefined": false
+      },
+      {
+        "text": "yesterday",
+        "alias": "date-time",
+        "meta": "@sys.date-time",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  },
+  {
+    "id": "3d97494c-b8b6-4429-a2b8-f55f7eefdfd4",
+    "data": [
+      {
+        "text": "How much did I spend in ",
+        "userDefined": false
+      },
+      {
+        "text": "Starbucks",
+        "alias": "merchant",
+        "meta": "@merchant",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 0
+  }
+]
