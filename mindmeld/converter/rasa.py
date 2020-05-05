@@ -79,16 +79,16 @@ class RasaConverter(Converter):
     def _does_intent_ex_contain_entity(intent_example):
         return len(re.findall(r"\[.*\]\(.*\)", intent_example)) > 0
 
-    def _write_intent_with_extinty(self, intent_f, intent_example):
+    def _write_intent_with_entinty(self, intent_f, intent_example):
         mindmend_intent_example = intent_example
-        pattern = re.compile(r"\[\w*\]\(\w*\)")
+        pattern = re.compile(r"\[.*\]\(.*\)")
         for match in pattern.findall(intent_example):
             mindmeld_entity = (
                 match.replace("[", "{")
                 .replace("]", "|")
                 .replace("(", "")
                 .replace(")", "}")
-            )
+            ).lower()
             mindmend_intent_example = mindmend_intent_example.replace(
                 match, mindmeld_entity
             )
@@ -113,7 +113,7 @@ class RasaConverter(Converter):
                 RasaConverter._remove_comments_from_line(intent_example) + "\n"
             )
             if RasaConverter._does_intent_ex_contain_entity(intent_example):
-                self._write_intent_with_extinty(intent_f, intent_example)
+                self._write_intent_with_entinty(intent_f, intent_example)
             else:
                 intent_f.write(intent_example)
 
@@ -161,25 +161,25 @@ class RasaConverter(Converter):
             return []
 
     def create_entity_files(self, mm_entry):
-        entity = mm_entry.strip("{}").split("|")
+        entity_value, entity = mm_entry.strip("{}").split("|")
         gazetteer_location = (
             self.mindmeld_project_directory
             + "/entities/"
-            + entity[1]
+            + entity
             + "/gazetteer.txt"
         )
         try:
             with open(gazetteer_location, "a") as f:
-                f.write(entity[0] + "\n")
+                f.write(entity_value + "\n")
                 f.close()
         except FileNotFoundError as e:
             self._create_entities_directories(
-                self.mindmeld_project_directory, [entity[1]]
+                self.mindmeld_project_directory, [entity]
             )
             with open(gazetteer_location, "a") as f:
-                f.write(entity[0] + "\n")
+                f.write(entity_value + "\n")
                 f.close()
-            logger.error("Domain file may not contain entity %s", entity[1])
+            logger.error("Domain file may not contain entity %s", entity)
             logger.error(e)
 
     @staticmethod
@@ -323,7 +323,7 @@ class RasaConverter(Converter):
         self._create_intents_directories(self.mindmeld_project_directory, intents)
 
         # read entities in domain.yml
-        entities = self._read_entities()
+        entities = [entity.lower() for entity in self._read_entities()]
 
         # create entities subdirectories if entities is not empty
         if entities:
@@ -474,16 +474,25 @@ __all__ = ['app']
                 file_lines.insert(insert_line, handle)
 
     @staticmethod
-    def _attach_actions_to_function(actions, file_lines):
-        current_line = 0
+    def _attach_actions_to_function(current_action, actions, file_lines):
+        """
+        When we have more than one actions in an intent, we want to attach the
+            actions to the same intent handler.
+        """
+        current_line = None
         for i, line in enumerate(file_lines):
-            if len(re.findall("def {action}", line) > 0):
+            if len(re.findall("def {action}".format(action=current_action), line)) > 0:
                 current_line = i
                 break
-        while file_lines[current_line] != "":
-            current_line += 1
-        assert file_lines[current_line] == ""
-        file_lines[current_line:current_line] = actions
+
+        if not current_line:
+            logger.warning("Action handler not found for %s.", current_action)
+            return
+
+        file_lines.insert(
+            current_line + 1,
+            "    additional_actions = {actions}\n".format(actions=actions),
+        )
 
     def create_mindmeld_init(self):
         f = self._write_init_header()
@@ -510,7 +519,9 @@ __all__ = ['app']
                 )
                 # check if more than 1 action per intent
                 if len(actions) > 1:
-                    self._attach_actions_to_function(actions[1:], file_lines)
+                    self._attach_actions_to_function(
+                        actions[0], actions[1:], file_lines
+                    )
         # write all lines back to file
         with open(self.mindmeld_project_directory + "/__init__.py", "w") as f:
             f.writelines(file_lines)
