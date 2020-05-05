@@ -21,7 +21,7 @@ import pycountry
 from .components.request import validate_language_code, validate_locale_code
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError
-from .system_entity_recognizer import SystemEntityRecognizer
+from .system_entity_recognizer import DucklingRecognizer
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +133,7 @@ def parse_numerics(
     locale=None,
     time_zone=None,
     timestamp=None,
+    url=None,
 ):
     """Calls System Entity Recognizer service API to extract numerical entities from a sentence.
 
@@ -216,7 +217,7 @@ def parse_numerics(
             # Convert a second grain unix timestamp to millisecond
             timestamp *= 1000
         data["reftime"] = timestamp
-    return SystemEntityRecognizer.get_instance().get_response(data)
+    return DucklingRecognizer.get_instance(url=url).get_response(data)
 
 
 def resolve_system_entity(query, entity_type, span):

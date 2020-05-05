@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from abc import ABC, abstractmethod
 import json
 import logging
 import sys
@@ -17,9 +18,11 @@ import os
 import requests
 
 from mindmeld.components._config import (
-    get_system_entity_url_config,
+    DEFAULT_DUCKLING_URL,
     is_duckling_configured,
+    get_system_entity_url_config,
 )
+
 from mindmeld.exceptions import MindMeldError
 
 NO_RESPONSE_CODE = -1
@@ -41,61 +44,101 @@ class SystemEntityError(Exception):
     pass
 
 
-class SystemEntityRecognizer:
+class SystemEntityRecognizer(ABC):
     """SystemEntityRecognizer is the external parsing service used to extract
     system entities. It is intended to be used as a singleton, so it's
     initialized only once during NLP object construction.
-
-    TODO: Abstract this class into an interface and implement the duckling
-    service as one such service.
     """
 
-    _instance = None
-
-    def __init__(self, app_path=None):
-        """Private constructor for SystemEntityRecognizer. Do not directly
-        construct the SystemEntityRecognizer object. Instead, use the
-        static get_instance method.
-
-        Args:
-            app_path (str): A application path
-        """
-        if SystemEntityRecognizer._instance:
-            raise Exception("SystemEntityRecognizer is a singleton")
-        else:
-            if not app_path:
-                # The service is turned on by default
-                self._use_duckling_api = True
-            else:
-                self._use_duckling_api = is_duckling_configured(app_path)
-
-        self.app_path = app_path
-        SystemEntityRecognizer._instance = self
-
     @staticmethod
-    def get_instance(app_path=None):
+    def get_instance(app_path):
         """ Static access method.
+        In general we want to find the system entity recognizer from the application config.
+        If the application configuration is empty, we do not use Duckling.
+        Otherwise, we return the Duckling recognizer with the URL defined in the application's
+          config, default to the DEFAULT_DUCKLING_URL.
 
         Args:
-            app_path (str): A application path
+            app_path: The application path
 
         Returns:
             (SystemEntityRecognizer): A SystemEntityRecognizer instance
         """
-        if not SystemEntityRecognizer._instance:
-            SystemEntityRecognizer(app_path)
-        return SystemEntityRecognizer._instance
+        if is_duckling_configured(app_path):
+            url = get_system_entity_url_config(app_path=app_path)
+            return DucklingRecognizer.get_instance(url)
+        else:
+            return DummySystemEntityRecognizer.get_instance()
+
+    @abstractmethod
+    def get_response(self, data):
+        pass
+
+
+class DummySystemEntityRecognizer(SystemEntityRecognizer):
+    """
+    This is a dummy recognizer which returns empty list and NO_RESPONSE_CODE.
+    """
+
+    _instance = None
+
+    def __init__(self):
+        if not DummySystemEntityRecognizer._instance:
+            DummySystemEntityRecognizer._instance = self
+        else:
+            raise Exception("DummySystemEntityRecognizer is a singleton")
+
+    @staticmethod
+    def get_instance():
+        if not DummySystemEntityRecognizer._instance:
+            DummySystemEntityRecognizer()
+
+        return DummySystemEntityRecognizer._instance
 
     def get_response(self, data):
+        del data
+        return [], NO_RESPONSE_CODE
 
-        if not self._use_duckling_api:
-            return [], NO_RESPONSE_CODE
 
-        url = get_system_entity_url_config(app_path=self.app_path)
+class DucklingRecognizer(SystemEntityRecognizer):
+    _instances = {}
 
+    def __init__(self, url=None):
+        """Private constructor for SystemEntityRecognizer. Do not directly
+        construct the DucklingRecognizer object. Instead, use the
+        static get_instance method.
+
+        Args:
+            url (str): Duckling URL
+        """
+        if url in DucklingRecognizer._instances:
+            raise Exception("DucklingRecognizer is a singleton")
+
+        self.url = url
+        DucklingRecognizer._instances[url] = self
+
+    @staticmethod
+    def get_instance(url=None):
+        """ Static access method.
+        We get an instance for the Duckling URL. If there is no URL being passed,
+          default to DEFAULT_DUCKLING_URL.
+
+        Args:
+            url: Duckling URL.
+
+        Returns:
+            (DucklingRecognizer): A DucklingRecognizer instance
+        """
+        url = url or DEFAULT_DUCKLING_URL
+
+        if url not in DucklingRecognizer._instances:
+            DucklingRecognizer(url=url)
+        return DucklingRecognizer._instances[url]
+
+    def get_response(self, data):
         try:
             response = requests.request(
-                "POST", url, data=data, timeout=float(SYS_ENTITY_REQUEST_TIMEOUT)
+                "POST", self.url, data=data, timeout=float(SYS_ENTITY_REQUEST_TIMEOUT)
             )
 
             if response.status_code == requests.codes["ok"]:
@@ -118,7 +161,7 @@ class SystemEntityRecognizer:
             logger.error(
                 "Numerical Entity Recognizer Error: %s\nURL: %r\nData: %s",
                 ex,
-                url,
+                self.url,
                 json.dumps(data),
             )
             sys.exit(
@@ -126,7 +169,7 @@ class SystemEntityRecognizer:
                 + "error:\n"
                 + str(ex)
                 + "\nURL: "
-                + url
+                + self.url
                 + "\nRaw data: "
                 + str(data)
                 + "\nPlease check your data and ensure Numerical parsing service is running. "
