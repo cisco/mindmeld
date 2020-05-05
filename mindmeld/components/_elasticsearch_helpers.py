@@ -223,6 +223,26 @@ def delete_index(
         raise KnowledgeBaseError
 
 
+def create_index_mapping(base_mapping, mapping_data):
+    """Creates an index mapping given provided base mapping template and additional data.
+
+    Args:
+        base_mapping (dict): The base mapping template
+        mapping_data (dict): The dictionary with metadata needed to create the mapping.
+    """
+    properties = base_mapping.get('mappings', {}).get('properties', {})
+    embedding_properties = mapping_data.get('embedding_properties', [])
+    for emb in embedding_properties:
+        properties[emb['field']] = {
+                "type": "dense_vector",
+                "dims": emb['dims']
+            }
+    if not 'mappings' in base_mapping:
+        base_mapping['mappings'] = base_mapping
+    base_mapping['mappings']['properties'] = properties
+    return base_mapping
+
+
 def load_index(
     app_namespace,
     index_name,

@@ -278,15 +278,6 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                         },
                     },
                 }
-            },
-            {
-                "default_embedding": {
-                    "match": "*_embedding",
-                    "mapping": {
-                        "type": "dense_vector",
-                        "dims": "768"
-                    }
-                }
             }
         ],
         "properties": {"id": {"type": "keyword"}},

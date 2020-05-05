@@ -35,6 +35,7 @@ from ._elasticsearch_helpers import (
     does_index_exist,
     get_scoped_index_name,
     load_index,
+    create_index_mapping,
 )
 
 logger = logging.getLogger(__name__)
@@ -305,12 +306,49 @@ class QuestionAnswerer:
                     app_namespace,
                 )
 
+        def _generate_mapping_data(data_file):
+            # generates a dictionary with any metadata needed to create the mapping"
+            MAX_ES_VECTOR_LEN = 2048
+            EMBEDDIND_MATCH_STRING = '_embedding'
+            embedding_properties = []
+            mapping_data = {
+                "embedding_properties": embedding_properties
+            }
+
+            with open(data_file) as data_fp:
+                line = data_fp.readline()
+                data_fp.seek(0)
+                # TODO: what does seek do
+                print(line)
+                if line.strip() == "[":
+                    docs = json.load(data_fp)
+                    doc = docs[0]
+                else:
+                    print(line)
+                    doc = json.loads(line)
+                for field, value in doc.items():
+                    if EMBEDDIND_MATCH_STRING in field and isinstance(value, list):
+                        dims = len(value)
+                        if dims > MAX_ES_VECTOR_LEN:
+                            logger.error(
+                                "Vectors in ElasticSearch must be less than size: %d",
+                                MAX_ES_VECTOR_LEN
+                            )
+                        embedding_properties.append({
+                                'field': field,
+                                'dims': dims
+                            })
+            return mapping_data
+
+        mapping_data = _generate_mapping_data(data_file)
+        qa_mapping = create_index_mapping(DEFAULT_ES_QA_MAPPING, mapping_data)
+
         load_index(
             app_namespace,
             index_name,
             docs,
             docs_count,
-            DEFAULT_ES_QA_MAPPING,
+            qa_mapping,
             es_host,
             es_client,
             connect_timeout=connect_timeout,
@@ -622,18 +660,6 @@ class Search:
         Returns:
             str: knowledge base search syntax for the current search object.
         """
-        if query_type == "embedding":
-            for clause in self._clauses["query"]:
-                query = clause.build_query()[0]
-
-            es_query = {
-                "query": {
-                }
-            }
-            es_query["query"] = query
-            logger.debug("ES query syntax: %s.", es_query)
-            return es_query
-
         es_query = {
             "query": {
                 "function_score": {
@@ -658,7 +684,8 @@ class Search:
                 es_boost_functions = []
                 for clause in self._clauses["query"]:
                     query_clause, boost_functions = clause.build_query()
-                    es_query_clauses.append(query_clause)
+                    if query_clause:
+                        es_query_clauses.append(query_clause)
                     es_boost_functions.extend(boost_functions)
 
                 if self._ranking_config["query_clauses_operator"] == "and":
@@ -777,6 +804,8 @@ class Search:
             # 4. matches on synonym if available (exact, word N-gram and character N-gram):
             # for a knowledge base text field the synonym are indexed in a separate field
             # "<field name>$whitelist" if available.
+            functions = []
+
             if self.query_type == "text":
                 clause = {
                     "bool": {
@@ -811,27 +840,43 @@ class Search:
                     }
                 }
             elif self.query_type == "embedding":
-                clause = {
-                    "script_score": {
-                        "query": {
-                            "match_all": {}
-                        },
-                        "script": {
-                            "source": "cosineSimilarity(params.query_embedding,"
-                                      " doc['question_embedding']) + 1.0",
-                            "params": {
-                                "query_embedding": self.value.tolist()
+                if self.field_info.is_vector_field():
+                    clause = None
+                    functions = [{
+                        "script_score": {
+                            "script": {
+                                "source": "cosineSimilarity(params.field_embedding,"
+                                          " doc[params.matching_field]) + 1.0",
+                                "params": {
+                                    "field_embedding": self.value.tolist(),
+                                    "matching_field": self.field
+                                }
                             }
+                        },
+                        "weight": 10
+                    }]
+                else:
+                    clause = {
+                        "bool": {
+                            "should": [
+                                {"match": {self.field: {"query": self.value}}},
+                                {
+                                    "match": {
+                                        self.field
+                                        + ".processed_text": {"query": self.value}
+                                    }
+                                },
+                            ]
                         }
                     }
-                }
+
             else:
                 raise Exception("Unknown query type.")
 
-            boost_functions = []
-            if isinstance(self.value, str):
+
+            if self.field_info.is_text_field():
                 # Boost function for boosting conditions, e.g. exact match boosting
-                boost_functions = [
+                functions = [
                     {
                         "filter": {
                             "match": {self.field + ".normalized_keyword": self.value}
@@ -880,7 +925,7 @@ class Search:
                     }
                 )
 
-                boost_functions.append(
+                functions.append(
                     {
                         "filter": {
                             "nested": {
@@ -897,7 +942,7 @@ class Search:
                     }
                 )
 
-            return clause, boost_functions
+            return clause, functions
 
         def validate(self):
             if not self.field_info.is_text_field() and not self.field_info.is_vector_field():
