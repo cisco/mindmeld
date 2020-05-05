@@ -207,8 +207,8 @@ class Params:
 
     def validate_dm_params(self, handler_map):
         """
-        Check that the value of the 'target_dialogue_state' parameter is a valid dialogue state
-            for the application.
+        Validate that the value of the 'target_dialogue_state' parameter is a valid dialogue state
+            for the application and returns that value in a dictionary.
 
         Args:
             handler_map (dict): Mapping from dialogue state to the function handler that gets
