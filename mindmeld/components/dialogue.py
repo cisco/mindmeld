@@ -736,6 +736,8 @@ class AutoEntityFilling:
         if not isinstance(self._exit_keys, list):
             raise TypeError("'exit_keys' should be of type: list.")
 
+        self._exit_keys = list(map(str.lower, self._exit_keys))
+
     def _set_target_state(self, request, responder):
         """Set target dialogue state to the entrance handler's name"""
         responder.params.allowed_intents = tuple([''.join([request.domain, ".", request.intent])])
@@ -891,7 +893,7 @@ class AutoEntityFilling:
             request (Request): The request object.
             responder (DialogueResponder): The responder object.
         """
-        if request.text in self._exit_keys:
+        if request.text.lower() in self._exit_keys:
             responder.reply(self._exit_response)
             return self._exit_flow(responder, self._exit_intent)
 
