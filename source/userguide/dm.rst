@@ -581,7 +581,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``entities`` (list, required): List of ``FormEntity`` objects with each defined for one entity slot to be filled.
   - ``max_retries`` (int, optional, default 1): maximum number of retries allowed per entity or slot if user response is invalid.
   - ``exit_msg`` (str, optional): If slot filling is exited abruptly without completion, define custom message to display.
-  - ``exit_intent`` (list, optional): If slot filling is exited abruptly without completion, the developer can define which intents should the following query be redirected to. Default: None.
+  - ``exit_intent`` (list, optional): If slot filling is exited abruptly without completion, the developer can define which particular intents (format ``['domain.intent', 'domain.intent'``) should the following query be redirected to. Default: None.
   - ``exit_hints`` (list, optional): List of exit hints for the slot filling flow. If these words or phrases are said by the user, the slot filling logic exits. Default: ['cancel', 'restart', 'exit', 'reset'].
 
 .. |br| raw:: html
@@ -593,7 +593,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``entity`` (str, required): Entity name
   - ``role`` (str, optional): The role of the entity
   - ``responses`` (list or str, optional): message for prompting the user for missing entities
-  - ``retry_response`` (str, optional): message for reprompting users
+  - ``retry_response`` (str, optional): message for re-prompting users. If not provided, defaults to ``responses``.
   - ``value`` (str, optional): The resolved value of the entity
   - ``default_eval`` (bool, optional): Use system validation (default: True)
   - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against

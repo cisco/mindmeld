@@ -738,14 +738,14 @@ class AutoEntityFilling:
 
     def _set_target_state(self, request, responder):
         """Set target dialogue state to the entrance handler's name"""
-        responder.allowed_intents = [request.intent]
+        responder.params.allowed_intents = tuple([''.join([request.domain, ".", request.intent])])
         responder.params.target_dialogue_state = self._entrance_handler.__name__
 
     def _exit_flow(self, responder, intents=None):
         """Exits this flow and clears the related parameter for re-usability"""
         self._prompt_user = None
         self._local_form = None
-        responder.allowed_intents = intents
+        responder.params.allowed_intents = tuple(intents) if intents else tuple()
         responder.exit_flow()
 
     def _extract_query_features(
