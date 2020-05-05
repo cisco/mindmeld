@@ -335,7 +335,7 @@ For example, what would happen if the user said "Close door" but then responded 
 In such scenarios, the conversation is locked in a certain state, which could be frustrating to the user. In the next section, we will explore a more graceful alternative that will guide the user along a certain path but also handles the unexpected divergences and interruptions.
 
 
-Specifying a list of allowable intents
+Specifying a tuple of allowable intents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Here is a variant of our multi-query-sequence case where the domain and intent do *not* remain the same:
@@ -344,15 +344,15 @@ Here is a variant of our multi-query-sequence case where the domain and intent d
     :width: 400px
     :align: center
 
-To support both the "happy path" scenario in the previous section and the unexpected scenario above, we can specify a list of domains and intents for the dialogue state handler to choose from.
+To support both the "happy path" scenario in the previous section and the unexpected scenario above, we can specify a tuple of domains and intents for the dialogue state handler to choose from.
 
 In a dialogue state handler, set the ``allowed_intents`` attribute of the params object. For example:
 
 .. code:: python
 
-    responder.params.allowed_intents = ['smart_home.close_door', 'greeting.*']
+    responder.params.allowed_intents = ('smart_home.close_door', 'greeting.*')
 
-The first element in the list, ``smart_home.close_door``, supports the "happy path." The second, ``greeting.*``, supports the unexpected "Hello" variant. The elements in the list must use dot-delimited notation to specify domains and intents. The asterisk ('*') wildcard means that *any* intent within the specified domain is allowed.
+The first element in the tuple, ``smart_home.close_door``, supports the "happy path." The second, ``greeting.*``, supports the unexpected "Hello" variant. The elements in the tuple must use dot-delimited notation to specify domains and intents. The asterisk ('*') wildcard means that *any* intent within the specified domain is allowed.
 
 Using this construct allows the dialogue handler to cover (1) the single-query case, (2) the "happy path" multi-query-sequence case, and (3) a variant of the multi-query-sequence case where the user unexpectedly responds to the "Of course, which door?" prompt by uttering a greeting:
 
@@ -367,12 +367,12 @@ Using this construct allows the dialogue handler to cover (1) the single-query c
             reply = _handle_door_lock_unlock_reply(selected_all, selected_location, request)
             responder.reply(reply)
         else:
-            responder.params.allowed_intents = ['smart_home.close_door', 'greeting.*']
+            responder.params.allowed_intents = ('smart_home.close_door', 'greeting.*')
             prompt = "Of course, which door?"
             responder.prompt(prompt)
 
 
-This example comes from the Home Assistant blueprint. It is simplistic in that if the conversation departs from the "happy path," only one domain (`greeting`) is supported. A production application would need a longer list of allowed domains and intents.
+This example comes from the Home Assistant blueprint. It is simplistic in that if the conversation departs from the "happy path," only one domain (`greeting`) is supported. A production application would need a longer tuple of allowed domains and intents.
 
 .. note::
    |
@@ -380,6 +380,11 @@ This example comes from the Home Assistant blueprint. It is simplistic in that i
    |
    |
     Like other settings in ``params``, ``allowed_intents`` and ``target_dialogue_state`` are one-turn operations, so you must re-assign them, if needed, in each subsequent turn.
+   |
+   |
+    When specifying a single allowed intent, explicitly define a tuple. E.g. 
+
+    ``responder.params.allowed_intents = tuple(['smart_home.close_door'])``
 
 
 .. _dynamic_gaz:
