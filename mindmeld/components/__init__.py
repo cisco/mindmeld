@@ -17,6 +17,7 @@ from .entity_resolver import EntityResolver
 from .nlp import NaturalLanguageProcessor
 from .preprocessor import Preprocessor
 from .question_answerer import QuestionAnswerer
+from .request import Request
 
 __all__ = [
     "Conversation",
@@ -26,4 +27,5 @@ __all__ = [
     "QuestionAnswerer",
     "EntityResolver",
     "Preprocessor",
+    "Request",
 ]

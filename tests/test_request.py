@@ -2,6 +2,8 @@ import pytest
 from attr.exceptions import FrozenInstanceError
 
 from mindmeld.components.request import FrozenParams, Params, Request
+from mindmeld.app_manager import freeze_params
+from immutables import Map
 
 
 @pytest.fixture
@@ -77,3 +79,88 @@ def test_immutability_of_sample_request_and_params():
     with pytest.raises(TypeError):
         request = Request()
         request.frame["a"] = "b"
+
+
+@pytest.mark.parametrize(
+    "allowed_intents, target_dialogue_state, time_zone, timestamp, language, locale, "
+    "dynamic_resource",
+    [
+        (
+            ("some-intents", "some-intents-2"),
+            "some-state",
+            "America/Los_Angeles",
+            1234,
+            "en",
+            "en_US",
+            {"resource": "dynamic"},
+        )
+    ],
+)
+def test_serialization_params(
+    allowed_intents,
+    target_dialogue_state,
+    time_zone,
+    timestamp,
+    language,
+    locale,
+    dynamic_resource,
+):
+    params = Params()
+    params.allowed_intents = allowed_intents
+    params.target_dialogue_state = target_dialogue_state
+    params.time_zone = time_zone
+    params.timestamp = timestamp
+    params.language = language
+    params.locale = locale
+    params.dynamic_resource = Map(dynamic_resource)
+    dict_result = params.to_dict()
+    assert allowed_intents == dict_result["allowed_intents"]
+    assert target_dialogue_state == dict_result["target_dialogue_state"]
+    assert time_zone == dict_result["time_zone"]
+    assert timestamp == dict_result["timestamp"]
+    assert language == dict_result["language"]
+    assert locale == dict_result["locale"]
+    assert dynamic_resource == dict_result["dynamic_resource"]
+
+
+@pytest.mark.parametrize(
+    "allowed_intents, target_dialogue_state, time_zone, timestamp, language, locale, "
+    "dynamic_resource",
+    [
+        (
+            ("some-intents", "some-intents-2"),
+            "some-state",
+            "America/Los_Angeles",
+            1234,
+            "en",
+            "en_US",
+            {"resource": "dynamic"},
+        )
+    ],
+)
+def test_serialization_frozen_params(
+    allowed_intents,
+    target_dialogue_state,
+    time_zone,
+    timestamp,
+    language,
+    locale,
+    dynamic_resource,
+):
+    params = Params()
+    params.allowed_intents = allowed_intents
+    params.target_dialogue_state = target_dialogue_state
+    params.time_zone = time_zone
+    params.timestamp = timestamp
+    params.language = language
+    params.locale = locale
+    params.dynamic_resource = Map(dynamic_resource)
+    frozen_params = freeze_params(params)
+    dict_result = frozen_params.to_dict()
+    assert allowed_intents == dict_result["allowed_intents"]
+    assert target_dialogue_state == dict_result["target_dialogue_state"]
+    assert time_zone == dict_result["time_zone"]
+    assert timestamp == dict_result["timestamp"]
+    assert language == dict_result["language"]
+    assert locale == dict_result["locale"]
+    assert dynamic_resource == dict_result["dynamic_resource"]
