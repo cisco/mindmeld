@@ -1,6 +1,9 @@
+import os
 import pytest
 
-from mindmeld.components import Conversation
+from mindmeld.components import Conversation, QuestionAnswerer
+
+STORE_DATA_FILE_PATH = os.path.dirname(__file__) + "/../kwik_e_mart/data/stores.json"
 
 
 def assert_reply(directives, templates, *, start_index=0, slots=None):
@@ -95,6 +98,11 @@ def test_auto_fill_happy_path(kwik_e_mart_app, kwik_e_mart_app_path):
     convo = Conversation(
         app=kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True
     )
+    qa = QuestionAnswerer(app_path='kwik_e_mart_app')
+    qa.load_kb(
+        app_namespace='kwik_e_mart',
+        index_name='stores',
+        data_file=STORE_DATA_FILE_PATH)
     directives = convo.process("What's the store phone number?").directives
     assert_target_dialogue_state(convo, "send_store_phone")
     assert_reply(directives, "Which store would you like to know about?")
@@ -110,6 +118,11 @@ def test_auto_fill_retry(kwik_e_mart_app, kwik_e_mart_app_path):
     convo = Conversation(
         app=kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True
     )
+    qa = QuestionAnswerer(app_path='kwik_e_mart_app')
+    qa.load_kb(
+        app_namespace='kwik_e_mart',
+        index_name='stores',
+        data_file=STORE_DATA_FILE_PATH)
     directives = convo.process("What's the store phone number?").directives
     assert_target_dialogue_state(convo, "send_store_phone")
     assert_reply(directives, "Which store would you like to know about?")
