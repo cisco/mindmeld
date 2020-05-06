@@ -26,9 +26,13 @@ NO_RESPONSE_CODE = -1
 SYS_ENTITY_REQUEST_TIMEOUT = os.environ.get("MM_SYS_ENTITY_REQUEST_TIMEOUT", 1.0)
 try:
     if float(SYS_ENTITY_REQUEST_TIMEOUT) <= 0.0:
-        raise MindMeldError("MM_SYS_ENTITY_REQUEST_TIMEOUT env var has to be > 0.0 seconds.")
-except ValueError:
-    raise MindMeldError("MM_SYS_ENTITY_REQUEST_TIMEOUT env var has to be a float value.")
+        raise MindMeldError(
+            "MM_SYS_ENTITY_REQUEST_TIMEOUT env var has to be > 0.0 seconds."
+        )
+except ValueError as e:
+    raise MindMeldError(
+        "MM_SYS_ENTITY_REQUEST_TIMEOUT env var has to be a float value."
+    ) from e
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +94,9 @@ class SystemEntityRecognizer:
         url = get_system_entity_url_config(app_path=self.app_path)
 
         try:
-            response = requests.request("POST", url, data=data, timeout=SYS_ENTITY_REQUEST_TIMEOUT)
+            response = requests.request(
+                "POST", url, data=data, timeout=float(SYS_ENTITY_REQUEST_TIMEOUT)
+            )
 
             if response.status_code == requests.codes["ok"]:
                 response_json = response.json()

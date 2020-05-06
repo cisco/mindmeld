@@ -85,7 +85,9 @@ def test_dialogue_state_rule_unexpected_keyword():
             dialogue_state="some-state", domain="some-domain", new_key="some-key"
         )
 
-    assert "DialogueStateRule() got an unexpected keyword argument 'new_key'" in str(ex)
+    assert "DialogueStateRule() got an unexpected keyword argument 'new_key'" in str(
+        ex.value
+    )
 
 
 def test_dialogue_state_rule_targeted_only():
@@ -103,7 +105,7 @@ def test_dialogue_state_rule_targeted_only():
         " must be omitted"
     )
 
-    assert msg in str(ex)
+    assert msg in str(ex.value)
 
 
 def test_dialogue_state_rule_exception():
@@ -290,12 +292,20 @@ def test_convo_params_are_cleared(kwik_e_mart_nlp, kwik_e_mart_app_path):
     "language, locale, expected_ser_call",
     [
         ("en", "en_GB", {"lang": "EN", "latent": True, "locale": "en_GB"}),
-        ("es", "en_US", {"latent": True, "locale": "en_US"}),
+        ("es", "en_US", {"lang": "EN", "latent": True, "locale": "en_US"}),
         (None, None, {"latent": True, "locale": "en_CA", "lang": "EN"}),
-        ("INVALID_LANG_CODE", "en_GB", {"latent": True, "locale": "en_GB"}),
-        (None, "en_GB", {"latent": True, "locale": "en_GB"}),
-        ("es", None, {"lang": "ES", "latent": True}),
-        ("es", "INVALID_LOCALE_CODE", {"lang": "ES", "latent": True}),
+        (
+            "INVALID_LANG_CODE",
+            "en_GB",
+            {"lang": "EN", "latent": True, "locale": "en_GB"},
+        ),
+        (None, "en_GB", {"lang": "EN", "latent": True, "locale": "en_GB"}),
+        ("es", None, {"lang": "EN", "latent": True, "locale": "en_CA"}),
+        (
+            "es",
+            "INVALID_LOCALE_CODE",
+            {"lang": "EN", "latent": True, "locale": "en_CA"},
+        ),
         ("eng", "en_GB", {"lang": "EN", "latent": True, "locale": "en_GB"}),
     ],
 )

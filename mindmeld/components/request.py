@@ -205,10 +205,10 @@ class Params:
             return validator(param)
         return param
 
-    def dm_params(self, handler_map):
+    def validate_dm_params(self, handler_map):
         """
-        Check that the value of the 'target_dialogue_state' parameter is a valid dialogue state
-            for the application.
+        Validate that the value of the 'target_dialogue_state' parameter is a valid dialogue state
+            for the application and returns that value in a dictionary.
 
         Args:
             handler_map (dict): Mapping from dialogue state to the function handler that gets
@@ -228,9 +228,10 @@ class Params:
             return {"target_dialogue_state": None}
         return {"target_dialogue_state": target_dialogue_state}
 
-    def nlp_params(self):
+    def validate_nlp_params(self):
         """
-        Validate time zone, timestamp, and dynamic resource parameters.
+        Validate language, locale, time zone, timestamp, and dynamic resource parameters
+            and return the params as a dictionary.
 
         Returns:
             dict: Mapping from parameter name to bool depending on validation.
@@ -245,6 +246,24 @@ class Params:
                 "locale",
             )
         }
+
+    def to_dict(self):
+        fields = [
+            "allowed_intents",
+            "target_dialogue_state",
+            "time_zone",
+            "timestamp",
+            "language",
+            "locale",
+            "dynamic_resource",
+        ]
+        _dic = {field: vars(self).get(field) for field in fields}
+        # converting from immutable map to just dictionary
+        _dic["dynamic_resource"] = {
+            key: _dic["dynamic_resource"][key] for key in _dic["dynamic_resource"]
+        }
+
+        return _dic
 
 
 @attr.s(frozen=True, kw_only=True)

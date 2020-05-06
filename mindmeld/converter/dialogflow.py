@@ -18,9 +18,12 @@ import json
 import logging
 import os
 import re
+import importlib.util
 
+from shutil import copyfile
 from mindmeld.converter.converter import Converter
 from mindmeld.converter.code_generator import MindmeldCodeGenerator
+from mindmeld.components._config import DEFAULT_INTENT_CLASSIFIER_CONFIG
 
 logger = logging.getLogger(__name__)
 package_dir = os.path.dirname(os.path.abspath(__file__))
@@ -89,7 +92,13 @@ class DialogflowConverter(Converter):
         "@sys.any",
     ]
 
-    def __init__(self, dialogflow_project_directory, mindmeld_project_directory):
+    def __init__(
+        self,
+        dialogflow_project_directory,
+        mindmeld_project_directory,
+        custom_config_file_path=None,
+        language="en",
+    ):
         if os.path.exists(os.path.dirname(dialogflow_project_directory)):
             self.dialogflow_project_directory = dialogflow_project_directory
             self.mindmeld_project_directory = mindmeld_project_directory
@@ -97,6 +106,8 @@ class DialogflowConverter(Converter):
             self.entities_list = set()
             self.intents_list = set()
             self.code_gen = MindmeldCodeGenerator()
+            self.custom_config_file_path = custom_config_file_path
+            self.language = language
         else:
             msg = "`{dialogflow_project_directory}` does not exist. Please verify."
             msg = msg.format(dialogflow_project_directory=dialogflow_project_directory)
@@ -124,6 +135,11 @@ class DialogflowConverter(Converter):
         """
         for languages in entities.values():
             for sub in languages.values():
+
+                if sub != self.language:
+                    # Each MindMeld app works on one language
+                    continue
+
                 dialogflow_entity_file = os.path.join(
                     self.dialogflow_project_directory, "entities", sub + ".json"
                 )
@@ -181,6 +197,11 @@ class DialogflowConverter(Converter):
 
         for languages in intents.values():
             for language, sub in languages.items():
+
+                if language != self.language:
+                    # Each MindMeld app works on one language
+                    continue
+
                 dialogflow_intent_file = os.path.join(
                     self.dialogflow_project_directory, "intents", sub + ".json"
                 )
@@ -223,7 +244,7 @@ class DialogflowConverter(Converter):
         all_text = []
         default_intent_to_training_file = {
             "default_fallback_intent": "unrelated.txt",
-            "default_welcome_intent": "greetings.txt"
+            "default_welcome_intent": "greetings.txt",
         }
 
         for usersay in datastore:
@@ -262,14 +283,23 @@ class DialogflowConverter(Converter):
 
         for key in default_intent_to_training_file:
             if key in mindmeld_intent_directory:
-                with open(os.path.join(package_dir, default_intent_to_training_file[key])) as fp:
+                with open(
+                    os.path.join(package_dir, default_intent_to_training_file[key])
+                ) as fp:
                     for line in fp:
                         all_text.append(line.strip())
 
-        # Double the size of the training set if there are less than 10 training examples.
-        # This is needed since the k-fold cross validation parameter is set to 10 for
-        # intent classification.
-        while len(all_text) < 10:
+        # Double the size of the training set if there are less than the number of
+        # folds for cross-val in the config.py file
+        intent_config = DEFAULT_INTENT_CLASSIFIER_CONFIG
+        if self.custom_config_file_path:
+            config_path = os.path.join(self.mindmeld_project_directory, "config.py")
+            spec = importlib.util.spec_from_file_location("mindmeld_app", config_path)
+            config = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(config)
+            intent_config = getattr(config, "INTENT_RECOGNIZER_CONFIG", intent_config)
+
+        while len(all_text) < intent_config["param_selection"]["k"]:
             all_text = all_text * 2
 
         target_train.write("\n".join(all_text))
@@ -390,21 +420,20 @@ class DialogflowConverter(Converter):
                 if entity in DialogflowConverter.sys_entity_map:
                     entity = DialogflowConverter.sys_entity_map[entity]
                 else:
-                    entity = (
-                        param["dataType"].replace("@", "").replace("-", "_")
-                    )
+                    entity = param["dataType"].replace("@", "").replace("-", "_")
                     entity = "%s_%s" % (entity, language)
                 role = param["name"].replace("@", "").replace("-", "_")
-                prompts = [x["value"] for x in param["prompts"]]
+
+                prompts = []
+                if "prompts" in param:
+                    prompts = [x["value"] for x in param["prompts"]]
+                else:
+                    prompts = ["What is the " + param["name"]]
 
                 if entity in intent_entity_role_replies[intent_lang]:
-                    intent_entity_role_replies[intent_lang][entity][
-                        role
-                    ] = prompts
+                    intent_entity_role_replies[intent_lang][entity][role] = prompts
                 else:
-                    intent_entity_role_replies[intent_lang][entity] = {
-                        role: prompts
-                    }
+                    intent_entity_role_replies[intent_lang][entity] = {role: prompts}
 
         if "speech" in message:
             data = message["speech"]
@@ -425,6 +454,7 @@ class DialogflowConverter(Converter):
 
             handle = "intent='%s_%s'" % (intent, language)
             function_name = intent + "_" + language + "_handler"
+
             if is_slot_template:
                 self.code_gen.generate_followup_function_code_block(
                     handle,
@@ -434,9 +464,7 @@ class DialogflowConverter(Converter):
                 )
             else:
                 self.code_gen.generate_function(
-                    handle=handle,
-                    function_name=function_name,
-                    replies=replies,
+                    handle=handle, function_name=function_name, replies=replies,
                 )
 
     # =========================
@@ -490,11 +518,17 @@ class DialogflowConverter(Converter):
         # Create project directory with sub folders
         self.create_mindmeld_directory()
 
-        # Transfer over test data from Dialogflow project and reformat to Mindmeld project
-        self.create_mindmeld_training_data()
-        file_loc = os.path.dirname(os.path.realpath(__file__))
+        # copy config file to the Mindmeld dir
+        if self.custom_config_file_path:
+            copyfile(
+                self.custom_config_file_path,
+                os.path.join(self.mindmeld_project_directory, "config.py"),
+            )
 
+        file_loc = os.path.dirname(os.path.realpath(__file__))
         self.create_main(self.mindmeld_project_directory, file_loc)
         self.create_mindmeld_init()
 
+        # Transfer over test data from Dialogflow project and reformat to Mindmeld project
+        self.create_mindmeld_training_data()
         logger.info("Project converted.")

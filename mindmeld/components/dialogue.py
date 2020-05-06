@@ -90,8 +90,8 @@ class DialogueStateRule:
         Args:
             dialogue_state (str): The name of the dialogue state.
             domain (str): The name of the domain to match against.
-            has_entity (str, list, set): A synonym for the ``has_entities`` param.
-            has_entities (str, list, set): A single entity type or a list of entity types to match
+            has_entity (str): A single entity type to match.
+            has_entities (list, set): A list/set of entity types to match
                 against.
             intent (str): The name of the intent to match against.
         """
@@ -120,16 +120,21 @@ class DialogueStateRule:
         resolved = {}
         for keys in key_kwargs:
             if len(keys) == 2:
-                single, plural = keys
+                single, plural = keys  # pylint: disable=unbalanced-tuple-unpacking
                 if single in kwargs and plural in kwargs:
                     msg = "Only one of {!r} and {!r} can be specified for a dialogue state rule"
-                    raise ValueError(
-                        msg.format(single, plural, self.__class__.__name__)
-                    )
-                if single in kwargs:
+                    raise ValueError(msg.format(single, plural))
+                elif single in kwargs and isinstance(kwargs[single], str):
                     resolved[plural] = {kwargs[single]}
-                if plural in kwargs:
+                elif plural in kwargs and isinstance(kwargs[plural], (list, set, tuple)):
                     resolved[plural] = set(kwargs[plural])
+                else:
+                    if single in kwargs:
+                        msg = "Invalid argument type {!r} for {!r}"
+                        raise ValueError(msg.format(kwargs[single], single))
+                    elif plural in kwargs:
+                        msg = "Invalid argument type {!r} for {!r}"
+                        raise ValueError(msg.format(kwargs[plural], plural))
             elif keys[0] in kwargs:
                 resolved[keys[0]] = kwargs[keys[0]]
 
