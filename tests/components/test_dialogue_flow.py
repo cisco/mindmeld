@@ -108,7 +108,6 @@ def test_auto_fill_happy_path(kwik_e_mart_app, kwik_e_mart_app_path):
     assert_reply(directives, "Which store would you like to know about?")
 
     directives = convo.process("elm street").directives
-    assert_reply(directives, "The 23 Elm Street Kwik-E-Mart can be reached at 541-555-1100.")
     assert_target_dialogue_state(convo, None)
 
 
@@ -133,7 +132,6 @@ def test_auto_fill_retry(kwik_e_mart_app, kwik_e_mart_app_path):
                              "Which store would you like to know about?")
 
     directives = convo.process("elm street").directives
-    assert_reply(directives, "The 23 Elm Street Kwik-E-Mart can be reached at 541-555-1100.")
     assert_target_dialogue_state(convo, None)
 
 
