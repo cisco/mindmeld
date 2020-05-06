@@ -159,7 +159,7 @@ def send_store_phone(request, responder):
     )
     try:
         stores = app.question_answerer.get(
-            index="stores", id=store_entity["value"]["id"]
+            index="stores", id=store_entity["value"][0]["id"]
         )
     except TypeError:
         # failed to resolve entity
