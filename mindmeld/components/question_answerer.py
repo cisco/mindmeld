@@ -28,6 +28,7 @@ from ._config import (
     DEFAULT_ES_QA_MAPPING,
     DEFAULT_RANKING_CONFIG,
     get_app_namespace,
+    get_classifier_config,
 )
 from ._elasticsearch_helpers import (
     create_es_client,
@@ -41,6 +42,7 @@ from ._elasticsearch_helpers import (
 logger = logging.getLogger(__name__)
 
 DEFAULT_QUERY_TYPE = "keyword"
+ALL_QUERY_TYPES = ["keyword", "text", "embedder"]
 
 
 class QuestionAnswerer:
@@ -63,6 +65,15 @@ class QuestionAnswerer:
         self.__es_client = None
         self._app_namespace = get_app_namespace(app_path)
         self._es_field_info = {}
+        self._qa_config = get_classifier_config("question_answering", app_path=app_path)
+
+        self._embedder_model = None
+        if self._qa_config.get('model_type') == "embedder":
+            model_settings = self._qa_config.get('model_settings')
+            if model_settings.get('embedder_type', 'bert') == 'bert':
+                from sentence_transformers import SentenceTransformer
+                trained_data = model_settings.get('trained_data', 'bert-base-nli-mean-tokens')
+                self._embedder_model = SentenceTransformer(trained_data)
 
     @property
     def _es_client(self):
@@ -71,7 +82,14 @@ class QuestionAnswerer:
             self.__es_client = create_es_client(self._es_host)
         return self.__es_client
 
-    def get(self, index, size=10, query_type=DEFAULT_QUERY_TYPE, **kwargs):
+    @property
+    def _query_type(self):
+        if self._qa_config.get('model_type') in ALL_QUERY_TYPES:
+            return self._qa_config.get('model_type')
+        else:
+            return DEFAULT_QUERY_TYPE
+
+    def get(self, index, size=10, query_type=None, **kwargs):
         """Gets a collection of documents from the knowledge base matching the provided
         search criteria. This API provides a simple interface for developers to specify a list of
         knowledge base field and query string pairs to find best matches in a similar way as in
@@ -102,8 +120,10 @@ class QuestionAnswerer:
         Returns:
             list: A list of matching documents.
         """
-
         doc_id = kwargs.get("id")
+
+        if not query_type:
+            query_type = self._query_type
 
         # If an id was passed in, simply retrieve the specified document
         if doc_id:
@@ -229,6 +249,58 @@ class QuestionAnswerer:
         """
         raise NotImplementedError
 
+    @staticmethod
+    def generate_embeddings_for_kb(data_file, model_config):
+        if model_config.get('embedder_type', 'bert') == 'bert':
+            from sentence_transformers import SentenceTransformer
+            trained_data = model_config.get('trained_data', 'bert-base-nli-mean-tokens')
+            embedder_model = SentenceTransformer(trained_data)
+        else:
+            logger.error(
+                "Embedder model %s not currently supported",
+                model_config.get('embedder_type')
+            )
+        embedding_fields = model_config.get('embedding_fields', [])
+
+        if len(embedding_fields) == 0:
+            logger.warning(
+                "No embedding fields specified in the app config, continuing without embeddings"
+            )
+
+        use_jsonl = False
+        with open(data_file) as data_fp:
+            line = data_fp.readline()
+            data_fp.seek(0)
+            if line.strip() == "[":
+                logging.debug("Loading data from a json file.")
+                docs = json.load(data_fp)
+            else:
+                logging.debug("Loading data from a jsonl file.")
+                use_jsonl = True
+                docs = []
+                for line in data_fp:
+                    doc = json.loads(line)
+                    docs.append(doc)
+
+        new_fields = {}
+        for field in embedding_fields:
+            text_list = [doc[field] for doc in docs]
+            embedding_list = embedder_model.encode(text_list)
+            new_fields[field + '_embedding'] = embedding_list
+
+        for idx, doc in enumerate(docs):
+            for new_field, embedding in new_fields.items():
+                doc[new_field] = embedding[idx].tolist()
+
+        # Rewrite doc with the embeddings included
+        with open(data_file, 'w') as data_fp:
+            if not use_jsonl:
+                json.dump(docs, data_fp, indent=4)
+            else:
+                for doc in docs:
+                    json.dump(doc, data_fp)
+                    data_fp.write('\n')
+
     @classmethod
     def load_kb(
         cls,
@@ -239,6 +311,8 @@ class QuestionAnswerer:
         es_client=None,
         connect_timeout=2,
         clean=False,
+        generate_embeddings=False,
+        app_path=None
     ):
         """Loads documents from disk into the specified index in the knowledge
         base. If an index with the specified name doesn't exist, a new index
@@ -258,7 +332,16 @@ class QuestionAnswerer:
                 connection to the Elasticsearch host.
             clean (bool): Set to true if you want to delete an existing index
                 and reindex it
+            generate_embeddings (bool): Set to true if you want to generate
+                embeddings using the model specified in the app config
+            app_path (str): The path to the directory containing the app's data
         """
+        if generate_embeddings:
+            if not app_path:
+                logger.error("You must provide the application path when generating embeddings.")
+            qa_config = get_classifier_config("question_answering", app_path=app_path)
+            model_config = qa_config.get('model_settings', {})
+            cls.generate_embeddings_for_kb(data_file, model_config)
 
         def _doc_count(data_file):
             with open(data_file) as data_fp:
@@ -275,6 +358,8 @@ class QuestionAnswerer:
 
         def _doc_generator(data_file):
             def transform(doc):
+                if not doc.get('id'):
+                    return doc
                 base = {"_id": doc["id"]}
                 base.update(doc)
                 return base
@@ -318,8 +403,6 @@ class QuestionAnswerer:
             with open(data_file) as data_fp:
                 line = data_fp.readline()
                 data_fp.seek(0)
-                # TODO: what does seek do
-                print(line)
                 if line.strip() == "[":
                     docs = json.load(data_fp)
                     doc = docs[0]
@@ -335,9 +418,9 @@ class QuestionAnswerer:
                                 MAX_ES_VECTOR_LEN
                             )
                         embedding_properties.append({
-                                'field': field,
-                                'dims': dims
-                            })
+                            'field': field,
+                            'dims': dims
+                        })
             return mapping_data
 
         mapping_data = _generate_mapping_data(data_file)
@@ -839,7 +922,7 @@ class Search:
                         ]
                     }
                 }
-            elif self.query_type == "embedding":
+            elif self.query_type == "embedder":
                 if self.field_info.is_vector_field():
                     clause = None
                     functions = [{
@@ -872,7 +955,6 @@ class Search:
 
             else:
                 raise Exception("Unknown query type.")
-
 
             if self.field_info.is_text_field():
                 # Boost function for boosting conditions, e.g. exact match boosting

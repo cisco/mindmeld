@@ -34,6 +34,7 @@ CONFIG_DEPRECATION_MAPPING = {
     "ENTITY_RECOGNIZER_CONFIG": "ENTITY_MODEL_CONFIG",
     "ROLE_CLASSIFIER_CONFIG": "ROLE_MODEL_CONFIG",
     "ENTITY_RESOLVER_CONFIG": "ENTITY_RESOLUTION_CONFIG",
+    "QUESTION_ANSWERER_CONFIG": "QUESTION_ANSWERING_CONFIG",
     "get_entity_recognizer_config": "get_entity_model_config",
     "get_intent_classifier_config": "get_intent_model_config",
     "get_entity_resolver_config": "get_entity_resolution_model_config",
@@ -101,6 +102,8 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 }
 
 DEFAULT_ENTITY_RESOLVER_CONFIG = {"model_type": "text_relevance"}
+
+DEFAULT_QUESTION_ANSWERER_CONFIG = {"model_type": "keyword"}
 
 ENGLISH_LANGUAGE_CODE = "en"
 ENGLISH_US_LOCALE = "en_US"
@@ -633,6 +636,7 @@ def get_classifier_config(
         "entity": "ENTITY_RECOGNIZER_CONFIG",
         "entity_resolution": "ENTITY_RESOLVER_CONFIG",
         "role": "ROLE_CLASSIFIER_CONFIG",
+        "question_answering": "QUESTION_ANSWERER_CONFIG"
     }[clf_type]
     try:
         return copy.deepcopy(getattr(module_conf, attr_name))
@@ -662,6 +666,7 @@ def _get_default_classifier_config(clf_type):
             "entity_resolution": DEFAULT_ENTITY_RESOLVER_CONFIG,
             "role": DEFAULT_ROLE_CLASSIFIER_CONFIG,
             "language_config": DEFAULT_LANGUAGE_CONFIG,
+            "question_answering": DEFAULT_QUESTION_ANSWERER_CONFIG
         }[clf_type]
     )
 
