@@ -154,6 +154,7 @@ form_store_phone = {
 
 @app.auto_fill(domain="store_info", intent="get_store_number", form=form_store_phone)
 def send_store_phone(request, responder):
+    active_store = None
     store_entity = next(
         (e for e in request.entities if e["type"] == "store_name"), None
     )

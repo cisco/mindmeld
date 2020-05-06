@@ -20,8 +20,8 @@ number for the e mart on {russian district|store_name} please
 dial the {181st|store_name} location
 Was {D street|store_name} reachable?
 what is the number of the {257th|store_name}?
-call the manager at {45 Fifth Avenue|store_name}
-call Ben at {45 Fifth Avenue|store_name}
+call the manager at {Industrial Road|store_name}
+call Ben at {Industrial Road|store_name}
 can you call to check the menu at {Central Plaza|store_name}?
 Ask  {Central Plaza|store_name} the status of my order?
 Where can I ring {D street|store_name}?
