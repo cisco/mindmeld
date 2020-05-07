@@ -270,12 +270,12 @@ class ApplicationManager:
     def _pre_nlp(self, params, verbose=False):
         # validate params
         allowed_intents = params.validate_param("allowed_intents")
-        nlp_params = params.nlp_params()
+        nlp_params = params.validate_nlp_params()
         nlp_params["verbose"] = verbose
         return (
             allowed_intents,
             nlp_params,
-            params.dm_params(self.dialogue_manager.handler_map),
+            params.validate_dm_params(self.dialogue_manager.handler_map),
         )
 
     def _post_dm(self, request, dm_response):
