@@ -270,8 +270,12 @@ def process_markup(markup, query_factory, query_options):
     return raw_text, query, entities
 
 
-def _process_annotations(query, annotations):
+def _process_annotations(query, annotations, duckling_url=None):
     """
+    Args:
+        query (Query)
+        annotations (list)
+        duckling_url (str)
 
     Returns:
         list of ProcessedQuery:
@@ -307,7 +311,9 @@ def _process_annotations(query, annotations):
             span = Span(ann["start"], ann["end"])
             if Entity.is_system_entity(ann["type"]):
                 try:
-                    raw_entity = resolve_system_entity(query, ann["type"], span).entity
+                    raw_entity = resolve_system_entity(
+                        query, ann["type"], span, url=duckling_url
+                    ).entity
                 except SystemEntityResolutionError as e:
                     logger.warning("Unable to load query: %s", e)
                     return

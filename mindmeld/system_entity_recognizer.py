@@ -86,7 +86,7 @@ class DummySystemEntityRecognizer(SystemEntityRecognizer):
         if not DummySystemEntityRecognizer._instance:
             DummySystemEntityRecognizer._instance = self
         else:
-            raise Exception("DummySystemEntityRecognizer is a singleton")
+            raise SystemEntityError("DummySystemEntityRecognizer is a singleton")
 
     @staticmethod
     def get_instance():
@@ -112,7 +112,7 @@ class DucklingRecognizer(SystemEntityRecognizer):
             url (str): Duckling URL
         """
         if url in DucklingRecognizer._instances:
-            raise Exception("DucklingRecognizer is a singleton")
+            raise SystemEntityError("DucklingRecognizer is a singleton")
 
         self.url = url
         DucklingRecognizer._instances[url] = self

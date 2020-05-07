@@ -30,16 +30,26 @@ class QueryFactory:
         tokenizer (Tokenizer): the object responsible for normalizing and tokenizing processed
             text
         stemmer (Stemmer): the object responsible for stemming the text
+        language (str): the language of the text
+        locale (str): the locale of the text
+        url (str): the URL for Duckling, if not passed, use the default one
     """
 
     def __init__(
-        self, tokenizer, preprocessor=None, stemmer=None, locale=None, language=None
+        self,
+        tokenizer,
+        preprocessor=None,
+        stemmer=None,
+        locale=None,
+        language=None,
+        url=None,
     ):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
         self.stemmer = stemmer
         self.locale = locale
         self.language = language
+        self.url = url
 
     def create_query(
         self, text, time_zone=None, timestamp=None, locale=None, language=None
@@ -102,7 +112,7 @@ class QueryFactory:
             stemmed_tokens=stemmed_tokens,
         )
         query.system_entity_candidates = sys_ent_rec.get_candidates(
-            query, locale=locale, language=language
+            query, locale=locale, language=language, url=self.url
         )
         return query
 

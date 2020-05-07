@@ -260,7 +260,7 @@ def _get_tags_from_entities(query, entities, scheme="IOB"):
     return iobs, types
 
 
-def get_entities_from_tags(query, tags):
+def get_entities_from_tags(query, tags, duckling_url=None):
     """From a set of joint IOB tags, parse the app and system entities.
 
     This performs the reverse operation of get_tags_from_entities.
@@ -269,6 +269,7 @@ def get_entities_from_tags(query, tags):
         query (Query): Any query instance.
         tags (list of str): Joint app and system tags, like those
             created by get_tags_from_entities.
+        duckling_url (str): The URL for Duckling, if not passed, use the default one.
 
     Returns:
         (list of QueryEntity) The tuple containing the list of entities.
@@ -308,7 +309,7 @@ def get_entities_from_tags(query, tags):
         span = query.transform_span(norm_span, TEXT_FORM_NORMALIZED, TEXT_FORM_RAW)
 
         try:
-            entity = resolve_system_entity(query, entity_type, span)
+            entity = resolve_system_entity(query, entity_type, span, url=duckling_url)
             entities.append(entity)
             logger.debug("Appended system entity %s.", entity)
         except SystemEntityResolutionError:

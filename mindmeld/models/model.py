@@ -1250,6 +1250,16 @@ class LabelEncoder:
 
 
 class EntityLabelEncoder(LabelEncoder):
+    def __init__(self, config, duckling_url=None):
+        """
+        Args:
+            config (ModelConfig): The model
+            duckling_url (str): The URL for Duckling, if not passed, use the default one
+
+        """
+        self.config = config
+        self.duckling_url = duckling_url
+
     def _get_tag_scheme(self):
         return self.config.model_settings.get("tag_scheme", "IOB").upper()
 
@@ -1287,7 +1297,7 @@ class EntityLabelEncoder(LabelEncoder):
         # TODO: support decoding multiple queries at once
         examples = kwargs["examples"]
         labels = [
-            get_entities_from_tags(examples[idx], tags)
+            get_entities_from_tags(examples[idx], tags, duckling_url=self.duckling_url)
             for idx, tags in enumerate(tags_by_example)
         ]
         return labels

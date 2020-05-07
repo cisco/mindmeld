@@ -229,6 +229,9 @@ def parse_numerics(
             # Convert a second grain unix timestamp to millisecond
             timestamp *= 1000
         data["reftime"] = timestamp
+
+    # Currently we rely on Duckling for parsing numerical data but in the future we can use
+    # other system entity recognizer too
     return DucklingRecognizer.get_instance(url=url).get_response(data)
 
 
