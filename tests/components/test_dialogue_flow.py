@@ -1,9 +1,6 @@
-import os
 import pytest
 
-from mindmeld.components import Conversation, QuestionAnswerer
-
-STORE_DATA_FILE_PATH = os.path.dirname(__file__) + "/../kwik_e_mart/data/stores.json"
+from mindmeld.components import Conversation
 
 
 def assert_reply(directives, templates, *, start_index=0, slots=None):
@@ -90,64 +87,6 @@ def test_intent_handler_and_exit_flow(async_kwik_e_mart_app, kwik_e_mart_app_pat
     directives = convo.process("exit").directives
     assert_target_dialogue_state(convo, None)
     assert_reply(directives, templates=["Bye", "Goodbye", "Have a nice day."])
-
-
-@pytest.mark.conversation
-def test_auto_fill_happy_path(kwik_e_mart_app, kwik_e_mart_app_path):
-    """Tests that the params are cleared in one trip from app to mm."""
-    convo = Conversation(
-        app=kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True
-    )
-    qa = QuestionAnswerer(app_path='kwik_e_mart_app')
-    qa.load_kb(
-        app_namespace='kwik_e_mart',
-        index_name='stores',
-        data_file=STORE_DATA_FILE_PATH)
-    directives = convo.process("What's the store phone number?").directives
-    assert_target_dialogue_state(convo, "send_store_phone")
-    assert_reply(directives, "Which store would you like to know about?")
-
-    directives = convo.process("elm street").directives
-    assert_target_dialogue_state(convo, None)
-
-
-@pytest.mark.conversation
-def test_auto_fill_retry(kwik_e_mart_app, kwik_e_mart_app_path):
-    """Tests that the params are cleared in one trip from app to mm."""
-    convo = Conversation(
-        app=kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True
-    )
-    qa = QuestionAnswerer(app_path='kwik_e_mart_app')
-    qa.load_kb(
-        app_namespace='kwik_e_mart',
-        index_name='stores',
-        data_file=STORE_DATA_FILE_PATH)
-    directives = convo.process("What's the store phone number?").directives
-    assert_target_dialogue_state(convo, "send_store_phone")
-    assert_reply(directives, "Which store would you like to know about?")
-
-    directives = convo.process("Some store").directives
-    assert_target_dialogue_state(convo, "send_store_phone")
-    assert_reply(directives, "Sorry, I did not get you. "
-                             "Which store would you like to know about?")
-
-    directives = convo.process("elm street").directives
-    assert_target_dialogue_state(convo, None)
-
-
-@pytest.mark.conversation
-def test_auto_fill_exit_flow(kwik_e_mart_app, kwik_e_mart_app_path):
-    """Tests that the params are cleared in one trip from app to mm."""
-    convo = Conversation(
-        app=kwik_e_mart_app, app_path=kwik_e_mart_app_path, force_sync=True
-    )
-    directives = convo.process("What's the store phone number?").directives
-    assert_target_dialogue_state(convo, "send_store_phone")
-    assert_reply(directives, "Which store would you like to know about?")
-
-    directives = convo.process("exit").directives
-    assert_reply(directives, "Sorry I cannot help you. Please try again.")
-    assert_target_dialogue_state(convo, None)
 
 
 def assert_dialogue_state(dm, dialogue_state):

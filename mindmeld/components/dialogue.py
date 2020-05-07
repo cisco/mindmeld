@@ -721,33 +721,29 @@ class AutoEntityFilling:
             self._form['max_retries'] if 'max_retries' in self._form else 1)
         self._exit_response = (
             self._form['exit_msg'] if 'exit_msg' in self._form else 'How may I help you?')
-        self._exit_intent = (
-            self._form['exit_intent'] if 'exit_intent' in self._form else None)
         self._exit_keys = (
             self._form['exit_keys'] if 'exit_keys' in self._form else
             ['cancel', 'restart', 'exit', 'reset'])
 
         if not isinstance(self._max_retries, int):
-                    raise TypeError("'max_retries' should be of type: int.")
+            raise TypeError("'max_retries' should be of type: int.")
         if not isinstance(self._exit_response, str):
-                    raise TypeError("'exit_msg' should be of type: str.")
-        if self._exit_intent and not isinstance(self._exit_intent, list):
-                    raise TypeError("'exit_intent' should be of type: list.")
+            raise TypeError("'exit_msg' should be of type: str.")
         if not isinstance(self._exit_keys, list):
             raise TypeError("'exit_keys' should be of type: list.")
 
         self._exit_keys = list(map(str.lower, self._exit_keys))
 
-    def _set_target_state(self, request, responder):
+    def _set_next_turn(self, request, responder):
         """Set target dialogue state to the entrance handler's name"""
-        responder.params.allowed_intents = tuple([''.join([request.domain, ".", request.intent])])
+        responder.params.allowed_intents = tuple(['{}.{}'.format(request.domain, request.intent)])
         responder.params.target_dialogue_state = self._entrance_handler.__name__
 
-    def _exit_flow(self, responder, intents=None):
+    def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
         self._prompt_user = None
         self._local_form = None
-        responder.params.allowed_intents = tuple(intents) if intents else tuple()
+        responder.params.allowed_intents = tuple()
         responder.exit_flow()
 
     def _extract_query_features(
@@ -873,6 +869,7 @@ class AutoEntityFilling:
 
     def _prompt_slot(self, responder, nlr):
         responder.reply(nlr)
+        self._retry_attempts = 0
         self._prompt_user = False
 
     def _retry_logic(self, responder, nlr):
@@ -895,9 +892,10 @@ class AutoEntityFilling:
         """
         if request.text.lower() in self._exit_keys:
             responder.reply(self._exit_response)
-            return self._exit_flow(responder, self._exit_intent)
+            self._exit_flow(responder)
+            return
 
-        self._set_target_state(request, responder)
+        self._set_next_turn(request, responder)
 
         if self._prompt_user is None or self._local_form is None:
             # Entering the flow
@@ -913,7 +911,8 @@ class AutoEntityFilling:
             if not slot.value:
                 # check if user has been prompted for this entity slot
                 if self._prompt_user:
-                    return self._prompt_slot(responder, slot.responses)
+                    self._prompt_slot(responder, slot.responses)
+                    return
 
                 # If already prompted,
                 # validate the user response and retry if invalid response
@@ -921,7 +920,8 @@ class AutoEntityFilling:
 
                 if not _is_valid:
                     # retry logic
-                    return self._retry_logic(responder, slot.retry_response)
+                    self._retry_logic(responder, slot.retry_response)
+                    return
 
                 slot.value = Entity(
                     text=request.text,
@@ -929,6 +929,7 @@ class AutoEntityFilling:
                     role=slot.role,
                     value=_resolved_value).to_dict()
 
+                # Reset prompt for next slot
                 self._prompt_user = True
 
         # Finish slot-filling and return to handler

@@ -63,7 +63,6 @@ class Application:
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
         self.preprocessor = preprocessor
-        self.autofill = AutoEntityFilling
         self.async_mode = async_mode
 
     @property
@@ -179,8 +178,8 @@ class Application:
             func_name = name or func.__name__
             if not form or not isinstance(form, dict):
                 raise TypeError("Form cannot be empty.")
-            autofill_func = self.autofill(func, form, self)
-            self.add_dialogue_rule(func_name, autofill_func, **kwargs)
+            auto_fill = AutoEntityFilling(func, form, self)
+            self.add_dialogue_rule(func_name, auto_fill, **kwargs)
             return func
 
         return _decorator

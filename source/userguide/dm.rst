@@ -578,11 +578,10 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
 
 - ``form`` is a dictionary containing the following entries:
 
-  - ``entities`` (list, required): List of ``FormEntity`` objects with each defined for one entity slot to be filled.
+  - ``entities`` (list, required): List of ``FormEntity`` objects with each defined for one entity slot to be filled. The order of entities provided in this list is important as the slots will be prompted in that order. So the order should follow the flow of the dialogue intended for slot filling.
   - ``max_retries`` (int, optional, default 1): maximum number of retries allowed per entity or slot if user response is invalid.
   - ``exit_msg`` (str, optional): If slot filling is exited abruptly without completion, define custom message to display.
-  - ``exit_intent`` (list, optional): If slot filling is exited abruptly without completion, the developer can define which particular intents (format ``['domain.intent', 'domain.intent'``) should the following query be redirected to. Default: None.
-  - ``exit_hints`` (list, optional): List of exit hints for the slot filling flow. If these words or phrases are said by the user, the slot filling logic exits. Default: ['cancel', 'restart', 'exit', 'reset'].
+  - ``exit_keys`` (list, optional): List of exit hints for the slot filling flow. If these words or phrases are said by the user, the slot filling logic exits. Default: ['cancel', 'restart', 'exit', 'reset'].
 
 .. |br| raw:: html
 
@@ -605,6 +604,10 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
    <br />
 
 Once the slot filling is complete, the filled in entities can be access through ``request.entities`` in the same manner as any other handler.
+
+.. note::
+   |
+    The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order.
 
 Example use-case
 ^^^^^^^^^^^^^^^^
@@ -636,8 +639,7 @@ Transfer money in a banking app:
           ],
       'max_retries': 1,
       'exit_keys': [<list of keywords>],
-      'exit_msg': 'custom exit message',
-      'exit_intent': [<list of exit intents>]
+      'exit_msg': 'custom exit message'
       }
 
 .. code:: python

@@ -15,11 +15,13 @@ import warnings
 
 import pytest
 
-from mindmeld.components import NaturalLanguageProcessor, Preprocessor
+from mindmeld.components import NaturalLanguageProcessor, Preprocessor, QuestionAnswerer
+from mindmeld.components._elasticsearch_helpers import create_es_client
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.stemmers import EnglishNLTKStemmer
 from mindmeld.tokenizer import Tokenizer
+
 
 warnings.filterwarnings(
     "module", category=DeprecationWarning, module="sklearn.preprocessing.label"
@@ -36,6 +38,8 @@ HOME_ASSISTANT_APP_PATH = os.path.join(
 )
 AENEID_FILE = "aeneid.txt"
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
+
+STORE_DATA_FILE_PATH = os.path.join(APP_PATH, "data/stores.json")
 
 
 @pytest.fixture
@@ -112,6 +116,24 @@ def async_kwik_e_mart_app(kwik_e_mart_nlp):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(app.app_manager.load())
     return app
+
+
+@pytest.fixture
+def es_client():
+    """An Elasticsearch client"""
+    return create_es_client()
+
+
+@pytest.fixture
+def qa_kwik_e_mart(kwik_e_mart_app_path, es_client):
+    QuestionAnswerer.load_kb(
+        app_namespace="kwik_e_mart",
+        index_name="stores",
+        data_file=STORE_DATA_FILE_PATH,
+    )
+    es_client.indices.flush(index="_all")
+    qa = QuestionAnswerer(kwik_e_mart_app_path)
+    return qa
 
 
 class GhostPreprocessor(Preprocessor):
