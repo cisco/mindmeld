@@ -709,7 +709,7 @@ class AutoEntityFilling:
         self._entrance_handler = entrance_handler
         self._form = form
         self._local_form = None
-        self._prompt_user = None
+        self._prompt_turn = None
         self._check_attr()
 
     def _check_attr(self):
@@ -741,7 +741,7 @@ class AutoEntityFilling:
 
     def _exit_flow(self, responder):
         """Exits this flow and clears the related parameter for re-usability"""
-        self._prompt_user = None
+        self._prompt_turn = None
         self._local_form = None
         responder.params.allowed_intents = tuple()
         responder.exit_flow()
@@ -870,7 +870,7 @@ class AutoEntityFilling:
     def _prompt_slot(self, responder, nlr):
         responder.reply(nlr)
         self._retry_attempts = 0
-        self._prompt_user = False
+        self._prompt_turn = False
 
     def _retry_logic(self, responder, nlr):
         if self._retry_attempts < self._max_retries:
@@ -897,9 +897,9 @@ class AutoEntityFilling:
 
         self._set_next_turn(request, responder)
 
-        if self._prompt_user is None or self._local_form is None:
+        if self._prompt_turn is None or self._local_form is None:
             # Entering the flow
-            self._prompt_user = True
+            self._prompt_turn = True
             self._local_form = copy.deepcopy(self._entity_form)
             self._retry_attempts = 0
 
@@ -910,7 +910,7 @@ class AutoEntityFilling:
 
             if not slot.value:
                 # check if user has been prompted for this entity slot
-                if self._prompt_user:
+                if self._prompt_turn:
                     self._prompt_slot(responder, slot.responses)
                     return
 
@@ -930,7 +930,7 @@ class AutoEntityFilling:
                     value=_resolved_value).to_dict()
 
                 # Reset prompt for next slot
-                self._prompt_user = True
+                self._prompt_turn = True
 
         # Finish slot-filling and return to handler
         return self._end_slot_fill(request, responder)
