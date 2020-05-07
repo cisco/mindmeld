@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module contains the Kwik-E-Mart MindMeld demo application"""
 from mindmeld import Application
+from mindmeld.core import FormEntity
 
 from . import custom_features  # noqa: F401
 
@@ -32,8 +33,9 @@ def say_goodbye(request, responder):
 @app.handle(intent="help")
 def provide_help(request, responder):
     prompts = [
-        "I can help you find store hours for your local Kwik-E-Mart. For example, you can "
-        "say 'Where's the nearest store?' or 'When does the Elm Street store open?'"
+        "I can help you find store hours phone numbers for your local Kwik-E-Mart."
+        "For example, you can say 'When does the Elm Street store open?' or "
+        "'Where's the nearest store?' or  or 'what's the phone number for Central Plaza?"
     ]
     responder.reply(prompts)
     responder.listen()
@@ -137,3 +139,44 @@ def exit_handler(request, responder):
 @send_store_hours.handle(intent="get_store_hours")
 def send_store_hours_in_flow_handler(request, responder):
     send_store_hours(request, responder)
+
+
+form_store_phone = {
+    'entities': [
+        FormEntity(
+            entity='store_name',
+            responses='Which store would you like to know about?',
+            retry_response="Sorry, I did not get you. "
+                           "Which store would you like to know about?")],
+    'max_retries': 1,
+    'exit_msg': "Sorry I cannot help you. Please try again."}
+
+
+@app.auto_fill(domain="store_info", intent="get_store_number", form=form_store_phone)
+def send_store_phone(request, responder):
+    active_store = None
+    store_entity = next(
+        (e for e in request.entities if e["type"] == "store_name"), None
+    )
+    try:
+        stores = app.question_answerer.get(
+            index="stores", id=store_entity["value"][0]["id"]
+        )
+    except TypeError:
+        # failed to resolve entity
+        stores = app.question_answerer.get(
+            index="stores", store_name=store_entity["text"]
+        )
+    try:
+        active_store = stores[0]
+    except IndexError:
+        # No active store... continue
+        pass
+
+    if active_store:
+        responder.slots["store_name"] = active_store["store_name"]
+        responder.slots["phone_number"] = active_store["phone_number"]
+        responder.reply(
+            "The {store_name} Kwik-E-Mart can be reached at {phone_number}."
+        )
+        return

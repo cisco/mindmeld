@@ -747,6 +747,47 @@ class Entity:
         return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.type)
 
 
+class FormEntity:
+    """A form entity is used for defining custom objects for the entity form used in
+    AutoEntityFilling (slot-filling).
+
+    Attributes:
+        entity (str): Entity name
+        role (str, optional): The role of the entity
+        responses(list, optional): NLR for prompting the user for missing entities
+        value (str, optional): The resolved value of the entity
+        default_eval(bool, optional): Use system validation (default: True)
+        hints(list, optional): Developer defined list of keywords to verify the
+        user input against
+        custom_eval(func, optional): custom validation function (should return bool:
+        validated or not)
+    """
+    def __init__(
+        self,
+        entity=None,
+        role=None,
+        responses=None,
+        retry_response=None,
+        value=None,
+        default_eval=True,
+        hints=None,
+        custom_eval=None
+    ):
+        self.entity = entity
+        if not self.entity or not isinstance(self.entity, str):
+                raise TypeError("Entity cannot be empty.")
+        self.role = role
+        self.responses = (
+            responses or ["Please provide value for: {}".format(self.entity)])
+        self.retry_response = retry_response or self.responses
+        self.value = value
+        self.default_eval = default_eval
+        self.hints = hints
+        self.custom_eval = custom_eval
+        if self.custom_eval and not callable(custom_eval):
+            raise TypeError('Invalid custom validation function type.')
+
+
 def resolve_entity_conflicts(query_entities):
     """This method takes a list containing query entities for a query, and resolves
     any entity conflicts. The resolved list is returned.
