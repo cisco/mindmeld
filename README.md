@@ -1,6 +1,6 @@
 # MindMeld Conversational AI Platform
 
-[![CircleCI](https://circleci.com/gh/expectlabs/mindmeld-workbench.svg?style=svg&circle-token=437cf905895688ac1b58b60fe79144c180893372)](https://circleci.com/gh/expectlabs/mindmeld-workbench)
+![MindMeld](https://github.com/cisco/mindmeld/workflows/MindMeld/badge.svg?branch=master)
 
 This repository contains the [MindMeld Conversational AI Platform](https://www.mindmeld.com).
 
