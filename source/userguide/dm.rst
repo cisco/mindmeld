@@ -579,7 +579,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
 - ``form`` is a dictionary containing the following entries:
 
   - ``entities`` (list, required): List of ``FormEntity`` objects with each defined for one entity slot to be filled. The order of entities provided in this list is important as the slots will be prompted in that order. So the order should follow the flow of the dialogue intended for slot filling.
-  - ``max_retries`` (int, optional, default 1): maximum number of retries allowed per entity or slot if user response is invalid.
+  - ``max_retries`` (int, optional, default 1): Maximum number of retries allowed per entity or slot if user response is invalid.
   - ``exit_msg`` (str, optional): If slot filling is exited abruptly without completion, define custom message to display.
   - ``exit_keys`` (list, optional): List of exit hints for the slot filling flow. If these words or phrases are said by the user, the slot filling logic exits. Default: ['cancel', 'restart', 'exit', 'reset'].
 
@@ -591,12 +591,12 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   
   - ``entity`` (str, required): Entity name
   - ``role`` (str, optional): The role of the entity
-  - ``responses`` (list or str, optional): message for prompting the user for missing entities
-  - ``retry_response`` (str, optional): message for re-prompting users. If not provided, defaults to ``responses``.
+  - ``responses`` (list or str, optional): Message for prompting the user for missing entities
+  - ``retry_response`` (str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
   - ``value`` (str, optional): The resolved value of the entity
   - ``default_eval`` (bool, optional): Use system validation (default: True)
   - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against
-  - ``custom_eval`` (func, optional): custom validation function (should return bool:
+  - ``custom_eval`` (func, optional): Custom validation function (should return bool:
     validated or not)
 
 .. |br| raw:: html
@@ -618,14 +618,16 @@ Transfer money in a banking app:
 
     from mindmeld.core import FormEntity
 
+    def test_for_money(ent):
+      return True if '$' in ent else False
+
     form_transfermoney = {
       'entities':[
           FormEntity(
               entity='account_en',
               role='account_from',
-              responses=['Sure. Transfer from which account?'],
-              custom_eval=developer_func # validates the user-response for this entity 
-              ),                         # using this custom developer-defined function
+              responses=['Sure. Transfer from which account?']
+              ),
           FormEntity(
               entity='account_en',
               role='account_to',
@@ -634,12 +636,14 @@ Transfer money in a banking app:
               ),
           FormEntity(
               entity='sys_amount-of-money',
-              responses=['And, how much do you want to transfer?']
-              )
+              responses=['And, how much do you want to transfer?'],
+              custom_eval=test_for_money # validates the user-response for this entity 
+              ),                         # using this custom developer-defined function
+                                         # checking for '$' sign.
           ],
       'max_retries': 1,
-      'exit_keys': [<list of keywords>],
-      'exit_msg': 'custom exit message'
+      'exit_keys': ['cancel', 'quit', 'exit'],
+      'exit_msg': "Sorry I cannot help you. Please try again.""
       }
 
 .. code:: python

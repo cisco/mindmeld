@@ -774,7 +774,8 @@ class FormEntity:
         custom_eval=None
     ):
         self.entity = entity
-        assert self.entity, 'Entity cannot be empty.'
+        if not self.entity or not isinstance(self.entity, str):
+                raise TypeError("Entity cannot be empty.")
         self.role = role
         self.responses = (
             responses or ["Please provide value for: {}".format(self.entity)])
