@@ -44,7 +44,13 @@ class DucklingDimension(Enum):
 
 
 def get_candidates(
-    query, entity_types=None, locale=None, language=None, time_zone=None, timestamp=None
+    query,
+    entity_types=None,
+    locale=None,
+    language=None,
+    time_zone=None,
+    timestamp=None,
+    url=None,
 ):
     """Identifies candidate system entities in the given query.
 
@@ -59,6 +65,7 @@ def get_candidates(
         timestamp (long, optional): A unix timestamp used as the reference time.
             If not specified, the current system time is used. If `time_zone`
             is not also specified, this parameter is ignored.
+        url (str): Duckling URL, if not passed, use the default one.
 
     Returns:
         list of QueryEntity: The system entities found in the query
@@ -74,6 +81,7 @@ def get_candidates(
         language=language,
         time_zone=time_zone,
         timestamp=timestamp,
+        url=url,
     )
     if response_code == SUCCESSFUL_HTTP_CODE:
         return [
@@ -92,7 +100,9 @@ def get_candidates(
     return []
 
 
-def get_candidates_for_text(text, entity_types=None, language=None, locale=None):
+def get_candidates_for_text(
+    text, entity_types=None, language=None, locale=None, url=None
+):
     """Identifies candidate system entities in the given text.
 
     Args:
@@ -100,12 +110,13 @@ def get_candidates_for_text(text, entity_types=None, language=None, locale=None)
         entity_types (list of str): The entity types to consider
         language (str): Language code
         locale (str): Locale code
+        url (str): Duckling URL, if not passed, use the default one
     Returns:
         list of dict: The system entities found in the text
     """
     dims = _dimensions_from_entity_types(entity_types)
     response, response_code = parse_numerics(
-        text, dimensions=dims, language=language, locale=locale
+        text, dimensions=dims, language=language, locale=locale, url=url
     )
     if response_code == SUCCESSFUL_HTTP_CODE:
         items = []
@@ -151,6 +162,7 @@ def parse_numerics(
         timestamp (long, optional): A unix millisecond timestamp used as the reference time. \
             If not specified, the current system time is used. If `time_zone` \
             is not also specified, this parameter is ignored.
+        url (str): Duckling URL, if not passed, use the default one.
 
     Returns:
         (tuple): A tuple containing:
@@ -220,13 +232,14 @@ def parse_numerics(
     return DucklingRecognizer.get_instance(url=url).get_response(data)
 
 
-def resolve_system_entity(query, entity_type, span):
+def resolve_system_entity(query, entity_type, span, url=None):
     """Resolves a system entity in the provided query at the specified span.
 
     Args:
         query (Query): The query containing the entity
         entity_type (str): The type of the entity
         span (Span): The character span of the entity in the query
+        url (str): Duckling URL, if not passed, use default one
 
     Returns:
         Entity: The resolved entity
@@ -262,6 +275,7 @@ def resolve_system_entity(query, entity_type, span):
         language=language,
         time_zone=time_zone,
         timestamp=timestamp,
+        url=url,
     )
     duckling_text_val_to_candidate = {}
 

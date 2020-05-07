@@ -468,7 +468,7 @@ DEFAULT_NLP_CONFIG = {
 }
 
 
-class NlpConfigException(Exception):
+class NlpConfigError(Exception):
     pass
 
 
@@ -542,7 +542,7 @@ def is_duckling_configured(app_path):
             should be run
     """
     if not app_path:
-        raise NlpConfigException("Application path is not valid")
+        raise NlpConfigError("Application path is not valid")
 
     config = get_nlp_config(app_path).get("system_entity_recognizer")
 
@@ -562,7 +562,7 @@ def get_system_entity_url_config(app_path):
         return the default duckling url.
     """
     if not app_path:
-        raise NlpConfigException("Application path is not valid")
+        raise NlpConfigError("Application path is not valid")
 
     return (
         get_nlp_config(app_path)
@@ -706,7 +706,7 @@ def get_parser_config(app_path=None, config=None, domain=None, intent=None):
         return _expand_parser_config(config)
 
     if not app_path:
-        raise NlpConfigException("Application path is not valid")
+        raise NlpConfigError("Application path is not valid")
 
     try:
         module_conf = _get_config_module(app_path)
