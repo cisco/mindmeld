@@ -415,7 +415,7 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, generate_embe
 
     try:
         QuestionAnswerer.load_kb(app_namespace, index_name, data_file, es_host,
-            generate_embeddings=generate_embeddings, app_path=app_path)
+                                 generate_embeddings=generate_embeddings, app_path=app_path)
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)

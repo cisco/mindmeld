@@ -148,6 +148,9 @@ class QuestionAnswerer:
                 sort_clause["type"] = value
             elif key == "_sort_location":
                 sort_clause["location"] = value
+            elif '_embedding' in key and self._embedder_model:
+                embedded_value = self._embedder_model.encode([value])[0]
+                query_clauses.append({key: embedded_value})
             else:
                 query_clauses.append({key: value})
                 logger.debug("Added query clause: field= %s value= %s.", key, value)
