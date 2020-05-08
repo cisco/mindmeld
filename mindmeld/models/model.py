@@ -1251,16 +1251,6 @@ class LabelEncoder:
 
 
 class EntityLabelEncoder(LabelEncoder):
-    def __init__(self, config, sys_resolver=None):
-        """
-        Args:
-            config (ModelConfig): The model
-            sys_resolver (SystemEntityResolver): The System Entity Resolver, default to Duckling
-
-        """
-        self.config = config
-        self.sys_resolver = sys_resolver or DucklingRecognizer.get_instance()
-
     def _get_tag_scheme(self):
         return self.config.model_settings.get("tag_scheme", "IOB").upper()
 
@@ -1297,8 +1287,10 @@ class EntityLabelEncoder(LabelEncoder):
         """
         # TODO: support decoding multiple queries at once
         examples = kwargs["examples"]
+        # TODO: we should figure out how to pass or decouple entity resolution from this
+        sys_resolver = kwargs.get("sys_resolver", DucklingRecognizer.get_instance())
         labels = [
-            get_entities_from_tags(examples[idx], tags, sys_resolver=self.sys_resolver)
+            get_entities_from_tags(examples[idx], tags, sys_resolver=sys_resolver)
             for idx, tags in enumerate(tags_by_example)
         ]
         return labels
