@@ -126,7 +126,9 @@ class DialogueStateRule:
                     raise ValueError(msg.format(single, plural))
                 elif single in kwargs and isinstance(kwargs[single], str):
                     resolved[plural] = {kwargs[single]}
-                elif plural in kwargs and isinstance(kwargs[plural], (list, set, tuple)):
+                elif plural in kwargs and isinstance(
+                    kwargs[plural], (list, set, tuple)
+                ):
                     resolved[plural] = set(kwargs[plural])
                 else:
                     if single in kwargs:

@@ -181,10 +181,7 @@ PHONETIC_ES_SYNONYM_MAPPING = {
                         "type": "text",
                         "analyzer": "keyword_match_analyzer",
                     },
-                    "char_ngram": {
-                        "type": "text",
-                        "analyzer": "char_ngram_analyzer",
-                    },
+                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer",},
                     "double_metaphone": {
                         "type": "text",
                         "analyzer": "phonetic_analyzer",
@@ -270,10 +267,7 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer",
                             },
-                            "processed_text": {
-                                "type": "text",
-                                "analyzer": "english",
-                            },
+                            "processed_text": {"type": "text", "analyzer": "english",},
                             "char_ngram": {
                                 "type": "text",
                                 "analyzer": "char_ngram_analyzer",
@@ -635,7 +629,7 @@ def get_classifier_config(
         "entity": "ENTITY_RECOGNIZER_CONFIG",
         "entity_resolution": "ENTITY_RESOLVER_CONFIG",
         "role": "ROLE_CLASSIFIER_CONFIG",
-        "question_answering": "QUESTION_ANSWERER_CONFIG"
+        "question_answering": "QUESTION_ANSWERER_CONFIG",
     }[clf_type]
     try:
         return copy.deepcopy(getattr(module_conf, attr_name))
@@ -665,7 +659,7 @@ def _get_default_classifier_config(clf_type):
             "entity_resolution": DEFAULT_ENTITY_RESOLVER_CONFIG,
             "role": DEFAULT_ROLE_CLASSIFIER_CONFIG,
             "language_config": DEFAULT_LANGUAGE_CONFIG,
-            "question_answering": DEFAULT_QUESTION_ANSWERER_CONFIG
+            "question_answering": DEFAULT_QUESTION_ANSWERER_CONFIG,
         }[clf_type]
     )
 

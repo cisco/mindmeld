@@ -41,6 +41,12 @@ from ._elasticsearch_helpers import (
 
 logger = logging.getLogger(__name__)
 
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError:
+    logger.warning("Must install the extra [bert] to use the built in embbedder.")
+
+
 DEFAULT_QUERY_TYPE = "keyword"
 ALL_QUERY_TYPES = ["keyword", "text", "embedder"]
 
@@ -68,11 +74,12 @@ class QuestionAnswerer:
         self._qa_config = get_classifier_config("question_answering", app_path=app_path)
 
         self._embedder_model = None
-        if self._qa_config.get('model_type') == "embedder":
-            model_settings = self._qa_config.get('model_settings')
-            if model_settings.get('embedder_type', 'bert') == 'bert':
-                from sentence_transformers import SentenceTransformer
-                trained_data = model_settings.get('trained_data', 'bert-base-nli-mean-tokens')
+        if self._qa_config.get("model_type") == "embedder":
+            model_settings = self._qa_config.get("model_settings")
+            if model_settings.get("embedder_type", "bert") == "bert":
+                trained_data = model_settings.get(
+                    "trained_data", "bert-base-nli-mean-tokens"
+                )
                 self._embedder_model = SentenceTransformer(trained_data)
 
     @property
@@ -84,8 +91,8 @@ class QuestionAnswerer:
 
     @property
     def _query_type(self):
-        if self._qa_config.get('model_type') in ALL_QUERY_TYPES:
-            return self._qa_config.get('model_type')
+        if self._qa_config.get("model_type") in ALL_QUERY_TYPES:
+            return self._qa_config.get("model_type")
         else:
             return DEFAULT_QUERY_TYPE
 
@@ -132,7 +139,7 @@ class QuestionAnswerer:
             )
             s = self.build_search(index)
             s = s.filter(query_type=query_type, id=doc_id)
-            results = s.execute(size=size, query_type=query_type)
+            results = s.execute(size=size)
             return results
 
         sort_clause = {}
@@ -148,7 +155,7 @@ class QuestionAnswerer:
                 sort_clause["type"] = value
             elif key == "_sort_location":
                 sort_clause["location"] = value
-            elif '_embedding' in key and self._embedder_model:
+            elif "_embedding" in key and self._embedder_model:
                 embedded_value = self._embedder_model.encode([value])[0]
                 query_clauses.append({key: embedded_value})
             else:
@@ -173,7 +180,7 @@ class QuestionAnswerer:
                 location=sort_clause.get("location"),
             )
 
-        results = s.execute(size=size, query_type=query_type)
+        results = s.execute(size=size)
         return results
 
     def build_search(self, index, ranking_config=None):
@@ -254,16 +261,15 @@ class QuestionAnswerer:
 
     @staticmethod
     def generate_embeddings_for_kb(data_file, model_config):
-        if model_config.get('embedder_type', 'bert') == 'bert':
-            from sentence_transformers import SentenceTransformer
-            trained_data = model_config.get('trained_data', 'bert-base-nli-mean-tokens')
+        if model_config.get("embedder_type", "bert") == "bert":
+            trained_data = model_config.get("trained_data", "bert-base-nli-mean-tokens")
             embedder_model = SentenceTransformer(trained_data)
         else:
             logger.error(
                 "Embedder model %s not currently supported",
-                model_config.get('embedder_type')
+                model_config.get("embedder_type"),
             )
-        embedding_fields = model_config.get('embedding_fields', [])
+        embedding_fields = model_config.get("embedding_fields", [])
 
         if len(embedding_fields) == 0:
             logger.warning(
@@ -289,20 +295,20 @@ class QuestionAnswerer:
         for field in embedding_fields:
             text_list = [doc[field] for doc in docs]
             embedding_list = embedder_model.encode(text_list)
-            new_fields[field + '_embedding'] = embedding_list
+            new_fields[field + "_embedding"] = embedding_list
 
         for idx, doc in enumerate(docs):
             for new_field, embedding in new_fields.items():
                 doc[new_field] = embedding[idx].tolist()
 
         # Rewrite doc with the embeddings included
-        with open(data_file, 'w') as data_fp:
+        with open(data_file, "w") as data_fp:
             if not use_jsonl:
                 json.dump(docs, data_fp, indent=4)
             else:
                 for doc in docs:
                     json.dump(doc, data_fp)
-                    data_fp.write('\n')
+                    data_fp.write("\n")
 
     @classmethod
     def load_kb(
@@ -315,7 +321,7 @@ class QuestionAnswerer:
         connect_timeout=2,
         clean=False,
         generate_embeddings=False,
-        app_path=None
+        app_path=None,
     ):
         """Loads documents from disk into the specified index in the knowledge
         base. If an index with the specified name doesn't exist, a new index
@@ -341,9 +347,11 @@ class QuestionAnswerer:
         """
         if generate_embeddings:
             if not app_path:
-                logger.error("You must provide the application path when generating embeddings.")
+                logger.error(
+                    "You must provide the application path when generating embeddings."
+                )
             qa_config = get_classifier_config("question_answering", app_path=app_path)
-            model_config = qa_config.get('model_settings', {})
+            model_config = qa_config.get("model_settings", {})
             cls.generate_embeddings_for_kb(data_file, model_config)
 
         def _doc_count(data_file):
@@ -361,7 +369,7 @@ class QuestionAnswerer:
 
         def _doc_generator(data_file):
             def transform(doc):
-                if not doc.get('id'):
+                if not doc.get("id"):
                     return doc
                 base = {"_id": doc["id"]}
                 base.update(doc)
@@ -397,11 +405,9 @@ class QuestionAnswerer:
         def _generate_mapping_data(data_file):
             # generates a dictionary with any metadata needed to create the mapping"
             MAX_ES_VECTOR_LEN = 2048
-            EMBEDDIND_MATCH_STRING = '_embedding'
+            EMBEDDIND_MATCH_STRING = "_embedding"
             embedding_properties = []
-            mapping_data = {
-                "embedding_properties": embedding_properties
-            }
+            mapping_data = {"embedding_properties": embedding_properties}
 
             with open(data_file) as data_fp:
                 line = data_fp.readline()
@@ -410,7 +416,6 @@ class QuestionAnswerer:
                     docs = json.load(data_fp)
                     doc = docs[0]
                 else:
-                    print(line)
                     doc = json.loads(line)
                 for field, value in doc.items():
                     if EMBEDDIND_MATCH_STRING in field and isinstance(value, list):
@@ -418,12 +423,9 @@ class QuestionAnswerer:
                         if dims > MAX_ES_VECTOR_LEN:
                             logger.error(
                                 "Vectors in ElasticSearch must be less than size: %d",
-                                MAX_ES_VECTOR_LEN
+                                MAX_ES_VECTOR_LEN,
                             )
-                        embedding_properties.append({
-                            'field': field,
-                            'dims': dims
-                        })
+                        embedding_properties.append({"field": field, "dims": dims})
             return mapping_data
 
         mapping_data = _generate_mapping_data(data_file)
@@ -737,7 +739,7 @@ class Search:
             "max_value": res["aggregations"][field + "_max"]["value"],
         }
 
-    def _build_es_query(self, size=10, query_type=DEFAULT_QUERY_TYPE):
+    def _build_es_query(self, size=10):
         """Build knowledge base search syntax based on provided search criteria.
 
         Args:
@@ -808,7 +810,7 @@ class Search:
 
         return es_query
 
-    def execute(self, size=10, query_type=DEFAULT_QUERY_TYPE):
+    def execute(self, size=10):
         """Executes the knowledge base search with provided criteria and returns matching documents.
 
         Args:
@@ -819,7 +821,7 @@ class Search:
         """
         try:
             # TODO: move the ES API call logic to ES helper
-            es_query = self._build_es_query(size=size, query_type=query_type)
+            es_query = self._build_es_query(size=size)
 
             response = self.client.search(index=self.index, body=es_query)
             results = [hit["_source"] for hit in response["hits"]["hits"]]
@@ -868,7 +870,12 @@ class Search:
         DEFAULT_EXACT_MATCH_BOOSTING_WEIGHT = 100
 
         def __init__(
-            self, field, field_info, value, query_type=DEFAULT_QUERY_TYPE, synonym_field=None
+            self,
+            field,
+            field_info,
+            value,
+            query_type=DEFAULT_QUERY_TYPE,
+            synonym_field=None,
         ):
             """Initialize a knowledge base query clause."""
             self.field = field
@@ -928,19 +935,21 @@ class Search:
             elif self.query_type == "embedder":
                 if self.field_info.is_vector_field():
                     clause = None
-                    functions = [{
-                        "script_score": {
-                            "script": {
-                                "source": "cosineSimilarity(params.field_embedding,"
-                                          " doc[params.matching_field]) + 1.0",
-                                "params": {
-                                    "field_embedding": self.value.tolist(),
-                                    "matching_field": self.field
+                    functions = [
+                        {
+                            "script_score": {
+                                "script": {
+                                    "source": "cosineSimilarity(params.field_embedding,"
+                                    " doc[params.matching_field]) + 1.0",
+                                    "params": {
+                                        "field_embedding": self.value.tolist(),
+                                        "matching_field": self.field,
+                                    },
                                 }
-                            }
-                        },
-                        "weight": 10
-                    }]
+                            },
+                            "weight": 10,
+                        }
+                    ]
                 else:
                     clause = {
                         "bool": {
@@ -1030,7 +1039,10 @@ class Search:
             return clause, functions
 
         def validate(self):
-            if not self.field_info.is_text_field() and not self.field_info.is_vector_field():
+            if (
+                not self.field_info.is_text_field()
+                and not self.field_info.is_vector_field()
+            ):
                 raise ValueError("Query can only be defined on text and vector fields.")
 
     class FilterClause(Clause):

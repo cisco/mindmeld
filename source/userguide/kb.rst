@@ -813,3 +813,86 @@ We can perform the same search using the :meth:`query()` API as well.
 	To delete and reindex your data, follow the steps mentioned :ref:`here <import_kb>`.
 
 
+.. _semantic_embeddings:
+
+Leveraging semantic embeddings
+------------------------------
+Up until now, the described Question Answering relies on text based retrieval. Deep learning based dense embeddings (character, word, or sentence) are in many cases better at capturing semantic information than traditional sparse vectors. Pretrained or fine-tuned embeddings can be used to find the best match in the Knowledge Base even if the search token wasn’t present in the uploaded data.
+
+To leverage semantic embeddings in search, the first step is to store the embeddings in your Knowledge Base. You can decide to use one of the provided embedders, or you can use your own. If you app consists of mainly standard English vocabulary, one of provided embedders may work well enough, but if the text you are searching against has quite a bit of domain specific vocabulary, you may benefit from training or fine tuning your own embedder on your data.
+
+To use one of the built in embedders, you can simply specify ``embedder`` as the ``model_type`` in your Question Answering config file, specify which model you would like to use ``model_settings``, and specify which fields you would like to generate embeddings for in ``embedding_fields``. Using the HR Assistant blueprint as an example, here is what the config would look like.
+
+.. code:: python
+
+  QUESTION_ANSWERER_CONFIG = {
+      "model_type": "embedder",
+      "model_settings": {
+          "embedder_type": "bert",
+          "trained_data": "bert-base-nli-mean-tokens",
+          "embedding_fields": ['question', 'answer']
+      }
+  }
+
+Here is the full list of included models. 
+
+# TODO: add table.
+
+One your config file is specified, you can load the Knowledge Base with the embeddings by passing in the flag ``--generate-embeddings`` or ``-g`` to the ``load-kb`` CLI command. Or the parameter ``generate_embeddings=True`` to the ``load_kb`` method. This will generate embeddings for each of the config specified fields and adds them to your json file before loading.
+
+
+.. code-block:: console
+
+  mindmeld load-kb hr_assistant faq_emb data/hr_faq_data.jsonl -g --app_path ./
+
+
+If instead you would like to use your own embedder, you can add your embeddings to your json file yourself. Any field with embedding vectors to be used for search should include in its name the match string ``_embedding``. For example, an entry in your data file could look like the following.
+
+.. code-block:: console
+
+  {
+      "question": "Is my pay information available online?",
+      "answer": "Electronic delivery of confidential pay information is more secure, cost effective, and environmentally friendly than using paper pay statements. The HR/Payroll System provides secure access to your pay information, as well as to links related to your employment, from any web enabled computer.",
+      "id": "hrfaq0",
+      "question_embedding": [
+          0.41734108328819275,
+          0.2525993585586548,
+          -0.23399826884269714,
+          0.5100545883178711,
+          0.4124661087989807,
+          -0.2906648814678192,
+          1.7669250965118408,
+          0.22675183415412903,
+          0.028472289443016052,
+          -0.11649968475103378,
+         ... ],
+        "answer_embbedding": [
+          0.7043768763542175,
+          -0.23288851976394653,
+          0.8947263360023499,
+          0.8209620714187622,
+          0.3936426043510437,
+          0.3860139846801758,
+          0.3475436270236969,
+          0.23400725424289703,
+          -0.18841758370399475,
+          0.1854674071073532,
+         ... ]
+  }
+
+To load the KB once the embeddings are part of your data file, simply load as normal, and they will be automatically processed.
+
+Once your KB has been created, to search the knowledge base leveraging vector similarity, we will use the :meth:`get()` API as before with one small modification. We set the ``query_type`` parameter to ``embedder``.
+
+If you are using the built in embedder, pass in your search term to the appropriate field ending with '_embedding', and it will generate the embedding and retrieve the documents with the closest cosine similarity. For example, if you generated embeddings for the field 'question' and want to search 'Can I get my pay info online?' against the question embedding you can pass "question_embedding='Can I get my pay info online?'" to your :meth:`get()` command.
+
+If you are using your own embedder, encode your search term and pass in the vector to the appropriate '*_embedding' field, and it will retrieve the documents with the closest cosine similarity to the embedding. Note that for the built in embedder you pass in a string and for leveraging your own embedder you pass in a vector to your embedding search.
+
+Finally, you can also search using multiple embedding fields or even using a combination of embedder and text based search.
+
+.. code:: python
+
+  answers = qa.get(index=index_name, query_type='embedder',
+                   question_embedding=query_embedding,
+                   answer_embedding=query_embedding,
+                   question=query)
