@@ -10,27 +10,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from abc import ABC, abstractmethod
+from enum import Enum
 import json
 import logging
 import os
-import pycountry
-import requests
 import sys
 
-from abc import ABC, abstractmethod
-from enum import Enum
+import pycountry
+import requests
+
 
 from .components.request import validate_language_code, validate_locale_code
-from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
-from .exceptions import SystemEntityResolutionError
-
-from mindmeld.components._config import (
+from .components._config import (
     DEFAULT_DUCKLING_URL,
     is_duckling_configured,
     get_system_entity_url_config,
 )
-
-from mindmeld.exceptions import MindMeldError
+from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
+from .exceptions import SystemEntityResolutionError, MindMeldError
 
 NO_RESPONSE_CODE = -1
 SUCCESSFUL_HTTP_CODE = 200
@@ -113,6 +111,52 @@ class SystemEntityRecognizer(ABC):
     def resolve_system_entity(self, query, entity_type, span):
         pass
 
+    @abstractmethod
+    def get_candidates(
+        self,
+        query,
+        entity_types=None,
+        locale=None,
+        language=None,
+        time_zone=None,
+        timestamp=None,
+    ):
+        """Identifies candidate system entities in the given query.
+
+        Args:
+            query (Query): The query to examine
+            entity_types (list of str): The entity types to consider
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
+            language (str, optional): Language as specified using a 639-1/2 code.
+            time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
+                If not specified, the system time zone is used.
+            timestamp (long, optional): A unix timestamp used as the reference time.
+                If not specified, the current system time is used. If `time_zone`
+                is not also specified, this parameter is ignored.
+
+        Returns:
+            list of QueryEntity: The system entities found in the query
+        """
+        pass
+
+    @abstractmethod
+    def get_candidates_for_text(
+        self, text, entity_types=None, language=None, locale=None
+    ):
+        """Identifies candidate system entities in the given text.
+
+        Args:
+            text (str): The text to examine
+            entity_types (list of str): The entity types to consider
+            language (str): Language code
+            locale (str): Locale code
+
+        Returns:
+            list of dict: The system entities found in the text
+        """
+        pass
+
 
 class DummySystemEntityRecognizer(SystemEntityRecognizer):
     """
@@ -151,6 +195,22 @@ class DummySystemEntityRecognizer(SystemEntityRecognizer):
 
     def resolve_system_entity(self, query, entity_type, span):
         return
+
+    def get_candidates(
+        self,
+        query,
+        entity_types=None,
+        locale=None,
+        language=None,
+        time_zone=None,
+        timestamp=None,
+    ):
+        return []
+
+    def get_candidates_for_text(
+        self, text, entity_types=None, language=None, locale=None
+    ):
+        return []
 
 
 class DucklingRecognizer(SystemEntityRecognizer):
@@ -315,7 +375,9 @@ class DucklingRecognizer(SystemEntityRecognizer):
 
         if timestamp:
             if len(str(timestamp)) != 13:
-                logger.debug("Warning: Possible non-millisecond unix timestamp passed in.")
+                logger.debug(
+                    "Warning: Possible non-millisecond unix timestamp passed in."
+                )
             if len(str(timestamp)) == 10:
                 # Convert a second grain unix timestamp to millisecond
                 timestamp *= 1000
@@ -340,7 +402,9 @@ class DucklingRecognizer(SystemEntityRecognizer):
             SystemEntityResolutionError:
         """
         span_filtered_candidates = list(
-            filter(lambda candidate: candidate.span == span, query.system_entity_candidates)
+            filter(
+                lambda candidate: candidate.span == span, query.system_entity_candidates
+            )
         )
 
         entity_type_filtered_candidates = list(
@@ -389,9 +453,9 @@ class DucklingRecognizer(SystemEntityRecognizer):
                 if candidate.span == span:
                     return candidate
                 else:
-                    duckling_text_val_to_candidate.setdefault(candidate.text, []).append(
-                        candidate
-                    )
+                    duckling_text_val_to_candidate.setdefault(
+                        candidate.text, []
+                    ).append(candidate)
 
         # Sort duckling matching candidates by the length of the value
         best_duckling_candidate_names = list(duckling_text_val_to_candidate.keys())
@@ -419,6 +483,100 @@ class DucklingRecognizer(SystemEntityRecognizer):
             )
 
         raise SystemEntityResolutionError(msg)
+
+    def get_candidates(
+        self,
+        query,
+        entity_types=None,
+        locale=None,
+        language=None,
+        time_zone=None,
+        timestamp=None,
+    ):
+        """Identifies candidate system entities in the given query.
+
+        Args:
+            query (Query): The query to examine
+            entity_types (list of str): The entity types to consider
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
+            language (str, optional): Language as specified using a 639-1/2 code.
+            time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
+                If not specified, the system time zone is used.
+            timestamp (long, optional): A unix timestamp used as the reference time.
+                If not specified, the current system time is used. If `time_zone`
+                is not also specified, this parameter is ignored.
+
+        Returns:
+            list of QueryEntity: The system entities found in the query
+        """
+        dims = dimensions_from_entity_types(entity_types)
+        language = language or query.language
+        time_zone = time_zone or query.time_zone
+        timestamp = timestamp or query.timestamp
+
+        response, response_code = self.parse(
+            query.text,
+            dimensions=dims,
+            locale=locale,
+            language=language,
+            time_zone=time_zone,
+            timestamp=timestamp,
+        )
+
+        if response_code == SUCCESSFUL_HTTP_CODE:
+            return [
+                e
+                for e in [
+                    duckling_item_to_query_entity(query, item) for item in response
+                ]
+                if entity_types is None or e.entity.type in entity_types
+            ]
+
+        logger.debug(
+            "System Entity Recognizer service did not process query: %s with dims: %s "
+            "correctly and returned response: %s",
+            query.text,
+            str(dims),
+            str(response),
+        )
+        return []
+
+    def get_candidates_for_text(
+        self, text, entity_types=None, language=None, locale=None
+    ):
+        """Identifies candidate system entities in the given text.
+
+        Args:
+            text (str): The text to examine
+            entity_types (list of str): The entity types to consider
+            language (str): Language code
+            locale (str): Locale code
+
+        Returns:
+            list of dict: The system entities found in the text
+        """
+        dims = dimensions_from_entity_types(entity_types)
+        response, response_code = self.parse(
+            text, dimensions=dims, language=language, locale=locale
+        )
+        if response_code == SUCCESSFUL_HTTP_CODE:
+            items = []
+            for item in response:
+                entity = duckling_item_to_entity(item)
+                if entity_types is None or entity.type in entity_types:
+                    item["entity_type"] = entity.type
+                    items.append(item)
+            return items
+        else:
+            logger.debug(
+                "System Entity Recognizer service did not process query: %s with dims: %s "
+                "correctly and returned response: %s",
+                text,
+                str(dims),
+                str(response),
+            )
+            return []
 
 
 def duckling_item_to_entity(item):
@@ -507,3 +665,16 @@ def duckling_item_to_query_entity(query, item, offset=0):
         return QueryEntity.from_query(query, Span(start, end), entity=entity)
     else:
         return
+
+
+def dimensions_from_entity_types(entity_types):
+    entity_types = entity_types or []
+    dims = set()
+    for entity_type in entity_types:
+        if entity_type == "sys_interval":
+            dims.add("time")
+        if entity_type.startswith("sys_"):
+            dims.add(entity_type.split("_")[1])
+    if not dims:
+        return None
+    return list(dims)

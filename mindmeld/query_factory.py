@@ -15,11 +15,11 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from . import ser as sys_ent_rec
 from .core import TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED, TEXT_FORM_RAW, Query
 from .stemmers import get_language_stemmer
 from .tokenizer import Tokenizer
 from .components._config import get_language_config
+from .system_entity_recognizer import DucklingRecognizer, SystemEntityRecognizer
 
 
 class QueryFactory:
@@ -32,7 +32,7 @@ class QueryFactory:
         stemmer (Stemmer): the object responsible for stemming the text
         language (str): the language of the text
         locale (str): the locale of the text
-        url (str): the URL for Duckling, if not passed, use the default one
+        sys_recognizer (SystemEntityRecognizer): the system entity recognizer, default to Duckling
     """
 
     def __init__(
@@ -42,14 +42,14 @@ class QueryFactory:
         stemmer=None,
         locale=None,
         language=None,
-        url=None,
+        sys_recognizer=None,
     ):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
         self.stemmer = stemmer
         self.locale = locale
         self.language = language
-        self.url = url
+        self.sys_recognizer = sys_recognizer or DucklingRecognizer.get_instance()
 
     def create_query(
         self, text, time_zone=None, timestamp=None, locale=None, language=None
@@ -111,8 +111,8 @@ class QueryFactory:
             timestamp=timestamp,
             stemmed_tokens=stemmed_tokens,
         )
-        query.system_entity_candidates = sys_ent_rec.get_candidates(
-            query, locale=locale, language=language, url=self.url
+        query.system_entity_candidates = self.sys_recognizer.get_candidates(
+            query, locale=locale, language=language
         )
         return query
 
@@ -151,6 +151,15 @@ class QueryFactory:
         language, locale = get_language_config(app_path)
         tokenizer = tokenizer or Tokenizer.create_tokenizer()
         stemmer = stemmer or get_language_stemmer(language_code=language)
+        if app_path:
+            sys_recognizer = SystemEntityRecognizer.get_instance(app_path)
+        else:
+            sys_recognizer = DucklingRecognizer.get_instance()
         return QueryFactory(
-            tokenizer, preprocessor, stemmer, language=language, locale=locale
+            tokenizer,
+            preprocessor,
+            stemmer,
+            language=language,
+            locale=locale,
+            sys_recognizer=sys_recognizer,
         )

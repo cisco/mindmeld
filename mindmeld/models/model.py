@@ -45,6 +45,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
     register_label,
 )
+from ..system_entity_recognizer import DucklingRecognizer
 from .taggers.taggers import (
     BoundaryCounts,
     get_boundary_counts,
@@ -1250,15 +1251,15 @@ class LabelEncoder:
 
 
 class EntityLabelEncoder(LabelEncoder):
-    def __init__(self, config, duckling_url=None):
+    def __init__(self, config, sys_resolver=None):
         """
         Args:
             config (ModelConfig): The model
-            duckling_url (str): The URL for Duckling, if not passed, use the default one
+            sys_resolver (SystemEntityResolver): The System Entity Resolver, default to Duckling
 
         """
         self.config = config
-        self.duckling_url = duckling_url
+        self.sys_resolver = sys_resolver or DucklingRecognizer.get_instance()
 
     def _get_tag_scheme(self):
         return self.config.model_settings.get("tag_scheme", "IOB").upper()
@@ -1297,7 +1298,7 @@ class EntityLabelEncoder(LabelEncoder):
         # TODO: support decoding multiple queries at once
         examples = kwargs["examples"]
         labels = [
-            get_entities_from_tags(examples[idx], tags, duckling_url=self.duckling_url)
+            get_entities_from_tags(examples[idx], tags, sys_resolver=self.sys_resolver)
             for idx, tags in enumerate(tags_by_example)
         ]
         return labels

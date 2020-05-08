@@ -26,7 +26,7 @@ from .exceptions import (
     SystemEntityResolutionError,
 )
 from .query_factory import QueryFactory
-from .ser import resolve_system_entity
+from .system_entity_recognizer import DucklingRecognizer
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,10 @@ def load_query(
     query_factory = query_factory or QueryFactory.create_query_factory(app_path)
     query_options = query_options or {}
     _, query, entities = process_markup(
-        markup, query_factory=query_factory, query_options=query_options
+        markup,
+        query_factory=query_factory,
+        query_options=query_options,
+        sys_resolver=query_factory.sys_recognizer,
     )
 
     return ProcessedQuery(
@@ -244,7 +247,7 @@ def bootstrap_query_row(proc_query, show_confidence, **kwargs):
     return csv_row
 
 
-def process_markup(markup, query_factory, query_options):
+def process_markup(markup, query_factory, query_options, sys_resolver=None):
     """This function takes in some text and returns a constructed Query object associated with the
         text, along with other objects like a list of entities.
 
@@ -252,15 +255,17 @@ def process_markup(markup, query_factory, query_options):
         markup (str): The markup string to process
         query_factory (QueryFactory): The factory used to construct Query objects
         query_options (dict): A dictionary containing options for language, time_zone and time_stamp
+        sys_resolver (SystemEntityRecognizer): A SystemEntityRecognizer, default to Duckling
 
     Returns:
         (str, Query, list): Returns a tuple of the raw text, the Query object associated with the
         text and a list of entities (ProcessedQuery) associated with the text
     """
     try:
+        sys_resolver = sys_resolver or DucklingRecognizer.get_instance()
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
         query = query_factory.create_query(raw_text, **query_options)
-        entities = _process_annotations(query, annotations)
+        entities = _process_annotations(query, annotations, sys_resolver=sys_resolver)
     except MarkupError as exc:
         msg = "Invalid markup in query {!r}: {}"
         raise MarkupError(msg.format(markup, exc)) from exc
@@ -270,17 +275,18 @@ def process_markup(markup, query_factory, query_options):
     return raw_text, query, entities
 
 
-def _process_annotations(query, annotations, duckling_url=None):
+def _process_annotations(query, annotations, sys_resolver=None):
     """
     Args:
         query (Query)
         annotations (list)
-        duckling_url (str)
+        sys_resolver (SystemEntityRecognizer): Default to Duckling
 
     Returns:
         list of ProcessedQuery:
     """
     stack = []
+    sys_resolver = sys_resolver or DucklingRecognizer.get_instance()
 
     def _close_ann(ann, entities):
         if ann["ann_type"] == "group":
@@ -311,8 +317,8 @@ def _process_annotations(query, annotations, duckling_url=None):
             span = Span(ann["start"], ann["end"])
             if Entity.is_system_entity(ann["type"]):
                 try:
-                    raw_entity = resolve_system_entity(
-                        query, ann["type"], span, url=duckling_url
+                    raw_entity = sys_resolver.resolve_system_entity(
+                        query, ann["type"], span
                     ).entity
                 except SystemEntityResolutionError as e:
                     logger.warning("Unable to load query: %s", e)
