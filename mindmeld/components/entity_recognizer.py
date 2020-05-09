@@ -23,6 +23,7 @@ from ..core import Entity, Query
 from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
+from ..system_entity_recognizer import DucklingRecognizer
 
 logger = logging.getLogger(__name__)
 
@@ -41,17 +42,20 @@ class EntityRecognizer(Classifier):
     CLF_TYPE = "entity"
     """The classifier type."""
 
-    def __init__(self, resource_loader, domain, intent):
+    def __init__(self, resource_loader, domain, intent, sys_recognizer=None):
         """Initializes an entity recognizer
 
         Args:
             resource_loader (ResourceLoader): An object which can load resources for the classifier
             domain (str): The domain that this entity recognizer belongs to
             intent (str): The intent that this entity recognizer belongs to
+            sys_recognizer (SystemEntityRecognizer): The system entity recognizer, default to
+                Duckling
         """
         super().__init__(resource_loader)
         self.domain = domain
         self.intent = intent
+        self.sys_recognizer = sys_recognizer or DucklingRecognizer.get_instance()
         self.entity_types = set()
         self._model_config = None
 
@@ -206,6 +210,18 @@ class EntityRecognizer(Classifier):
         self.ready = True
         self.dirty = False
 
+    def _predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
+        if not self._model:
+            logger.error("You must fit or load the model before running predict")
+            return None
+        if not isinstance(query, Query):
+            query = self._resource_loader.query_factory.create_query(
+                query, time_zone=time_zone, timestamp=timestamp
+            )
+        return self._model.predict(
+            [query], dynamic_resource=dynamic_resource, sys_resolver=self.sys_recognizer
+        )[0]
+
     def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts entities for the given query using the trained recognition model.
 
@@ -221,7 +237,7 @@ class EntityRecognizer(Classifier):
             (str): The predicted class label.
         """
         prediction = (
-            super().predict(
+            self._predict(
                 query,
                 time_zone=time_zone,
                 timestamp=timestamp,
@@ -258,7 +274,9 @@ class EntityRecognizer(Classifier):
             query = self._resource_loader.query_factory.create_query(
                 query, time_zone=time_zone, timestamp=timestamp
             )
-        predict_proba_result = self._model.predict_proba([query])
+        predict_proba_result = self._model.predict_proba(
+            [query], sys_resolver=self.sys_recognizer
+        )
         return predict_proba_result
 
     def _get_query_tree(

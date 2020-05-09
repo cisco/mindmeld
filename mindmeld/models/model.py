@@ -1287,8 +1287,7 @@ class EntityLabelEncoder(LabelEncoder):
         """
         # TODO: support decoding multiple queries at once
         examples = kwargs["examples"]
-        # TODO: we should figure out how to pass or decouple entity resolution from this
-        sys_resolver = kwargs.get("sys_resolver", DucklingRecognizer.get_instance())
+        sys_resolver = kwargs.get("sys_resolver") or DucklingRecognizer.get_instance()
         labels = [
             get_entities_from_tags(examples[idx], tags, sys_resolver=sys_resolver)
             for idx, tags in enumerate(tags_by_example)
