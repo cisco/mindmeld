@@ -281,7 +281,7 @@ def test_system_entity_recognizer_component_no_config(kwik_e_mart_app_path):
     # If the app has no config, then we need to default to duckling
     result = SystemEntityRecognizer.get_instance(
         app_path=kwik_e_mart_app_path
-    ).get_response({"text": "test"})
+    ).parse('today is sunday')
     assert result[1] == 200
 
 
@@ -290,7 +290,7 @@ def test_system_entity_recognizer_component_empty_config(food_ordering_app_path)
     # detection
     result = SystemEntityRecognizer.get_instance(
         app_path=food_ordering_app_path
-    ).get_response({"text": "test"})
+    ).parse('today is sunday')
 
     assert result[1] == -1
 

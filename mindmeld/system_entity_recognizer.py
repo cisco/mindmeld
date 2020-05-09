@@ -92,10 +92,6 @@ class SystemEntityRecognizer(ABC):
             return DummySystemEntityRecognizer.get_instance()
 
     @abstractmethod
-    def get_response(self, data):
-        pass
-
-    @abstractmethod
     def parse(
         self,
         sentence,
@@ -178,10 +174,6 @@ class DummySystemEntityRecognizer(SystemEntityRecognizer):
 
         return DummySystemEntityRecognizer._instance
 
-    def get_response(self, data):
-        del data
-        return [], NO_RESPONSE_CODE
-
     def parse(
         self,
         sentence,
@@ -249,6 +241,16 @@ class DucklingRecognizer(SystemEntityRecognizer):
         return DucklingRecognizer._instances[url]
 
     def get_response(self, data):
+        """
+        Send a post request to Duckling, data is a dictionary with field `text`.
+        Return a tuple consisting the JSON response and a response code.
+
+        Args:
+            data (dict)
+
+        Returns:
+            (dict, int)
+        """
         try:
             response = requests.request(
                 "POST", self.url, data=data, timeout=float(SYS_ENTITY_REQUEST_TIMEOUT)
