@@ -92,44 +92,45 @@ class SystemEntityRecognizer(ABC):
             return DummySystemEntityRecognizer.get_instance()
 
     @abstractmethod
-    def parse(
-        self,
-        sentence,
-        dimensions=None,
-        language=None,
-        locale=None,
-        time_zone=None,
-        timestamp=None,
-    ):
+    def parse(self, sentence, **kwargs):
+        """Calls System Entity Recognizer service API to extract numerical entities from a sentence.
+
+        Args:
+            sentence (str): A raw sentence.
+
+        Returns:
+            (tuple): A tuple containing:
+                - response (list, dict): Response from the System Entity Recognizer service that \
+                consists of a list of dicts, each corresponding to a single prediction or just a \
+                dict, corresponding to a single prediction.
+                - response_code (int): http status code.
+        """
         pass
 
     @abstractmethod
     def resolve_system_entity(self, query, entity_type, span):
+        """Resolves a system entity in the provided query at the specified span.
+
+        Args:
+            query (Query): The query containing the entity
+            entity_type (str): The type of the entity
+            span (Span): The character span of the entity in the query
+
+        Returns:
+            Entity: The resolved entity
+
+        Raises:
+            SystemEntityResolutionError
+        """
         pass
 
     @abstractmethod
-    def get_candidates(
-        self,
-        query,
-        entity_types=None,
-        locale=None,
-        language=None,
-        time_zone=None,
-        timestamp=None,
-    ):
+    def get_candidates(self, query, entity_types=None, **kwargs):
         """Identifies candidate system entities in the given query.
 
         Args:
             query (Query): The query to examine
             entity_types (list of str): The entity types to consider
-            locale (str, optional): The locale representing the ISO 639-1 language code and \
-                ISO3166 alpha 2 country code separated by an underscore character.
-            language (str, optional): Language as specified using a 639-1/2 code.
-            time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
-                If not specified, the system time zone is used.
-            timestamp (long, optional): A unix timestamp used as the reference time.
-                If not specified, the current system time is used. If `time_zone`
-                is not also specified, this parameter is ignored.
 
         Returns:
             list of QueryEntity: The system entities found in the query
@@ -137,16 +138,12 @@ class SystemEntityRecognizer(ABC):
         pass
 
     @abstractmethod
-    def get_candidates_for_text(
-        self, text, entity_types=None, language=None, locale=None
-    ):
+    def get_candidates_for_text(self, text, entity_types=None, **kwargs):
         """Identifies candidate system entities in the given text.
 
         Args:
             text (str): The text to examine
             entity_types (list of str): The entity types to consider
-            language (str): Language code
-            locale (str): Locale code
 
         Returns:
             list of dict: The system entities found in the text
@@ -174,41 +171,23 @@ class DummySystemEntityRecognizer(SystemEntityRecognizer):
 
         return DummySystemEntityRecognizer._instance
 
-    def parse(
-        self,
-        sentence,
-        dimensions=None,
-        language=None,
-        locale=None,
-        time_zone=None,
-        timestamp=None,
-    ):
+    def parse(self, sentence, **kwargs):
         return [], NO_RESPONSE_CODE
 
     def resolve_system_entity(self, query, entity_type, span):
         return
 
-    def get_candidates(
-        self,
-        query,
-        entity_types=None,
-        locale=None,
-        language=None,
-        time_zone=None,
-        timestamp=None,
-    ):
+    def get_candidates(self, query, entity_types=None, **kwargs):
         return []
 
-    def get_candidates_for_text(
-        self, text, entity_types=None, language=None, locale=None
-    ):
+    def get_candidates_for_text(self, text, entity_types=None, **kwargs):
         return []
 
 
 class DucklingRecognizer(SystemEntityRecognizer):
     _instances = {}
 
-    def __init__(self, url=None):
+    def __init__(self, url=DEFAULT_DUCKLING_URL):
         """Private constructor for SystemEntityRecognizer. Do not directly
         construct the DucklingRecognizer object. Instead, use the
         static get_instance method.
@@ -235,7 +214,6 @@ class DucklingRecognizer(SystemEntityRecognizer):
             (DucklingRecognizer): A DucklingRecognizer instance
         """
         url = url or DEFAULT_DUCKLING_URL
-
         if url not in DucklingRecognizer._instances:
             DucklingRecognizer(url=url)
         return DucklingRecognizer._instances[url]
@@ -401,7 +379,7 @@ class DucklingRecognizer(SystemEntityRecognizer):
             Entity: The resolved entity
 
         Raises:
-            SystemEntityResolutionError:
+            SystemEntityResolutionError
         """
         span_filtered_candidates = list(
             filter(
@@ -585,10 +563,7 @@ def duckling_item_to_entity(item):
     """Converts an item from the output of duckling into an Entity
 
     Args:
-        query (Query): The query to construct the QueryEntity from
         item (dict): The duckling item
-        offset (int, optional): The offset into the query that the item's
-            indexing begins
 
     Returns:
         Entity: The entity described by the duckling item
@@ -670,6 +645,13 @@ def duckling_item_to_query_entity(query, item, offset=0):
 
 
 def dimensions_from_entity_types(entity_types):
+    """
+    Args:
+        entity_types (list)
+
+    Returns:
+        (list)
+    """
     entity_types = entity_types or []
     dims = set()
     for entity_type in entity_types:

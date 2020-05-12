@@ -78,7 +78,7 @@ def load_query(
     query_factory = query_factory or QueryFactory.create_query_factory(app_path)
     query_options = query_options or {}
     _, query, entities = process_markup(
-        markup, query_factory=query_factory, query_options=query_options,
+        markup, query_factory=query_factory, query_options=query_options
     )
 
     return ProcessedQuery(

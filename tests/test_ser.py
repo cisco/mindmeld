@@ -5,7 +5,7 @@
 test_ser
 ----------------------------------
 
-Tests for `ser` module (Duckling)
+Tests for `system_entity_recognizer` module
 """
 import pytest
 import requests
@@ -279,18 +279,18 @@ def test_time(query, predicted_texts, predicted_values):
 
 def test_system_entity_recognizer_component_no_config(kwik_e_mart_app_path):
     # If the app has no config, then we need to default to duckling
-    result = SystemEntityRecognizer.get_instance(
-        app_path=kwik_e_mart_app_path
-    ).parse('today is sunday')
+    result = SystemEntityRecognizer.get_instance(app_path=kwik_e_mart_app_path).parse(
+        "today is sunday"
+    )
     assert result[1] == 200
 
 
 def test_system_entity_recognizer_component_empty_config(food_ordering_app_path):
     # If the app has an empty config (ie. {}), then it should not run system entity
     # detection
-    result = SystemEntityRecognizer.get_instance(
-        app_path=food_ordering_app_path
-    ).parse('today is sunday')
+    result = SystemEntityRecognizer.get_instance(app_path=food_ordering_app_path).parse(
+        "today is sunday"
+    )
 
     assert result[1] == -1
 
