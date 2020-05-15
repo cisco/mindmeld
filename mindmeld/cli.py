@@ -406,32 +406,17 @@ def shared_cli():
 @click.argument("index_name", required=True)
 @click.argument("data_file", required=True)
 @click.option(
-    "-g",
-    "--generate-embeddings",
-    is_flag=True,
-    required=False,
-    default=False,
-    help="If flag is passed, generates embeddings for KB and updates KB file.",
-)
-@click.option(
     "--app-path",
     required=False,
     default=None,
-    help="Needed to access app config if generating embeddings.",
+    help="Needed to access app config to generating embeddings.",
 )
-def load_index(
-    ctx, es_host, app_namespace, index_name, data_file, generate_embeddings, app_path
-):
+def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
     """Loads data into a question answerer index."""
 
     try:
         QuestionAnswerer.load_kb(
-            app_namespace,
-            index_name,
-            data_file,
-            es_host,
-            generate_embeddings=generate_embeddings,
-            app_path=app_path,
+            app_namespace, index_name, data_file, es_host, app_path=app_path,
         )
     except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)

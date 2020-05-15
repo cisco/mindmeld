@@ -12,13 +12,20 @@
 # limitations under the License.
 
 # Need to import the following so models and features are registered. See helpers module
-from . import entity_features, query_features, tagger_models, text_models
+from . import (
+    entity_features,
+    query_features,
+    tagger_models,
+    text_models,
+    embedder_models,
+)
 from .helpers import (
     CLASS_LABEL_TYPE,
     ENTITIES_LABEL_TYPE,
     ENTITY_EXAMPLE_TYPE,
     QUERY_EXAMPLE_TYPE,
     create_model,
+    create_embedder_model,
 )
 from .model import ModelConfig
 
@@ -33,4 +40,6 @@ __all__ = [
     "ENTITY_EXAMPLE_TYPE",
     "CLASS_LABEL_TYPE",
     "ENTITIES_LABEL_TYPE",
+    "create_embedder_model",
+    "embedder_models",
 ]

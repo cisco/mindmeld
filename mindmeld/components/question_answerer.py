@@ -38,13 +38,9 @@ from ._elasticsearch_helpers import (
     load_index,
     create_index_mapping,
 )
+from ..models import create_embedder_model
 
 logger = logging.getLogger(__name__)
-
-try:
-    from sentence_transformers import SentenceTransformer
-except ImportError:
-    logger.warning("Must install the extra [bert] to use the built in embbedder.")
 
 
 DEFAULT_QUERY_TYPE = "keyword"
@@ -75,12 +71,9 @@ class QuestionAnswerer:
 
         self._embedder_model = None
         if self._qa_config.get("model_type") == "embedder":
-            model_settings = self._qa_config.get("model_settings")
-            if model_settings.get("embedder_type", "bert") == "bert":
-                trained_data = model_settings.get(
-                    "trained_data", "bert-base-nli-mean-tokens"
-                )
-                self._embedder_model = SentenceTransformer(trained_data)
+            embedder_config = self._qa_config.get("model_settings")
+            embedder_config["app_path"] = app_path
+            self._embbedder_model = create_embedder_model(embedder_config)
 
     @property
     def _es_client(self):
@@ -156,7 +149,7 @@ class QuestionAnswerer:
             elif key == "_sort_location":
                 sort_clause["location"] = value
             elif "_embedding" in key and self._embedder_model:
-                embedded_value = self._embedder_model.encode([value])[0]
+                embedded_value = self._embedder_model.get_encodings([value])[0]
                 query_clauses.append({key: embedded_value})
             else:
                 query_clauses.append({key: value})
@@ -259,57 +252,6 @@ class QuestionAnswerer:
         """
         raise NotImplementedError
 
-    @staticmethod
-    def generate_embeddings_for_kb(data_file, model_config):
-        if model_config.get("embedder_type", "bert") == "bert":
-            trained_data = model_config.get("trained_data", "bert-base-nli-mean-tokens")
-            embedder_model = SentenceTransformer(trained_data)
-        else:
-            logger.error(
-                "Embedder model %s not currently supported",
-                model_config.get("embedder_type"),
-            )
-        embedding_fields = model_config.get("embedding_fields", [])
-
-        if len(embedding_fields) == 0:
-            logger.warning(
-                "No embedding fields specified in the app config, continuing without embeddings"
-            )
-
-        use_jsonl = False
-        with open(data_file) as data_fp:
-            line = data_fp.readline()
-            data_fp.seek(0)
-            if line.strip() == "[":
-                logging.debug("Loading data from a json file.")
-                docs = json.load(data_fp)
-            else:
-                logging.debug("Loading data from a jsonl file.")
-                use_jsonl = True
-                docs = []
-                for line in data_fp:
-                    doc = json.loads(line)
-                    docs.append(doc)
-
-        new_fields = {}
-        for field in embedding_fields:
-            text_list = [doc[field] for doc in docs]
-            embedding_list = embedder_model.encode(text_list)
-            new_fields[field + "_embedding"] = embedding_list
-
-        for idx, doc in enumerate(docs):
-            for new_field, embedding in new_fields.items():
-                doc[new_field] = embedding[idx].tolist()
-
-        # Rewrite doc with the embeddings included
-        with open(data_file, "w") as data_fp:
-            if not use_jsonl:
-                json.dump(docs, data_fp, indent=4)
-            else:
-                for doc in docs:
-                    json.dump(doc, data_fp)
-                    data_fp.write("\n")
-
     @classmethod
     def load_kb(
         cls,
@@ -320,7 +262,6 @@ class QuestionAnswerer:
         es_client=None,
         connect_timeout=2,
         clean=False,
-        generate_embeddings=False,
         app_path=None,
     ):
         """Loads documents from disk into the specified index in the knowledge
@@ -341,18 +282,27 @@ class QuestionAnswerer:
                 connection to the Elasticsearch host.
             clean (bool): Set to true if you want to delete an existing index
                 and reindex it
-            generate_embeddings (bool): Set to true if you want to generate
-                embeddings using the model specified in the app config
             app_path (str): The path to the directory containing the app's data
         """
-        if generate_embeddings:
-            if not app_path:
-                logger.error(
-                    "You must provide the application path when generating embeddings."
-                )
+        EMBEDDING_FIELD_STRING = "_embedding"
+        embedder_model = None
+        if not app_path:
+            logger.warning(
+                "You must provide the application path to upload embeddings as specified"
+                " in the app config."
+            )
+        else:
             qa_config = get_classifier_config("question_answering", app_path=app_path)
             model_config = qa_config.get("model_settings", {})
-            cls.generate_embeddings_for_kb(data_file, model_config)
+            model_config["app_path"] = app_path
+            embedding_fields = model_config.get("embedding_fields", [])
+
+            if len(embedding_fields) == 0:
+                logger.warning(
+                    "No embedding fields specified in the app config, continuing without embeddings"
+                )
+            else:
+                embedder_model = create_embedder_model(model_config)
 
         def _doc_count(data_file):
             with open(data_file) as data_fp:
@@ -367,8 +317,25 @@ class QuestionAnswerer:
                         count += 1
                     return count
 
-        def _doc_generator(data_file):
-            def transform(doc):
+        def _doc_generator(data_file, embedder_model=None, embedding_fields=None):
+            def transform(doc, embedder_model, embedding_fields):
+                if embedder_model:
+                    embed_fields = [
+                        (key, val)
+                        for key, val in doc.items()
+                        if key in embedding_fields
+                    ]
+                    embed_keys = list(zip(*embed_fields))[0]
+                    embed_vals = embedder_model.get_encodings(
+                        list(zip(*embed_fields))[1]
+                    )
+                    embedded_doc = dict(
+                        [
+                            (key + EMBEDDING_FIELD_STRING, emb.tolist())
+                            for key, emb in zip(embed_keys, embed_vals)
+                        ]
+                    )
+                    doc.update(embedded_doc)
                 if not doc.get("id"):
                     return doc
                 base = {"_id": doc["id"]}
@@ -382,14 +349,14 @@ class QuestionAnswerer:
                     logging.debug("Loading data from a json file.")
                     docs = json.load(data_fp)
                     for doc in docs:
-                        yield transform(doc)
+                        yield transform(doc, embedder_model, embedding_fields)
                 else:
                     logging.debug("Loading data from a jsonl file.")
                     for line in data_fp:
                         doc = json.loads(line)
-                        yield transform(doc)
+                        yield transform(doc, embedder_model, embedding_fields)
 
-        docs = _doc_generator(data_file)
+        docs = _doc_generator(data_file, embedder_model, embedding_fields)
         docs_count = _doc_count(data_file)
 
         if clean:
@@ -402,33 +369,26 @@ class QuestionAnswerer:
                     app_namespace,
                 )
 
-        def _generate_mapping_data(data_file):
+        def _generate_mapping_data(embedder_model, embedding_fields):
             # generates a dictionary with any metadata needed to create the mapping"
             MAX_ES_VECTOR_LEN = 2048
-            EMBEDDIND_MATCH_STRING = "_embedding"
             embedding_properties = []
             mapping_data = {"embedding_properties": embedding_properties}
 
-            with open(data_file) as data_fp:
-                line = data_fp.readline()
-                data_fp.seek(0)
-                if line.strip() == "[":
-                    docs = json.load(data_fp)
-                    doc = docs[0]
-                else:
-                    doc = json.loads(line)
-                for field, value in doc.items():
-                    if EMBEDDIND_MATCH_STRING in field and isinstance(value, list):
-                        dims = len(value)
-                        if dims > MAX_ES_VECTOR_LEN:
-                            logger.error(
-                                "Vectors in ElasticSearch must be less than size: %d",
-                                MAX_ES_VECTOR_LEN,
-                            )
-                        embedding_properties.append({"field": field, "dims": dims})
+            dims = len(embedder_model.get_encodings(["encoding"])[0])
+            if dims > MAX_ES_VECTOR_LEN:
+                logger.error(
+                    "Vectors in ElasticSearch must be less than size: %d",
+                    MAX_ES_VECTOR_LEN,
+                )
+            for field in embedding_fields:
+                embedding_properties.append(
+                    {"field": field + EMBEDDING_FIELD_STRING, "dims": dims}
+                )
+
             return mapping_data
 
-        mapping_data = _generate_mapping_data(data_file)
+        mapping_data = _generate_mapping_data(embedder_model, embedding_fields)
         qa_mapping = create_index_mapping(DEFAULT_ES_QA_MAPPING, mapping_data)
 
         load_index(
@@ -441,6 +401,8 @@ class QuestionAnswerer:
             es_client,
             connect_timeout=connect_timeout,
         )
+
+        embedder_model.dump()
 
 
 class FieldInfo:
