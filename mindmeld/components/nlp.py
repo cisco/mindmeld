@@ -1005,7 +1005,7 @@ class IntentProcessor(Processor):
             self.resource_loader,
             domain,
             intent,
-            sys_recognizer=self.sys_entity_recognizer,
+            system_entity_recognizer=self.sys_entity_recognizer,
         )
 
         try:

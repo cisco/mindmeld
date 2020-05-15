@@ -42,20 +42,22 @@ class EntityRecognizer(Classifier):
     CLF_TYPE = "entity"
     """The classifier type."""
 
-    def __init__(self, resource_loader, domain, intent, sys_recognizer=None):
+    def __init__(self, resource_loader, domain, intent, system_entity_recognizer=None):
         """Initializes an entity recognizer
 
         Args:
             resource_loader (ResourceLoader): An object which can load resources for the classifier
             domain (str): The domain that this entity recognizer belongs to
             intent (str): The intent that this entity recognizer belongs to
-            sys_recognizer (SystemEntityRecognizer): The system entity recognizer, default to
+            system_entity_recognizer (SystemEntityRecognizer): The system entity recognizer, default to
                 Duckling
         """
         super().__init__(resource_loader)
         self.domain = domain
         self.intent = intent
-        self.sys_recognizer = sys_recognizer or DucklingRecognizer.get_instance()
+        self.system_entity_recognizer = (
+            system_entity_recognizer or DucklingRecognizer.get_instance()
+        )
         self.entity_types = set()
         self._model_config = None
 
@@ -89,7 +91,9 @@ class EntityRecognizer(Classifier):
 
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
-        model = create_model(self._model_config)
+        model = create_model(
+            self._model_config, system_entity_recognizer=self.system_entity_recognizer
+        )
 
         if not label_set:
             label_set = self._model_config.train_label_set
@@ -167,7 +171,10 @@ class EntityRecognizer(Classifier):
                 # Load the model in directly from the dictionary since its serializable
                 self._model = er_data["model"]
             else:
-                self._model = create_model(self._model_config)
+                self._model = create_model(
+                    self._model_config,
+                    system_entity_recognizer=self.system_entity_recognizer,
+                )
                 self._model.load(model_path, er_data)
         except (OSError, IOError):
             msg = "Unable to load {}. Pickle file cannot be read from {!r}"
@@ -210,18 +217,6 @@ class EntityRecognizer(Classifier):
         self.ready = True
         self.dirty = False
 
-    def _predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
-        if not self._model:
-            logger.error("You must fit or load the model before running predict")
-            return None
-        if not isinstance(query, Query):
-            query = self._resource_loader.query_factory.create_query(
-                query, time_zone=time_zone, timestamp=timestamp
-            )
-        return self._model.predict(
-            [query], dynamic_resource=dynamic_resource, sys_resolver=self.sys_recognizer
-        )[0]
-
     def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts entities for the given query using the trained recognition model.
 
@@ -237,7 +232,7 @@ class EntityRecognizer(Classifier):
             (str): The predicted class label.
         """
         prediction = (
-            self._predict(
+            super().predict(
                 query,
                 time_zone=time_zone,
                 timestamp=timestamp,
@@ -274,9 +269,7 @@ class EntityRecognizer(Classifier):
             query = self._resource_loader.query_factory.create_query(
                 query, time_zone=time_zone, timestamp=timestamp
             )
-        predict_proba_result = self._model.predict_proba(
-            [query], sys_resolver=self.sys_recognizer
-        )
+        predict_proba_result = self._model.predict_proba([query])
         return predict_proba_result
 
     def _get_query_tree(

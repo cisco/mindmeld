@@ -87,7 +87,7 @@ class TaggerModel(Model):
             "k-folds".
     """
 
-    def __init__(self, config):
+    def __init__(self, config, system_entity_recognizer=None):
         if not config.features:
             config_dict = config.to_dict()
             config_dict["features"] = DEFAULT_FEATURES
@@ -101,6 +101,7 @@ class TaggerModel(Model):
 
         self._no_entities = False
         self.types = None
+        self.system_entity_recognizer = system_entity_recognizer
 
     def __getstate__(self):
         """Returns the information needed to pickle an instance of this class.
@@ -144,7 +145,9 @@ class TaggerModel(Model):
             return self
 
         # Extract labels - label encoders are the same accross all entity recognition models
-        self._label_encoder = get_label_encoder(self.config)
+        self._label_encoder = get_label_encoder(
+            self.config, system_entity_recognizer=self.system_entity_recognizer
+        )
         y = self._label_encoder.encode(labels, examples=examples)
 
         # Extract features
@@ -208,12 +211,11 @@ class TaggerModel(Model):
         """
         return param_grid
 
-    def predict(self, examples, dynamic_resource=None, sys_resolver=None):
+    def predict(self, examples, dynamic_resource=None):
         """
         Args:
             examples (list of mindmeld.core.Query): a list of queries to train on
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            sys_resolver: A system entity resolver, default to Duckling
 
         Returns:
             (list of tuples of mindmeld.core.QueryEntity): a list of predicted labels
@@ -229,19 +231,16 @@ class TaggerModel(Model):
         )
         # Decode the tags to labels
         labels = [
-            self._label_encoder.decode(
-                [example_predicted_tags], examples=[example], sys_resolver=sys_resolver
-            )[0]
+            self._label_encoder.decode([example_predicted_tags], examples=[example])[0]
             for example_predicted_tags, example in zip(predicted_tags, examples)
         ]
         return labels
 
-    def predict_proba(self, examples, dynamic_resource=None, sys_resolver=None):
+    def predict_proba(self, examples, dynamic_resource=None):
         """
         Args:
             examples (list of mindmeld.core.Query): a list of queries to train on
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            sys_resolver: A system entity resolver, default to Duckling
 
         Returns:
             list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
@@ -258,9 +257,7 @@ class TaggerModel(Model):
         )
         tags, probas = zip(*predicted_tags_probas[0])
         entity_confidence = []
-        entities = self._label_encoder.decode(
-            [tags], examples=[examples[0]], sys_resolver=sys_resolver
-        )[0]
+        entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
         for entity in entities:
             entity_proba = probas[
                 entity.normalized_token_span.start : entity.normalized_token_span.end
@@ -302,13 +299,12 @@ class TaggerModel(Model):
         else:
             return scorer
 
-    def evaluate(self, examples, labels, sys_resolver=None):
+    def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
 
         Args:
             examples: A list of examples to predict
             labels: A list of expected labels
-            sys_resolver: A system entity resolver, default to Duckling
 
         Returns:
             ModelEvaluation: an object containing information about the \
@@ -321,7 +317,7 @@ class TaggerModel(Model):
             )
             return
 
-        predictions = self.predict(examples, sys_resolver=sys_resolver)
+        predictions = self.predict(examples)
 
         evaluations = [
             EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
