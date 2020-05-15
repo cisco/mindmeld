@@ -19,6 +19,7 @@ from mindmeld.components import NaturalLanguageProcessor, Preprocessor
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.stemmers import EnglishNLTKStemmer
+from mindmeld.system_entity_recognizer import DucklingRecognizer
 from mindmeld.tokenizer import Tokenizer
 
 warnings.filterwarnings(
@@ -145,9 +146,19 @@ def stemmer():
 
 
 @pytest.fixture
-def query_factory(tokenizer, preprocessor, stemmer):
+def duckling():
+    return DucklingRecognizer.get_instance()
+
+
+@pytest.fixture
+def query_factory(tokenizer, preprocessor, stemmer, duckling):
     """For creating queries"""
-    return QueryFactory(tokenizer=tokenizer, preprocessor=preprocessor, stemmer=stemmer)
+    return QueryFactory(
+        tokenizer=tokenizer,
+        preprocessor=preprocessor,
+        stemmer=stemmer,
+        sys_recognizer=duckling,
+    )
 
 
 @pytest.fixture

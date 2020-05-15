@@ -23,7 +23,6 @@ from ..core import Entity, Query
 from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
-from ..system_entity_recognizer import DucklingRecognizer
 
 logger = logging.getLogger(__name__)
 
@@ -49,15 +48,13 @@ class EntityRecognizer(Classifier):
             resource_loader (ResourceLoader): An object which can load resources for the classifier
             domain (str): The domain that this entity recognizer belongs to
             intent (str): The intent that this entity recognizer belongs to
-            system_entity_recognizer (SystemEntityRecognizer): The system entity recognizer, default to
-                Duckling
+            system_entity_recognizer (SystemEntityRecognizer): The system entity recognizer,
+              default to Duckling
         """
         super().__init__(resource_loader)
         self.domain = domain
         self.intent = intent
-        self.system_entity_recognizer = (
-            system_entity_recognizer or DucklingRecognizer.get_instance()
-        )
+        self.system_entity_recognizer = system_entity_recognizer
         self.entity_types = set()
         self._model_config = None
 

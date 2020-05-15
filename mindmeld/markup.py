@@ -26,7 +26,6 @@ from .exceptions import (
     SystemEntityResolutionError,
 )
 from .query_factory import QueryFactory
-from .system_entity_recognizer import DucklingRecognizer
 
 logger = logging.getLogger(__name__)
 
@@ -283,7 +282,6 @@ def _process_annotations(query, annotations, sys_resolver=None):
         list of ProcessedQuery:
     """
     stack = []
-    sys_resolver = sys_resolver or DucklingRecognizer.get_instance()
 
     def _close_ann(ann, entities):
         if ann["ann_type"] == "group":

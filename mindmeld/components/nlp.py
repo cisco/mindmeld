@@ -415,7 +415,7 @@ class NaturalLanguageProcessor(Processor):
         self._app_path = app_path
 
         # initialize the system entity recognizer singleton
-        SystemEntityRecognizer.get_instance(app_path)
+        self.system_entity_recognizer = SystemEntityRecognizer.get_instance(app_path)
 
         self.name = app_path
         self._load_custom_features()

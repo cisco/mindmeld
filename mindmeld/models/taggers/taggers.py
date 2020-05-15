@@ -25,7 +25,7 @@ from ...core import (
     _sort_by_lowest_time_grain,
 )
 from ...markup import MarkupError
-from ...system_entity_recognizer import SystemEntityResolutionError, DucklingRecognizer
+from ...system_entity_recognizer import SystemEntityResolutionError
 from ..helpers import ENABLE_STEMMING, get_feature_extractor
 
 logger = logging.getLogger(__name__)
@@ -277,8 +277,6 @@ def get_entities_from_tags(query, tags, sys_resolver=None):
     normalized_tokens = query.normalized_tokens
 
     entities = []
-
-    sys_resolver = sys_resolver or DucklingRecognizer.get_instance()
 
     def _is_system_entity(entity_type):
         if entity_type.split("_")[0] == "sys":
