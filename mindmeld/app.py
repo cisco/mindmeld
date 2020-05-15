@@ -20,7 +20,7 @@ import sys
 
 from .app_manager import ApplicationManager
 from .cli import app_cli
-from .components.dialogue import DialogueFlow, DialogueResponder
+from .components.dialogue import DialogueFlow, DialogueResponder, AutoEntityFilling
 from .components.request import Request
 from .server import MindMeldServer
 
@@ -168,6 +168,19 @@ class Application:
             name = kwargs.pop("name", func.__name__)
             flow = DialogueFlow(name, func, self, **kwargs)
             return flow
+
+        return _decorator
+
+    def auto_fill(self, name=None, *, form, **kwargs):
+        """Creates a flow to fill missing entities"""
+
+        def _decorator(func):
+            func_name = name or func.__name__
+            if not form or not isinstance(form, dict):
+                raise TypeError("Form cannot be empty.")
+            auto_fill = AutoEntityFilling(func, form, self)
+            self.add_dialogue_rule(func_name, auto_fill, **kwargs)
+            return func
 
         return _decorator
 

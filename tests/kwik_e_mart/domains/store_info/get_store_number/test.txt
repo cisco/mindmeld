@@ -1,0 +1,15 @@
+What is the number for the {Central Plaza|store_name} store?
+How can I reach {evergreen|store_name}
+Can you call {181st|store_name}?
+call {181st|store_name}?
+Is the {Elm Street|store_name} number available?
+Give me the phone listing for the Kwik-E-Mart at {Pine and Market|store_name}?
+What is the cell phone for the one in {Central Plaza|store_name}?
+Tell me the {Elm Street|store_name} Kwik-E-Mart phone number.
+Please tell me the {Shelbyville|store_name} store's phone details.
+call and check with the {Pine and Market|store_name}?
+what is your {north haverbrook|store_name} store's phone number?
+what phone number does the store at {55 3rd|store_name} ring at?
+please ring the {156th|store_name} location?
+Does the kwik e mart on {156th street|store_name} have a number listed?
+which number can i reach {13 W Oak St|store_name} kwik emart on?

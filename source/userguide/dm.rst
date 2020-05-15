@@ -567,6 +567,102 @@ There are three ways to exit a Dialogue Flow:
 
 As shown here, you can use the dialog flow functionality to effectively craft complex flows that gracefully direct the user to provide the desired information for your application.
 
+.. _auto_slot_filling_for_entities:
+
+Automatic Slot Filling for Entities
+-----------------------------------
+
+MindMeld provides a useful functionality for automatically prompting the user for missing entities or slots required to fulfill an intent. This is done via applying the ``@app.auto_fill`` decorator for the dialogue state handler requiring entities to be obtained prior to applying the functionality defined within.
+
+This decorator replaces the need to define the ``@app.handle`` decorator. MindMeld will prompt the user for missing entities before applying the handler functionality by itself. The arguments required for this decorator are all the rules that would apply for that dialogue state (such as domain, intent, entities etc.), with the addition of a ``form`` argument.
+
+- ``form`` is a dictionary containing the following entries:
+
+  - ``entities`` (list, required): List of ``FormEntity`` objects with each defined for one entity slot to be filled. The order of entities provided in this list is important as the slots will be prompted in that order. So the order should follow the flow of the dialogue intended for slot filling.
+  - ``max_retries`` (int, optional, default 1): Maximum number of retries allowed per entity or slot if user response is invalid.
+  - ``exit_msg`` (str, optional): If slot filling is exited abruptly without completion, define custom message to display.
+  - ``exit_keys`` (list, optional): List of exit hints for the slot filling flow. If these words or phrases are said by the user, the slot filling logic exits. Default: ['cancel', 'restart', 'exit', 'reset'].
+
+.. |br| raw:: html
+
+   <br />
+
+- ``FormEntity`` is a class that allows creation of entity objects for slot filling and comprises of the following attributes:
+  
+  - ``entity`` (str, required): Entity name
+  - ``role`` (str, optional): The role of the entity
+  - ``responses`` (list or str, optional): Message for prompting the user for missing entities
+  - ``retry_response`` (str, optional): Message for re-prompting users. If not provided, defaults to ``responses``.
+  - ``value`` (str, optional): The resolved value of the entity
+  - ``default_eval`` (bool, optional): Use system validation (default: True)
+  - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against
+  - ``custom_eval`` (func, optional): Custom validation function (should return bool:
+    validated or not)
+
+.. |br| raw:: html
+
+   <br />
+
+Once the slot filling is complete, the filled in entities can be access through ``request.entities`` in the same manner as any other handler.
+
+.. note::
+   |
+    The order of entities provided in the ``entities`` list in the form is important as the slots will be prompted in that order.
+
+Example use-case
+^^^^^^^^^^^^^^^^
+
+Transfer money in a banking app:
+
+.. code:: python
+
+    from mindmeld.core import FormEntity
+
+    def test_for_money(ent):
+      return True if '$' in ent else False
+
+    form_transfermoney = {
+      'entities':[
+          FormEntity(
+              entity='account_en',
+              role='account_from',
+              responses=['Sure. Transfer from which account?']
+              ),
+          FormEntity(
+              entity='account_en',
+              role='account_to',
+              responses=['To which account?']
+              hints=['checking', 'checkings', ....] # can be only from this list
+              ),
+          FormEntity(
+              entity='sys_amount-of-money',
+              responses=['And, how much do you want to transfer?'],
+              custom_eval=test_for_money # validates the user-response for this entity 
+              ),                         # using this custom developer-defined function
+                                         # checking for '$' sign.
+          ],
+      'max_retries': 1,
+      'exit_keys': ['cancel', 'quit', 'exit'],
+      'exit_msg': "Sorry I cannot help you. Please try again.""
+      }
+
+.. code:: python
+
+    @app.auto_fill(intent='transfermoney', form=form_transfermoney)
+    def transfermoney_handler(request, responder):
+        for entity in request.entities:
+          if entity['type'] == 'account_en':
+              if entity['role'] == 'account_from':
+                  responder.slots['account_from'] = entity['value'][0]['cname']
+              elif entity['role'] == 'account_to':
+                  responder.slots['account_to'] = entity['value'][0]['cname']
+          else:
+              responder.slots['amount'] = entity['value'][0]['value']
+
+      replies = ["All right. So, you're transferring {amount} from your "
+                 "{account_from} to a {account_to}. Is that right?"]
+      responder.reply(replies)
+
 .. _dialogue_middleware:
 
 Dialogue Middleware

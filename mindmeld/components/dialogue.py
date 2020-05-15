@@ -23,6 +23,9 @@ import immutables
 
 from .. import path
 from .request import FrozenParams, Params, Request
+from ..core import Entity
+from ..models import entity_features, query_features
+from ..models.helpers import DEFAULT_SYS_ENTITIES
 
 mod_logger = logging.getLogger(__name__)
 
@@ -694,6 +697,250 @@ class DialogueFlow(DialogueManager):
             handler = partial(m, handler=handler)
 
         return handler
+
+
+class AutoEntityFilling:
+    """A special dialogue flow sublcass to implement Automatic Entitiy (Slot) Filling
+    (AEF) that allows developers to prompt users for completing the missing
+    requirements for entity slots.
+
+    Attributes:
+        app (Application): The application that initializes this flow.
+    """
+
+    _logger = mod_logger.getChild("AutoEntityFilling")
+    """Class logger."""
+
+    def __init__(self, entrance_handler, form, app):
+        self._app = app
+        self._entrance_handler = entrance_handler
+        self._form = form
+        self._local_form = None
+        self._prompt_turn = None
+        self._check_attr()
+
+    def _check_attr(self):
+        if not ('entities' in self._form and len(self._form['entities']) > 0):
+            raise KeyError("Entity list cannot be empty.")
+
+        self._entity_form = self._form['entities']
+        self._max_retries = (
+            self._form['max_retries'] if 'max_retries' in self._form else 1)
+        self._exit_response = (
+            self._form['exit_msg'] if 'exit_msg' in self._form else 'How may I help you?')
+        self._exit_keys = (
+            self._form['exit_keys'] if 'exit_keys' in self._form else
+            ['cancel', 'restart', 'exit', 'reset'])
+
+        if not isinstance(self._max_retries, int):
+            raise TypeError("'max_retries' should be of type: int.")
+        if not isinstance(self._exit_response, str):
+            raise TypeError("'exit_msg' should be of type: str.")
+        if not isinstance(self._exit_keys, list):
+            raise TypeError("'exit_keys' should be of type: list.")
+
+        self._exit_keys = list(map(str.lower, self._exit_keys))
+
+    def _set_next_turn(self, request, responder):
+        """Set target dialogue state to the entrance handler's name"""
+        responder.params.allowed_intents = tuple(['{}.{}'.format(request.domain, request.intent)])
+        responder.params.target_dialogue_state = self._entrance_handler.__name__
+
+    def _exit_flow(self, responder):
+        """Exits this flow and clears the related parameter for re-usability"""
+        self._prompt_turn = None
+        self._local_form = None
+        responder.params.allowed_intents = tuple()
+        responder.exit_flow()
+
+    def _extract_query_features(
+        self, text, time_zone=None, timestamp=None, locale=None, language=None
+    ):
+        """ Extracts Query object from the user input and converts it into
+        appropriate format for entity extraction.
+
+        Args:
+            text (Request.text): Text in the query
+            time_zone (str, optional): An IANA time zone id to create the query relative to.
+            timestamp (int, optional): A reference unix timestamp to create the query relative to,
+                in seconds.
+            locale (str, optional): The locale representing the ISO 639-1 language code and \
+                ISO3166 alpha 2 country code separated by an underscore character.
+            language (str, optional): Language as specified using a 639-1/2 code
+
+        Returns:
+            Query: A newly constructed query
+        """
+        query_factory = self._app.app_manager.nlp.resource_loader.query_factory
+        query = query_factory.create_query(text, time_zone, timestamp, locale, language)
+
+        return query
+
+    def _validate(self, request, slot):
+        """Validates the user input based on the entity type and validation type.
+
+        Args:
+            request: Request object
+            slot: FormEntity object
+
+        Returns:
+            (bool): Boolean whether the user input fulfills the slot requirements
+        """
+        text = request.text
+        entity_type = slot.entity
+        query = self._extract_query_features(text)
+
+        # payload format for entity feature extractors:
+        #     tuple(query (Query Object), list of entities, entity index)
+
+        # For slot filling, the user query will consist of the prompted entity.
+        # Hence `entity = [query]` and `entity_index = 0`.
+        formatted_payload = (query, [query], 0)
+
+        extracted_feature = {}
+        _resolved_value = {}
+
+        if slot.default_eval:
+            if entity_type in DEFAULT_SYS_ENTITIES:
+                # system entity validation - checks for presence of required system entity
+                resources = {}
+                extracted_feature = dict(
+                    query_features.extract_sys_candidates([entity_type])(query, resources)
+                )
+
+            else:
+                # gazetteer validation
+                gaz = self._app.app_manager.nlp.resource_loader.get_gazetteer(entity_type)
+
+                if len(gaz) > 0:
+                    gazetteer = {'gazetteers': {entity_type: gaz}}
+                    extracted_feature = (
+                        entity_features.extract_in_gaz_features()(formatted_payload, gazetteer))
+
+            if not extracted_feature:
+                return False, _resolved_value
+
+            if request.entities:
+                if request.entities[0]['text'] == text:
+                    _resolved_value = request.entities[0]['value']
+
+        if slot.hints:
+            # hints / user-list validation
+            if text in slot.hints:
+                extracted_feature.update({'hint_validated_entity': text})
+            else:
+                return False, _resolved_value
+
+        if slot.custom_eval:
+            # Custom validation using function provided by developer. Should return True/False
+            # for validation status. If true, then continue, else fail overall validation.
+
+            if (slot.custom_eval(text) not in (True, False) or slot.custom_eval(text) is False):
+                return False, _resolved_value
+            else:
+                extracted_feature.update({'custom_validated_entity': text})
+
+        # return True iff user input results in extracted features (i.e. successfully validated)
+        return len(extracted_feature) > 0, _resolved_value
+
+    def _initial_fill(self, request):
+        """Performs the first pass and fills the entity form with entity values available
+        in the initial query.
+
+        Args:
+            request (Request): The request object.
+        """
+        for entity in request.entities:
+            entity_type = entity['type']
+            role = entity['role']
+
+            for slot in self._local_form:
+                if entity_type == slot.entity:
+                    if (slot.role is None) or (role == slot.role):
+                        slot.value = entity
+                        break
+
+    def _end_slot_fill(self, request, responder):
+        # Returns filled entity objects as request.entities
+        # We pass in the previous turn's responder's params to the current request
+        request = self._app.app_manager.request_class(
+            entities=[slot.value for slot in self._local_form],
+            context=request.context or {},
+            history=request.history or [],
+            frame=responder.frame or {},
+            params=request.params
+        )
+
+        self._exit_flow(responder)
+        return self._entrance_handler(request, responder)
+
+    def _prompt_slot(self, responder, nlr):
+        responder.reply(nlr)
+        self._retry_attempts = 0
+        self._prompt_turn = False
+
+    def _retry_logic(self, responder, nlr):
+        if self._retry_attempts < self._max_retries:
+            self._retry_attempts += 1
+            responder.reply(nlr)
+        else:
+            # max attempts exceeded, reset counter, exit auto_fill.
+            self._retry_attempts = 0
+            self._exit_flow(responder)
+            self._app.app_manager.dialogue_manager.reprocess()
+
+    def __call__(self, request, responder):
+        """The iterative call to fill missing slots in the entity form till all slots have been
+        filled up or the flow has been exited.
+
+        Args:
+            request (Request): The request object.
+            responder (DialogueResponder): The responder object.
+        """
+        if request.text.lower() in self._exit_keys:
+            responder.reply(self._exit_response)
+            self._exit_flow(responder)
+            return
+
+        self._set_next_turn(request, responder)
+
+        if self._prompt_turn is None or self._local_form is None:
+            # Entering the flow
+            self._prompt_turn = True
+            self._local_form = copy.deepcopy(self._entity_form)
+            self._retry_attempts = 0
+
+            # Fill the form with the entities in the first query
+            self._initial_fill(request)
+
+        for slot in self._local_form:
+
+            if not slot.value:
+                # check if user has been prompted for this entity slot
+                if self._prompt_turn:
+                    self._prompt_slot(responder, slot.responses)
+                    return
+
+                # If already prompted,
+                # validate the user response and retry if invalid response
+                _is_valid, _resolved_value = self._validate(request, slot)
+
+                if not _is_valid:
+                    # retry logic
+                    self._retry_logic(responder, slot.retry_response)
+                    return
+
+                slot.value = Entity(
+                    text=request.text,
+                    entity_type=slot.entity,
+                    role=slot.role,
+                    value=_resolved_value).to_dict()
+
+                # Reset prompt for next slot
+                self._prompt_turn = True
+
+        # Finish slot-filling and return to handler
+        return self._end_slot_fill(request, responder)
 
 
 class DialogueResponder:
