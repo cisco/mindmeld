@@ -26,8 +26,11 @@ logger = logging.getLogger(__name__)
 
 try:
     from sentence_transformers import SentenceTransformer
+
+    register_bert = True
 except ImportError:
     logger.warning("Must install the extra [bert] to use the built in embbedder.")
+    register_bert = False
 
 
 class Embedder(ABC):
@@ -68,9 +71,8 @@ class Embedder(ABC):
             text_list (list): A list of text strings for which to generate the embeddings.
 
         Returns:
-            (np.array): A numpy 2-D array of the embeddings.
+            (list): A list of numpy arrays of the embeddings.
         """
-        # TODO: check return type
         pass
 
     def clear_cache(self):
@@ -121,4 +123,5 @@ class BertEmbedder(Embedder):
         return self.model.encode(text_list)
 
 
-register_embedder("bert", BertEmbedder)
+if register_bert:
+    register_embedder("bert", BertEmbedder)

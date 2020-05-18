@@ -1,9 +1,7 @@
 import pytest
 
 from mindmeld.components import Conversation
-from .test_dialogue_flow import (
-    assert_target_dialogue_state,
-    assert_reply)
+from .test_dialogue_flow import assert_target_dialogue_state, assert_reply
 
 
 @pytest.mark.conversation
@@ -32,8 +30,10 @@ def test_auto_fill_retry(kwik_e_mart_app, kwik_e_mart_app_path, qa_kwik_e_mart):
 
     directives = convo.process("Some store").directives
     assert_target_dialogue_state(convo, "send_store_phone")
-    assert_reply(directives, "Sorry, I did not get you. "
-                             "Which store would you like to know about?")
+    assert_reply(
+        directives,
+        "Sorry, I did not get you. " "Which store would you like to know about?",
+    )
 
     directives = convo.process("elm street").directives
     assert_target_dialogue_state(convo, None)

@@ -28,11 +28,13 @@ from .helpers import (
     create_embedder_model,
 )
 from .model import ModelConfig
+from .embedder_models import Embedder
 
 __all__ = [
     "ModelConfig",
     "text_models",
     "tagger_models",
+    "embedder_models",
     "query_features",
     "entity_features",
     "create_model",
@@ -41,5 +43,5 @@ __all__ = [
     "CLASS_LABEL_TYPE",
     "ENTITIES_LABEL_TYPE",
     "create_embedder_model",
-    "embedder_models",
+    "Embedder",
 ]

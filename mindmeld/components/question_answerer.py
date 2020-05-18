@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_QUERY_TYPE = "keyword"
 ALL_QUERY_TYPES = ["keyword", "text", "embedder"]
+EMBEDDING_FIELD_STRING = "_embedding"
 
 
 class QuestionAnswerer:
@@ -73,7 +74,7 @@ class QuestionAnswerer:
         if self._qa_config.get("model_type") == "embedder":
             embedder_config = self._qa_config.get("model_settings")
             embedder_config["app_path"] = app_path
-            self._embbedder_model = create_embedder_model(embedder_config)
+            self._embedder_model = create_embedder_model(embedder_config)
 
     @property
     def _es_client(self):
@@ -148,7 +149,7 @@ class QuestionAnswerer:
                 sort_clause["type"] = value
             elif key == "_sort_location":
                 sort_clause["location"] = value
-            elif "_embedding" in key and self._embedder_model:
+            elif EMBEDDING_FIELD_STRING in key and self._embedder_model:
                 embedded_value = self._embedder_model.get_encodings([value])[0]
                 query_clauses.append({key: embedded_value})
             else:
@@ -284,7 +285,6 @@ class QuestionAnswerer:
                 and reindex it
             app_path (str): The path to the directory containing the app's data
         """
-        EMBEDDING_FIELD_STRING = "_embedding"
         embedder_model = None
         if not app_path:
             logger.warning(
@@ -329,12 +329,10 @@ class QuestionAnswerer:
                     embed_vals = embedder_model.get_encodings(
                         list(zip(*embed_fields))[1]
                     )
-                    embedded_doc = dict(
-                        [
-                            (key + EMBEDDING_FIELD_STRING, emb.tolist())
-                            for key, emb in zip(embed_keys, embed_vals)
-                        ]
-                    )
+                    embedded_doc = {
+                        key + EMBEDDING_FIELD_STRING: emb.tolist()
+                        for key, emb in zip(embed_keys, embed_vals)
+                    }
                     doc.update(embedded_doc)
                 if not doc.get("id"):
                     return doc
