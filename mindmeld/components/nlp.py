@@ -415,7 +415,7 @@ class NaturalLanguageProcessor(Processor):
         self._app_path = app_path
 
         # initialize the system entity recognizer singleton
-        self.system_entity_recognizer = SystemEntityRecognizer.get_instance(app_path)
+        self._system_entity_recognizer = SystemEntityRecognizer.get_instance(app_path)
 
         self.name = app_path
         self._load_custom_features()
@@ -999,7 +999,7 @@ class IntentProcessor(Processor):
         self.domain = domain
         self.name = intent
 
-        self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent,)
+        self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent)
 
         try:
             self.parser = Parser(self.resource_loader, domain=domain, intent=intent)

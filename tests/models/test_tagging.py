@@ -37,7 +37,7 @@ def test_get_entities_from_tags_where_tag_idx_in_sys_candidate(
     processed_query = kwik_e_mart_nlp.create_query(query, time_zone="UTC")
 
     res_entity = taggers.get_entities_from_tags(
-        processed_query, tags, sys_resolver=kwik_e_mart_nlp.system_entity_recognizer
+        processed_query, tags, sys_resolver=kwik_e_mart_nlp._system_entity_recognizer
     )
 
     if res_entity[0].to_dict()["value"]["grain"] == "minute":
@@ -66,7 +66,7 @@ def test_get_entities_from_tags_where_tag_idx_not_in_sys_candidate(
 
     processed_query = kwik_e_mart_nlp.create_query(query)
     res_entity = taggers.get_entities_from_tags(
-        processed_query, tags, sys_resolver=kwik_e_mart_nlp.system_entity_recognizer
+        processed_query, tags, sys_resolver=kwik_e_mart_nlp._system_entity_recognizer
     )
     assert res_entity == ()
 
@@ -92,7 +92,7 @@ def test_get_entities_from_tags_where_entity_truncated_by_new_entity(
 
     processed_query = kwik_e_mart_nlp.create_query(query)
     res_entity = taggers.get_entities_from_tags(
-        processed_query, tags, sys_resolver=kwik_e_mart_nlp.system_entity_recognizer
+        processed_query, tags, sys_resolver=kwik_e_mart_nlp._system_entity_recognizer
     )
     assert len(res_entity) == 2
 
@@ -113,7 +113,7 @@ def test_get_entities_from_tags_where_sys_entity_between_entities(
 
     processed_query = kwik_e_mart_nlp.create_query(query)
     res_entity = taggers.get_entities_from_tags(
-        processed_query, tags, sys_resolver=kwik_e_mart_nlp.system_entity_recognizer
+        processed_query, tags, sys_resolver=kwik_e_mart_nlp._system_entity_recognizer
     )
     assert len(res_entity) == 4
 
@@ -132,7 +132,7 @@ def test_get_entities_from_tags_where_entities_end_with_query_end(
 
     processed_query = kwik_e_mart_nlp.create_query(query)
     res_entity = taggers.get_entities_from_tags(
-        processed_query, tags, sys_resolver=kwik_e_mart_nlp.system_entity_recognizer
+        processed_query, tags, sys_resolver=kwik_e_mart_nlp._system_entity_recognizer
     )
     assert len(res_entity) == 1
 
@@ -155,7 +155,7 @@ def test_get_entities_from_tags_with_multi_token_entities(kwik_e_mart_nlp, query
 
     processed_query = kwik_e_mart_nlp.create_query(query)
     res_entity = taggers.get_entities_from_tags(
-        processed_query, tags, sys_resolver=kwik_e_mart_nlp.system_entity_recognizer
+        processed_query, tags, sys_resolver=kwik_e_mart_nlp._system_entity_recognizer
     )
     assert len(res_entity) == 2
 
