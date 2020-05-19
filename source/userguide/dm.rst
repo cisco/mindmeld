@@ -597,7 +597,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``default_eval`` (bool, optional): Use system validation (default: True)
   - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against
   - ``custom_eval`` (func, optional): Custom validation function (should return bool:
-    validated or not)
+    validated or not). For this function, the developer is provided with the user input ``text`` and the current turn's ``request`` object as arguments.
 
 .. |br| raw:: html
 
@@ -618,8 +618,8 @@ Transfer money in a banking app:
 
     from mindmeld.core import FormEntity
 
-    def test_for_money(ent):
-      return True if '$' in ent else False
+    def test_for_money(text, request):
+      return True if '$' in text else False
 
     form_transfermoney = {
       'entities':[
