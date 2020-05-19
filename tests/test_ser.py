@@ -287,11 +287,12 @@ def test_system_entity_recognizer_component_no_config(kwik_e_mart_app_path):
 
 def test_system_entity_recognizer_component_empty_config(food_ordering_app_path):
     # If the app has an empty config (ie. {}), then it should not run system entity
-    # detection
+    # detection. Since this is a singleton pattern we need to reset the singleton instance
+    previous_recognizer, SystemEntityRecognizer._instance = SystemEntityRecognizer._instance, None
     result = SystemEntityRecognizer.get_instance(app_path=food_ordering_app_path).parse(
         "today is sunday"
     )
-
+    SystemEntityRecognizer._instance = previous_recognizer
     assert result[1] == -1
 
 

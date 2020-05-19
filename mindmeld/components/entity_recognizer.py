@@ -41,20 +41,17 @@ class EntityRecognizer(Classifier):
     CLF_TYPE = "entity"
     """The classifier type."""
 
-    def __init__(self, resource_loader, domain, intent, system_entity_recognizer=None):
+    def __init__(self, resource_loader, domain, intent):
         """Initializes an entity recognizer
 
         Args:
             resource_loader (ResourceLoader): An object which can load resources for the classifier
             domain (str): The domain that this entity recognizer belongs to
             intent (str): The intent that this entity recognizer belongs to
-            system_entity_recognizer (SystemEntityRecognizer): The system entity recognizer,
-              default to Duckling
         """
         super().__init__(resource_loader)
         self.domain = domain
         self.intent = intent
-        self.system_entity_recognizer = system_entity_recognizer
         self.entity_types = set()
         self._model_config = None
 
@@ -88,9 +85,7 @@ class EntityRecognizer(Classifier):
 
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
-        model = create_model(
-            self._model_config, system_entity_recognizer=self.system_entity_recognizer
-        )
+        model = create_model(self._model_config)
 
         if not label_set:
             label_set = self._model_config.train_label_set
@@ -168,10 +163,7 @@ class EntityRecognizer(Classifier):
                 # Load the model in directly from the dictionary since its serializable
                 self._model = er_data["model"]
             else:
-                self._model = create_model(
-                    self._model_config,
-                    system_entity_recognizer=self.system_entity_recognizer,
-                )
+                self._model = create_model(self._model_config)
                 self._model.load(model_path, er_data)
         except (OSError, IOError):
             msg = "Unable to load {}. Pickle file cannot be read from {!r}"

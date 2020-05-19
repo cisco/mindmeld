@@ -55,7 +55,7 @@ DEFAULT_SYS_ENTITIES = [
 ]
 
 
-def create_model(config, **kwargs):
+def create_model(config):
     """Creates a model instance using the provided configuration
 
     Args:
@@ -68,13 +68,7 @@ def create_model(config, **kwargs):
         ValueError: When model configuration is invalid
     """
     try:
-        if config.model_type == "tagger":
-            system_entity_recognizer = kwargs.get("system_entity_recognizer")
-            return MODEL_MAP[config.model_type](
-                config, system_entity_recognizer=system_entity_recognizer
-            )
-        else:
-            return MODEL_MAP[config.model_type](config)
+        return MODEL_MAP[config.model_type](config)
     except KeyError:
         msg = "Invalid model configuration: Unknown model type {!r}"
         raise ValueError(msg.format(config.model_type))
@@ -93,7 +87,7 @@ def get_feature_extractor(example_type, name):
     return FEATURE_MAP[example_type][name]
 
 
-def get_label_encoder(config, **kwargs):
+def get_label_encoder(config):
     """Gets a label encoder given the label type from the config
 
     Args:
@@ -102,13 +96,7 @@ def get_label_encoder(config, **kwargs):
     Returns:
         LabelEncoder: The appropriate LabelEncoder object for the given config
     """
-    if config.model_type == "tagger":
-        system_entity_recognizer = kwargs.get("system_entity_recognizer")
-        return LABEL_MAP[config.label_type](
-            config, system_entity_recognizer=system_entity_recognizer
-        )
-    else:
-        return LABEL_MAP[config.label_type](config)
+    return LABEL_MAP[config.label_type](config)
 
 
 def register_model(model_type, model_class):

@@ -87,7 +87,7 @@ class TaggerModel(Model):
             "k-folds".
     """
 
-    def __init__(self, config, system_entity_recognizer=None):
+    def __init__(self, config):
         if not config.features:
             config_dict = config.to_dict()
             config_dict["features"] = DEFAULT_FEATURES
@@ -101,7 +101,6 @@ class TaggerModel(Model):
 
         self._no_entities = False
         self.types = None
-        self.system_entity_recognizer = system_entity_recognizer
 
     def __getstate__(self):
         """Returns the information needed to pickle an instance of this class.
@@ -145,9 +144,7 @@ class TaggerModel(Model):
             return self
 
         # Extract labels - label encoders are the same accross all entity recognition models
-        self._label_encoder = get_label_encoder(
-            self.config, system_entity_recognizer=self.system_entity_recognizer
-        )
+        self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
 
         # Extract features

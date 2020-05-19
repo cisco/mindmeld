@@ -994,19 +994,12 @@ class IntentProcessor(Processor):
             domain (str): The domain this intent belongs to.
             intent (str): The name of this intent.
             resource_loader (ResourceLoader): An object which can load resources for the processor.
-            sys_recognizer (SystemEntityRecognizer): A SystemEntityRecognizer, default to Duckling
         """
         super().__init__(app_path, resource_loader)
         self.domain = domain
         self.name = intent
 
-        self.sys_entity_recognizer = SystemEntityRecognizer.get_instance(app_path)
-        self.entity_recognizer = EntityRecognizer(
-            self.resource_loader,
-            domain,
-            intent,
-            system_entity_recognizer=self.sys_entity_recognizer,
-        )
+        self.entity_recognizer = EntityRecognizer(self.resource_loader, domain, intent,)
 
         try:
             self.parser = Parser(self.resource_loader, domain=domain, intent=intent)

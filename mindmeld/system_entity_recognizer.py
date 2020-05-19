@@ -71,8 +71,10 @@ class SystemEntityRecognizer(ABC):
     initialized only once during NLP object construction.
     """
 
+    _instance = None
+
     @staticmethod
-    def get_instance(app_path):
+    def get_instance(app_path=None):
         """ Static access method.
         In general we want to find the system entity recognizer from the application config.
         If the application configuration is empty, we do not use Duckling.
@@ -85,11 +87,15 @@ class SystemEntityRecognizer(ABC):
         Returns:
             (SystemEntityRecognizer): A SystemEntityRecognizer instance
         """
-        if is_duckling_configured(app_path):
-            url = get_system_entity_url_config(app_path=app_path)
-            return DucklingRecognizer.get_instance(url)
-        else:
-            return DummySystemEntityRecognizer.get_instance()
+        if not SystemEntityRecognizer._instance:
+            if is_duckling_configured(app_path):
+                url = get_system_entity_url_config(app_path=app_path)
+                SystemEntityRecognizer._instance = DucklingRecognizer.get_instance(url)
+            else:
+                SystemEntityRecognizer._instance = (
+                    DummySystemEntityRecognizer.get_instance()
+                )
+        return SystemEntityRecognizer._instance
 
     @abstractmethod
     def parse(self, sentence, **kwargs):

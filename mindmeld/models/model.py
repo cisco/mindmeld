@@ -45,6 +45,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
     register_label,
 )
+from ..system_entity_recognizer import SystemEntityRecognizer
 from .taggers.taggers import (
     BoundaryCounts,
     get_boundary_counts,
@@ -1250,15 +1251,14 @@ class LabelEncoder:
 
 
 class EntityLabelEncoder(LabelEncoder):
-    def __init__(self, config, system_entity_recognizer=None):
+    def __init__(self, config):
         """Initializes an encoder
 
         Args:
             config (ModelConfig): The model configuration
-            system_entity_recognizer (SystemEntityRecognizer)
         """
         self.config = config
-        self.system_entity_recognizer = system_entity_recognizer
+        self.system_entity_recognizer = SystemEntityRecognizer.get_instance()
 
     def _get_tag_scheme(self):
         return self.config.model_settings.get("tag_scheme", "IOB").upper()
