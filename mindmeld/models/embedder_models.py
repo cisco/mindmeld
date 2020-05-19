@@ -18,9 +18,13 @@ from abc import ABC, abstractmethod
 import pickle
 import logging
 import os
+import string
+import numpy as np
 
 from .. import path
 from .helpers import register_embedder
+from .taggers.embeddings import WordSequenceEmbedding
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +45,10 @@ class Embedder(ABC):
     def __init__(self, app_path, embedder_type, **kwargs):
         """Initializes an embedder.
         """
-        self.cache_path = path.get_embedder_cache_file_path(app_path, embedder_type)
+        self.model_name = kwargs.get("model_name", "default")
+        self.cache_path = path.get_embedder_cache_file_path(
+            app_path, embedder_type, self.model_name
+        )
 
         folder = os.path.dirname(self.cache_path)
         if not os.path.isdir(folder):
@@ -113,15 +120,66 @@ class BertEmbedder(Embedder):
 
     def load(self, **kwargs):
         DEFAULT_BERT = "bert-base-nli-mean-tokens"
-        if "trained_data" in kwargs:
-            return SentenceTransformer(kwargs["trained_data"])
+        if self.model_name == "default":
+            bert_model_name = DEFAULT_BERT
+            logger.info("No bert model specifications passed, using default.")
         else:
-            logger.warning("No bert model specifications passed, using default.")
-            return SentenceTransformer(DEFAULT_BERT)
+            bert_model_name = self.model_name
+        return SentenceTransformer(bert_model_name)
 
     def encode(self, text_list):
         return self.model.encode(text_list)
 
 
+class GloveEmbedder(Embedder):
+    """
+    Encoder class for GloVe embeddings as described here: https://nlp.stanford.edu/projects/glove/
+    """
+
+    def load(self, **kwargs):
+        DEFAULT_PADDING_LEN = 20
+        DEFAULT_EMBEDDING_DIM = 300
+        padding_length = kwargs.get("padding_length", DEFAULT_PADDING_LEN)
+        token_embedding_dimension = kwargs.get(
+            "token_embedding_dimension", DEFAULT_EMBEDDING_DIM
+        )
+        token_pretrained_embedding_filepath = kwargs.get(
+            "token_pretrained_embedding_filepath"
+        )
+        return WordSequenceEmbedding(
+            padding_length,
+            token_embedding_dimension,
+            token_pretrained_embedding_filepath,
+            use_padding=False,
+        )
+
+    def get_query_tokens(self, query):
+        """Splits into tokens, removes punctuation, and removes whitespace.
+        """
+        query = query.translate(str.maketrans("", "", string.punctuation))
+        tokens = query.split()
+        tokens = [t.strip() for t in tokens]
+        return tokens
+
+    def encode(self, text_list):
+        token_list = [self.get_query_tokens(text) for text in text_list]
+        vector_list = [self.model.encode_sequence_of_tokens(tl) for tl in token_list]
+        encoded_vecs = []
+        for vl in vector_list:
+            if len(vl) == 1:
+                encoded_vecs.append(vl[0])
+            else:
+                encoded_vecs.append(np.average(vl, axis=0))
+        return encoded_vecs
+
+    def dump(self):
+        """Dumps the cache to disk.
+        """
+        super().dump()
+        self.model.save_embeddings()
+
+
 if register_bert:
     register_embedder("bert", BertEmbedder)
+
+register_embedder("glove", GloveEmbedder)

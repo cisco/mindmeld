@@ -26,6 +26,7 @@ from .helpers import (
     QUERY_EXAMPLE_TYPE,
     create_model,
     create_embedder_model,
+    register_embedder,
 )
 from .model import ModelConfig
 from .embedder_models import Embedder
@@ -44,4 +45,5 @@ __all__ = [
     "ENTITIES_LABEL_TYPE",
     "create_embedder_model",
     "Embedder",
+    "register_embedder",
 ]

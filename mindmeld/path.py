@@ -55,7 +55,9 @@ GAZETTEER_PATH = os.path.join(GEN_FOLDER, "gaz-{entity}.pkl")
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, "indexes")
 GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, "{index}")
 RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
-GEN_EMBEDDER_MODEL_PATH = os.path.join(GEN_INDEXES_FOLDER, "{embedder_model}_cache.pkl")
+GEN_EMBEDDER_MODEL_PATH = os.path.join(
+    GEN_INDEXES_FOLDER, "{embedder_type}_{model_name}_cache.pkl"
+)
 
 # Domains sub tree for labeled queries
 DOMAINS_FOLDER = os.path.join(APP_PATH, "domains")
@@ -510,18 +512,19 @@ def get_ranking_file_path(app_path, index):
 
 
 @safe_path
-def get_embedder_cache_file_path(app_path, embedder_model):
+def get_embedder_cache_file_path(app_path, embedder_type, model_name):
     """Gets the path to the model_cache.json file for a given embedder model.
 
     Args:
         app_path (str): The path to the app data.
-        embedder_model (str): The name of the embedder model.
+        embedder_type (str): The name of the embedder type.
+        model_name (str): The name of the specific trained model.
 
     Returns:
         (str) The path for the json cached of the embedded values.
     """
     return GEN_EMBEDDER_MODEL_PATH.format(
-        app_path=app_path, embedder_model=embedder_model
+        app_path=app_path, embedder_type=embedder_type, model_name=model_name,
     )
 
 

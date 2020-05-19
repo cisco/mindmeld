@@ -100,14 +100,18 @@ def get_label_encoder(config):
     return LABEL_MAP[config.label_type](config)
 
 
-def create_embedder_model(embedder_config):
+def create_embedder_model(app_path, config):
     """Creates and loads the embedder model.
     """
-    app_path = embedder_config.pop("app_path")
+    embedder_config = config.get("model_settings", {})
+    embedding_fields = embedder_config.get("embedding_fields", [])
+    if len(embedding_fields) == 0:
+        # No embedding fields specified in the app config, continuing without embedder model.
+        return None
     try:
         embedder_type = embedder_config.pop("embedder_type")
     except KeyError:
-        raise ValueError("Invalid model configuration: Unknown embedder type.")
+        raise ValueError("Invalid model configuration: No provided embedder type.")
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, embedder_type, **embedder_config)

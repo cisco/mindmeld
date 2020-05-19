@@ -72,9 +72,7 @@ class QuestionAnswerer:
 
         self._embedder_model = None
         if self._qa_config.get("model_type") == "embedder":
-            embedder_config = self._qa_config.get("model_settings")
-            embedder_config["app_path"] = app_path
-            self._embedder_model = create_embedder_model(embedder_config)
+            self._embedder_model = create_embedder_model(app_path, self._qa_config)
 
     @property
     def _es_client(self):
@@ -123,8 +121,7 @@ class QuestionAnswerer:
         """
         doc_id = kwargs.get("id")
 
-        if not query_type:
-            query_type = self._query_type
+        query_type = query_type or self._query_type
 
         # If an id was passed in, simply retrieve the specified document
         if doc_id:
@@ -286,6 +283,7 @@ class QuestionAnswerer:
             app_path (str): The path to the directory containing the app's data
         """
         embedder_model = None
+        embedding_fields = None
         if not app_path:
             logger.warning(
                 "You must provide the application path to upload embeddings as specified"
@@ -293,16 +291,10 @@ class QuestionAnswerer:
             )
         else:
             qa_config = get_classifier_config("question_answering", app_path=app_path)
-            model_config = qa_config.get("model_settings", {})
-            model_config["app_path"] = app_path
-            embedding_fields = model_config.get("embedding_fields", [])
-
-            if len(embedding_fields) == 0:
-                logger.warning(
-                    "No embedding fields specified in the app config, continuing without embeddings"
-                )
-            else:
-                embedder_model = create_embedder_model(model_config)
+            embedder_model = create_embedder_model(app_path, qa_config)
+            embedding_fields = qa_config.get("model_settings", {}).get(
+                "embedding_fields", []
+            )
 
         def _doc_count(data_file):
             with open(data_file) as data_fp:
