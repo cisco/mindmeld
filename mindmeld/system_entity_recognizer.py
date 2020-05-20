@@ -30,7 +30,6 @@ from .components._config import (
 from .core import Entity, QueryEntity, Span, _sort_by_lowest_time_grain
 from .exceptions import SystemEntityResolutionError, MindMeldError
 
-NO_RESPONSE_CODE = -1
 SUCCESSFUL_HTTP_CODE = 200
 SYS_ENTITY_REQUEST_TIMEOUT = os.environ.get("MM_SYS_ENTITY_REQUEST_TIMEOUT", 1.0)
 try:
@@ -74,28 +73,65 @@ class SystemEntityRecognizer(ABC):
     _instance = None
 
     @staticmethod
-    def get_instance(app_path=None):
-        """ Static access method.
-        In general we want to find the system entity recognizer from the application config.
-        If the application configuration is empty, we do not use Duckling.
-        Otherwise, we return the Duckling recognizer with the URL defined in the application's
-          config, default to the DEFAULT_DUCKLING_URL.
-
-        Args:
-            app_path: The application path
+    def get_instance():
+        """ Static access method. If there is no instance instantiated, we instantiate
+        NoOpSystemEntityRecognizer.
 
         Returns:
             (SystemEntityRecognizer): A SystemEntityRecognizer instance
         """
         if not SystemEntityRecognizer._instance:
-            if is_duckling_configured(app_path):
-                url = get_system_entity_url_config(app_path=app_path)
-                SystemEntityRecognizer._instance = DucklingRecognizer.get_instance(url)
-            else:
-                SystemEntityRecognizer._instance = (
-                    DummySystemEntityRecognizer.get_instance()
-                )
+            SystemEntityRecognizer._instance = NoOpSystemEntityRecognizer.get_instance()
         return SystemEntityRecognizer._instance
+
+    @staticmethod
+    def set_system_entity_recognizer(system_entity_recognizer=None, app_path=None):
+        """We set the global System Entity Recognizer to be the one configured from the
+        application's path.
+
+        Args:
+              system_entity_recognizer: A system entity recognizer
+              app_path (str): The application path
+
+        Returns:
+            (SystemEntityRecognizer)
+        """
+        if system_entity_recognizer and isinstance(
+            system_entity_recognizer, SystemEntityRecognizer
+        ):
+            SystemEntityRecognizer._instance = system_entity_recognizer
+        elif app_path:
+            SystemEntityRecognizer._instance = SystemEntityRecognizer.load_from_app_path(
+                app_path
+            )
+        else:
+            raise SystemEntityError(
+                "Either `system_entity_recognizer` or `app_path` must be valid."
+            )
+
+    @staticmethod
+    def load_from_app_path(app_path):
+        """If the application configuration is empty, we do not use Duckling.
+
+        Otherwise, we return the Duckling recognizer with the URL defined in the application's
+          config, default to the DEFAULT_DUCKLING_URL.
+
+        Args:
+              app_path (str): Application path
+
+        Returns:
+            (SystemEntityRecognizer)
+        """
+        if not app_path:
+            raise SystemEntityError(
+                "App path must be valid to load entity recognizer config."
+            )
+
+        if is_duckling_configured(app_path):
+            url = get_system_entity_url_config(app_path=app_path)
+            return DucklingRecognizer.get_instance(url)
+        else:
+            return NoOpSystemEntityRecognizer.get_instance()
 
     @abstractmethod
     def parse(self, sentence, **kwargs):
@@ -157,28 +193,28 @@ class SystemEntityRecognizer(ABC):
         pass
 
 
-class DummySystemEntityRecognizer(SystemEntityRecognizer):
+class NoOpSystemEntityRecognizer(SystemEntityRecognizer):
     """
-    This is a dummy recognizer which returns empty list and NO_RESPONSE_CODE.
+    This is a no-ops recognizer which returns empty list and 200.
     """
 
     _instance = None
 
     def __init__(self):
-        if not DummySystemEntityRecognizer._instance:
-            DummySystemEntityRecognizer._instance = self
-        else:
-            raise SystemEntityError("DummySystemEntityRecognizer is a singleton")
+        if self._instance:
+            raise SystemEntityError("NoOpSystemEntityRecognizer is a singleton.")
+
+        NoOpSystemEntityRecognizer._instance = self
 
     @staticmethod
     def get_instance():
-        if not DummySystemEntityRecognizer._instance:
-            DummySystemEntityRecognizer()
+        if not NoOpSystemEntityRecognizer._instance:
+            NoOpSystemEntityRecognizer()
 
-        return DummySystemEntityRecognizer._instance
+        return NoOpSystemEntityRecognizer._instance
 
     def parse(self, sentence, **kwargs):
-        return [], NO_RESPONSE_CODE
+        return [], SUCCESSFUL_HTTP_CODE
 
     def resolve_system_entity(self, query, entity_type, span):
         return
@@ -191,7 +227,7 @@ class DummySystemEntityRecognizer(SystemEntityRecognizer):
 
 
 class DucklingRecognizer(SystemEntityRecognizer):
-    _instances = {}
+    _instance = None
 
     def __init__(self, url=DEFAULT_DUCKLING_URL):
         """Private constructor for SystemEntityRecognizer. Do not directly
@@ -201,11 +237,11 @@ class DucklingRecognizer(SystemEntityRecognizer):
         Args:
             url (str): Duckling URL
         """
-        if url in DucklingRecognizer._instances:
+        if DucklingRecognizer._instance:
             raise SystemEntityError("DucklingRecognizer is a singleton")
 
         self.url = url
-        DucklingRecognizer._instances[url] = self
+        DucklingRecognizer._instance = self
 
     @staticmethod
     def get_instance(url=None):
@@ -220,9 +256,9 @@ class DucklingRecognizer(SystemEntityRecognizer):
             (DucklingRecognizer): A DucklingRecognizer instance
         """
         url = url or DEFAULT_DUCKLING_URL
-        if url not in DucklingRecognizer._instances:
+        if not DucklingRecognizer._instance:
             DucklingRecognizer(url=url)
-        return DucklingRecognizer._instances[url]
+        return DucklingRecognizer._instance
 
     def get_response(self, data):
         """
@@ -310,7 +346,7 @@ class DucklingRecognizer(SystemEntityRecognizer):
         """
         if sentence == "":
             logger.error("Empty query passed to the system entity resolver")
-            return {}, SUCCESSFUL_HTTP_CODE
+            return [], SUCCESSFUL_HTTP_CODE
 
         data = {
             "text": sentence,

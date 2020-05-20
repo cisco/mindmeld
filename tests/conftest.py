@@ -157,7 +157,7 @@ def query_factory(tokenizer, preprocessor, stemmer, duckling):
         tokenizer=tokenizer,
         preprocessor=preprocessor,
         stemmer=stemmer,
-        sys_recognizer=duckling,
+        system_entity_recognizer=duckling,
     )
 
 

@@ -260,7 +260,9 @@ def process_markup(markup, query_factory, query_options):
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
         query = query_factory.create_query(raw_text, **query_options)
         entities = _process_annotations(
-            query, annotations, sys_resolver=query_factory.sys_recognizer
+            query,
+            annotations,
+            query_factory.system_entity_recognizer,
         )
     except MarkupError as exc:
         msg = "Invalid markup in query {!r}: {}"
@@ -271,12 +273,12 @@ def process_markup(markup, query_factory, query_options):
     return raw_text, query, entities
 
 
-def _process_annotations(query, annotations, sys_resolver=None):
+def _process_annotations(query, annotations, system_entity_recognizer):
     """
     Args:
         query (Query)
         annotations (list)
-        sys_resolver (SystemEntityRecognizer): Default to Duckling
+        system_entity_recognizer (SystemEntityRecognizer)
 
     Returns:
         list of ProcessedQuery:
@@ -312,7 +314,7 @@ def _process_annotations(query, annotations, sys_resolver=None):
             span = Span(ann["start"], ann["end"])
             if Entity.is_system_entity(ann["type"]):
                 try:
-                    raw_entity = sys_resolver.resolve_system_entity(
+                    raw_entity = system_entity_recognizer.resolve_system_entity(
                         query, ann["type"], span
                     ).entity
                 except SystemEntityResolutionError as e:

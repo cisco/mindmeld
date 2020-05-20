@@ -19,7 +19,10 @@ from .core import TEXT_FORM_NORMALIZED, TEXT_FORM_PROCESSED, TEXT_FORM_RAW, Quer
 from .stemmers import get_language_stemmer
 from .tokenizer import Tokenizer
 from .components._config import get_language_config
-from .system_entity_recognizer import DucklingRecognizer, SystemEntityRecognizer
+from .system_entity_recognizer import (
+    NoOpSystemEntityRecognizer,
+    SystemEntityRecognizer,
+)
 
 
 class QueryFactory:
@@ -32,7 +35,7 @@ class QueryFactory:
         stemmer (Stemmer): the object responsible for stemming the text
         language (str): the language of the text
         locale (str): the locale of the text
-        sys_recognizer (SystemEntityRecognizer): the system entity recognizer, default to Duckling
+        system_entity_recognizer (SystemEntityRecognizer): default to NoOpSystemEntityRecognizer
     """
 
     def __init__(
@@ -42,14 +45,16 @@ class QueryFactory:
         stemmer=None,
         locale=None,
         language=None,
-        sys_recognizer=None,
+        system_entity_recognizer=None,
     ):
         self.tokenizer = tokenizer
         self.preprocessor = preprocessor
         self.stemmer = stemmer
         self.locale = locale
         self.language = language
-        self.sys_recognizer = sys_recognizer or DucklingRecognizer.get_instance()
+        self.system_entity_recognizer = (
+            system_entity_recognizer or NoOpSystemEntityRecognizer.get_instance()
+        )
 
     def create_query(
         self, text, time_zone=None, timestamp=None, locale=None, language=None
@@ -111,7 +116,7 @@ class QueryFactory:
             timestamp=timestamp,
             stemmed_tokens=stemmed_tokens,
         )
-        query.system_entity_candidates = self.sys_recognizer.get_candidates(
+        query.system_entity_candidates = self.system_entity_recognizer.get_candidates(
             query, locale=locale, language=language
         )
         return query
@@ -132,7 +137,11 @@ class QueryFactory:
 
     @staticmethod
     def create_query_factory(
-        app_path=None, tokenizer=None, preprocessor=None, stemmer=None
+        app_path=None,
+        tokenizer=None,
+        preprocessor=None,
+        stemmer=None,
+        system_entity_recognizer=None,
     ):
         """Creates a query factory for the application.
 
@@ -144,6 +153,8 @@ class QueryFactory:
                 created if none is provided
             preprocessor (Processor, optional): The app's preprocessor.
             stemmer (Stemmer, optional): The stemmer to use for stemming
+            system_entity_recognizer (SystemEntityRecognizer): If not passed, we use either the one
+                from the application's configuration or NoOpSystemEntityRecognizer.
 
         Returns:
             QueryFactory: A QueryFactory object that is used to create Query objects.
@@ -151,15 +162,17 @@ class QueryFactory:
         language, locale = get_language_config(app_path)
         tokenizer = tokenizer or Tokenizer.create_tokenizer()
         stemmer = stemmer or get_language_stemmer(language_code=language)
-        if app_path:
-            sys_recognizer = SystemEntityRecognizer.get_instance(app_path)
+        if system_entity_recognizer:
+            sys_entity_recognizer = system_entity_recognizer
+        elif app_path:
+            sys_entity_recognizer = SystemEntityRecognizer.load_from_app_path(app_path)
         else:
-            sys_recognizer = DucklingRecognizer.get_instance()
+            sys_entity_recognizer = NoOpSystemEntityRecognizer.get_instance()
         return QueryFactory(
             tokenizer,
             preprocessor,
             stemmer,
             language=language,
             locale=locale,
-            sys_recognizer=sys_recognizer,
+            system_entity_recognizer=sys_entity_recognizer,
         )
