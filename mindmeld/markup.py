@@ -260,9 +260,7 @@ def process_markup(markup, query_factory, query_options):
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
         query = query_factory.create_query(raw_text, **query_options)
         entities = _process_annotations(
-            query,
-            annotations,
-            query_factory.system_entity_recognizer,
+            query, annotations, query_factory.system_entity_recognizer,
         )
     except MarkupError as exc:
         msg = "Invalid markup in query {!r}: {}"
