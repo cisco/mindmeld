@@ -460,16 +460,6 @@ def test_entity_no_context_detection(
     entity_recognizer = (
         home_assistant_nlp.domains[domain].intents[intent].entity_recognizer
     )
-    from mindmeld.system_entity_recognizer import (
-        DucklingRecognizer,
-        SystemEntityRecognizer,
-    )
-
-    assert isinstance(home_assistant_nlp._system_entity_recognizer, DucklingRecognizer)
-    assert (
-        home_assistant_nlp._system_entity_recognizer
-        == SystemEntityRecognizer.get_instance()
-    )
     entities = entity_recognizer.predict(query)
     assert len(entities) > 0
     assert entities[0].entity.type == expected_entity_type
