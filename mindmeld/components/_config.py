@@ -468,6 +468,10 @@ DEFAULT_NLP_CONFIG = {
 }
 
 
+class NlpConfigError(Exception):
+    pass
+
+
 def get_language_config(app_path):
     if not app_path:
         return ENGLISH_LANGUAGE_CODE, ENGLISH_US_LOCALE
@@ -537,6 +541,9 @@ def is_duckling_configured(app_path):
         (bool): True if the app config specifies that the numerical parsing
             should be run
     """
+    if not app_path:
+        raise NlpConfigError("Application path is not valid")
+
     config = get_nlp_config(app_path).get("system_entity_recognizer")
 
     if isinstance(config, dict):
@@ -550,8 +557,13 @@ def is_duckling_configured(app_path):
 
 
 def get_system_entity_url_config(app_path):
+    """
+    Get system entity url from the application's config. If the application does not define the url,
+        return the default duckling url.
+    """
     if not app_path:
-        return DEFAULT_DUCKLING_URL
+        raise NlpConfigError("Application path is not valid")
+
     return (
         get_nlp_config(app_path)
         .get("system_entity_recognizer", {})
@@ -692,6 +704,10 @@ def get_parser_config(app_path=None, config=None, domain=None, intent=None):
     """
     if config:
         return _expand_parser_config(config)
+
+    if not app_path:
+        raise NlpConfigError("Application path is not valid")
+
     try:
         module_conf = _get_config_module(app_path)
     except (OSError, IOError):

@@ -5,13 +5,12 @@
 test_ser
 ----------------------------------
 
-Tests for `ser` module (Duckling)
+Tests for `system_entity_recognizer` module
 """
 import pytest
 import requests
 
-from mindmeld import system_entity_recognizer
-from mindmeld.ser import get_candidates_for_text
+from mindmeld.system_entity_recognizer import SystemEntityRecognizer, DucklingRecognizer
 
 
 NOW_TIMESTAMP = 1544706000000
@@ -280,26 +279,20 @@ def test_time(query, predicted_texts, predicted_values):
 
 def test_system_entity_recognizer_component_no_config(kwik_e_mart_app_path):
     # If the app has no config, then we need to default to duckling
-    result = system_entity_recognizer.SystemEntityRecognizer.get_instance(
-        app_path=kwik_e_mart_app_path
-    ).get_response({"text": "test"})
+    recognizer = SystemEntityRecognizer.load_from_app_path(kwik_e_mart_app_path)
+    result = recognizer.parse("today is sunday")
+    assert len(result[0]) > 0
     assert result[1] == 200
 
 
-def test_system_entity_recognizer_component_empty_config(food_ordering_app_path):
+def test_system_entity_recognizer_component_empty_config(
+    food_ordering_app_path, kwik_e_mart_app_path
+):
     # If the app has an empty config (ie. {}), then it should not run system entity
-    # detection
-
-    old_instance = system_entity_recognizer.SystemEntityRecognizer._instance
-    system_entity_recognizer.SystemEntityRecognizer._instance = None
-
-    result = system_entity_recognizer.SystemEntityRecognizer.get_instance(
-        app_path=food_ordering_app_path
-    ).get_response({"text": "test"})
-
-    # reset system_entity_recognizer singleton
-    system_entity_recognizer.SystemEntityRecognizer._instance = old_instance
-    assert result[1] == -1
+    recognizer = SystemEntityRecognizer.load_from_app_path(food_ordering_app_path)
+    result = recognizer.parse("today is sunday")
+    assert result[0] == []
+    assert result[1] == 200
 
 
 test_data = [
@@ -312,7 +305,9 @@ test_data = [
 
 @pytest.mark.parametrize("text, language, expected_entity", test_data)
 def test_get_candidates_for_text_language(text, language, expected_entity):
-    candidates = get_candidates_for_text(text, language=language)
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        text, language=language
+    )
     assert candidates[0]["body"] == expected_entity
 
 
@@ -326,5 +321,7 @@ test_data = [
 
 @pytest.mark.parametrize("text, locale, expected_entity", test_data)
 def test_get_candidates_for_text_locale(text, locale, expected_entity):
-    candidates = get_candidates_for_text(text, locale=locale)
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        text, locale=locale
+    )
     assert candidates[0]["body"] == expected_entity
