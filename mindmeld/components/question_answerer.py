@@ -17,6 +17,7 @@ This module contains the question answerer component of MindMeld.
 import copy
 import json
 import logging
+import re
 from abc import ABC, abstractmethod
 
 from elasticsearch import ConnectionError as EsConnectionError
@@ -292,28 +293,42 @@ class QuestionAnswerer:
         else:
             qa_config = get_classifier_config("question_answering", app_path=app_path)
             embedder_model = create_embedder_model(app_path, qa_config)
-            embedding_fields = qa_config.get("model_settings", {}).get(
-                "embedding_fields", []
+            embedding_fields = (
+                qa_config.get("model_settings", {})
+                .get("embedding_fields", {})
+                .get(index_name, [])
             )
 
-        def _doc_count(data_file):
+        def _doc_data(data_file, embedding_fields):
+            def match_regex(string, pattern_list):
+                for pattern in pattern_list:
+                    if re.match(pattern, string):
+                        return True
+
             with open(data_file) as data_fp:
                 line = data_fp.readline()
                 data_fp.seek(0)
                 if line.strip() == "[":
                     docs = json.load(data_fp)
-                    return len(docs)
+                    count = len(docs)
+                    doc_example = docs[0]
                 else:
                     count = 0
-                    for _ in data_fp:
+                    for line in data_fp:
                         count += 1
-                    return count
+                    doc_example = json.loads(line)
+                embedding_fields = [
+                    key
+                    for key in doc_example.keys()
+                    if match_regex(key, embedding_fields)
+                ]
+                return count, embedding_fields
 
         def _doc_generator(data_file, embedder_model=None, embedding_fields=None):
             def transform(doc, embedder_model, embedding_fields):
                 if embedder_model:
                     embed_fields = [
-                        (key, val)
+                        (key, str(val))
                         for key, val in doc.items()
                         if key in embedding_fields
                     ]
@@ -346,8 +361,14 @@ class QuestionAnswerer:
                         doc = json.loads(line)
                         yield transform(doc, embedder_model, embedding_fields)
 
+        docs_count, embedding_fields = _doc_data(data_file, embedding_fields)
+        if len(embedding_fields) == 0:
+            logger.warning(
+                "No matching embedding fields found from the app config, "
+                "continuing without generating embeddings..."
+            )
+            embedder_model = None
         docs = _doc_generator(data_file, embedder_model, embedding_fields)
-        docs_count = _doc_count(data_file)
 
         if clean:
             try:
@@ -361,6 +382,8 @@ class QuestionAnswerer:
 
         def _generate_mapping_data(embedder_model, embedding_fields):
             # generates a dictionary with any metadata needed to create the mapping"
+            if not embedder_model:
+                return {}
             MAX_ES_VECTOR_LEN = 2048
             embedding_properties = []
             mapping_data = {"embedding_properties": embedding_properties}
@@ -392,7 +415,9 @@ class QuestionAnswerer:
             connect_timeout=connect_timeout,
         )
 
-        embedder_model.dump()
+        # Saves the embedder model cache to disk
+        if embedder_model:
+            embedder_model.dump()
 
 
 class FieldInfo:

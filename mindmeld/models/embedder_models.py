@@ -131,15 +131,22 @@ class BertEmbedder(Embedder):
         return self.model.encode(text_list)
 
 
+def get_query_tokens(query):
+    """Splits into tokens, removes punctuation, and removes whitespace.
+    """
+    query = query.translate(str.maketrans("", "", string.punctuation))
+    tokens = query.split()
+    tokens = [t.strip() for t in tokens]
+    return tokens
+
+
 class GloveEmbedder(Embedder):
     """
     Encoder class for GloVe embeddings as described here: https://nlp.stanford.edu/projects/glove/
     """
 
     def load(self, **kwargs):
-        DEFAULT_PADDING_LEN = 20
         DEFAULT_EMBEDDING_DIM = 300
-        padding_length = kwargs.get("padding_length", DEFAULT_PADDING_LEN)
         token_embedding_dimension = kwargs.get(
             "token_embedding_dimension", DEFAULT_EMBEDDING_DIM
         )
@@ -147,22 +154,14 @@ class GloveEmbedder(Embedder):
             "token_pretrained_embedding_filepath"
         )
         return WordSequenceEmbedding(
-            padding_length,
+            0,
             token_embedding_dimension,
             token_pretrained_embedding_filepath,
             use_padding=False,
         )
 
-    def get_query_tokens(self, query):
-        """Splits into tokens, removes punctuation, and removes whitespace.
-        """
-        query = query.translate(str.maketrans("", "", string.punctuation))
-        tokens = query.split()
-        tokens = [t.strip() for t in tokens]
-        return tokens
-
     def encode(self, text_list):
-        token_list = [self.get_query_tokens(text) for text in text_list]
+        token_list = [get_query_tokens(text) for text in text_list]
         vector_list = [self.model.encode_sequence_of_tokens(tl) for tl in token_list]
         encoded_vecs = []
         for vl in vector_list:
