@@ -149,7 +149,7 @@ def _validate_generic(name, ptype):
 
 
 PARAM_VALIDATORS = {
-    "allowed_intents": _validate_generic("allowed_intents", tuple),
+    "allowed_intents": _validate_generic("allowed_intents", (tuple, list)),
     "target_dialogue_state": _validate_generic("target_dialogue_state", str),
     "time_zone": _validate_time_zone,
     "language": validate_language_code,

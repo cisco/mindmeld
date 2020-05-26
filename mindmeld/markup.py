@@ -26,7 +26,6 @@ from .exceptions import (
     SystemEntityResolutionError,
 )
 from .query_factory import QueryFactory
-from .ser import resolve_system_entity
 
 logger = logging.getLogger(__name__)
 
@@ -260,7 +259,9 @@ def process_markup(markup, query_factory, query_options):
     try:
         raw_text, annotations = _parse_tokens(_tokenize_markup(markup))
         query = query_factory.create_query(raw_text, **query_options)
-        entities = _process_annotations(query, annotations)
+        entities = _process_annotations(
+            query, annotations, query_factory.system_entity_recognizer,
+        )
     except MarkupError as exc:
         msg = "Invalid markup in query {!r}: {}"
         raise MarkupError(msg.format(markup, exc)) from exc
@@ -270,8 +271,12 @@ def process_markup(markup, query_factory, query_options):
     return raw_text, query, entities
 
 
-def _process_annotations(query, annotations):
+def _process_annotations(query, annotations, system_entity_recognizer):
     """
+    Args:
+        query (Query)
+        annotations (list)
+        system_entity_recognizer (SystemEntityRecognizer)
 
     Returns:
         list of ProcessedQuery:
@@ -307,7 +312,9 @@ def _process_annotations(query, annotations):
             span = Span(ann["start"], ann["end"])
             if Entity.is_system_entity(ann["type"]):
                 try:
-                    raw_entity = resolve_system_entity(query, ann["type"], span).entity
+                    raw_entity = system_entity_recognizer.resolve_system_entity(
+                        query, ann["type"], span
+                    ).entity
                 except SystemEntityResolutionError as e:
                     logger.warning("Unable to load query: %s", e)
                     return

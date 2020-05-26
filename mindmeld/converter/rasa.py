@@ -162,9 +162,10 @@ class RasaConverter(Converter):
 
     def create_entity_files(self, mm_entry):
         entity_value, entity = mm_entry.strip("{}").split("|")
-        gazetteer_location = (
-            self.mindmeld_project_directory + "/entities/" + entity + "/gazetteer.txt"
+        gazetteer_location = os.path.join(
+            self.mindmeld_project_directory, "entities", entity, "gazetteer.txt"
         )
+
         try:
             with open(gazetteer_location, "a") as f:
                 f.write(entity_value + "\n")

@@ -20,6 +20,7 @@ from mindmeld.components._elasticsearch_helpers import create_es_client
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.stemmers import EnglishNLTKStemmer
+from mindmeld.system_entity_recognizer import DucklingRecognizer
 from mindmeld.tokenizer import Tokenizer
 
 
@@ -167,9 +168,19 @@ def stemmer():
 
 
 @pytest.fixture
-def query_factory(tokenizer, preprocessor, stemmer):
+def duckling():
+    return DucklingRecognizer.get_instance()
+
+
+@pytest.fixture
+def query_factory(tokenizer, preprocessor, stemmer, duckling):
     """For creating queries"""
-    return QueryFactory(tokenizer=tokenizer, preprocessor=preprocessor, stemmer=stemmer)
+    return QueryFactory(
+        tokenizer=tokenizer,
+        preprocessor=preprocessor,
+        stemmer=stemmer,
+        system_entity_recognizer=duckling,
+    )
 
 
 @pytest.fixture

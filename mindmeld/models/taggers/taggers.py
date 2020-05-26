@@ -25,7 +25,7 @@ from ...core import (
     _sort_by_lowest_time_grain,
 )
 from ...markup import MarkupError
-from ...ser import SystemEntityResolutionError, resolve_system_entity
+from ...system_entity_recognizer import SystemEntityResolutionError
 from ..helpers import ENABLE_STEMMING, get_feature_extractor
 
 logger = logging.getLogger(__name__)
@@ -260,7 +260,7 @@ def _get_tags_from_entities(query, entities, scheme="IOB"):
     return iobs, types
 
 
-def get_entities_from_tags(query, tags):
+def get_entities_from_tags(query, tags, system_entity_recognizer):
     """From a set of joint IOB tags, parse the app and system entities.
 
     This performs the reverse operation of get_tags_from_entities.
@@ -269,6 +269,7 @@ def get_entities_from_tags(query, tags):
         query (Query): Any query instance.
         tags (list of str): Joint app and system tags, like those
             created by get_tags_from_entities.
+        system_entity_recognizer (SystemEntityRecognizer)
 
     Returns:
         (list of QueryEntity) The tuple containing the list of entities.
@@ -308,7 +309,9 @@ def get_entities_from_tags(query, tags):
         span = query.transform_span(norm_span, TEXT_FORM_NORMALIZED, TEXT_FORM_RAW)
 
         try:
-            entity = resolve_system_entity(query, entity_type, span)
+            entity = system_entity_recognizer.resolve_system_entity(
+                query, entity_type, span
+            )
             entities.append(entity)
             logger.debug("Appended system entity %s.", entity)
         except SystemEntityResolutionError:

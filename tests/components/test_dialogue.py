@@ -15,7 +15,7 @@ import pytest
 from mindmeld.components import Conversation, DialogueManager, DialogueResponder
 from mindmeld.components.dialogue import DialogueStateRule
 from mindmeld.components.request import Params, Request
-from mindmeld.system_entity_recognizer import SystemEntityRecognizer
+from mindmeld.system_entity_recognizer import DucklingRecognizer
 
 
 def create_request(domain, intent, entities=None):
@@ -316,7 +316,7 @@ def test_convo_language_and_locales(
     convo = Conversation(nlp=kwik_e_mart_nlp, app_path=kwik_e_mart_app_path)
     convo.params = Params(language=language, locale=locale)
     mock1 = mocker.patch.object(
-        SystemEntityRecognizer, "get_response", return_value=({}, 400)
+        DucklingRecognizer, "get_response", return_value=({}, 400)
     )
     convo.say("set alarm for 4pm tomorrow")
     mock1.call_args_list[0][0][0].pop("text")
