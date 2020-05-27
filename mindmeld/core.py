@@ -762,6 +762,7 @@ class FormEntity:
         custom_eval(func, optional): custom validation function (should return bool:
         validated or not)
     """
+
     def __init__(
         self,
         entity=None,
@@ -771,21 +772,22 @@ class FormEntity:
         value=None,
         default_eval=True,
         hints=None,
-        custom_eval=None
+        custom_eval=None,
     ):
         self.entity = entity
         if not self.entity or not isinstance(self.entity, str):
-                raise TypeError("Entity cannot be empty.")
+            raise TypeError("Entity cannot be empty.")
         self.role = role
-        self.responses = (
-            responses or ["Please provide value for: {}".format(self.entity)])
+        self.responses = responses or [
+            "Please provide value for: {}".format(self.entity)
+        ]
         self.retry_response = retry_response or self.responses
         self.value = value
         self.default_eval = default_eval
         self.hints = hints
         self.custom_eval = custom_eval
         if self.custom_eval and not callable(custom_eval):
-            raise TypeError('Invalid custom validation function type.')
+            raise TypeError("Invalid custom validation function type.")
 
 
 def resolve_entity_conflicts(query_entities):
