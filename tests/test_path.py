@@ -20,8 +20,16 @@ APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
 DOMAIN_NAME = "store_info"
 DOMAINS = set([DOMAIN_NAME])
 
-INTENTS = set(["exit", "find_nearest_store", "get_store_hours", "get_store_number",
-               "greet", "help"])
+INTENTS = set(
+    [
+        "exit",
+        "find_nearest_store",
+        "get_store_hours",
+        "get_store_number",
+        "greet",
+        "help",
+    ]
+)
 
 
 def test_get_domains():
