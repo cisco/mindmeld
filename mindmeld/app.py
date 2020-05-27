@@ -179,7 +179,10 @@ class Application:
             if not form or not isinstance(form, dict):
                 raise TypeError("Form cannot be empty.")
             auto_fill = AutoEntityFilling(func, form, self)
-            self.add_dialogue_rule(func_name, auto_fill, **kwargs)
+            if self.async_mode:
+                self.add_dialogue_rule(func_name, auto_fill.call_async, **kwargs)
+            else:
+                self.add_dialogue_rule(func_name, auto_fill.call_sync, **kwargs)
             return func
 
         return _decorator
